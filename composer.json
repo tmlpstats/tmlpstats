@@ -1,0 +1,49 @@
+{
+    "name": "tmlp/stats",
+    "description": "TMLP Stats Application",
+    "keywords": ["framework", "laravel"],
+    "license": "MIT",
+    "type": "project",
+    "require": {
+        "laravel/framework": "5.0.*",
+        "kris/laravel-form-builder": "~1.3",
+        "kirkbushell/eloquence": "~1.2",
+        "nesbot/carbon": "~1.14",
+        "respect/validation": "~0.6",
+        "phpoffice/phpexcel": "~1.8"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.0",
+        "phpspec/phpspec": "~2.1"
+    },
+    "autoload": {
+        "classmap": [
+            "database"
+        ],
+        "psr-4": {
+            "TmlpStats\\": "app/"
+        }
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/TestCase.php"
+        ]
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "php artisan clear-compiled",
+            "php artisan optimize"
+        ],
+        "post-update-cmd": [
+            "php artisan clear-compiled",
+            "php artisan optimize"
+        ],
+        "post-create-project-cmd": [
+            "php -r \"copy('.env.example', '.env');\"",
+            "php artisan key:generate"
+        ]
+    },
+    "config": {
+        "preferred-install": "dist"
+    }
+}

@@ -1,0 +1,5 @@
+suites:
+    main:
+        namespace: TmlpStats
+        psr4_prefix: TmlpStats
+        src_path: app

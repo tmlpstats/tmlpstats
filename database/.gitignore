@@ -1,0 +1,16 @@
+*.sqlite
+
+# Skip test seeders that may contain PII
+seeds/CenterStatsDataTableSeeder.php
+seeds/CenterStatsTableSeeder.php
+seeds/CourseDataTableSeeder.php
+seeds/CourseTableSeeder.php
+seeds/ProgramTeamMemberTableSeeder.php
+seeds/StatsReportTableSeeder.php
+seeds/TeamMemberDataTableSeeder.php
+seeds/TeamMemberTableSeeder.php
+seeds/TmlpGameDataTableSeeder.php
+seeds/TmlpGameTableSeeder.php
+seeds/TmlpRegistrationDataTableSeeder.php
+seeds/TmlpRegistrationTableSeeder.php
+seeds/UserTableSeeder.php
