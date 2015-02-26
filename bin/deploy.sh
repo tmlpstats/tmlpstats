@@ -37,7 +37,7 @@ cp -a $DEST/* $ROLLBACK/
 # Do actual deploy
 cd $SOURCE/
 sed -i.bak 's/php artisan/php-cli artisan/g' composer.json # workaround issue with artisan an bluehost
-php-cli ~/common/composer.phar update
+php-cli ~/common/composer.phar install
 mv composer.json.bak composer.json # clean up
 cd ../
 
