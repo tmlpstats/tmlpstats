@@ -12,39 +12,6 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
 	use Authenticatable, CanResetPassword, CamelCaseModel;
 
-/*
-    User -> authentication and tracking object
-         -> Not an object directly associated with a team, but a team can add them
-
-
-    User has roles:
-        administrator
-        global_statistician
-        global_regional_statistician
-        local_regional_statistician
-        team_member
-        ...
-
-    TeamMember belongs to a center
-
-    TeamMember has roles
-        team_admin
-        team_statistician
-
-
-    Distinguish between roles (RBM) and accountabilities (access and responsibility)
-
-
-
-
-*/
-
-
-
-
-
-
-
 	/**
 	 * The database table used by the model.
 	 *
@@ -67,7 +34,6 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
     protected $casts = array(
         'active' => 'boolean',
-        'is_admin' => 'boolean',
     );
 
 

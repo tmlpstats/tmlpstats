@@ -44,6 +44,16 @@
         	{!! Form::password('password_confirmation', ['class' => 'form-control']) !!}
 		</div>
 	</div>
+	@if (Request::has('invite'))
+		{!! Form::hidden('invite_code', base64_decode(Request::get('invite'))) !!}
+	@else
+	<div class="form-group">
+		{!! Form::label('invite_code', 'Invite Code', ['class' => 'col-md-4 control-label']) !!}
+		<div class="col-md-6">
+        	{!! Form::text('invite_code', null, ['class' => 'form-control']) !!}
+		</div>
+	</div>
+	@endif
 
 	<div class="form-group">
 		<div class="col-md-6 col-md-offset-4">

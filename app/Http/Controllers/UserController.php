@@ -53,26 +53,26 @@ class UserController extends Controller {
 	 */
 	public function store(UserRequest $request)
 	{
-		if (!$request->has('cancel')) {
-        	$user = User::create($request->all());
-        	if ($request->has('is_admin')) {
-        		$adminRole = Role::findByName('adminstrator');
+        $redirect = 'admin/users';
 
-        		if ($request->get('is_admin') == true) {
-					$user->roles()->attach($adminRole->id);
-        		} else {
-					$user->roles()->detach($adminRole->id);
-        		}
-        	}
-        	if ($request->has('active')) {
-        		$user->active = $request->get('active') == true;
-        	}
-        	if ($request->has('require_password_reset')) {
-        		$user->require_password_reset = $request->get('require_password_reset') == true;
-        	}
-        	$user->save();
-		}
-		return redirect('admin/users');
+		if (!$request->has('cancel')) {
+            return redirect($redirect);
+        }
+
+    	$user = User::create($request->all());
+
+        if ($request->has('roles')) {
+            $user->updateRoles($request->get('roles'));
+        }
+        if ($request->has('active')) {
+            $user->active = $request->get('active') == true;
+        }
+        if ($request->has('require_password_reset')) {
+            $user->requirePasswordReset = $request->get('require_password_reset') == true;
+        }
+    	$user->save();
+
+		return redirect($redirect);
 	}
 
 	/**
@@ -123,7 +123,6 @@ class UserController extends Controller {
         $user = User::findOrFail($id);
         $user->update($request->all());
 
-        // Import Roles
     	if ($request->has('roles')) {
     		$user->updateRoles($request->get('roles'));
     	}
@@ -131,8 +130,9 @@ class UserController extends Controller {
     		$user->active = $request->get('active') == true;
     	}
     	if ($request->has('require_password_reset')) {
-    		$user->require_password_reset = $request->get('require_password_reset') == true;
+    		$user->requirePasswordReset = $request->get('require_password_reset') == true;
     	}
+        $user->save();
 
         return redirect($redirect);
 	}
@@ -147,4 +147,29 @@ class UserController extends Controller {
 	{
 		//
 	}
+
+    public function showProfile()
+    {
+        $user = Auth::user();
+        $roles = $user->roles;
+        $showPasswordUpdate = true;
+
+        return view('users.edit', compact('user', 'roles'));
+    }
+
+    public function updateProfile()
+    {
+        $redirect = 'user/profile';
+
+        if ($request->has('cancel')) {
+            return redirect($redirect);
+        }
+
+        $user = User::findOrFail($id);
+        $user->update($request->all());
+
+        $user->save();
+
+        return redirect($redirect);
+    }
 }

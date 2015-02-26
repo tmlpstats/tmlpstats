@@ -21,6 +21,7 @@ class Registrar implements RegistrarContract {
 			'phone'      => 'regex:/^[\s\d\+\-\.]+$/',
 			'email'      => 'required|email|max:255|unique:users',
 			'password'   => 'required|confirmed|min:6',
+			'invite_code'=> 'required|in:GloabalStatisticiansRock2015'
 		]);
 	}
 
