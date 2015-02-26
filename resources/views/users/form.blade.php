@@ -33,7 +33,7 @@
     <div class="col-sm-5" style="padding-left: 40px">
     @foreach ($roles as $role)
         <label class="checkbox" style="font-weight: normal">
-            <input type="checkbox" name="roles[]" value="{{ $role->id }}" {{ $user->hasRole($role->name) ? 'checked="checked"' : '' }} > {{ $role->name }}
+            <input type="checkbox" name="roles[]" value="{{ $role->id }}" {{ ($user && $user->hasRole($role->name)) ? 'checked="checked"' : '' }} > {{ $role->name }}
         </label>
     @endforeach
     </div>

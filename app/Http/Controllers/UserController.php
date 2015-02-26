@@ -41,7 +41,9 @@ class UserController extends Controller {
 	 */
 	public function create()
 	{
-        return view('users.create');
+        $roles = Role::all();
+
+        return view('users.create', compact('roles'));
 	}
 
 	/**
@@ -82,8 +84,9 @@ class UserController extends Controller {
 	public function show($id)
 	{
         $user = User::findOrFail($id);
+        $roles = Role::all();
 
-        return view('users.show', compact('user'));
+        return view('users.show', compact('user', 'roles'));
 	}
 
 	/**

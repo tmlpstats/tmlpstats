@@ -8,7 +8,7 @@
 
 {!! Form::model($user, ['url' => '/admin/users/' . $user->id, 'method' => 'PUT', 'class' => 'form-horizontal']) !!}
 
-    @include('users.form', ['submitButtonText' => 'Update'])
+    @include('users.form', ['submitButtonText' => 'Update', 'roles' => $roles])
 
 {!! Form::close() !!}
 

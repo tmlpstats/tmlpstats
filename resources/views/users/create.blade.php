@@ -7,7 +7,7 @@
 
 {!! Form::open(['url' => '/admin/users', 'class' => 'form-horizontal']) !!}
 
-    @include('users.form', ['submitButtonText' => 'Create'])
+    @include('users.form', ['submitButtonText' => 'Create', 'user' => null, 'roles' => $roles])
 
 {!! Form::close() !!}
 
