@@ -18,9 +18,10 @@
 #    1) Run deploy script with rollback option
 #       $ ./deploy.sh rollback
 
+PHP=/ramdisk/php/54/bin/php54-cli
 
 SOURCE='tmlpstats'
-DEST='../public_html/tmlp'
+DEST='../public_html/tmlpstats'
 ROLLBACK='rollback'
 
 if [ "$1" == "rollback" ]; then
@@ -35,8 +36,8 @@ mkdir -p $ROLLBACK
 cp -a $DEST/* $ROLLBACK/
 
 cd $SOURCE/
-/ramdisk/php/54/bin/php54-cli ~/common/composer.phar install
+$PHP ~/common/composer.phar update
 cd ../
 
 rm -rf $DEST/*
-rsync -av --exclude='.git*' --exclude='README.md' --exclude='lib/offline-scripts' --exclude='composer.*' $SOURCE/ $DEST
+rsync -av --exclude='.git*' --exclude='readme.md' --exclude'bin' --exclude='composer.*' $SOURCE/ $DEST
