@@ -18,8 +18,6 @@
 #    1) Run deploy script with rollback option
 #       $ ./deploy.sh rollback
 
-PHP=/ramdisk/php/54/bin/php54-cli
-
 SOURCE='tmlpstats'
 DEST='../public_html/tmlpstats'
 ROLLBACK='rollback'
@@ -31,13 +29,16 @@ if [ "$1" == "rollback" ]; then
     exit 0;
 fi
 
+# Setup rollback copy
 rm -rf $ROLLBACK
 mkdir -p $ROLLBACK
 cp -a $DEST/* $ROLLBACK/
 
+# Do actual deploy
 cd $SOURCE/
-$PHP ~/common/composer.phar update
+sed -i.bak 's/php artisan/php-cli artisan/g' composer.json # workaround issue with artisan an bluehost
+php-cli ~/common/composer.phar update
+mv composer.json.bak composer.json # clean up
 cd ../
 
-rm -rf $DEST/*
-rsync -av --exclude='.git*' --exclude='readme.md' --exclude'bin' --exclude='composer.*' $SOURCE/ $DEST
+rsync -av --delete --exclude='.git*' --exclude='composer.*' --exclude='readme.md' --exclude='.env.example' --exclude='bin' $SOURCE/ $DEST
