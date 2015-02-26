@@ -31,8 +31,7 @@ fi
 
 # Setup rollback copy
 rm -rf $ROLLBACK
-mkdir -p $ROLLBACK
-cp -a $DEST/* $ROLLBACK/
+cp -a $DEST $ROLLBACK
 
 # Do actual deploy
 cd $SOURCE/
