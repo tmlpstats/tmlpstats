@@ -22,8 +22,6 @@ class TmlpRegistrationReader extends ReaderAbstract
         'wd'                      => array('col' => 'M'),
         'wdDate'                  => array('col' => 'N', 'format' => 'date'),
         'committedTeamMemberName' => array('col' => 'Q'),
-        'reasonWithdraw'          => array('col' => 'AG'),
-        'futureReasonWithdraw'    => array('col' => 'AE'),
         'comment'                 => array('col' => 'V'),
         'travel'                  => array('col' => 'AE'),
         'room'                    => array('col' => 'AF'),

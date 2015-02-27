@@ -71,11 +71,8 @@ class TmlpRegistrationImporter extends DataImporterAbstract
         $incomingData->comment                 = $this->reader->getComment($row);
         $incomingData->incomingWeekend         = is_numeric($type) ? 'current' : $type;
         if ($incomingData->incomingWeekend == 'current') {
-            $incomingData->reasonWithdraw      = $this->reader->getReasonWithdraw($row);
             $incomingData->travel              = $this->reader->getTravel($row);
             $incomingData->room                = $this->reader->getRoom($row);
-        } else {
-            $incomingData->reasonWithdraw      = $this->reader->getFutureReasonWithdraw($row);
         }
         $incomingData->statsReportId = $this->statsReport->id;
         $incomingData->save();

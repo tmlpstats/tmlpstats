@@ -82,12 +82,11 @@ class ImportManager
                 }
 
                 $sheet = array(
-                    'statsReportId' => $doc->statsReport->id,
-                    'centerId'      => $doc->center->id,
-                    'center'        => $doc->center->name,
-                    'reportingDate' => $doc->reportingDate->format('M j, Y'),
-                    'quarter'       => $doc->quarter->distinction,
-                    'sheetVersion'  => $doc->version,
+                    'statsReportId' => ($doc->statsReport) ? $doc->statsReport->id : '',
+                    'centerId'      => ($doc->center) ? $doc->center->id : '',
+                    'center'        => ($doc->center) ? $doc->center->name : 'Unknown',
+                    'reportingDate' => ($doc->reportingDate) ? $doc->reportingDate->format('M j, Y') : 'Unknown',
+                    'sheetVersion'  => ($doc->version) ? $doc->version : 'Unknown',
                     'errors'        => $doc->messages['errors'],
                     'warnings'      => $doc->messages['warnings'],
                 );

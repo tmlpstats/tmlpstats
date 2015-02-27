@@ -56,9 +56,9 @@ class ClassListImporter extends DataImporterAbstract
 
     public function getTdo()
     {
-        $tdoActual = '0%';
+        $tdoActual = 0;
         if ($this->totalTeamMembers > 0) {
-            $tdoActual = round(($this->totalTeamMembersDoingTdo/$this->totalTeamMembers)*100).'%';
+            $tdoActual = round(($this->totalTeamMembersDoingTdo/$this->totalTeamMembers)*100);
         }
         return $tdoActual;
     }
@@ -122,22 +122,21 @@ class ClassListImporter extends DataImporterAbstract
         $memberData->wbo            = $this->reader->getWbo($row);
         $memberData->rereg          = $this->reader->getRereg($row);
         $memberData->excep          = $this->reader->getExcep($row);
-        $memberData->reasonWithdraw = $this->reader->getReasonWithdraw($row);
         $memberData->travel         = $this->reader->getTravel($row);
         $memberData->room           = $this->reader->getRoom($row);
         $memberData->comment        = $this->reader->getComment($row);
         $memberData->accountability = $this->reader->getAccountability($row); // intentionally set twice to keep track of changes
         $memberData->gitw           = $this->reader->getGitw($row);
         $memberData->tdo            = $this->reader->getTdo($row);
-        $memberData->additionalTdo  = $this->reader->getAdditionalTdo($row);
         $memberData->statsReportId  = $this->statsReport->id;
         $memberData->save();
 
+        // TODO: this belongs in post processing
         $wd = $memberData->wd;
         $wbo = $memberData->wbo;
         if ($wd || $wbo) return;
 
-        $tdo = (int)$memberData->tdo;
+        $tdo = preg_match('/^y$/i', $memberData->tdo) ? 1 : 0;
         if ($tdo > 0) {
             $this->totalTdos += $tdo;
             $this->totalTeamMembersDoingTdo++;

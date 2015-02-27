@@ -11,8 +11,31 @@ class ClassListValidator extends ValidatorAbstract
     {
         $nameValidator           = v::string()->notEmpty();
         $rowIdValidator          = v::numeric()->positive();
-        $yesValidator            = v::when(v::nullValue(), v::alwaysValid(), v::string()->regex('/^[Yy]$/'));
+        $yesValidator            = v::string()->regex('/^[Y]$/i');
+        $yesOrNullValidator      = v::when(v::nullValue(), v::alwaysValid(), $yesValidator);
         $equalsTeamYearValidator = v::when(v::nullValue(), v::alwaysValid(), v::equals($this->data->teamYear));
+
+        $wdTypes = array(
+            '1 AP',
+            '1 AP',
+            '1 FIN',
+            '1 MOA',
+            '1 NW',
+            '1 OOC',
+            '1 T',
+            '2 AP',
+            '2 FIN',
+            '2 MOA',
+            '2 NW',
+            '2 OOC',
+            '2 T',
+            'R AP',
+            'R FIN',
+            'R MOA',
+            'R NW',
+            'R OOC',
+            'R T',
+        );
 
         $this->dataValidators['firstName']           = $nameValidator;
         $this->dataValidators['lastName']            = $nameValidator;
@@ -22,24 +45,21 @@ class ClassListValidator extends ValidatorAbstract
         // Skipping center (auto-generated)
         $this->dataValidators['statsReportId']       = $rowIdValidator;
 
-
         // Skipping reporting date (auto-generated)
         // Skipping team member id (auto-generated)
         $this->dataValidators['wknd']                = $equalsTeamYearValidator;
         $this->dataValidators['xferOut']             = $equalsTeamYearValidator;
         $this->dataValidators['xferIn']              = $equalsTeamYearValidator;
         $this->dataValidators['ctw']                 = $equalsTeamYearValidator;
-        $this->dataValidators['wd']                  = $equalsTeamYearValidator;
+        $this->dataValidators['wd']                  = v::when(v::nullValue(), v::alwaysValid(), v::in($wdTypes));
         $this->dataValidators['wbo']                 = $equalsTeamYearValidator;
         $this->dataValidators['rereg']               = $equalsTeamYearValidator;
         $this->dataValidators['excep']               = $equalsTeamYearValidator;
-        // Skipping reason_withdraw
-        $this->dataValidators['travel']              = $yesValidator;
-        $this->dataValidators['room']                = $yesValidator;
+        $this->dataValidators['travel']              = $yesOrNullValidator;
+        $this->dataValidators['room']                = $yesOrNullValidator;
         // Skipping comment
-        $this->dataValidators['gitw']                = v::when(v::nullValue(), v::alwaysValid(), v::string()->notEmpty()->regex('/[IiEe]/'));
-        $this->dataValidators['tdo']                 = v::when(v::nullValue(), v::alwaysValid(), v::numeric()->between(0, 2, true));
-        $this->dataValidators['additionalTdo']       = v::when(v::nullValue(), v::alwaysValid(), v::numeric()->between(0, 3, true));
+        $this->dataValidators['gitw']                = v::when(v::nullValue(), v::alwaysValid(), v::string()->regex('/^[EI]$/i'));
+        $this->dataValidators['tdo']                 = v::when(v::nullValue(), v::alwaysValid(), v::string()->regex('/^[YN]$/i'));
         // Skipping quarter (auto-generated)
     }
 
@@ -76,17 +96,9 @@ class ClassListValidator extends ValidatorAbstract
                 $this->addMessage("If team member has withdrawn, please leave TDO empty.", 'error');
                 $this->isValid = false;
             }
-            if (!is_null($this->data->additionalTdo) && $this->data->additionalTdo > 0) {
-                $this->addMessage("If team member has withdrawn, please leave Additional TDO empty.", 'error');
-                $this->isValid = false;
-            }
         } else {
             if (is_null($this->data->tdo)) {
                 $this->addMessage("No value provided for TDO.", 'error');
-                $this->isValid = false;
-            }
-            if ((is_null($this->data->tdo) || $this->data->tdo == 0) && (!is_null($this->data->additionalTdo) && $this->data->additionalTdo > 0)) {
-                $this->addMessage("Additional TDO provided, but regular TDO is 0.", 'error');
                 $this->isValid = false;
             }
         }
@@ -106,10 +118,6 @@ class ClassListValidator extends ValidatorAbstract
     protected function validateWithdraw()
     {
         if (!is_null($this->data->wd) || !is_null($this->data->wbo)) {
-            if (is_null($this->data->reasonWithdraw)) {
-                $this->addMessage("No Reason for Withdraw provided.", 'error');
-                $this->isValid = false;
-            }
             if (!is_null($this->data->wd) && !is_null($this->data->wbo)) {
                 $this->addMessage("Both WD and WBO are set. Only one should be set.", 'error');
                 $this->isValid = false;
@@ -117,6 +125,13 @@ class ClassListValidator extends ValidatorAbstract
             if (!is_null($this->data->ctw)) {
                 $this->addMessage("Both WD/WBO and CTW are set. CTW should not be set after the team member has withdrawn.", 'error');
                 $this->isValid = false;
+            }
+            if (!is_null($this->data->wd)) {
+                $value = $this->data->wd;
+                if ($value[0] != $this->data->teamYear && ($value[0] == 'R' && $this->data->teamYear != 2)) {
+                    $this->addMessage("The program year specified for WD doesn't match the team members program year. It should match the value in Wknd or X In", 'error');
+                    $this->isValid = false;
+                }
             }
         }
     }

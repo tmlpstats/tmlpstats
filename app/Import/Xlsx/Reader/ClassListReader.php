@@ -16,13 +16,11 @@ class ClassListReader extends ReaderAbstract
         'wbo'               => array('col' => 'K'),
         'rereg'             => array('col' => 'L'),
         'excep'             => array('col' => 'M'),
-        'reasonWithdraw'    => array('col' => 'S'),
         'travel'            => array('col' => 'Q'),
         'room'              => array('col' => 'R'),
         'comment'           => array('col' => 'O'),
         'gitw'              => array('col' => 'C'),
         'tdo'               => array('col' => 'E'),
-        'additionalTdo'     => array('col' => 'T'),
     );
 
     // This is a total hack. We can get rid of it once we transition to a

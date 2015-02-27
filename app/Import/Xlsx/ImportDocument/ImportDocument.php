@@ -115,12 +115,12 @@ class ImportDocument extends ImportDocumentAbstract
         $tmlpGameStats = DB::table('tmlp_registrations')
                             ->select(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.incoming_weekend = 'current', 1, 0), 0)) as currentTeam1Registered"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.incoming_weekend = 'future', 1, 0), 0)) as futureTeam1Registered"))
-                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'current', 1, 0), 0), 0)) as currentTeam1Approved"))
-                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'future', 1, 0), 0), 0)) as futureTeam1Approved"))
+                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'current', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as currentTeam1Approved"))
+                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'future', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as futureTeam1Approved"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.incoming_weekend = 'current', 1, 0), 0)) as currentTeam2Registered"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.incoming_weekend = 'future', 1, 0), 0)) as futureTeam2Registered"))
-                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'current', 1, 0), 0), 0)) as currentTeam2Approved"))
-                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'future', 1, 0), 0), 0)) as futureTeam2Approved"))
+                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'current', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as currentTeam2Approved"))
+                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'future', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as futureTeam2Approved"))
                             ->join('tmlp_registrations_data', 'tmlp_registrations.id', '=', 'tmlp_registrations_data.tmlp_registration_id')
                             ->where('tmlp_registrations_data.stats_report_id', '=', $this->statsReport->id)
                             ->where('tmlp_registrations.reg_date', '<=', $quarterStartDate)
@@ -174,14 +174,14 @@ class ImportDocument extends ImportDocumentAbstract
                 $registeredKey = "{$game}Registered";
                 $registered = $tmlpGameStats->$registeredKey ?: 0;
                 if ($data->quarterStartRegistered != $registered) {
-                    $this->messages['errors'][] = Message::create('CAP & CPC Course Info')->reportError("{$data->type} Quarter Starting Total Registered ({$data->quarterStartRegistered}) does not match the number of incoming registered before quarter start date({$registered}).");
+                    $this->messages['errors'][] = Message::create('CAP & CPC Course Info')->reportError("{$data->type} Quarter Starting Total Registered ({$data->quarterStartRegistered}) does not match the number of incoming registered before quarter start date ({$registered}).");
                     $isValid = false;
                 }
 
                 $approvedKey = "{$game}Approved";
                 $approved = $tmlpGameStats->$approvedKey ?: 0;
                 if ($data->quarterStartApproved != $approved) {
-                    $this->messages['errors'][] = Message::create('CAP & CPC Course Info')->reportError("{$data->type} Quarter Starting Total Approved({$data->quarterStartApproved}) does not match the number of incoming approved before quarter start date({$approved}).");
+                    $this->messages['errors'][] = Message::create('CAP & CPC Course Info')->reportError("{$data->type} Quarter Starting Total Approved ({$data->quarterStartApproved}) does not match the number of incoming approved before quarter start date ({$approved}).");
                     $isValid = false;
                 }
             }
@@ -203,7 +203,7 @@ class ImportDocument extends ImportDocumentAbstract
 
             $totals = $tmlpGameStats->currentTeam2Registered + $tmlpGameStats->futureTeam2Registered;
             if ($qStartRegisteredTotalT2 != $totals) {
-                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info')->reportWarning("T2 Quarter Starting Total Registered totals ({$qStartRegisteredTotalT2}) do not match the number of incoming registered before quarter start date($totals). Double check what the difference is. It could be a mistake, or a transfer from another center.");
+                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info')->reportWarning("T2 Quarter Starting Total Registered totals ({$qStartRegisteredTotalT2}) do not match the number of incoming registered before quarter start date ($totals). Double check what the difference is. It could be a mistake, or a transfer from another center.");
                 $isValid = false;
             }
 
@@ -242,7 +242,7 @@ class ImportDocument extends ImportDocumentAbstract
     protected function validateCenterStats()
     {
         $isValid = true;
-        $thisWeekActual = NULL;
+        $thisWeekActual = null;
 
         // Actuals
         $list = DB::table('center_stats')
@@ -260,7 +260,7 @@ class ImportDocument extends ImportDocumentAbstract
                 $isValid = false;
             }
             $this->mergeMessages($validator->getMessages());
-            if ($data->reportingDate == $this->statsReport->reportingDate) {
+            if ($data->reportingDate == $this->statsReport->reportingDate->toDateString()) {
                 $thisWeekActual = $data;
             }
         }
@@ -287,15 +287,15 @@ class ImportDocument extends ImportDocumentAbstract
         $teamMemberStats = DB::table('team_members_data')
                                 ->select(DB::raw("COUNT(*) as activeMemberCount"))
                                 ->addSelect(DB::raw("SUM(IF(gitw = 'E', 1, 0)) as effectiveCount"))
-                                ->addSelect(DB::raw("SUM(IF(tdo <> '0', 1, 0)) as tdoCount"))
+                                ->addSelect(DB::raw("SUM(IF(tdo = 'Y', 1, 0)) as tdoCount"))
                                 ->where('stats_report_id', '=', $this->statsReport->id)
                                 ->whereNull('wd')
                                 ->whereNull('wbo')
                                 ->whereNull('xfer_out')
                                 ->first();
 
-        $gitwGame = round(((int)$teamMemberStats->effectiveCount/(int)$teamMemberStats->activeMemberCount) * 100) . "%";
-        $tdoGame = round(((int)$teamMemberStats->tdoCount/(int)$teamMemberStats->activeMemberCount) * 100) . "%";
+        $gitwGame = round(((int)$teamMemberStats->effectiveCount/(int)$teamMemberStats->activeMemberCount) * 100);
+        $tdoGame = round(((int)$teamMemberStats->tdoCount/(int)$teamMemberStats->activeMemberCount) * 100);
 
         // CAP Game
         $capStats = DB::table('courses')
@@ -327,7 +327,7 @@ class ImportDocument extends ImportDocumentAbstract
         $startWeekendDate = $this->quarter->startWeekendDate->toDateString();
         $tmlpStats = DB::table('tmlp_registrations_data')
                         ->select(DB::raw("SUM(IF(appr = '1', 1, IF(wd = '1' AND appr_date <= '{$startWeekendDate}', -1, 0))) as team1Approved"))
-                        ->addSelect(DB::raw("SUM(IF(appr = '2', 1, IF(wd = '2' AND appr_date <= '{$startWeekendDate}', -1, 0))) as team2Approved"))
+                        ->addSelect(DB::raw("SUM(IF((appr = '2' OR appr = 'R'), 1, IF((wd = '2' OR wd = 'R') AND appr_date <= '{$startWeekendDate}', -1, 0))) as team2Approved"))
                         ->where('tmlp_registrations_data.stats_report_id', '=', $this->statsReport->id)
                         ->where(function($query) use ($startWeekendDate) {
 
@@ -363,7 +363,7 @@ class ImportDocument extends ImportDocumentAbstract
             }
 
             if ($thisWeekActual->gitw != $gitwGame) {
-                $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("GITW actual for this week ({$thisWeekActual->gitw}) does not match the total number of team members reported as effective({$gitwGame}).");
+                $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("GITW actual for this week ({$thisWeekActual->gitw}%) does not match the total number of team members reported as effective ({$gitwGame}%).");
                 $isValid = false;
             }
         }
@@ -417,33 +417,39 @@ class ImportDocument extends ImportDocumentAbstract
         $this->processContactInfo();
         $this->processTmlpRegistrations();
     }
+
     protected function loadCenter()
     {
         $data = $this->getWeeklyStatsSheet();
 
-        $centerName = ($data[1]['G'] == 'San Jose, CA') ? 'San Jose' : $data[1]['G'];
+        $centerName = $data[1]['G'];
 
         $this->center = Center::name($centerName)->first();
         if (!$this->center) {
-            $this->messages['errors'][] = "Could not find center '{$data[1]['G']}'. The name may not match our list or this sgeet may be an invalid/corrupt.";
+            $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("Could not find center '$centerName'. The name may not match our list or this sheet may be an invalid/corrupt.");
         }
     }
     protected function loadDate()
     {
         $data = $this->getWeeklyStatsSheet();
-        $this->reportingDate = Util::getExcelDate($data[2]['A']);
+
+        $reportindDate = $data[2]['A'];
+
+        $this->reportingDate = Util::getExcelDate($reportindDate);
         if (!$this->reportingDate || $this->reportingDate->lt(Carbon::create(1980,1,1,0,0,0))) {
-            $this->messages['errors'][] = "Could not find reporting date. Got '{$data[2]['A']}'. This may be an invalid/corrupt sheet.";
+            $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("Could not find reporting date. Got '$reportindDate'. This may be an invalid/corrupt sheet.");
         }
     }
     protected function loadVersion()
     {
-        if ($this->version === NULL) {
+        if ($this->version === null) {
 
             $data = $this->getWeeklyStatsSheet();
+
             $version = $data[2]['L'];
-            if (!preg_match("/^V(\d+\.\d+)(\.\d+)?$/i", $version, $matches)) {
-                throw new \Exception("Unable to recognize sheet version: '{$version}'");
+
+            if (!preg_match("/^V((\d+\.\d+)(\.\d+))?$/i", $version, $matches)) {
+                throw new \Exception("Unable to recognize sheet version: '$version'");
             } else {
                 $this->version = $matches[1]; // only grab to num
             }
@@ -453,7 +459,7 @@ class ImportDocument extends ImportDocumentAbstract
     {
         $this->quarter = Quarter::findByDate($this->reportingDate);
         if (!$this->quarter) {
-            $this->messages['errors'][] = "Could not find quarter with date '{$this->reportingDate->toDateString()}'. This may be an invalid/corrupt sheet";
+            $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("Could not find quarter with date '{$this->reportingDate->toDateString()}'. This may be an invalid/corrupt sheet");
         }
     }
 

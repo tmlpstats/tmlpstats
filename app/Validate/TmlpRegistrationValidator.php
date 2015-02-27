@@ -17,7 +17,7 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         $rowIdValidator              = v::numeric()->positive();
         $dateValidator               = v::date('Y-m-d');
         $dateOrNullValidator         = v::when(v::nullValue(), v::alwaysValid(), $dateValidator);
-        $yesValidator                = v::string()->regex('/^[Yy]$/');
+        $yesValidator                = v::string()->regex('/^[Y]$/i');
         $yesOrNullValidator          = v::when(v::nullValue(), v::alwaysValid(), $yesValidator);
 
         $weekendRegTypes = array(
@@ -30,6 +30,41 @@ class TmlpRegistrationValidator extends ValidatorAbstract
             'current',
             'future',
         );
+
+        $wdTypes = array(
+            '1 AP',
+            '1 NW',
+            '1 FIN',
+            '1 FW',
+            '1 MOA',
+            '1 NA',
+            '1 OOC',
+            '1 T',
+            '1 RE',
+            '1 WB',
+            '2 AP',
+            '2 NW',
+            '2 FIN',
+            '2 FW',
+            '2 MOA',
+            '2 NA',
+            '2 OOC',
+            '2 T',
+            '2 RE',
+            '2 WB',
+            'R AP',
+            'R NW',
+            'R FIN',
+            'R FW',
+            'R MOA',
+            'R NA',
+            'R OOC',
+            'R T',
+            'R RE',
+            'R WB',
+        );
+
+
 
         $incomingTeamYearValidator = v::numeric()->between(1, 2, true);
         $equalsIncomingYearValidator = ($this->data->incomingTeamYear == 1)
@@ -48,7 +83,7 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         $this->dataValidators['appOut']                  = $equalsIncomingYearValidator;
         $this->dataValidators['appIn']                   = $equalsIncomingYearValidator;
         $this->dataValidators['appr']                    = $equalsIncomingYearValidator;
-        $this->dataValidators['wd']                      = $equalsIncomingYearValidator;
+        $this->dataValidators['wd']                      = v::when(v::nullValue(), v::alwaysValid(), v::in($wdTypes));
         $this->dataValidators['regDate']                 = $dateValidator;
         $this->dataValidators['appOutDate']              = $dateOrNullValidator;
         $this->dataValidators['appInDate']               = $dateOrNullValidator;
@@ -95,8 +130,11 @@ class TmlpRegistrationValidator extends ValidatorAbstract
                 $this->addMessage("No withdraw date was provided, but '$col' column contains a {$this->data->incomingTeamYear}", 'error');
                 $this->isValid = false;
             }
-            if (is_null($this->data->reasonWithdraw)) {
-                $this->addMessage("No Reason for Withdraw provided", 'error');
+
+            $value = $this->data->wd;
+            $weekendRegType = $this->getWeekendReg();
+            if ($value[0] != $weekendRegType) {
+                $this->addMessage("The program year specified for WD doesn't match the incoming program year. It should match the value in the Weekend Reg columns", 'error');
                 $this->isValid = false;
             }
             if (!is_null($this->data->appOut) || !is_null($this->data->appIn) || !is_null($this->data->appr)) {
@@ -312,6 +350,17 @@ class TmlpRegistrationValidator extends ValidatorAbstract
                 $this->addMessage("Either rooming must be complete and marked with a Y in the Room colunm, or a comment providing a specific promise must be provided", 'error');
                 $this->isValid = false;
             }
+        }
+    }
+
+    protected function getWeekendReg()
+    {
+        if (!is_null($this->data->bef)){
+            return $this->data->bef;
+        } else if (!is_null($this->data->aft)){
+            return $this->data->aft;
+        } else {
+            return $this->data->dur;
         }
     }
 }

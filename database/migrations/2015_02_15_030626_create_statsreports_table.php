@@ -20,8 +20,8 @@ class CreateStatsreportsTable extends Migration {
 			$table->integer('center_stats_id')->unsigned()->nullable();
 			$table->boolean('validated')->default(false);
 			$table->integer('reporting_statistician_id')->unsigned()->nullable();
-			$table->boolean('program_manager_attending_weekend')->default(false);
-			$table->boolean('classroom_leader_attending_weekend')->default(false);
+			$table->string('program_manager_attending_weekend')->default(false);
+			$table->string('classroom_leader_attending_weekend')->default(false);
 			$table->integer('center_id')->unsigned();
 			$table->integer('quarter_id')->unsigned();
 			$table->timestamps();

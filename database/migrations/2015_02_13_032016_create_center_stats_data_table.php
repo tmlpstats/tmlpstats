@@ -18,13 +18,13 @@ class CreateCenterStatsDataTable extends Migration {
 			$table->date('reporting_date');
 			$table->string('type'); // promise/actual
 			$table->string('offset');
-			$table->integer('tdo')->nullable();
-			$table->integer('cap')->nullable();
-			$table->integer('cpc')->nullable();
-			$table->integer('t1x')->nullable();
-			$table->integer('t2x')->nullable();
-			$table->integer('gitw')->nullable();
-			$table->integer('lf')->nullable();
+			$table->string('tdo')->nullable();
+			$table->string('cap')->nullable();
+			$table->string('cpc')->nullable();
+			$table->string('t1x')->nullable();
+			$table->string('t2x')->nullable();
+			$table->string('gitw')->nullable();
+			$table->string('lf')->nullable();
 			$table->string('rating')->nullable();
 			$table->integer('center_id')->unsigned();
 			$table->integer('quarter_id')->unsigned();

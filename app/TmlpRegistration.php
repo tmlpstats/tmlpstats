@@ -35,4 +35,13 @@ class TmlpRegistration extends Model {
         return $this->hasMany('TmlpStats\TmlpRegistrationData');
     }
 
+    public function scopeTeam1Incoming($query)
+    {
+        return $query->where('incoming_team_year', '=', '1');
+    }
+
+    public function scopeTeam2Incoming($query)
+    {
+        return $query->where('incoming_team_year', '=', '2')->orWhere('incoming_team_year', '=', 'R');
+    }
 }

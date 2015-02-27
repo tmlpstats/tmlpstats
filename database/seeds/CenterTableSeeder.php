@@ -40,7 +40,7 @@ class CenterTableSeeder extends Seeder {
         foreach ($centers as $center) {
             $newCenter = $center;
             $newCenter['team_name'] = null;
-            $newCenter['sheet_version'] = '15.5';
+            $newCenter['sheet_version'] = '15.1.0';
             Center::create($newCenter);
         }
     }
