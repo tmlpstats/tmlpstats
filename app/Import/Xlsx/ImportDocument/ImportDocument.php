@@ -5,12 +5,12 @@ use TmlpStats\Quarter;
 use TmlpStats\Center;
 use TmlpStats\StatsReport;
 use TmlpStats\Message;
-
 use TmlpStats\Util;
 
 use TmlpStats\Import\Xlsx\DataImporter\DataImporterFactory;
 use Carbon\Carbon;
 
+use Auth;
 use DB;
 
 class ImportDocument extends ImportDocumentAbstract
@@ -408,6 +408,8 @@ class ImportDocument extends ImportDocumentAbstract
             'reporting_date'      => $this->reportingDate->toDateString(),
             'spreadsheet_version' => $this->version,
         ));
+        $this->statsReport->userId = Auth::user()->id;
+        $this->statsReport->save();
 
         // Order matters here. TmlpRegistrations and ContactInfo search for team members
         // so ClassList must be loaded first
@@ -436,6 +438,12 @@ class ImportDocument extends ImportDocumentAbstract
         $reportindDate = $data[2]['A'];
 
         $this->reportingDate = Util::getExcelDate($reportindDate);
+
+        if (!$this->reportingDate) {
+            // Parse international dates properly
+            $this->reportingDate = Util::parseUnknownDateFormat($reportindDate);
+        }
+
         if (!$this->reportingDate || $this->reportingDate->lt(Carbon::create(1980,1,1,0,0,0))) {
             $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("Could not find reporting date. Got '$reportindDate'. This may be an invalid/corrupt sheet.");
         }

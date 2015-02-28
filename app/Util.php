@@ -40,11 +40,13 @@ class Util
 
     public static function getExcelDate($excelDate)
     {
-        $excelDateFormatted = \PHPExcel_Style_NumberFormat::toFormattedString($excelDate, "YYYY-MM-DD");
-        if (!preg_match('/^\d\d\d\d-\d\d-\d\d$/', $excelDateFormatted)) {
-            return false;
+        $dateObj = null;
+        if (is_numeric($excelDate)) {
+            $formattedDate = \PHPExcel_Style_NumberFormat::toFormattedString($excelDate, "YYYY-MM-DD");
+            $dateObj = Carbon::createFromFormat('Y-m-d', $formattedDate);
         }
-        return Carbon::createFromFormat('Y-m-d', $excelDateFormatted)->startOfDay();
+
+        return $dateObj ? $dateObj->startOfDay() : false;
     }
 
     public static function parseUnknownDateFormat($dateStr)
@@ -53,11 +55,11 @@ class Util
         if (preg_match("/^\d{5,}$/", $dateStr)) { // Unix timestamp
             $dateObj = Carbon::createFromFormat('U', $dateStr);
         } else if (preg_match("/^\d\d-\d\d-\d\d\d\d$/", $dateStr)) { // 01-01-2015
-            $dateObj = Carbon::createFromFormat('Y-m-d', $dateStr);
+            $dateObj = Carbon::createFromFormat('m-d-Y', $dateStr);
         } else if (preg_match("/^\d\d\/\d\d\/\d\d\d\d$/", $dateStr)) { // 01/01/2015
-            $dateObj = Carbon::createFromFormat('Y-m-d', $dateStr);
+            $dateObj = Carbon::createFromFormat('m/d/Y', $dateStr);
         } else if (preg_match("/^\d\d\d\d\/\d\d\/\d\d$/", $dateStr)) { // 2015/01/01
-            $dateObj = Carbon::createFromFormat('Y-m-d', $dateStr);
+            $dateObj = Carbon::createFromFormat('Y/m/d', $dateStr);
         } else if (preg_match("/^\d\d\d\d-\d\d-\d\d$/", $dateStr)) { // 2015-01-01
             $dateObj = Carbon::createFromFormat('Y-m-d', $dateStr);
         } else if (preg_match("/^\d\d?-[a-zA-Z]{3}$/", $dateStr)) { // 1-Jan

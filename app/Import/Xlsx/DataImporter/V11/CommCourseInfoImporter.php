@@ -6,8 +6,6 @@ use TmlpStats\CourseData;
 
 use Carbon\Carbon;
 
-use DB;
-
 class CommCourseInfoImporter extends DataImporterAbstract
 {
     protected $classDisplayName = "CAP & CPC Course Info";

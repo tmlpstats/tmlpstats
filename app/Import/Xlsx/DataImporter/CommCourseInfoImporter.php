@@ -3,10 +3,9 @@ namespace TmlpStats\Import\Xlsx\DataImporter;
 
 use TmlpStats\Course;
 use TmlpStats\CourseData;
+use TmlpStats\Util;
 
 use Carbon\Carbon;
-
-use DB;
 
 class CommCourseInfoImporter extends DataImporterAbstract
 {

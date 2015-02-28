@@ -3,7 +3,6 @@ namespace TmlpStats\Import\Xlsx\DataImporter\V11;
 
 use TmlpStats\ProgramTeamMember;
 use TmlpStats\TeamMember;
-
 use TmlpStats\Util;
 
 class ContactInfoImporter extends DataImporterAbstract
