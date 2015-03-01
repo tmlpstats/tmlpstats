@@ -78,16 +78,13 @@ class ContactInfoImporter extends DataImporterAbstract
         $member->phone = $this->reader->getPhone($row);
         $member->email = $this->reader->getEmail($row);
 
-        if ($this->isValid()) {
-            if ($member->isDirty()) {
-                if ($member->statsReportId === null) {
-                    $member->statsReportId = $this->statsReport->id;
-                }
-                $member->save();
+        if ($member->isDirty()) {
+            if ($member->statsReportId === null) {
+                $member->statsReportId = $this->statsReport->id;
             }
-            return $member;
+            $member->save();
         }
-        return NULL;
+        return $member;
     }
 
     protected function loadProgramLeadersAttendingWeekend()
@@ -142,11 +139,8 @@ class ContactInfoImporter extends DataImporterAbstract
         }
 
         $member->phone = $this->reader->getReportingStatisticianPhone();
-        if ($this->isValid()) {
-            $member->save();
-            return $member;
-        }
-        return NULL;
+        $member->save();
+        return $member;
     }
 
     protected function getTeamMember($programTeamMember)

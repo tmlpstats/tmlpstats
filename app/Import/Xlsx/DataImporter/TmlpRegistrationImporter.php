@@ -81,14 +81,11 @@ class TmlpRegistrationImporter extends DataImporterAbstract
             ? $type
             : $this->reader->getIncomingTeamYear($row);
 
-
-        if ($this->isValid()) {
-            if ($incoming->statsReportId === null) {
-                $incoming->statsReportId = $this->statsReport->id;
-            }
+        if ($incoming->statsReportId === null) {
             $incoming->statsReportId = $this->statsReport->id;
-            $incoming->save();
         }
+        $incoming->statsReportId = $this->statsReport->id;
+        $incoming->save();
     }
 
     public function postProcess()

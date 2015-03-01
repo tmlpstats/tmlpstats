@@ -177,22 +177,20 @@ class CenterStatsImporter extends DataImporterAbstract
             $this->weeks[] = $week;
         }
 
-        if ($this->isValid()) {
-            if ($centerStats->statsReportId === null) {
-                $centerStats->statsReportId = $this->statsReport->id;
-            }
-            $centerStats->save();
+        if ($centerStats->statsReportId === null) {
+            $centerStats->statsReportId = $this->statsReport->id;
+        }
+        $centerStats->save();
 
-            if ($weekDate->eq($this->statsReport->reportingDate)) {
-                $this->centerStats = $centerStats;
-            }
+        if ($weekDate->eq($this->statsReport->reportingDate)) {
+            $this->centerStats = $centerStats;
         }
     }
 
     public function postProcess()
     {
         foreach ($this->weeks as $week) {
-            
+
             if (!isset($week['promises']) || !isset($week['actuals'])) {
                 continue;
             }

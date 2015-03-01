@@ -178,16 +178,13 @@ class CenterStatsImporter extends DataImporterAbstract
             $week['actuals'] = $actualData;
             $this->weeks[] = $week;
         }
+        if ($centerStats->statsReportId === null) {
+            $centerStats->statsReportId = $this->statsReport->id;
+        }
+        $centerStats->save();
 
-        if ($this->isValid()) {
-            if ($centerStats->statsReportId === null) {
-                $centerStats->statsReportId = $this->statsReport->id;
-            }
-            $centerStats->save();
-
-            if ($weekDate->eq($this->statsReport->reportingDate)) {
-                $this->centerStats = $centerStats;
-            }
+        if ($weekDate->eq($this->statsReport->reportingDate)) {
+            $this->centerStats = $centerStats;
         }
     }
 

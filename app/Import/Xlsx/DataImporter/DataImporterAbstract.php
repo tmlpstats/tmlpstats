@@ -35,11 +35,6 @@ abstract class DataImporterAbstract
         }
     }
 
-    public function isValid()
-    {
-        return (!$this->hasError);
-    }
-
     public function getMessages()
     {
         return $this->messages;
