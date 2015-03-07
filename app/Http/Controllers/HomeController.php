@@ -42,7 +42,46 @@ class HomeController extends Controller {
 		$reportingDate = $this->getExpectedReportDate();
 		$centers = Center::active()->orderBy('local_region', 'asc')->get();
 
+
 		foreach ($centers as $center) {
+
+			// TODO: probably want to add this to login info based on the user's location, not the centers
+			switch ($center->abbreviation) {
+				case 'BOS':
+				case 'NY':
+				case 'NJ':
+				case 'WDC':
+				case 'ATL':
+				case 'FLA':
+				case 'MON':
+				case 'PA':
+				case 'TOR':
+				case 'DET':
+					date_default_timezone_set('America/New_York');
+					break;
+				case 'CHI':
+				case 'MSP':
+				case 'DFW':
+				case 'HOU':
+				case 'MEX':
+					date_default_timezone_set('America/Chicago');
+					break;
+				case 'DEN':
+				case 'PHX':
+					date_default_timezone_set('America/Denver');
+					break;
+				case 'VAN':
+				case 'LA':
+				case 'OC':
+				case 'SJ':
+				case 'SF':
+				case 'SD':
+				case 'SEA':
+				default:
+					date_default_timezone_set('America/Los_Angeles');
+					break;
+
+			}
 
 			$statsReport = $center->statsReports()->reportingDate($reportingDate)->first();
 
@@ -59,7 +98,7 @@ class HomeController extends Controller {
 				'localRegion' => $center->localRegion,
 				'validated'   => $statsReport ? $statsReport->validated : false,
 				'rating'      => $actualData ? $actualData->rating : '-',
-				'updatedAt'   => $statsReport ? $statsReport->updatedAt : '-',
+				'updatedAt'   => $statsReport ? date('M d, Y @ g:i:sa T', strtotime($statsReport->updatedAt)) : '-',
 				'updatedBy'   => $user ? $user->firstName : '-',
 			);
 		}
