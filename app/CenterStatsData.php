@@ -22,6 +22,26 @@ class CenterStatsData extends Model {
         'reporting_date',
     ];
 
+    public function scopeStatsReport($query, $statsReport)
+    {
+        return $query->whereStatsReportId($statsReport->id);
+    }
+
+    public function scopeCenter($query, $center)
+    {
+        return $query->whereCenterId($center->id);
+    }
+
+    public function scopeReportingDate($query, $date)
+    {
+        return $query->whereReportingDate($date);
+    }
+
+    public function scopeActual($query)
+    {
+        return $query->whereType('actual');
+    }
+
     public function centerStats()
     {
         // Only true for Actuals

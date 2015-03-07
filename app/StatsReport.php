@@ -60,6 +60,16 @@ class StatsReport extends Model {
         }
     }
 
+    public function scopeReportingDate($query, $date)
+    {
+        return $query->whereReportingDate($date);
+    }
+
+    public function scopeCenter($query, $center)
+    {
+        return $query->whereCenterId($center->id);
+    }
+
     public function centerStats()
     {
         return $this->hasOne('TmlpStats\CenterStats');

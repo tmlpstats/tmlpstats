@@ -34,13 +34,18 @@ class Center extends Model {
         return $query->whereName($name);
     }
 
+    public function scopeActive($query)
+    {
+        return $query->whereActive(true);
+    }
+
     public function users()
     {
         return $this->belongsToMany('TmlpStats\User', 'role_user')->withTimestamps();
     }
 
-    public function statsReport()
+    public function statsReports()
     {
-        return $this->hasMany('TmlpStats\StatsReport')->withTimestamps();
+        return $this->hasMany('TmlpStats\StatsReport');
     }
 }
