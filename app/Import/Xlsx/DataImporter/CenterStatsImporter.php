@@ -66,6 +66,7 @@ class CenterStatsImporter extends DataImporterAbstract
 
         if ($weekDate === false) {
             $this->addMessage("Week end date in column $weekCol is not in the correct format. The sheet may be corrupt.", 'error', $row);
+            return;
         } else if (!$weekDate) {
             // There was no week date found. skip this column since it's blank
             return;
@@ -84,7 +85,7 @@ class CenterStatsImporter extends DataImporterAbstract
         $newPromiseData = null;
         if ($centerStats->promiseDataId) {
 
-            if ($centerStats->actualDataId) {
+            if ($centerStats->actualDataId && $weekDate->ne($this->statsReport->reportingDate)) {
                 return; // Week already populated. Nothing to do here...
             }
 

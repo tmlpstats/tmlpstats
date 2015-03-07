@@ -80,7 +80,6 @@ class HomeController extends Controller {
 				default:
 					date_default_timezone_set('America/Los_Angeles');
 					break;
-
 			}
 
 			$statsReport = $center->statsReports()->reportingDate($reportingDate)->first();
