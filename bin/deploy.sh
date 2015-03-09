@@ -17,6 +17,7 @@
 # Rollback Process:
 #    1) Run deploy script with rollback option
 #       $ ./deploy.sh rollback
+#
 
 SOURCE='tmlpstats'
 DEST='../public_html/tmlpstats'
