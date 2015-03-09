@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
 use DB;
+use TmlpStats\Quarter;
 
 class StatsReport extends Model {
 
@@ -68,6 +69,12 @@ class StatsReport extends Model {
     public function scopeCenter($query, $center)
     {
         return $query->whereCenterId($center->id);
+    }
+
+    public function scopeCurrentQuarter($query)
+    {
+        $quarter = Quarter::current()->first();
+        return $query->whereQuarterId($quarter->id);
     }
 
     public function centerStats()

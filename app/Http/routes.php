@@ -53,7 +53,8 @@ Route::when('import', 'auth|globalStatistician');
 Route::get('import', 'ImportController@index');
 Route::post('import', 'ImportController@uploadSpreadsheet');
 
-Route::get('home', 'HomeController@index');
+Route::match(['get', 'post'], 'home', 'HomeController@index');
+Route::get('home/timezone', 'HomeController@setTimezone');
 Route::get('/', 'WelcomeController@index');
 
 Route::controllers([

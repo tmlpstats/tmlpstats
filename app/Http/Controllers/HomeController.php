@@ -8,6 +8,9 @@ use TmlpStats\CenterStatsData;
 
 use Carbon\Carbon;
 
+use Session;
+use Request;
+
 class HomeController extends Controller {
 
 	/*
@@ -38,58 +41,50 @@ class HomeController extends Controller {
 	 */
 	public function index()
 	{
-		$centerData = array();
-		$reportingDate = $this->getExpectedReportDate();
+		$timezone = '';
+		if (Session::has('timezone')) {
+			$timezone = 'set';
+			date_default_timezone_set(Session::get('timezone'));
+		} else {
+			date_default_timezone_set('America/Los_Angeles');
+		}
+
+		$reportingDate = '';
+		if (Request::has('stats_report')) {
+			$statsReport = StatsReport::reportingDate(Request::get('stats_report'))->first();
+			if ($statsReport) {
+				$reportingDate = $statsReport->reportingDate;
+			}
+		}
+
+		if (!$reportingDate) {
+			$reportingDate = $this->getExpectedReportDate();
+		}
+
+
+		$allReports = StatsReport::currentQuarter()->orderBy('reporting_date', 'desc')->get();
+
+		$reportingDates = array();
+		foreach ($allReports as $report) {
+			$dateString = $report->reportingDate->toDateString();
+			$displayString = $report->reportingDate->format('M j, Y');
+
+			$reportingDates[$dateString] = $displayString;
+		}
+
 		$centers = Center::active()->orderBy('local_region', 'asc')->get();
 
-
+		$centerData = array();
 		foreach ($centers as $center) {
 
-			// TODO: probably want to add this to login info based on the user's location, not the centers
-			switch ($center->abbreviation) {
-				case 'BOS':
-				case 'NY':
-				case 'NJ':
-				case 'WDC':
-				case 'ATL':
-				case 'FLA':
-				case 'MON':
-				case 'PA':
-				case 'TOR':
-				case 'DET':
-					date_default_timezone_set('America/New_York');
-					break;
-				case 'CHI':
-				case 'MSP':
-				case 'DFW':
-				case 'HOU':
-				case 'MEX':
-					date_default_timezone_set('America/Chicago');
-					break;
-				case 'DEN':
-				case 'PHX':
-					date_default_timezone_set('America/Denver');
-					break;
-				case 'VAN':
-				case 'LA':
-				case 'OC':
-				case 'SJ':
-				case 'SF':
-				case 'SD':
-				case 'SEA':
-				default:
-					date_default_timezone_set('America/Los_Angeles');
-					break;
-			}
-
-			$statsReport = $center->statsReports()->reportingDate($reportingDate)->first();
+			$statsReport = $center->statsReports()->reportingDate($reportingDate->toDateString())->first();
 
 			$user = $statsReport
 				? User::find($statsReport->user_id)
 				: null;
 
 			$actualData = $statsReport
-				? CenterStatsData::actual()->reportingDate($reportingDate)->statsReport($statsReport)->first()
+				? CenterStatsData::actual()->reportingDate($reportingDate->toDateString())->statsReport($statsReport)->first()
 				: null;
 
 			$centerData[$center->name] = array(
@@ -101,7 +96,15 @@ class HomeController extends Controller {
 				'updatedBy'   => $user ? $user->firstName : '-',
 			);
 		}
-		return view('home')->with(['reportingDate' => $reportingDate, 'centersData' => $centerData]);
+
+		return view('home')->with(['reportingDate' => $reportingDate, 'centersData' => $centerData, 'reportingDates' => $reportingDates, 'timezone' => $timezone]);
+	}
+
+	public function setTimezone()
+	{
+		if (Request::has('timezone')) {
+			Session::put('timezone', Request::get('timezone'));
+		}
 	}
 
 	// TODO: Duplicated from Import. put somewhere else
@@ -113,6 +116,6 @@ class HomeController extends Controller {
 		} else {
 			$expectedDate = new Carbon('last friday');
 		}
-		return $expectedDate->startOfDay()->toDateString();
+		return $expectedDate->startOfDay();
 	}
 }

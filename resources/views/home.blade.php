@@ -8,7 +8,17 @@
 
 				<div class="panel-body">
 					@if (Auth::user()->hasRole('globalStatistician'))
-						<h1>Results for Week Ending {{ $reportingDate }}</h1>
+						<h1>Results for Week Ending {{ $reportingDate->format('F j, Y') }}</h1>
+
+						{!! Form::open(['url' => 'home', 'class' => 'form-horizontal']) !!}
+						<div class="form-group">
+							{!! Form::label('stats_report', 'Week:', ['class' => 'col-sm-1 control-label']) !!}
+							<div class="col-sm-2">
+								{!! Form::select('stats_report', $reportingDates, $reportingDate->toDateString(), ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}
+							</div>
+						</div>
+						{!! Form::close() !!}
+
 						<div class="table-responsive">
 							<table class="table table-hover">
 								<thead>
@@ -42,4 +52,31 @@
 			</div>
 		</div>
 	</div>
+@endsection
+
+@section('scripts')
+<script type="text/javascript">
+	$(document).ready(function() {
+		if("<?php echo $timezone; ?>".length == 0){
+			var tz = jstz.determine();
+
+			if (typeof (tz) !== 'undefined') {
+
+				var timezone = tz.name();
+
+				console.log(tz);
+				console.log(timezone);
+
+				$.ajax({
+					type: "GET",
+					url: "{{ action('HomeController@setTimezone') }}",
+					data: 'timezone=' + encodeURI(tz.name()),
+					success: function(){
+						location.reload();
+					}
+				});
+			}
+		}
+	});
+</script>
 @endsection

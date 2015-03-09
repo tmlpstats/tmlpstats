@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TMLP Stats</title>
 
+    <script type="text/javascript" src="{{ asset('/js/jstz.min.js') }}"></script>
+
     <!-- Bootstrap -->
     <link href="{{ asset('/css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('/css/bootstrap.min.css') }}" rel="stylesheet">
@@ -52,8 +54,7 @@
             });
         });
     </script>
-    <script type="text/javascript">
-        @yield('scripts')
-    </script>
+    @yield('scripts')
+
   </body>
 </html>
