@@ -72,9 +72,18 @@ class HomeController extends Controller {
 			$reportingDates[$dateString] = $displayString;
 		}
 
-		$centers = Center::active()->orderBy('local_region', 'asc')->get();
+		$centers = Center::active()->orderBy('local_region', 'asc')->orderBy('name', 'asc')->get();
 
-		$centerData = array();
+		$centerData = array(
+			'East' => array(
+				'validated' => array(),
+				'not-validated' => array(),
+			),
+			'West' => array(
+				'validated' => array(),
+				'not-validated' => array(),
+			),
+		);
 		foreach ($centers as $center) {
 
 			$statsReport = $center->statsReports()->reportingDate($reportingDate->toDateString())->first();
@@ -87,7 +96,11 @@ class HomeController extends Controller {
 				? CenterStatsData::actual()->reportingDate($reportingDate->toDateString())->statsReport($statsReport)->first()
 				: null;
 
-			$centerData[$center->name] = array(
+			$validatedKey = $statsReport && $statsReport->validated
+				? 'validated'
+				: 'not-validated';
+
+			$centerData[$center->localRegion][$validatedKey][$center->name] = array(
 				'name'        => $center->name,
 				'localRegion' => $center->localRegion,
 				'validated'   => $statsReport ? $statsReport->validated : false,
@@ -97,7 +110,21 @@ class HomeController extends Controller {
 			);
 		}
 
-		return view('home')->with(['reportingDate' => $reportingDate, 'centersData' => $centerData, 'reportingDates' => $reportingDates, 'timezone' => $timezone]);
+		$results['eastCount'] = count($centerData['East']['validated']) + count($centerData['East']['not-validated']);
+		$results['westCount'] = count($centerData['West']['validated']) + count($centerData['West']['not-validated']);
+		$results['eastComplete'] = count($centerData['East']['validated']);
+		$results['westComplete'] = count($centerData['West']['validated']);
+
+		$centerData = array_merge($centerData['East']['validated'],
+								  $centerData['East']['not-validated'],
+								  $centerData['West']['validated'],
+								  $centerData['West']['not-validated']);
+
+		return view('home')->with(['reportingDate' => $reportingDate,
+								   'centersData' => $centerData,
+								   'reportingDates' => $reportingDates,
+								   'timezone' => $timezone,
+								   'results' => $results]);
 	}
 
 	public function setTimezone()
