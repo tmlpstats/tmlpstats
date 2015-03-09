@@ -192,25 +192,21 @@ class ImportDocument extends ImportDocumentAbstract
             $totals = $tmlpGameStats->currentTeam1Registered + $tmlpGameStats->futureTeam1Registered;
             if ($qStartRegisteredTotalT1 != $totals) {
                 $this->messages['warnings'][] = Message::create('CAP & CPC Course Info')->reportWarning("T1 Quarter Starting Total Registered totals ({$qStartRegisteredTotalT1}) do not match the number of incoming registered before quarter start date ({$totals}). Double check what the difference is. It could be a mistake, or a transfer from another center.");
-                $isValid = false;
             }
 
             $totals = $tmlpGameStats->currentTeam1Approved + $tmlpGameStats->futureTeam1Approved;
             if ($qStartApprovedTotalT1 != $totals) {
                 $this->messages['warnings'][] = Message::create('CAP & CPC Course Info')->reportWarning("T1 Quarter Starting Total Approved totals ({$qStartApprovedTotalT1}) do not match the number of incoming approved before quarter start date ({$totals}). Double check what the difference is. It could be a mistake, or a transfer from another center.");
-                $isValid = false;
             }
 
             $totals = $tmlpGameStats->currentTeam2Registered + $tmlpGameStats->futureTeam2Registered;
             if ($qStartRegisteredTotalT2 != $totals) {
                 $this->messages['warnings'][] = Message::create('CAP & CPC Course Info')->reportWarning("T2 Quarter Starting Total Registered totals ({$qStartRegisteredTotalT2}) do not match the number of incoming registered before quarter start date ($totals). Double check what the difference is. It could be a mistake, or a transfer from another center.");
-                $isValid = false;
             }
 
             $totals = $tmlpGameStats->currentTeam2Approved + $tmlpGameStats->futureTeam2Approved;
             if ($qStartApprovedTotalT2 != $totals) {
                 $this->messages['warnings'][] = Message::create('CAP & CPC Course Info')->reportWarning("T2 Quarter Starting Total Approved totals ({$qStartApprovedTotalT2}) do not match the number of incoming approved before quarter start date ({$totals}). Double check what the difference is. It could be a mistake, or a transfer from another center.");
-                $isValid = false;
             }
         }
 
@@ -406,8 +402,8 @@ class ImportDocument extends ImportDocumentAbstract
             'center_id'           => $this->center->id,
             'quarter_id'          => $this->quarter->id,
             'reporting_date'      => $this->reportingDate->toDateString(),
-            'spreadsheet_version' => $this->version,
         ));
+        $this->statsReport->spreadsheetVersion = $this->version;
         $this->statsReport->userId = Auth::user()->id;
         $this->statsReport->save();
 
@@ -429,23 +425,26 @@ class ImportDocument extends ImportDocumentAbstract
         $this->center = Center::name($centerName)->first();
         if (!$this->center) {
             $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("Could not find center '$centerName'. The name may not match our list or this sheet may be an invalid/corrupt.");
+        } else if (!$this->center->active) {
+            $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("Center '$centerName' is marked as inactive. Please have an administrator activate this center if they are now an active team.");
         }
     }
     protected function loadDate()
     {
         $data = $this->getWeeklyStatsSheet();
 
-        $reportindDate = $data[2]['A'];
+        $reportingDate = $data[2]['A'];
 
-        $this->reportingDate = Util::getExcelDate($reportindDate);
+        $this->reportingDate = Util::getExcelDate($reportingDate);
 
         if (!$this->reportingDate) {
             // Parse international dates properly
-            $this->reportingDate = Util::parseUnknownDateFormat($reportindDate);
+            $this->reportingDate = Util::parseUnknownDateFormat($reportingDate);
+            $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("Reporting date format was incorrect, '$reportingDate'. Please input date explicately (i.e. {$this->reportingDate->format('M d, Y')}).");
         }
 
         if (!$this->reportingDate || $this->reportingDate->lt(Carbon::create(1980,1,1,0,0,0))) {
-            $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("Could not find reporting date. Got '$reportindDate'. This may be an invalid/corrupt sheet.");
+            $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("Could not find reporting date. Got '$reportingDate'. This may be an invalid/corrupt sheet.");
         }
     }
     protected function loadVersion()
@@ -456,8 +455,8 @@ class ImportDocument extends ImportDocumentAbstract
 
             $version = $data[2]['L'];
 
-            if (!preg_match("/^V((\d+\.\d+)(\.\d+))?$/i", $version, $matches)) {
-                throw new \Exception("Unable to recognize sheet version: '$version'");
+            if (!preg_match("/^V((\d+\.\d+)(\.\d+)?)$/i", $version, $matches)) {
+                $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("Version '$version' is in an incorrect format. Sheet may be invalid/corrupt.");
             } else {
                 $this->version = $matches[1]; // only grab to num
             }

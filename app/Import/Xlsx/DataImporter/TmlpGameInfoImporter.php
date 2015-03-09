@@ -38,8 +38,8 @@ class TmlpGameInfoImporter extends DataImporterAbstract
         ));
         if ($game->statsReportId == null) {
             $game->statsReportId = $this->statsReport->id;
+            $game->save();
         }
-        $game->save();
 
         $gameData = TmlpGameData::firstOrCreate(array(
             'center_id'      => $this->statsReport->center->id,

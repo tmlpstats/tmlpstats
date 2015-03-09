@@ -47,6 +47,15 @@ class TmlpRegistrationImporter extends DataImporterAbstract
             'center_id'  => $this->statsReport->center->id,
             'reg_date'   => $this->reader->getRegDate($row),
         ));
+        if ($incoming->statsReportId === null) {
+            $incoming->statsReportId = $this->statsReport->id;
+        }
+
+        $incoming->incomingTeamYear = is_numeric($type)
+            ? $type
+            : $this->reader->getIncomingTeamYear($row);
+
+        $incoming->save();
 
         $incomingData = TmlpRegistrationData::firstOrCreate(array(
             'reporting_date'       => $this->statsReport->reportingDate->toDateString(),
@@ -54,6 +63,7 @@ class TmlpRegistrationImporter extends DataImporterAbstract
             'quarter_id'           => $this->statsReport->quarter->id,
             'tmlp_registration_id' => $incoming->id,
         ));
+
         $incomingData->offset = $row;
         $incomingData->bef                     = $this->reader->getBef($row);
         $incomingData->dur                     = $this->reader->getDur($row);
@@ -76,16 +86,6 @@ class TmlpRegistrationImporter extends DataImporterAbstract
         }
         $incomingData->statsReportId = $this->statsReport->id;
         $incomingData->save();
-
-        $incoming->incomingTeamYear = is_numeric($type)
-            ? $type
-            : $this->reader->getIncomingTeamYear($row);
-
-        if ($incoming->statsReportId === null) {
-            $incoming->statsReportId = $this->statsReport->id;
-        }
-        $incoming->statsReportId = $this->statsReport->id;
-        $incoming->save();
     }
 
     public function postProcess()

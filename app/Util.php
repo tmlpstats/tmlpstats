@@ -41,6 +41,7 @@ class Util
     public static function getExcelDate($excelDate)
     {
         $dateObj = null;
+        // Excel dates are numeric. If it's not, then it's probably some kind of date string.
         if (is_numeric($excelDate)) {
             $formattedDate = \PHPExcel_Style_NumberFormat::toFormattedString($excelDate, "YYYY-MM-DD");
             $dateObj = Carbon::createFromFormat('Y-m-d', $formattedDate);
@@ -70,6 +71,11 @@ class Util
             $dateObj = Carbon::createFromFormat('j-M-y', $dateStr);
         }
         return $dateObj->startOfDay();
+    }
+
+    public static function isCarbonDate($date)
+    {
+        return get_class($date) == "Carbon\Carbon";
     }
 
     public static function getNameParts($name)
