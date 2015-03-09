@@ -34,6 +34,7 @@
 
 
 @section('scripts')
+<script type="text/javascript">
     $(function($) {
         $("input[name='ignoreReportDate']").click(function(){
             if ($(this).is(':checked')) {
@@ -43,4 +44,5 @@
             }
         });
     });
+</script>
 @stop
