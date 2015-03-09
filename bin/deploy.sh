@@ -40,4 +40,4 @@ php-cli ~/common/composer.phar install --no-dev --optimize-autoloader
 mv composer.json.bak composer.json # clean up
 cd ../
 
-rsync -av --delete --filter='protect storage/framework/sessions/*' --filter='protect storage/logs/*' --exclude='.git*' --exclude='composer.*' --exclude='readme.md' --exclude='.env.example' --exclude='bin' $SOURCE/ $DEST
+rsync -av --delete --filter='protect storage/framework/sessions/*' --filter='protect storage/logs/*' --filter='protect public/error_log' --exclude='.git*' --exclude='composer.*' --exclude='readme.md' --exclude='.env.example' --exclude='bin' $SOURCE/ $DEST
