@@ -1,5 +1,7 @@
 <?php
 
+use App;
+
 return [
 
 	/*
@@ -109,7 +111,7 @@ return [
 	|
 	*/
 
-	'cookie' => 'laravel_session',
+	'cookie' => 'gdfk', // non-sense, obfuscate the session id. every little bit helps
 
 	/*
 	|--------------------------------------------------------------------------
@@ -148,6 +150,6 @@ return [
 	|
 	*/
 
-	'secure' => false,
+	'secure' => $app->environment('prod'), // require secure session cookies in prod
 
 ];

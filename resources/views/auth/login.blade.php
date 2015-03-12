@@ -2,6 +2,12 @@
 
 @section('auth.form')
 
+@if (isset($message))
+    <div class="alert alert-danger" role="alert">
+        <p>{{ $message }}</p>
+    </div>
+@endif
+
 {!! Form::open(['url' => '/auth/login', 'class' => 'form-horizontal']) !!}
 
 	<div class="form-group">

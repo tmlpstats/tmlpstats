@@ -440,7 +440,7 @@ class ImportDocument extends ImportDocumentAbstract
         if (!$this->reportingDate) {
             // Parse international dates properly
             $this->reportingDate = Util::parseUnknownDateFormat($reportingDate);
-            $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("Reporting date format was incorrect, '$reportingDate'. Please input date explicately (i.e. {$this->reportingDate->format('M d, Y')}).");
+            $this->messages['errors'][] = Message::create('Current Weekly Stats')->reportError("Reporting date format was incorrect, '$reportingDate'. Please input date explicitly (i.e. {$this->reportingDate->format('M d, Y')}).");
         }
 
         if (!$this->reportingDate || $this->reportingDate->lt(Carbon::create(1980,1,1,0,0,0))) {

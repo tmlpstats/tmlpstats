@@ -4,6 +4,10 @@ namespace TmlpStats\Exceptions;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
+use Illuminate\Session\TokenMismatchException;
+
+use Redirect;
+
 class Handler extends ExceptionHandler {
 
 	/**
@@ -40,6 +44,11 @@ class Handler extends ExceptionHandler {
 		if ($this->isHttpException($e))
 		{
 			return $this->renderHttpException($e);
+		}
+		else if ($e instanceof TokenMismatchException)
+		{
+			// Probably a session expiration. Redirect to login
+			return redirect('auth/login')->with('message','Your session has expired. Please try logging in again.');
 		}
 		else
 		{
