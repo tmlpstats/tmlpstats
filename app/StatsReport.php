@@ -22,6 +22,11 @@ class StatsReport extends Model {
         'reporting_date',
     ];
 
+    public function isValidated()
+    {
+        return (bool) $this->validated;
+    }
+
     // Flush all objects created by this report.
     public function clear()
     {
