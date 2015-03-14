@@ -69,8 +69,10 @@ class Util
             $dateObj = Carbon::createFromFormat('n-j', $dateStr);
         } else if (preg_match("/^\d\d?-[a-zA-Z]{3}-\d\d$/", $dateStr)) { // 1-Jan-15
             $dateObj = Carbon::createFromFormat('j-M-y', $dateStr);
+        } else {
+            $dateObj = Carbon::createFromFormat('U', strtotime($dateStr));
         }
-        return $dateObj->startOfDay();
+        return $dateObj ? $dateObj->startOfDay() : null;
     }
 
     public static function isCarbonDate($date)

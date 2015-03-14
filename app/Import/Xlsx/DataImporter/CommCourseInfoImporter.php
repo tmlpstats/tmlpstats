@@ -46,7 +46,7 @@ class CommCourseInfoImporter extends DataImporterAbstract
 
         $course = Course::firstOrCreate(array(
             'center_id'  => $this->statsReport->center->id,
-            'start_date' => $startDate->toDateString(),
+            'start_date' => $startDate ? $startDate->toDateString() : $startDateRawValue,
             'type'       => $type,
         ));
         if ($course->statsReportId === null) {
