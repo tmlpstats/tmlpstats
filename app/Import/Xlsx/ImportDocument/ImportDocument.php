@@ -174,14 +174,14 @@ class ImportDocument extends ImportDocumentAbstract
                 $registeredKey = "{$game}Registered";
                 $registered = $tmlpGameStats->$registeredKey ?: 0;
                 if ($data->quarterStartRegistered != $registered) {
-                    $this->messages['errors'][] = Message::create('CAP & CPC Course Info')->reportError("{$data->type} Quarter Starting Total Registered ({$data->quarterStartRegistered}) does not match the number of incoming registered before quarter start date ({$registered}).");
+                    $this->messages['errors'][] = Message::create('CAP & CPC Course Info.')->reportError("{$data->type} Quarter Starting Total Registered ({$data->quarterStartRegistered}) does not match the number of incoming registered before quarter start date ({$registered}).");
                     $isValid = false;
                 }
 
                 $approvedKey = "{$game}Approved";
                 $approved = $tmlpGameStats->$approvedKey ?: 0;
                 if ($data->quarterStartApproved != $approved) {
-                    $this->messages['errors'][] = Message::create('CAP & CPC Course Info')->reportError("{$data->type} Quarter Starting Total Approved ({$data->quarterStartApproved}) does not match the number of incoming approved before quarter start date ({$approved}).");
+                    $this->messages['errors'][] = Message::create('CAP & CPC Course Info.')->reportError("{$data->type} Quarter Starting Total Approved ({$data->quarterStartApproved}) does not match the number of incoming approved before quarter start date ({$approved}).");
                     $isValid = false;
                 }
             }
@@ -191,22 +191,22 @@ class ImportDocument extends ImportDocumentAbstract
 
             $totals = $tmlpGameStats->currentTeam1Registered + $tmlpGameStats->futureTeam1Registered;
             if ($qStartRegisteredTotalT1 != $totals) {
-                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info')->reportWarning("T1 Quarter Starting Total Registered totals ({$qStartRegisteredTotalT1}) do not match the number of incoming registered before quarter start date ({$totals}). Double check what the difference is. It could be a mistake, or a transfer from another center.");
+                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info.')->reportWarning("T1 Quarter Starting Total Registered totals ({$qStartRegisteredTotalT1}) do not match the number of incoming registered before quarter start date ({$totals}). Double check what the difference is. It could be a mistake, or a transfer from another center.");
             }
 
             $totals = $tmlpGameStats->currentTeam1Approved + $tmlpGameStats->futureTeam1Approved;
             if ($qStartApprovedTotalT1 != $totals) {
-                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info')->reportWarning("T1 Quarter Starting Total Approved totals ({$qStartApprovedTotalT1}) do not match the number of incoming approved before quarter start date ({$totals}). Double check what the difference is. It could be a mistake, or a transfer from another center.");
+                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info.')->reportWarning("T1 Quarter Starting Total Approved totals ({$qStartApprovedTotalT1}) do not match the number of incoming approved before quarter start date ({$totals}). Double check what the difference is. It could be a mistake, or a transfer from another center.");
             }
 
             $totals = $tmlpGameStats->currentTeam2Registered + $tmlpGameStats->futureTeam2Registered;
             if ($qStartRegisteredTotalT2 != $totals) {
-                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info')->reportWarning("T2 Quarter Starting Total Registered totals ({$qStartRegisteredTotalT2}) do not match the number of incoming registered before quarter start date ($totals). Double check what the difference is. It could be a mistake, or a transfer from another center.");
+                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info.')->reportWarning("T2 Quarter Starting Total Registered totals ({$qStartRegisteredTotalT2}) do not match the number of incoming registered before quarter start date ($totals). Double check what the difference is. It could be a mistake, or a transfer from another center.");
             }
 
             $totals = $tmlpGameStats->currentTeam2Approved + $tmlpGameStats->futureTeam2Approved;
             if ($qStartApprovedTotalT2 != $totals) {
-                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info')->reportWarning("T2 Quarter Starting Total Approved totals ({$qStartApprovedTotalT2}) do not match the number of incoming approved before quarter start date ({$totals}). Double check what the difference is. It could be a mistake, or a transfer from another center.");
+                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info.')->reportWarning("T2 Quarter Starting Total Approved totals ({$qStartApprovedTotalT2}) do not match the number of incoming approved before quarter start date ({$totals}). Double check what the difference is. It could be a mistake, or a transfer from another center.");
             }
         }
 

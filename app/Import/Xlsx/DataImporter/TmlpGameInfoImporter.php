@@ -6,7 +6,7 @@ use TmlpStats\TmlpGameData;
 
 class TmlpGameInfoImporter extends DataImporterAbstract
 {
-    protected $classDisplayName = "CAP & CPC Course Info";
+    protected $classDisplayName = "CAP & CPC Course Info.";
 
     protected static $blockT1X = array();
     protected static $blockT2X = array();

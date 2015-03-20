@@ -38,22 +38,27 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
         $isValid = false;
         $this->process();
 
+
         if ($this->statsReport) {
-            if (!$validateReport || ($this->isValid() && $this->validateReport())) {
+            if (!$validateReport || $this->validateReport()) {
                 $this->postProcess();
-                $this->statsReport->validated = $validateReport;
+                $this->statsReport->validated = true;
                 $this->statsReport->save();
                 $isValid =  true;
             }
 
-            if (defined('VALIDATE_ONLY') || !$isValid) {
+            if (defined('VALIDATE_ONLY') || !$isValid || !$this->isValid()) {
                 // Flush all data imported from this report. Keeps db clean from
                 // data left over from invalid sheets
                 $this->statsReport->clear();
             }
-        } else {
+        }
+
+        // Check if there were any errors during import
+        if (!$this->isValid()) {
             $isValid = false;
         }
+
         return $isValid;
     }
 

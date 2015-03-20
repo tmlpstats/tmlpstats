@@ -289,8 +289,7 @@ class TmlpRegistrationValidator extends ValidatorAbstract
                 }
             } else if (is_null($this->data->appInDate)) {
                 if ($appOutDate->diffInDays($statsReport->reportingDate) > $maxApplicationDays) {
-                    $this->addMessage("Application not returned within {$maxApplicationDays} days since sending application out. Application is considered a withdraw.", 'error');
-                    $this->isValid = false;
+                    $this->addMessage("Application not returned within {$maxApplicationDays} days since sending application out. Application is not in integrity with design of application process.", 'warn');
                 }
             } else if (is_null($this->data->apprDate)) {
                 if ($appOutDate->diffInDays($statsReport->reportingDate) > $maxApplicationDays) {

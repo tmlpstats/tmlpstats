@@ -9,7 +9,7 @@ use Carbon\Carbon;
 
 class CommCourseInfoImporter extends DataImporterAbstract
 {
-    protected $classDisplayName = "CAP & CPC Course Info";
+    protected $classDisplayName = "CAP & CPC Course Info.";
 
     protected static $blockCAP = array();
     protected static $blockCPC = array();
@@ -42,6 +42,10 @@ class CommCourseInfoImporter extends DataImporterAbstract
             $startDateRawValue = $this->reader->getValue($row, $startDateCol);
             $startDate = Util::parseUnknownDateFormat($startDateRawValue);
             $this->addMessage("Start date format is invalid for $type course.", 'error', $row);
+
+            if ($startDate === false) {
+                $this->addMessage("Unable to determine start date for $type course due to invalid date format. Validation may be skipped. Check manually.", 'error', $row);
+            }
         }
 
         $course = Course::firstOrCreate(array(

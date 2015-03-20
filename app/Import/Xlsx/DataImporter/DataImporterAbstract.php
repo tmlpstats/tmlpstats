@@ -11,8 +11,6 @@ abstract class DataImporterAbstract
     protected $reader = NULL;
     protected $statsReport = NULL;
 
-    protected $hasError = false;
-
     protected $messages = array();
 
     public function __construct(&$sheet, &$statsReport)
@@ -104,10 +102,6 @@ abstract class DataImporterAbstract
 
     protected function addMessage($message, $severity = 'error', $offset = false)
     {
-        if ($severity == 'error')
-        {
-            $this->hasError = true;
-        }
         $this->messages[] = Message::create($this->classDisplayName)->addMessage($message, $severity, $offset);
     }
 

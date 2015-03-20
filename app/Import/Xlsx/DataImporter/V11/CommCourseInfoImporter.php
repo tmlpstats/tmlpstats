@@ -8,7 +8,7 @@ use Carbon\Carbon;
 
 class CommCourseInfoImporter extends DataImporterAbstract
 {
-    protected $classDisplayName = "CAP & CPC Course Info";
+    protected $classDisplayName = "CAP & CPC Course Info.";
 
     protected static $blockCAP = array();
     protected static $blockCPC = array();
