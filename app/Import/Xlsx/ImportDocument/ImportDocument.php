@@ -349,12 +349,11 @@ class ImportDocument extends ImportDocumentAbstract
             }
 
             if ($thisWeekActual->t1x != $t1xGame) {
-                // This is a warning since the regional is asked to verify info manually
+                // This is a warning since the regional is asked to verify
                 $this->messages['warnings'][] = Message::create('Current Weekly Stats')->reportWarning("T1X actual approved for this week ({$thisWeekActual->t1x}) does not match number of T1 incoming with approval dates during this quarter ({$t1xGame}). If the sheet does not detect this, the quarter starting totals are likely inaccurate. Verify manually.");
             }
 
             if ($thisWeekActual->t2x != $t2xGame) {
-                // This is a warning since the regional is asked to verify info manually
                 $this->messages['warnings'][] = Message::create('Current Weekly Stats')->reportWarning("T2X actual approved for this week ({$thisWeekActual->t2x}) does not match number of T2 incoming with approval dates during this quarter ({$t2xGame}). If the sheet does not detect this, the quarter starting totals are likely inaccurate. Verify manually.");
             }
 

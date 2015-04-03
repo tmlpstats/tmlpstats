@@ -61,6 +61,18 @@ class CommCourseInfoValidator extends ValidatorAbstract
                 $this->addMessage("Course has completed but is missing Registrations", 'error');
                 $this->isValid = false;
             }
+
+            if (!is_null($this->data->completedStandardStarts) && !is_null($this->data->currentStandardStarts)) {
+                if ($this->data->completedStandardStarts > $this->data->currentStandardStarts) {
+
+                    $this->addMessage("More people completed the course than there were that started. Make sure Current Standard Starts matches the number of people that started the course, and Completed Standard Starts matches the number of people that completed the course.", 'error');
+                    $this->isValid = false;
+                } else if ($this->data->completedStandardStarts < ($this->data->currentStandardStarts - 3)) {
+
+                    $withdrew = $this->data->currentStandardStarts - $this->data->completedStandardStarts;
+                    $this->addMessage("Completed Standard Starts is $withdrew less than the course starting standard starts. Confirm that $withdrew people did withdraw during the course.", 'warning');
+                }
+            }
         }
     }
 
