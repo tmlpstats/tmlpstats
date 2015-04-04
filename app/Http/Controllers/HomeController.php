@@ -105,7 +105,7 @@ class HomeController extends Controller {
 				'localRegion' => $center->localRegion,
 				'validated'   => $statsReport ? $statsReport->validated : false,
 				'rating'      => $actualData ? $actualData->rating : '-',
-				'updatedAt'   => $statsReport ? date('M d, Y @ g:i:sa T', strtotime($statsReport->updatedAt)) : '-',
+				'updatedAt'   => $statsReport ? date('M d, Y @ g:ia T', strtotime($statsReport->updatedAt . ' UTC')) : '-',
 				'updatedBy'   => $user ? $user->firstName : '-',
 			);
 		}
