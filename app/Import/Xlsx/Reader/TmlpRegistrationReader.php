@@ -12,7 +12,6 @@ class TmlpRegistrationReader extends ReaderAbstract
         'dur'                     => array('col' => 'D'),
         'aft'                     => array('col' => 'E'),
         'incomingTeamYear'        => array('col' => array('C', 'D', 'E')),
-        // 'incomingTeamYear'        => array('col' => 'C'),
         'appOut'                  => array('col' => 'G'),
         'appOutDate'              => array('col' => 'H', 'format' => 'date'),
         'appIn'                   => array('col' => 'I'),
@@ -64,6 +63,6 @@ class TmlpRegistrationReader extends ReaderAbstract
                 break;
             }
         }
-        return $this->getValue($row, $col);
+        return $col ? $this->getValue($row, $col) : NULL;
     }
 }

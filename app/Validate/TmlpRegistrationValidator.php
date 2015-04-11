@@ -26,6 +26,12 @@ class TmlpRegistrationValidator extends ValidatorAbstract
             'after',
         );
 
+        $incomingTeamYearTypes = array(
+           1,
+           2,
+           'R'
+        );
+
         $incomingWeekendTypes = array(
             'current',
             'future',
@@ -64,12 +70,8 @@ class TmlpRegistrationValidator extends ValidatorAbstract
             'R WB',
         );
 
-
-
-        $incomingTeamYearValidator = v::numeric()->between(1, 2, true);
-        $equalsIncomingYearValidator = ($this->data->incomingTeamYear == 1)
-            ? v::when(v::nullValue(), v::alwaysValid(), v::equals($this->data->incomingTeamYear))
-            : v::when(v::nullValue(), v::alwaysValid(), v::in(array(2,'R'))); // R for reviewer
+        $incomingTeamYearValidator = v::in($incomingTeamYearTypes);
+        $equalsIncomingYearValidator = v::when(v::nullValue(), v::alwaysValid(), v::equals($this->data->incomingTeamYear));
 
         $this->dataValidators['firstName']               = $nameValidator;
         $this->dataValidators['lastName']                = $nameValidator;
