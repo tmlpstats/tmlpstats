@@ -117,10 +117,12 @@ class ImportDocument extends ImportDocumentAbstract
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.incoming_weekend = 'future', 1, 0), 0)) as futureTeam1Registered"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'current', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as currentTeam1Approved"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'future', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as futureTeam1Approved"))
+                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.wd IS NOT NULL, 1, 0), 0), 0)) as team1Withdraws"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.incoming_weekend = 'current', 1, 0), 0)) as currentTeam2Registered"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.incoming_weekend = 'future', 1, 0), 0)) as futureTeam2Registered"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'current', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as currentTeam2Approved"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'future', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as futureTeam2Approved"))
+                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.wd IS NOT NULL, 1, 0), 0), 0)) as team2Withdraws"))
                             ->join('tmlp_registrations_data', 'tmlp_registrations.id', '=', 'tmlp_registrations_data.tmlp_registration_id')
                             ->where('tmlp_registrations_data.stats_report_id', '=', $this->statsReport->id)
                             ->where('tmlp_registrations.reg_date', '<=', $quarterStartDate)
@@ -194,7 +196,7 @@ class ImportDocument extends ImportDocumentAbstract
                 $this->messages['warnings'][] = Message::create('CAP & CPC Course Info.')->reportWarning("T1 Quarter Starting Total Registered totals ({$qStartRegisteredTotalT1}) do not match the number of incoming registered before quarter start date ({$totals}). Double check what the difference is. It could be a mistake, or a transfer from another center.");
             }
 
-            $totals = $tmlpGameStats->currentTeam1Approved + $tmlpGameStats->futureTeam1Approved;
+            $totals = ($tmlpGameStats->currentTeam1Approved + $tmlpGameStats->futureTeam1Approved) + $tmlpGameStats->team1Withdraws;
             if ($qStartApprovedTotalT1 != $totals) {
                 $this->messages['warnings'][] = Message::create('CAP & CPC Course Info.')->reportWarning("T1 Quarter Starting Total Approved totals ({$qStartApprovedTotalT1}) do not match the number of incoming approved before quarter start date ({$totals}). Double check what the difference is. It could be a mistake, or a transfer from another center.");
             }
@@ -204,7 +206,7 @@ class ImportDocument extends ImportDocumentAbstract
                 $this->messages['warnings'][] = Message::create('CAP & CPC Course Info.')->reportWarning("T2 Quarter Starting Total Registered totals ({$qStartRegisteredTotalT2}) do not match the number of incoming registered before quarter start date ($totals). Double check what the difference is. It could be a mistake, or a transfer from another center.");
             }
 
-            $totals = $tmlpGameStats->currentTeam2Approved + $tmlpGameStats->futureTeam2Approved;
+            $totals = ($tmlpGameStats->currentTeam2Approved + $tmlpGameStats->futureTeam2Approved) + $tmlpGameStats->team2Withdraws;
             if ($qStartApprovedTotalT2 != $totals) {
                 $this->messages['warnings'][] = Message::create('CAP & CPC Course Info.')->reportWarning("T2 Quarter Starting Total Approved totals ({$qStartApprovedTotalT2}) do not match the number of incoming approved before quarter start date ({$totals}). Double check what the difference is. It could be a mistake, or a transfer from another center.");
             }
@@ -322,8 +324,8 @@ class ImportDocument extends ImportDocumentAbstract
         // T1x and T2x Games
         $startWeekendDate = $this->quarter->startWeekendDate->toDateString();
         $tmlpStats = DB::table('tmlp_registrations_data')
-                        ->select(DB::raw("SUM(IF(appr = '1', 1, IF(wd = '1' AND appr_date <= '{$startWeekendDate}', -1, 0))) as team1Approved"))
-                        ->addSelect(DB::raw("SUM(IF((appr = '2' OR appr = 'R'), 1, IF((wd = '2' OR wd = 'R') AND appr_date <= '{$startWeekendDate}', -1, 0))) as team2Approved"))
+                        ->select(DB::raw("SUM(IF(appr = '1', 1, IF(wd LIKE '1%' AND appr_date <= '{$startWeekendDate}', -1, 0))) as team1Approved"))
+                        ->addSelect(DB::raw("SUM(IF((appr = '2' OR appr = 'R'), 1, IF((wd LIKE '2%' OR wd LIKE 'R%') AND appr_date <= '{$startWeekendDate}', -1, 0))) as team2Approved"))
                         ->where('tmlp_registrations_data.stats_report_id', '=', $this->statsReport->id)
                         ->where(function($query) use ($startWeekendDate) {
 
