@@ -38,6 +38,7 @@ class CommCourseInfoValidator extends ValidatorAbstract
 
     protected function validate()
     {
+        $this->validateCourseBalance();
         $this->validateCourseCompletionStats();
         $this->validateCourseStartDate();
 
@@ -83,6 +84,40 @@ class CommCourseInfoValidator extends ValidatorAbstract
         if ($startDate->lt($statsReport->quarter->startWeekendDate)) {
             $this->addMessage("Course occured before quarter started", 'error');
             $this->isValid = false;
+        }
+    }
+
+    protected function validateCourseBalance()
+    {
+        if (!is_null($this->data->quarterStartTer)
+            && !is_null($this->data->quarterStartStandardStarts)
+            && !is_null($this->data->quarterStartXfer)
+        ) {
+            if ($this->data->quarterStartTer < $this->data->quarterStartStandardStarts) {
+
+                $this->addMessage("Quarter Starting Standard Starts ({$this->data->quarterStartStandardStarts}) cannot be more than the quarter starting total number of people ever registered in the course ({$this->data->quarterStartTer})", 'error');
+                $this->isValid = false;
+            }
+            if ($this->data->quarterStartTer < $this->data->quarterStartXfer) {
+
+                $this->addMessage("Quarter Starting Transfer ({$this->data->quarterStartXfer}) cannot be more than the quarter starting total number of people ever registered in the course ({$this->data->quarterStartTer})", 'error');
+                $this->isValid = false;
+            }
+        }
+        if (!is_null($this->data->currentTer)
+            && !is_null($this->data->currentStandardStarts)
+            && !is_null($this->data->currentXfer)
+        ) {
+            if ($this->data->currentTer < $this->data->currentStandardStarts) {
+
+                $this->addMessage("Current Standard Starts ({$this->data->currentStandardStarts}) cannot be more than the total number of people ever registered in the course ({$this->data->currentTer})", 'error');
+                $this->isValid = false;
+            }
+            if ($this->data->currentTer < $this->data->currentXfer) {
+
+                $this->addMessage("Quarter Starting Transfer ({$this->data->currentXfer}) cannot be more than the total number of people ever registered in the course ({$this->data->currentTer})", 'error');
+                $this->isValid = false;
+            }
         }
     }
 }
