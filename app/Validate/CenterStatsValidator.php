@@ -1,12 +1,13 @@
 <?php
 namespace TmlpStats\Validate;
 
+use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\Import\Xlsx\Reader as Reader;
 use Respect\Validation\Validator as v;
 
 class CenterStatsValidator extends ValidatorAbstract
 {
-    protected $classDisplayName = 'Current Weekly Stats';
+    protected $sheetId = ImportDocument::TAB_WEEKLY_STATS;
 
     protected function populateValidators()
     {

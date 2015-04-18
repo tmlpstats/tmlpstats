@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\TmlpRegistration;
 use TmlpStats\TmlpRegistrationData;
 use TmlpStats\TeamMember;
@@ -8,7 +9,7 @@ use TmlpStats\Util;
 
 class TmlpRegistrationImporter extends DataImporterAbstract
 {
-    protected $classDisplayName = "Weekly Center Stats";
+    protected $sheetId = ImportDocument::TAB_WEEKLY_STATS;
 
     protected static $blockT1Reg = array();
     protected static $blockT2Reg = array();
@@ -16,15 +17,17 @@ class TmlpRegistrationImporter extends DataImporterAbstract
 
     protected function populateSheetRanges()
     {
-        self::$blockT1Reg[]     = $this->excelRange('A','AG');
-        self::$blockT1Reg[]     = $this->excelRange(35,74);
+        $t1Reg = $this->findRange(32, 'Team 1 Registrations', 'Team 2 Registrations');
+        self::$blockT1Reg[] = $this->excelRange('A','AG');
+        self::$blockT1Reg[] = $this->excelRange($t1Reg['start'] + 1, $t1Reg['end']);
 
-        self::$blockT2Reg[]     = $this->excelRange('A','AG');
-        self::$blockT2Reg[]     = $this->excelRange(77,96);
+        $t2Reg = $this->findRange($t1Reg['end'], 'Team 2 Registrations', 'Future Weekend Reg');
+        self::$blockT2Reg[] = $this->excelRange('A','AG');
+        self::$blockT2Reg[] = $this->excelRange($t2Reg['start'] + 1, $t2Reg['end']);
 
+        $futureReg = $this->findRange($t2Reg['end'], 'Future Weekend Reg', 'REMEMBER TO ENTER THE COURSE INFORMATION ON THE "CAP & CPC Course Info" Tab');
         self::$blockFutureReg[] = $this->excelRange('A','AE');
-        self::$blockFutureReg[] = $this->excelRange(99,123);
-    }
+        self::$blockFutureReg[] = $this->excelRange($futureReg['start'] + 1, $futureReg['end']);    }
 
     public function load()
     {

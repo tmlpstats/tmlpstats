@@ -176,14 +176,14 @@ class ImportDocument extends ImportDocumentAbstract
                 $registeredKey = "{$game}Registered";
                 $registered = $tmlpGameStats->$registeredKey ?: 0;
                 if ($data->quarterStartRegistered != $registered) {
-                    $this->messages['errors'][] = Message::create('CAP & CPC Course Info.')->addMessage('IMPORTDOC_QSTART_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $data->type, $data->quarterStartRegistered, $registered);
+                    $this->messages['errors'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $data->type, $data->quarterStartRegistered, $registered);
                     $isValid = false;
                 }
 
                 $approvedKey = "{$game}Approved";
                 $approved = $tmlpGameStats->$approvedKey ?: 0;
                 if ($data->quarterStartApproved != $approved) {
-                    $this->messages['errors'][] = Message::create('CAP & CPC Course Info.')->addMessage('IMPORTDOC_QSTART_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $data->type, $data->quarterStartApproved, $approved);
+                    $this->messages['errors'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $data->type, $data->quarterStartApproved, $approved);
                     $isValid = false;
                 }
             }
@@ -193,22 +193,22 @@ class ImportDocument extends ImportDocumentAbstract
 
             $totals = $tmlpGameStats->currentTeam1Registered + $tmlpGameStats->futureTeam1Registered;
             if ($qStartRegisteredTotalT1 != $totals) {
-                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info.')->addMessage('IMPORTDOC_QSTART_T1_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT1, $totals);
+                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T1_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT1, $totals);
             }
 
             $totals = ($tmlpGameStats->currentTeam1Approved + $tmlpGameStats->futureTeam1Approved) + $tmlpGameStats->team1Withdraws;
             if ($qStartApprovedTotalT1 != $totals) {
-                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info.')->addMessage('IMPORTDOC_QSTART_T1_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartApprovedTotalT1, $totals);
+                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T1_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartApprovedTotalT1, $totals);
             }
 
             $totals = $tmlpGameStats->currentTeam2Registered + $tmlpGameStats->futureTeam2Registered;
             if ($qStartRegisteredTotalT2 != $totals) {
-                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info.')->addMessage('IMPORTDOC_QSTART_T2_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT2, $totals);
+                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T2_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT2, $totals);
             }
 
             $totals = ($tmlpGameStats->currentTeam2Approved + $tmlpGameStats->futureTeam2Approved) + $tmlpGameStats->team2Withdraws;
             if ($qStartApprovedTotalT2 != $totals) {
-                $this->messages['warnings'][] = Message::create('CAP & CPC Course Info.')->addMessage('IMPORTDOC_QSTART_T2_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartApprovedTotalT2, $totals);
+                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T2_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartApprovedTotalT2, $totals);
             }
         }
 
@@ -341,26 +341,26 @@ class ImportDocument extends ImportDocumentAbstract
         if ($thisWeekActual) {
 
             if ($thisWeekActual->cap != $capGame) {
-                $this->messages['errors'][] = Message::create('Current Weekly Stats')->addMessage('IMPORTDOC_CAP_ACTUAL_INCORRECT', false, $thisWeekActual->cap, $capGame);
+                $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_CAP_ACTUAL_INCORRECT', false, $thisWeekActual->cap, $capGame);
                 $isValid = false;
             }
 
             if ($thisWeekActual->cpc != $cpcGame) {
-                $this->messages['errors'][] = Message::create('Current Weekly Stats')->addMessage('IMPORTDOC_CPC_ACTUAL_INCORRECT', false, $thisWeekActual->cpc, $cpcGame);
+                $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_CPC_ACTUAL_INCORRECT', false, $thisWeekActual->cpc, $cpcGame);
                 $isValid = false;
             }
 
             if ($thisWeekActual->t1x != $t1xGame) {
                 // This is a warning since the regional is asked to verify
-                $this->messages['warnings'][] = Message::create('Current Weekly Stats')->addMessage('IMPORTDOC_T1X_ACTUAL_INCORRECT', false, $thisWeekActual->t1x, $t1xGame);
+                $this->messages['warnings'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_T1X_ACTUAL_INCORRECT', false, $thisWeekActual->t1x, $t1xGame);
             }
 
             if ($thisWeekActual->t2x != $t2xGame) {
-                $this->messages['warnings'][] = Message::create('Current Weekly Stats')->addMessage('IMPORTDOC_T2X_ACTUAL_INCORRECT', false, $thisWeekActual->t2x, $t2xGame);
+                $this->messages['warnings'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_T2X_ACTUAL_INCORRECT', false, $thisWeekActual->t2x, $t2xGame);
             }
 
             if ($thisWeekActual->gitw != $gitwGame) {
-                $this->messages['errors'][] = Message::create('Current Weekly Stats')->addMessage('IMPORTDOC_GITW_ACTUAL_INCORRECT', false, $thisWeekActual->gitw, $gitwGame);
+                $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_GITW_ACTUAL_INCORRECT', false, $thisWeekActual->gitw, $gitwGame);
                 $isValid = false;
             }
         }
@@ -374,13 +374,13 @@ class ImportDocument extends ImportDocumentAbstract
 
         if ($this->enforceVersion && $this->statsReport->spreadsheetVersion != $this->center->sheetVersion) {
 
-            $this->messages['errors'][] = Message::create('Current Weekly Stats')->addMessage('IMPORTDOC_SPREADSHEET_VERSION_MISMATCH', false, $this->statsReport->spreadsheetVersion, $this->center->sheetVersion);
+            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_SPREADSHEET_VERSION_MISMATCH', false, $this->statsReport->spreadsheetVersion, $this->center->sheetVersion);
             $isValid = false;
         }
 
         if ($this->expectedDate && $this->expectedDate->ne($this->statsReport->reportingDate)) {
 
-            $this->messages['errors'][] = Message::create('Current Weekly Stats')->addMessage('IMPORTDOC_SPREADSHEET_DATE_MISMATCH', false, $this->statsReport->reportingDate->toDateString(), $this->expectedDate->toDateString());
+            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_SPREADSHEET_DATE_MISMATCH', false, $this->statsReport->reportingDate->toDateString(), $this->expectedDate->toDateString());
             $isValid = false;
         }
 
@@ -425,9 +425,9 @@ class ImportDocument extends ImportDocumentAbstract
 
         $this->center = Center::name($centerName)->first();
         if (!$this->center) {
-            $this->messages['errors'][] = Message::create('Current Weekly Stats')->addMessage('IMPORTDOC_CENTER_NOT_FOUND', false, $centerName);
+            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_CENTER_NOT_FOUND', false, $centerName);
         } else if (!$this->center->active) {
-            $this->messages['errors'][] = Message::create('Current Weekly Stats')->addMessage('IMPORTDOC_CENTER_INACTIVE', false, $centerName);
+            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_CENTER_INACTIVE', false, $centerName);
         }
     }
     protected function loadDate()
@@ -441,11 +441,11 @@ class ImportDocument extends ImportDocumentAbstract
         if (!$this->reportingDate) {
             // Parse international dates properly
             $this->reportingDate = Util::parseUnknownDateFormat($reportingDate);
-            $this->messages['errors'][] = Message::create('Current Weekly Stats')->addMessage('IMPORTDOC_DATE_FORMAT_INCORRECT', false, $reportingDate);
+            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_DATE_FORMAT_INCORRECT', false, $reportingDate);
         }
 
         if (!$this->reportingDate || $this->reportingDate->lt(Carbon::create(1980,1,1,0,0,0))) {
-            $this->messages['errors'][] = Message::create('Current Weekly Stats')->addMessage('IMPORTDOC_DATE_NOT_FOUND', false, $reportingDate);
+            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_DATE_NOT_FOUND', false, $reportingDate);
         }
     }
     protected function loadVersion()
@@ -457,7 +457,7 @@ class ImportDocument extends ImportDocumentAbstract
             $version = $data[2]['L'];
 
             if (!preg_match("/^V((\d+\.\d+)(\.\d+)?)$/i", $version, $matches)) {
-                $this->messages['errors'][] = Message::create('Current Weekly Stats')->addMessage('IMPORTDOC_VERSION_FORMAT_INCORRECT', false, $version);
+                $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_VERSION_FORMAT_INCORRECT', false, $version);
             } else {
                 $this->version = $matches[1]; // only grab to num
             }
@@ -467,7 +467,7 @@ class ImportDocument extends ImportDocumentAbstract
     {
         $this->quarter = Quarter::findByDate($this->reportingDate);
         if (!$this->quarter) {
-            $this->messages['errors'][] = Message::create('Current Weekly Stats')->addMessage('IMPORTDOC_QUARTER_NOT_FOUND', false, $this->reportingDate->toDateString());
+            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_QUARTER_NOT_FOUND', false, $this->reportingDate->toDateString());
         }
     }
 

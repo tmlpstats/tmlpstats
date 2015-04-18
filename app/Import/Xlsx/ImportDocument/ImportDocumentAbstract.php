@@ -8,8 +8,20 @@ use Carbon\Carbon;
 
 abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
 {
+    const TAB_WEEKLY_STATS       = 0;
+    const TAB_CLASS_LIST         = 1;
+    const TAB_COURSES            = 2;
+    const TAB_LOCAL_TEAM_CONTACT = 3;
+
+    const TYPE_NORTHAMERICA      = 0;
+    const TYPE_INTERNATIONAL     = 1;
+
     protected $xlsType = 'Excel2007'; // Same format for Excel 2010
-    protected $sheetNames = array('Current Weekly Stats', 'Class List', 'CAP & CPC Course Info.', 'Local Team Contact Info.');
+
+    protected $sheetNameType = ImportDocumentAbstract::TYPE_NORTHAMERICA;
+
+    protected $naSheetNames = array('Current Weekly Stats', 'Class List', 'CAP & CPC Course Info.', 'Local Team Contact Info.');
+    protected $intSheetNames = array('Current Weekly Perf. Measures', 'Class List', 'Centre Courses Info.', 'Local Team Contact Info.');
     protected $sheets = array(null, null, null, null);
 
     protected $version = null;
@@ -61,6 +73,8 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
             $isValid = false;
         }
 
+        $this->normalizeMessages();
+
         return $isValid;
     }
 
@@ -93,30 +107,21 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
     protected function loadWorkbook($file)
     {
         $reader = PHPExcel_IOFactory::createReader($this->xlsType);
+        $inputWorksheetNames = $reader->listWorksheetNames($file);
 
         // Verify document has only the expected worksheets
-        $expectedSheets = $this->sheetNames;
-        array_push($expectedSheets, 'Instructions - Revision History');
-
-        $inputWorksheetNames = $reader->listWorksheetNames($file);
-        $diff = array_diff($inputWorksheetNames, $expectedSheets);
-        if (count($diff) > 0) {
-            $ignoreExtra = true;;
-            foreach ($diff as $sheet) {
-
-                // Ignore default sheets excel may add
-                if (!preg_match('/^Sheet\d+$/', $sheet)) {
-                    $ignoreExtra = false;
-                }
-            }
-
-            if (!$ignoreExtra) {
-                throw new \Exception("Excel document doesn't appear to be a center stats report.");
-            }
+        if ($this->isNorthAmericaSheet($inputWorksheetNames)) {
+            $this->sheetNameType = static::TYPE_NORTHAMERICA;
+            $sheetNames = $this->naSheetNames;
+        } else if ($this->isInternationalSheet($inputWorksheetNames)) {
+            $this->sheetNameType = static::TYPE_INTERNATIONAL;
+            $sheetNames = $this->intSheetNames;
+        } else {
+            throw new \Exception("Excel document doesn't appear to be a center stats report.");
         }
 
         // Make sure we can load the document
-        $reader->setLoadSheetsOnly($this->sheetNames);
+        $reader->setLoadSheetsOnly($sheetNames);
         $doc = $reader->load($file);
         if (!$doc) {
             throw new \Exception("Unable to load excel file.");
@@ -128,29 +133,99 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
         $doc->disconnectWorksheets();
     }
 
+    protected function isNorthAmericaSheet($inputWorksheetNames)
+    {
+        $expectedSheets = $this->naSheetNames;
+        array_push($expectedSheets, 'Instructions - Revision History');
+
+        return $this->hasExpectedSheets($inputWorksheetNames, $expectedSheets);
+    }
+
+    protected function isInternationalSheet($inputWorksheetNames)
+    {
+        $expectedSheets = $this->intSheetNames;
+        array_push($expectedSheets, 'Instructions - Revision History');
+
+        return $this->hasExpectedSheets($inputWorksheetNames, $expectedSheets);
+    }
+
+    protected function hasExpectedSheets($inputWorksheetNames, $expectedSheets)
+    {
+        $diff = array_diff($inputWorksheetNames, $expectedSheets);
+        if (count($diff) > 0) {
+            $ignoreExtra = true;
+            foreach ($diff as $sheet) {
+
+                // Ignore default sheets excel may add
+                if (!preg_match('/^Sheet\d+$/', $sheet)) {
+                    $ignoreExtra = false;
+                }
+            }
+
+            if (!$ignoreExtra) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     protected function loadAllSheets($doc)
     {
+        $sheetNames = ($this->sheetNameType == static::TYPE_NORTHAMERICA)
+            ? $this->naSheetNames
+            : $this->intSheetNames;
+
         $loadedCount = 0;
-        for($i = 0; $i < count($this->sheetNames); $i++) {
+        for($i = 0; $i < count($sheetNames); $i++) {
 
             $sheet = $this->loadSheet($i, $doc);
             if (!is_array($sheet) || count($sheet) == 0) {
-                throw new \Exception("Workbook is missing sheet '{$this->sheetNames[$i]}'");
+                throw new \Exception("Workbook is missing sheet '{$sheetNames[$i]}'");
             }
         }
     }
 
     protected function loadSheet($index, $doc=null)
     {
+        $sheetNames = ($this->sheetNameType == static::TYPE_NORTHAMERICA)
+            ? $this->naSheetNames
+            : $this->intSheetNames;
+
         if ($this->sheets[$index] === null && $doc) {
-            $sheet = $doc->getSheetByName($this->sheetNames[$index]);
+            $sheet = $doc->getSheetByName($sheetNames[$index]);
             if (!$sheet) {
-                throw new \Exception("Could not find sheet {$this->sheetNames[$index]}");
+                throw new \Exception("Could not find sheet {$sheetNames[$index]}");
             } else {
                 $this->sheets[$index] = $sheet->toArray(null,true,false,true);
             }
         }
         return $this->sheets[$index];
+    }
+
+    public function getSheetName($sheetId)
+    {
+        switch ($sheetId) {
+            case static::TAB_WEEKLY_STATS:
+            case static::TAB_CLASS_LIST:
+            case static::TAB_COURSES:
+            case static::TAB_LOCAL_TEAM_CONTACT:
+                return $this->sheetNameType == static::TYPE_NORTHAMERICA
+                    ? $this->naSheetNames[$sheetId]
+                    : $this->intSheetNames[$sheetId];
+
+            default:
+                return 'unspecified';
+        }
+    }
+
+    protected function normalizeMessages()
+    {
+        foreach ($this->messages['errors'] as &$message) {
+            $message['section'] = $this->getSheetName($message['section']);
+        }
+        foreach ($this->messages['warnings'] as &$message) {
+            $message['section'] = $this->getSheetName($message['section']);
+        }
     }
 
     protected function postProcess() { }

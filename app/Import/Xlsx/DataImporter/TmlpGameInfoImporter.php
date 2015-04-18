@@ -1,12 +1,13 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\TmlpGame;
 use TmlpStats\TmlpGameData;
 
 class TmlpGameInfoImporter extends DataImporterAbstract
 {
-    protected $classDisplayName = "CAP & CPC Course Info.";
+    protected $sheetId = ImportDocument::TAB_COURSES;
 
     protected static $blockT1X = array();
     protected static $blockT2X = array();

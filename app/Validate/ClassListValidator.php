@@ -1,11 +1,12 @@
 <?php
 namespace TmlpStats\Validate;
 
+use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use Respect\Validation\Validator as v;
 
 class ClassListValidator extends ValidatorAbstract
 {
-    protected $classDisplayName = 'Class List';
+    protected $sheetId = ImportDocument::TAB_CLASS_LIST;
 
     protected function populateValidators()
     {

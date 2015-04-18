@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\Quarter;
 use TmlpStats\TeamMember;
 use TmlpStats\TeamMemberData;
@@ -11,7 +12,7 @@ use Carbon\Carbon;
 
 class ClassListImporter extends DataImporterAbstract
 {
-    protected $classDisplayName = "Class List";
+    protected $sheetId = ImportDocument::TAB_CLASS_LIST;
 
     protected $totalTdos = 0;
     protected $totalTeamMembersDoingTdo = 0;

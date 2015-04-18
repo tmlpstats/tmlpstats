@@ -1,12 +1,13 @@
 <?php
 namespace TmlpStats\Validate;
 
+use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use Carbon\Carbon;
 use Respect\Validation\Validator as v;
 
 class CommCourseInfoValidator extends ValidatorAbstract
 {
-    protected $classDisplayName = 'CAP & CPC Course Info.';
+    protected $sheetId = ImportDocument::TAB_COURSES;
 
     protected function populateValidators()
     {

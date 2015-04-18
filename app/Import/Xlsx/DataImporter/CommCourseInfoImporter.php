@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\Course;
 use TmlpStats\CourseData;
 use TmlpStats\Util;
@@ -9,7 +10,7 @@ use Carbon\Carbon;
 
 class CommCourseInfoImporter extends DataImporterAbstract
 {
-    protected $classDisplayName = "CAP & CPC Course Info.";
+    protected $sheetId = ImportDocument::TAB_COURSES;
 
     protected static $blockCAP = array();
     protected static $blockCPC = array();
