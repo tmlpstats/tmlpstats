@@ -13,7 +13,18 @@ class ClassListValidator extends ValidatorAbstract
         $rowIdValidator          = v::numeric()->positive();
         $yesValidator            = v::string()->regex('/^[Y]$/i');
         $yesOrNullValidator      = v::when(v::nullValue(), v::alwaysValid(), $yesValidator);
-        $equalsTeamYearValidator = v::when(v::nullValue(), v::alwaysValid(), v::equals($this->data->teamYear));
+
+        $teamYearValidator = v::numeric()->between(1, 2, true);
+
+        if ($this->data->teamYear == 1) {
+            $indicator = 1;
+        } else {
+            $indicator = 2;
+            if ($this->data->wknd == 'R' || $this->data->xferIn == 'R') {
+                $indicator = 'R';
+            }
+        }
+        $equalsTeamYearValidator = v::when(v::nullValue(), v::alwaysValid(), v::equals($indicator));
 
         $wdTypes = array(
             '1 AP',
@@ -39,7 +50,7 @@ class ClassListValidator extends ValidatorAbstract
 
         $this->dataValidators['firstName']           = $nameValidator;
         $this->dataValidators['lastName']            = $nameValidator;
-        $this->dataValidators['teamYear']            = v::numeric()->between(1, 2, true);
+        $this->dataValidators['teamYear']            = $teamYearValidator;
         // Skipping accountability
         $this->dataValidators['completionQuarterId'] = $rowIdValidator;
         // Skipping center (auto-generated)
@@ -147,11 +158,11 @@ class ClassListValidator extends ValidatorAbstract
         $secondClassroomDate = $statsReport->quarter->classroom2Date;
         if ($statsReport->reportingDate->gt($secondClassroomDate)) {
             if (is_null($this->data->travel) && is_null($this->data->comment)) {
-                $this->addMessage("Either travel must be complete and marked with a Y in the Travel colunm, or a comment providing a specific promise must be provided", 'error');
+                $this->addMessage("Either travel must be complete and marked with a Y in the Travel column, or a comment providing a specific promise must be provided", 'error');
                 $this->isValid = false;
             }
             if (is_null($this->data->room) && is_null($this->data->comment)) {
-                $this->addMessage("Either rooming must be complete and marked with a Y in the Room colunm, or a comment providing a specific promise must be provided", 'error');
+                $this->addMessage("Either rooming must be complete and marked with a Y in the Room column, or a comment providing a specific promise must be provided", 'error');
                 $this->isValid = false;
             }
         }

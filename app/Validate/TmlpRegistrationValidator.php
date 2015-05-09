@@ -26,12 +26,6 @@ class TmlpRegistrationValidator extends ValidatorAbstract
             'after',
         );
 
-        $incomingTeamYearTypes = array(
-           1,
-           2,
-           'R'
-        );
-
         $incomingWeekendTypes = array(
             'current',
             'future',
@@ -70,8 +64,17 @@ class TmlpRegistrationValidator extends ValidatorAbstract
             'R WB',
         );
 
-        $incomingTeamYearValidator = v::in($incomingTeamYearTypes);
-        $equalsIncomingYearValidator = v::when(v::nullValue(), v::alwaysValid(), v::equals($this->data->incomingTeamYear));
+        $incomingTeamYearValidator = v::numeric()->between(1, 2, true);
+
+        if ($this->data->incomingTeamYear == 1) {
+            $indicator = 1;
+        } else {
+            $indicator = 2;
+            if ($this->data->bef == 'R' || $this->data->dur == 'R' || $this->data->aft == 'R') {
+                $indicator = 'R';
+            }
+        }
+        $equalsIncomingYearValidator = v::when(v::nullValue(), v::alwaysValid(), v::equals($indicator));
 
         $this->dataValidators['firstName']               = $nameValidator;
         $this->dataValidators['lastName']                = $nameValidator;
@@ -344,11 +347,11 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         $statsReport = $this->getStatsReport();
         if ($statsReport->reportingDate->gt($statsReport->quarter->classroom2Date)) {
             if (is_null($this->data->travel) && is_null($this->data->comment)) {
-                $this->addMessage("Either travel must be complete and marked with a Y in the Travel colunm, or a comment providing a specific promise must be provided", 'error');
+                $this->addMessage("Either travel must be complete and marked with a Y in the Travel column, or a comment providing a specific promise must be provided", 'error');
                 $this->isValid = false;
             }
             if (is_null($this->data->room) && is_null($this->data->comment)) {
-                $this->addMessage("Either rooming must be complete and marked with a Y in the Room colunm, or a comment providing a specific promise must be provided", 'error');
+                $this->addMessage("Either rooming must be complete and marked with a Y in the Room column, or a comment providing a specific promise must be provided", 'error');
                 $this->isValid = false;
             }
         }
