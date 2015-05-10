@@ -52,19 +52,19 @@ class ContactInfoImporter extends DataImporterAbstract
         $accountability = $this->reader->getAccountability($row);
 
         if ($name === NULL || strtoupper($name) == 'NA' || strtoupper($name) == 'N/A') {
-            $this->addMessage("No name provided for $accountability", 'warn', $row);
+            $this->addMessage('CONTACTINFO_NO_NAME', $row, $accountability);
             return NULL; // It's possible that a center may not have a program manager
         }
 
         if (defined('IMPORT_HACKS') && strpos($name, '/') !== false) {
             $name = str_replace('/', ' ', $name);
         } else if (strpos($name, '/') !== false) {
-            $this->addMessage("Please provide name like 'Jane D' with a space, not a '/' separating the first name and last initial.", 'error', $row);
+            $this->addMessage('CONTACTINFO_SLASHES_FOUND', $row);
         }
         $nameParts = Util::getNameParts($name);
 
         if (strtoupper($nameParts['firstName']) == $nameParts['firstName']) {
-            $this->addMessage("First name is in all capital letters. Please provide them with appropriate capitalization, otherwise we may not be able to find this person in some cases.", 'warn', $this->reader->getReportingStatisticianNameRow());
+            $this->addMessage('CONTACTINFO_FIRST_NAME_ALL_CAPS', $this->reader->getReportingStatisticianNameRow());
         }
 
         $member = ProgramTeamMember::firstOrCreate(array(
@@ -116,13 +116,13 @@ class ContactInfoImporter extends DataImporterAbstract
         if (defined('IMPORT_HACKS') && strpos($name, '/') !== false) {
             $name = str_replace('/', ' ', $name);
         } else if (strpos($name, '/') !== false) {
-            $this->addMessage("Please provide name like 'Jane D' with a space, not a '/' separating the first name and last initial.", 'error', $row);
+            $this->addMessage('CONTACTINFO_SLASHES_FOUND', $row);
         }
 
         $nameParts = Util::getNameParts($name);
 
         if (strtoupper($nameParts['firstName']) == $nameParts['firstName']) {
-            $this->addMessage("First name is in all capital letters. Please provide them with appropriate capitalization, otherwise we may not be able to find this person in some cases.", 'warn', $this->reader->$this->reader->getReportingStatisticianNameRow());
+            $this->addMessage('CONTACTINFO_FIRST_NAME_ALL_CAPS', $this->reader->$this->reader->getReportingStatisticianNameRow());
         }
 
         $member = ProgramTeamMember::firstOrCreate(array(

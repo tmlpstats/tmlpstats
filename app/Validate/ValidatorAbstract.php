@@ -37,7 +37,7 @@ abstract class ValidatorAbstract
                     $value = '[empty]';
                 }
 
-                $this->addMessage("Value provided for $displayName '$value' is incorrect.", 'error');
+                $this->addMessage('INVALID_VALUE', $displayName, $value);
                 $this->isValid = false;
             }
         }
@@ -73,8 +73,13 @@ abstract class ValidatorAbstract
         return Carbon::createFromFormat('Y-m-d', $date)->startOfDay();
     }
 
-    protected function addMessage($message, $severity = 'error')
+    protected function addMessage($messageId)
     {
-        $this->messages[] = Message::create($this->classDisplayName)->addMessage($message, $severity, $this->getOffset($this->data));
+        $message = Message::create($this->classDisplayName);
+
+        $arguments = array_slice(func_get_args(), 1);
+        array_unshift($arguments, $messageId, $this->getOffset($this->data));
+
+        $this->messages[] = call_user_func_array(array($message, 'addMessage'), $arguments);
     }
 }

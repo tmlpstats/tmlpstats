@@ -118,7 +118,7 @@ class TmlpRegistrationValidator extends ValidatorAbstract
             || (!is_null($this->data->bef) && !is_null($this->data->aft))
             || (!is_null($this->data->dur) && !is_null($this->data->aft))
         ) {
-            $this->addMessage("Weekend Reg section contains multiple {$this->data->incomingTeamYear}'s. Only one should be provided", 'error');
+            $this->addMessage('TMLPREG_MULTIPLE_WEEKENDREG', $this->data->incomingTeamYear);
             $this->isValid = false;
         }
     }
@@ -128,80 +128,80 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         if (!is_null($this->data->wd) || !is_null($this->data->wdDate)) {
             $col = 'wd';
             if (is_null($this->data->wd)) {
-                $this->addMessage("Withdraw date was provided, but '$col' column does not contain a {$this->data->incomingTeamYear}", 'error');
+                $this->addMessage('TMLPREG_WD_MISSING', $col, $this->data->incomingTeamYear);
                 $this->isValid = false;
             }
             if (is_null($this->data->wdDate)) {
-                $this->addMessage("No withdraw date was provided, but '$col' column contains a {$this->data->incomingTeamYear}", 'error');
+                $this->addMessage('TMLPREG_WD_DATE_MISSING', $col, $this->data->incomingTeamYear);
                 $this->isValid = false;
             }
 
             $value = $this->data->wd;
             $weekendRegType = $this->getWeekendReg();
             if ($value[0] != $weekendRegType) {
-                $this->addMessage("The program year specified for WD doesn't match the incoming program year. It should match the value in the Weekend Reg columns", 'error');
+                $this->addMessage('TMLPREG_WD_DOESNT_MATCH_INCOMING_YEAR');
                 $this->isValid = false;
             }
             if (!is_null($this->data->appOut) || !is_null($this->data->appIn) || !is_null($this->data->appr)) {
-                $this->addMessage("If person has withdrawn, only column '$col' should contain a {$this->data->incomingTeamYear}", 'error');
+                $this->addMessage('TMLPREG_WD_ONLY_ONE_YEAR_INDICATOR', $col, $this->data->incomingTeamYear);
                 $this->isValid = false;
             }
         } else if (!is_null($this->data->appr) || !is_null($this->data->apprDate)) {
             $col = 'appr';
             if (is_null($this->data->appr)) {
-                $this->addMessage("Approved date was provided, but '$col' column does not contain a {$this->data->incomingTeamYear}", 'error');
+                $this->addMessage('TMLPREG_APPR_MISSING', $col, $this->data->incomingTeamYear);
                 $this->isValid = false;
             }
             if (is_null($this->data->apprDate)) {
-                $this->addMessage("No approved date was provided, but '$col' column contains a {$this->data->incomingTeamYear}", 'error');
+                $this->addMessage('TMLPREG_APPR_DATE_MISSING', $col, $this->data->incomingTeamYear);
                 $this->isValid = false;
             }
             if (is_null($this->data->appInDate)) {
-                $this->addMessage("No app in date provided", 'error');
+                $this->addMessage('TMLPREG_APPR_MISSING_APPIN_DATE');
                 $this->isValid = false;
             }
             if (is_null($this->data->appOutDate)) {
-                $this->addMessage("No app out date provided", 'error');
+                $this->addMessage('TMLPREG_APPR_MISSING_APPOUT_DATE');
                 $this->isValid = false;
             }
 
             if (!is_null($this->data->appOut) || !is_null($this->data->appIn)) {
-                $this->addMessage("If person is approved, only column '$col' should contain a {$this->data->incomingTeamYear}", 'error');
+                $this->addMessage('TMLPREG_APPR_ONLY_ONE_YEAR_INDICATOR', $col, $this->data->incomingTeamYear);
                 $this->isValid = false;
             }
         } else if (!is_null($this->data->appIn) || !is_null($this->data->appInDate)) {
             $col = 'in';
             if (is_null($this->data->appIn)) {
-                $this->addMessage("App in date was provided, but '$col' column does not contain a {$this->data->incomingTeamYear}", 'error');
+                $this->addMessage('TMLPREG_APPIN_MISSING', $col, $this->data->incomingTeamYear);
                 $this->isValid = false;
             }
             if (is_null($this->data->appInDate)) {
-                $this->addMessage("No app in date was provided, but '$col' column contains a {$this->data->incomingTeamYear}", 'error');
+                $this->addMessage('TMLPREG_APPIN_DATE_MISSING', $col, $this->data->incomingTeamYear);
                 $this->isValid = false;
             }
             if (is_null($this->data->appOutDate)) {
-                $this->addMessage("No app out date provided", 'error');
+                $this->addMessage('TMLPREG_APPIN_MISSING_APPOUT_DATE');
                 $this->isValid = false;
             }
 
             if (!is_null($this->data->appOut)) {
-                $this->addMessage("If person's application is in, only column '$col' should contain a {$this->data->incomingTeamYear}", 'error');
+                $this->addMessage('TMLPREG_APPIN_ONLY_ONE_YEAR_INDICATOR', $col, $this->data->incomingTeamYear);
                 $this->isValid = false;
             }
         } else if (!is_null($this->data->appOut) || !is_null($this->data->appOutDate)) {
             $col = 'out';
             if (is_null($this->data->appOut)) {
-                $this->addMessage("App out date was provided, but '$col' column does not contain a {$this->data->incomingTeamYear}", 'error');
+                $this->addMessage('TMLPREG_APPOUT_MISSING', $col, $this->data->incomingTeamYear);
                 $this->isValid = false;
             }
             if (is_null($this->data->appOutDate)) {
-                $this->addMessage("No app out date was provided, but '$col' column contains a {$this->data->incomingTeamYear}", 'error');
+                $this->addMessage('TMLPREG_APPOUT_DATE_MISSING', $col, $this->data->incomingTeamYear);
                 $this->isValid = false;
             }
         }
 
         if (is_null($this->data->committedTeamMemberName) && is_null($this->data->wd)) {
-            $this->addMessage("No committed team member provided", 'error');
+            $this->addMessage('TMLPREG_NO_COMMITTED_TEAM_MEMBER');
             $this->isValid = false;
         }
     }
@@ -220,49 +220,49 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         // Make sure dates for each step make sense
         if (!is_null($this->data->wdDate)) {
             if ($wdDate->lt($regDate)) {
-                $this->addMessage("Withdraw date is before registration date", 'error');
+                $this->addMessage('TMLPREG_WD_DATE_BEFORE_REG_DATE');
                 $this->isValid = false;
             }
             if (!is_null($this->data->apprDate) && $wdDate->lt($apprDate)) {
-                $this->addMessage("Withdraw date is before approval date", 'error');
+                $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPR_DATE');
                 $this->isValid = false;
             }
             if (!is_null($this->data->appInDate) && $wdDate->lt($appInDate)) {
-                $this->addMessage("Withdraw date is before app in date", 'error');
+                $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPIN_DATE');
                 $this->isValid = false;
             }
             if (!is_null($this->data->appOutDate) && $wdDate->lt($appOutDate)) {
-                $this->addMessage("Withdraw date is before app out date", 'error');
+                $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPOUT_DATE');
                 $this->isValid = false;
             }
         }
         if (!is_null($this->data->apprDate)) {
             if ($apprDate->lt($regDate)) {
-                $this->addMessage("Approval date is before registration date", 'error');
+                $this->addMessage('TMLPREG_APPR_DATE_BEFORE_REG_DATE');
                 $this->isValid = false;
             }
             if (!is_null($this->data->appInDate) && $apprDate->lt($appInDate)) {
-                $this->addMessage("Approval date is before app in date", 'error');
+                $this->addMessage('TMLPREG_APPR_DATE_BEFORE_APPIN_DATE');
                 $this->isValid = false;
             }
             if (!is_null($this->data->appOutDate) && $apprDate->lt($appOutDate)) {
-                $this->addMessage("Approval date is before app out date", 'error');
+                $this->addMessage('TMLPREG_APPR_DATE_BEFORE_APPOUT_DATE');
                 $this->isValid = false;
             }
         }
         if (!is_null($this->data->appInDate)) {
             if ($appInDate->lt($regDate)) {
-                $this->addMessage("App in date is before registration date", 'error');
+                $this->addMessage('TMLPREG_APPIN_DATE_BEFORE_REG_DATE');
                 $this->isValid = false;
             }
             if (!is_null($this->data->appOutDate) && $appInDate->lt($appOutDate)) {
-                $this->addMessage("App in date is before app out date", 'error');
+                $this->addMessage('TMLPREG_APPIN_DATE_BEFORE_APPOUT_DATE');
                 $this->isValid = false;
             }
         }
         if (!is_null($this->data->appOutDate)) {
             if ($appOutDate->lt($regDate)) {
-                $this->addMessage("App out date is before registration date", 'error');
+                $this->addMessage('TMLPREG_APPOUT_DATE_BEFORE_REG_DATE');
                 $this->isValid = false;
             }
         }
@@ -271,15 +271,15 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         if ($this->data->incomingWeekend == 'current') {
             $dateStr = $statsReport->quarter->startWeekendDate->format('M d, Y');
             if (!is_null($this->data->bef) && $regDate->gt($statsReport->quarter->startWeekendDate)) {
-                $this->addMessage("Registration is not before quarter start date ($dateStr) but has a {$this->data->bef} in Bef column", 'error');
+                $this->addMessage('TMLPREG_BEF_REG_DATE_NOT_BEFORE_WEEKEND', $dateStr, $this->data->bef);
                 $this->isValid = false;
             }
             if (!is_null($this->data->dur) && $regDate->diffInDays($statsReport->quarter->startWeekendDate) > 3) {
-                $this->addMessage("Registration date is not during quarter start weekend ($dateStr) but has a {$this->data->dur} in Dur column", 'error');
+                $this->addMessage('TMLPREG_DUR_REG_DATE_NOT_DURING_WEEKEND', $dateStr, $$this->data->dur);
                 $this->isValid = false;
             }
             if (!is_null($this->data->aft) && $regDate->lte($statsReport->quarter->startWeekendDate)) {
-                $this->addMessage("Registration date is not after quarter start date ($dateStr) but has a {$this->data->aft} in Aft column", 'error');
+                $this->addMessage('TMLPREG_AFT_REG_DATE_NOT_AFTER_WEEKEND', $dateStr, $this->data->aft);
                 $this->isValid = false;
             }
         }
@@ -290,38 +290,38 @@ class TmlpRegistrationValidator extends ValidatorAbstract
             // Make sure steps are taken in timely manner
             if (is_null($this->data->appOutDate)) {
                 if ($regDate->diffInDays($statsReport->reportingDate) > $maxAppOutDays) {
-                    $this->addMessage("Application was not sent to applicant within {$maxAppOutDays} days of registration.", 'warn');
+                    $this->addMessage('TMLPREG_APPOUT_LATE', $maxAppOutDays);
                 }
             } else if (is_null($this->data->appInDate)) {
                 if ($appOutDate->diffInDays($statsReport->reportingDate) > $maxApplicationDays) {
-                    $this->addMessage("Application not returned within {$maxApplicationDays} days since sending application out. Application is not in integrity with design of application process.", 'warn');
+                    $this->addMessage('TMLPREG_APPIN_LATE', $maxApplicationDays);
                 }
             } else if (is_null($this->data->apprDate)) {
                 if ($appOutDate->diffInDays($statsReport->reportingDate) > $maxApplicationDays) {
-                    $this->addMessage("Application not approved within {$maxApplicationDays} days since sending application out.", 'warn');
+                    $this->addMessage('TMLPREG_APPR_LATE', $maxApplicationDays);
                 }
             }
         }
 
         // Make sure dates are in the past
         if (!is_null($this->data->regDate) && $statsReport->reportingDate->lt($regDate)) {
-            $this->addMessage("Registration date is in the future. Please check date.", 'error');
+            $this->addMessage('TMLPREG_REG_DATE_IN_FUTURE');
             $this->isValid = false;
         }
         if (!is_null($this->data->wdDate) && $statsReport->reportingDate->lt($wdDate)) {
-            $this->addMessage("Withdraw date is in the future. Please check date.", 'error');
+            $this->addMessage('TMLPREG_WD_DATE_IN_FUTURE');
             $this->isValid = false;
         }
         if (!is_null($this->data->apprDate) && $statsReport->reportingDate->lt($apprDate)) {
-            $this->addMessage("Approve date is in the future. Please check date.", 'error');
+            $this->addMessage('TMLPREG_APPR_DATE_IN_FUTURE');
             $this->isValid = false;
         }
         if (!is_null($this->data->appInDate) && $statsReport->reportingDate->lt($appInDate)) {
-            $this->addMessage("Application In date is in the future. Please check date.", 'error');
+            $this->addMessage('TMLPREG_APPIN_DATE_IN_FUTURE');
             $this->isValid = false;
         }
         if (!is_null($this->data->appOutDate) && $statsReport->reportingDate->lt($appOutDate)) {
-            $this->addMessage("Application Out date is in the future. Please check date.", 'error');
+            $this->addMessage('TMLPREG_APPOUT_DATE_IN_FUTURE');
             $this->isValid = false;
         }
     }
@@ -333,7 +333,7 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         }
 
         if (is_null($this->data->comment) && $this->data->incomingWeekend == 'future') {
-            $this->addMessage("No comment provided specifying incoming weekend for future registration", 'error');
+            $this->addMessage('TMLPREG_COMMENT_MISSING_FUTURE_WEEKEND');
             $this->isValid = false;
         }
     }
@@ -347,11 +347,11 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         $statsReport = $this->getStatsReport();
         if ($statsReport->reportingDate->gt($statsReport->quarter->classroom2Date)) {
             if (is_null($this->data->travel) && is_null($this->data->comment)) {
-                $this->addMessage("Either travel must be complete and marked with a Y in the Travel column, or a comment providing a specific promise must be provided", 'error');
+                $this->addMessage('TMLPREG_TRAVEL_MISSING');
                 $this->isValid = false;
             }
             if (is_null($this->data->room) && is_null($this->data->comment)) {
-                $this->addMessage("Either rooming must be complete and marked with a Y in the Room column, or a comment providing a specific promise must be provided", 'error');
+                $this->addMessage('TMLPREG_ROOM_MISSING');
                 $this->isValid = false;
             }
         }

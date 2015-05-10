@@ -6241,6 +6241,6 @@ label,
 .error {
     color: red !important;
 }
-.warn {
+.warning {
     color: orange !important;
 }

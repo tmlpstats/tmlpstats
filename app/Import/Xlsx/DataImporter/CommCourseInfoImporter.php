@@ -41,10 +41,10 @@ class CommCourseInfoImporter extends DataImporterAbstract
             $startDateCol = $this->reader->getStartDateCol();
             $startDateRawValue = $this->reader->getValue($row, $startDateCol);
             $startDate = Util::parseUnknownDateFormat($startDateRawValue);
-            $this->addMessage("Start date format is invalid for $type course.", 'error', $row);
+            $this->addMessage('COMMCOURSE_START_DATE_FORMAT_INVALID', $row, $type);
 
             if ($startDate === false) {
-                $this->addMessage("Unable to determine start date for $type course due to invalid date format. Validation may be skipped. Check manually.", 'error', $row);
+                $this->addMessage('COMMCOURSE_START_DATE_FORMAT_UNREADABLE', $row, $type);
             }
         }
 
