@@ -1,3 +1,5 @@
+<div id="results">
+
 <h2>Imported <?= count($results['sheets']) ?> Sheets</h2>
 
 <ul>
@@ -59,3 +61,5 @@
     <li>{{ $file }}</li>
 @endforeach
 </ul>
+
+</div>

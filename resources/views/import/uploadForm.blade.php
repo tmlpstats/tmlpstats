@@ -7,7 +7,7 @@
             'accept' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel.sheet.macroEnabled.12'
         ])
     !!}
-    <p class="help-block">Up to 20 sheets at a time seems to work. Please be patient. It takes about 30 seconds per sheet.</p>
+    <!-- <p class="help-block">Up to 20 sheets at a time seems to work. Please be patient. It takes about 30 seconds per sheet.</p> -->
 </div>
 @if ($showReportCheckSettings)
 <div class="form-group">
@@ -26,7 +26,8 @@
 </div>
 @endif
 
-{!! Form::submit('Go', ['class' => 'btn btn-default btn-primary']) !!}
+{!! Form::submit('Go', ['id' => 'go', 'class' => 'btn btn-default btn-primary']) !!}
+<div id="updating" style="display:none"><br/><p>Please be patient. <span style="font-weight:bold">It may take up to 1 minute to complete.</span></div>
 
 {!! Form::hidden('validate_only', true) !!}
 {!! Form::close() !!}
@@ -42,6 +43,10 @@
             } else if ($(this).not(':checked')) {
                 $('#expectedReportDate').removeAttr("disabled");
             }
+        });
+        $("#go").click(function(){
+            $("#updating").show();
+            $("#results").hide();
         });
     });
 </script>
