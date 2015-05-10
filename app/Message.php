@@ -646,21 +646,22 @@ class Message
 
     public function addMessage($messageId, $offset)
     {
-        if ($offset !== false)
-        {
-            $offsetType = $this->getOffsetType($offset);
-            $offset = "$offsetType $offset";
-        }
 
         $message = static::$messageList[$messageId];
         $arguments = array_slice(func_get_args(), 2);
 
-        return array(
-            'type'    => $message['type'],
+        $result = array(
+            'type'    => $this->getMessageTypeString($message['type']),
             'section' => $this->objectClassDisplayName,
             'message' => $this->getMessageFromFormat($messageId, $message['format'], $message['arguments'], $arguments),
-            'offset'  => $offset,
         );
+
+        if ($offset !== false)
+        {
+            $result['offset'] = $offset;
+            $result['offsetType'] = $this->getOffsetType($offset);
+        }
+        return $result;
     }
 
     protected function getMessageFromFormat($messageId, $format, $argumentNames, $arguments = array())
@@ -700,6 +701,28 @@ class Message
         else
         {
             return 'offset';
+        }
+    }
+
+    protected function getMessageTypeString($type)
+    {
+        switch ($type) {
+            case static::EMERGENCY:
+                return 'emergency';
+            case static::ALERT:
+                return 'alert';
+            case static::CRITICAL:
+                return 'critical';
+            case static::ERROR:
+                return 'error';
+            case static::WARNING:
+                return 'warning';
+            case static::NOTICE:
+                return 'notice';
+            case static::INFO:
+                return 'info';
+            case static::DEBUG:
+                return 'debug';
         }
     }
 }
