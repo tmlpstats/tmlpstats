@@ -104,7 +104,7 @@ class ImportManager
                     $sheet['result'] = 'error';
                     $errorSheets[]   = $sheet;
                 } else if (count($sheet['warnings']) > 0) {
-                    $sheet['result'] = 'warn';
+                    $sheet['result'] = 'warning';
                     $warnSheets[]    = $sheet;
                 } else {
                     $sheet['result'] = 'ok';
