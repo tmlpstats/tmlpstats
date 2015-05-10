@@ -89,12 +89,12 @@ class ClassListValidator extends ValidatorAbstract
     {
         if (!is_null($this->data->wd) || !is_null($this->data->wbo)) {
             if (!is_null($this->data->gitw)) {
-                $this->addMessage("If team member has withdrawn, please leave GITW empty.", 'error');
+                $this->addMessage('CLASSLIST_GITW_LEAVE_BLANK');
                 $this->isValid = false;
             }
         } else {
             if (is_null($this->data->gitw)) {
-                $this->addMessage("No value provided for GITW.", 'error');
+                $this->addMessage('CLASSLIST_GITW_MISSING');
                 $this->isValid = false;
             }
         }
@@ -104,12 +104,12 @@ class ClassListValidator extends ValidatorAbstract
     {
         if (!is_null($this->data->wd) || !is_null($this->data->wbo)) {
             if (!is_null($this->data->tdo)) {
-                $this->addMessage("If team member has withdrawn, please leave TDO empty.", 'error');
+                $this->addMessage('CLASSLIST_TDO_LEAVE_BLANK');
                 $this->isValid = false;
             }
         } else {
             if (is_null($this->data->tdo)) {
-                $this->addMessage("No value provided for TDO.", 'error');
+                $this->addMessage('CLASSLIST_TDO_MISSING');
                 $this->isValid = false;
             }
         }
@@ -118,10 +118,10 @@ class ClassListValidator extends ValidatorAbstract
     protected function validateTeamYear()
     {
         if (is_null($this->data->wknd) && is_null($this->data->xferIn)) {
-            $this->addMessage("No value provided for Wknd or X In. One should be {$this->data->teamYear}.", 'error');
+            $this->addMessage('CLASSLIST_WKND_MISSING', $this->data->teamYear);
             $this->isValid = false;
         } else if (!is_null($this->data->wknd) && !is_null($this->data->xferIn)) {
-            $this->addMessage("Only one of Wknd and X In should be set.", 'error');
+            $this->addMessage('CLASSLIST_WKND_XIN_ONLY_ONE', 'error');
             $this->isValid = false;
         }
     }
@@ -130,17 +130,17 @@ class ClassListValidator extends ValidatorAbstract
     {
         if (!is_null($this->data->wd) || !is_null($this->data->wbo)) {
             if (!is_null($this->data->wd) && !is_null($this->data->wbo)) {
-                $this->addMessage("Both WD and WBO are set. Only one should be set.", 'error');
+                $this->addMessage('CLASSLIST_WD_WBO_ONLY_ONE');
                 $this->isValid = false;
             }
             if (!is_null($this->data->ctw)) {
-                $this->addMessage("Both WD/WBO and CTW are set. CTW should not be set after the team member has withdrawn.", 'error');
+                $this->addMessage('CLASSLIST_WD_CTO_ONLY_ONE');
                 $this->isValid = false;
             }
             if (!is_null($this->data->wd)) {
                 $value = $this->data->wd;
                 if ($value[0] != $this->data->teamYear && ($value[0] == 'R' && $this->data->teamYear != 2)) {
-                    $this->addMessage("The program year specified for WD doesn't match the team members program year. It should match the value in Wknd or X In", 'error');
+                    $this->addMessage('CLASSLIST_WD_DOESNT_MATCH_YEAR');
                     $this->isValid = false;
                 }
             }
@@ -158,11 +158,11 @@ class ClassListValidator extends ValidatorAbstract
         $secondClassroomDate = $statsReport->quarter->classroom2Date;
         if ($statsReport->reportingDate->gt($secondClassroomDate)) {
             if (is_null($this->data->travel) && is_null($this->data->comment)) {
-                $this->addMessage("Either travel must be complete and marked with a Y in the Travel column, or a comment providing a specific promise must be provided", 'error');
+                $this->addMessage('CLASSLIST_TRAVEL_MISSING');
                 $this->isValid = false;
             }
             if (is_null($this->data->room) && is_null($this->data->comment)) {
-                $this->addMessage("Either rooming must be complete and marked with a Y in the Room column, or a comment providing a specific promise must be provided", 'error');
+                $this->addMessage('CLASSLIST_ROOM_MISSING');
                 $this->isValid = false;
             }
         }

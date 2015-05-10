@@ -65,7 +65,7 @@ class CenterStatsImporter extends DataImporterAbstract
         $weekDate = $this->reader->getWeekDate($blockStartRow, $weekCol);
 
         if ($weekDate === false) {
-            $this->addMessage("Week end date in column $weekCol is not in the correct format. The sheet may be corrupt.", 'error', $row);
+            $this->addMessage('CENTERSTATS_WEEK_DATE_FORMAT_INVALID', $row, $weekCol);
             return;
         } else if (!$weekDate) {
             // There was no week date found. skip this column since it's blank

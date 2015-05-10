@@ -42,7 +42,7 @@ class TmlpCourseInfoValidator extends ValidatorAbstract
     protected function validateQuarterStartValues()
     {
         if ($this->data->quarterStartApproved > $this->data->quarterStartRegistered) {
-            $this->addMessage("Quarter Starting Total Registered is less than Quarter Starting Total Approved. Starting Registered should include Approved applications.", 'error');
+            $this->addMessage('TMLPCOURSE_QSTART_TER_LESS_THAN_QSTART_APPROVED');
             $this->isValid = false;
         }
     }

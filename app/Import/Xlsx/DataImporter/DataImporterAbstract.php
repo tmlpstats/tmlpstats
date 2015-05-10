@@ -46,7 +46,7 @@ abstract class DataImporterAbstract
         }
         else
         {
-            $this->addMessage('Unable to import tab.', 'error');
+            $this->addMessage('IMPORT_TAB_FAILED', false);
         }
     }
     abstract protected function load();
@@ -100,9 +100,13 @@ abstract class DataImporterAbstract
         return $values;
     }
 
-    protected function addMessage($message, $severity = 'error', $offset = false)
+    protected function addMessage($messageId, $offset)
     {
-        $this->messages[] = Message::create($this->classDisplayName)->addMessage($message, $severity, $offset);
+        $message = Message::create($this->classDisplayName);
+
+        $arguments = func_get_args();
+
+        $this->messages[] = call_user_func_array(array($message, 'addMessage'), $arguments);
     }
 
     public function postProcess() { }

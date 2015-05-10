@@ -51,27 +51,27 @@ class CommCourseInfoValidator extends ValidatorAbstract
         $startDate = $this->getDateObject($this->data->startDate);
         if ($startDate->lt($statsReport->reportingDate)) {
             if (is_null($this->data->completedStandardStarts)) {
-                $this->addMessage("Course has completed but is missing Standard Starts Completed", 'error');
+                $this->addMessage('COMMCOURSE_COMPLETED_SS_MISSING');
                 $this->isValid = false;
             }
             if (is_null($this->data->potentials)) {
-                $this->addMessage("Course has completed but is missing Potentials", 'error');
+                $this->addMessage('COMMCOURSE_POTENTIALS_MISSING');
                 $this->isValid = false;
             }
             if (is_null($this->data->registrations)) {
-                $this->addMessage("Course has completed but is missing Registrations", 'error');
+                $this->addMessage('COMMCOURSE_REGISTRATIONS_MISSING');
                 $this->isValid = false;
             }
 
             if (!is_null($this->data->completedStandardStarts) && !is_null($this->data->currentStandardStarts)) {
                 if ($this->data->completedStandardStarts > $this->data->currentStandardStarts) {
 
-                    $this->addMessage("More people completed the course than there were that started. Make sure Current Standard Starts matches the number of people that started the course, and Completed Standard Starts matches the number of people that completed the course.", 'error');
+                    $this->addMessage('COMMCOURSE_COMPLETED_SS_GREATER_THAN_CURRENT_SS');
                     $this->isValid = false;
                 } else if ($this->data->completedStandardStarts < ($this->data->currentStandardStarts - 3)) {
 
                     $withdrew = $this->data->currentStandardStarts - $this->data->completedStandardStarts;
-                    $this->addMessage("Completed Standard Starts is $withdrew less than the course starting standard starts. Confirm that $withdrew people did withdraw during the course.", 'warning');
+                    $this->addMessage('COMMCOURSE_COMPLETED_SS_LESS_THAN_CURRENT_SS', $withdrew);
                 }
             }
         }
@@ -82,7 +82,7 @@ class CommCourseInfoValidator extends ValidatorAbstract
         $statsReport = $this->getStatsReport($this->data->statsReportId);
         $startDate = $this->getDateObject($this->data->startDate);
         if ($startDate->lt($statsReport->quarter->startWeekendDate)) {
-            $this->addMessage("Course occured before quarter started", 'error');
+            $this->addMessage('COMMCOURSE_COURSE_DATE_BEFORE_QUARTER');
             $this->isValid = false;
         }
     }
@@ -95,12 +95,12 @@ class CommCourseInfoValidator extends ValidatorAbstract
         ) {
             if ($this->data->quarterStartTer < $this->data->quarterStartStandardStarts) {
 
-                $this->addMessage("Quarter Starting Standard Starts ({$this->data->quarterStartStandardStarts}) cannot be more than the quarter starting total number of people ever registered in the course ({$this->data->quarterStartTer})", 'error');
+                $this->addMessage('COMMCOURSE_QSTART_SS_GREATER_THAN_QSTART_TER', $this->data->quarterStartStandardStarts, $this->data->quarterStartTer);
                 $this->isValid = false;
             }
             if ($this->data->quarterStartTer < $this->data->quarterStartXfer) {
 
-                $this->addMessage("Quarter Starting Transfer ({$this->data->quarterStartXfer}) cannot be more than the quarter starting total number of people ever registered in the course ({$this->data->quarterStartTer})", 'error');
+                $this->addMessage('COMMCOURSE_QSTART_XFER_GREATER_THAN_QSTART_TER', $this->data->quarterStartXfer, $this->data->quarterStartTer);
                 $this->isValid = false;
             }
         }
@@ -110,12 +110,12 @@ class CommCourseInfoValidator extends ValidatorAbstract
         ) {
             if ($this->data->currentTer < $this->data->currentStandardStarts) {
 
-                $this->addMessage("Current Standard Starts ({$this->data->currentStandardStarts}) cannot be more than the total number of people ever registered in the course ({$this->data->currentTer})", 'error');
+                $this->addMessage('COMMCOURSE_CURRENT_SS_GREATER_THAN_CURRENT_TER', $this->data->currentStandardStarts, $this->data->currentTer);
                 $this->isValid = false;
             }
             if ($this->data->currentTer < $this->data->currentXfer) {
 
-                $this->addMessage("Quarter Starting Transfer ({$this->data->currentXfer}) cannot be more than the total number of people ever registered in the course ({$this->data->currentTer})", 'error');
+                $this->addMessage('COMMCOURSE_CURRENT_XFER_GREATER_THAN_CURRENT_TER', $this->data->currentXfer, $this->data->currentTer);
                 $this->isValid = false;
             }
         }
