@@ -14,8 +14,8 @@ abstract class ValidatorAbstract
     protected $dataValidators = array();
 
     protected $isValid = true;
-    protected $data = NULL;
-    protected $reader = NULL;
+    protected $data = null;
+    protected $reader = null;
 
     protected $messages = array();
 
@@ -24,7 +24,7 @@ abstract class ValidatorAbstract
     public function run($data)
     {
         $this->data = $data;
-        $this->populateValidators();
+        $this->populateValidators($data);
 
         foreach ($this->dataValidators as $field => $validator)
         {
@@ -41,7 +41,8 @@ abstract class ValidatorAbstract
                 $this->isValid = false;
             }
         }
-        $this->validate();
+
+        $this->validate($data);
         return $this->isValid;
     }
 
@@ -50,8 +51,8 @@ abstract class ValidatorAbstract
         return $this->messages;
     }
 
-    abstract protected function populateValidators();
-    abstract protected function validate();
+    abstract protected function populateValidators($data);
+    abstract protected function validate($data);
 
     protected function getValueDisplayName($value)
     {
@@ -63,14 +64,9 @@ abstract class ValidatorAbstract
         return $data->offset;
     }
 
-    protected function getStatsReport()
-    {
-        return StatsReport::findOrFail($this->data->statsReportId);
-    }
-
     protected function getDateObject($date)
     {
-        return Carbon::createFromFormat('Y-m-d', $date)->startOfDay();
+        return $date ? Carbon::createFromFormat('Y-m-d', $date)->startOfDay() : null;
     }
 
     protected function addMessage($messageId)
@@ -80,6 +76,20 @@ abstract class ValidatorAbstract
         $arguments = array_slice(func_get_args(), 1);
         array_unshift($arguments, $messageId, $this->getOffset($this->data));
 
-        $this->messages[] = call_user_func_array(array($message, 'addMessage'), $arguments);
+        $this->messages[] = $this->getMessage($message, $arguments);
     }
+
+    // @codeCoverageIgnoreStart
+    // PHPUnit dropped support for mocking static methods, and I don't want testcases
+    // that call into the database.
+    protected function getStatsReport()
+    {
+        return StatsReport::findOrFail($this->data->statsReportId);
+    }
+
+    protected function getMessage($message, $arguments)
+    {
+        return call_user_func_array(array($message, 'addMessage'), $arguments);
+    }
+    // @codeCoverageIgnoreEnd
 }

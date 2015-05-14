@@ -8,7 +8,7 @@ class ContactInfoValidator extends ValidatorAbstract
 {
     protected $sheetId = ImportDocument::TAB_LOCAL_TEAM_CONTACT;
 
-    protected function populateValidators()
+    protected function populateValidators($data)
     {
         $nameValidator  = v::string()->notEmpty();
         $rowIdValidator = v::numeric()->positive();
@@ -35,7 +35,7 @@ class ContactInfoValidator extends ValidatorAbstract
         $this->dataValidators['statsReportId']  = $rowIdValidator;
     }
 
-    protected function validate()
+    protected function validate($data)
     {
         return $this->isValid;
     }

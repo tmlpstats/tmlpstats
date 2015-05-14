@@ -9,7 +9,7 @@ class TmlpCourseInfoValidator extends ValidatorAbstract
 {
     protected $sheetId = ImportDocument::TAB_COURSES;
 
-    protected function populateValidators()
+    protected function populateValidators($data)
     {
         $positiveIntValidator        = v::int()->min(0, true);
         $positiveIntNotNullValidator = v::when(v::nullValue(), v::alwaysInvalid(), $positiveIntValidator);
@@ -33,18 +33,24 @@ class TmlpCourseInfoValidator extends ValidatorAbstract
         // Skipping quarter (auto-generated)
     }
 
-    protected function validate()
+    protected function validate($data)
     {
-        $this->validateQuarterStartValues();
+        if (!$this->validateQuarterStartValues($data)) {
+            $this->isValid = false;
+        }
 
         return $this->isValid;
     }
 
-    protected function validateQuarterStartValues()
+    public function validateQuarterStartValues($data)
     {
-        if ($this->data->quarterStartApproved > $this->data->quarterStartRegistered) {
+        $isValid = true;
+
+        if ($data->quarterStartApproved > $data->quarterStartRegistered) {
             $this->addMessage('TMLPCOURSE_QSTART_TER_LESS_THAN_QSTART_APPROVED');
-            $this->isValid = false;
+            $isValid = false;
         }
+
+        return $isValid;
     }
 }
