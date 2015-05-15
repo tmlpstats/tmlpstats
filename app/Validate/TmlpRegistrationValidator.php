@@ -217,7 +217,7 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         $apprDate   = is_null($this->data->apprDate) ? null : $this->getDateObject($this->data->apprDate);
         $wdDate     = is_null($this->data->wdDate) ? null : $this->getDateObject($this->data->wdDate);
 
-        // Make sure dates for each step make sense
+        // Make sure dates for each step are chronological
         if (!is_null($this->data->wdDate)) {
             if ($wdDate->lt($regDate)) {
                 $this->addMessage('TMLPREG_WD_DATE_BEFORE_REG_DATE');
@@ -287,7 +287,7 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         $maxAppOutDays = static::MAX_DAYS_TO_SEND_APPLICATION_OUT;
         $maxApplicationDays = static::MAX_DAYS_TO_APPROVE_APPLICATION;
         if (is_null($this->data->wdDate)){
-            // Make sure steps are taken in timely manner
+            // Make sure steps are taken according to design
             if (is_null($this->data->appOutDate)) {
                 if ($regDate->diffInDays($statsReport->reportingDate) > $maxAppOutDays) {
                     $this->addMessage('TMLPREG_APPOUT_LATE', $maxAppOutDays);
@@ -336,6 +336,8 @@ class TmlpRegistrationValidator extends ValidatorAbstract
             $this->addMessage('TMLPREG_COMMENT_MISSING_FUTURE_WEEKEND');
             $this->isValid = false;
         }
+
+        // For travel and room comment checks see validateTravel()
     }
 
     protected function validateTravel()
@@ -346,13 +348,32 @@ class TmlpRegistrationValidator extends ValidatorAbstract
 
         $statsReport = $this->getStatsReport();
         if ($statsReport->reportingDate->gt($statsReport->quarter->classroom2Date)) {
-            if (is_null($this->data->travel) && is_null($this->data->comment)) {
-                $this->addMessage('TMLPREG_TRAVEL_MISSING');
-                $this->isValid = false;
+            if (is_null($this->data->travel)) {
+                // Error if no comment provided, warning to look at it otherwise
+                if (is_null($this->data->comment)) {
+                    $this->addMessage('TMLPREG_TRAVEL_COMMENT_MISSING');
+                    $this->isValid = false;
+                } else {
+                    $this->addMessage('TMLPREG_TRAVEL_COMMENT_REVIEW');
+                }
             }
-            if (is_null($this->data->room) && is_null($this->data->comment)) {
-                $this->addMessage('TMLPREG_ROOM_MISSING');
-                $this->isValid = false;
+            if (is_null($this->data->room)) {
+                // Error if no comment provided, warning to look at it otherwise
+                if (is_null($this->data->comment)) {
+                    $this->addMessage('TMLPREG_ROOM_COMMENT_MISSING');
+                    $this->isValid = false;
+                } else {
+                    $this->addMessage('TMLPREG_ROOM_COMMENT_REVIEW');
+                }
+            }
+
+            // Any incoming without travel AND rooming booked by 2 weeks before the end of the quarter
+            // is considered in a Conversation To Withdraw
+            $twoWeeksBeforeWeekend = $statsReport->quarter->endWeekendDate->subWeeks(3);
+            if ($statsReport->reportingDate->gte($twoWeeksBeforeWeekend)) {
+                if (is_null($this->data->travel) || is_null($this->data->room)) {
+                    $this->addMessage('TMLPREG_TRAVEL_ROOM_CTW_COMMENT_REVIEW');
+                }
             }
         }
     }

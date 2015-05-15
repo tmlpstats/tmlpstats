@@ -154,17 +154,38 @@ class ClassListValidator extends ValidatorAbstract
             return; // Not required if withdrawn
         }
 
+        // Travel and Rooming must be reported starting after the 2nd Classroom
         $statsReport = $this->getStatsReport();
-        $secondClassroomDate = $statsReport->quarter->classroom2Date;
-        if ($statsReport->reportingDate->gt($secondClassroomDate)) {
-            if (is_null($this->data->travel) && is_null($this->data->comment)) {
-                $this->addMessage('CLASSLIST_TRAVEL_MISSING');
-                $this->isValid = false;
+        if ($statsReport->reportingDate->gt($statsReport->quarter->classroom2Date)) {
+            if (is_null($this->data->travel)) {
+                // Error if no comment provided, warning to look at it otherwise
+                if (is_null($this->data->comment)) {
+                    $this->addMessage('CLASSLIST_TRAVEL_COMMENT_MISSING');
+                    $this->isValid = false;
+                } else {
+                    $this->addMessage('CLASSLIST_TRAVEL_COMMENT_REVIEW');
+                }
             }
-            if (is_null($this->data->room) && is_null($this->data->comment)) {
-                $this->addMessage('CLASSLIST_ROOM_MISSING');
-                $this->isValid = false;
+            if (is_null($this->data->room)) {
+                // Error if no comment provided, warning to look at it otherwise
+                if (is_null($this->data->comment)) {
+                    $this->addMessage('CLASSLIST_ROOM_COMMENT_MISSING');
+                    $this->isValid = false;
+                } else {
+                    $this->addMessage('CLASSLIST_ROOM_COMMENT_REVIEW');
+                }
+            }
+
+            // Any team member without travel AND rooming booked by 2 weeks before the end of the quarter
+            // is considered in a Conversation To Withdraw
+            $twoWeeksBeforeWeekend = $statsReport->quarter->endWeekendDate->subWeeks(3);
+            if ($statsReport->reportingDate->gte($twoWeeksBeforeWeekend)) {
+                if ((is_null($this->data->travel) || is_null($this->data->room)) && is_null($this->data->ctw)) {
+                    $this->addMessage('CLASSLIST_TRAVEL_ROOM_CTW_MISSING');
+                    $this->isValid = false;
+                }
             }
         }
+
     }
 }

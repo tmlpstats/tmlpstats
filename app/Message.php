@@ -284,14 +284,29 @@ class Message
             'format' => "No comment provided specifying incoming weekend for future registration",
             'arguments' => array(),
         ),
-        'TMLPREG_TRAVEL_MISSING' => array(
+        'TMLPREG_TRAVEL_COMMENT_MISSING' => array(
             'type' => Message::ERROR,
-            'format' => "Either travel must be complete and marked with a Y in the Travel column, or a comment providing a specific promise must be provided",
+            'format' => "Either travel must be complete and marked with a Y in the Travel column, or a comment with a specific promise must be provided",
             'arguments' => array(),
         ),
-        'TMLPREG_ROOM_MISSING' => array(
+        'TMLPREG_ROOM_COMMENT_MISSING' => array(
             'type' => Message::ERROR,
-            'format' => "Either rooming must be complete and marked with a Y in the Room column, or a comment providing a specific promise must be provided",
+            'format' => "Either rooming must be complete and marked with a Y in the Room column, or a comment with a specific promise must be provided",
+            'arguments' => array(),
+        ),
+        'TMLPREG_TRAVEL_COMMENT_REVIEW' => array(
+            'type' => Message::WARNING,
+            'format' => "Travel is not booked. Make sure the comment provides a specific promise for when travel will be complete.",
+            'arguments' => array(),
+        ),
+        'TMLPREG_ROOM_COMMENT_REVIEW' => array(
+            'type' => Message::WARNING,
+            'format' => "Rooming is not booked. Make sure the comment provides a specific promise for when rooming will be complete.",
+            'arguments' => array(),
+        ),
+        'TMLPREG_TRAVEL_ROOM_CTW_COMMENT_REVIEW' => array(
+            'type' => Message::WARNING,
+            'format' => "Travel/rooming are not complete by 2 weeks before the end of the quarter. Make sure the comment states that they are in a Conversation To Withdraw (CTW).",
             'arguments' => array(),
         ),
 
@@ -418,14 +433,29 @@ class Message
             'format' => "The program year specified for WD doesn't match the team members program year. It should match the value in Wknd or X In",
             'arguments' => array(),
         ),
-        'CLASSLIST_TRAVEL_MISSING' => array(
+        'CLASSLIST_TRAVEL_COMMENT_MISSING' => array(
             'type' => Message::ERROR,
             'format' => "Either travel must be complete and marked with a Y in the Travel column, or a comment providing a specific promise must be provided",
             'arguments' => array(),
         ),
-        'CLASSLIST_ROOM_MISSING' => array(
+        'CLASSLIST_ROOM_COMMENT_MISSING' => array(
             'type' => Message::ERROR,
             'format' => "Either rooming must be complete and marked with a Y in the Room column, or a comment providing a specific promise must be provided",
+            'arguments' => array(),
+        ),
+        'CLASSLIST_TRAVEL_COMMENT_REVIEW' => array(
+            'type' => Message::WARNING,
+            'format' => "Travel is not booked. Make sure the comment provides a specific promise for when travel will be complete.",
+            'arguments' => array(),
+        ),
+        'CLASSLIST_ROOM_COMMENT_REVIEW' => array(
+            'type' => Message::WARNING,
+            'format' => "Rooming is not booked. Make sure the comment provides a specific promise for when rooming will be complete.",
+            'arguments' => array(),
+        ),
+        'CLASSLIST_TRAVEL_ROOM_CTW_MISSING' => array(
+            'type' => Message::ERROR,
+            'format' => "If travel and rooming are not complete by 2 weeks before the end of the quarter, mark the team member as a Conversation To Withdraw (CTW).",
             'arguments' => array(),
         ),
 
