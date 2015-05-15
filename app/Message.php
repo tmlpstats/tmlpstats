@@ -591,7 +591,7 @@ class Message
         ),
         'IMPORTDOC_DATE_NOT_FOUND' => array(
             'type' => Message::ERROR,
-            'format' => "Could not find reporting date. Got '%%reportingDate%%'. This may be an invalid/corrupt sheet.",
+            'format' => "Could not find reporting date. Got '%%reportingDate%%'. The date format may be incorrect or this may be an invalid/corrupt sheet. Please input date explicitly (i.e. 'May 15, 2015').",
             'arguments' => array(
                 '%%reportingDate%%',
             ),
