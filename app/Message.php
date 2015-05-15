@@ -584,10 +584,9 @@ class Message
         ),
         'IMPORTDOC_DATE_FORMAT_INCORRECT' => array(
             'type' => Message::ERROR,
-            'format' => "Reporting date format was incorrect, '%%reportingDate%%'. Please input date explicitly (i.e. %%reportingDateString%%).",
+            'format' => "Reporting date format was incorrect, '%%reportingDate%%'. Please input date explicitly (i.e. 'May 15, 2015').",
             'arguments' => array(
                 '%%reportingDate%%',
-                '%%reportingDateString%%',
             ),
         ),
         'IMPORTDOC_DATE_NOT_FOUND' => array(
