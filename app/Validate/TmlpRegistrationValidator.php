@@ -369,7 +369,7 @@ class TmlpRegistrationValidator extends ValidatorAbstract
 
             // Any incoming without travel AND rooming booked by 2 weeks before the end of the quarter
             // is considered in a Conversation To Withdraw
-            $twoWeeksBeforeWeekend = $statsReport->quarter->endWeekendDate->subWeeks(3);
+            $twoWeeksBeforeWeekend = $statsReport->quarter->endWeekendDate->subWeeks(2);
             if ($statsReport->reportingDate->gte($twoWeeksBeforeWeekend)) {
                 if (is_null($this->data->travel) || is_null($this->data->room)) {
                     $this->addMessage('TMLPREG_TRAVEL_ROOM_CTW_COMMENT_REVIEW');
