@@ -43,9 +43,11 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
             if (!$validateReport || $this->validateReport()) {
                 $this->postProcess();
                 $this->statsReport->validated = true;
-                $this->statsReport->save();
                 $isValid =  true;
+            } else {
+                $this->statsReport->validated = false;
             }
+            $this->statsReport->save();
 
             if (defined('VALIDATE_ONLY') || !$isValid || !$this->isValid()) {
                 // Flush all data imported from this report. Keeps db clean from
