@@ -4,13 +4,13 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h3 class="panel-title">Legend:</h3>
+        <h3 class="panel-title">Decoding the Results:</h3>
     </div>
     <div class="panel-body">
         <ul>
-            <li class='ok'>No errors found. Finish by reviewing manually.</li>
-            <li class='warning'>Possible error found. Review items manually.</li>
-            <li class='error'>Error found that requires revision. Update and re-run.</li>
+            <li class='ok'>Green: No errors found. Finish by reviewing manually.</li>
+            <li class='warning'>Orange: Possible error found. Review items manually.</li>
+            <li class='error'>Red: Error found that requires revision. Update and re-run.</li>
         </ul>
     </div>
 </div>
