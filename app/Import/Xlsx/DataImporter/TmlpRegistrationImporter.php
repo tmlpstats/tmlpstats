@@ -55,6 +55,10 @@ class TmlpRegistrationImporter extends DataImporterAbstract
             ? $type
             : $this->reader->getIncomingTeamYear($row);
 
+        if ($incoming->incomingTeamYear == 'R') {
+            $incoming->incomingTeamYear = 2;
+        }
+
         $incoming->save();
 
         $incomingData = TmlpRegistrationData::firstOrCreate(array(
