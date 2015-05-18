@@ -3,6 +3,8 @@ namespace TmlpStats\Import;
 
 use Carbon\Carbon;
 
+
+use Auth;
 use Log;
 use Exception;
 
@@ -60,16 +62,20 @@ class ImportManager
 
         foreach($this->files as $file) {
 
+            $fileSaved = false;
+
             try {
                 // If someone refreshes the page after submitting file, and the browser doesn't send the file contents,
                 // we end up with empty files.
                 if (!($file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile)) {
+                    $file = null;
                     throw new Exception("There was a problem uploading one of the files. Please try again.");
                 }
 
                 $fileName = $file->getClientOriginalName();
-                $doc = NULL;
+                $doc = null;
                 if (!$file->isValid()) {
+                    $file = null;
                     Log::error("Error uploading '$fileName': {$file->getError()}");
                     throw new Exception("There was a problem uploading '$fileName'. Please try again.");
                 } else {
@@ -79,7 +85,7 @@ class ImportManager
                         $doc = $importer->getImportDocument();
                     } catch(Exception $e) {
                         Log::error("Error processing '$fileName': " . $e->getMessage() . "\n" . $e->getTraceAsString());
-                        throw new Exception("Error processing '$fileName': ".$e->getMessage());
+                        throw new Exception("There was an error processing '$fileName': ".$e->getMessage());
                     }
                 }
 
@@ -93,12 +99,27 @@ class ImportManager
                     'warnings'      => $doc->messages['warnings'],
                 );
 
-                if ($doc->statsReport && $doc->statsReport->isValidated()) {
-                    $this->archiveSheet($file, $doc->statsReport);
+                $user = Auth::user()->email;
+                $errorCount = count($sheet['errors']);
+                $warningCount = count($sheet['warnings']);
+                Log::info("{$user} submitted sheet for {$sheet['center']} with {$errorCount} errors and {$warningCount} warnings.");
+
+                if ($doc->statsReport) {
+
+                    if ($doc->statsReport->isValidated()) {
+                        $this->archiveSheet($file,
+                                            $doc->statsReport->reportingDate->toDateString(),
+                                            $doc->statsReport->center->sheetFilename);
+                    } else {
+                        $this->saveWorkingSheet($file,
+                                                $doc->statsReport->reportingDate->toDateString(),
+                                                $doc->statsReport->center->sheetFilename);
+                    }
+                    $fileSaved = true;
                 }
 
                 // We're done with doc now, so hand it over to the garbage collector. (Added to help with importing large numbers of files)
-                $doc = NULL;
+                $doc = null;
 
                 if (count($sheet['errors']) > 0) {
                     $sheet['result'] = 'error';
@@ -111,7 +132,16 @@ class ImportManager
                     $successSheets[] = $sheet;
                 }
             } catch(Exception $e) {
+
+                Log::error("Error processing file: " . $e->getMessage());
                 $unknownFiles[] = $e->getMessage();
+            }
+
+            if (!$fileSaved && $file) {
+
+                $this->saveWorkingSheet($file,
+                                        Carbon::now()->toDateString(),
+                                        $file->getClientOriginalName());
             }
         }
 
@@ -119,28 +149,91 @@ class ImportManager
         $this->results['unknownFiles'] = $unknownFiles;
     }
 
-    protected function archiveSheet($file, $statsReport)
+    public static function getExpectedReportDate()
     {
-        if (!$statsReport || !($file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile)) {
-            Log::error('Unable to archive file. Invalid file or stats report.');
-            return;
+        $expectedDate = null;
+        if (Carbon::now()->dayOfWeek == Carbon::FRIDAY) {
+            $expectedDate = Carbon::now();
+        } else {
+            $expectedDate = new Carbon('last friday');
+        }
+        return $expectedDate->startOfDay();
+    }
+
+    public static function getArchiveDirectory()
+    {
+        return storage_path() . "/app/archive/xlsx";
+    }
+
+    public static function getArchivedFilePath($reportingDate, $fileName)
+    {
+        $baseDir = static::getArchiveDirectory();
+
+        return "{$baseDir}/{$reportingDate}/{$fileName}.xlsx";
+    }
+
+    public static function getWorkingSheetFilePath($reportingDate, $fileName)
+    {
+        $baseDir = static::getArchiveDirectory();
+
+        return "{$baseDir}/working_files/{$reportingDate}/{$fileName}.xlsx";
+    }
+
+    public static function getSheetPath($reportingDate, $name)
+    {
+        $archivedFile = static::getArchivedFilePath($reportingDate, $name);
+
+        if (file_exists($archivedFile)) {
+            return $archivedFile;
         }
 
-        $baseDir = storage_path() . "/app/archive/xlsx";
-        $reportingDate = $statsReport->reportingDate->toDateString();
-        $centerName = $statsReport->center->sheetFilename;
+        $workingFile = static::getWorkingSheetFilePath($reportingDate, $name);
 
-        $dir = "{$baseDir}/{$reportingDate}";
-        $name = "{$centerName}.xlsx";
+        if (file_exists($workingFile)) {
+            return $workingFile;
+        }
+
+        return '';
+    }
+
+    public function archiveSheet($file, $reportingDate, $fileName)
+    {
+        $destination = static::getArchivedFilePath($reportingDate, $fileName);
+
+        return $this->saveFile($destination, $file);
+    }
+
+    protected function saveWorkingSheet($file, $reportingDate, $fileName)
+    {
+        $destination = static::getWorkingSheetFilePath($reportingDate, $fileName);
+
+        return $this->saveFile($destination, $file);
+    }
+
+    protected function saveFile($destinationPath, $sourceFile)
+    {
+        $savedFile = '';
+
+        if (!($sourceFile instanceof \Symfony\Component\HttpFoundation\File\UploadedFile)) {
+            Log::error('Unable to save file. Invalid file.');
+            return $savedFile;
+        }
+
+        $pathInfo = pathinfo($destinationPath);
+        $dir = $pathInfo['dirname'];
+        $fileName = $pathInfo['basename'];
 
         if (is_dir($dir) || mkdir($dir, 0777, true)) {
             try {
-                $file->move($dir, $name);
+                $sourceFile->move($dir, $fileName);
+                $savedFile = $destinationPath;
             } catch (Exception $e) {
-                Log::error("Unable to archive file '$reportingDate/$newFile'. Caught exception moving file: {$e->getMessage()}.");
+                Log::error("Unable to save file '$destinationPath'. Caught exception moving file: {$e->getMessage()}.");
             }
         } else {
-            Log::error("Unable to archive file '$reportingDate/$newFile'. Failed to setup directory.");
+            Log::error("Unable to save file '$destinationPath'. Failed to setup directory.");
         }
+
+        return $savedFile;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+use TmlpStats\Import\ImportManager;
+
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -52,6 +54,22 @@ Route::when('import', 'auth|globalStatistician');
 
 Route::get('import', 'ImportController@index');
 Route::post('import', 'ImportController@uploadSpreadsheet');
+
+Route::get('download/sheets/{date}/{center}', array('as' => 'downloadSheet', 'uses' => function($date, $center) {
+    $path = ImportManager::getSheetPath($date, $center);
+    if ($path)
+    {
+        return Response::download($path, basename($path), [
+            'Content-Length: '. filesize($path)
+        ]);
+    }
+    else
+    {
+        exit('Requested file not found.');
+    }
+}))
+->where('date', '^\d\d\d\d-\d\d-\d\d$')
+->where('center', '^\w+$');
 
 Route::match(['get', 'post'], 'home', 'HomeController@index');
 Route::get('home/timezone', 'HomeController@setTimezone');
