@@ -7,7 +7,7 @@
 				<div class="panel-heading">Dashboard</div>
 
 				<div class="panel-body">
-					@if (Auth::user()->hasRole('globalStatistician'))
+					@if (Auth::user()->hasRole('localStatistician') || Auth::user()->hasRole('globalStatistician'))
 						<h1>Results for Week Ending {{ $reportingDate->format('F j, Y') }}</h1>
 
 						{!! Form::open(['url' => 'home', 'class' => 'form-horizontal']) !!}
@@ -30,6 +30,7 @@
 									<th data-sortable="true">Rating</th>
 									<th data-sortable="true">Last Submitted</th>
 									<th data-sortable="true">Last Submitted By</th>
+									<th>&nbsp;</th>
 								</tr>
 								</thead>
 								<tbody>
@@ -42,6 +43,11 @@
 									<td>{{ $center['rating'] }}</td>
 									<td>{{ $center['updatedAt'] }}</td>
 									<td>{{ $center['updatedBy'] }}</td>
+									<td>
+									@if ($center['sheet'])
+										<a href="{{ $center['sheet'] }}">Download</a>
+									@endif
+									</td>
 								</tr>
 								@endif
 								@endforeach
@@ -60,6 +66,7 @@
 									<th data-sortable="true">Rating</th>
 									<th data-sortable="true">Last Submitted</th>
 									<th data-sortable="true">Last Submitted By</th>
+									<th>&nbsp;</th>
 								</tr>
 								</thead>
 								<tbody>
@@ -72,6 +79,11 @@
 									<td>{{ $center['rating'] }}</td>
 									<td>{{ $center['updatedAt'] }}</td>
 									<td>{{ $center['updatedBy'] }}</td>
+									<td>
+									@if ($center['sheet'])
+										<a href="{{ $center['sheet'] }}">Download</a>
+									@endif
+									</td>
 								</tr>
 								@endif
 								@endforeach

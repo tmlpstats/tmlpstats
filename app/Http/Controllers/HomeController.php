@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
 use TmlpStats\User;
 use TmlpStats\StatsReport;
@@ -8,6 +9,7 @@ use TmlpStats\CenterStatsData;
 
 use Carbon\Carbon;
 
+use Auth;
 use Session;
 use Request;
 
@@ -58,9 +60,8 @@ class HomeController extends Controller {
 		}
 
 		if (!$reportingDate) {
-			$reportingDate = $this->getExpectedReportDate();
+			$reportingDate = ImportManager::getExpectedReportDate();
 		}
-
 
 		$allReports = StatsReport::currentQuarter()->orderBy('reporting_date', 'desc')->get();
 
@@ -100,6 +101,16 @@ class HomeController extends Controller {
 				? 'validated'
 				: 'not-validated';
 
+			$sheetUrl = null;
+
+			if (Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator')
+				|| (Auth::user()->hasRole('localStatistician') && preg_match("/^{$center->name}\.tmlpstats@gmail\.com$/i", Auth::user()->email))
+			) {
+				$sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->name)
+								? route('downloadSheet', array($reportingDate->toDateString(), $center->name))
+								: null;
+			}
+
 			$centerData[$center->localRegion][$validatedKey][$center->name] = array(
 				'name'        => $center->name,
 				'localRegion' => $center->localRegion,
@@ -107,6 +118,7 @@ class HomeController extends Controller {
 				'rating'      => $actualData ? $actualData->rating : '-',
 				'updatedAt'   => $statsReport ? date('M d, Y @ g:ia T', strtotime($statsReport->updatedAt . ' UTC')) : '-',
 				'updatedBy'   => $user ? $user->firstName : '-',
+				'sheet'       => $sheetUrl,
 			);
 		}
 
@@ -132,17 +144,5 @@ class HomeController extends Controller {
 		if (Request::has('timezone')) {
 			Session::put('timezone', Request::get('timezone'));
 		}
-	}
-
-	// TODO: Duplicated from Import. put somewhere else
-	protected function getExpectedReportDate()
-	{
-		$expectedDate = null;
-		if (Carbon::now()->dayOfWeek == Carbon::FRIDAY) {
-			$expectedDate = Carbon::now();
-		} else {
-			$expectedDate = new Carbon('last friday');
-		}
-		return $expectedDate->startOfDay();
 	}
 }

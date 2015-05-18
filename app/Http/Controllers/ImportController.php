@@ -21,7 +21,7 @@ class ImportController extends Controller {
 		return view('import.index')->with([
 			'showUploadForm'          => true,
 			'showReportCheckSettings' => true,
-			'expectedDate'            => $this->getExpectedReportDate(),
+			'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),
 		]);
 	}
 
@@ -38,7 +38,7 @@ class ImportController extends Controller {
 		return view('import.index')->with([
 			'showUploadForm'          => true,
 			'showReportCheckSettings' => true,
-			'expectedDate'            => $this->getExpectedReportDate(),
+			'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),
 			'results'                 => $results,
 		]);
 	}
@@ -67,14 +67,4 @@ class ImportController extends Controller {
 		]);
 	}
 
-	protected function getExpectedReportDate()
-	{
-		$expectedDate = null;
-		if (Carbon::now()->dayOfWeek == Carbon::FRIDAY) {
-			$expectedDate = Carbon::now();
-		} else {
-			$expectedDate = new Carbon('last friday');
-		}
-		return $expectedDate->startOfDay()->toDateString();
-	}
 }

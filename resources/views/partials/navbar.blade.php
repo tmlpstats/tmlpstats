@@ -13,7 +13,7 @@
           <ul class="nav navbar-nav">
             <li {{ Request::is('/') ? 'class="active"' : '' }}><a href="{{ url('/') }}">Home</a></li>
             @if (Auth::check())
-              @if (Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator'))
+              @if (Auth::user()->hasRole('localStatistician') || Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator'))
               <li {!! Request::is('import') ? 'class="active"' : '' !!}><a href="{{ url('/import') }}">Validate Stats</a></li>
               @endif
               @if (Auth::user()->hasRole('administrator'))

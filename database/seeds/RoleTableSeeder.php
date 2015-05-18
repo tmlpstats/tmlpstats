@@ -15,6 +15,7 @@ class RoleTableSeeder extends Seeder {
             'globalStatistician',
             'programLeader',
             'programMember',
+            'localStatistician',
         );
 
         foreach ($roles as $name) {

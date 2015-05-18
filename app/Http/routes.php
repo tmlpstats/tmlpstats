@@ -1,5 +1,7 @@
 <?php
 
+use TmlpStats\Import\ImportManager;
+
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -20,12 +22,12 @@ Route::filter('admin', function()
         return App::abort(403, 'Unauthorized action.');
     }
 });
-Route::filter('globalStatistician', function()
+Route::filter('statistician', function()
 {
     if (!Auth::check()) {
         return redirect('auth/login');
     }
-    if (!Auth::user()->hasRole('globalStatistician') && !Auth::user()->hasRole('administrator')) {
+    if (!Auth::user()->hasRole('localStatistician') && !Auth::user()->hasRole('globalStatistician') && !Auth::user()->hasRole('administrator')) {
         return App::abort(403, 'Unauthorized action.');
     }
 });
@@ -48,10 +50,26 @@ Route::resource('admin/users', 'UserController');
 Route::resource('admin/roles', 'RoleController');
 
 // Import
-Route::when('import', 'auth|globalStatistician');
+Route::when('import', 'auth|statistician');
 
 Route::get('import', 'ImportController@index');
 Route::post('import', 'ImportController@uploadSpreadsheet');
+
+Route::get('download/sheets/{date}/{center}', array('as' => 'downloadSheet', 'uses' => function($date, $center) {
+    $path = ImportManager::getSheetPath($date, $center);
+    if ($path)
+    {
+        return Response::download($path, basename($path), [
+            'Content-Length: '. filesize($path)
+        ]);
+    }
+    else
+    {
+        abort(404);
+    }
+}))
+->where('date', '^\d\d\d\d-\d\d-\d\d$')
+->where('center', '^\w+$');
 
 Route::match(['get', 'post'], 'home', 'HomeController@index');
 Route::get('home/timezone', 'HomeController@setTimezone');
