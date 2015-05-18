@@ -9,6 +9,7 @@ use TmlpStats\CenterStatsData;
 
 use Carbon\Carbon;
 
+use Auth;
 use Session;
 use Request;
 
@@ -100,9 +101,15 @@ class HomeController extends Controller {
 				? 'validated'
 				: 'not-validated';
 
-			$sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->name)
-							? route('downloadSheet', array($reportingDate->toDateString(), $center->name))
-							: null;
+			$sheetUrl = null;
+
+			if (Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator')
+				|| (Auth::user()->hasRole('localStatistician') && preg_match("/^{$center->name}\.tmlpstats@gmail\.com$/i", Auth::user()->email))
+			) {
+				$sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->name)
+								? route('downloadSheet', array($reportingDate->toDateString(), $center->name))
+								: null;
+			}
 
 			$centerData[$center->localRegion][$validatedKey][$center->name] = array(
 				'name'        => $center->name,
