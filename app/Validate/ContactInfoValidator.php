@@ -1,11 +1,12 @@
 <?php
 namespace TmlpStats\Validate;
 
+use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use Respect\Validation\Validator as v;
 
 class ContactInfoValidator extends ValidatorAbstract
 {
-    protected $classDisplayName = 'Local Team Contact Info.';
+    protected $sheetId = ImportDocument::TAB_LOCAL_TEAM_CONTACT;
 
     protected function populateValidators()
     {

@@ -1,13 +1,14 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\ProgramTeamMember;
 use TmlpStats\TeamMember;
 use TmlpStats\Util;
 
 class ContactInfoImporter extends DataImporterAbstract
 {
-    protected $classDisplayName = "Local Team Contact Info";
+    protected $sheetId = ImportDocument::TAB_LOCAL_TEAM_CONTACT;
 
     protected $reportingStatistician           = NULL;
     protected $programManager                  = NULL;

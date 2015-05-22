@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Validate;
 
+use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\Import\Xlsx\Reader as Reader;
 use Respect\Validation\Validator as v;
 
@@ -9,7 +10,7 @@ class TmlpRegistrationValidator extends ValidatorAbstract
     const MAX_DAYS_TO_SEND_APPLICATION_OUT = 2;
     const MAX_DAYS_TO_APPROVE_APPLICATION = 14;
 
-    protected $classDisplayName = 'Current Weekly Stats';
+    protected $sheetId = ImportDocument::TAB_WEEKLY_STATS;
 
     protected function populateValidators()
     {
@@ -275,7 +276,7 @@ class TmlpRegistrationValidator extends ValidatorAbstract
                 $this->isValid = false;
             }
             if (!is_null($this->data->dur) && $regDate->diffInDays($statsReport->quarter->startWeekendDate) > 3) {
-                $this->addMessage('TMLPREG_DUR_REG_DATE_NOT_DURING_WEEKEND', $dateStr, $$this->data->dur);
+                $this->addMessage('TMLPREG_DUR_REG_DATE_NOT_DURING_WEEKEND', $dateStr, $this->data->dur);
                 $this->isValid = false;
             }
             if (!is_null($this->data->aft) && $regDate->lte($statsReport->quarter->startWeekendDate)) {

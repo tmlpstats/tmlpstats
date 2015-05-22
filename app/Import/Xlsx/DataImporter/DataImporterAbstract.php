@@ -6,7 +6,7 @@ use TmlpStats\Message;
 
 abstract class DataImporterAbstract
 {
-    protected $classDisplayName = "";
+    protected $sheetId = "";
     protected $sheet = NULL;
     protected $reader = NULL;
     protected $statsReport = NULL;
@@ -55,6 +55,31 @@ abstract class DataImporterAbstract
     // This lets us process each block separately
     abstract protected function populateSheetRanges();
 
+    protected function findRange($startRow, $targetStartText, $targetEndText, $targetColumn = 'A')
+    {
+        $rangeStart = NULL;
+        $rangeEnd = NULL;
+
+        $row = $startRow;
+        $searching = true;
+        $maxSearchRows = 1000;
+        while ($searching && $row < $maxSearchRows) {
+            $value = $this->sheet[$row][$targetColumn];
+
+            if ($rangeStart === NULL && $value == $targetStartText) {
+                $rangeStart = $row + 1; // Range starts the row after start text
+            }
+
+            if ($rangeEnd === NULL && $value == $targetEndText) {
+                $rangeEnd = $row - 1; // Range ends the row before end text
+                $searching = false;
+            }
+
+            $row++;
+        }
+        return array('start' => $rangeStart, 'end' => $rangeEnd);
+    }
+
     protected function getReader($data)
     {
         // First, strip off the namespace if there is one
@@ -102,7 +127,7 @@ abstract class DataImporterAbstract
 
     protected function addMessage($messageId, $offset)
     {
-        $message = Message::create($this->classDisplayName);
+        $message = Message::create($this->sheetId);
 
         $arguments = func_get_args();
 

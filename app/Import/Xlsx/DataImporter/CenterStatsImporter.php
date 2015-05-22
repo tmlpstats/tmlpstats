@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\CenterStats;
 use TmlpStats\CenterStatsData;
 
@@ -8,7 +9,7 @@ use Carbon\Carbon;
 
 class CenterStatsImporter extends DataImporterAbstract
 {
-    protected $classDisplayName = "Weekly Center Stats";
+    protected $sheetId = ImportDocument::TAB_WEEKLY_STATS;
 
     protected $centerStats = null;
     protected $weeks = array();

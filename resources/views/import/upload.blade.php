@@ -52,9 +52,11 @@
                     <li>{{ ucfirst($tabName) }}
                         <ul>
                         @foreach ($tab as $offset => $offsetMessages)
-                            @if ($offset == 0)
+                            @if ($offset === 0)
                                 @foreach($offsetMessages as $msg)
-                                    <li class="{{ $msg['type'] }}">{{ $msg['message'] }}</li>
+                                    @if (is_array($msg))
+                                        <li class="{{ $msg['type'] }}">{{ $msg['message'] }}</li>
+                                    @endif
                                 @endforeach
                             @else
                             <li>{{ ucfirst($offsetMessages['offsetType']) . " " . $offset }}

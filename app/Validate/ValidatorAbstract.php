@@ -10,7 +10,7 @@ use Respect\Validation\Validator as v;
 
 abstract class ValidatorAbstract
 {
-    protected $classDisplayName = '';
+    protected $sheetId = NULL;
     protected $dataValidators = array();
 
     protected $isValid = true;
@@ -75,7 +75,7 @@ abstract class ValidatorAbstract
 
     protected function addMessage($messageId)
     {
-        $message = Message::create($this->classDisplayName);
+        $message = Message::create($this->sheetId);
 
         $arguments = array_slice(func_get_args(), 1);
         array_unshift($arguments, $messageId, $this->getOffset($this->data));
