@@ -206,7 +206,7 @@ class CenterStatsImporter extends DataImporterAbstract
                 $promise = $promiseData->$game;
                 $actual = $actualData->$game;
                 $percent = $promise
-                    ? ($actual / $promise) * 100
+                    ? round(($actual / $promise) * 100)
                     : 0;
 
                 if ($percent >= 100) {
@@ -228,15 +228,15 @@ class CenterStatsImporter extends DataImporterAbstract
             }
 
             if ($points == 28) {
-                $rating = 'Powerful';
+                $rating = "Powerful ($points pts)";
             } else if ($points >= 22) {
-                $rating = 'High Performing';
+                $rating = "High Performing ($points pts)";
             } else if ($points >= 16) {
-                $rating = 'Effective';
+                $rating = "Effective ($points pts)";
             } else if ($points >= 9) {
-                $rating = 'Marginally Effective';
+                $rating = "Marginally Effective ($points pts)";
             } else {
-                $rating = 'Ineffective';
+                $rating = "Ineffective ($points pts)";
             }
             $actualData->rating = $rating;
             $actualData->save();
