@@ -407,6 +407,7 @@ class ImportDocument extends ImportDocumentAbstract
         $this->statsReport->spreadsheetVersion = $this->version;
         $this->statsReport->userId = Auth::user()->id;
         $this->statsReport->save();
+        $this->statsReport->clear(); // Make sure there aren't any left over artifacts from the last run
 
         // Order matters here. TmlpRegistrations and ContactInfo search for team members
         // so ClassList must be loaded first
