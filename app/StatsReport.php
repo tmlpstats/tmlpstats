@@ -62,7 +62,7 @@ class StatsReport extends Model {
             DB::table('tmlp_registrations')
                 ->where('stats_report_id', '=', $this->id)->delete();
         } catch(\Exception $e) {
-            // TODO: log the error
+            Log::error("Error clearing statsReport {$this->id}: " . $e->getMessage());
         }
     }
 
