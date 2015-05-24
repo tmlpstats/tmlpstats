@@ -6,7 +6,7 @@
 <br/><br/>
 
 <div class="table-responsive">
-    <table class="table table-hover">
+    <table id="usersTable" class="table table-hover">
         <thead>
         <tr>
             <th>Name</th>
@@ -33,4 +33,14 @@
         </tbody>
     </table>
 </div>
+<script src="{{ asset('/js/query.dataTables.min.js') }}"></script>
+<script src="{{ asset('/js/dataTables.bootstrap.js') }}"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#usersTable').dataTable({
+            "paging":    false,
+            "searching": false
+        });
+    });
+</script>
 @endsection

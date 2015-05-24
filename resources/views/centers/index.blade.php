@@ -7,7 +7,7 @@
 
 <div class="table-responsive">
     <h4>Active Centers</h4>
-    <table class="table table-hover">
+    <table id="activeCenterTable" class="table table-hover">
         <thead>
         <tr>
             <th>Center</th>
@@ -25,8 +25,8 @@
         <tr>
             <td><a href="{{ url('/admin/centers/'.$center->abbreviation) }}">{{ $center->name }}</a></td>
             <td>{{ $center->teamName }}</td>
-            <td>{{ $center->globalTegion }}</td>
-            <td>{{ $center->localTegion }}</td>
+            <td>{{ $center->globalRegion }}</td>
+            <td>{{ $center->localRegion }}</td>
             <td>{{ $center->statsEmail }}</td>
             <td><span class="glyphicon {{ $center->active ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span></td>
             <td><a href="{{ url('/admin/centers/' . $center->abbreviation . '/edit') }}">Edit</a></td>
@@ -37,7 +37,7 @@
     </table>
 
     <h4>Inactive Centers</h4>
-    <table class="table table-hover">
+    <table id="inactiveCenterTable" class="table table-hover">
         <thead>
         <tr>
             <th>Center</th>
@@ -66,4 +66,19 @@
         </tbody>
     </table>
 </div>
+
+<script src="{{ asset('/js/query.dataTables.min.js') }}"></script>
+<script src="{{ asset('/js/dataTables.bootstrap.js') }}"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#activeCenterTable').dataTable({
+            "paging":    false,
+            "searching": false
+        });
+        $('#inactiveCenterTable').dataTable({
+            "paging":    false,
+            "searching": false
+        });
+    });
+</script>
 @endsection
