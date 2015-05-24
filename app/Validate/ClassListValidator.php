@@ -88,7 +88,7 @@ class ClassListValidator extends ValidatorAbstract
 
     protected function validateGitw()
     {
-        if (!is_null($this->data->wd) || !is_null($this->data->wbo)) {
+        if (!is_null($this->data->xferOut) || !is_null($this->data->wd) || !is_null($this->data->wbo)) {
             if (!is_null($this->data->gitw)) {
                 $this->addMessage('CLASSLIST_GITW_LEAVE_BLANK');
                 $this->isValid = false;
@@ -103,7 +103,7 @@ class ClassListValidator extends ValidatorAbstract
 
     protected function validateTdo()
     {
-        if (!is_null($this->data->wd) || !is_null($this->data->wbo)) {
+        if (!is_null($this->data->xferOut) || !is_null($this->data->wd) || !is_null($this->data->wbo)) {
             if (!is_null($this->data->tdo)) {
                 $this->addMessage('CLASSLIST_TDO_LEAVE_BLANK');
                 $this->isValid = false;
