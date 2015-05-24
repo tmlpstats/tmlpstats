@@ -58,8 +58,7 @@ class Message
         'TMLPREG_WD_DOESNT_MATCH_INCOMING_YEAR' => array(
             'type' => Message::ERROR,
             'format' => "The program year specified for WD doesn't match the incoming program year. It should match the value in the Weekend Reg columns",
-            'arguments' => array(
-            ),
+            'arguments' => array(),
         ),
         'TMLPREG_WD_ONLY_ONE_YEAR_INDICATOR' => array(
             'type' => Message::ERROR,
@@ -96,14 +95,12 @@ class Message
         'TMLPREG_APPR_MISSING_APPIN_DATE' => array(
             'type' => Message::ERROR,
             'format' => "No app in date provided",
-            'arguments' => array(
-            ),
+            'arguments' => array(),
         ),
         'TMLPREG_APPR_MISSING_APPOUT_DATE' => array(
             'type' => Message::ERROR,
             'format' => "No app out date provided",
-            'arguments' => array(
-            ),
+            'arguments' => array(),
         ),
         'TMLPREG_APPIN_MISSING' => array(
             'type' => Message::ERROR,
@@ -132,10 +129,7 @@ class Message
         'TMLPREG_APPIN_MISSING_APPOUT_DATE' => array(
             'type' => Message::ERROR,
             'format' => "No app out date provided",
-            'arguments' => array(
-                '%%offset%%',
-                '%%incomingTeamYear%%',
-            ),
+            'arguments' => array(),
         ),
         'TMLPREG_APPOUT_MISSING' => array(
             'type' => Message::ERROR,
@@ -156,8 +150,7 @@ class Message
         'TMLPREG_NO_COMMITTED_TEAM_MEMBER' => array(
             'type' => Message::ERROR,
             'format' => "No committed team member provided",
-            'arguments' => array(
-            ),
+            'arguments' => array(),
         ),
         'TMLPREG_WD_DATE_BEFORE_REG_DATE' => array(
             'type' => Message::ERROR,
@@ -486,7 +479,7 @@ class Message
         ),
         'IMPORTDOC_QSTART_T1_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND' => array(
             'type' => Message::WARNING,
-            'format' => "T1 Quarter Starting Total Approved totals ({%%qStartApprovedTotal%%) do not match the number of incoming approved before quarter start date (%%totals%%). Double check what the difference is. It could be a mistake, or a transfer from another center.",
+            'format' => "T1 Quarter Starting Total Approved totals (%%qStartApprovedTotal%%) do not match the number of incoming approved before quarter start date (%%totals%%). Double check what the difference is. It could be a mistake, or a transfer from another center.",
             'arguments' => array(
                 '%%qStartApprovedTotal%%',
                 '%%totals%%',
@@ -645,11 +638,6 @@ class Message
         'CONTACTINFO_SLASHES_FOUND' => array(
             'type' => Message::ERROR,
             'format' => "Please provide name like 'Jane D' with a space, not a '/' separating the first name and last initial.",
-            'arguments' => array(),
-        ),
-        'CONTACTINFO_FIRST_NAME_ALL_CAPS' => array(
-            'type' => Message::WARNING,
-            'format' => "First name is in all capital letters. Please provide them with appropriate capitalization, otherwise we may not be able to find this person in some cases.",
             'arguments' => array(),
         ),
 

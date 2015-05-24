@@ -64,10 +64,6 @@ class ContactInfoImporter extends DataImporterAbstract
         }
         $nameParts = Util::getNameParts($name);
 
-        if (strtoupper($nameParts['firstName']) == $nameParts['firstName']) {
-            $this->addMessage('CONTACTINFO_FIRST_NAME_ALL_CAPS', $this->reader->getReportingStatisticianNameRow());
-        }
-
         $member = ProgramTeamMember::firstOrCreate(array(
             'center_id'      => $this->statsReport->center->id,
             'quarter_id'     => $this->statsReport->quarter->id,
@@ -121,10 +117,6 @@ class ContactInfoImporter extends DataImporterAbstract
         }
 
         $nameParts = Util::getNameParts($name);
-
-        if (strtoupper($nameParts['firstName']) == $nameParts['firstName']) {
-            $this->addMessage('CONTACTINFO_FIRST_NAME_ALL_CAPS', $this->reader->$this->reader->getReportingStatisticianNameRow());
-        }
 
         $member = ProgramTeamMember::firstOrCreate(array(
             'center_id'  => $this->statsReport->center->id,
