@@ -15,7 +15,7 @@ class CreateQuartersTable extends Migration {
 		Schema::create('quarters', function(Blueprint $table)
 		{
 			$table->increments('id');
-			$table->string('location');
+			$table->string('location', 128);
 			$table->string('distinction');
 			$table->date('start_weekend_date')->unique();
 			$table->date('end_weekend_date');

@@ -11,15 +11,32 @@
 						<h1>Results for Week Ending {{ $reportingDate->format('F j, Y') }}</h1>
 
 						{!! Form::open(['url' => 'home', 'class' => 'form-horizontal']) !!}
+
 						<div class="form-group">
 							{!! Form::label('stats_report', 'Week:', ['class' => 'col-sm-1 control-label']) !!}
 							<div class="col-sm-2">
 								{!! Form::select('stats_report', $reportingDates, $reportingDate->toDateString(), ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}
 							</div>
 						</div>
+
+
+						<div class="form-group">
+						    {!! Form::label('region', 'Region:', ['class' => 'col-sm-1 control-label']) !!}
+						    <div class="col-sm-5" style="padding-left: 40px">
+						        {!! Form::select('region',[
+						                'ANZ' => 'Australia/New Zealand',
+						                'EME' => 'Europe/Middle East',
+						                'IND' => 'India',
+						                'NA'  => 'North America'
+					                ], $selectedRegion, ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}
+						    </div>
+						</div>
+
 						{!! Form::close() !!}
-						<h3>Eastern Region</h3>
-						<h4>({{ $results['eastComplete'] }} of {{ $results['eastCount'] }} centers complete)</h4>
+
+						@foreach ($regionsData as $data)
+						<h3>{{ $data['displayName'] }}</h3>
+						<h4>({{ $data['completeCount'] }} of {{ $data['validatedCount'] }} centers complete)</h4>
 						<div class="table-responsive">
 							<table class="table table-hover">
 								<thead>
@@ -34,12 +51,11 @@
 								</tr>
 								</thead>
 								<tbody>
-								@foreach ($centersData as $center)
-								@if ($center['localRegion'] == 'East')
-								<tr {!! !$center['validated'] ? 'style="background-color: MistyRose"' : 'style="background-color: #E0FEE0"' !!}>
+								@foreach ($data['centersData'] as $name => $center)
+								<tr {!! !$center['complete'] ? 'style="background-color: MistyRose"' : 'style="background-color: #E0FEE0"' !!}>
 									<td>{{ $center['name'] }}</td>
 									<td>{{ $center['localRegion'] }}</td>
-									<td><span style="align: center" class="glyphicon {{ $center['validated'] ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span></td>
+									<td><span style="align: center" class="glyphicon {{ $center['complete'] ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span></td>
 									<td>{{ $center['rating'] }}</td>
 									<td>{{ $center['updatedAt'] }}</td>
 									<td>{{ $center['updatedBy'] }}</td>
@@ -49,47 +65,11 @@
 									@endif
 									</td>
 								</tr>
-								@endif
 								@endforeach
 								</tbody>
 							</table>
 						</div>
-						<h3>Western Region</h3>
-						<h4>({{ $results['westComplete'] }} of {{ $results['westCount'] }} centers complete)</h4>
-						<div class="table-responsive">
-							<table class="table table-hover">
-								<thead>
-								<tr>
-									<th data-sortable="true">Center</th>
-									<th data-sortable="true">Region</th>
-									<th data-sortable="true">Complete</th>
-									<th data-sortable="true">Rating</th>
-									<th data-sortable="true">Last Submitted</th>
-									<th data-sortable="true">Last Submitted By</th>
-									<th>&nbsp;</th>
-								</tr>
-								</thead>
-								<tbody>
-								@foreach ($centersData as $center)
-								@if ($center['localRegion'] == 'West')
-								<tr {!! !$center['validated'] ? 'style="background-color: MistyRose"' : 'style="background-color: #E0FEE0"' !!}>
-									<td>{{ $center['name'] }}</td>
-									<td>{{ $center['localRegion'] }}</td>
-									<td><span style="align: center" class="glyphicon {{ $center['validated'] ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span></td>
-									<td>{{ $center['rating'] }}</td>
-									<td>{{ $center['updatedAt'] }}</td>
-									<td>{{ $center['updatedBy'] }}</td>
-									<td>
-									@if ($center['sheet'])
-										<a href="{{ $center['sheet'] }}">Download</a>
-									@endif
-									</td>
-								</tr>
-								@endif
-								@endforeach
-								</tbody>
-							</table>
-						</div>
+						@endforeach
 					@else
 						Welcome to your dashboard. This will be the home of your TMLP stats experience. We're still in the process of creating it, but check back soon for some great new features.
 					@endif

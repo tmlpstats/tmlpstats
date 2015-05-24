@@ -73,19 +73,57 @@ class HomeController extends Controller {
 			$reportingDates[$dateString] = $displayString;
 		}
 
-		$centers = Center::active()->orderBy('local_region', 'asc')->orderBy('name', 'asc')->get();
+		$userHomeRegion = Auth::user()->homeRegion();
+		$defaultRegion = $userHomeRegion ?: 'NA';
 
-		$centerData = array(
-			'East' => array(
-				'validated' => array(),
-				'not-validated' => array(),
-			),
-			'West' => array(
-				'validated' => array(),
-				'not-validated' => array(),
-			),
-		);
+		$region = Request::has('region') ? Request::get('region') : $defaultRegion;
+
+
+
+		$centers = Center::active()
+						 ->globalRegion($region)
+						 ->orderBy('local_region', 'asc')
+						 ->orderBy('name', 'asc')
+						 ->get();
+
+		$regionsData = array();
+
+		switch($region) {
+			case 'ANZ':
+				$regionsData[0]['displayName'] = 'Australia/New Zealand Region';
+				$regionsData[0]['validatedCount'] = 0;
+				$regionsData[0]['completeCount'] = 0;
+				$regionsData[0]['centersData'] = array();
+				break;
+			case 'EME':
+				$regionsData[0]['displayName'] = 'Europe/Middle East Region';
+				$regionsData[0]['validatedCount'] = 0;
+				$regionsData[0]['completeCount'] = 0;
+				$regionsData[0]['centersData'] = array();
+				break;
+			case 'IND':
+				$regionsData[0]['displayName'] = 'India Region';
+				$regionsData[0]['validatedCount'] = 0;
+				$regionsData[0]['completeCount'] = 0;
+				$regionsData[0]['centersData'] = array();
+				break;
+			case 'NA':
+			default:
+				$regionsData['East']['displayName'] = 'North America - Eastern Region';
+				$regionsData['East']['validatedCount'] = 0;
+				$regionsData['East']['completeCount'] = 0;
+				$regionsData['East']['centersData'] = array();
+
+				$regionsData['West']['displayName'] = 'North America - Western Region';
+				$regionsData['West']['validatedCount'] = 0;
+				$regionsData['West']['completeCount'] = 0;
+				$regionsData['West']['centersData'] = array();
+				break;
+		}
+
 		foreach ($centers as $center) {
+
+			$localRegion = $center->localRegion ?: 0;
 
 			$statsReport = $center->statsReports()->reportingDate($reportingDate->toDateString())->first();
 
@@ -97,10 +135,6 @@ class HomeController extends Controller {
 				? CenterStatsData::actual()->reportingDate($reportingDate->toDateString())->statsReport($statsReport)->first()
 				: null;
 
-			$validatedKey = $statsReport && $statsReport->validated
-				? 'validated'
-				: 'not-validated';
-
 			$sheetUrl = null;
 
 			if (Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator')
@@ -111,32 +145,42 @@ class HomeController extends Controller {
 								: null;
 			}
 
-			$centerData[$center->localRegion][$validatedKey][$center->name] = array(
+			$centerResults = array(
 				'name'        => $center->name,
 				'localRegion' => $center->localRegion,
-				'validated'   => $statsReport ? $statsReport->validated : false,
+				'complete'    => $statsReport ? $statsReport->validated : false,
 				'rating'      => $actualData ? $actualData->rating : '-',
 				'updatedAt'   => $statsReport ? date('M d, Y @ g:ia T', strtotime($statsReport->updatedAt . ' UTC')) : '-',
 				'updatedBy'   => $user ? $user->firstName : '-',
 				'sheet'       => $sheetUrl,
 			);
+
+			if ($statsReport && $statsReport->validated) {
+				$regionsData[$localRegion]['completeCount'] += 1;
+			}
+			$regionsData[$localRegion]['validatedCount'] += 1;
+
+			$regionsData[$localRegion]['centersData'][] = $centerResults;
 		}
 
-		$results['eastCount'] = count($centerData['East']['validated']) + count($centerData['East']['not-validated']);
-		$results['westCount'] = count($centerData['West']['validated']) + count($centerData['West']['not-validated']);
-		$results['eastComplete'] = count($centerData['East']['validated']);
-		$results['westComplete'] = count($centerData['West']['validated']);
-
-		$centerData = array_merge($centerData['East']['validated'],
-								  $centerData['East']['not-validated'],
-								  $centerData['West']['validated'],
-								  $centerData['West']['not-validated']);
+		foreach ($regionsData as &$sortRegion) {
+			usort($sortRegion['centersData'], array(get_class(), 'sortByComplete'));
+		}
 
 		return view('home')->with(['reportingDate' => $reportingDate,
-								   'centersData' => $centerData,
 								   'reportingDates' => $reportingDates,
 								   'timezone' => $timezone,
-								   'results' => $results]);
+								   'selectedRegion' => $region,
+								   'regionsData' => $regionsData]);
+	}
+
+	protected static function sortByComplete($a, $b)
+	{
+		if ($a['complete'] != $b['complete']) {
+			return $a['complete'] ? -1 : 1; // reverse order to get sort in DESC order
+		} else {
+			return strcmp($a['name'], $b['name']);
+		}
 	}
 
 	public function setTimezone()

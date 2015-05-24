@@ -39,6 +39,11 @@ class Center extends Model {
         return $query->whereActive(true);
     }
 
+    public function scopeGlobalRegion($query, $region)
+    {
+        return $query->whereGlobalRegion($region);
+    }
+
     public function users()
     {
         return $this->belongsToMany('TmlpStats\User', 'center_user')->withTimestamps();

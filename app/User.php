@@ -64,6 +64,11 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         return false;
     }
 
+    public function homeRegion()
+    {
+        return count($this->centers) ? $this->centers[0]->globalRegion : null;
+    }
+
     public function updateRoles($roles)
     {
         foreach ($roles as $roleId) {
