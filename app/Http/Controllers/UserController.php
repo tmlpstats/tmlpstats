@@ -29,7 +29,7 @@ class UserController extends Controller {
 	 */
 	public function index()
 	{
-		$users = User::active()->get();
+		$users = User::active()->orderby('first_name')->orderby('last_name')->get();
 
         return view('users.index', compact('users'));
 	}
