@@ -1,6 +1,18 @@
 {!! Form::hidden('previous_url', URL::previous()) !!}
 
 <div class="form-group">
+    {!! Form::label('global_region', 'Region:', ['class' => 'col-sm-2 control-label']) !!}
+    <div class="col-sm-5">
+        {!! Form::select('global_region', [
+                'ANZ' => 'Australia/New Zealand',
+                'EME' => 'Europe/Middle East',
+                'IND' => 'India',
+                'NA'  => 'North America',
+            ], null, ['class' => 'form-control']) !!}
+    </div>
+</div>
+
+<div class="form-group">
     {!! Form::label('location', 'Location:', ['class' => 'col-sm-2 control-label']) !!}
     <div class="col-sm-5">
         {!! Form::text('location', null, ['class' => 'form-control']) !!}
@@ -11,11 +23,11 @@
     {!! Form::label('distinction', 'Distinction:', ['class' => 'col-sm-2 control-label']) !!}
     <div class="col-sm-5">
         {!! Form::select('distinction', [
-                'Relatedness'=>'Relatedness',
-                'Possibility'=>'Possibility',
-                'Opportunity'=>'Opportunity',
-                'Action'=>'Action',
-                'Completion'=>'Completion',
+                'Relatedness' => 'Relatedness',
+                'Possibility' => 'Possibility',
+                'Opportunity' => 'Opportunity',
+                'Action'      => 'Action',
+                'Completion'  => 'Completion',
             ], null, ['class' => 'form-control']) !!}
     </div>
 </div>

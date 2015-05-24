@@ -220,12 +220,21 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
 
     protected function normalizeMessages()
     {
+        // Sort first so they are in tab order instead of ordered by tab name
+        usort($this->messages['errors'], array(get_class($this), 'sortBySection'));
+        usort($this->messages['warnings'], array(get_class($this), 'sortBySection'));
+
         foreach ($this->messages['errors'] as &$message) {
             $message['section'] = $this->getSheetName($message['section']);
         }
         foreach ($this->messages['warnings'] as &$message) {
             $message['section'] = $this->getSheetName($message['section']);
         }
+    }
+
+    protected static function sortBySection($a, $b)
+    {
+        return ($a['section'] >= $b['section']) ? 1 : -1;
     }
 
     protected function postProcess() { }

@@ -9,6 +9,10 @@
 <div class="table-responsive">
     <table class="table table-condensed table-striped">
         <tr>
+            <th>Region:</th>
+            <td>{{ $quarter->global_region }}</td>
+        </tr>
+        <tr>
             <th>City:</th>
             <td>{{ $quarter->location }}</td>
         </tr>

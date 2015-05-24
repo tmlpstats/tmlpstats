@@ -26,8 +26,11 @@ class QuarterController extends Controller {
 	 */
 	public function index()
 	{
-        $quarters = Quarter::oldest('start_weekend_date')->current()->get();
-        return view('quarters.index', compact('quarters'));
+		$quarters = Quarter::orderBy('global_region')
+						   ->orderBy('start_weekend_date', 'ASC')
+						   ->current()
+						   ->get();
+		return view('quarters.index', compact('quarters'));
 	}
 
 	/**

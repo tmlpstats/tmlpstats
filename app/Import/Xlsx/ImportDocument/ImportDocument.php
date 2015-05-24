@@ -466,7 +466,7 @@ class ImportDocument extends ImportDocumentAbstract
     }
     protected function loadQuarter()
     {
-        $this->quarter = Quarter::findByDate($this->reportingDate);
+        $this->quarter = Quarter::findByDateAndRegion($this->reportingDate, $this->center->globalRegion);
         if (!$this->quarter) {
             $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_QUARTER_NOT_FOUND', false, $this->reportingDate->toDateString());
         }

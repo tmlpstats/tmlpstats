@@ -54,6 +54,16 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         return false;
     }
 
+    public function hasCenter($centerId)
+    {
+        foreach($this->centers as $center) {
+            if ($center->id == $centerId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function updateRoles($roles)
     {
         foreach ($roles as $roleId) {
@@ -66,6 +76,22 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         foreach ($this->roles as $existingRole) {
             if (!in_array($existingRole->id, $roles)) {
                 $this->roles()->detach($existingRole->id);
+            }
+        }
+    }
+
+    public function updateCenters($centers)
+    {
+        foreach ($this->centers as $existingCenter) {
+            if (!in_array($existingCenter->id, $centers)) {
+                $this->centers()->detach($existingCenter->id);
+            }
+        }
+        foreach ($centers as $centerAbbr) {
+            $center = Center::abbreviation($centerAbbr)->first();
+
+            if ($center && !$this->hasCenter($center->id)) {
+                $this->centers()->attach($center->id);
             }
         }
     }

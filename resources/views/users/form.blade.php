@@ -39,6 +39,13 @@
     </div>
 </div>
 
+<div class="form-group">
+    {!! Form::label('center', 'Center:', ['class' => 'col-sm-2 control-label']) !!}
+    <div class="col-sm-5" style="padding-left: 40px">
+        {!! Form::select('center', $centers, null, ['class' => 'form-control']) !!}
+    </div>
+</div>
+
 @if ($submitButtonText == 'Update')
 <div class="form-group">
     {!! Form::label('require_password_reset', 'Require Password Reset:', ['class' => 'col-sm-2 control-label']) !!}

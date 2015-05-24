@@ -17,6 +17,8 @@ class Quarter extends Model {
         'classroom3_date',
         'location',
         'distinction',
+        'global_region',
+        'local_region',
     );
 
     protected $dates = [
@@ -27,10 +29,11 @@ class Quarter extends Model {
         'classroom3_date',
     ];
 
-    public static function findByDate($date)
+    public static function findByDateAndRegion($date, $region)
     {
         return static::where('start_weekend_date', '<', $date->toDateString())
                      ->where('end_weekend_date', '>=', $date->toDateString())
+                     ->where('global_region', $region)
                      ->first();
     }
 

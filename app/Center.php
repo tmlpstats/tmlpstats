@@ -41,7 +41,7 @@ class Center extends Model {
 
     public function users()
     {
-        return $this->belongsToMany('TmlpStats\User', 'role_user')->withTimestamps();
+        return $this->belongsToMany('TmlpStats\User', 'center_user')->withTimestamps();
     }
 
     public function statsReports()

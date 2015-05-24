@@ -93,7 +93,7 @@ class ClassListImporter extends DataImporterAbstract
         if ($this->reader->isEmptyCell($row,'A')) return;
 
         $teamYear          = $args[0];
-        $completionQuarter = Quarter::findByDate($args[1]);
+        $completionQuarter = Quarter::findByDateAndRegion($args[1], $this->statsReport->center->globalRegion);
 
         $member = TeamMember::firstOrCreate(array(
             'center_id'             => $this->statsReport->center->id,

@@ -16,6 +16,9 @@ class AddRegionToQuartersTable extends Migration {
 		{
 			$table->string('global_region');
 			$table->string('local_region');
+
+			$table->dropUnique('quarters_start_weekend_date_unique');
+			$table->unique(array('global_region','local_region','start_weekend_date'));
 		});
 	}
 
@@ -28,6 +31,9 @@ class AddRegionToQuartersTable extends Migration {
 	{
 		Schema::table('quarters', function(Blueprint $table)
 		{
+			$table->dropUnique(array('global_region','local_region','start_weekend_date'));
+			$table->unique('start_weekend_date');
+
 			$table->dropColumn('global_region');
 			$table->dropColumn('local_region');
 		});

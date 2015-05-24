@@ -25,6 +25,10 @@
             <td>{{ implode(', ', array_fetch($user->roles->toArray(), 'name')) }}</td>
         </tr>
         <tr>
+            <th>Center:</th>
+            <td>{{ implode(', ', array_fetch($user->centers->toArray(), 'name')) }}</td>
+        </tr>
+        <tr>
             <th>Active:</th>
             <td><span class="glyphicon {{ $user->active ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span></td>
         </tr>

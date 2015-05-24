@@ -9,6 +9,7 @@
     <table class="table table-hover">
         <thead>
         <tr>
+            <th>Region</th>
             <th>Location</th>
             <th>Distinction</th>
             <th>Start Date</th>
@@ -22,13 +23,14 @@
         <tbody>
         @foreach ($quarters as $quarter)
         <tr>
+            <td>{{ $quarter->global_region }}</td>
             <td><a href="{{ url('/admin/quarters/'.$quarter->id) }}">{{ $quarter->location }}</a></td>
             <td>{{ $quarter->distinction }}</td>
-            <td>{{ $quarter->start_weekend_date->format('M d, Y') }}</td>
-            <td>{{ $quarter->classroom1_date->format('M d, Y') }}</td>
-            <td>{{ $quarter->classroom2_date->format('M d, Y') }}</td>
-            <td>{{ $quarter->classroom3_date->format('M d, Y') }}</td>
-            <td>{{ $quarter->end_weekend_date->format('M d, Y') }}</td>
+            <td>{{ ($quarter->start_weekend_date->format('Y') < 0) ? '-' : $quarter->start_weekend_date->format('M d, Y') }}</td>
+            <td>{{ ($quarter->classroom1_date->format('Y') < 0) ? '-' : $quarter->classroom1_date->format('M d, Y') }}</td>
+            <td>{{ ($quarter->classroom2_date->format('Y') < 0) ? '-' : $quarter->classroom2_date->format('M d, Y') }}</td>
+            <td>{{ ($quarter->classroom3_date->format('Y') < 0) ? '-' : $quarter->classroom3_date->format('M d, Y') }}</td>
+            <td>{{ ($quarter->end_weekend_date->format('Y') < 0) ? '-' : $quarter->end_weekend_date->format('M d, Y') }}</td>
             <td><a href="{{ url('/admin/quarters/' . $quarter->id . '/edit') }}">Edit</a></td>
         </tr>
         @endforeach

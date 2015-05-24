@@ -13,6 +13,7 @@
             <th>Email</th>
             <th>Phone</th>
             <th>Roles</th>
+            <th>Center</th>
             <th>Active</th>
             <th>&nbsp;</th>
         </tr>
@@ -24,6 +25,7 @@
             <td>{{ $user->email }}</td>
             <td>{{ $user->phone ? $user->formatPhone() : '-' }}</td>
             <td>{{ implode(', ', array_fetch($user->roles->toArray(), 'name')) }}</td>
+            <td>{{ implode(', ', array_fetch($user->centers->toArray(), 'name')) }}</td>
             <td><span class="glyphicon {{ $user->active ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span></td>
             <td><a href="{{ url('/admin/users/' . $user->id . '/edit') }}">Edit</a></td>
         </tr>

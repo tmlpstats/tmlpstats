@@ -98,9 +98,14 @@ class UserController extends Controller {
 	public function edit($id)
 	{
         $user = User::findOrFail($id);
-		$roles = Role::all();
+        $roles = Role::all();
+        $centerList = Center::orderBy('global_region')->orderBy('name')->get();
+        $centers = array();
+        foreach ($centerList as $center) {
+            $centers[$center->abbreviation] = "{$center->globalRegion} - {$center->name}";
+        }
 
-        return view('users.edit', compact('user', 'roles'));
+        return view('users.edit', compact('user', 'roles', 'centers'));
 	}
 
 	/**
@@ -123,9 +128,12 @@ class UserController extends Controller {
         $user = User::findOrFail($id);
         $user->update($request->all());
 
-    	if ($request->has('roles')) {
-    		$user->updateRoles($request->get('roles'));
-    	}
+        if ($request->has('center')) {
+            $user->updateCenters(array($request->get('center')));
+        }
+        if ($request->has('roles')) {
+            $user->updateRoles($request->get('roles'));
+        }
     	if ($request->has('active')) {
     		$user->active = $request->get('active') == true;
     	}
