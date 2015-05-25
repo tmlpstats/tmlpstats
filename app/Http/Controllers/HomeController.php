@@ -140,8 +140,8 @@ class HomeController extends Controller {
 			if (Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator')
 				|| (Auth::user()->hasRole('localStatistician') && Auth::user()->hasCenter($center->abbreviation))
 			) {
-				$sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->name)
-								? route('downloadSheet', array($reportingDate->toDateString(), $center->name))
+				$sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->sheetFilename)
+								? route('downloadSheet', array($reportingDate->toDateString(), $center->sheetFilename))
 								: null;
 			}
 

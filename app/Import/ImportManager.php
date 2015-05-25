@@ -169,14 +169,22 @@ class ImportManager
     {
         $baseDir = static::getArchiveDirectory();
 
-        return "{$baseDir}/{$reportingDate}/{$fileName}.xlsx";
+        $name = "{$baseDir}/{$reportingDate}/{$fileName}";
+        if (strpos($name, '.xlsx') === false) {
+            $name .= '.xlsx';
+        }
+        return $name;
     }
 
     public static function getWorkingSheetFilePath($reportingDate, $fileName)
     {
         $baseDir = static::getArchiveDirectory();
 
-        return "{$baseDir}/working_files/{$reportingDate}/{$fileName}.xlsx";
+        $name = "{$baseDir}/working_files/{$reportingDate}/{$fileName}";
+        if (strpos($name, '.xlsx') === false) {
+            $name .= '.xlsx';
+        }
+        return $name;
     }
 
     public static function getSheetPath($reportingDate, $name)
