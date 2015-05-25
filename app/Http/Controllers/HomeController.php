@@ -138,7 +138,7 @@ class HomeController extends Controller {
 			$sheetUrl = null;
 
 			if (Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator')
-				|| (Auth::user()->hasRole('localStatistician') && Auth::user()->hasCenter($center->abbreviation))
+				|| (Auth::user()->hasRole('localStatistician') && Auth::user()->hasCenter($center->id))
 			) {
 				$sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->sheetFilename)
 								? route('downloadSheet', array($reportingDate->toDateString(), $center->sheetFilename))
