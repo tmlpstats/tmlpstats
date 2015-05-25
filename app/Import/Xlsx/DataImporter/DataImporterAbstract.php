@@ -21,7 +21,7 @@ abstract class DataImporterAbstract
         }
         if ($statsReport == NULL)
         {
-            throw new \Exception('An error occurred while processing request. StatsReoirt not provided to data importer.');
+            throw new \Exception('An error occurred while processing request. StatsReport not provided to data importer.');
         }
         $this->sheet = $sheet;
         $this->statsReport = $statsReport;
@@ -94,7 +94,11 @@ abstract class DataImporterAbstract
     {
         foreach($blockParams[1] as $offset)
         {
-            $this->loadEntry($offset, $arg);
+            try {
+                $this->loadEntry($offset, $arg);
+            } catch (\Exception $e) {
+                $this->addMessage('EXCEPTION_LOADING_ENTRY', $offset, $e->getMessage());
+            }
         }
     }
 

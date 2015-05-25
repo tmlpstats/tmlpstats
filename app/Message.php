@@ -30,6 +30,13 @@ class Message
             'format' => "Unable to import tab.",
             'arguments' => array(),
         ),
+        'EXCEPTION_LOADING_ENTRY' => array(
+            'type' => Message::ERROR,
+            'format' => "There was an error processing tab: %%message%%.",
+            'arguments' => array(
+                '%%message%%',
+            ),
+        ),
 
         // TMLP Registration Validator Errors
         'TMLPREG_MULTIPLE_WEEKENDREG' => array(

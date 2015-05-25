@@ -52,7 +52,11 @@ class CenterStatsImporter extends DataImporterAbstract
     protected function loadBlock($blockParams, $args = null)
     {
         for ($week = 0; $week < count($blockParams[0]); $week+=2) {
-            $this->loadEntry($week, $blockParams);
+            try{
+                $this->loadEntry($week, $blockParams);
+            } catch(\Exception $e) {
+                $this->addMessage('EXCEPTION_LOADING_ENTRY', $week, $e->getMessage());
+            }
         }
     }
 
