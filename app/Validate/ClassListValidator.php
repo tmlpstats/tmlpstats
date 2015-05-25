@@ -52,13 +52,8 @@ class ClassListValidator extends ValidatorAbstract
         $this->dataValidators['firstName']           = $nameValidator;
         $this->dataValidators['lastName']            = $nameValidator;
         $this->dataValidators['teamYear']            = $teamYearValidator;
-        // Skipping accountability
         $this->dataValidators['completionQuarterId'] = $rowIdValidator;
-        // Skipping center (auto-generated)
         $this->dataValidators['statsReportId']       = $rowIdValidator;
-
-        // Skipping reporting date (auto-generated)
-        // Skipping team member id (auto-generated)
         $this->dataValidators['wknd']                = $equalsTeamYearValidator;
         $this->dataValidators['xferOut']             = $equalsTeamYearValidator;
         $this->dataValidators['xferIn']              = $equalsTeamYearValidator;
@@ -69,9 +64,14 @@ class ClassListValidator extends ValidatorAbstract
         $this->dataValidators['excep']               = $equalsTeamYearValidator;
         $this->dataValidators['travel']              = $yesOrNullValidator;
         $this->dataValidators['room']                = $yesOrNullValidator;
-        // Skipping comment
         $this->dataValidators['gitw']                = v::when(v::nullValue(), v::alwaysValid(), v::string()->regex('/^[EI]$/i'));
         $this->dataValidators['tdo']                 = v::when(v::nullValue(), v::alwaysValid(), v::string()->regex('/^[YN]$/i'));
+
+        // Skipping comment
+        // Skipping accountability
+        // Skipping center (auto-generated)
+        // Skipping reporting date (auto-generated)
+        // Skipping team member id (auto-generated)
         // Skipping quarter (auto-generated)
     }
 
@@ -80,6 +80,7 @@ class ClassListValidator extends ValidatorAbstract
         $this->validateGitw();
         $this->validateTdo();
         $this->validateTeamYear();
+        $this->validateTransfer();
         $this->validateWithdraw();
         $this->validateTravel();
 
@@ -122,8 +123,24 @@ class ClassListValidator extends ValidatorAbstract
             $this->addMessage('CLASSLIST_WKND_MISSING', $this->data->teamYear);
             $this->isValid = false;
         } else if (!is_null($this->data->wknd) && !is_null($this->data->xferIn)) {
-            $this->addMessage('CLASSLIST_WKND_XIN_ONLY_ONE', 'error');
+            $this->addMessage('CLASSLIST_WKND_XIN_ONLY_ONE');
             $this->isValid = false;
+        }
+    }
+
+    protected function validateTransfer()
+    {
+        if (!is_null($this->data->xferIn) || !is_null($this->data->xferOut)) {
+
+            // TODO: We probably don't need to show this every week. We need a better way to alert something for
+            //       the first week.
+            // Always display this message.
+            $this->addMessage('CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER');
+
+            if (is_null($this->data->comment)) {
+                $this->addMessage('CLASSLIST_XFER_COMMENT_MISSING');
+                $this->isValid = false;
+            }
         }
     }
 
@@ -135,7 +152,7 @@ class ClassListValidator extends ValidatorAbstract
                 $this->isValid = false;
             }
             if (!is_null($this->data->ctw)) {
-                $this->addMessage('CLASSLIST_WD_CTO_ONLY_ONE');
+                $this->addMessage('CLASSLIST_WD_CTW_ONLY_ONE');
                 $this->isValid = false;
             }
             if (!is_null($this->data->wd)) {
@@ -144,6 +161,15 @@ class ClassListValidator extends ValidatorAbstract
                     $this->addMessage('CLASSLIST_WD_DOESNT_MATCH_YEAR');
                     $this->isValid = false;
                 }
+            }
+            if (is_null($this->data->comment)) {
+                $this->addMessage('CLASSLIST_WD_COMMENT_MISSING');
+                $this->isValid = false;
+            }
+        } else if (!is_null($this->data->ctw)) {
+            if (is_null($this->data->comment)) {
+                $this->addMessage('CLASSLIST_CTW_COMMENT_MISSING');
+                $this->isValid = false;
             }
         }
     }

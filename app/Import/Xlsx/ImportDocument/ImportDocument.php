@@ -113,11 +113,13 @@ class ImportDocument extends ImportDocumentAbstract
 
         $quarterStartDate = $this->quarter->startWeekendDate->toDateString();
         $tmlpGameStats = DB::table('tmlp_registrations')
-                            ->select(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.incoming_weekend = 'current', 1, 0), 0)) as currentTeam1Registered"))
+                            // Get Team 1 current/future registered/approved, and withdraws of incoming approved at quarter start
+                            ->select   (DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.incoming_weekend = 'current', 1, 0), 0)) as currentTeam1Registered"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.incoming_weekend = 'future', 1, 0), 0)) as futureTeam1Registered"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'current', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as currentTeam1Approved"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'future', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as futureTeam1Approved"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.wd IS NOT NULL, 1, 0), 0), 0)) as team1Withdraws"))
+                            // Get Team 2 current/future registered/approved, and withdraws of incoming approved at quarter start
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.incoming_weekend = 'current', 1, 0), 0)) as currentTeam2Registered"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.incoming_weekend = 'future', 1, 0), 0)) as futureTeam2Registered"))
                             ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'current', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as currentTeam2Approved"))
@@ -188,29 +190,30 @@ class ImportDocument extends ImportDocumentAbstract
                 }
             }
         }
+        // TODO: Turning this off for now because it's a bit more complicated to calculate these properly.
         // Validate Quarter starting totals on mid quarter weeks. (Registrations may move between current and future)
-        if ($this->reportingDate->ne($firstWeekDate)) {
+        // if ($this->reportingDate->ne($firstWeekDate)) {
 
-            $totals = $tmlpGameStats->currentTeam1Registered + $tmlpGameStats->futureTeam1Registered;
-            if ($qStartRegisteredTotalT1 != $totals) {
-                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T1_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT1, $totals);
-            }
+        //     $totals = $tmlpGameStats->currentTeam1Registered + $tmlpGameStats->futureTeam1Registered;
+        //     if ($qStartRegisteredTotalT1 != $totals) {
+        //         $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T1_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT1, $totals);
+        //     }
 
-            $totals = ($tmlpGameStats->currentTeam1Approved + $tmlpGameStats->futureTeam1Approved) + $tmlpGameStats->team1Withdraws;
-            if ($qStartApprovedTotalT1 != $totals) {
-                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T1_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartApprovedTotalT1, $totals);
-            }
+        //     $totals = ($tmlpGameStats->currentTeam1Approved + $tmlpGameStats->futureTeam1Approved) + $tmlpGameStats->team1Withdraws;
+        //     if ($qStartApprovedTotalT1 != $totals) {
+        //         $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T1_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartApprovedTotalT1, $totals);
+        //     }
 
-            $totals = $tmlpGameStats->currentTeam2Registered + $tmlpGameStats->futureTeam2Registered;
-            if ($qStartRegisteredTotalT2 != $totals) {
-                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T2_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT2, $totals);
-            }
+        //     $totals = $tmlpGameStats->currentTeam2Registered + $tmlpGameStats->futureTeam2Registered;
+        //     if ($qStartRegisteredTotalT2 != $totals) {
+        //         $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T2_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT2, $totals);
+        //     }
 
-            $totals = ($tmlpGameStats->currentTeam2Approved + $tmlpGameStats->futureTeam2Approved) + $tmlpGameStats->team2Withdraws;
-            if ($qStartApprovedTotalT2 != $totals) {
-                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T2_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartApprovedTotalT2, $totals);
-            }
-        }
+        //     $totals = ($tmlpGameStats->currentTeam2Approved + $tmlpGameStats->futureTeam2Approved) + $tmlpGameStats->team2Withdraws;
+        //     if ($qStartApprovedTotalT2 != $totals) {
+        //         $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T2_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartApprovedTotalT2, $totals);
+        //     }
+        // }
 
         return $isValid;
     }

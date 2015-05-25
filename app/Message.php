@@ -379,7 +379,7 @@ class Message
         // Class List Errors
         'CLASSLIST_GITW_LEAVE_BLANK' => array(
             'type' => Message::ERROR,
-            'format' => "If team member has withdrawn, please leave GITW empty.",
+            'format' => "If team member is no longer on your team, leave GITW empty.",
             'arguments' => array(),
         ),
         'CLASSLIST_GITW_MISSING' => array(
@@ -389,7 +389,7 @@ class Message
         ),
         'CLASSLIST_TDO_LEAVE_BLANK' => array(
             'type' => Message::ERROR,
-            'format' => "If team member has withdrawn, please leave TDO empty.",
+            'format' => "If team member is no longer on your team, leave TDO empty.",
             'arguments' => array(),
         ),
         'CLASSLIST_TDO_MISSING' => array(
@@ -409,12 +409,22 @@ class Message
             'format' => "Only one of Wknd and X In should be set.",
             'arguments' => array(),
         ),
+        'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER' => array(
+            'type' => Message::WARNING,
+            'format' => "Confirm with other center that team member is reported appropriately on their sheet.",
+            'arguments' => array(),
+        ),
+        'CLASSLIST_XFER_COMMENT_MISSING' => array(
+            'type' => Message::ERROR,
+            'format' => "Add a comment specifying the date of transfer and the center they transfered to/from.",
+            'arguments' => array(),
+        ),
         'CLASSLIST_WD_WBO_ONLY_ONE' => array(
             'type' => Message::ERROR,
             'format' => "Both WD and WBO are set. Only one should be set.",
             'arguments' => array(),
         ),
-        'CLASSLIST_WD_CTO_ONLY_ONE' => array(
+        'CLASSLIST_WD_CTW_ONLY_ONE' => array(
             'type' => Message::ERROR,
             'format' => "Both WD/WBO and CTW are set. CTW should not be set after the team member has withdrawn.",
             'arguments' => array(),
@@ -422,6 +432,16 @@ class Message
         'CLASSLIST_WD_DOESNT_MATCH_YEAR' => array(
             'type' => Message::ERROR,
             'format' => "The program year specified for WD doesn't match the team members program year. It should match the value in Wknd or X In",
+            'arguments' => array(),
+        ),
+        'CLASSLIST_WD_COMMENT_MISSING' => array(
+            'type' => Message::ERROR,
+            'format' => "Add a comment with the date of withdraw.",
+            'arguments' => array(),
+        ),
+        'CLASSLIST_CTW_COMMENT_MISSING' => array(
+            'type' => Message::ERROR,
+            'format' => "Add a comment with the issue/concern.",
             'arguments' => array(),
         ),
         'CLASSLIST_TRAVEL_COMMENT_MISSING' => array(
