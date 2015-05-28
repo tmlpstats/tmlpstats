@@ -585,6 +585,14 @@ class Message
                 '%%expected%%',
             ),
         ),
+        'IMPORTDOC_SPREADSHEET_DATE_MISMATCH_LAST_WEEK' => array(
+            'type' => Message::ERROR,
+            'format' => "Spreadsheet date (%%reported%%) doesn't match expected date (%%expected%%). If this is the last week of the quarter and you are reporting preliminary results, use Friday's date.",
+            'arguments' => array(
+                '%%reported%%',
+                '%%expected%%',
+            ),
+        ),
 
         'IMPORTDOC_CENTER_NOT_FOUND' => array(
             'type' => Message::ERROR,

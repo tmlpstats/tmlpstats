@@ -383,8 +383,14 @@ class ImportDocument extends ImportDocumentAbstract
 
         if ($this->expectedDate && $this->expectedDate->ne($this->statsReport->reportingDate)) {
 
-            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_SPREADSHEET_DATE_MISMATCH', false, $this->statsReport->reportingDate->toDateString(), $this->expectedDate->toDateString());
-            $isValid = false;
+            if ($this->statsReport->quarter->endWeekendDate->diffInDays($this->statsReport->reportingDate) < 7) {
+                // Reporting in the last week of quarter
+                $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_SPREADSHEET_DATE_MISMATCH_LAST_WEEK', false, $this->statsReport->reportingDate->toDateString(), $this->statsReport->quarter->endWeekendDate->toDateString());
+                $isValid = false;
+            } else {
+                $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_SPREADSHEET_DATE_MISMATCH', false, $this->statsReport->reportingDate->toDateString(), $this->expectedDate->toDateString());
+                $isValid = false;
+            }
         }
 
         return $isValid;
