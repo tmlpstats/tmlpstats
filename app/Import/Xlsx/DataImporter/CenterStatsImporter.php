@@ -176,6 +176,8 @@ class CenterStatsImporter extends DataImporterAbstract
             $actualData->statsReportId = $this->statsReport->id;
             $actualData->save();
 
+            $centerStats->actualDataId = $actualData->id;
+
             // Save new weeks for post processing
             $week = array();
             $week['promises'] = $promiseData ?: $newPromiseData;
@@ -244,27 +246,6 @@ class CenterStatsImporter extends DataImporterAbstract
             }
             $actualData->rating = $rating;
             $actualData->save();
-        }
-
-        // Populate actuals
-        $actuals = CenterStatsData::find(array(
-            'center_id'       => $this->statsReport->center->id,
-            'quarter_id'      => $this->statsReport->quarter->id,
-            'stats_report_id' => $this->statsReport->id,
-            'type'            => 'actual',
-        ));
-        foreach ($actuals as $actualData) {
-            $centerStats = CenterStats::first(array(
-                'center_id'      => $actualData->center->id,
-                'quarter_id'     => $actualData->quarter->id,
-                'reporting_date' => $actualData->reportingDate->toDateString(),
-                'actual_data_id' => null,
-            ));
-
-            if ($centerStats) {
-                $centerStats->actualDataId = $actualData->id;
-                $centerStats->save();
-            }
         }
     }
 }
