@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
 use DB;
+use Log;
 use TmlpStats\Quarter;
 
 class StatsReport extends Model {

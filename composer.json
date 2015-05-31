@@ -21,7 +21,8 @@
             "database"
         ],
         "psr-4": {
-            "TmlpStats\\": "app/"
+            "TmlpStats\\": "app/",
+            "TmlpStatsTests\\": "tests/unit/"
         }
     },
     "autoload-dev": {

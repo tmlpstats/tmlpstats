@@ -8,7 +8,7 @@ class ClassListValidator extends ValidatorAbstract
 {
     protected $sheetId = ImportDocument::TAB_CLASS_LIST;
 
-    protected function populateValidators()
+    protected function populateValidators($data)
     {
         $nameValidator           = v::string()->notEmpty();
         $rowIdValidator          = v::numeric()->positive();
@@ -17,11 +17,11 @@ class ClassListValidator extends ValidatorAbstract
 
         $teamYearValidator = v::numeric()->between(1, 2, true);
 
-        if ($this->data->teamYear == 1) {
+        if ($data->teamYear == 1) {
             $indicator = 1;
         } else {
             $indicator = 2;
-            if ($this->data->wknd == 'R' || $this->data->xferIn == 'R') {
+            if ($data->wknd == 'R' || $data->xferIn == 'R') {
                 $indicator = 'R';
             }
         }
@@ -75,144 +75,184 @@ class ClassListValidator extends ValidatorAbstract
         // Skipping quarter (auto-generated)
     }
 
-    protected function validate()
+    protected function validate($data)
     {
-        $this->validateGitw();
-        $this->validateTdo();
-        $this->validateTeamYear();
-        $this->validateTransfer();
-        $this->validateWithdraw();
-        $this->validateTravel();
+        if (!$this->validateGitw($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateTdo($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateTeamYear($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateTransfer($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateWithdraw($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateTravel($data)) {
+            $this->isValid = false;
+        }
 
         return $this->isValid;
     }
 
-    protected function validateGitw()
+    public function validateGitw($data)
     {
-        if (!is_null($this->data->xferOut) || !is_null($this->data->wd) || !is_null($this->data->wbo)) {
-            if (!is_null($this->data->gitw)) {
+        $isValid = true;
+
+        if (!is_null($data->xferOut) || !is_null($data->wd) || !is_null($data->wbo)) {
+            if (!is_null($data->gitw)) {
                 $this->addMessage('CLASSLIST_GITW_LEAVE_BLANK');
-                $this->isValid = false;
+                $isValid = false;
             }
         } else {
-            if (is_null($this->data->gitw)) {
+            if (is_null($data->gitw)) {
                 $this->addMessage('CLASSLIST_GITW_MISSING');
-                $this->isValid = false;
+                $isValid = false;
             }
         }
+
+        return $isValid;
     }
 
-    protected function validateTdo()
+    public function validateTdo($data)
     {
-        if (!is_null($this->data->xferOut) || !is_null($this->data->wd) || !is_null($this->data->wbo)) {
-            if (!is_null($this->data->tdo)) {
+        $isValid = true;
+
+        if (!is_null($data->xferOut) || !is_null($data->wd) || !is_null($data->wbo)) {
+            if (!is_null($data->tdo)) {
                 $this->addMessage('CLASSLIST_TDO_LEAVE_BLANK');
-                $this->isValid = false;
+                $isValid = false;
             }
         } else {
-            if (is_null($this->data->tdo)) {
+            if (is_null($data->tdo)) {
                 $this->addMessage('CLASSLIST_TDO_MISSING');
-                $this->isValid = false;
+                $isValid = false;
             }
         }
+
+        return $isValid;
     }
 
-    protected function validateTeamYear()
+    public function validateTeamYear($data)
     {
-        if (is_null($this->data->wknd) && is_null($this->data->xferIn)) {
-            $this->addMessage('CLASSLIST_WKND_MISSING', $this->data->teamYear);
-            $this->isValid = false;
-        } else if (!is_null($this->data->wknd) && !is_null($this->data->xferIn)) {
-            $this->addMessage('CLASSLIST_WKND_XIN_ONLY_ONE');
-            $this->isValid = false;
+        $isValid = true;
+
+        if (is_null($data->wknd) && is_null($data->xferIn)) {
+            $this->addMessage('CLASSLIST_WKND_MISSING', $data->teamYear);
+            $isValid = false;
+        } else if (!is_null($data->wknd) && !is_null($data->xferIn)) {
+            $this->addMessage('CLASSLIST_WKND_XIN_ONLY_ONE', $data->teamYear);
+            $isValid = false;
         }
+
+        return $isValid;
     }
 
-    protected function validateTransfer()
+    public function validateTransfer($data)
     {
-        if (!is_null($this->data->xferIn) || !is_null($this->data->xferOut)) {
+        $isValid = true;
+
+        if (!is_null($data->xferIn) || !is_null($data->xferOut)) {
 
             // TODO: We probably don't need to show this every week. We need a better way to alert something for
             //       the first week.
             // Always display this message.
             $this->addMessage('CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER');
 
-            if (is_null($this->data->comment)) {
+            if (is_null($data->comment)) {
                 $this->addMessage('CLASSLIST_XFER_COMMENT_MISSING');
-                $this->isValid = false;
+                $isValid = false;
             }
         }
+
+        return $isValid;
     }
 
-    protected function validateWithdraw()
+    public function validateWithdraw($data)
     {
-        if (!is_null($this->data->wd) || !is_null($this->data->wbo)) {
-            if (!is_null($this->data->wd) && !is_null($this->data->wbo)) {
+        $isValid = true;
+
+        if (!is_null($data->wd) || !is_null($data->wbo)) {
+            if (!is_null($data->wd) && !is_null($data->wbo)) {
                 $this->addMessage('CLASSLIST_WD_WBO_ONLY_ONE');
-                $this->isValid = false;
+                $isValid = false;
             }
-            if (!is_null($this->data->ctw)) {
+            if (!is_null($data->ctw)) {
                 $this->addMessage('CLASSLIST_WD_CTW_ONLY_ONE');
-                $this->isValid = false;
+                $isValid = false;
             }
-            if (!is_null($this->data->wd)) {
-                $value = $this->data->wd;
-                if ($value[0] != $this->data->teamYear && ($value[0] == 'R' && $this->data->teamYear != 2)) {
+            if (!is_null($data->wd)) {
+                $value = $data->wd;
+                if ($value[0] == 'R') {
+                    if ($data->teamYear != 2) {
+                        $this->addMessage('CLASSLIST_WD_DOESNT_MATCH_YEAR');
+                        $isValid = false;
+                    }
+                } else if ($value[0] != $data->teamYear) {
                     $this->addMessage('CLASSLIST_WD_DOESNT_MATCH_YEAR');
-                    $this->isValid = false;
+                    $isValid = false;
                 }
             }
-            if (is_null($this->data->comment)) {
+            if (is_null($data->comment)) {
                 $this->addMessage('CLASSLIST_WD_COMMENT_MISSING');
-                $this->isValid = false;
+                $isValid = false;
             }
-        } else if (!is_null($this->data->ctw)) {
-            if (is_null($this->data->comment)) {
+        } else if (!is_null($data->ctw)) {
+            if (is_null($data->comment)) {
                 $this->addMessage('CLASSLIST_CTW_COMMENT_MISSING');
-                $this->isValid = false;
+                $isValid = false;
             }
         }
+
+        return $isValid;
     }
 
-    protected function validateTravel()
+    public function validateTravel($data)
     {
-        if (!is_null($this->data->wd) || !is_null($this->data->wbo))
+        $isValid = true;
+
+        if (!is_null($data->wd) || !is_null($data->wbo) || !is_null($data->xferOut))
         {
-            return; // Not required if withdrawn
+            return $isValid; // Not required if withdrawn
         }
 
         // Travel and Rooming must be reported starting after the 2nd Classroom
         $statsReport = $this->getStatsReport();
         if ($statsReport->reportingDate->gt($statsReport->quarter->classroom2Date)) {
-            if (is_null($this->data->travel)) {
+            if (is_null($data->travel)) {
                 // Error if no comment provided, warning to look at it otherwise
-                if (is_null($this->data->comment)) {
+                if (is_null($data->comment)) {
                     $this->addMessage('CLASSLIST_TRAVEL_COMMENT_MISSING');
-                    $this->isValid = false;
+                    $isValid = false;
                 } else {
                     $this->addMessage('CLASSLIST_TRAVEL_COMMENT_REVIEW');
                 }
             }
-            if (is_null($this->data->room)) {
+            if (is_null($data->room)) {
                 // Error if no comment provided, warning to look at it otherwise
-                if (is_null($this->data->comment)) {
+                if (is_null($data->comment)) {
                     $this->addMessage('CLASSLIST_ROOM_COMMENT_MISSING');
-                    $this->isValid = false;
+                    $isValid = false;
                 } else {
-                    $this->addMessage('CLASSLIST_ROOM_COMMENT_REVIEW');
-                }
+                    $this->addMessage('CLASSLIST_ROOM_COMMENT_REVIEW');                }
             }
 
             // Any team member without travel AND rooming booked by 2 weeks before the end of the quarter
             // is considered in a Conversation To Withdraw
-            $twoWeeksBeforeWeekend = $statsReport->quarter->endWeekendDate->subWeeks(2);
+            $endDate = clone $statsReport->quarter->endWeekendDate;
+            $twoWeeksBeforeWeekend = $endDate->subWeeks(2);
             if ($statsReport->reportingDate->gte($twoWeeksBeforeWeekend)) {
-                if ((is_null($this->data->travel) || is_null($this->data->room)) && is_null($this->data->ctw)) {
+                if ((is_null($data->travel) || is_null($data->room)) && is_null($data->ctw)) {
                     $this->addMessage('CLASSLIST_TRAVEL_ROOM_CTW_MISSING');
-                    $this->isValid = false;
+                    $isValid = false;
                 }
             }
         }
 
+        return $isValid;
     }
 }

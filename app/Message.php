@@ -5,14 +5,14 @@ use Respect\Validation\Validator as v;
 
 class Message
 {
-    const EMERGENCY = 0;
-    const ALERT     = 1;
-    const CRITICAL  = 2;
-    const ERROR     = 3;
-    const WARNING   = 4;
-    const NOTICE    = 5;
-    const INFO      = 6;
-    const DEBUG     = 7;
+    const EMERGENCY = 1;
+    const ALERT     = 2;
+    const CRITICAL  = 3;
+    const ERROR     = 4;
+    const WARNING   = 5;
+    const NOTICE    = 6;
+    const INFO      = 7;
+    const DEBUG     = 8;
 
     // Message Definitions
     static $messageList = array(
@@ -413,12 +413,14 @@ class Message
         ),
         'CLASSLIST_WKND_XIN_ONLY_ONE' => array(
             'type' => Message::ERROR,
-            'format' => "Only one of Wknd and X In should be set.",
-            'arguments' => array(),
+            'format' => "Only one of Wknd and X In should have a '%%teamYear%%'.",
+            'arguments' => array(
+                '%%teamYear%%',
+            ),
         ),
         'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER' => array(
             'type' => Message::WARNING,
-            'format' => "Confirm with other center that team member is reported appropriately on their sheet.",
+            'format' => "Team member is transferring. Confirm with other center that team member is reported appropriately on their sheet.",
             'arguments' => array(),
         ),
         'CLASSLIST_XFER_COMMENT_MISSING' => array(
@@ -685,12 +687,12 @@ class Message
         // ),
     );
 
-    protected $objectClassDisplayName = '';
+    protected $section = '';
 
-    public static function create($className)
+    public static function create($section)
     {
         $me = new static();
-        $me->objectClassDisplayName = $className;
+        $me->section = $section;
         return $me;
     }
 
@@ -702,7 +704,7 @@ class Message
 
         $result = array(
             'type'    => $this->getMessageTypeString($message['type']),
-            'section' => $this->objectClassDisplayName,
+            'section' => $this->section,
             'message' => $this->getMessageFromFormat($messageId, $message['format'], $message['arguments'], $arguments),
         );
 
@@ -765,6 +767,7 @@ class Message
             case static::INFO:
                 return 'info';
             case static::DEBUG:
+            default:
                 return 'debug';
         }
     }

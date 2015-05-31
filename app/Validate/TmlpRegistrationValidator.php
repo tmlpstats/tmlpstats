@@ -12,7 +12,7 @@ class TmlpRegistrationValidator extends ValidatorAbstract
 
     protected $sheetId = ImportDocument::TAB_WEEKLY_STATS;
 
-    protected function populateValidators()
+    protected function populateValidators($data)
     {
         $nameValidator               = v::string()->notEmpty();
         $rowIdValidator              = v::numeric()->positive();
@@ -67,11 +67,11 @@ class TmlpRegistrationValidator extends ValidatorAbstract
 
         $incomingTeamYearValidator = v::numeric()->between(1, 2, true);
 
-        if ($this->data->incomingTeamYear == 1) {
+        if ($data->incomingTeamYear == 1) {
             $indicator = 1;
         } else {
             $indicator = 2;
-            if ($this->data->bef == 'R' || $this->data->dur == 'R' || $this->data->aft == 'R') {
+            if ($data->bef == 'R' || $data->dur == 'R' || $data->aft == 'R') {
                 $indicator = 'R';
             }
         }
@@ -102,267 +102,295 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         $this->dataValidators['statsReportId']           = $rowIdValidator;
     }
 
-    protected function validate()
+    protected function validate($data)
     {
-        $this->validateWeekendReg();
-        $this->validateApprovalProcess();
-        $this->validateDates();
-        $this->validateComment();
-        $this->validateTravel();
+        if (!$this->validateWeekendReg($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateApprovalProcess($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateDates($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateComment($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateTravel($data)) {
+            $this->isValid = false;
+        }
 
         return $this->isValid;
     }
 
-    protected function validateWeekendReg()
+    public function validateWeekendReg($data)
     {
-        if ((!is_null($this->data->bef) && !is_null($this->data->dur))
-            || (!is_null($this->data->bef) && !is_null($this->data->aft))
-            || (!is_null($this->data->dur) && !is_null($this->data->aft))
+        $isValid = true;
+
+        if ((!is_null($data->bef) && !is_null($data->dur))
+            || (!is_null($data->bef) && !is_null($data->aft))
+            || (!is_null($data->dur) && !is_null($data->aft))
         ) {
-            $this->addMessage('TMLPREG_MULTIPLE_WEEKENDREG', $this->data->incomingTeamYear);
-            $this->isValid = false;
+            $this->addMessage('TMLPREG_MULTIPLE_WEEKENDREG', $data->incomingTeamYear);
+            $isValid = false;
         }
+
+        return $isValid;
     }
 
-    protected function validateApprovalProcess()
+    public function validateApprovalProcess($data)
     {
-        if (!is_null($this->data->wd) || !is_null($this->data->wdDate)) {
+        $isValid = true;
+
+        if (!is_null($data->wd) || !is_null($data->wdDate)) {
             $col = 'wd';
-            if (is_null($this->data->wd)) {
-                $this->addMessage('TMLPREG_WD_MISSING', $col, $this->data->incomingTeamYear);
-                $this->isValid = false;
+            if (is_null($data->wd)) {
+                $this->addMessage('TMLPREG_WD_MISSING', $col, $data->incomingTeamYear);
+                $isValid = false;
             }
-            if (is_null($this->data->wdDate)) {
-                $this->addMessage('TMLPREG_WD_DATE_MISSING', $col, $this->data->incomingTeamYear);
-                $this->isValid = false;
+            if (is_null($data->wdDate)) {
+                $this->addMessage('TMLPREG_WD_DATE_MISSING', $col, $data->incomingTeamYear);
+                $isValid = false;
             }
 
-            $value = $this->data->wd;
-            $weekendRegType = $this->getWeekendReg();
+            $value = $data->wd;
+            $weekendRegType = $this->getWeekendReg($data);
             if ($value[0] != $weekendRegType) {
                 $this->addMessage('TMLPREG_WD_DOESNT_MATCH_INCOMING_YEAR');
-                $this->isValid = false;
+                $isValid = false;
             }
-            if (!is_null($this->data->appOut) || !is_null($this->data->appIn) || !is_null($this->data->appr)) {
-                $this->addMessage('TMLPREG_WD_ONLY_ONE_YEAR_INDICATOR', $col, $this->data->incomingTeamYear);
-                $this->isValid = false;
+            if (!is_null($data->appOut) || !is_null($data->appIn) || !is_null($data->appr)) {
+                $this->addMessage('TMLPREG_WD_ONLY_ONE_YEAR_INDICATOR', $col, $data->incomingTeamYear);
+                $isValid = false;
             }
-        } else if (!is_null($this->data->appr) || !is_null($this->data->apprDate)) {
+        } else if (!is_null($data->appr) || !is_null($data->apprDate)) {
             $col = 'appr';
-            if (is_null($this->data->appr)) {
-                $this->addMessage('TMLPREG_APPR_MISSING', $col, $this->data->incomingTeamYear);
-                $this->isValid = false;
+            if (is_null($data->appr)) {
+                $this->addMessage('TMLPREG_APPR_MISSING', $col, $data->incomingTeamYear);
+                $isValid = false;
             }
-            if (is_null($this->data->apprDate)) {
-                $this->addMessage('TMLPREG_APPR_DATE_MISSING', $col, $this->data->incomingTeamYear);
-                $this->isValid = false;
+            if (is_null($data->apprDate)) {
+                $this->addMessage('TMLPREG_APPR_DATE_MISSING', $col, $data->incomingTeamYear);
+                $isValid = false;
             }
-            if (is_null($this->data->appInDate)) {
+            if (is_null($data->appInDate)) {
                 $this->addMessage('TMLPREG_APPR_MISSING_APPIN_DATE');
-                $this->isValid = false;
+                $isValid = false;
             }
-            if (is_null($this->data->appOutDate)) {
+            if (is_null($data->appOutDate)) {
                 $this->addMessage('TMLPREG_APPR_MISSING_APPOUT_DATE');
-                $this->isValid = false;
+                $isValid = false;
             }
 
-            if (!is_null($this->data->appOut) || !is_null($this->data->appIn)) {
-                $this->addMessage('TMLPREG_APPR_ONLY_ONE_YEAR_INDICATOR', $col, $this->data->incomingTeamYear);
-                $this->isValid = false;
+            if (!is_null($data->appOut) || !is_null($data->appIn)) {
+                $this->addMessage('TMLPREG_APPR_ONLY_ONE_YEAR_INDICATOR', $col, $data->incomingTeamYear);
+                $isValid = false;
             }
-        } else if (!is_null($this->data->appIn) || !is_null($this->data->appInDate)) {
+        } else if (!is_null($data->appIn) || !is_null($data->appInDate)) {
             $col = 'in';
-            if (is_null($this->data->appIn)) {
-                $this->addMessage('TMLPREG_APPIN_MISSING', $col, $this->data->incomingTeamYear);
-                $this->isValid = false;
+            if (is_null($data->appIn)) {
+                $this->addMessage('TMLPREG_APPIN_MISSING', $col, $data->incomingTeamYear);
+                $isValid = false;
             }
-            if (is_null($this->data->appInDate)) {
-                $this->addMessage('TMLPREG_APPIN_DATE_MISSING', $col, $this->data->incomingTeamYear);
-                $this->isValid = false;
+            if (is_null($data->appInDate)) {
+                $this->addMessage('TMLPREG_APPIN_DATE_MISSING', $col, $data->incomingTeamYear);
+                $isValid = false;
             }
-            if (is_null($this->data->appOutDate)) {
+            if (is_null($data->appOutDate)) {
                 $this->addMessage('TMLPREG_APPIN_MISSING_APPOUT_DATE');
-                $this->isValid = false;
+                $isValid = false;
             }
 
-            if (!is_null($this->data->appOut)) {
-                $this->addMessage('TMLPREG_APPIN_ONLY_ONE_YEAR_INDICATOR', $col, $this->data->incomingTeamYear);
-                $this->isValid = false;
+            if (!is_null($data->appOut)) {
+                $this->addMessage('TMLPREG_APPIN_ONLY_ONE_YEAR_INDICATOR', $col, $data->incomingTeamYear);
+                $isValid = false;
             }
-        } else if (!is_null($this->data->appOut) || !is_null($this->data->appOutDate)) {
+        } else if (!is_null($data->appOut) || !is_null($data->appOutDate)) {
             $col = 'out';
-            if (is_null($this->data->appOut)) {
-                $this->addMessage('TMLPREG_APPOUT_MISSING', $col, $this->data->incomingTeamYear);
-                $this->isValid = false;
+            if (is_null($data->appOut)) {
+                $this->addMessage('TMLPREG_APPOUT_MISSING', $col, $data->incomingTeamYear);
+                $isValid = false;
             }
-            if (is_null($this->data->appOutDate)) {
-                $this->addMessage('TMLPREG_APPOUT_DATE_MISSING', $col, $this->data->incomingTeamYear);
-                $this->isValid = false;
+            if (is_null($data->appOutDate)) {
+                $this->addMessage('TMLPREG_APPOUT_DATE_MISSING', $col, $data->incomingTeamYear);
+                $isValid = false;
             }
         }
 
-        if (is_null($this->data->committedTeamMemberName) && is_null($this->data->wd)) {
+        if (is_null($data->committedTeamMemberName) && is_null($data->wd)) {
             $this->addMessage('TMLPREG_NO_COMMITTED_TEAM_MEMBER');
-            $this->isValid = false;
+            $isValid = false;
         }
+
+        return $isValid;
     }
 
-    protected function validateDates()
+    public function validateDates($data)
     {
+        $isValid = true;
+
         $statsReport = $this->getStatsReport();
 
         // Get Date objects from date strings
-        $regDate    = is_null($this->data->regDate) ? null : $this->getDateObject($this->data->regDate);
-        $appInDate  = is_null($this->data->appInDate) ? null : $this->getDateObject($this->data->appInDate);
-        $appOutDate = is_null($this->data->appOutDate) ? null : $this->getDateObject($this->data->appOutDate);
-        $apprDate   = is_null($this->data->apprDate) ? null : $this->getDateObject($this->data->apprDate);
-        $wdDate     = is_null($this->data->wdDate) ? null : $this->getDateObject($this->data->wdDate);
+        $regDate    = is_null($data->regDate) ? null : $this->getDateObject($data->regDate);
+        $appInDate  = is_null($data->appInDate) ? null : $this->getDateObject($data->appInDate);
+        $appOutDate = is_null($data->appOutDate) ? null : $this->getDateObject($data->appOutDate);
+        $apprDate   = is_null($data->apprDate) ? null : $this->getDateObject($data->apprDate);
+        $wdDate     = is_null($data->wdDate) ? null : $this->getDateObject($data->wdDate);
 
-        // Make sure dates for each step are chronological
-        if (!is_null($this->data->wdDate)) {
-            if ($wdDate->lt($regDate)) {
+        // Make sure dates for each step make sense
+        if (!is_null($data->wdDate) && $wdDate) {
+            if ($regDate && $wdDate->lt($regDate)) {
                 $this->addMessage('TMLPREG_WD_DATE_BEFORE_REG_DATE');
-                $this->isValid = false;
+                $isValid = false;
             }
-            if (!is_null($this->data->apprDate) && $wdDate->lt($apprDate)) {
+            if (!is_null($data->apprDate) && $apprDate && $wdDate->lt($apprDate)) {
                 $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPR_DATE');
-                $this->isValid = false;
+                $isValid = false;
             }
-            if (!is_null($this->data->appInDate) && $wdDate->lt($appInDate)) {
+            if (!is_null($data->appInDate) && $appInDate && $wdDate->lt($appInDate)) {
                 $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPIN_DATE');
-                $this->isValid = false;
+                $isValid = false;
             }
-            if (!is_null($this->data->appOutDate) && $wdDate->lt($appOutDate)) {
+            if (!is_null($data->appOutDate) && $wdDate->lt($appOutDate)) {
                 $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPOUT_DATE');
-                $this->isValid = false;
+                $isValid = false;
             }
         }
-        if (!is_null($this->data->apprDate)) {
-            if ($apprDate->lt($regDate)) {
+        if (!is_null($data->apprDate) && $apprDate) {
+            if ($regDate && $apprDate->lt($regDate)) {
                 $this->addMessage('TMLPREG_APPR_DATE_BEFORE_REG_DATE');
-                $this->isValid = false;
+                $isValid = false;
             }
-            if (!is_null($this->data->appInDate) && $apprDate->lt($appInDate)) {
+            if (!is_null($data->appInDate) && $appInDate && $apprDate->lt($appInDate)) {
                 $this->addMessage('TMLPREG_APPR_DATE_BEFORE_APPIN_DATE');
-                $this->isValid = false;
+                $isValid = false;
             }
-            if (!is_null($this->data->appOutDate) && $apprDate->lt($appOutDate)) {
+            if (!is_null($data->appOutDate) && $appOutDate && $apprDate->lt($appOutDate)) {
                 $this->addMessage('TMLPREG_APPR_DATE_BEFORE_APPOUT_DATE');
-                $this->isValid = false;
+                $isValid = false;
             }
         }
-        if (!is_null($this->data->appInDate)) {
-            if ($appInDate->lt($regDate)) {
+        if (!is_null($data->appInDate) && $appInDate) {
+            if ($regDate && $appInDate->lt($regDate)) {
                 $this->addMessage('TMLPREG_APPIN_DATE_BEFORE_REG_DATE');
-                $this->isValid = false;
+                $isValid = false;
             }
-            if (!is_null($this->data->appOutDate) && $appInDate->lt($appOutDate)) {
+            if (!is_null($data->appOutDate) && $appOutDate && $appInDate->lt($appOutDate)) {
                 $this->addMessage('TMLPREG_APPIN_DATE_BEFORE_APPOUT_DATE');
-                $this->isValid = false;
+                $isValid = false;
             }
         }
-        if (!is_null($this->data->appOutDate)) {
-            if ($appOutDate->lt($regDate)) {
+        if (!is_null($data->appOutDate) && $appOutDate) {
+            if ($regDate && $appOutDate->lt($regDate)) {
                 $this->addMessage('TMLPREG_APPOUT_DATE_BEFORE_REG_DATE');
-                $this->isValid = false;
+                $isValid = false;
             }
         }
 
         // Make sure Weekend Reg fields match registration date
-        if ($this->data->incomingWeekend == 'current') {
+        if ($data->incomingWeekend == 'current') {
             $dateStr = $statsReport->quarter->startWeekendDate->format('M d, Y');
-            if (!is_null($this->data->bef) && $regDate->gt($statsReport->quarter->startWeekendDate)) {
-                $this->addMessage('TMLPREG_BEF_REG_DATE_NOT_BEFORE_WEEKEND', $dateStr, $this->data->bef);
-                $this->isValid = false;
+            if (!is_null($data->bef) && $regDate && $regDate->gt($statsReport->quarter->startWeekendDate)) {
+                $this->addMessage('TMLPREG_BEF_REG_DATE_NOT_BEFORE_WEEKEND', $dateStr, $data->bef);
+                $isValid = false;
             }
-            if (!is_null($this->data->dur) && $regDate->diffInDays($statsReport->quarter->startWeekendDate) > 3) {
-                $this->addMessage('TMLPREG_DUR_REG_DATE_NOT_DURING_WEEKEND', $dateStr, $this->data->dur);
-                $this->isValid = false;
+            if (!is_null($data->dur) && $regDate && $regDate->diffInDays($statsReport->quarter->startWeekendDate) > 3) {
+                $this->addMessage('TMLPREG_DUR_REG_DATE_NOT_DURING_WEEKEND', $dateStr, $data->dur);
+                $isValid = false;
             }
-            if (!is_null($this->data->aft) && $regDate->lte($statsReport->quarter->startWeekendDate)) {
-                $this->addMessage('TMLPREG_AFT_REG_DATE_NOT_AFTER_WEEKEND', $dateStr, $this->data->aft);
-                $this->isValid = false;
+            if (!is_null($data->aft) && $regDate && $regDate->lte($statsReport->quarter->startWeekendDate)) {
+                $this->addMessage('TMLPREG_AFT_REG_DATE_NOT_AFTER_WEEKEND', $dateStr, $data->aft);
+                $isValid = false;
             }
         }
 
         $maxAppOutDays = static::MAX_DAYS_TO_SEND_APPLICATION_OUT;
         $maxApplicationDays = static::MAX_DAYS_TO_APPROVE_APPLICATION;
-        if (is_null($this->data->wdDate)){
-            // Make sure steps are taken according to design
-            if (is_null($this->data->appOutDate)) {
-                if ($regDate->diffInDays($statsReport->reportingDate) > $maxAppOutDays) {
+
+        if (is_null($data->wdDate)){
+            // Make sure steps are taken in timely manner
+            if (is_null($data->appOutDate)) {
+                if ($regDate && $regDate->lt($statsReport->reportingDate) && $regDate->diffInDays($statsReport->reportingDate) > $maxAppOutDays) {
                     $this->addMessage('TMLPREG_APPOUT_LATE', $maxAppOutDays);
                 }
-            } else if (is_null($this->data->appInDate)) {
-                if ($appOutDate->diffInDays($statsReport->reportingDate) > $maxApplicationDays) {
+            } else if (is_null($data->appInDate)) {
+                if ($appOutDate && $appOutDate->lt($statsReport->reportingDate) && $appOutDate->diffInDays($statsReport->reportingDate) > $maxApplicationDays) {
                     $this->addMessage('TMLPREG_APPIN_LATE', $maxApplicationDays);
                 }
-            } else if (is_null($this->data->apprDate)) {
-                if ($appOutDate->diffInDays($statsReport->reportingDate) > $maxApplicationDays) {
+            } else if (is_null($data->apprDate)) {
+                if ($appInDate && $appInDate->lt($statsReport->reportingDate) && $appInDate->diffInDays($statsReport->reportingDate) > $maxApplicationDays) {
                     $this->addMessage('TMLPREG_APPR_LATE', $maxApplicationDays);
                 }
             }
         }
 
         // Make sure dates are in the past
-        if (!is_null($this->data->regDate) && $statsReport->reportingDate->lt($regDate)) {
+        if (!is_null($data->regDate) && $regDate && $statsReport->reportingDate->lt($regDate)) {
             $this->addMessage('TMLPREG_REG_DATE_IN_FUTURE');
-            $this->isValid = false;
+            $isValid = false;
         }
-        if (!is_null($this->data->wdDate) && $statsReport->reportingDate->lt($wdDate)) {
+        if (!is_null($data->wdDate) && $wdDate && $statsReport->reportingDate->lt($wdDate)) {
             $this->addMessage('TMLPREG_WD_DATE_IN_FUTURE');
-            $this->isValid = false;
+            $isValid = false;
         }
-        if (!is_null($this->data->apprDate) && $statsReport->reportingDate->lt($apprDate)) {
+        if (!is_null($data->apprDate) && $apprDate && $statsReport->reportingDate->lt($apprDate)) {
             $this->addMessage('TMLPREG_APPR_DATE_IN_FUTURE');
-            $this->isValid = false;
+            $isValid = false;
         }
-        if (!is_null($this->data->appInDate) && $statsReport->reportingDate->lt($appInDate)) {
+        if (!is_null($data->appInDate) && $appInDate && $statsReport->reportingDate->lt($appInDate)) {
             $this->addMessage('TMLPREG_APPIN_DATE_IN_FUTURE');
-            $this->isValid = false;
+            $isValid = false;
         }
-        if (!is_null($this->data->appOutDate) && $statsReport->reportingDate->lt($appOutDate)) {
+        if (!is_null($data->appOutDate) && $appOutDate && $statsReport->reportingDate->lt($appOutDate)) {
             $this->addMessage('TMLPREG_APPOUT_DATE_IN_FUTURE');
-            $this->isValid = false;
+            $isValid = false;
         }
+
+        return $isValid;
     }
 
-    protected function validateComment()
+    public function validateComment($data)
     {
-        if (!is_null($this->data->wd)) {
-            return; // Not required if withdrawn
+        $isValid = true;
+
+        if (!is_null($data->wd)) {
+            return $isValid; // Not required if withdrawn
         }
 
-        if (is_null($this->data->comment) && $this->data->incomingWeekend == 'future') {
+        if (is_null($data->comment) && $data->incomingWeekend == 'future') {
             $this->addMessage('TMLPREG_COMMENT_MISSING_FUTURE_WEEKEND');
-            $this->isValid = false;
+            $isValid = false;
         }
 
         // For travel and room comment checks see validateTravel()
+        return $isValid;
     }
 
-    protected function validateTravel()
+    public function validateTravel($data)
     {
-        if (!is_null($this->data->wd) || $this->data->incomingWeekend == 'future') {
-            return; // Not required if withdrawn or future registration
+        $isValid = true;
+
+        if (!is_null($data->wd) || $data->incomingWeekend == 'future') {
+            return $isValid; // Not required if withdrawn or future registration
         }
 
         $statsReport = $this->getStatsReport();
         if ($statsReport->reportingDate->gt($statsReport->quarter->classroom2Date)) {
-            if (is_null($this->data->travel)) {
+            if (is_null($data->travel)) {
                 // Error if no comment provided, warning to look at it otherwise
-                if (is_null($this->data->comment)) {
+                if (is_null($data->comment)) {
                     $this->addMessage('TMLPREG_TRAVEL_COMMENT_MISSING');
-                    $this->isValid = false;
+                    $isValid = false;
                 } else {
                     $this->addMessage('TMLPREG_TRAVEL_COMMENT_REVIEW');
                 }
             }
-            if (is_null($this->data->room)) {
+            if (is_null($data->room)) {
                 // Error if no comment provided, warning to look at it otherwise
-                if (is_null($this->data->comment)) {
+                if (is_null($data->comment)) {
                     $this->addMessage('TMLPREG_ROOM_COMMENT_MISSING');
-                    $this->isValid = false;
+                    $isValid = false;
                 } else {
                     $this->addMessage('TMLPREG_ROOM_COMMENT_REVIEW');
                 }
@@ -371,22 +399,24 @@ class TmlpRegistrationValidator extends ValidatorAbstract
             // Any approved incoming without travel AND rooming booked by 2 weeks before the end of the quarter
             // is considered in a Conversation To Withdraw
             $twoWeeksBeforeWeekend = $statsReport->quarter->endWeekendDate->subWeeks(2);
-            if ($statsReport->reportingDate->gte($twoWeeksBeforeWeekend) && !is_null($this->data->appr)) {
-                if (is_null($this->data->travel) || is_null($this->data->room)) {
+            if ($statsReport->reportingDate->gte($twoWeeksBeforeWeekend) && !is_null($data->appr)) {
+                if (is_null($data->travel) || is_null($data->room)) {
                     $this->addMessage('TMLPREG_TRAVEL_ROOM_CTW_COMMENT_REVIEW');
                 }
             }
         }
+
+        return $isValid;
     }
 
-    protected function getWeekendReg()
+    public function getWeekendReg($data)
     {
-        if (!is_null($this->data->bef)){
-            return $this->data->bef;
-        } else if (!is_null($this->data->aft)){
-            return $this->data->aft;
+        if (!is_null($data->bef)){
+            return $data->bef;
+        } else if (!is_null($data->aft)){
+            return $data->aft;
         } else {
-            return $this->data->dur;
+            return $data->dur;
         }
     }
 }

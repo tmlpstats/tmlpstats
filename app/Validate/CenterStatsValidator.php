@@ -9,7 +9,7 @@ class CenterStatsValidator extends ValidatorAbstract
 {
     protected $sheetId = ImportDocument::TAB_WEEKLY_STATS;
 
-    protected function populateValidators()
+    protected function populateValidators($data)
     {
         $intValidator           = v::int();
         $intNotNullValidator    = v::when(v::nullValue(), v::alwaysInvalid(), $intValidator);
@@ -38,7 +38,7 @@ class CenterStatsValidator extends ValidatorAbstract
         $this->dataValidators['lf']                   = $intNotNullValidator;
     }
 
-    protected function validate()
+    protected function validate($data)
     {
         return $this->isValid;
     }
