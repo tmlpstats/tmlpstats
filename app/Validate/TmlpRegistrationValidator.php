@@ -239,16 +239,16 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         $wdDate     = is_null($data->wdDate) ? null : $this->getDateObject($data->wdDate);
 
         // Make sure dates for each step make sense
-        if (!is_null($data->wdDate)) {
-            if ($wdDate->lt($regDate)) {
+        if (!is_null($data->wdDate) && $wdDate) {
+            if ($regDate && $wdDate->lt($regDate)) {
                 $this->addMessage('TMLPREG_WD_DATE_BEFORE_REG_DATE');
                 $isValid = false;
             }
-            if (!is_null($data->apprDate) && $wdDate->lt($apprDate)) {
+            if (!is_null($data->apprDate) && $apprDate && $wdDate->lt($apprDate)) {
                 $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPR_DATE');
                 $isValid = false;
             }
-            if (!is_null($data->appInDate) && $wdDate->lt($appInDate)) {
+            if (!is_null($data->appInDate) && $appInDate && $wdDate->lt($appInDate)) {
                 $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPIN_DATE');
                 $isValid = false;
             }
@@ -257,32 +257,32 @@ class TmlpRegistrationValidator extends ValidatorAbstract
                 $isValid = false;
             }
         }
-        if (!is_null($data->apprDate)) {
-            if ($apprDate->lt($regDate)) {
+        if (!is_null($data->apprDate) && $apprDate) {
+            if ($regDate && $apprDate->lt($regDate)) {
                 $this->addMessage('TMLPREG_APPR_DATE_BEFORE_REG_DATE');
                 $isValid = false;
             }
-            if (!is_null($data->appInDate) && $apprDate->lt($appInDate)) {
+            if (!is_null($data->appInDate) && $appInDate && $apprDate->lt($appInDate)) {
                 $this->addMessage('TMLPREG_APPR_DATE_BEFORE_APPIN_DATE');
                 $isValid = false;
             }
-            if (!is_null($data->appOutDate) && $apprDate->lt($appOutDate)) {
+            if (!is_null($data->appOutDate) && $appOutDate && $apprDate->lt($appOutDate)) {
                 $this->addMessage('TMLPREG_APPR_DATE_BEFORE_APPOUT_DATE');
                 $isValid = false;
             }
         }
-        if (!is_null($data->appInDate)) {
-            if ($appInDate->lt($regDate)) {
+        if (!is_null($data->appInDate) && $appInDate) {
+            if ($regDate && $appInDate->lt($regDate)) {
                 $this->addMessage('TMLPREG_APPIN_DATE_BEFORE_REG_DATE');
                 $isValid = false;
             }
-            if (!is_null($data->appOutDate) && $appInDate->lt($appOutDate)) {
+            if (!is_null($data->appOutDate) && $appOutDate && $appInDate->lt($appOutDate)) {
                 $this->addMessage('TMLPREG_APPIN_DATE_BEFORE_APPOUT_DATE');
                 $isValid = false;
             }
         }
-        if (!is_null($data->appOutDate)) {
-            if ($appOutDate->lt($regDate)) {
+        if (!is_null($data->appOutDate) && $appOutDate) {
+            if ($regDate && $appOutDate->lt($regDate)) {
                 $this->addMessage('TMLPREG_APPOUT_DATE_BEFORE_REG_DATE');
                 $isValid = false;
             }
@@ -291,15 +291,15 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         // Make sure Weekend Reg fields match registration date
         if ($data->incomingWeekend == 'current') {
             $dateStr = $statsReport->quarter->startWeekendDate->format('M d, Y');
-            if (!is_null($data->bef) && $regDate->gt($statsReport->quarter->startWeekendDate)) {
+            if (!is_null($data->bef) && $regDate && $regDate->gt($statsReport->quarter->startWeekendDate)) {
                 $this->addMessage('TMLPREG_BEF_REG_DATE_NOT_BEFORE_WEEKEND', $dateStr, $data->bef);
                 $isValid = false;
             }
-            if (!is_null($data->dur) && $regDate->diffInDays($statsReport->quarter->startWeekendDate) > 3) {
+            if (!is_null($data->dur) && $regDate && $regDate->diffInDays($statsReport->quarter->startWeekendDate) > 3) {
                 $this->addMessage('TMLPREG_DUR_REG_DATE_NOT_DURING_WEEKEND', $dateStr, $data->dur);
                 $isValid = false;
             }
-            if (!is_null($data->aft) && $regDate->lte($statsReport->quarter->startWeekendDate)) {
+            if (!is_null($data->aft) && $regDate && $regDate->lte($statsReport->quarter->startWeekendDate)) {
                 $this->addMessage('TMLPREG_AFT_REG_DATE_NOT_AFTER_WEEKEND', $dateStr, $data->aft);
                 $isValid = false;
             }
@@ -311,38 +311,38 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         if (is_null($data->wdDate)){
             // Make sure steps are taken in timely manner
             if (is_null($data->appOutDate)) {
-                if ($regDate->lt($statsReport->reportingDate) && $regDate->diffInDays($statsReport->reportingDate) > $maxAppOutDays) {
+                if ($regDate && $regDate->lt($statsReport->reportingDate) && $regDate->diffInDays($statsReport->reportingDate) > $maxAppOutDays) {
                     $this->addMessage('TMLPREG_APPOUT_LATE', $maxAppOutDays);
                 }
             } else if (is_null($data->appInDate)) {
-                if ($appOutDate->lt($statsReport->reportingDate) && $appOutDate->diffInDays($statsReport->reportingDate) > $maxApplicationDays) {
+                if ($appOutDate && $appOutDate->lt($statsReport->reportingDate) && $appOutDate->diffInDays($statsReport->reportingDate) > $maxApplicationDays) {
                     $this->addMessage('TMLPREG_APPIN_LATE', $maxApplicationDays);
                 }
             } else if (is_null($data->apprDate)) {
-                if ($appInDate->lt($statsReport->reportingDate) && $appInDate->diffInDays($statsReport->reportingDate) > $maxApplicationDays) {
+                if ($appInDate && $appInDate->lt($statsReport->reportingDate) && $appInDate->diffInDays($statsReport->reportingDate) > $maxApplicationDays) {
                     $this->addMessage('TMLPREG_APPR_LATE', $maxApplicationDays);
                 }
             }
         }
 
         // Make sure dates are in the past
-        if (!is_null($data->regDate) && $statsReport->reportingDate->lt($regDate)) {
+        if (!is_null($data->regDate) && $regDate && $statsReport->reportingDate->lt($regDate)) {
             $this->addMessage('TMLPREG_REG_DATE_IN_FUTURE');
             $isValid = false;
         }
-        if (!is_null($data->wdDate) && $statsReport->reportingDate->lt($wdDate)) {
+        if (!is_null($data->wdDate) && $wdDate && $statsReport->reportingDate->lt($wdDate)) {
             $this->addMessage('TMLPREG_WD_DATE_IN_FUTURE');
             $isValid = false;
         }
-        if (!is_null($data->apprDate) && $statsReport->reportingDate->lt($apprDate)) {
+        if (!is_null($data->apprDate) && $apprDate && $statsReport->reportingDate->lt($apprDate)) {
             $this->addMessage('TMLPREG_APPR_DATE_IN_FUTURE');
             $isValid = false;
         }
-        if (!is_null($data->appInDate) && $statsReport->reportingDate->lt($appInDate)) {
+        if (!is_null($data->appInDate) && $appInDate && $statsReport->reportingDate->lt($appInDate)) {
             $this->addMessage('TMLPREG_APPIN_DATE_IN_FUTURE');
             $isValid = false;
         }
-        if (!is_null($data->appOutDate) && $statsReport->reportingDate->lt($appOutDate)) {
+        if (!is_null($data->appOutDate) && $appOutDate && $statsReport->reportingDate->lt($appOutDate)) {
             $this->addMessage('TMLPREG_APPOUT_DATE_IN_FUTURE');
             $isValid = false;
         }

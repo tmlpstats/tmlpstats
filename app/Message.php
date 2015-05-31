@@ -420,7 +420,7 @@ class Message
         ),
         'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER' => array(
             'type' => Message::WARNING,
-            'format' => "Confirm with other center that team member is reported appropriately on their sheet.",
+            'format' => "Team member is transferring. Confirm with other center that team member is reported appropriately on their sheet.",
             'arguments' => array(),
         ),
         'CLASSLIST_XFER_COMMENT_MISSING' => array(

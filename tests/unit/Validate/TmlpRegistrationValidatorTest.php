@@ -1596,6 +1596,23 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                 array(),
                 true,
             ),
+            // Withdraw date invalid and doesn't blow up
+            array(
+                $this->arrayToObject(array(
+                    'wdDate'                  => 'asdf',
+                    'appOutDate'              => null,
+                    'appInDate'               => null,
+                    'apprDate'                => null,
+                    'regDate'                 => '2015-01-07',
+                    'incomingWeekend'         => 'current',
+                    'bef'                     => null,
+                    'dur'                     => null,
+                    'aft'                     => 1,
+                )),
+                $statsReport,
+                array(),
+                true,
+            ),
             // Withdraw and wdDate before regDate
             array(
                 $this->arrayToObject(array(
@@ -1716,7 +1733,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                 false,
             ),
 
-
             // Approved date OK
             array(
                 $this->arrayToObject(array(
@@ -1724,6 +1740,23 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'appOutDate'              => '2015-01-09',
                     'appInDate'               => '2015-01-14',
                     'apprDate'                => '2015-01-21',
+                    'regDate'                 => '2015-01-07',
+                    'incomingWeekend'         => 'current',
+                    'bef'                     => null,
+                    'dur'                     => null,
+                    'aft'                     => 1,
+                )),
+                $statsReport,
+                array(),
+                true,
+            ),
+            // Approved invalid and doesn't blow up
+            array(
+                $this->arrayToObject(array(
+                    'wdDate'                  => null,
+                    'appOutDate'              => '2015-01-09',
+                    'appInDate'               => '2015-01-14',
+                    'apprDate'                => 'asdf',
                     'regDate'                 => '2015-01-07',
                     'incomingWeekend'         => 'current',
                     'bef'                     => null,
@@ -1820,13 +1853,29 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                 false,
             ),
 
-
             // AppIn date OK
             array(
                 $this->arrayToObject(array(
                     'wdDate'                  => null,
                     'appOutDate'              => '2015-01-09',
                     'appInDate'               => '2015-01-14',
+                    'apprDate'                => null,
+                    'regDate'                 => '2015-01-07',
+                    'incomingWeekend'         => 'current',
+                    'bef'                     => null,
+                    'dur'                     => null,
+                    'aft'                     => 1,
+                )),
+                $statsReport,
+                array(),
+                true,
+            ),
+            // AppIn date invalid and doesn't blow up
+            array(
+                $this->arrayToObject(array(
+                    'wdDate'                  => null,
+                    'appOutDate'              => '2015-01-09',
+                    'appInDate'               => 'asdf',
                     'apprDate'                => null,
                     'regDate'                 => '2015-01-07',
                     'incomingWeekend'         => 'current',
@@ -1890,12 +1939,28 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                 false,
             ),
 
-
             // AppOut date OK
             array(
                 $this->arrayToObject(array(
                     'wdDate'                  => null,
                     'appOutDate'              => '2015-01-09',
+                    'appInDate'               => null,
+                    'apprDate'                => null,
+                    'regDate'                 => '2015-01-07',
+                    'incomingWeekend'         => 'current',
+                    'bef'                     => null,
+                    'dur'                     => null,
+                    'aft'                     => 1,
+                )),
+                $statsReport,
+                array(),
+                true,
+            ),
+            // AppOut date invalid and doesn't blow up
+            array(
+                $this->arrayToObject(array(
+                    'wdDate'                  => null,
+                    'appOutDate'              => 'asdf',
                     'appInDate'               => null,
                     'apprDate'                => null,
                     'regDate'                 => '2015-01-07',
@@ -1926,7 +1991,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                 false,
             ),
 
-
             // RegDate before weekend start
             array(
                 $this->arrayToObject(array(
@@ -1935,6 +1999,23 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'appInDate'               => '2014-11-07',
                     'apprDate'                => '2014-11-07',
                     'regDate'                 => '2014-11-07',
+                    'incomingWeekend'         => 'current',
+                    'bef'                     => 1,
+                    'dur'                     => null,
+                    'aft'                     => null,
+                )),
+                $statsReport,
+                array(),
+                true,
+            ),
+            // RegDate invalid and doesn't blow up
+            array(
+                $this->arrayToObject(array(
+                    'wdDate'                  => null,
+                    'appOutDate'              => '2014-11-07',
+                    'appInDate'               => '2014-11-07',
+                    'apprDate'                => '2014-11-07',
+                    'regDate'                 => 'asdf',
                     'incomingWeekend'         => 'current',
                     'bef'                     => 1,
                     'dur'                     => null,
@@ -2035,7 +2116,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                 ),
                 false,
             ),
-
 
             // AppOut within 2 days of regDate
             array(
@@ -2146,7 +2226,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                 true,
             ),
 
-
             // RegDate in future
             array(
                 $this->arrayToObject(array(
@@ -2231,6 +2310,41 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                 $statsReport,
                 array('TMLPREG_APPOUT_DATE_IN_FUTURE'),
                 false,
+            ),
+
+            // Invalid dates don't blow up
+            array(
+                $this->arrayToObject(array(
+                    'wdDate'                  => 'asdf',
+                    'appOutDate'              => 'asdf',
+                    'appInDate'               => 'asdf',
+                    'apprDate'                => 'asdf',
+                    'regDate'                 => 'asdf',
+                    'incomingWeekend'         => 'current',
+                    'bef'                     => null,
+                    'dur'                     => null,
+                    'aft'                     => 1,
+                )),
+                $statsReport,
+                array(),
+                true,
+            ),
+            // Invalid dates don't blow up
+            array(
+                $this->arrayToObject(array(
+                    'wdDate'                  => 'asdf',
+                    'appOutDate'              => 'asdf',
+                    'appInDate'               => 'asdf',
+                    'apprDate'                => 'asdf',
+                    'regDate'                 => 'asdf',
+                    'incomingWeekend'         => 'future',
+                    'bef'                     => null,
+                    'dur'                     => null,
+                    'aft'                     => 1,
+                )),
+                $statsReport,
+                array(),
+                true,
             ),
         );
     }

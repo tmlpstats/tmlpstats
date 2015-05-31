@@ -1219,6 +1219,7 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'wd'       => null,
                     'wbo'      => null,
+                    'xferOut'  => null,
                     'ctw'      => null,
                     'travel'   => null,
                     'room'     => null,
@@ -1234,6 +1235,7 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'wd'       => 1,
                     'wbo'      => null,
+                    'xferOut'  => null,
                     'ctw'      => null,
                     'travel'   => null,
                     'room'     => null,
@@ -1248,6 +1250,22 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'wd'       => null,
                     'wbo'      => 1,
+                    'xferOut'  => null,
+                    'ctw'      => null,
+                    'travel'   => null,
+                    'room'     => null,
+                    'comment'  => null,
+                )),
+                null,
+                array(),
+                true,
+            ),
+            // XferOut set and travel/room ignored
+            array(
+                $this->arrayToObject(array(
+                    'wd'       => null,
+                    'wbo'      => null,
+                    'xferOut'  => 1,
                     'ctw'      => null,
                     'travel'   => null,
                     'room'     => null,
@@ -1263,6 +1281,7 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'wd'       => null,
                     'wbo'      => null,
+                    'xferOut'  => null,
                     'ctw'      => null,
                     'travel'   => null,
                     'room'     => null,
@@ -1278,6 +1297,7 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'wd'       => null,
                     'wbo'      => null,
+                    'xferOut'  => null,
                     'ctw'      => null,
                     'travel'   => 'Y',
                     'room'     => 'y',
@@ -1292,6 +1312,7 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'wd'       => null,
                     'wbo'      => null,
+                    'xferOut'  => null,
                     'ctw'      => null,
                     'travel'   => null,
                     'room'     => 'y',
@@ -1306,6 +1327,7 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'wd'       => null,
                     'wbo'      => null,
+                    'xferOut'  => null,
                     'ctw'      => null,
                     'travel'   => null,
                     'room'     => 'y',
@@ -1320,6 +1342,7 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'wd'       => null,
                     'wbo'      => null,
+                    'xferOut'  => null,
                     'ctw'      => null,
                     'travel'   => 'Y',
                     'room'     => null,
@@ -1334,6 +1357,7 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'wd'       => null,
                     'wbo'      => null,
+                    'xferOut'  => null,
                     'ctw'      => null,
                     'travel'   => 'Y',
                     'room'     => null,
@@ -1349,6 +1373,7 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'wd'       => null,
                     'wbo'      => null,
+                    'xferOut'  => null,
                     'ctw'      => 1,
                     'travel'   => null,
                     'room'     => 'Y',
@@ -1365,6 +1390,7 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'wd'       => null,
                     'wbo'      => null,
+                    'xferOut'  => null,
                     'ctw'      => 1,
                     'travel'   => 'Y',
                     'room'     => null,
@@ -1381,6 +1407,7 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'wd'       => null,
                     'wbo'      => null,
+                    'xferOut'  => null,
                     'ctw'      => null,
                     'travel'   => null,
                     'room'     => 'Y',
@@ -1398,6 +1425,7 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'wd'       => null,
                     'wbo'      => null,
+                    'xferOut'  => null,
                     'ctw'      => null,
                     'travel'   => 'Y',
                     'room'     => null,

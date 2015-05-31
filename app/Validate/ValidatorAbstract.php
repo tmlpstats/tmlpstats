@@ -66,7 +66,10 @@ abstract class ValidatorAbstract
 
     protected function getDateObject($date)
     {
-        return $date ? Carbon::createFromFormat('Y-m-d', $date)->startOfDay() : null;
+        if (!$date || !preg_match("/^20\d\d-[0-1]\d-[0-3]\d$/", $date)) {
+            return null;
+        }
+        return Carbon::createFromFormat('Y-m-d', $date)->startOfDay();
     }
 
     protected function addMessage($messageId)

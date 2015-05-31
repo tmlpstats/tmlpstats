@@ -215,7 +215,7 @@ class ClassListValidator extends ValidatorAbstract
     {
         $isValid = true;
 
-        if (!is_null($data->wd) || !is_null($data->wbo))
+        if (!is_null($data->wd) || !is_null($data->wbo) || !is_null($data->xferOut))
         {
             return $isValid; // Not required if withdrawn
         }
