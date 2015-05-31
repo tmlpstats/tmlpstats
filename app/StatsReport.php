@@ -4,6 +4,8 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
+use Carbon\Carbon;
+
 use DB;
 use Log;
 use TmlpStats\Quarter;
@@ -77,10 +79,17 @@ class StatsReport extends Model {
         return $query->whereCenterId($center->id);
     }
 
-    public function scopeCurrentQuarter($query)
+    public function scopeCurrentQuarter($query, $region)
     {
-        $quarter = Quarter::current()->first();
+        $quarter = Quarter::findByDateAndRegion(Carbon::now(), $region);
         return $query->whereQuarterId($quarter->id);
+    }
+
+    public function scopeLastQuarter($query, $region)
+    {
+        $currentQuarter = Quarter::findByDateAndRegion(Carbon::now(), $region);
+        $lastQuarter = Quarter::findByDateAndRegion($currentQuarter->startWeekendDate, $region);
+        return $query->whereQuarterId($lastQuarter->id);
     }
 
     public function centerStats()

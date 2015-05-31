@@ -6,6 +6,7 @@ use TmlpStats\Center;
 use TmlpStats\User;
 use TmlpStats\StatsReport;
 use TmlpStats\CenterStatsData;
+use TmlpStats\Quarter;
 
 use Carbon\Carbon;
 
@@ -51,6 +52,11 @@ class HomeController extends Controller {
 			date_default_timezone_set('America/Los_Angeles');
 		}
 
+		$userHomeRegion = Auth::user()->homeRegion();
+		$defaultRegion = $userHomeRegion ?: 'NA';
+
+		$region = Request::has('region') ? Request::get('region') : $defaultRegion;
+
 		$reportingDate = '';
 		if (Request::has('stats_report')) {
 			$statsReport = StatsReport::reportingDate(Request::get('stats_report'))->first();
@@ -63,7 +69,10 @@ class HomeController extends Controller {
 			$reportingDate = ImportManager::getExpectedReportDate();
 		}
 
-		$allReports = StatsReport::currentQuarter()->orderBy('reporting_date', 'desc')->get();
+		$allReports = StatsReport::currentQuarter($region)->orderBy('reporting_date', 'desc')->get();
+		if ($allReports->count() == 0) {
+			$allReports = StatsReport::lastQuarter($region)->orderBy('reporting_date', 'desc')->get();
+		}
 
 		$reportingDates = array();
 		foreach ($allReports as $report) {
@@ -72,13 +81,6 @@ class HomeController extends Controller {
 
 			$reportingDates[$dateString] = $displayString;
 		}
-
-		$userHomeRegion = Auth::user()->homeRegion();
-		$defaultRegion = $userHomeRegion ?: 'NA';
-
-		$region = Request::has('region') ? Request::get('region') : $defaultRegion;
-
-
 
 		$centers = Center::active()
 						 ->globalRegion($region)
