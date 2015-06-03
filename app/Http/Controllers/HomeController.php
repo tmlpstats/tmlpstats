@@ -70,7 +70,7 @@ class HomeController extends Controller {
 		}
 
 		$allReports = StatsReport::currentQuarter($region)->orderBy('reporting_date', 'desc')->get();
-		if ($allReports->count() == 0) {
+		if ($allReports->isEmpty()) {
 			$allReports = StatsReport::lastQuarter($region)->orderBy('reporting_date', 'desc')->get();
 		}
 
