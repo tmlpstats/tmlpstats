@@ -6,6 +6,7 @@ use TmlpStats\Center;
 use TmlpStats\StatsReport;
 use TmlpStats\Message;
 use TmlpStats\Util;
+use TmlpStats\TmlpRegistration;
 
 use TmlpStats\Import\Xlsx\DataImporter\DataImporterFactory;
 use Carbon\Carbon;
@@ -111,32 +112,119 @@ class ImportDocument extends ImportDocumentAbstract
                     ->orderBy('offset', 'asc')
                     ->get();
 
-        $quarterStartDate = $this->quarter->startWeekendDate->toDateString();
-        $tmlpGameStats = DB::table('tmlp_registrations')
-                            // Get Team 1 current/future registered/approved, and withdraws of incoming approved at quarter start
-                            ->select   (DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.incoming_weekend = 'current', 1, 0), 0)) as currentTeam1Registered"))
-                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.incoming_weekend = 'future', 1, 0), 0)) as futureTeam1Registered"))
-                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'current', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as currentTeam1Approved"))
-                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'future', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as futureTeam1Approved"))
-                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '1', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.wd IS NOT NULL, 1, 0), 0), 0)) as team1Withdraws"))
-                            // Get Team 2 current/future registered/approved, and withdraws of incoming approved at quarter start
-                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.incoming_weekend = 'current', 1, 0), 0)) as currentTeam2Registered"))
-                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.incoming_weekend = 'future', 1, 0), 0)) as futureTeam2Registered"))
-                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'current', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as currentTeam2Approved"))
-                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.incoming_weekend = 'future', IF(tmlp_registrations_data.wd IS NULL, 1, 0), 0), 0), 0)) as futureTeam2Approved"))
-                            ->addSelect(DB::raw("SUM(IF(tmlp_registrations.incoming_team_year = '2', IF(tmlp_registrations_data.appr_date <= '{$quarterStartDate}', IF(tmlp_registrations_data.wd IS NOT NULL, 1, 0), 0), 0)) as team2Withdraws"))
-                            ->join('tmlp_registrations_data', 'tmlp_registrations.id', '=', 'tmlp_registrations_data.tmlp_registration_id')
-                            ->where('tmlp_registrations_data.stats_report_id', '=', $this->statsReport->id)
-                            ->where('tmlp_registrations.reg_date', '<=', $quarterStartDate)
-                            ->first();
+        $qStartCurrentTeam1Registered = 0;
+        $qStartFutureTeam1Registered  = 0;
+        $qStartCurrentTeam1Approved   = 0;
+        $qStartFutureTeam1Approved    = 0;
+
+        $currentTeam1Registered       = 0;
+        $futureTeam1Registered        = 0;
+        $currentTeam1Approved         = 0;
+        $futureTeam1Approved          = 0;
+
+        $qStartCurrentTeam2Registered = 0;
+        $qStartFutureTeam2Registered  = 0;
+        $qStartCurrentTeam2Approved   = 0;
+        $qStartFutureTeam2Approved    = 0;
+
+        $currentTeam2Registered       = 0;
+        $futureTeam2Registered        = 0;
+        $currentTeam2Approved         = 0;
+        $futureTeam2Approved          = 0;
+
+        $t1Registrations = TmlpRegistration::team1Incoming()->center($this->center)->get();
+        foreach ($t1Registrations as $registration) {
+            $data = $registration->registrationData()->reportingDate($this->statsReport->reportingDate)->first();
+
+            if (!$data) {
+                continue;
+            }
+
+            if ($data->incomingWeekend == 'current') {
+
+                if ($registration->regDate->lte($this->quarter->startWeekendDate)) {
+                    $qStartCurrentTeam1Registered++;
+                }
+                $currentTeam1Registered++;
+            } else {
+
+                if ($registration->regDate->lte($this->quarter->startWeekendDate)) {
+                    $qStartFutureTeam1Registered++;
+                }
+                $futureTeam1Registered++;
+            }
+
+            if ($data->apprDate) {
+                if ($data->incomingWeekend == 'current') {
+
+                    if ($data->apprDate->lte($this->quarter->startWeekendDate)) {
+                        $qStartCurrentTeam1Approved++;
+                    }
+                    if ($data->appr) {
+                        $currentTeam1Approved++;
+                    }
+                } else {
+
+                    if ($data->apprDate->lte($this->quarter->startWeekendDate)) {
+                        $qStartFutureTeam1Approved++;
+                    }
+                    if ($data->appr) {
+                        $futureTeam1Approved++;
+                    }
+                }
+            }
+        }
+
+        $t2Registrations = TmlpRegistration::team2Incoming()->center($this->center)->get();
+        foreach ($t2Registrations as $registration) {
+            $data = $registration->registrationData()->reportingDate($this->statsReport->reportingDate)->first();
+
+            if (!$data) {
+                continue;
+            }
+
+            if ($data->incomingWeekend == 'current') {
+
+                if ($registration->regDate->lte($this->quarter->startWeekendDate)) {
+                    $qStartCurrentTeam2Registered++;
+                }
+                $currentTeam2Registered++;
+            } else {
+
+                if ($registration->regDate->lte($this->quarter->startWeekendDate)) {
+                    $qStartFutureTeam2Registered++;
+                }
+                $futureTeam2Registered++;
+            }
+
+            if ($data->apprDate) {
+                if ($data->incomingWeekend == 'current') {
+
+                    if ($data->apprDate->lte($this->quarter->startWeekendDate)) {
+                        $qStartCurrentTeam2Approved++;
+                    }
+                    if ($data->appr) {
+                        $currentTeam2Approved++;
+                    }
+                } else {
+
+                    if ($data->apprDate->lte($this->quarter->startWeekendDate)) {
+                        $qStartFutureTeam2Approved++;
+                    }
+                    if ($data->appr) {
+                        $futureTeam2Approved++;
+                    }
+                }
+            }
+        }
 
         $quarterStart = $this->quarter->startWeekendDate;
         $firstWeekDate = $quarterStart->addDays(7);
 
         $qStartRegisteredTotalT1 = 0;
-        $qStartApprovedTotalT1 = 0;
+        $qStartApprovedTotalT1   = 0;
         $qStartRegisteredTotalT2 = 0;
-        $qStartApprovedTotalT2 = 0;
+        $qStartApprovedTotalT2   = 0;
 
         foreach ($list as $dataArray) {
 
@@ -151,69 +239,82 @@ class ImportDocument extends ImportDocumentAbstract
             switch ($data->type) {
 
                 case 'Incoming T1':
-                    $game = 'currentTeam1';
-                    $qStartRegisteredTotalT1 += $data->quarterStartRegistered;
-                    $qStartApprovedTotalT1 += $data->quarterStartApproved;
+                    $reportedRegistered      = $data->quarterStartRegistered;
+                    $reportedApproved        = $data->quarterStartApproved;
+                    $calculatedRegistered    = $qStartCurrentTeam1Registered;
+                    $calculatedApproved      = $qStartCurrentTeam1Approved;
+
+                    $qStartRegisteredTotalT1 += $reportedRegistered;
+                    $qStartApprovedTotalT1   += $reportedApproved;
                     break;
                 case 'Future T1':
-                    $game = 'futureTeam1';
-                    $qStartRegisteredTotalT1 += $data->quarterStartRegistered;
-                    $qStartApprovedTotalT1 += $data->quarterStartApproved;
+                    $reportedRegistered      = $data->quarterStartRegistered;
+                    $reportedApproved        = $data->quarterStartApproved;
+                    $calculatedRegistered    = $qStartFutureTeam1Registered;
+                    $calculatedApproved      = $qStartFutureTeam1Approved;
+
+                    $qStartRegisteredTotalT1 += $reportedRegistered;
+                    $qStartApprovedTotalT1   += $reportedApproved;
                     break;
                 case 'Incoming T2':
-                    $game = 'currentTeam2';
-                    $qStartRegisteredTotalT2 += $data->quarterStartRegistered;
-                    $qStartApprovedTotalT2 += $data->quarterStartApproved;
+                    $reportedRegistered      = $data->quarterStartRegistered;
+                    $reportedApproved        = $data->quarterStartApproved;
+                    $calculatedRegistered    = $qStartCurrentTeam2Registered;
+                    $calculatedApproved      = $qStartCurrentTeam2Approved;
+
+                    $qStartRegisteredTotalT2 += $reportedRegistered;
+                    $qStartApprovedTotalT2   += $reportedApproved;
                     break;
                 case 'Future T2':
-                    $game = 'futureTeam2';
-                    $qStartRegisteredTotalT2 += $data->quarterStartRegistered;
-                    $qStartApprovedTotalT2 += $data->quarterStartApproved;
+                    $reportedRegistered      = $data->quarterStartRegistered;
+                    $reportedApproved        = $data->quarterStartApproved;
+                    $calculatedRegistered    = $qStartFutureTeam2Registered;
+                    $calculatedApproved      = $qStartFutureTeam2Approved;
+
+                    $qStartRegisteredTotalT2 += $reportedRegistered;
+                    $qStartApprovedTotalT2   += $reportedApproved;
                     break;
             }
 
             // Validate Quarter starting totals on the first week
             if ($this->reportingDate->eq($firstWeekDate)) {
 
-                $registeredKey = "{$game}Registered";
-                $registered = $tmlpGameStats->$registeredKey ?: 0;
-                if ($data->quarterStartRegistered != $registered) {
-                    $this->messages['errors'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $data->type, $data->quarterStartRegistered, $registered);
+                if ($reportedRegistered != $calculatedRegistered) {
+                    $this->messages['errors'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $data->type, $reportedRegistered, $calculatedRegistered);
                     $isValid = false;
                 }
 
-                $approvedKey = "{$game}Approved";
-                $approved = $tmlpGameStats->$approvedKey ?: 0;
-                if ($data->quarterStartApproved != $approved) {
-                    $this->messages['errors'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $data->type, $data->quarterStartApproved, $approved);
+                if ($reportedApproved != $calculatedApproved) {
+                    $this->messages['errors'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_APPROVED_DOESNT_MATCH_APPR_BEFORE_WEEKEND', false, $data->type, $reportedApproved, $calculatedApproved);
                     $isValid = false;
                 }
             }
         }
+
         // TODO: Turning this off for now because it's a bit more complicated to calculate these properly.
         // Validate Quarter starting totals on mid quarter weeks. (Registrations may move between current and future)
-        // if ($this->reportingDate->ne($firstWeekDate)) {
+        if ($this->reportingDate->ne($firstWeekDate)) {
 
-        //     $totals = $tmlpGameStats->currentTeam1Registered + $tmlpGameStats->futureTeam1Registered;
-        //     if ($qStartRegisteredTotalT1 != $totals) {
-        //         $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T1_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT1, $totals);
-        //     }
+            $totals = $qStartCurrentTeam1Registered + $qStartFutureTeam1Registered;
+            if ($qStartRegisteredTotalT1 != $totals) {
+                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T1_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT1, $totals);
+            }
 
-        //     $totals = ($tmlpGameStats->currentTeam1Approved + $tmlpGameStats->futureTeam1Approved) + $tmlpGameStats->team1Withdraws;
-        //     if ($qStartApprovedTotalT1 != $totals) {
-        //         $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T1_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartApprovedTotalT1, $totals);
-        //     }
+            $totals = $qStartCurrentTeam1Approved + $qStartFutureTeam1Approved;
+            if ($qStartApprovedTotalT1 != $totals) {
+                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T1_APPROVED_DOESNT_MATCH_APPR_BEFORE_WEEKEND', false, $qStartApprovedTotalT1, $totals);
+            }
 
-        //     $totals = $tmlpGameStats->currentTeam2Registered + $tmlpGameStats->futureTeam2Registered;
-        //     if ($qStartRegisteredTotalT2 != $totals) {
-        //         $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T2_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT2, $totals);
-        //     }
+            $totals = $qStartCurrentTeam2Registered + $qStartFutureTeam2Registered;
+            if ($qStartRegisteredTotalT2 != $totals) {
+                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T2_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT2, $totals);
+            }
 
-        //     $totals = ($tmlpGameStats->currentTeam2Approved + $tmlpGameStats->futureTeam2Approved) + $tmlpGameStats->team2Withdraws;
-        //     if ($qStartApprovedTotalT2 != $totals) {
-        //         $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T2_APPROVED_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartApprovedTotalT2, $totals);
-        //     }
-        // }
+            $totals = $qStartCurrentTeam2Approved + $qStartFutureTeam2Approved;
+            if ($qStartApprovedTotalT2 != $totals) {
+                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T2_APPROVED_DOESNT_MATCH_APPR_BEFORE_WEEKEND', false, $qStartApprovedTotalT2, $totals);
+            }
+        }
 
         return $isValid;
     }
@@ -326,19 +427,21 @@ class ImportDocument extends ImportDocumentAbstract
 
         // T1x and T2x Games
         $startWeekendDate = $this->quarter->startWeekendDate->toDateString();
-        $tmlpStats = DB::table('tmlp_registrations_data')
-                        ->select(DB::raw("SUM(IF(appr = '1', 1, IF(wd LIKE '1%' AND appr_date <= '{$startWeekendDate}', -1, 0))) as team1Approved"))
-                        ->addSelect(DB::raw("SUM(IF((appr = '2' OR appr = 'R'), 1, IF((wd LIKE '2%' OR wd LIKE 'R%') AND appr_date <= '{$startWeekendDate}', -1, 0))) as team2Approved"))
+        $tmlpRegCurrent = DB::table('tmlp_registrations_data')
+                        ->select(DB::raw("SUM(IF(appr = '1', 1, 0)) as team1Approved"))
+                        ->addSelect(DB::raw("SUM(IF((appr = '2' OR appr = 'R'), 1, 0)) as team2Approved"))
                         ->where('tmlp_registrations_data.stats_report_id', '=', $this->statsReport->id)
-                        ->where(function($query) use ($startWeekendDate) {
-
-                            return $query->where('appr_date', '>', $startWeekendDate)
-                                         ->orWhereNotNull('wd');
-                        })
                         ->first();
 
-        $t1xGame = (int)$tmlpStats->team1Approved;
-        $t2xGame = (int)$tmlpStats->team2Approved;
+        $tmlpRegQStart = DB::table('tmlp_games')
+                        ->select(DB::raw("SUM(IF(tmlp_games.type LIKE '%T1', tmlp_games_data.quarter_start_approved, 0)) as team1Approved"))
+                        ->addSelect(DB::raw("SUM(IF(tmlp_games.type LIKE '%T2', tmlp_games_data.quarter_start_approved, 0)) as team2Approved"))
+                        ->join('tmlp_games_data', 'tmlp_games.id', '=', 'tmlp_games_data.tmlp_game_id')
+                        ->where('tmlp_games_data.stats_report_id', '=', $this->statsReport->id)
+                        ->first();
+
+        $t1xGame = $tmlpRegCurrent->team1Approved - $tmlpRegQStart->team1Approved;
+        $t2xGame = $tmlpRegCurrent->team2Approved - $tmlpRegQStart->team2Approved;
 
         // Make sure they match
         if ($thisWeekActual) {

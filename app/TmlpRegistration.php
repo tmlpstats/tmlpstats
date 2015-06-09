@@ -18,7 +18,7 @@ class TmlpRegistration extends Model {
     ];
 
     protected $dates = array(
-        'reg_date' => 'boolean',
+        'reg_date',
     );
 
     protected $casts = array(
@@ -35,6 +35,11 @@ class TmlpRegistration extends Model {
         return $this->hasMany('TmlpStats\TmlpRegistrationData');
     }
 
+    public function scopeCenter($query, $center)
+    {
+        return $query->where('center_id', '=', $center->id);
+    }
+
     public function scopeTeam1Incoming($query)
     {
         return $query->where('incoming_team_year', '=', '1');
@@ -42,6 +47,6 @@ class TmlpRegistration extends Model {
 
     public function scopeTeam2Incoming($query)
     {
-        return $query->where('incoming_team_year', '=', '2')->orWhere('incoming_team_year', '=', 'R');
+        return $query->where('incoming_team_year', '=', '2');
     }
 }

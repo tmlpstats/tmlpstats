@@ -55,8 +55,29 @@ class TmlpRegistrationData extends Model {
         return $this->belongsTo('TmlpStats\Quarter');
     }
 
-    public function game()
+    public function registration()
     {
         return $this->belongsTo('TmlpStats\TmlpRegistration');
+    }
+
+    public function scopeReportingDate($query, $date)
+    {
+        $dateStr = '';
+        if (Util::isCarbonDate($date)) {
+            $dateStr = $date->toDateString();
+        } else {
+            $dateStr = $date;
+        }
+        return $query->where('reporting_date', '=', $dateStr);
+    }
+
+    public function scopeCenter($query, $center)
+    {
+        return $query->where('center_id', '=', $center->id);
+    }
+
+    public function scopeIncomingWeekend($query, $weekend)
+    {
+        return $query->where('incoming_weekend', '=', $weekend);
     }
 }
