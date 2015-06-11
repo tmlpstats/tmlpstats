@@ -83,6 +83,11 @@ class CommCourseInfoValidator extends ValidatorAbstract
                     $this->addMessage('COMMCOURSE_COMPLETED_SS_LESS_THAN_CURRENT_SS', $withdrew);
                 }
             }
+        } else {
+            if (!is_null($data->completedStandardStarts) || !is_null($data->potentials) || !is_null($data->registrations)) {
+                $this->addMessage('COMMCOURSE_COMPLETION_STATS_PROVIDED_BEFORE_COURSE');
+                $isValid = false;
+            }
         }
 
         return $isValid;

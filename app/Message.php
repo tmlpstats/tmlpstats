@@ -333,6 +333,11 @@ class Message
             'format' => "Course has completed but is missing Registrations",
             'arguments' => array(),
         ),
+        'COMMCOURSE_COMPLETION_STATS_PROVIDED_BEFORE_COURSE' => array(
+            'type' => Message::ERROR,
+            'format' => "Course Completion stats provided, but course has not completed.",
+            'arguments' => array(),
+        ),
         'COMMCOURSE_COMPLETED_SS_LESS_THAN_CURRENT_SS' => array(
             'type' => Message::WARNING,
             'format' => "Completed Standard Starts is %%difference%% less than the course starting standard starts. Confirm that %%difference%% people did withdraw during the course.",
