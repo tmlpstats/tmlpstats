@@ -62,6 +62,7 @@ abstract class DataImporterAbstract
 
         $row = $startRow;
         $searching = true;
+        $maxRows = count($this->sheet);
         $maxSearchRows = 1000;
         while ($searching && $row < $maxSearchRows) {
             $value = $this->sheet[$row][$targetColumn];
@@ -70,7 +71,7 @@ abstract class DataImporterAbstract
                 $rangeStart = $row + 1; // Range starts the row after start text
             }
 
-            if ($rangeEnd === NULL && $value == $targetEndText) {
+            if ($rangeEnd === NULL && ($value == $targetEndText || $row >= $maxRows)) {
                 $rangeEnd = $row - 1; // Range ends the row before end text
                 $searching = false;
             }

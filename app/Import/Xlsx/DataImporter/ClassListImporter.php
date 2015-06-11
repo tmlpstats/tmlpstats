@@ -30,29 +30,37 @@ class ClassListImporter extends DataImporterAbstract
 
     protected function populateSheetRanges()
     {
-        self::$blockT1Q1[] = $this->excelRange('A','S');
-        self::$blockT1Q1[] = $this->excelRange(195,224);
-
-        self::$blockT1Q2[] = $this->excelRange('A','S');
-        self::$blockT1Q2[] = $this->excelRange(139,168);
-
-        self::$blockT1Q3[] = $this->excelRange('A','S');
-        self::$blockT1Q3[] = $this->excelRange(83,112);
-
+        $t1q4 = $this->findRange(25, 'Team 1 Completing', 'Team 2 Completing');
         self::$blockT1Q4[] = $this->excelRange('A','S');
-        self::$blockT1Q4[] = $this->excelRange(27,56);
+        self::$blockT1Q4[] = $this->excelRange($t1q4['start'] + 1, $t1q4['end']);
 
-        self::$blockT2Q1[] = $this->excelRange('A','S');
-        self::$blockT2Q1[] = $this->excelRange(227,246);
-
-        self::$blockT2Q2[] = $this->excelRange('A','S');
-        self::$blockT2Q2[] = $this->excelRange(171,190);
-
-        self::$blockT2Q3[] = $this->excelRange('A','S');
-        self::$blockT2Q3[] = $this->excelRange(115,134);
-
+        $t2q4 = $this->findRange($t1q4['end'], 'Team 2 Completing', 'Current Team Completing');
         self::$blockT2Q4[] = $this->excelRange('A','S');
-        self::$blockT2Q4[] = $this->excelRange(59,78);
+        self::$blockT2Q4[] = $this->excelRange($t2q4['start'] + 1, $t2q4['end']);
+
+        $t1q3 = $this->findRange($t2q4['end'], 'Team 1 Completing', 'Team 2 Completing');
+        self::$blockT1Q3[] = $this->excelRange('A','S');
+        self::$blockT1Q3[] = $this->excelRange($t1q3['start'] + 1, $t1q3['end']);
+
+        $t2q3 = $this->findRange($t1q3['end'], 'Team 2 Completing', 'Current Team Completing');
+        self::$blockT2Q3[] = $this->excelRange('A','S');
+        self::$blockT2Q3[] = $this->excelRange($t2q3['start'] + 1, $t2q3['end']);
+
+        $t1q2 = $this->findRange($t2q3['end'], 'Team 1 Completing', 'Team 2 Completing');
+        self::$blockT1Q2[] = $this->excelRange('A','S');
+        self::$blockT1Q2[] = $this->excelRange($t1q2['start'] + 1, $t1q2['end']);
+
+        $t2q2 = $this->findRange($t1q2['end'], 'Team 2 Completing', 'Current Team Completing');
+        self::$blockT2Q2[] = $this->excelRange('A','S');
+        self::$blockT2Q2[] = $this->excelRange($t2q2['start'] + 1, $t2q2['end']);
+
+        $t1q1 = $this->findRange($t2q2['end'], 'Team 1 Completing', 'Team 2 Completing');
+        self::$blockT1Q1[] = $this->excelRange('A','S');
+        self::$blockT1Q1[] = $this->excelRange($t1q1['start'] + 1, $t1q1['end']);
+
+        $t2q1 = $this->findRange($t1q1['end'], 'Team 2 Completing', 'Please e-mail the completed performance report to your Regional Statistician(s)');
+        self::$blockT2Q1[] = $this->excelRange('A','S');
+        self::$blockT2Q1[] = $this->excelRange($t2q1['start'] + 1, $t2q1['end'] - 4);
     }
 
     public function getTdo()

@@ -580,7 +580,7 @@ class ImportDocument extends ImportDocumentAbstract
     }
     protected function loadQuarter()
     {
-        if (!$this->center) {
+        if (!$this->center || !$this->reportingDate) {
             // Don't try to load the quarter without a center.
             // No need to throw error, one has already been logged
             return;
