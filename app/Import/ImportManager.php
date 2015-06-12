@@ -154,8 +154,10 @@ class ImportManager
         $expectedDate = null;
         if (Carbon::now()->dayOfWeek == Carbon::FRIDAY) {
             $expectedDate = Carbon::now();
-        } else {
+        } else if (Carbon::now()->isWeekend()) {
             $expectedDate = new Carbon('last friday');
+        } else {
+            $expectedDate = new Carbon('next friday');
         }
         return $expectedDate->startOfDay();
     }
