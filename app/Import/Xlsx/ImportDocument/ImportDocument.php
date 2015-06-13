@@ -139,6 +139,9 @@ class ImportDocument extends ImportDocumentAbstract
             if (!$data) {
                 continue;
             }
+            if (!is_object($registration->regDate)) {
+                return $isValid;
+            }
 
             if ($data->incomingWeekend == 'current') {
 
@@ -154,7 +157,7 @@ class ImportDocument extends ImportDocumentAbstract
                 $futureTeam1Registered++;
             }
 
-            if ($data->apprDate) {
+            if ($data->apprDate && is_object($data->apprDate)) {
                 if ($data->incomingWeekend == 'current') {
 
                     if ($data->apprDate->lte($this->quarter->startWeekendDate)) {
@@ -182,6 +185,9 @@ class ImportDocument extends ImportDocumentAbstract
             if (!$data) {
                 continue;
             }
+            if (!is_object($registration->regDate)) {
+                return $isValid;
+            }
 
             if ($data->incomingWeekend == 'current') {
 
@@ -197,7 +203,7 @@ class ImportDocument extends ImportDocumentAbstract
                 $futureTeam2Registered++;
             }
 
-            if ($data->apprDate) {
+            if ($data->apprDate && is_object($data->apprDate)) {
                 if ($data->incomingWeekend == 'current') {
 
                     if ($data->apprDate->lte($this->quarter->startWeekendDate)) {

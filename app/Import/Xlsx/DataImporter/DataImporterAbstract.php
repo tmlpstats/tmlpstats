@@ -78,6 +78,10 @@ abstract class DataImporterAbstract
 
             $row++;
         }
+        if ($rangeEnd === NULL) {
+            $rangeEnd = $row;
+        }
+
         return array('start' => $rangeStart, 'end' => $rangeEnd);
     }
 
