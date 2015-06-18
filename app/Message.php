@@ -365,7 +365,7 @@ class Message
         ),
         'COMMCOURSE_QSTART_XFER_GREATER_THAN_QSTART_TER' => array(
             'type' => Message::ERROR,
-            'format' => "Quarter Starting Transfer (%%xfer%%) cannot be more than the quarter starting total number of people ever registered in the course (%%ter%%)",
+            'format' => "Quarter Starting Transfer in from Earlier (%%xfer%%) cannot be more than the quarter starting total number of people ever registered in the course (%%ter%%)",
             'arguments' => array(
                 '%%xfer%%',
                 '%%ter%%',
@@ -381,10 +381,26 @@ class Message
         ),
         'COMMCOURSE_CURRENT_XFER_GREATER_THAN_CURRENT_TER' => array(
             'type' => Message::ERROR,
-            'format' => "Current Starting Transfer (%%xfer%%) cannot be more than the total number of people ever registered in the course (%%ter%%)",
+            'format' => "Current Transfer in from Earlier (%%xfer%%) cannot be more than the total number of people ever registered in the course (%%ter%%)",
             'arguments' => array(
                 '%%xfer%%',
                 '%%ter%%',
+            ),
+        ),
+        'COMMCOURSE_CURRENT_TER_LESS_THAN_QSTART_TER' => array(
+            'type' => Message::WARNING,
+            'format' => "Current Total Ever Registered (%%currentTer%%) is less than Quarter Starting Total Ever Registered (%%quarterStartTer%%). Please verify that this is accurate.",
+            'arguments' => array(
+                '%%currentTer%%',
+                '%%quarterStartTer%%',
+            ),
+        ),
+        'COMMCOURSE_CURRENT_XFER_LESS_THAN_QSTART_XFER' => array(
+            'type' => Message::ERROR,
+            'format' => "Current Transfer in from Earlier (%%currentXfer%%) cannot be less than the Quarter Starting Transfer in from Earlier (%%quarterStartXfer%%)",
+            'arguments' => array(
+                '%%currentXfer%%',
+                '%%quarterStartXfer%%',
             ),
         ),
 

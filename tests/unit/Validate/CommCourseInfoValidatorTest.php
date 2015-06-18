@@ -812,6 +812,63 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
                 ),
                 false,
             ),
+
+            // Current and QStart values align
+            array(
+                $this->arrayToObject(array(
+                    'quarterStartTer'            => 12,
+                    'quarterStartStandardStarts' => 12,
+                    'quarterStartXfer'           => 2,
+                    'currentTer'                 => 18,
+                    'currentStandardStarts'      => 15,
+                    'currentXfer'                => 5,
+                )),
+                array(),
+                true,
+            ),
+            // Current and QStart values align with less standard stats
+            array(
+                $this->arrayToObject(array(
+                    'quarterStartTer'            => 12,
+                    'quarterStartStandardStarts' => 12,
+                    'quarterStartXfer'           => 2,
+                    'currentTer'                 => 18,
+                    'currentStandardStarts'      => 10,
+                    'currentXfer'                => 5,
+                )),
+                array(),
+                true,
+            ),
+            // Current TER less than QStart TER
+            array(
+                $this->arrayToObject(array(
+                    'quarterStartTer'            => 20,
+                    'quarterStartStandardStarts' => 12,
+                    'quarterStartXfer'           => 2,
+                    'currentTer'                 => 18,
+                    'currentStandardStarts'      => 15,
+                    'currentXfer'                => 5,
+                )),
+                array(
+                    array('COMMCOURSE_CURRENT_TER_LESS_THAN_QSTART_TER', 18, 20),
+                ),
+                true,
+            ),
+            // Current Xfer less than QStart Xfer
+            array(
+                $this->arrayToObject(array(
+                    'quarterStartTer'            => 12,
+                    'quarterStartStandardStarts' => 12,
+                    'quarterStartXfer'           => 2,
+                    'currentTer'                 => 18,
+                    'currentStandardStarts'      => 15,
+                    'currentXfer'                => 0,
+                )),
+                array(
+                    array('COMMCOURSE_CURRENT_XFER_LESS_THAN_QSTART_XFER', 0, 2),
+                ),
+                false,
+            ),
         );
     }
 }

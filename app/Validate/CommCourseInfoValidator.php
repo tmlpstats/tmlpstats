@@ -140,6 +140,16 @@ class CommCourseInfoValidator extends ValidatorAbstract
                 $this->addMessage('COMMCOURSE_CURRENT_XFER_GREATER_THAN_CURRENT_TER', $data->currentXfer, $data->currentTer);
                 $isValid = false;
             }
+
+            if ($data->currentTer < (int)$data->quarterStartTer) {
+
+                $this->addMessage('COMMCOURSE_CURRENT_TER_LESS_THAN_QSTART_TER', $data->currentTer, $data->quarterStartTer);
+            }
+            if ($data->currentXfer < (int)$data->quarterStartXfer) {
+
+                $this->addMessage('COMMCOURSE_CURRENT_XFER_LESS_THAN_QSTART_XFER', $data->currentXfer, $data->quarterStartXfer);
+                $isValid = false;
+            }
         }
 
         return $isValid;
