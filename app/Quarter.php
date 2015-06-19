@@ -37,6 +37,11 @@ class Quarter extends Model {
                      ->first();
     }
 
+    public function scopePresentAndFuture($query)
+    {
+        return $query->where('end_weekend_date', '>=', Carbon::now());
+    }
+
     public function scopeCurrent($query, $region)
     {
         return $query->where('start_weekend_date', '<', Carbon::now())

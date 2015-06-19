@@ -28,7 +28,7 @@ class QuarterController extends Controller {
 	{
 		$quarters = Quarter::orderBy('global_region')
 						   ->orderBy('start_weekend_date', 'ASC')
-						   ->current()
+						   ->presentAndFuture()
 						   ->get();
 		return view('quarters.index', compact('quarters'));
 	}
