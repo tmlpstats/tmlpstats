@@ -10,9 +10,6 @@ class TmlpCourseInfoValidatorTest extends ValidatorTestAbstract
 
     protected $dataFields = array(
         'type',
-        'statsReportId',
-        'reportingDate',
-        'tmlpGameId',
         'quarterStartRegistered',
         'quarterStartApproved',
     );
@@ -52,17 +49,11 @@ class TmlpCourseInfoValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'type'                   => null,
-                    'statsReportId'          => null,
-                    'reportingDate'          => null,
-                    'tmlpGameId'             => null,
                     'quarterStartRegistered' => null,
                     'quarterStartApproved'   => null,
                 )),
                 array(
                     array('INVALID_VALUE', 'Type', '[empty]'),
-                    array('INVALID_VALUE', 'Stats Report Id', '[empty]'),
-                    array('INVALID_VALUE', 'Reporting Date', '[empty]'),
-                    array('INVALID_VALUE', 'Tmlp Game Id', '[empty]'),
                     array('INVALID_VALUE', 'Quarter Start Registered', '[empty]'),
                     array('INVALID_VALUE', 'Quarter Start Approved', '[empty]'),
                 ),

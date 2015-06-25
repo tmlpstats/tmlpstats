@@ -10,9 +10,6 @@ class ContactInfoValidator extends ValidatorAbstract
 
     protected function populateValidators($data)
     {
-        $nameValidator  = v::string()->notEmpty();
-        $rowIdValidator = v::numeric()->positive();
-
         $accountabilities = array(
             'Program Manager',
             'Classroom Leader',
@@ -25,14 +22,10 @@ class ContactInfoValidator extends ValidatorAbstract
             'Reporting Statistician',
         );
 
-        $this->dataValidators['firstName']      = $nameValidator;
-        $this->dataValidators['lastName']       = $nameValidator;
+        $this->dataValidators['name']           = v::string()->regex('/^(.+)\s([^\s]+)$/i');
         $this->dataValidators['accountability'] = v::in($accountabilities);
         $this->dataValidators['phone']          = v::phone();
         $this->dataValidators['email']          = v::email();
-        // Skipping center (auto-generated)
-        // Skipping quarter (auto-generated)
-        $this->dataValidators['statsReportId']  = $rowIdValidator;
     }
 
     protected function validate($data)

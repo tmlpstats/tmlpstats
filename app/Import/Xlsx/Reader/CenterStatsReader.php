@@ -11,7 +11,7 @@ class CenterStatsReader extends ReaderAbstract
     protected function formatGameValue($name, $value)
     {
         // janky way of check if this value is a decimal. Unfortunately, all numbers come in as floats.
-        if (preg_match("/\d+\.\d+/", "$value"))
+        if (!is_null($value) && preg_match("/\d+\.\d+/", "$value"))
         {
             $value = number_format($value * 100) . '%';
         }

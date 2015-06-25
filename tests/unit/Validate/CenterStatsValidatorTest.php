@@ -10,10 +10,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
 
     protected $dataFields = array(
         'reportingDate',
-        'promiseDataId',
-        'revokedPromiseDataId',
-        'actualDataId',
-        'statsReportId',
         'type',
         'tdo',
         'cap',
@@ -59,10 +55,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'reportingDate'        => null,
-                    'promiseDataId'        => null,
-                    'revokedPromiseDataId' => null,
-                    'actualDataId'         => null,
-                    'statsReportId'        => null,
                     'type'                 => null,
                     'tdo'                  => null,
                     'cap'                  => null,
@@ -74,8 +66,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
                 )),
                 array(
                     array('INVALID_VALUE', 'Reporting Date', '[empty]'),
-                    array('INVALID_VALUE', 'Promise Data Id', '[empty]'),
-                    array('INVALID_VALUE', 'Stats Report Id', '[empty]'),
                     array('INVALID_VALUE', 'Type', '[empty]'),
                     array('INVALID_VALUE', 'Cap', '[empty]'),
                     array('INVALID_VALUE', 'Cpc', '[empty]'),
@@ -90,10 +80,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
                     'type'                 => 'promise',
                     'tdo'                  => 0,
                     'cap'                  => 0,
@@ -110,10 +96,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
                     'type'                 => 'actual',
                     'tdo'                  => 1,
                     'cap'                  => 55,
@@ -131,10 +113,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'reportingDate'        => 'asdf',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
                     'type'                 => 'actual',
                     'tdo'                  => 1,
                     'cap'                  => 55,
@@ -149,102 +127,10 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
                 ),
                 false,
             ),
-            // Test Invalid promiseDataId
-            array(
-                $this->arrayToObject(array(
-                    'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => -1,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
-                    'type'                 => 'actual',
-                    'tdo'                  => 1,
-                    'cap'                  => 55,
-                    'cpc'                  => 66,
-                    't1x'                  => 77,
-                    't2x'                  => 88,
-                    'gitw'                 => 99,
-                    'lf'                   => 100,
-                )),
-                array(
-                    array('INVALID_VALUE', 'Promise Data Id', '-1'),
-                ),
-                false,
-            ),
-            // Test Invalid revokedPromiseDataId
-            array(
-                $this->arrayToObject(array(
-                    'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 'asdf',
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
-                    'type'                 => 'actual',
-                    'tdo'                  => 1,
-                    'cap'                  => 55,
-                    'cpc'                  => 66,
-                    't1x'                  => 77,
-                    't2x'                  => 88,
-                    'gitw'                 => 99,
-                    'lf'                   => 100,
-                )),
-                array(
-                    array('INVALID_VALUE', 'Revoked Promise Data Id', 'asdf'),
-                ),
-                false,
-            ),
-            // Test Invalid actualDataId
-            array(
-                $this->arrayToObject(array(
-                    'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 0,
-                    'statsReportId'        => 5432,
-                    'type'                 => 'actual',
-                    'tdo'                  => 1,
-                    'cap'                  => 55,
-                    'cpc'                  => 66,
-                    't1x'                  => 77,
-                    't2x'                  => 88,
-                    'gitw'                 => 99,
-                    'lf'                   => 100,
-                )),
-                array(
-                    array('INVALID_VALUE', 'Actual Data Id', '0'),
-                ),
-                false,
-            ),
-            // Test Invalid statsReportId
-            array(
-                $this->arrayToObject(array(
-                    'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 'asdf',
-                    'type'                 => 'actual',
-                    'tdo'                  => 1,
-                    'cap'                  => 55,
-                    'cpc'                  => 66,
-                    't1x'                  => 77,
-                    't2x'                  => 88,
-                    'gitw'                 => 99,
-                    'lf'                   => 100,
-                )),
-                array(
-                    array('INVALID_VALUE', 'Stats Report Id', 'asdf'),
-                ),
-                false,
-            ),
             // Test Invalid type
             array(
                 $this->arrayToObject(array(
                     'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
                     'type'                 => 'asdf',
                     'tdo'                  => 1,
                     'cap'                  => 55,
@@ -263,10 +149,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
                     'type'                 => 'actual',
                     'tdo'                  => 'asdf',
                     'cap'                  => 55,
@@ -285,10 +167,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
                     'type'                 => 'actual',
                     'tdo'                  => 1,
                     'cap'                  => 'asdf',
@@ -307,10 +185,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
                     'type'                 => 'actual',
                     'tdo'                  => 1,
                     'cap'                  => 55,
@@ -329,10 +203,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
                     'type'                 => 'actual',
                     'tdo'                  => 1,
                     'cap'                  => 55,
@@ -351,10 +221,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
                     'type'                 => 'actual',
                     'tdo'                  => 1,
                     'cap'                  => 55,
@@ -373,10 +239,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
                     'type'                 => 'actual',
                     'tdo'                  => 1,
                     'cap'                  => 55,
@@ -395,10 +257,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
                     'type'                 => 'actual',
                     'tdo'                  => 1,
                     'cap'                  => 55,
@@ -417,10 +275,6 @@ class CenterStatsValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'reportingDate'        => '2015-01-01',
-                    'promiseDataId'        => 1234,
-                    'revokedPromiseDataId' => 5678,
-                    'actualDataId'         => 9876,
-                    'statsReportId'        => 5432,
                     'type'                 => 'actual',
                     'tdo'                  => 1,
                     'cap'                  => 55,

@@ -5,7 +5,7 @@ class TestAbstract extends \PHPUnit_Framework_TestCase
 {
     protected $testClass = '';
 
-    protected function getObjectMock($methods = array())
+    protected function getObjectMock($methods = array(), $constructorArgs = array())
     {
         if (!$this->testClass) {
             $class = get_class($this);
@@ -13,6 +13,7 @@ class TestAbstract extends \PHPUnit_Framework_TestCase
         }
         return $this->getMockBuilder($this->testClass)
                     ->setMethods($methods)
+                    ->setConstructorArgs($constructorArgs)
                     ->getMock();
     }
 

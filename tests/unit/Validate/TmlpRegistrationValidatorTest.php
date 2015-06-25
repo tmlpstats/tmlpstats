@@ -2,6 +2,7 @@
 namespace TmlpStatsTests\Validate;
 
 use TmlpStats\Validate\TmlpRegistrationValidator;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use stdClass;
 
@@ -15,7 +16,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
         'weekendReg',
         'incomingWeekend',
         'incomingTeamYear',
-        'isReviewer',
         'bef',
         'dur',
         'aft',
@@ -31,14 +31,12 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
         'committedTeamMemberName',
         'travel',
         'room',
-        'tmlpRegistrationId',
-        'statsReportId',
     );
 
     //
     // populateValidators()
     //
-    public function testPopulateValidatorsSetsValidatorsForEachInput()
+    public function testPopulateValidatorsSetsValidatorsForEachInput($data = null)
     {
         $data = new stdClass;
         $data->incomingTeamYear = 2;
@@ -68,10 +66,11 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                       ->method('addMessage');
         }
 
-
         $validator->expects($this->at($i))
                   ->method('validate')
                   ->with($data);
+
+        Log::shouldReceive('error');
 
         $result = $validator->run($data);
 
@@ -89,7 +88,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => null,
                     'incomingWeekend'         => null,
                     'incomingTeamYear'        => null,
-                    'isReviewer'              => null,
                     'bef'                     => null,
                     'dur'                     => null,
                     'aft'                     => null,
@@ -105,8 +103,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => null,
                     'travel'                  => null,
                     'room'                    => null,
-                    'tmlpRegistrationId'      => null,
-                    'statsReportId'           => null,
                 )),
                 array(
                     array('INVALID_VALUE', 'First Name', '[empty]'),
@@ -114,10 +110,7 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     array('INVALID_VALUE', 'Weekend Reg', '[empty]'),
                     array('INVALID_VALUE', 'Incoming Weekend', '[empty]'),
                     array('INVALID_VALUE', 'Incoming Team Year', '[empty]'),
-                    array('INVALID_VALUE', 'Is Reviewer', '[empty]'),
                     array('INVALID_VALUE', 'Reg Date', '[empty]'),
-                    array('INVALID_VALUE', 'Tmlp Registration Id', '[empty]'),
-                    array('INVALID_VALUE', 'Stats Report Id', '[empty]'),
                 ),
                 false,
             ),
@@ -129,7 +122,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'before',
                     'incomingWeekend'         => 'current',
                     'incomingTeamYear'        => '1',
-                    'isReviewer'              => '0',
                     'bef'                     => '1',
                     'dur'                     => '1',
                     'aft'                     => '1',
@@ -145,8 +137,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(),
                 true,
@@ -159,7 +149,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'during',
                     'incomingWeekend'         => 'future',
                     'incomingTeamYear'        => '2',
-                    'isReviewer'              => '0',
                     'bef'                     => '2',
                     'dur'                     => '2',
                     'aft'                     => '2',
@@ -175,8 +164,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(),
                 true,
@@ -189,7 +176,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'after',
                     'incomingWeekend'         => 'future',
                     'incomingTeamYear'        => '2',
-                    'isReviewer'              => '0',
                     'bef'                     => 'R',
                     'dur'                     => 'R',
                     'aft'                     => 'R',
@@ -205,8 +191,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(),
                 true,
@@ -220,7 +204,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'before',
                     'incomingWeekend'         => 'current',
                     'incomingTeamYear'        => '1',
-                    'isReviewer'              => '0',
                     'bef'                     => '1',
                     'dur'                     => '1',
                     'aft'                     => '1',
@@ -236,8 +219,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'First Name', '[empty]'),
@@ -252,7 +233,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'before',
                     'incomingWeekend'         => 'current',
                     'incomingTeamYear'        => '1',
-                    'isReviewer'              => '0',
                     'bef'                     => '1',
                     'dur'                     => '1',
                     'aft'                     => '1',
@@ -268,8 +248,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'Last Name', '[empty]'),
@@ -284,7 +262,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'sometime',
                     'incomingWeekend'         => 'current',
                     'incomingTeamYear'        => '1',
-                    'isReviewer'              => '0',
                     'bef'                     => '1',
                     'dur'                     => '1',
                     'aft'                     => '1',
@@ -300,8 +277,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'Weekend Reg', 'sometime'),
@@ -316,7 +291,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'before',
                     'incomingWeekend'         => 'past',
                     'incomingTeamYear'        => '1',
-                    'isReviewer'              => '0',
                     'bef'                     => '1',
                     'dur'                     => '1',
                     'aft'                     => '1',
@@ -332,8 +306,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'Incoming Weekend', 'past'),
@@ -349,7 +321,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'after',
                     'incomingWeekend'         => 'future',
                     'incomingTeamYear'        => '1',
-                    'isReviewer'              => '0',
                     'bef'                     => 'R',
                     'dur'                     => 'R',
                     'aft'                     => 'R',
@@ -365,8 +336,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'Bef', 'R'),
@@ -386,7 +355,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'after',
                     'incomingWeekend'         => 'future',
                     'incomingTeamYear'        => '1',
-                    'isReviewer'              => '0',
                     'bef'                     => '2',
                     'dur'                     => '2',
                     'aft'                     => '2',
@@ -402,8 +370,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'Bef', '2'),
@@ -423,7 +389,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'after',
                     'incomingWeekend'         => 'future',
                     'incomingTeamYear'        => '2',
-                    'isReviewer'              => '0',
                     'bef'                     => '1',
                     'dur'                     => '1',
                     'aft'                     => '1',
@@ -439,8 +404,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'Bef', '1'),
@@ -460,7 +423,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'after',
                     'incomingWeekend'         => 'future',
                     'incomingTeamYear'        => '2',
-                    'isReviewer'              => '0',
                     'bef'                     => 'R',
                     'dur'                     => 'R',
                     'aft'                     => 'R',
@@ -476,8 +438,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(),
                 true,
@@ -491,7 +451,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'after',
                     'incomingWeekend'         => 'future',
                     'incomingTeamYear'        => '2',
-                    'isReviewer'              => '0',
                     'bef'                     => 'R',
                     'dur'                     => 'R',
                     'aft'                     => 'R',
@@ -507,8 +466,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'Reg Date', 'asdf'),
@@ -523,7 +480,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'after',
                     'incomingWeekend'         => 'future',
                     'incomingTeamYear'        => '2',
-                    'isReviewer'              => '0',
                     'bef'                     => 'R',
                     'dur'                     => 'R',
                     'aft'                     => 'R',
@@ -539,8 +495,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'App Out Date', 'asdf'),
@@ -555,7 +509,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'after',
                     'incomingWeekend'         => 'future',
                     'incomingTeamYear'        => '2',
-                    'isReviewer'              => '0',
                     'bef'                     => 'R',
                     'dur'                     => 'R',
                     'aft'                     => 'R',
@@ -571,8 +524,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'App In Date', 'asdf'),
@@ -587,7 +538,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'after',
                     'incomingWeekend'         => 'future',
                     'incomingTeamYear'        => '2',
-                    'isReviewer'              => '0',
                     'bef'                     => 'R',
                     'dur'                     => 'R',
                     'aft'                     => 'R',
@@ -603,8 +553,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'Appr Date', 'asdf'),
@@ -619,7 +567,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'after',
                     'incomingWeekend'         => 'future',
                     'incomingTeamYear'        => '2',
-                    'isReviewer'              => '0',
                     'bef'                     => 'R',
                     'dur'                     => 'R',
                     'aft'                     => 'R',
@@ -635,8 +582,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'Wd Date', 'asdf'),
@@ -653,7 +598,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'after',
                     'incomingWeekend'         => 'future',
                     'incomingTeamYear'        => '2',
-                    'isReviewer'              => '0',
                     'bef'                     => 'R',
                     'dur'                     => 'R',
                     'aft'                     => 'R',
@@ -669,8 +613,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'H',
                     'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'Travel', 'H'),
@@ -685,7 +627,6 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'weekendReg'              => 'after',
                     'incomingWeekend'         => 'future',
                     'incomingTeamYear'        => '2',
-                    'isReviewer'              => '0',
                     'bef'                     => 'R',
                     'dur'                     => 'R',
                     'aft'                     => 'R',
@@ -701,77 +642,9 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'committedTeamMemberName' => 'Jeff B',
                     'travel'                  => 'Y',
                     'room'                    => 'H',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => 5678,
                 )),
                 array(
                     array('INVALID_VALUE', 'Room', 'H'),
-                ),
-                false,
-            ),
-
-
-            // Test Invalid tmlpRegistrationid
-            array(
-                $this->arrayToObject(array(
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '2',
-                    'isReviewer'              => '0',
-                    'bef'                     => 'R',
-                    'dur'                     => 'R',
-                    'aft'                     => 'R',
-                    'appOut'                  => 'R',
-                    'appIn'                   => 'R',
-                    'appr'                    => 'R',
-                    'wd'                      => 'R WB',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
-                    'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
-                    'tmlpRegistrationId'      => 'asdf',
-                    'statsReportId'           => 5678,
-                )),
-                array(
-                    array('INVALID_VALUE', 'Tmlp Registration Id', 'asdf'),
-                ),
-                false,
-            ),
-            // Test Invalid statsReportId
-            array(
-                $this->arrayToObject(array(
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '2',
-                    'isReviewer'              => '0',
-                    'bef'                     => 'R',
-                    'dur'                     => 'R',
-                    'aft'                     => 'R',
-                    'appOut'                  => 'R',
-                    'appIn'                   => 'R',
-                    'appr'                    => 'R',
-                    'wd'                      => 'R WB',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
-                    'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
-                    'tmlpRegistrationId'      => 1234,
-                    'statsReportId'           => -1234,
-                )),
-                array(
-                    array('INVALID_VALUE', 'Stats Report Id', '-1234'),
                 ),
                 false,
             ),
@@ -2668,14 +2541,14 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
     //
     // Helpers
     //
-    protected function getObjectMock($methods = array())
+    protected function getObjectMock($methods = array(), $constructorArgs = array())
     {
         $defaultMethods = array(
             'addMessage'
         );
         $methods = $this->mergeMockMethods($defaultMethods, $methods);
 
-        return parent::getObjectMock($methods);
+        return parent::getObjectMock($methods, $constructorArgs);
     }
 
     protected function arrayToObject($array)

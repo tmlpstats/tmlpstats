@@ -18,6 +18,12 @@ class CenterStats extends Model {
         'reporting_date',
     ];
 
+    public function setReportingDateAttribute($value)
+    {
+        $date = $this->asDateTime($value);
+        $this->attributes['reporting_date'] = $date->toDateString();
+    }
+
     public function promiseData()
     {
         return $this->hasOne('TmlpStats\CenterStatsData', 'id', 'promise_data_id');

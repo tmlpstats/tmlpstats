@@ -14,16 +14,11 @@ class CommCourseInfoValidator extends ValidatorAbstract
         $positiveIntValidator        = v::int()->min(0, true);
         $positiveIntNotNullValidator = v::when(v::nullValue(), v::alwaysInvalid(), $positiveIntValidator);
         $positiveIntOrNullValidator  = v::when(v::nullValue(), v::alwaysValid(), $positiveIntValidator);
-        $rowIdValidator              = v::numeric()->positive();
 
         $types = array('CAP', 'CPC');
 
         $this->dataValidators['startDate']                  = v::date('Y-m-d');
         $this->dataValidators['type']                       = v::in($types);
-        $this->dataValidators['statsReportId']              = $rowIdValidator;
-
-        $this->dataValidators['reportingDate']              = v::date('Y-m-d');
-        $this->dataValidators['courseId']                   = $rowIdValidator;
         $this->dataValidators['quarterStartTer']            = $positiveIntNotNullValidator;
         $this->dataValidators['quarterStartStandardStarts'] = $positiveIntNotNullValidator;
         $this->dataValidators['quarterStartXfer']           = $positiveIntNotNullValidator;
@@ -33,8 +28,6 @@ class CommCourseInfoValidator extends ValidatorAbstract
         $this->dataValidators['completedStandardStarts']    = $positiveIntOrNullValidator;
         $this->dataValidators['potentials']                 = $positiveIntOrNullValidator;
         $this->dataValidators['registrations']              = $positiveIntOrNullValidator;
-        // Skipping center (auto-generated)
-        // Skipping quarter (auto-generated)
     }
 
     protected function validate($data)
@@ -56,7 +49,7 @@ class CommCourseInfoValidator extends ValidatorAbstract
     {
         $isValid = true;
 
-        $statsReport = $this->getStatsReport($data->statsReportId);
+        $statsReport = $this->getStatsReport();
         $startDate = $this->getDateObject($data->startDate);
         if ($startDate && $startDate->lt($statsReport->reportingDate)) {
             if (is_null($data->completedStandardStarts)) {
@@ -97,7 +90,7 @@ class CommCourseInfoValidator extends ValidatorAbstract
     {
         $isValid = true;
 
-        $statsReport = $this->getStatsReport($data->statsReportId);
+        $statsReport = $this->getStatsReport();
         $startDate = $this->getDateObject($data->startDate);
         if ($startDate && $startDate->lt($statsReport->quarter->startWeekendDate)) {
             $this->addMessage('COMMCOURSE_COURSE_DATE_BEFORE_QUARTER');

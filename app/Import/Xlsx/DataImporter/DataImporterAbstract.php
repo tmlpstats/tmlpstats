@@ -11,6 +11,8 @@ abstract class DataImporterAbstract
     protected $reader = NULL;
     protected $statsReport = NULL;
 
+    protected $data = array();
+
     protected $messages = array();
 
     public function __construct(&$sheet, &$statsReport)
@@ -105,6 +107,19 @@ abstract class DataImporterAbstract
                 $this->addMessage('EXCEPTION_LOADING_ENTRY', $offset, $e->getMessage());
             }
         }
+    }
+
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    public function setValues($object, $data)
+    {
+        foreach ($data as $key => $value) {
+            $object->$key = $value;
+        }
+        return $object;
     }
 
     protected function getOffset($data)

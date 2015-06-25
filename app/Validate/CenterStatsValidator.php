@@ -11,23 +11,13 @@ class CenterStatsValidator extends ValidatorAbstract
 
     protected function populateValidators($data)
     {
-        $intValidator           = v::int();
-        $intNotNullValidator    = v::when(v::nullValue(), v::alwaysInvalid(), $intValidator);
-        $rowIdValidator         = v::numeric()->positive();
-        $rowIdOrNullValidator   = v::when(v::nullValue(), v::alwaysValid(), $rowIdValidator);
+        $intNotNullValidator    = v::when(v::nullValue(), v::alwaysInvalid(), v::int());
         $percentValidator       = v::numeric()->between(0, 100, true);
         $percentOrNullValidator = v::when(v::nullValue(), v::alwaysValid(), $percentValidator);
 
         $types = array('promise', 'actual');
 
         $this->dataValidators['reportingDate']        = v::date('Y-m-d');
-        $this->dataValidators['promiseDataId']        = $rowIdValidator;
-        $this->dataValidators['revokedPromiseDataId'] = $rowIdOrNullValidator;
-        $this->dataValidators['actualDataId']         = $rowIdOrNullValidator;
-        // Skipping center (auto-generated)
-        // Skipping quarter (auto-generated)
-        $this->dataValidators['statsReportId']        = $rowIdValidator;
-
         $this->dataValidators['type']                 = v::in($types);
         $this->dataValidators['tdo']                  = $percentOrNullValidator;
         $this->dataValidators['cap']                  = $intNotNullValidator;

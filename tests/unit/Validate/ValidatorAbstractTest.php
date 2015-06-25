@@ -2,6 +2,7 @@
 namespace TmlpStatsTests\Validate;
 
 use TmlpStats\Message;
+use Illuminate\Support\Facades\Log;
 use stdClass;
 
 class ValidatorAbstractImplementation extends \TmlpStats\Validate\ValidatorAbstract
@@ -174,7 +175,7 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
             'message2' => 'Not such a big deal.',
         );
 
-        $validator = new ValidatorAbstractImplementation();
+        $validator = new ValidatorAbstractImplementation(new stdClass);
         $this->setProperty($validator, 'messages', $messages);
         $result = $validator->getMessages();
 
@@ -186,7 +187,7 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
         $value = 'someValueToDisplay';
         $display = 'Some Value To Display';
 
-        $validator = new ValidatorAbstractImplementation();
+        $validator = new ValidatorAbstractImplementation(new stdClass);
         $result = $this->runMethod($validator, 'getValueDisplayName', $value);
 
         $this->assertEquals($display, $result);
@@ -199,7 +200,7 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
         $data = new stdClass;
         $data->offset = $offset;
 
-        $validator = new ValidatorAbstractImplementation();
+        $validator = new ValidatorAbstractImplementation(new stdClass);
         $result = $this->runMethod($validator, 'getOffset', $data);
 
         $this->assertEquals($offset, $result);
@@ -209,11 +210,34 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
     {
         $date = '2015-05-11';
 
-        $validator = new ValidatorAbstractImplementation();
+        $validator = new ValidatorAbstractImplementation(new stdClass);
         $result = $this->runMethod($validator, 'getDateObject', $date);
 
         $this->assertInstanceOf('Carbon\Carbon', $result);
-        $this->assertEquals("$date 00:00:00", $result->toDateTimeString());
+        $this->assertEquals("2015-05-11 00:00:00", $result->toDateTimeString());
+    }
+
+    public function testGetDateObjectReturnsCorrectDateObjectForMisformedDate()
+    {
+        $date = '05/11/2015';
+
+        $validator = new ValidatorAbstractImplementation(new stdClass);
+        $result = $this->runMethod($validator, 'getDateObject', $date);
+
+        $this->assertInstanceOf('Carbon\Carbon', $result);
+        $this->assertEquals("2015-05-11 00:00:00", $result->toDateTimeString());
+    }
+
+    public function testGetDateObjectReturnsNullForInvalidDates()
+    {
+        $date = 'asdf';
+
+        Log::shouldReceive('error');
+
+        $validator = new ValidatorAbstractImplementation(new stdClass);
+        $result = $this->runMethod($validator, 'getDateObject', $date);
+
+        $this->assertNull($result);
     }
 
     public function testAddMessageHandlesBasicMessage()
@@ -235,7 +259,7 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
         $data = new stdClass;
         $data->offset = $offset;
 
-        $validator = new ValidatorAbstractImplementation();
+        $validator = new ValidatorAbstractImplementation(new stdClass);
         $validator->setData($data);
 
         $result = $this->runMethod($validator, 'addMessage', $messageId);
@@ -266,7 +290,7 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
         $data = new stdClass;
         $data->offset = $offset;
 
-        $validator = new ValidatorAbstractImplementation();
+        $validator = new ValidatorAbstractImplementation(new stdClass);
         $validator->setData($data);
 
         $result = $this->runMethod($validator, 'addMessage', $messageId, $displayName, $value);
@@ -274,5 +298,16 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
         $messages = $this->getProperty($validator, 'messages');
 
         $this->assertEquals(array($messageArray), $messages);
+    }
+
+    public function testGetStatsReportReturnsStatsReport()
+    {
+        $statsReport = new stdClass;
+        $statsReport->sameGuarantee = true;
+
+        $validator = new ValidatorAbstractImplementation($statsReport);
+        $result = $this->runMethod($validator, 'getStatsReport');
+
+        $this->assertSame($statsReport, $result);
     }
 }

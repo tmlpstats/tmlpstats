@@ -33,25 +33,39 @@ class TmlpGameInfoImporter extends DataImporterAbstract
     {
         if ($this->reader->isEmptyCell($row,'B')) return;
 
-        $game = TmlpGame::firstOrCreate(array(
-            'center_id' => $this->statsReport->center->id,
-            'type'      => $this->reader->getType($row),
-        ));
-        if ($game->statsReportId == null) {
-            $game->statsReportId = $this->statsReport->id;
-            $game->save();
-        }
+        $this->data[] = array(
+            'offset'                 => $row,
+            'type'                   => $this->reader->getType($row),
+            'quarterStartRegistered' => $this->reader->getQuarterStartRegistered($row),
+            'quarterStartApproved'   => $this->reader->getQuarterStartApproved($row),
+        );
+    }
 
-        $gameData = TmlpGameData::firstOrCreate(array(
-            'center_id'      => $this->statsReport->center->id,
-            'quarter_id'     => $this->statsReport->quarter->id,
-            'tmlp_game_id'   => $game->id,
-            'reporting_date' => $this->statsReport->reportingDate->toDateString(),
-        ));
-        $gameData->offset = $row;
-        $gameData->quarterStartRegistered = $this->reader->getQuarterStartRegistered($row);
-        $gameData->quarterStartApproved   = $this->reader->getQuarterStartApproved($row);
-        $gameData->statsReportId = $this->statsReport->id;
-        $gameData->save();
+    public function postProcess()
+    {
+        foreach ($this->data as $gameInput) {
+
+            $game = TmlpGame::firstOrNew(array(
+                'center_id' => $this->statsReport->center->id,
+                'type'      => $gameInput['type'],
+            ));
+            if ($game->statsReportId == null) {
+                $game->statsReportId = $this->statsReport->id;
+                $game->save();
+            }
+
+            $gameData = TmlpGameData::firstOrNew(array(
+                'center_id'      => $this->statsReport->center->id,
+                'quarter_id'     => $this->statsReport->quarter->id,
+                'tmlp_game_id'   => $game->id,
+                'reporting_date' => $this->statsReport->reportingDate->toDateString(),
+            ));
+
+            unset($gameInput['type']);
+            $this->setValues($gameData, $gameInput);
+
+            $gameData->statsReportId = $this->statsReport->id;
+            $gameData->save();
+        }
     }
 }

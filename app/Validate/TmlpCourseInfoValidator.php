@@ -13,7 +13,6 @@ class TmlpCourseInfoValidator extends ValidatorAbstract
     {
         $positiveIntValidator        = v::int()->min(0, true);
         $positiveIntNotNullValidator = v::when(v::nullValue(), v::alwaysInvalid(), $positiveIntValidator);
-        $rowIdValidator              = v::numeric()->positive();
 
         $types = array(
             'Incoming T1',
@@ -23,14 +22,8 @@ class TmlpCourseInfoValidator extends ValidatorAbstract
         );
 
         $this->dataValidators['type']                   = v::in($types);
-        // Skipping center (auto-generated)
-        $this->dataValidators['statsReportId']          = $rowIdValidator;
-
-        $this->dataValidators['reportingDate']          = v::date('Y-m-d');
-        $this->dataValidators['tmlpGameId']             = $rowIdValidator;
         $this->dataValidators['quarterStartRegistered'] = $positiveIntNotNullValidator;
         $this->dataValidators['quarterStartApproved']   = $positiveIntNotNullValidator;
-        // Skipping quarter (auto-generated)
     }
 
     protected function validate($data)

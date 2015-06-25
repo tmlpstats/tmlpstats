@@ -24,4 +24,9 @@ class ProgramTeamMember extends Model {
     {
         return $this->belongsTo('TmlpStats\Center');
     }
+
+    public function teamMember()
+    {
+        return $this->belongsTo('TmlpStats\TeamMember');
+    }
 }

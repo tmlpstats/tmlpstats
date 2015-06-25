@@ -1,7 +1,7 @@
 <?php
 namespace TmlpStats;
 
-use Log;
+use Illuminate\Support\Facades\Log;
 use Exception;
 use Carbon\Carbon;
 
@@ -25,6 +25,18 @@ class Util
             $output .= ucfirst($part);
         }
         return $output ?: $str;
+    }
+
+    public static function arrayToObject($array)
+    {
+        $object = new \stdClass;
+
+        foreach($array as $key => $value) {
+
+            $objectKey = static::camelCase($key);
+            $object->$objectKey = $value;
+        }
+        return $object;
     }
 
     public static function objectToCamelCase($object)

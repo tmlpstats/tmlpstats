@@ -15,7 +15,6 @@ class TmlpRegistrationValidator extends ValidatorAbstract
     protected function populateValidators($data)
     {
         $nameValidator               = v::string()->notEmpty();
-        $rowIdValidator              = v::numeric()->positive();
         $dateValidator               = v::date('Y-m-d');
         $dateOrNullValidator         = v::when(v::nullValue(), v::alwaysValid(), $dateValidator);
         $yesValidator                = v::string()->regex('/^[Y]$/i');
@@ -82,7 +81,6 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         $this->dataValidators['weekendReg']              = v::in($weekendRegTypes);
         $this->dataValidators['incomingWeekend']         = v::in($incomingWeekendTypes);
         $this->dataValidators['incomingTeamYear']        = $incomingTeamYearValidator;
-        $this->dataValidators['isReviewer']              = v::numeric()->between(0, 1, true);
         $this->dataValidators['bef']                     = $equalsIncomingYearValidator;
         $this->dataValidators['dur']                     = $equalsIncomingYearValidator;
         $this->dataValidators['aft']                     = $equalsIncomingYearValidator;
@@ -98,8 +96,6 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         $this->dataValidators['committedTeamMemberName'] = v::when(v::nullValue(), v::alwaysValid(), $nameValidator);
         $this->dataValidators['travel']                  = $yesOrNullValidator;
         $this->dataValidators['room']                    = $yesOrNullValidator;
-        $this->dataValidators['tmlpRegistrationId']      = $rowIdValidator;
-        $this->dataValidators['statsReportId']           = $rowIdValidator;
     }
 
     protected function validate($data)

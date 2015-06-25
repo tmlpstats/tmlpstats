@@ -101,7 +101,7 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
 
     protected function getValidator($type = null)
     {
-        return Validate\ValidatorFactory::build($this->version, $type);
+        return Validate\ValidatorFactory::build($this->statsReport, $type);
     }
 
     protected function loadWorkbook($file)

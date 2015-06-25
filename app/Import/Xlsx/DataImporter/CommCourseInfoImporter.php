@@ -36,46 +36,50 @@ class CommCourseInfoImporter extends DataImporterAbstract
     {
         if ($this->reader->isEmptyCell($row,'B')) return;
 
-        $startDate = $this->reader->getStartDate($row);
+        $this->data[] = array(
+            'type'                       => $type,
+            'offset'                     => $row,
+            'startDate'                  => $this->reader->getStartDate($row),
+            'quarterStartTer'            => $this->reader->getQuarterStartTer($row),
+            'quarterStartStandardStarts' => $this->reader->getQuarterStartStandardStarts($row),
+            'quarterStartXfer'           => $this->reader->getQuarterStartXfer($row),
+            'currentTer'                 => $this->reader->getCurrentTer($row),
+            'currentStandardStarts'      => $this->reader->getCurrentStandardStarts($row),
+            'currentXfer'                => $this->reader->getCurrentXfer($row),
+            'completedStandardStarts'    => $this->reader->getCompletedStandardStarts($row),
+            'potentials'                 => $this->reader->getPotentials($row),
+            'registrations'              => $this->reader->getRegistrations($row),
+        );
+    }
 
-        if ($startDate === false) {
-            $startDateCol = $this->reader->getStartDateCol();
-            $startDateRawValue = $this->reader->getValue($row, $startDateCol);
-            $startDate = Util::parseUnknownDateFormat($startDateRawValue);
-            $this->addMessage('COMMCOURSE_START_DATE_FORMAT_INVALID', $row, $type);
+    public function postProcess()
+    {
+        foreach ($this->data as $courseInput) {
 
-            if ($startDate === false) {
-                $this->addMessage('COMMCOURSE_START_DATE_FORMAT_UNREADABLE', $row, $type);
+            $course = Course::firstOrNew(array(
+                'center_id'  => $this->statsReport->center->id,
+                'start_date' => $courseInput['startDate'],
+                'type'       => $courseInput['type'],
+            ));
+            if ($course->statsReportId === null) {
+                $course->statsReportId = $this->statsReport->id;
+                $course->save();
             }
-        }
 
-        $course = Course::firstOrCreate(array(
-            'center_id'  => $this->statsReport->center->id,
-            'start_date' => $startDate ? $startDate->toDateString() : $startDateRawValue,
-            'type'       => $type,
-        ));
-        if ($course->statsReportId === null) {
-            $course->statsReportId = $this->statsReport->id;
-            $course->save();
-        }
+            $courseData = CourseData::firstOrNew(array(
+                'center_id'      => $this->statsReport->center->id,
+                'quarter_id'     => $this->statsReport->quarter->id,
+                'course_id'      => $course->id,
+                'reporting_date' => $this->statsReport->reportingDate->toDateString(),
+            ));
 
-        $courseData = CourseData::firstOrCreate(array(
-            'center_id'      => $this->statsReport->center->id,
-            'quarter_id'     => $this->statsReport->quarter->id,
-            'course_id'      => $course->id,
-            'reporting_date' => $this->statsReport->reportingDate->toDateString(),
-        ));
-        $courseData->offset = $row;
-        $courseData->quarterStartTer            = $this->reader->getQuarterStartTer($row);
-        $courseData->quarterStartStandardStarts = $this->reader->getQuarterStartStandardStarts($row);
-        $courseData->quarterStartXfer           = $this->reader->getQuarterStartXfer($row);
-        $courseData->currentTer                 = $this->reader->getCurrentTer($row);
-        $courseData->currentStandardStarts      = $this->reader->getCurrentStandardStarts($row);
-        $courseData->currentXfer                = $this->reader->getCurrentXfer($row);
-        $courseData->completedStandardStarts    = $this->reader->getCompletedStandardStarts($row);
-        $courseData->potentials                 = $this->reader->getPotentials($row);
-        $courseData->registrations              = $this->reader->getRegistrations($row);
-        $courseData->statsReportId              = $this->statsReport->id;
-        $courseData->save();
+            unset($courseInput['startDate']);
+            unset($courseInput['type']);
+
+            $courseData = $this->setValues($courseData, $courseInput);
+
+            $courseData->statsReportId = $this->statsReport->id;
+            $courseData->save();
+        }
     }
 }
