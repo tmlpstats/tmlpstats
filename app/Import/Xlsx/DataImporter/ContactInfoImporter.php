@@ -43,46 +43,30 @@ class ContactInfoImporter extends DataImporterAbstract
         $this->t1tl                  = $this->loadEntry(8);
         $this->statistician          = $this->loadEntry(9);
         $this->apprentice            = $this->loadEntry(10);
-        // $this->reportingStatistician = $this->loadReportingStatistician();
+        $this->reportingStatistician = $this->loadReportingStatistician();
         $this->loadProgramLeadersAttendingWeekend();
     }
 
     protected function loadEntry($row, $unused = null)
     {
-        $name           = $this->reader->getName($row);
-        $accountability = $this->reader->getAccountability($row);
+        $this->data[] = array(
+            'offset'         => $row,
+            'accountability' => $this->reader->getAccountability($row),
+            'name'           => $this->reader->getName($row),
+            'phone'          => $this->reader->getPhone($row),
+            'email'          => $this->reader->getEmail($row),
+        );
+    }
 
-        if ($name === NULL || strtoupper($name) == 'NA' || strtoupper($name) == 'N/A') {
-            $this->addMessage('CONTACTINFO_NO_NAME', $row, $accountability);
-            return NULL; // It's possible that a center may not have a program manager
-        }
-
-        if (defined('IMPORT_HACKS') && strpos($name, '/') !== false) {
-            $name = str_replace('/', ' ', $name);
-        } else if (strpos($name, '/') !== false) {
-            $this->addMessage('CONTACTINFO_SLASHES_FOUND', $row);
-        }
-        $nameParts = Util::getNameParts($name);
-
-        $member = ProgramTeamMember::firstOrCreate(array(
-            'center_id'      => $this->statsReport->center->id,
-            'quarter_id'     => $this->statsReport->quarter->id,
-            'accountability' => $accountability,
-            'first_name'     => $nameParts['firstName'],
-            'last_name'      => $nameParts['lastName'],
-        ));
-        $member->offset = $row;
-        $member->phone = $this->reader->getPhone($row);
-        $member->email = $this->reader->getEmail($row);
-
-        if ($member->isDirty()) {
-            if ($member->statsReportId === null) {
-                $member->statsReportId = $this->statsReport->id;
-            }
-            $member->save();
-        }
-
-        return $member;
+    protected function loadReportingStatistician()
+    {
+        $this->data[] = array(
+            'offset'         => $this->reader->getReportingStatisticianNameRow(),
+            'accountability' => 'Reporting Statistician',
+            'name'           => $this->reader->getReportingStatisticianName(),
+            'phone'          => $this->reader->getReportingStatisticianPhone(),
+            'email'          => $this->statsReport->center->statsEmail,
+        );
     }
 
     protected function loadProgramLeadersAttendingWeekend()
@@ -91,57 +75,48 @@ class ContactInfoImporter extends DataImporterAbstract
         $this->classroomLeaderAttendingWeekend = $this->reader->getClassroomLeaderAttendingWeekend();
     }
 
-    // TODO: implement setting the reporting statistician after validation
     public function postProcess()
     {
-        $this->reportingStatistician = $this->loadReportingStatistician();
+        foreach ($this->data as $leader) {
 
-        $programTeamMembers = ProgramTeamMember::where('stats_report_id', '=', $this->statsReport->id)->get();
-        foreach ($programTeamMembers as $member) {
+            if ($leader['name'] === NULL || strtoupper($leader['name']) == 'NA' || strtoupper($leader['name']) == 'N/A') {
+                continue;
+            }
 
-            $member->teamMember = $this->getTeamMember;
-            $member->save();
+            $nameParts = Util::getNameParts($leader['name']);
+
+            $member = ProgramTeamMember::firstOrNew(array(
+                'center_id'      => $this->statsReport->center->id,
+                'quarter_id'     => $this->statsReport->quarter->id,
+                'accountability' => $leader['accountability'],
+                'first_name'     => $nameParts['firstName'],
+                'last_name'      => $nameParts['lastName'],
+            ));
+
+            unset($leader['name']);
+
+            $this->setValues($member, $leader);
+
+            if ($member->teamMember === null) {
+                $teamMember = $this->getTeamMember($member);
+                if ($teamMember) {
+                    $member->teamMemberId = $teamMember->id;
+                }
+            }
+            if ($member->statsReportId === null) {
+                $member->statsReportId = $this->statsReport->id;
+            }
+            if (!$member->exists || $member->isDirty()) {
+                $member->save();
+            }
         }
-    }
-
-    protected function loadReportingStatistician()
-    {
-        $accountability = 'Reporting Statistician';
-
-        $name = $this->reader->getReportingStatisticianName();
-
-        if (defined('IMPORT_HACKS') && strpos($name, '/') !== false) {
-            $name = str_replace('/', ' ', $name);
-        } else if (strpos($name, '/') !== false) {
-            $this->addMessage('CONTACTINFO_SLASHES_FOUND', $row);
-        }
-
-        $nameParts = Util::getNameParts($name);
-
-        $member = ProgramTeamMember::firstOrCreate(array(
-            'center_id'  => $this->statsReport->center->id,
-            'quarter_id' => $this->statsReport->quarter->id,
-            'first_name' => $nameParts['firstName'],
-            'last_name'  => $nameParts['lastName'],
-        ));
-
-        if (!$member->accountability) {
-            $member->offset = $this->reader->getReportingStatisticianNameRow();
-            $member->accountability = $accountability;
-            $member->email = $member->center->statsEmail;
-            $member->statsReportId = $this->statsReport->id;
-        }
-
-        $member->phone = $this->reader->getReportingStatisticianPhone();
-        $member->save();
-        return $member;
     }
 
     protected function getTeamMember($programTeamMember)
     {
         return TeamMember::where('center_id', '=', $this->statsReport->center->id)
-                         ->where('first_name', '=', $programTeamMember['firstName'])
-                         ->where('last_name', '=', $programTeamMember['lastName'])
+                         ->where('first_name', '=', $programTeamMember->firstName)
+                         ->where('last_name', '=', $programTeamMember->lastName)
                          ->first();
     }
 

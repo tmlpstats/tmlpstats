@@ -2,6 +2,7 @@
 namespace TmlpStatsTests\Validate;
 
 use TmlpStats\Validate\CommCourseInfoValidator;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use stdClass;
 
@@ -12,9 +13,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
     protected $dataFields = array(
         'startDate',
         'type',
-        'statsReportId',
-        'reportingDate',
-        'courseId',
         'quarterStartTer',
         'quarterStartStandardStarts',
         'quarterStartXfer',
@@ -49,6 +47,8 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
                   ->method('validate')
                   ->with($data);
 
+        Log::shouldReceive('error');
+
         $result = $validator->run($data);
 
         $this->assertEquals($expectedResult, $result);
@@ -62,9 +62,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'startDate'                  => null,
                     'type'                       => null,
-                    'statsReportId'              => null,
-                    'reportingDate'              => null,
-                    'courseId'                   => null,
                     'quarterStartTer'            => null,
                     'quarterStartStandardStarts' => null,
                     'quarterStartXfer'           => null,
@@ -78,9 +75,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
                 array(
                     array('INVALID_VALUE', 'Start Date', '[empty]'),
                     array('INVALID_VALUE', 'Type', '[empty]'),
-                    array('INVALID_VALUE', 'Stats Report Id', '[empty]'),
-                    array('INVALID_VALUE', 'Reporting Date', '[empty]'),
-                    array('INVALID_VALUE', 'Course Id', '[empty]'),
                     array('INVALID_VALUE', 'Quarter Start Ter', '[empty]'),
                     array('INVALID_VALUE', 'Quarter Start Standard Starts', '[empty]'),
                     array('INVALID_VALUE', 'Quarter Start Xfer', '[empty]'),
@@ -95,9 +89,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'startDate'                  => '2015-05-16',
                     'type'                       => 'CAP',
-                    'statsReportId'              => 1234,
-                    'reportingDate'              => '2015-05-08',
-                    'courseId'                   => 5678,
                     'quarterStartTer'            => 15,
                     'quarterStartStandardStarts' => 14,
                     'quarterStartXfer'           => 0,
@@ -116,9 +107,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'startDate'                  => '2016-05-16',
                     'type'                       => 'CPC',
-                    'statsReportId'              => 1234,
-                    'reportingDate'              => '2015-12-31',
-                    'courseId'                   => 5678,
                     'quarterStartTer'            => 0,
                     'quarterStartStandardStarts' => 0,
                     'quarterStartXfer'           => 0,
@@ -138,9 +126,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
                 $this->arrayToObject(array(
                     'startDate'                  => 'asdf',
                     'type'                       => 'CPC',
-                    'statsReportId'              => 1234,
-                    'reportingDate'              => '2015-12-31',
-                    'courseId'                   => 5678,
                     'quarterStartTer'            => 0,
                     'quarterStartStandardStarts' => 0,
                     'quarterStartXfer'           => 0,
@@ -153,121 +138,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
                 )),
                 array(
                     array('INVALID_VALUE', 'Start Date', 'asdf'),
-                ),
-                false,
-            ),
-            // Test Invalid Reporting Date non-date
-            array(
-                $this->arrayToObject(array(
-                    'startDate'                  => '2016-05-16',
-                    'type'                       => 'CPC',
-                    'statsReportId'              => 1234,
-                    'reportingDate'              => 'asdf',
-                    'courseId'                   => 5678,
-                    'quarterStartTer'            => 0,
-                    'quarterStartStandardStarts' => 0,
-                    'quarterStartXfer'           => 0,
-                    'currentTer'                 => 0,
-                    'currentStandardStarts'      => 0,
-                    'currentXfer'                => 0,
-                    'completedStandardStarts'    => 0,
-                    'potentials'                 => 0,
-                    'registrations'              => 0,
-                )),
-                array(
-                    array('INVALID_VALUE', 'Reporting Date', 'asdf'),
-                ),
-                false,
-            ),
-            // Test Invalid StatsReportId negative
-            array(
-                $this->arrayToObject(array(
-                    'startDate'                  => '2016-05-16',
-                    'type'                       => 'CPC',
-                    'statsReportId'              => -1,
-                    'reportingDate'              => '2015-12-31',
-                    'courseId'                   => 5678,
-                    'quarterStartTer'            => 0,
-                    'quarterStartStandardStarts' => 0,
-                    'quarterStartXfer'           => 0,
-                    'currentTer'                 => 0,
-                    'currentStandardStarts'      => 0,
-                    'currentXfer'                => 0,
-                    'completedStandardStarts'    => 0,
-                    'potentials'                 => 0,
-                    'registrations'              => 0,
-                )),
-                array(
-                    array('INVALID_VALUE', 'Stats Report Id', '-1'),
-                ),
-                false,
-            ),
-            // Test Invalid StatsReportId non-numeric
-            array(
-                $this->arrayToObject(array(
-                    'startDate'                  => '2016-05-16',
-                    'type'                       => 'CPC',
-                    'statsReportId'              => 'asdf',
-                    'reportingDate'              => '2015-12-31',
-                    'courseId'                   => 5678,
-                    'quarterStartTer'            => 0,
-                    'quarterStartStandardStarts' => 0,
-                    'quarterStartXfer'           => 0,
-                    'currentTer'                 => 0,
-                    'currentStandardStarts'      => 0,
-                    'currentXfer'                => 0,
-                    'completedStandardStarts'    => 0,
-                    'potentials'                 => 0,
-                    'registrations'              => 0,
-                )),
-                array(
-                    array('INVALID_VALUE', 'Stats Report Id', 'asdf'),
-                ),
-                false,
-            ),
-            // Test Invalid CourseId negative
-            array(
-                $this->arrayToObject(array(
-                    'startDate'                  => '2016-05-16',
-                    'type'                       => 'CPC',
-                    'statsReportId'              => 5678,
-                    'reportingDate'              => '2015-12-31',
-                    'courseId'                   => '-1',
-                    'quarterStartTer'            => 0,
-                    'quarterStartStandardStarts' => 0,
-                    'quarterStartXfer'           => 0,
-                    'currentTer'                 => 0,
-                    'currentStandardStarts'      => 0,
-                    'currentXfer'                => 0,
-                    'completedStandardStarts'    => 0,
-                    'potentials'                 => 0,
-                    'registrations'              => 0,
-                )),
-                array(
-                    array('INVALID_VALUE', 'Course Id', '-1'),
-                ),
-                false,
-            ),
-            // Test Invalid CourseId non-numeric
-            array(
-                $this->arrayToObject(array(
-                    'startDate'                  => '2016-05-16',
-                    'type'                       => 'CPC',
-                    'statsReportId'              => 5678,
-                    'reportingDate'              => '2015-12-31',
-                    'courseId'                   => 'asdf',
-                    'quarterStartTer'            => 0,
-                    'quarterStartStandardStarts' => 0,
-                    'quarterStartXfer'           => 0,
-                    'currentTer'                 => 0,
-                    'currentStandardStarts'      => 0,
-                    'currentXfer'                => 0,
-                    'completedStandardStarts'    => 0,
-                    'potentials'                 => 0,
-                    'registrations'              => 0,
-                )),
-                array(
-                    array('INVALID_VALUE', 'Course Id', 'asdf'),
                 ),
                 false,
             ),
@@ -387,7 +257,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
         ));
         $validator->expects($this->once())
                   ->method('getStatsReport')
-                  ->with($data->statsReportId)
                   ->will($this->returnValue($statsReport));
 
         if ($messages) {
@@ -422,7 +291,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Gracefully handle null start date (don't blow up - required validator will catch this error)
             array(
                 $this->arrayToObject(array(
-                    'statsReportId'           => null,
                     'startDate'               => null,
                     'completedStandardStarts' => null,
                     'potentials'              => null,
@@ -436,7 +304,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Course in future
             array(
                 $this->arrayToObject(array(
-                    'statsReportId'           => 1234,
                     'startDate'               => '2015-06-06',
                     'completedStandardStarts' => null,
                     'potentials'              => null,
@@ -450,7 +317,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Course in past with completion stats
             array(
                 $this->arrayToObject(array(
-                    'statsReportId'           => 1234,
                     'startDate'               => '2015-05-01',
                     'completedStandardStarts' => 35,
                     'potentials'              => 30,
@@ -465,7 +331,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Course in past missing completedStandardStarts
             array(
                 $this->arrayToObject(array(
-                    'statsReportId'           => 1234,
                     'startDate'               => '2015-05-01',
                     'completedStandardStarts' => null,
                     'potentials'              => 30,
@@ -481,7 +346,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Course in past missing potentials
             array(
                 $this->arrayToObject(array(
-                    'statsReportId'           => 1234,
                     'startDate'               => '2015-05-01',
                     'completedStandardStarts' => 35,
                     'potentials'              => null,
@@ -497,7 +361,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Course in past missing registrations
             array(
                 $this->arrayToObject(array(
-                    'statsReportId'           => 1234,
                     'startDate'               => '2015-05-01',
                     'completedStandardStarts' => 35,
                     'potentials'              => 30,
@@ -514,7 +377,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Course in past with more completed SS that current SS
             array(
                 $this->arrayToObject(array(
-                    'statsReportId'           => 1234,
                     'startDate'               => '2015-05-01',
                     'completedStandardStarts' => 40,
                     'potentials'              => 30,
@@ -530,7 +392,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Course in past with more than 3 withdraw during course
             array(
                 $this->arrayToObject(array(
-                    'statsReportId'           => 1234,
                     'startDate'               => '2015-05-01',
                     'completedStandardStarts' => 31,
                     'potentials'              => 30,
@@ -546,7 +407,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Course in past with <= 3 withdraw during course
             array(
                 $this->arrayToObject(array(
-                    'statsReportId'           => 1234,
                     'startDate'               => '2015-05-01',
                     'completedStandardStarts' => 32,
                     'potentials'              => 30,
@@ -556,6 +416,52 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
                 $statsReport,
                 array(),
                 true,
+            ),
+
+            // Course in future with completion stats
+            array(
+                $this->arrayToObject(array(
+                    'startDate'               => '2015-05-16',
+                    'completedStandardStarts' => 35,
+                    'potentials'              => 30,
+                    'registrations'           => null,
+                    'currentStandardStarts'   => null,
+                )),
+                $statsReport,
+                array(
+                    array('COMMCOURSE_COMPLETION_STATS_PROVIDED_BEFORE_COURSE')
+                ),
+                false,
+            ),
+            // Course in future with completion stats
+            array(
+                $this->arrayToObject(array(
+                    'startDate'               => '2015-05-16',
+                    'completedStandardStarts' => 35,
+                    'potentials'              => null,
+                    'registrations'           => 30,
+                    'currentStandardStarts'   => null,
+                )),
+                $statsReport,
+                array(
+                    array('COMMCOURSE_COMPLETION_STATS_PROVIDED_BEFORE_COURSE')
+                ),
+                false,
+            ),
+            // Course in future with completion stats
+            array(
+                $this->arrayToObject(array(
+                    'startDate'               => '2015-05-16',
+                    'completedStandardStarts' => 35,
+                    'potentials'              => null,
+                    'registrations'           => null,
+                    'currentStandardStarts'   => 30,
+                )),
+                $statsReport,
+                array(
+                    array('COMMCOURSE_COMPLETION_STATS_PROVIDED_BEFORE_COURSE')
+                ),
+                false,
             ),
         );
     }
@@ -571,7 +477,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
         ));
         $validator->expects($this->once())
                   ->method('getStatsReport')
-                  ->with($data->statsReportId)
                   ->will($this->returnValue($statsReport));
 
         if ($messages) {
@@ -601,7 +506,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Gracefully handle null start date (don't blow up - required validator will catch this error)
             array(
                 $this->arrayToObject(array(
-                    'statsReportId' => null,
                     'startDate'     => null,
                 )),
                 $statsReport,
@@ -611,7 +515,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Start Date during quarter
             array(
                 $this->arrayToObject(array(
-                    'statsReportId' => 1234,
                     'startDate'     => '2015-02-27',
                 )),
                 $statsReport,
@@ -621,7 +524,6 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Start Date before quarter
             array(
                 $this->arrayToObject(array(
-                    'statsReportId' => 1234,
                     'startDate'     => '2015-02-13',
                 )),
                 $statsReport,

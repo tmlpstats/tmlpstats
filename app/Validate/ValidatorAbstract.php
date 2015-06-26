@@ -16,10 +16,14 @@ abstract class ValidatorAbstract
     protected $isValid = true;
     protected $data = null;
     protected $reader = null;
+    protected $statsReport = null;
 
     protected $messages = array();
 
-    public function __construct() { }
+    public function __construct(&$statsReport)
+    {
+        $this->statsReport = $statsReport;
+    }
 
     public function run($data)
     {
@@ -67,7 +71,7 @@ abstract class ValidatorAbstract
     protected function getDateObject($date)
     {
         if (!$date || !preg_match("/^20\d\d-[0-1]\d-[0-3]\d$/", $date)) {
-            return null;
+            return Util::parseUnknownDateFormat($date);
         }
         return Carbon::createFromFormat('Y-m-d', $date)->startOfDay();
     }
@@ -79,18 +83,16 @@ abstract class ValidatorAbstract
         $arguments = array_slice(func_get_args(), 1);
         array_unshift($arguments, $messageId, $this->getOffset($this->data));
 
-        $this->messages[] = $this->getMessage($message, $arguments);
+        $this->messages[] = $this->callMessageAdd($message, $arguments);
+    }
+
+    protected function getStatsReport()
+    {
+        return $this->statsReport;
     }
 
     // @codeCoverageIgnoreStart
-    // PHPUnit dropped support for mocking static methods, and I don't want testcases
-    // that call into the database.
-    protected function getStatsReport()
-    {
-        return StatsReport::findOrFail($this->data->statsReportId);
-    }
-
-    protected function getMessage($message, $arguments)
+    protected function callMessageAdd($message, $arguments)
     {
         return call_user_func_array(array($message, 'addMessage'), $arguments);
     }

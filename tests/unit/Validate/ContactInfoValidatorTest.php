@@ -9,13 +9,29 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
     protected $testClass = 'TmlpStats\Validate\ContactInfoValidator';
 
     protected $dataFields = array(
-        'firstName',
-        'lastName',
+        'name',
         'accountability',
         'phone',
         'email',
-        'statsReportId',
     );
+
+
+    public function testPopulateValidatorsSetsValidatorsForEachInput($data = null)
+    {
+        $data = new stdClass;
+        $data->accountability = 'Program Manager';
+
+        parent::testPopulateValidatorsSetsValidatorsForEachInput($data);
+    }
+
+    public function testPopulateValidatorsSetsValidatorsForEachInputReportingStatistician($data = null)
+    {
+        $data = new stdClass;
+        $data->accountability = 'Reporting Statistician';
+
+        parent::testPopulateValidatorsSetsValidatorsForEachInput($data);
+    }
+
     /**
     * @dataProvider providerRun
     */
@@ -50,32 +66,26 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
             // Test Required
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => null,
-                    'lastName'       => null,
+                    'name'           => null,
                     'accountability' => null,
                     'phone'          => null,
                     'email'          => null,
-                    'statsReportId'  => null,
                 )),
                 array(
-                    array('INVALID_VALUE', 'First Name', '[empty]'),
-                    array('INVALID_VALUE', 'Last Name', '[empty]'),
+                    array('INVALID_VALUE', 'Name', '[empty]'),
                     array('INVALID_VALUE', 'Accountability', '[empty]'),
                     array('INVALID_VALUE', 'Phone', '[empty]'),
                     array('INVALID_VALUE', 'Email', '[empty]'),
-                    array('INVALID_VALUE', 'Stats Report Id', '[empty]'),
                 ),
                 false,
             ),
             // Test Valid
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
+                    'name'           => 'Keith Stone',
                     'accountability' => 'Program Manager',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 1234,
                 )),
                 array(),
                 true,
@@ -83,12 +93,10 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
             // Test Valid
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
+                    'name'           => 'Keith Stone',
                     'accountability' => 'Classroom Leader',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 1234,
                 )),
                 array(),
                 true,
@@ -96,12 +104,10 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
             // Test Valid
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
+                    'name'           => 'Keith Stone',
                     'accountability' => 'T-1 Leader',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 1234,
                 )),
                 array(),
                 true,
@@ -109,12 +115,10 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
             // Test Valid
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
+                    'name'           => 'Keith Stone',
                     'accountability' => 'T-2 Leader',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 1234,
                 )),
                 array(),
                 true,
@@ -122,12 +126,10 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
             // Test Valid
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
+                    'name'           => 'Keith Stone',
                     'accountability' => 'Team 2 Team Leader',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 1234,
                 )),
                 array(),
                 true,
@@ -135,12 +137,10 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
             // Test Valid
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
+                    'name'           => 'Keith Stone',
                     'accountability' => 'Team 1 Team Leader',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 1234,
                 )),
                 array(),
                 true,
@@ -148,12 +148,10 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
             // Test Valid
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
+                    'name'           => 'Keith Stone',
                     'accountability' => 'Statistician',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 1234,
                 )),
                 array(),
                 true,
@@ -161,12 +159,10 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
             // Test Valid
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
+                    'name'           => 'Keith Stone',
                     'accountability' => 'Statistician Apprentice',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 1234,
                 )),
                 array(),
                 true,
@@ -174,12 +170,21 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
             // Test Valid
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
+                    'name'           => 'Keith Stone',
                     'accountability' => 'Reporting Statistician',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 1234,
+                )),
+                array(),
+                true,
+            ),
+            // Test Valid
+            array(
+                $this->arrayToObject(array(
+                    'name'           => 'Keith Stone',
+                    'accountability' => 'Reporting Statistician',
+                    'phone'          => '555-555-5555',
+                    'email'          => '',
                 )),
                 array(),
                 true,
@@ -189,42 +194,36 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
             // Test Invalid First Name
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => '',
-                    'lastName'       => 'Stone',
+                    'name'           => ' Stone',
                     'accountability' => 'Program Manager',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 1234,
                 )),
                 array(
-                    array('INVALID_VALUE', 'First Name', '[empty]'),
+                    array('INVALID_VALUE', 'Name', ' Stone'),
                 ),
                 false,
             ),
             // Test Invalid Last Name
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => '',
+                    'name'           => 'Keith ',
                     'accountability' => 'Program Manager',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 1234,
                 )),
                 array(
-                    array('INVALID_VALUE', 'Last Name', '[empty]'),
+                    array('INVALID_VALUE', 'Name', 'Keith '),
                 ),
                 false,
             ),
             // Test Invalid accountability
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
+                    'name'           => 'Keith Stone',
                     'accountability' => 'asdf',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 1234,
                 )),
                 array(
                     array('INVALID_VALUE', 'Accountability', 'asdf'),
@@ -234,12 +233,10 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
             // Test Invalid phone
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
+                    'name'           => 'Keith Stone',
                     'accountability' => 'Program Manager',
                     'phone'          => 'asdf',
                     'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 1234,
                 )),
                 array(
                     array('INVALID_VALUE', 'Phone', 'asdf'),
@@ -249,45 +246,13 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
             // Test Invalid email
             array(
                 $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
+                    'name'           => 'Keith Stone',
                     'accountability' => 'Program Manager',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone',
-                    'statsReportId'  => 1234,
                 )),
                 array(
                     array('INVALID_VALUE', 'Email', 'keith.stone'),
-                ),
-                false,
-            ),
-            // Test Invalid statsReportId
-            array(
-                $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
-                    'accountability' => 'Program Manager',
-                    'phone'          => '555-555-5555',
-                    'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 0,
-                )),
-                array(
-                    array('INVALID_VALUE', 'Stats Report Id', '0'),
-                ),
-                false,
-            ),
-            // Test Invalid statsReportId
-            array(
-                $this->arrayToObject(array(
-                    'firstName'      => 'Keith',
-                    'lastName'       => 'Stone',
-                    'accountability' => 'Program Manager',
-                    'phone'          => '555-555-5555',
-                    'email'          => 'keith.stone@example.com',
-                    'statsReportId'  => 'asdf',
-                )),
-                array(
-                    array('INVALID_VALUE', 'Stats Report Id', 'asdf'),
                 ),
                 false,
             ),

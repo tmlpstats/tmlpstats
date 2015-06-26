@@ -3,7 +3,7 @@ namespace TmlpStats\Validate;
 
 class ValidatorFactory
 {
-    public static function build($version, $type = null)
+    public static function build($statsReport, $type = null)
     {
         if ($type === null)
         {
@@ -25,6 +25,6 @@ class ValidatorFactory
                 throw new \Exception("Invalid type passed to ValidatorFactory");
         }
 
-       return new $class();
+       return new $class($statsReport);
     }
 }

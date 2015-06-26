@@ -22,457 +22,292 @@ class ImportDocument extends ImportDocumentAbstract
     protected function validateReport()
     {
         $isValid = true;
+
+        foreach ($this->importers as $type => $importer) {
+
+            $list = $importer->getData();
+
+            foreach ($list as $dataArray) {
+
+                $data = Util::arrayToObject($dataArray);
+                $validator = $this->getValidator($type);
+                if (!$validator->run($data)) {
+                    $isValid = false;
+                }
+                $this->mergeMessages($validator->getMessages());
+            }
+        }
+
         if (!$this->validateStatsReport()) {
             $isValid = false;
         }
-        foreach ($this->importers as $type => $object) {
-
-            $method = 'validate' . ucfirst($type);
-            if (method_exists($this, $method)) {
-                if(!$this->$method()) {
-                    $isValid = false;
-                }
-            }
+        if (!$this->validateTeamExpansion()) {
+            $isValid = false;
+        }
+        if (!$this->validateCenterGames()) {
+            $isValid = false;
         }
         return $isValid;
     }
 
-    protected function validateClassList()
+    protected function validateTeamExpansion()
     {
         $isValid = true;
-
-        $list = DB::table('team_members')
-                    ->join('team_members_data', 'team_members.id', '=', 'team_members_data.team_member_id')
-                    ->where('team_members_data.stats_report_id', '=', $this->statsReport->id)
-                    ->orderBy('offset', 'asc')
-                    ->get();
-
-        foreach ($list as $dataArray) {
-
-            $data = Util::objectToCamelCase($dataArray);
-            $validator = $this->getValidator('classList');
-            if (!$validator->run($data)) {
-                $isValid = false;
-            }
-            $this->mergeMessages($validator->getMessages());
-        }
-        return $isValid;
-    }
-
-    protected function validateContactInfo()
-    {
-        $isValid = true;
-
-        $list = DB::table('program_team_members')
-                    ->where('program_team_members.center_id', '=', $this->statsReport->center->id)
-                    ->orderBy('offset', 'asc')
-                    ->get();
-
-        foreach ($list as $dataArray) {
-
-            $data = Util::objectToCamelCase($dataArray);
-            $validator = $this->getValidator('contactInfo');
-            if (!$validator->run($data)) {
-                $isValid = false;
-            }
-            $this->mergeMessages($validator->getMessages());
-        }
-        return $isValid;
-    }
-
-    protected function validateCommCourseInfo()
-    {
-        $isValid = true;
-
-        $list = DB::table('courses')
-                    ->join('courses_data', 'courses.id', '=', 'courses_data.course_id')
-                    ->where('courses_data.stats_report_id', '=', $this->statsReport->id)
-                    ->orderBy('offset', 'asc')
-                    ->get();
-
-        foreach ($list as $dataArray) {
-
-            $data = Util::objectToCamelCase($dataArray);
-            $validator = $this->getValidator('commCourseInfo');
-            if (!$validator->run($data)) {
-                $isValid = false;
-            }
-            $this->mergeMessages($validator->getMessages());
-        }
-        return $isValid;
-    }
-
-    protected function validateTmlpGameInfo()
-    {
-        $isValid = true;
-
-        $list = DB::table('tmlp_games')
-                    ->join('tmlp_games_data', 'tmlp_games.id', '=', 'tmlp_games_data.tmlp_game_id')
-                    ->where('tmlp_games_data.stats_report_id', '=', $this->statsReport->id)
-                    ->orderBy('offset', 'asc')
-                    ->get();
 
         $qStartCurrentTeam1Registered = 0;
         $qStartFutureTeam1Registered  = 0;
         $qStartCurrentTeam1Approved   = 0;
         $qStartFutureTeam1Approved    = 0;
 
-        $currentTeam1Registered       = 0;
-        $futureTeam1Registered        = 0;
-        $currentTeam1Approved         = 0;
-        $futureTeam1Approved          = 0;
-
         $qStartCurrentTeam2Registered = 0;
         $qStartFutureTeam2Registered  = 0;
         $qStartCurrentTeam2Approved   = 0;
         $qStartFutureTeam2Approved    = 0;
 
-        $currentTeam2Registered       = 0;
-        $futureTeam2Registered        = 0;
-        $currentTeam2Approved         = 0;
-        $futureTeam2Approved          = 0;
+        $tmlpRegistrations = $this->importers['tmlpRegistration']->getData();
+        foreach ($tmlpRegistrations as $registration) {
 
-        $t1Registrations = TmlpRegistration::team1Incoming()->center($this->center)->get();
-        foreach ($t1Registrations as $registration) {
-            $data = $registration->registrationData()->reportingDate($this->statsReport->reportingDate)->first();
+            $regDate = Util::parseUnknownDateFormat($registration['regDate']);
+            if ($registration['incomingWeekend'] == 'current') {
 
-            if (!$data) {
-                continue;
-            }
-            if (!is_object($registration->regDate)) {
-                return $isValid;
-            }
-
-            if ($data->incomingWeekend == 'current') {
-
-                if ($registration->regDate->lte($this->quarter->startWeekendDate)) {
-                    $qStartCurrentTeam1Registered++;
+                if ($regDate && $regDate->lte($this->quarter->startWeekendDate)) {
+                    if ($registration['incomingTeamYear'] == 1) {
+                        $qStartCurrentTeam1Registered++;
+                    } else {
+                        $qStartCurrentTeam2Registered++;
+                    }
                 }
-                $currentTeam1Registered++;
             } else {
 
-                if ($registration->regDate->lte($this->quarter->startWeekendDate)) {
-                    $qStartFutureTeam1Registered++;
+                if ($regDate && $regDate->lte($this->quarter->startWeekendDate)) {
+                    if ($registration['incomingTeamYear'] == 1) {
+                        $qStartFutureTeam1Registered++;
+                    } else {
+                        $qStartFutureTeam2Registered++;
+                    }
                 }
-                $futureTeam1Registered++;
             }
 
-            if ($data->apprDate && is_object($data->apprDate)) {
-                if ($data->incomingWeekend == 'current') {
+            if ($registration['apprDate']) {
+                $apprDate = Util::parseUnknownDateFormat($registration['apprDate']);
+                if ($registration['incomingWeekend'] == 'current') {
 
-                    if ($data->apprDate->lte($this->quarter->startWeekendDate)) {
-                        $qStartCurrentTeam1Approved++;
-                    }
-                    if ($data->appr) {
-                        $currentTeam1Approved++;
+                    if ($apprDate && $apprDate->lte($this->quarter->startWeekendDate)) {
+                        if ($registration['incomingTeamYear'] == 1) {
+                            $qStartCurrentTeam1Approved++;
+                        } else {
+                            $qStartCurrentTeam2Approved++;
+                        }
                     }
                 } else {
 
-                    if ($data->apprDate->lte($this->quarter->startWeekendDate)) {
-                        $qStartFutureTeam1Approved++;
-                    }
-                    if ($data->appr) {
-                        $futureTeam1Approved++;
+                    if ($apprDate && $apprDate->lte($this->quarter->startWeekendDate)) {
+                        if ($registration['incomingTeamYear'] == 1) {
+                            $qStartFutureTeam1Approved++;
+                        } else {
+                            $qStartFutureTeam2Approved++;
+                        }
                     }
                 }
             }
         }
 
-        $t2Registrations = TmlpRegistration::team2Incoming()->center($this->center)->get();
-        foreach ($t2Registrations as $registration) {
-            $data = $registration->registrationData()->reportingDate($this->statsReport->reportingDate)->first();
-
-            if (!$data) {
-                continue;
-            }
-            if (!is_object($registration->regDate)) {
-                return $isValid;
-            }
-
-            if ($data->incomingWeekend == 'current') {
-
-                if ($registration->regDate->lte($this->quarter->startWeekendDate)) {
-                    $qStartCurrentTeam2Registered++;
-                }
-                $currentTeam2Registered++;
-            } else {
-
-                if ($registration->regDate->lte($this->quarter->startWeekendDate)) {
-                    $qStartFutureTeam2Registered++;
-                }
-                $futureTeam2Registered++;
-            }
-
-            if ($data->apprDate && is_object($data->apprDate)) {
-                if ($data->incomingWeekend == 'current') {
-
-                    if ($data->apprDate->lte($this->quarter->startWeekendDate)) {
-                        $qStartCurrentTeam2Approved++;
-                    }
-                    if ($data->appr) {
-                        $currentTeam2Approved++;
-                    }
-                } else {
-
-                    if ($data->apprDate->lte($this->quarter->startWeekendDate)) {
-                        $qStartFutureTeam2Approved++;
-                    }
-                    if ($data->appr) {
-                        $futureTeam2Approved++;
-                    }
-                }
-            }
-        }
-
-        $quarterStart = $this->quarter->startWeekendDate;
+        $quarterStart = clone $this->quarter->startWeekendDate;
         $firstWeekDate = $quarterStart->addDays(7);
 
-        $qStartRegisteredTotalT1 = 0;
-        $qStartApprovedTotalT1   = 0;
-        $qStartRegisteredTotalT2 = 0;
-        $qStartApprovedTotalT2   = 0;
+        $qStartTotalTeam1Registered = 0;
+        $qStartTotalTeam1Approved   = 0;
+        $qStartTotalTeam2Registered = 0;
+        $qStartTotalTeam2Approved   = 0;
 
-        foreach ($list as $dataArray) {
+        $tmlpGames = $this->importers['tmlpCourseInfo']->getData();
+        foreach ($tmlpGames as $game) {
 
-            $data = Util::objectToCamelCase($dataArray);
-            $validator = $this->getValidator('tmlpCourseInfo');
-            if (!$validator->run($data)) {
-                $isValid = false;
-            }
-            $this->mergeMessages($validator->getMessages());
+            $calculatedRegistered = 0;
+            $calculatedApproved   = 0;
 
-            $game = '';
-            switch ($data->type) {
+            switch ($game['type']) {
 
                 case 'Incoming T1':
-                    $reportedRegistered      = $data->quarterStartRegistered;
-                    $reportedApproved        = $data->quarterStartApproved;
-                    $calculatedRegistered    = $qStartCurrentTeam1Registered;
-                    $calculatedApproved      = $qStartCurrentTeam1Approved;
+                    $calculatedRegistered        = $qStartCurrentTeam1Registered;
+                    $calculatedApproved          = $qStartCurrentTeam1Approved;
 
-                    $qStartRegisteredTotalT1 += $reportedRegistered;
-                    $qStartApprovedTotalT1   += $reportedApproved;
+                    $qStartTotalTeam1Registered += $game['quarterStartRegistered'];
+                    $qStartTotalTeam1Approved   += $game['quarterStartApproved'];
                     break;
                 case 'Future T1':
-                    $reportedRegistered      = $data->quarterStartRegistered;
-                    $reportedApproved        = $data->quarterStartApproved;
-                    $calculatedRegistered    = $qStartFutureTeam1Registered;
-                    $calculatedApproved      = $qStartFutureTeam1Approved;
+                    $calculatedRegistered        = $qStartFutureTeam1Registered;
+                    $calculatedApproved          = $qStartFutureTeam1Approved;
 
-                    $qStartRegisteredTotalT1 += $reportedRegistered;
-                    $qStartApprovedTotalT1   += $reportedApproved;
+                    $qStartTotalTeam1Registered += $game['quarterStartRegistered'];
+                    $qStartTotalTeam1Approved   += $game['quarterStartApproved'];
                     break;
                 case 'Incoming T2':
-                    $reportedRegistered      = $data->quarterStartRegistered;
-                    $reportedApproved        = $data->quarterStartApproved;
-                    $calculatedRegistered    = $qStartCurrentTeam2Registered;
-                    $calculatedApproved      = $qStartCurrentTeam2Approved;
+                    $calculatedRegistered        = $qStartCurrentTeam2Registered;
+                    $calculatedApproved          = $qStartCurrentTeam2Approved;
 
-                    $qStartRegisteredTotalT2 += $reportedRegistered;
-                    $qStartApprovedTotalT2   += $reportedApproved;
+                    $qStartTotalTeam2Registered += $game['quarterStartRegistered'];
+                    $qStartTotalTeam2Approved   += $game['quarterStartApproved'];
                     break;
                 case 'Future T2':
-                    $reportedRegistered      = $data->quarterStartRegistered;
-                    $reportedApproved        = $data->quarterStartApproved;
-                    $calculatedRegistered    = $qStartFutureTeam2Registered;
-                    $calculatedApproved      = $qStartFutureTeam2Approved;
+                    $calculatedRegistered        = $qStartFutureTeam2Registered;
+                    $calculatedApproved          = $qStartFutureTeam2Approved;
 
-                    $qStartRegisteredTotalT2 += $reportedRegistered;
-                    $qStartApprovedTotalT2   += $reportedApproved;
+                    $qStartTotalTeam2Registered += $game['quarterStartRegistered'];
+                    $qStartTotalTeam2Approved   += $game['quarterStartApproved'];
                     break;
+                // default: ignore (only with corrupt sheet). An error is reported already
             }
 
             // Validate Quarter starting totals on the first week
             if ($this->reportingDate->eq($firstWeekDate)) {
 
-                if ($reportedRegistered != $calculatedRegistered) {
-                    $this->messages['errors'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $data->type, $reportedRegistered, $calculatedRegistered);
+                if ($game['quarterStartRegistered'] != $calculatedRegistered) {
+                    $this->addMessage(static::TAB_COURSES, 'IMPORTDOC_QSTART_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', $game['type'], $game['quarterStartRegistered'], $calculatedRegistered);
                     $isValid = false;
                 }
 
-                if ($reportedApproved != $calculatedApproved) {
-                    $this->messages['errors'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_APPROVED_DOESNT_MATCH_APPR_BEFORE_WEEKEND', false, $data->type, $reportedApproved, $calculatedApproved);
+                if ($game['quarterStartApproved'] != $calculatedApproved) {
+                    $this->addMessage(static::TAB_COURSES, 'IMPORTDOC_QSTART_APPROVED_DOESNT_MATCH_APPR_BEFORE_WEEKEND', $game['type'], $game['quarterStartApproved'], $calculatedApproved);
                     $isValid = false;
                 }
             }
         }
 
-        // TODO: Turning this off for now because it's a bit more complicated to calculate these properly.
         // Validate Quarter starting totals on mid quarter weeks. (Registrations may move between current and future)
         if ($this->reportingDate->ne($firstWeekDate)) {
 
-            $totals = $qStartCurrentTeam1Registered + $qStartFutureTeam1Registered;
-            if ($qStartRegisteredTotalT1 != $totals) {
-                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T1_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT1, $totals);
+            $calculatedTotals = $qStartCurrentTeam1Registered + $qStartFutureTeam1Registered;
+            if ($qStartTotalTeam1Registered != $calculatedTotals) {
+                $this->addMessage(static::TAB_COURSES, 'IMPORTDOC_QSTART_T1_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', $qStartTotalTeam1Registered, $calculatedTotals);
             }
 
-            $totals = $qStartCurrentTeam1Approved + $qStartFutureTeam1Approved;
-            if ($qStartApprovedTotalT1 != $totals) {
-                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T1_APPROVED_DOESNT_MATCH_APPR_BEFORE_WEEKEND', false, $qStartApprovedTotalT1, $totals);
+            $calculatedTotals = $qStartCurrentTeam1Approved + $qStartFutureTeam1Approved;
+            if ($qStartTotalTeam1Approved != $calculatedTotals) {
+                $this->addMessage(static::TAB_COURSES, 'IMPORTDOC_QSTART_T1_APPROVED_DOESNT_MATCH_APPR_BEFORE_WEEKEND', $qStartTotalTeam1Approved, $calculatedTotals);
             }
 
-            $totals = $qStartCurrentTeam2Registered + $qStartFutureTeam2Registered;
-            if ($qStartRegisteredTotalT2 != $totals) {
-                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T2_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', false, $qStartRegisteredTotalT2, $totals);
+            $calculatedTotals = $qStartCurrentTeam2Registered + $qStartFutureTeam2Registered;
+            if ($qStartTotalTeam2Registered != $calculatedTotals) {
+                $this->addMessage(static::TAB_COURSES, 'IMPORTDOC_QSTART_T2_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND', $qStartTotalTeam2Registered, $calculatedTotals);
             }
 
-            $totals = $qStartCurrentTeam2Approved + $qStartFutureTeam2Approved;
-            if ($qStartApprovedTotalT2 != $totals) {
-                $this->messages['warnings'][] = Message::create(static::TAB_COURSES)->addMessage('IMPORTDOC_QSTART_T2_APPROVED_DOESNT_MATCH_APPR_BEFORE_WEEKEND', false, $qStartApprovedTotalT2, $totals);
+            $calculatedTotals = $qStartCurrentTeam2Approved + $qStartFutureTeam2Approved;
+            if ($qStartTotalTeam2Approved != $calculatedTotals) {
+                $this->addMessage(static::TAB_COURSES, 'IMPORTDOC_QSTART_T2_APPROVED_DOESNT_MATCH_APPR_BEFORE_WEEKEND', $qStartTotalTeam2Approved, $calculatedTotals);
             }
         }
 
         return $isValid;
     }
 
-    protected function validateTmlpRegistration()
-    {
-        $isValid = true;
-
-        $list = DB::table('tmlp_registrations')
-                    ->join('tmlp_registrations_data', 'tmlp_registrations.id', '=', 'tmlp_registrations_data.tmlp_registration_id')
-                    ->where('tmlp_registrations_data.stats_report_id', '=', $this->statsReport->id)
-                    ->orderBy('offset', 'asc')
-                    ->get();
-
-        foreach ($list as $dataArray) {
-
-            $data = Util::objectToCamelCase($dataArray);
-            $validator = $this->getValidator('tmlpRegistration');
-            if (!$validator->run($data)) {
-                $isValid = false;
-            }
-            $this->mergeMessages($validator->getMessages());
-        }
-        return $isValid;
-    }
-
-    protected function validateCenterStats()
+    protected function validateCenterGames()
     {
         $isValid = true;
         $thisWeekActual = null;
 
-        // Actuals
-        $list = DB::table('center_stats')
-                    ->join('center_stats_data', 'center_stats.actual_data_id', '=', 'center_stats_data.id')
-                    ->where('center_stats_data.center_id', '=', $this->center->id)
-                    ->where('center_stats_data.stats_report_id', '=', $this->statsReport->id)
-                    ->orderBy('offset', 'asc')
-                    ->get();
+        $centerStats = $this->importers['centerStats']->getData();
 
-        foreach ($list as $dataArray) {
+        foreach ($centerStats as $week) {
 
-            $data = Util::objectToCamelCase($dataArray);
-            $validator = $this->getValidator('centerStats');
-            if (!$validator->run($data)) {
-                $isValid = false;
+            if ($week['type'] == 'actual'
+                && $week['reportingDate'] == $this->reportingDate->toDateString()) {
+
+                $thisWeekActual = $week;
+                break;
             }
-            $this->mergeMessages($validator->getMessages());
-            if ($data->reportingDate == $this->statsReport->reportingDate->toDateString()) {
-                $thisWeekActual = $data;
-            }
-        }
-
-        // Promises
-        $list = DB::table('center_stats')
-                    ->join('center_stats_data', 'center_stats.promise_data_id', '=', 'center_stats_data.id')
-                    ->where('center_stats_data.center_id', '=', $this->center->id)
-                    ->where('center_stats_data.stats_report_id', '=', $this->statsReport->id)
-                    ->orderBy('offset', 'asc')
-                    ->get();
-
-        foreach ($list as $dataArray) {
-
-            $data = Util::objectToCamelCase($dataArray);
-            $validator = $this->getValidator('centerStats');
-            if (!$validator->run($data)) {
-                $isValid = false;
-            }
-            $this->mergeMessages($validator->getMessages());
         }
 
         // GITW and TDO
-        $teamMemberStats = DB::table('team_members_data')
-                                ->select(DB::raw("COUNT(*) as activeMemberCount"))
-                                ->addSelect(DB::raw("SUM(IF(gitw = 'E', 1, 0)) as effectiveCount"))
-                                ->addSelect(DB::raw("SUM(IF(tdo = 'Y', 1, 0)) as tdoCount"))
-                                ->where('stats_report_id', '=', $this->statsReport->id)
-                                ->whereNull('wd')
-                                ->whereNull('wbo')
-                                ->whereNull('xfer_out')
-                                ->first();
+        $classList = $this->importers['classList']->getData();
+        $activeMemberCount = 0;
+        $effectiveCount    = 0;
+        $tdoCount          = 0;
 
-        $gitwGame = round(((int)$teamMemberStats->effectiveCount/(int)$teamMemberStats->activeMemberCount) * 100);
-        $tdoGame = round(((int)$teamMemberStats->tdoCount/(int)$teamMemberStats->activeMemberCount) * 100);
+        foreach ($classList as $member) {
 
-        // CAP Game
-        $capStats = DB::table('courses')
-                        ->select(DB::raw("SUM(courses_data.quarter_start_ter) as qStartTer"))
-                        ->addSelect(DB::raw("SUM(courses_data.quarter_start_standard_starts) as qStartStandardStarts"))
-                        ->addSelect(DB::raw("SUM(courses_data.current_ter) as currentTer"))
-                        ->addSelect(DB::raw("SUM(courses_data.current_standard_starts) as currentStandardStarts"))
-                        ->join('courses_data', 'courses.id', '=', 'courses_data.course_id')
-                        ->where('courses_data.stats_report_id', '=', $this->statsReport->id)
-                        ->where('courses.type', '=', 'CAP')
-                        ->first();
+            if ($member['wd'] || $member['wbo'] || $member['xferOut']) {
+                continue;
+            }
 
-        $capGame = (int)$capStats->currentStandardStarts - (int)$capStats->qStartStandardStarts;
+            $activeMemberCount++;
+            if (preg_match('/^E$/i', $member['gitw'])) {
+                $effectiveCount++;
+            }
+        }
 
-        // CPC Game
-        $cpcStats = DB::table('courses')
-                        ->select(DB::raw("SUM(courses_data.quarter_start_ter) as qStartTer"))
-                        ->addSelect(DB::raw("SUM(courses_data.quarter_start_standard_starts) as qStartStandardStarts"))
-                        ->addSelect(DB::raw("SUM(courses_data.current_ter) as currentTer"))
-                        ->addSelect(DB::raw("SUM(courses_data.current_standard_starts) as currentStandardStarts"))
-                        ->join('courses_data', 'courses.id', '=', 'courses_data.course_id')
-                        ->where('courses_data.stats_report_id', '=', $this->statsReport->id)
-                        ->where('courses.type', '=', 'CPC')
-                        ->first();
+        $gitwGame = $activeMemberCount ? round(($effectiveCount/$activeMemberCount) * 100) : 0;
 
-        $cpcGame = (int)$cpcStats->currentStandardStarts - (int)$cpcStats->qStartStandardStarts;
+        // CAP & CPC Game
+        $courses = $this->importers['commCourseInfo']->getData();
+        $capCurrentStandardStarts = 0;
+        $capQStartStandardStarts  = 0;
+        $cpcCurrentStandardStarts = 0;
+        $cpcQStartStandardStarts  = 0;
+
+        foreach ($courses as $course) {
+            if ($course['type'] == 'CAP') {
+                $capCurrentStandardStarts += $course['currentStandardStarts'];
+                $capQStartStandardStarts  += $course['quarterStartStandardStarts'];
+            } else if ($course['type'] == 'CPC') {
+                $cpcCurrentStandardStarts += $course['currentStandardStarts'];
+                $cpcQStartStandardStarts  += $course['quarterStartStandardStarts'];
+            }
+        }
+
+        $capGame = $capCurrentStandardStarts - $capQStartStandardStarts;
+        $cpcGame = $cpcCurrentStandardStarts - $cpcQStartStandardStarts;
 
         // T1x and T2x Games
-        $startWeekendDate = $this->quarter->startWeekendDate->toDateString();
-        $tmlpRegCurrent = DB::table('tmlp_registrations_data')
-                        ->select(DB::raw("SUM(IF(appr = '1', 1, 0)) as team1Approved"))
-                        ->addSelect(DB::raw("SUM(IF((appr = '2' OR appr = 'R'), 1, 0)) as team2Approved"))
-                        ->where('tmlp_registrations_data.stats_report_id', '=', $this->statsReport->id)
-                        ->first();
+        $registrations = $this->importers['tmlpRegistration']->getData();
+        $t1CurrentApproved = 0;
+        $t2CurrentApproved  = 0;
+        foreach ($registrations as $registration) {
+            if ($registration['appr'] && $registration['incomingTeamYear'] == 1) {
+                $t1CurrentApproved++;
+            } else if ($registration['appr']) {
+                $t2CurrentApproved++;
+            }
+        }
 
-        $tmlpRegQStart = DB::table('tmlp_games')
-                        ->select(DB::raw("SUM(IF(tmlp_games.type LIKE '%T1', tmlp_games_data.quarter_start_approved, 0)) as team1Approved"))
-                        ->addSelect(DB::raw("SUM(IF(tmlp_games.type LIKE '%T2', tmlp_games_data.quarter_start_approved, 0)) as team2Approved"))
-                        ->join('tmlp_games_data', 'tmlp_games.id', '=', 'tmlp_games_data.tmlp_game_id')
-                        ->where('tmlp_games_data.stats_report_id', '=', $this->statsReport->id)
-                        ->first();
+        $tmlpGames = $this->importers['tmlpCourseInfo']->getData();
+        $t1QStartApproved = 0;
+        $t2QStartApproved  = 0;
+        foreach ($tmlpGames as $game) {
+            if (preg_match('/T1/', $game['type'])) {
+                $t1QStartApproved += $game['quarterStartApproved'];
+            } else if (preg_match('/T2/', $game['type'])) {
+                $t2QStartApproved += $game['quarterStartApproved'];
+            }
+        }
 
-        $t1xGame = $tmlpRegCurrent->team1Approved - $tmlpRegQStart->team1Approved;
-        $t2xGame = $tmlpRegCurrent->team2Approved - $tmlpRegQStart->team2Approved;
+        $t1xGame = $t1CurrentApproved - $t1QStartApproved;
+        $t2xGame = $t2CurrentApproved - $t2QStartApproved;
 
         // Make sure they match
         if ($thisWeekActual) {
 
-            if ($thisWeekActual->cap != $capGame) {
-                $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_CAP_ACTUAL_INCORRECT', false, $thisWeekActual->cap, $capGame);
+            if ($thisWeekActual['cap'] != $capGame) {
+                $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_CAP_ACTUAL_INCORRECT', $thisWeekActual['cap'], $capGame);
                 $isValid = false;
             }
 
-            if ($thisWeekActual->cpc != $cpcGame) {
-                $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_CPC_ACTUAL_INCORRECT', false, $thisWeekActual->cpc, $cpcGame);
+            if ($thisWeekActual['cpc'] != $cpcGame) {
+                $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_CPC_ACTUAL_INCORRECT', $thisWeekActual['cpc'], $cpcGame);
                 $isValid = false;
             }
 
-            if ($thisWeekActual->t1x != $t1xGame) {
+            if ($thisWeekActual['t1x'] != $t1xGame) {
                 // This is a warning since the regional is asked to verify
-                $this->messages['warnings'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_T1X_ACTUAL_INCORRECT', false, $thisWeekActual->t1x, $t1xGame);
+                $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_T1X_ACTUAL_INCORRECT', $thisWeekActual['t1x'], $t1xGame);
             }
 
-            if ($thisWeekActual->t2x != $t2xGame) {
-                $this->messages['warnings'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_T2X_ACTUAL_INCORRECT', false, $thisWeekActual->t2x, $t2xGame);
+            if ($thisWeekActual['t2x'] != $t2xGame) {
+                $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_T2X_ACTUAL_INCORRECT', $thisWeekActual['t2x'], $t2xGame);
             }
 
-            if ($thisWeekActual->gitw != $gitwGame) {
-                $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_GITW_ACTUAL_INCORRECT', false, $thisWeekActual->gitw, $gitwGame);
+            if ($thisWeekActual['gitw'] != $gitwGame) {
+                $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_GITW_ACTUAL_INCORRECT', $thisWeekActual['gitw'], $gitwGame);
                 $isValid = false;
             }
         }
@@ -486,7 +321,7 @@ class ImportDocument extends ImportDocumentAbstract
 
         if ($this->enforceVersion && $this->statsReport->spreadsheetVersion != $this->center->sheetVersion) {
 
-            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_SPREADSHEET_VERSION_MISMATCH', false, $this->statsReport->spreadsheetVersion, $this->center->sheetVersion);
+            $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_SPREADSHEET_VERSION_MISMATCH', $this->statsReport->spreadsheetVersion, $this->center->sheetVersion);
             $isValid = false;
         }
 
@@ -495,11 +330,11 @@ class ImportDocument extends ImportDocumentAbstract
             if ($this->statsReport->reportingDate->diffInDays($this->statsReport->quarter->endWeekendDate) < 7) {
                 // Reporting in the last week of quarter
                 if ($this->statsReport->reportingDate->ne($this->statsReport->quarter->endWeekendDate)) {
-                    $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_SPREADSHEET_DATE_MISMATCH_LAST_WEEK', false, $this->statsReport->reportingDate->toDateString(), $this->statsReport->quarter->endWeekendDate->toDateString());
+                    $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_SPREADSHEET_DATE_MISMATCH_LAST_WEEK', $this->statsReport->reportingDate->toDateString(), $this->statsReport->quarter->endWeekendDate->toDateString());
                     $isValid = false;
                 }
             } else {
-                $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_SPREADSHEET_DATE_MISMATCH', false, $this->statsReport->reportingDate->toDateString(), $this->expectedDate->toDateString());
+                $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_SPREADSHEET_DATE_MISMATCH', $this->statsReport->reportingDate->toDateString(), $this->expectedDate->toDateString());
                 $isValid = false;
             }
         }
@@ -546,9 +381,9 @@ class ImportDocument extends ImportDocumentAbstract
 
         $this->center = Center::name($centerName)->first();
         if (!$this->center) {
-            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_CENTER_NOT_FOUND', false, $centerName);
+            $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_CENTER_NOT_FOUND', $centerName);
         } else if (!$this->center->active) {
-            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_CENTER_INACTIVE', false, $centerName);
+            $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_CENTER_INACTIVE', $centerName);
         }
     }
     protected function loadDate()
@@ -562,11 +397,11 @@ class ImportDocument extends ImportDocumentAbstract
         if (!$this->reportingDate) {
             // Parse international dates properly
             $this->reportingDate = Util::parseUnknownDateFormat($reportingDate);
-            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_DATE_FORMAT_INCORRECT', false, $reportingDate);
+            $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_DATE_FORMAT_INCORRECT', $reportingDate);
         }
 
         if (!$this->reportingDate || $this->reportingDate->lt(Carbon::create(1980,1,1,0,0,0))) {
-            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_DATE_NOT_FOUND', false, $reportingDate);
+            $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_DATE_NOT_FOUND', $reportingDate);
         }
     }
     protected function loadVersion()
@@ -578,7 +413,7 @@ class ImportDocument extends ImportDocumentAbstract
             $version = $data[2]['L'];
 
             if (!preg_match("/^V((\d+\.\d+)(\.\d+)?)$/i", $version, $matches)) {
-                $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_VERSION_FORMAT_INCORRECT', false, $version);
+                $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_VERSION_FORMAT_INCORRECT', $version);
             } else {
                 $this->version = $matches[1]; // only grab to num
             }
@@ -593,7 +428,7 @@ class ImportDocument extends ImportDocumentAbstract
         }
         $this->quarter = Quarter::findByDateAndRegion($this->reportingDate, $this->center->globalRegion);
         if (!$this->quarter) {
-            $this->messages['errors'][] = Message::create(static::TAB_WEEKLY_STATS)->addMessage('IMPORTDOC_QUARTER_NOT_FOUND', false, $this->reportingDate->toDateString());
+            $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_QUARTER_NOT_FOUND', $this->reportingDate->toDateString());
         }
     }
 
@@ -650,7 +485,19 @@ class ImportDocument extends ImportDocumentAbstract
         $importer->import();
         $this->mergeMessages($importer->getMessages());
 
-        $this->importers['tmlpGameInfo'] = $importer;
+        $this->importers['tmlpCourseInfo'] = $importer;
+    }
+
+    protected function addMessage($tab, $messageId)
+    {
+        $message = Message::create($tab);
+
+        $arguments = array_slice(func_get_args(), 2);
+        array_unshift($arguments, $messageId, false);
+
+        $message = $this->callMessageAdd($message, $arguments);
+
+        $this->mergeMessages(array($message));
     }
 
     protected function mergeMessages($messages)
@@ -689,7 +536,7 @@ class ImportDocument extends ImportDocumentAbstract
                     break;
 
                 default:
-                    return; // No need to save
+                    continue; // No need to save
             }
             $this->statsReport->save();
         }
@@ -736,4 +583,11 @@ class ImportDocument extends ImportDocumentAbstract
     {
         return DataImporterFactory::build('TmlpGameInfo', $this->version, $sheet, $this->statsReport);
     }
+
+    // @codeCoverageIgnoreStart
+    protected function callMessageAdd($message, $arguments)
+    {
+        return call_user_func_array(array($message, 'addMessage'), $arguments);
+    }
+    // @codeCoverageIgnoreEnd
 }

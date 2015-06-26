@@ -4,6 +4,7 @@ namespace TmlpStats\Import\Xlsx\DataImporter;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\CenterStats;
 use TmlpStats\CenterStatsData;
+use TmlpStats\Util;
 
 use Carbon\Carbon;
 
@@ -14,24 +15,24 @@ class CenterStatsImporter extends DataImporterAbstract
     protected $centerStats = null;
     protected $weeks = array();
 
-    protected static $blockClassroom1 = array();
-    protected static $blockClassroom2 = array();
-    protected static $blockClassroom3 = array();
-    protected static $blockClassroom4 = array();
+    protected $blockClassroom1 = array();
+    protected $blockClassroom2 = array();
+    protected $blockClassroom3 = array();
+    protected $blockClassroom4 = array();
 
     protected function populateSheetRanges()
     {
-        self::$blockClassroom1[] = $this->excelRange('C','L');
-        self::$blockClassroom1[] = $this->excelRange(4,11);
+        $this->blockClassroom1[] = $this->excelRange('C','L');
+        $this->blockClassroom1[] = $this->excelRange(4,11);
 
-        self::$blockClassroom2[] = $this->excelRange('Q','Z');
-        self::$blockClassroom2[] = $this->excelRange(4,11);
+        $this->blockClassroom2[] = $this->excelRange('Q','Z');
+        $this->blockClassroom2[] = $this->excelRange(4,11);
 
-        self::$blockClassroom3[] = $this->excelRange('C','L');
-        self::$blockClassroom3[] = $this->excelRange(14,21);
+        $this->blockClassroom3[] = $this->excelRange('C','L');
+        $this->blockClassroom3[] = $this->excelRange(14,21);
 
-        self::$blockClassroom4[] = $this->excelRange('Q','Z');
-        self::$blockClassroom4[] = $this->excelRange(14,21);
+        $this->blockClassroom4[] = $this->excelRange('Q','Z');
+        $this->blockClassroom4[] = $this->excelRange(14,21);
     }
 
     public function getCenterStats()
@@ -43,10 +44,10 @@ class CenterStatsImporter extends DataImporterAbstract
     {
         $this->reader = $this->getReader($this->sheet);
 
-        $this->loadBlock(self::$blockClassroom1);
-        $this->loadBlock(self::$blockClassroom2);
-        $this->loadBlock(self::$blockClassroom3);
-        $this->loadBlock(self::$blockClassroom4);
+        $this->loadBlock($this->blockClassroom1);
+        $this->loadBlock($this->blockClassroom2);
+        $this->loadBlock($this->blockClassroom3);
+        $this->loadBlock($this->blockClassroom4);
     }
 
     protected function loadBlock($blockParams, $args = null)
@@ -69,58 +70,26 @@ class CenterStatsImporter extends DataImporterAbstract
 
         $weekDate = $this->reader->getWeekDate($blockStartRow, $weekCol);
 
-        if ($weekDate === false) {
-            $this->addMessage('CENTERSTATS_WEEK_DATE_FORMAT_INVALID', $row, $weekCol);
+        if (empty($weekDate)) {
             return;
-        } else if (!$weekDate) {
-            // There was no week date found. skip this column since it's blank
-            return;
+        } else if (is_object($weekDate)) {
+            $weekDate = $weekDate->toDateString();
         }
 
-        $centerStats = CenterStats::firstOrCreate(array(
-            'center_id'      => $this->statsReport->center->id,
-            'quarter_id'     => $this->statsReport->quarter->id,
-            'reporting_date' => $weekDate->toDateString(),
-        ));
+        $promiseData = array(
+            'reportingDate' => $weekDate,
+            'offset'        => $promiseCol,
+            'type'          => 'promise',
+            'tdo'           => 100,
+        );
 
-        $isSecondClassroom = $this->statsReport->reportingDate->eq($this->statsReport->quarter->classroom2Date);
-        $hasRepromise = false;
-
-        $promiseData = null;
-        $newPromiseData = null;
-        if ($centerStats->promiseDataId) {
-
-            if ($centerStats->actualDataId && $weekDate->ne($this->statsReport->reportingDate)) {
-                return; // Week already populated. Nothing to do here...
-            }
-
-            $promiseData = CenterStatsData::find($centerStats->promiseDataId);
-        }
-
-        // Otherwise, this is the first week, and we need to import all of the promises
-        if ($promiseData == null || ($isSecondClassroom && $weekDate->gt($this->statsReport->reportingDate))) {
-            // Have to use create here to get a brand new one. Otherwise, it will use the old version.
-            $newPromiseData = CenterStatsData::create(array(
-                'center_id'      => $this->statsReport->center->id,
-                'quarter_id'     => $this->statsReport->quarter->id,
-                'reporting_date' => $weekDate->toDateString(),
-                'type'           => 'promise',
-                'offset'         => $promiseCol
-            ));
-            $newPromiseData->tdo = 100;
-        }
-
-        $actualData = null;
-        // Only create actualData if this is the current week or a past week with no actual data
-        if ($weekDate->lte($this->statsReport->reportingDate)) {
-            $actualData = CenterStatsData::firstOrCreate(array(
-                'center_id'      => $this->statsReport->center->id,
-                'quarter_id'     => $this->statsReport->quarter->id,
-                'reporting_date' => $weekDate->toDateString(),
-                'type'           => 'actual',
-                'offset'         => $actualCol,
-            ));
-        }
+        $actualData = array(
+            'reportingDate' => $weekDate,
+            'offset'        => $actualCol,
+            'type'          => 'actual',
+            'tdo'           => null,
+        );
+        $hasActuals = true;
 
         $rowHeaders = array('cap', 'cpc', 't1x', 't2x', 'gitw', 'lf');
         for ($i = 0; $i < count($rowHeaders); $i++) {
@@ -128,124 +97,164 @@ class CenterStatsImporter extends DataImporterAbstract
 
             $row = $blockParams[1][$i+2]; // skip 2 title rows
 
-            // Only set data if this is a new promise object (no updates)
-            if ($newPromiseData) {
-                $value = (string)$this->reader->getGameValue($row, $promiseCol);
-                if ($field == 'gitw') {
-                    if ($value <= 1) {
-                        $value = ((int)$value) * 100;
-                    } else {
-                        $value = str_replace('%', '', $value);
-                    }
+            $promiseValue = $this->reader->getGameValue($row, $promiseCol);
+            if ($field == 'gitw') {
+                if ($promiseValue <= 1) {
+                    $promiseValue = ((int)$promiseValue) * 100;
+                } else {
+                    $promiseValue = str_replace('%', '', $promiseValue);
                 }
-                if ($promiseData && $promiseData->$field != $value) {
-                    $hasRepromise = true;
-                }
-                $newPromiseData->$field = $value;
+            }
+            $promiseData[$field] = $promiseValue;
+
+            $actualValue = $this->reader->getGameValue($row, $actualCol);
+
+            if (!$hasActuals || $actualValue === null) {
+                $hasActuals = false;
+                continue;
             }
 
-            if ($actualData) {
-                $value = (string)$this->reader->getGameValue($row, $actualCol);
-                if ($field == 'gitw') {
-                    if ($value <= 1) {
-                        $value = ((int)$value) * 100;
-                    } else {
-                        $value = str_replace('%', '', $value);
-                    }
+            if ($field == 'gitw') {
+                if ($actualValue <= 1) {
+                    $actualValue = ((int)$actualValue) * 100;
+                } else {
+                    $actualValue = str_replace('%', '', $actualValue);
                 }
-                $actualData->$field = $value;
             }
+            $actualData[$field] = $actualValue;
         }
+        $this->data[] = $promiseData;
 
-        if ($newPromiseData) {
-            $newPromiseData->statsReportId = $this->statsReport->id;
-            $newPromiseData->save();
-
-            $centerStats->promiseDataId = $newPromiseData->id;
-
-            if ($isSecondClassroom && $hasRepromise) {
-                $centerStats->revokedPromiseDataId = $promiseData->id;
-                $centerStats->promiseDataId = $newPromiseData->id;
-
-                $promiseData = null; // make sure we use the right value for post processing
-            }
-        }
-
-        // Only save new actuals.
-        if ($actualData) {
-            $actualData->statsReportId = $this->statsReport->id;
-            $actualData->save();
-
-            $centerStats->actualDataId = $actualData->id;
-
-            // Save new weeks for post processing
-            $week = array();
-            $week['promises'] = $promiseData ?: $newPromiseData;
-            $week['actuals'] = $actualData;
-            $this->weeks[] = $week;
-        }
-        if ($centerStats->statsReportId === null) {
-            $centerStats->statsReportId = $this->statsReport->id;
-        }
-        $centerStats->save();
-
-        if ($weekDate->eq($this->statsReport->reportingDate)) {
-            $this->centerStats = $centerStats;
+        if ($hasActuals) {
+            $this->data[] = $actualData;
         }
     }
 
     public function postProcess()
     {
+        $isSecondClassroom = $this->statsReport->reportingDate->eq($this->statsReport->quarter->classroom2Date);
+
         // Calculate Rating
-        foreach ($this->weeks as $week) {
+        foreach ($this->data as $week) {
 
-            if (!isset($week['promises']) || !isset($week['actuals'])) {
-                continue;
-            }
-            $actualData = $week['actuals'];
-            $promiseData = $week['promises'];
+            $weekDate = Carbon::createFromFormat('Y-m-d', $week['reportingDate']);
 
-            $points = 0;
-            $games = array('cap', 'cpc', 't1x', 't2x', 'gitw', 'lf');
-            foreach ($games as $game) {
+            $centerStats = CenterStats::firstOrNew(array(
+                'center_id'      => $this->statsReport->center->id,
+                'quarter_id'     => $this->statsReport->quarter->id,
+                'reporting_date' => $week['reportingDate'],
+            ));
 
-                $promise = $promiseData->$game;
-                $actual = $actualData->$game;
-                $percent = $promise
-                    ? round(($actual / $promise) * 100)
-                    : 0;
+            if ($week['type'] == 'promise') {
+                $promiseData = CenterStatsData::firstOrNew(array(
+                    'center_id'      => $this->statsReport->center->id,
+                    'quarter_id'     => $this->statsReport->quarter->id,
+                    'reporting_date' => $week['reportingDate'],
+                    'type'           => $week['type'],
+                ));
 
-                if ($percent >= 100) {
-                    $gamePoints = 4;
-                } else if ($percent >= 90) {
-                    $gamePoints = 3;
-                } else if ($percent >= 80) {
-                    $gamePoints = 2;
-                } else if ($percent >= 75) {
-                    $gamePoints = 1;
-                } else {
-                    $gamePoints = 0;
+                unset($week['type']);
+
+                if (!$promiseData->exists || ($isSecondClassroom && $weekDate->gt($this->statsReport->reportingDate))) {
+                    $promiseData = $this->setValues($promiseData, $week);
+
+                    if (!$promiseData->exists) {
+                        $promiseData->statsReportId = $this->statsReport->id;
+                        $promiseData->save();
+
+                        $centerStats->promiseDataId = $promiseData->id;
+                    } else if ($promiseData->isDirty()) {
+                        $newPromiseData = $promiseData->replicate();
+
+                        $newPromiseData->statsReportId = $this->statsReport->id;
+                        $newPromiseData->save();
+
+                        $centerStats->revokedPromiseDataId = $promiseData->id;
+                        $centerStats->promiseDataId = $newPromiseData->id;
+                    }
+
                 }
+            } else if ($week['type'] == 'actual') {
 
-                if ($game == 'cap') {
-                    $gamePoints *= 2;
+                $actualData = CenterStatsData::firstOrNew(array(
+                    'center_id'      => $this->statsReport->center->id,
+                    'quarter_id'     => $this->statsReport->quarter->id,
+                    'reporting_date' => $week['reportingDate'],
+                    'type'           => $week['type'],
+                ));
+
+                unset($week['type']);
+
+                if (!$actualData->exists || $this->statsReport->reportingDate->eq($weekDate)) {
+
+                    $actualData = $this->setValues($actualData, $week);
+
+                    $points = $this->calculatePoints($promiseData, $actualData);
+                    $rating = $this->getRating($points);
+
+                    $actualData->rating = "$rating ($points)";
+                    $actualData->statsReportId = $this->statsReport->id;
+                    $actualData->save();
+
+                    $centerStats->actualDataId = $actualData->id;
                 }
-                $points += $gamePoints;
             }
 
-            if ($points == 28) {
-                $rating = "Powerful ($points pts)";
-            } else if ($points >= 22) {
-                $rating = "High Performing ($points pts)";
-            } else if ($points >= 16) {
-                $rating = "Effective ($points pts)";
-            } else if ($points >= 9) {
-                $rating = "Marginally Effective ($points pts)";
+            if ($centerStats->isDirty()) {
+                $centerStats->statsReportId = $this->statsReport->id;
+                $centerStats->save();
+            }
+
+            if ($weekDate->eq($this->statsReport->reportingDate)) {
+                $this->centerStats = $centerStats;
+            }
+        }
+    }
+
+    public function calculatePoints($promises, $actuals)
+    {
+        $points = 0;
+        $games = array('cap', 'cpc', 't1x', 't2x', 'gitw', 'lf');
+        foreach ($games as $game) {
+
+            $promise = $promises->$game;
+            $actual = $actuals->$game;
+            $percent = $promise
+                ? round(($actual / $promise) * 100)
+                : 0;
+
+            if ($percent >= 100) {
+                $gamePoints = 4;
+            } else if ($percent >= 90) {
+                $gamePoints = 3;
+            } else if ($percent >= 80) {
+                $gamePoints = 2;
+            } else if ($percent >= 75) {
+                $gamePoints = 1;
             } else {
-                $rating = "Ineffective ($points pts)";
+                $gamePoints = 0;
             }
-            $actualData->rating = $rating;
-            $actualData->save();
+
+            if ($game == 'cap') {
+                $gamePoints *= 2;
+            }
+            $points += $gamePoints;
+        }
+        return $points;
+    }
+
+    public function getRating($points)
+    {
+        if ($points == 28) {
+            return "Powerful";
+        } else if ($points >= 22) {
+            return "High Performing";
+        } else if ($points >= 16) {
+            return "Effective";
+        } else if ($points >= 9) {
+            return "Marginally Effective";
+        } else {
+            return "Ineffective";
         }
     }
 }

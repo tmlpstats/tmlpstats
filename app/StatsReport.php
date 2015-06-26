@@ -25,6 +25,12 @@ class StatsReport extends Model {
         'reporting_date',
     ];
 
+    public function setReportingDateAttribute($value)
+    {
+        $date = $this->asDateTime($value);
+        $this->attributes['reporting_date'] = $date->toDateString();
+    }
+
     public function isValidated()
     {
         return (bool) $this->validated;

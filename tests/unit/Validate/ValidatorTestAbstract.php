@@ -28,14 +28,18 @@ class ValidatorTestAbstract extends \TmlpStatsTests\TestAbstract
         }
     }
 
-    protected function getObjectMock($methods = array())
+    protected function getObjectMock($methods = array(), $constructorArgs = array())
     {
         $defaultMethods = array(
             'addMessage'
         );
         $methods = $this->mergeMockMethods($defaultMethods, $methods);
 
-        return parent::getObjectMock($methods);
+        if (!$constructorArgs) {
+            $constructorArgs[] = new stdClass;
+        }
+
+        return parent::getObjectMock($methods, $constructorArgs);
     }
 
     protected function arrayToObject($array)

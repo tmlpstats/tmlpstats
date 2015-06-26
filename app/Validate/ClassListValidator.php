@@ -11,7 +11,6 @@ class ClassListValidator extends ValidatorAbstract
     protected function populateValidators($data)
     {
         $nameValidator           = v::string()->notEmpty();
-        $rowIdValidator          = v::numeric()->positive();
         $yesValidator            = v::string()->regex('/^[Y]$/i');
         $yesOrNullValidator      = v::when(v::nullValue(), v::alwaysValid(), $yesValidator);
 
@@ -52,8 +51,6 @@ class ClassListValidator extends ValidatorAbstract
         $this->dataValidators['firstName']           = $nameValidator;
         $this->dataValidators['lastName']            = $nameValidator;
         $this->dataValidators['teamYear']            = $teamYearValidator;
-        $this->dataValidators['completionQuarterId'] = $rowIdValidator;
-        $this->dataValidators['statsReportId']       = $rowIdValidator;
         $this->dataValidators['wknd']                = $equalsTeamYearValidator;
         $this->dataValidators['xferOut']             = $equalsTeamYearValidator;
         $this->dataValidators['xferIn']              = $equalsTeamYearValidator;
@@ -66,13 +63,6 @@ class ClassListValidator extends ValidatorAbstract
         $this->dataValidators['room']                = $yesOrNullValidator;
         $this->dataValidators['gitw']                = v::when(v::nullValue(), v::alwaysValid(), v::string()->regex('/^[EI]$/i'));
         $this->dataValidators['tdo']                 = v::when(v::nullValue(), v::alwaysValid(), v::string()->regex('/^[YN]$/i'));
-
-        // Skipping comment
-        // Skipping accountability
-        // Skipping center (auto-generated)
-        // Skipping reporting date (auto-generated)
-        // Skipping team member id (auto-generated)
-        // Skipping quarter (auto-generated)
     }
 
     protected function validate($data)

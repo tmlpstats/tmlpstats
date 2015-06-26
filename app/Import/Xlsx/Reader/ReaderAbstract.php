@@ -99,7 +99,9 @@ abstract class ReaderAbstract
                     case 'date':
                         if (!is_null($value))
                         {
-                            $value = Util::getExcelDate($value);
+                            $dateObj = Util::getExcelDate($value);
+
+                            $value = $dateObj !== false ? $dateObj : $value;
                         }
                         break;
                     case 'phone':

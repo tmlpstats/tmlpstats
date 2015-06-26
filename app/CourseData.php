@@ -31,6 +31,12 @@ class CourseData extends Model {
         'reporting_date',
     ];
 
+    public function setReportingDateAttribute($value)
+    {
+        $date = $this->asDateTime($value);
+        $this->attributes['reporting_date'] = $date->toDateString();
+    }
+
     public function center()
     {
         return $this->belongsTo('TmlpStats\Center');
