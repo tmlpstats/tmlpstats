@@ -105,6 +105,10 @@ class Util
             'lastName' => '',
         );
 
+        if (strpos($name, '/') !== false) {
+            $name = str_replace('/', ' ', $name);
+        }
+
         $names = explode(' ', trim($name));
         if ($names && count($names) > 0) {
             $parts['firstName'] = $names[0];
