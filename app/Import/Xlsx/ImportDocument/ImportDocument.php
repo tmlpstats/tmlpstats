@@ -514,32 +514,35 @@ class ImportDocument extends ImportDocumentAbstract
 
     // This method is called after validateReport, and only if it passes.
     // Put work here that add/updates data based on valid values
-    protected function postProcess()
+    protected function postProcess($isValid)
     {
-        foreach($this->importers as $name => $importer) {
+        if ($isValid) {
+            foreach ($this->importers as $name => $importer) {
 
-            $importer->postProcess();
+                $importer->postProcess();
 
-            // Update the Stats Report after post processing
-            switch ($name) {
+                // Update the Stats Report after post processing
+                switch ($name) {
 
-                case 'centerStats':
-                    $centerStats = $importer->getCenterStats();
-                    $this->statsReport->centerStatsId = $centerStats ? $centerStats->id : null;
-                    break;
+                    case 'centerStats':
+                        $centerStats = $importer->getCenterStats();
+                        $this->statsReport->centerStatsId = $centerStats ? $centerStats->id : null;
+                        break;
 
-                case 'contactInfo':
-                    $reportingStatistician = $importer->getReportingStatistician();
-                    $this->statsReport->reportingStatisticianId = $reportingStatistician ? $reportingStatistician->id : null;
-                    $this->statsReport->programManagerAttendingWeekend = $importer->getProgramManagerAttendingWeekend();
-                    $this->statsReport->classroomLeaderAttendingWeekend = $importer->getClassroomLeaderAttendingWeekend();
-                    break;
+                    case 'contactInfo':
+                        $reportingStatistician = $importer->getReportingStatistician();
+                        $this->statsReport->reportingStatisticianId = $reportingStatistician ? $reportingStatistician->id : null;
+                        $this->statsReport->programManagerAttendingWeekend = $importer->getProgramManagerAttendingWeekend();
+                        $this->statsReport->classroomLeaderAttendingWeekend = $importer->getClassroomLeaderAttendingWeekend();
+                        break;
 
-                default:
-                    continue; // No need to save
+                    default:
+                        continue; // No need to save
+                }
             }
-            $this->statsReport->save();
         }
+        $this->statsReport->validated = $isValid;
+        $this->statsReport->save();
     }
 
     protected function getWeeklyStatsSheet()
