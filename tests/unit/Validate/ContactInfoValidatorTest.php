@@ -14,6 +14,24 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
         'phone',
         'email',
     );
+
+
+    public function testPopulateValidatorsSetsValidatorsForEachInput($data = null)
+    {
+        $data = new stdClass;
+        $data->accountability = 'Program Manager';
+
+        parent::testPopulateValidatorsSetsValidatorsForEachInput($data);
+    }
+
+    public function testPopulateValidatorsSetsValidatorsForEachInputReportingStatistician($data = null)
+    {
+        $data = new stdClass;
+        $data->accountability = 'Reporting Statistician';
+
+        parent::testPopulateValidatorsSetsValidatorsForEachInput($data);
+    }
+
     /**
     * @dataProvider providerRun
     */
@@ -156,6 +174,17 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
                     'accountability' => 'Reporting Statistician',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
+                )),
+                array(),
+                true,
+            ),
+            // Test Valid
+            array(
+                $this->arrayToObject(array(
+                    'name'           => 'Keith Stone',
+                    'accountability' => 'Reporting Statistician',
+                    'phone'          => '555-555-5555',
+                    'email'          => '',
                 )),
                 array(),
                 true,

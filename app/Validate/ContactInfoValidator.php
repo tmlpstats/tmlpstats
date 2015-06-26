@@ -22,10 +22,15 @@ class ContactInfoValidator extends ValidatorAbstract
             'Reporting Statistician',
         );
 
+        $emailValidator = v::email();
+        if ($data->accountability == 'Reporting Statistician') {
+            $emailValidator = v::alwaysValid();
+        }
+
         $this->dataValidators['name']           = v::string()->regex('/^(.+)\s([^\s]+)$/i');
         $this->dataValidators['accountability'] = v::in($accountabilities);
         $this->dataValidators['phone']          = v::phone();
-        $this->dataValidators['email']          = v::email();
+        $this->dataValidators['email']          = $emailValidator;
     }
 
     protected function validate($data)
