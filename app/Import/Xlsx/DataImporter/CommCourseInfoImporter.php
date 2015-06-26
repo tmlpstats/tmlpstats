@@ -12,24 +12,24 @@ class CommCourseInfoImporter extends DataImporterAbstract
 {
     protected $sheetId = ImportDocument::TAB_COURSES;
 
-    protected static $blockCAP = array();
-    protected static $blockCPC = array();
+    protected $blockCAP = array();
+    protected $blockCPC = array();
 
     protected function populateSheetRanges()
     {
-        self::$blockCAP[] = $this->excelRange('A','O');
-        self::$blockCAP[] = $this->excelRange(5,14);
+        $this->blockCAP[] = $this->excelRange('A','O');
+        $this->blockCAP[] = $this->excelRange(5,14);
 
-        self::$blockCPC[] = $this->excelRange('A','O');
-        self::$blockCPC[] = $this->excelRange(18,25);
+        $this->blockCPC[] = $this->excelRange('A','O');
+        $this->blockCPC[] = $this->excelRange(18,25);
     }
 
     protected function load()
     {
         $this->reader = $this->getReader($this->sheet);
 
-        $this->loadBlock(self::$blockCAP, 'CAP');
-        $this->loadBlock(self::$blockCPC, 'CPC');
+        $this->loadBlock($this->blockCAP, 'CAP');
+        $this->loadBlock($this->blockCPC, 'CPC');
     }
 
     protected function loadEntry($row, $type)

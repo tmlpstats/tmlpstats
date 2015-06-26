@@ -9,24 +9,24 @@ class TmlpGameInfoImporter extends DataImporterAbstract
 {
     protected $sheetId = ImportDocument::TAB_COURSES;
 
-    protected static $blockT1X = array();
-    protected static $blockT2X = array();
+    protected $blockT1X = array();
+    protected $blockT2X = array();
 
     protected function populateSheetRanges()
     {
-        self::$blockT1X[] = $this->excelRange('A','K');
-        self::$blockT1X[] = $this->excelRange(30,31);
+        $this->blockT1X[] = $this->excelRange('A','K');
+        $this->blockT1X[] = $this->excelRange(30,31);
 
-        self::$blockT2X[] = $this->excelRange('A','K');
-        self::$blockT2X[] = $this->excelRange(38,39);
+        $this->blockT2X[] = $this->excelRange('A','K');
+        $this->blockT2X[] = $this->excelRange(38,39);
     }
 
     protected function load()
     {
         $this->reader = $this->getReader($this->sheet);
 
-        $this->loadBlock(self::$blockT1X, 'T1X');
-        $this->loadBlock(self::$blockT2X, 'T2X');
+        $this->loadBlock($this->blockT1X, 'T1X');
+        $this->loadBlock($this->blockT2X, 'T2X');
     }
 
     protected function loadEntry($row, $type)

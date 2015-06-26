@@ -18,63 +18,63 @@ class ClassListImporter extends DataImporterAbstract
     protected $totalTeamMembersDoingTdo = 0;
     protected $totalTeamMembers = 0;
 
-    protected static $blockT1Q1 = array();
-    protected static $blockT1Q2 = array();
-    protected static $blockT1Q3 = array();
-    protected static $blockT1Q4 = array();
+    protected $blockT1Q1 = array();
+    protected $blockT1Q2 = array();
+    protected $blockT1Q3 = array();
+    protected $blockT1Q4 = array();
 
-    protected static $blockT2Q1 = array();
-    protected static $blockT2Q2 = array();
-    protected static $blockT2Q3 = array();
-    protected static $blockT2Q4 = array();
+    protected $blockT2Q1 = array();
+    protected $blockT2Q2 = array();
+    protected $blockT2Q3 = array();
+    protected $blockT2Q4 = array();
 
     protected function populateSheetRanges()
     {
         $t1q4 = $this->findRange(25, 'Team 1 Completing', 'Team 2 Completing');
-        self::$blockT1Q4[] = $this->excelRange('A','S');
-        self::$blockT1Q4[] = $this->excelRange($t1q4['start'] + 1, $t1q4['end']);
+        $this->blockT1Q4[] = $this->excelRange('A','S');
+        $this->blockT1Q4[] = $this->excelRange($t1q4['start'] + 1, $t1q4['end']);
 
         $t2q4 = $this->findRange($t1q4['end'], 'Team 2 Completing', 'Current Team Completing');
-        self::$blockT2Q4[] = $this->excelRange('A','S');
-        self::$blockT2Q4[] = $this->excelRange($t2q4['start'] + 1, $t2q4['end']);
+        $this->blockT2Q4[] = $this->excelRange('A','S');
+        $this->blockT2Q4[] = $this->excelRange($t2q4['start'] + 1, $t2q4['end']);
 
         $t1q3 = $this->findRange($t2q4['end'], 'Team 1 Completing', 'Team 2 Completing');
-        self::$blockT1Q3[] = $this->excelRange('A','S');
-        self::$blockT1Q3[] = $this->excelRange($t1q3['start'] + 1, $t1q3['end']);
+        $this->blockT1Q3[] = $this->excelRange('A','S');
+        $this->blockT1Q3[] = $this->excelRange($t1q3['start'] + 1, $t1q3['end']);
 
         $t2q3 = $this->findRange($t1q3['end'], 'Team 2 Completing', 'Current Team Completing');
-        self::$blockT2Q3[] = $this->excelRange('A','S');
-        self::$blockT2Q3[] = $this->excelRange($t2q3['start'] + 1, $t2q3['end']);
+        $this->blockT2Q3[] = $this->excelRange('A','S');
+        $this->blockT2Q3[] = $this->excelRange($t2q3['start'] + 1, $t2q3['end']);
 
         $t1q2 = $this->findRange($t2q3['end'], 'Team 1 Completing', 'Team 2 Completing');
-        self::$blockT1Q2[] = $this->excelRange('A','S');
-        self::$blockT1Q2[] = $this->excelRange($t1q2['start'] + 1, $t1q2['end']);
+        $this->blockT1Q2[] = $this->excelRange('A','S');
+        $this->blockT1Q2[] = $this->excelRange($t1q2['start'] + 1, $t1q2['end']);
 
         $t2q2 = $this->findRange($t1q2['end'], 'Team 2 Completing', 'Current Team Completing');
-        self::$blockT2Q2[] = $this->excelRange('A','S');
-        self::$blockT2Q2[] = $this->excelRange($t2q2['start'] + 1, $t2q2['end']);
+        $this->blockT2Q2[] = $this->excelRange('A','S');
+        $this->blockT2Q2[] = $this->excelRange($t2q2['start'] + 1, $t2q2['end']);
 
         $t1q1 = $this->findRange($t2q2['end'], 'Team 1 Completing', 'Team 2 Completing');
-        self::$blockT1Q1[] = $this->excelRange('A','S');
-        self::$blockT1Q1[] = $this->excelRange($t1q1['start'] + 1, $t1q1['end']);
+        $this->blockT1Q1[] = $this->excelRange('A','S');
+        $this->blockT1Q1[] = $this->excelRange($t1q1['start'] + 1, $t1q1['end']);
 
         $t2q1 = $this->findRange($t1q1['end'], 'Team 2 Completing', 'Please e-mail the completed performance report to your Regional Statistician(s)');
-        self::$blockT2Q1[] = $this->excelRange('A','S');
-        self::$blockT2Q1[] = $this->excelRange($t2q1['start'] + 1, $t2q1['end'] - 4);
+        $this->blockT2Q1[] = $this->excelRange('A','S');
+        $this->blockT2Q1[] = $this->excelRange($t2q1['start'] + 1, $t2q1['end'] - 4);
     }
 
     protected function load()
     {
         $this->reader = $this->getReader($this->sheet);
 
-        $this->loadBlock(self::$blockT1Q4, 1);
-        $this->loadBlock(self::$blockT2Q4, 2);
-        $this->loadBlock(self::$blockT1Q3, 1);
-        $this->loadBlock(self::$blockT2Q3, 2);
-        $this->loadBlock(self::$blockT1Q2, 1);
-        $this->loadBlock(self::$blockT2Q2, 2);
-        $this->loadBlock(self::$blockT1Q1, 1);
-        $this->loadBlock(self::$blockT2Q1, 2);
+        $this->loadBlock($this->blockT1Q4, 1);
+        $this->loadBlock($this->blockT2Q4, 2);
+        $this->loadBlock($this->blockT1Q3, 1);
+        $this->loadBlock($this->blockT2Q3, 2);
+        $this->loadBlock($this->blockT1Q2, 1);
+        $this->loadBlock($this->blockT2Q2, 2);
+        $this->loadBlock($this->blockT1Q1, 1);
+        $this->loadBlock($this->blockT2Q1, 2);
     }
 
     protected function loadBlock($blockParams, $teamYear=NULL)

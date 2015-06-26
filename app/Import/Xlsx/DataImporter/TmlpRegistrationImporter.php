@@ -11,32 +11,33 @@ class TmlpRegistrationImporter extends DataImporterAbstract
 {
     protected $sheetId = ImportDocument::TAB_WEEKLY_STATS;
 
-    protected static $blockT1Reg = array();
-    protected static $blockT2Reg = array();
-    protected static $blockFutureReg = array();
+    protected $blockT1Reg = array();
+    protected $blockT2Reg = array();
+    protected $blockFutureReg = array();
 
     protected function populateSheetRanges()
     {
         $t1Reg = $this->findRange(32, 'Team 1 Registrations', 'Team 2 Registrations');
-        self::$blockT1Reg[] = $this->excelRange('A','AG');
-        self::$blockT1Reg[] = $this->excelRange($t1Reg['start'] + 1, $t1Reg['end']);
+        $this->blockT1Reg[] = $this->excelRange('A','AG');
+        $this->blockT1Reg[] = $this->excelRange($t1Reg['start'] + 1, $t1Reg['end']);
 
         $t2Reg = $this->findRange($t1Reg['end'], 'Team 2 Registrations', 'Future Weekend Reg');
-        self::$blockT2Reg[] = $this->excelRange('A','AG');
-        self::$blockT2Reg[] = $this->excelRange($t2Reg['start'] + 1, $t2Reg['end']);
+        $this->blockT2Reg[] = $this->excelRange('A','AG');
+        $this->blockT2Reg[] = $this->excelRange($t2Reg['start'] + 1, $t2Reg['end']);
 
         $futureReg = $this->findRange($t2Reg['end'], 'Future Weekend Reg', 'REMEMBER TO ENTER THE COURSE INFORMATION ON THE "CAP & CPC Course Info" Tab');
-        self::$blockFutureReg[] = $this->excelRange('A','AE');
-        self::$blockFutureReg[] = $this->excelRange($futureReg['start'] + 1, $futureReg['end']);    }
+        $this->blockFutureReg[] = $this->excelRange('A','AE');
+        $this->blockFutureReg[] = $this->excelRange($futureReg['start'] + 1, $futureReg['end']);
+    }
 
     public function load()
     {
         $this->reader = $this->getReader($this->sheet);
         $this->reader->setReportingDate($this->statsReport->reportingDate);
 
-        $this->loadBlock(self::$blockT1Reg, 1);
-        $this->loadBlock(self::$blockT2Reg, 2);
-        $this->loadBlock(self::$blockFutureReg, 'future');
+        $this->loadBlock($this->blockT1Reg, 1);
+        $this->loadBlock($this->blockT2Reg, 2);
+        $this->loadBlock($this->blockFutureReg, 'future');
     }
 
     protected function loadEntry($row, $type)

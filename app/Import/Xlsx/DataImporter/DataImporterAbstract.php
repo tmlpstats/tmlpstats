@@ -65,7 +65,7 @@ abstract class DataImporterAbstract
         $row = $startRow;
         $searching = true;
         $maxRows = count($this->sheet);
-        $maxSearchRows = 1000;
+        $maxSearchRows = 500;
         while ($searching && $row < $maxSearchRows) {
             $value = $this->sheet[$row][$targetColumn];
 

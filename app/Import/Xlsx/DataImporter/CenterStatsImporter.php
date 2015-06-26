@@ -15,24 +15,24 @@ class CenterStatsImporter extends DataImporterAbstract
     protected $centerStats = null;
     protected $weeks = array();
 
-    protected static $blockClassroom1 = array();
-    protected static $blockClassroom2 = array();
-    protected static $blockClassroom3 = array();
-    protected static $blockClassroom4 = array();
+    protected $blockClassroom1 = array();
+    protected $blockClassroom2 = array();
+    protected $blockClassroom3 = array();
+    protected $blockClassroom4 = array();
 
     protected function populateSheetRanges()
     {
-        self::$blockClassroom1[] = $this->excelRange('C','L');
-        self::$blockClassroom1[] = $this->excelRange(4,11);
+        $this->blockClassroom1[] = $this->excelRange('C','L');
+        $this->blockClassroom1[] = $this->excelRange(4,11);
 
-        self::$blockClassroom2[] = $this->excelRange('Q','Z');
-        self::$blockClassroom2[] = $this->excelRange(4,11);
+        $this->blockClassroom2[] = $this->excelRange('Q','Z');
+        $this->blockClassroom2[] = $this->excelRange(4,11);
 
-        self::$blockClassroom3[] = $this->excelRange('C','L');
-        self::$blockClassroom3[] = $this->excelRange(14,21);
+        $this->blockClassroom3[] = $this->excelRange('C','L');
+        $this->blockClassroom3[] = $this->excelRange(14,21);
 
-        self::$blockClassroom4[] = $this->excelRange('Q','Z');
-        self::$blockClassroom4[] = $this->excelRange(14,21);
+        $this->blockClassroom4[] = $this->excelRange('Q','Z');
+        $this->blockClassroom4[] = $this->excelRange(14,21);
     }
 
     public function getCenterStats()
@@ -44,10 +44,10 @@ class CenterStatsImporter extends DataImporterAbstract
     {
         $this->reader = $this->getReader($this->sheet);
 
-        $this->loadBlock(self::$blockClassroom1);
-        $this->loadBlock(self::$blockClassroom2);
-        $this->loadBlock(self::$blockClassroom3);
-        $this->loadBlock(self::$blockClassroom4);
+        $this->loadBlock($this->blockClassroom1);
+        $this->loadBlock($this->blockClassroom2);
+        $this->loadBlock($this->blockClassroom3);
+        $this->loadBlock($this->blockClassroom4);
     }
 
     protected function loadBlock($blockParams, $args = null)
