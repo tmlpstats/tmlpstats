@@ -233,5 +233,5 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
         return ($a['section'] >= $b['section']) ? 1 : -1;
     }
 
-    protected function postProcess() { }
+    protected function postProcess($isValid) { }
 }
