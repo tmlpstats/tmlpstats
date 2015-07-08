@@ -162,7 +162,7 @@ class StatsReportController extends Controller {
                 if ($statsReport->save()) {
                     $response['success'] = true;
                     $response['locked'] = $statsReport->locked;
-                    Log::info("User {$userEmail} " . $statsReport->locked ? 'locked' : 'unlocked' . " statsReport {$id}");
+                    Log::info("User {$userEmail} " . ($statsReport->locked ? 'locked' : 'unlocked') . " statsReport {$id}");
                 } else {
                     $response['message'] = 'Unable to lock stats report.';
                     $response['locked'] = !$statsReport->locked;
