@@ -3,6 +3,10 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
+//
+// Moved migrations into table creation migration to avoid issues with migrate:refresh
+//
+
 class AddRegionToQuartersTable extends Migration {
 
 	/**
@@ -14,11 +18,11 @@ class AddRegionToQuartersTable extends Migration {
 	{
 		Schema::table('quarters', function(Blueprint $table)
 		{
-			$table->string('global_region', 64);
-			$table->string('local_region', 64);
+			// $table->string('global_region', 64);
+			// $table->string('local_region', 64);
 
-			$table->dropUnique('quarters_start_weekend_date_unique');
-			$table->unique(array('global_region','local_region','start_weekend_date'));
+			// $table->dropUnique('quarters_start_weekend_date_unique');
+			// $table->unique(array('global_region','local_region','start_weekend_date'));
 		});
 	}
 
@@ -31,11 +35,11 @@ class AddRegionToQuartersTable extends Migration {
 	{
 		Schema::table('quarters', function(Blueprint $table)
 		{
-			$table->dropUnique(array('global_region','local_region','start_weekend_date'));
-			$table->unique('start_weekend_date');
+			// $table->dropUnique(array('global_region','local_region','start_weekend_date'));
+			// $table->unique('start_weekend_date');
 
-			$table->dropColumn('global_region');
-			$table->dropColumn('local_region');
+			// $table->dropColumn('global_region');
+			// $table->dropColumn('local_region');
 		});
 	}
 

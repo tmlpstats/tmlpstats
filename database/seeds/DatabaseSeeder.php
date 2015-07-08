@@ -22,19 +22,24 @@ class DatabaseSeeder extends Seeder {
 		try {
 			// Not checked in to github, and will not be available in prod
 			$this->call('UserTableSeeder');
+			$this->call('RoleUserTableSeeder');
+			$this->call('CenterUserTableSeeder');
 
-			// $this->call('CenterStatsDataTableSeeder');
-			// $this->call('CenterStatsTableSeeder');
-			// $this->call('TeamMemberTableSeeder');
-			// $this->call('TeamMemberDataTableSeeder');
-			// $this->call('CourseTableSeeder');
-			// $this->call('CourseDataTableSeeder');
-			// $this->call('TmlpGameTableSeeder');
-			// $this->call('TmlpGameDataTableSeeder');
-			// $this->call('ProgramTeamMemberTableSeeder');
-			// $this->call('TmlpRegistrationTableSeeder');
-			// $this->call('TmlpRegistrationDataTableSeeder');
-			// $this->call('StatsReportTableSeeder');
-		} catch (\ReflectionException $e) { }
+			$this->call('CenterStatsDataTableSeeder');
+			$this->call('CenterStatsTableSeeder');
+			$this->call('TeamMemberTableSeeder');
+			$this->call('TeamMemberDataTableSeeder');
+			$this->call('CourseTableSeeder');
+			$this->call('CourseDataTableSeeder');
+			$this->call('TmlpGameTableSeeder');
+			$this->call('TmlpGameDataTableSeeder');
+			$this->call('ProgramTeamMemberTableSeeder');
+			$this->call('TmlpRegistrationTableSeeder');
+			$this->call('TmlpRegistrationDataTableSeeder');
+			$this->call('StatsReportTableSeeder');
+		} catch (\ReflectionException $e) {
+			// var_dump($e);
+			throw $e;
+		}
 	}
 }
