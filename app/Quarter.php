@@ -29,12 +29,14 @@ class Quarter extends Model {
         'classroom3_date',
     ];
 
-    public static function findByDateAndRegion($date, $region)
+    public static function findByDateAndRegion($date, $region = null)
     {
-        return static::where('start_weekend_date', '<', $date->toDateString())
-                     ->where('end_weekend_date', '>=', $date->toDateString())
-                     ->where('global_region', $region)
-                     ->first();
+        $query = static::where('start_weekend_date', '<', $date->toDateString())
+                       ->where('end_weekend_date', '>=', $date->toDateString());
+        if ($region !== null) {
+            $query->where('global_region', $region);
+        }
+        return $query->first();
     }
 
     public function scopePresentAndFuture($query)
@@ -42,11 +44,16 @@ class Quarter extends Model {
         return $query->where('end_weekend_date', '>=', Carbon::now());
     }
 
-    public function scopeCurrent($query, $region)
+    public function scopeCurrent($query, $region = null)
     {
-        return $query->where('start_weekend_date', '<', Carbon::now())
-                     ->where('end_weekend_date', '>=', Carbon::now())
-                     ->where('global_region', $region);
+        $query = $query->where('start_weekend_date', '<', Carbon::now())
+                       ->where('end_weekend_date', '>=', Carbon::now());
+
+        if ($region !== null) {
+            $query = $query->where('global_region', $region);
+        }
+
+        return $query;
     }
 
     public function statsReport()

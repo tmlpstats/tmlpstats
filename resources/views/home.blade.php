@@ -11,7 +11,6 @@
 						<h1>Results for Week Ending {{ $reportingDate->format('F j, Y') }}</h1>
 
 						{!! Form::open(['url' => 'home', 'class' => 'form-horizontal']) !!}
-
 						<div class="form-group">
 							{!! Form::label('stats_report', 'Week:', ['class' => 'col-sm-1 control-label']) !!}
 							<div class="col-sm-2">
@@ -19,19 +18,7 @@
 							</div>
 						</div>
 
-
-						<div class="form-group">
-						    {!! Form::label('region', 'Region:', ['class' => 'col-sm-1 control-label']) !!}
-						    <div class="col-sm-5" style="padding-left: 40px">
-						        {!! Form::select('region',[
-						                'ANZ' => 'Australia/New Zealand',
-						                'EME' => 'Europe/Middle East',
-						                'IND' => 'India',
-						                'NA'  => 'North America'
-					                ], $selectedRegion, ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}
-						    </div>
-						</div>
-
+						@include('partials.regions')
 						{!! Form::close() !!}
 
 						@foreach ($regionsData as $data)
@@ -41,27 +28,27 @@
 							<table class="table table-hover">
 								<thead>
 								<tr>
-									<th data-sortable="true">Center</th>
-									<th data-sortable="true">Region</th>
-									<th data-sortable="true">Complete</th>
-									<th data-sortable="true">Rating</th>
-									<th data-sortable="true">Last Submitted</th>
-									<th data-sortable="true">Last Submitted By</th>
+									<th>Center</th>
+									<th>Region</th>
+									<th style="text-align: center">Complete</th>
+									<th>Rating</th>
+									<th>Last Submitted</th>
+									<th>Last Submitted By</th>
 									<th>&nbsp;</th>
 								</tr>
 								</thead>
 								<tbody>
 								@foreach ($data['centersData'] as $name => $center)
-								<tr {!! !$center['complete'] ? 'style="background-color: MistyRose"' : 'style="background-color: #E0FEE0"' !!}>
+									<tr class="{{ $center['complete'] ? 'success' : 'danger' }}" >
 									<td>{{ $center['name'] }}</td>
 									<td>{{ $center['localRegion'] }}</td>
-									<td><span style="align: center" class="glyphicon {{ $center['complete'] ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span></td>
+									<td style="text-align: center"><span class="glyphicon {{ $center['complete'] ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span></td>
 									<td>{{ $center['rating'] }}</td>
 									<td>{{ $center['updatedAt'] }}</td>
 									<td>{{ $center['updatedBy'] }}</td>
-									<td>
+									<td style="text-align: center">
 									@if ($center['sheet'])
-										<a href="{{ $center['sheet'] }}">Download</a>
+										<a href="{{ $center['sheet'] }}" title="Download" style="color: black"><span class="glyphicon glyphicon-cloud-download"></span></a>
 									@endif
 									</td>
 								</tr>
@@ -89,12 +76,12 @@
 
 				var timezone = tz.name();
 
-				console.log(tz);
-				console.log(timezone);
-
 				$.ajax({
-					type: "GET",
+					type: "POST",
 					url: "{{ action('HomeController@setTimezone') }}",
+					beforeSend: function (request) {
+						request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
+					},
 					data: 'timezone=' + encodeURI(tz.name()),
 					success: function(){
 						location.reload();

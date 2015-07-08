@@ -94,7 +94,7 @@ abstract class DataImporterAbstract
 
         // Now, grab the type
         $readerType = preg_replace("/Importer$/", '', $class);
-        return ReaderFactory::build($readerType, $this->statsReport->spreadsheetVersion, $data);
+        return ReaderFactory::build($readerType, $data);
     }
 
     protected function loadBlock($blockParams, $arg=NULL)

@@ -39,44 +39,52 @@ class StatsReport extends Model {
     // Flush all objects created by this report.
     public function clear()
     {
+        // Do not clear if locked!
+        if ($this->locked) {
+            return false;
+        }
+
+        $success = true;
+        $tables = array(
+        //  Table Name                Ignore errors encountered while deleting
+            'center_stats'            => false,
+            'center_stats_data'       => false,
+            'courses_data'            => false,
+            'courses'                 => true,
+            'program_team_members'    => false,
+            'team_members_data'       => false,
+            'team_members'            => true,
+            'tmlp_games_data'         => false,
+            'tmlp_games'              => true,
+            'tmlp_registrations_data' => false,
+            'tmlp_registrations'      => true,
+        );
+
         $this->centerStatsId = null;
         $this->reportingStatisticianId = null;
         $this->save();
-        try {
-            DB::table('center_stats')
-                ->where('stats_report_id', '=', $this->id)->delete();
-            DB::table('center_stats_data')
-                ->where('stats_report_id', '=', $this->id)->delete();
 
-            DB::table('courses_data')
-                ->where('stats_report_id', '=', $this->id)->delete();
-            DB::table('courses')
-                ->where('stats_report_id', '=', $this->id)->delete();
+        foreach ($tables as $table => $ignoreErrors) {
+            try {
+                DB::table($table)->where('stats_report_id', '=', $this->id)
+                                 ->delete();
+            } catch(\Exception $e) {
+                Log::error("Error clearing statsReport {$this->id} from $table table: " . $e->getMessage());
 
-            DB::table('program_team_members')
-                ->where('stats_report_id', '=', $this->id)->delete();
-
-            DB::table('team_members_data')
-                ->where('stats_report_id', '=', $this->id)->delete();
-            DB::table('team_members')
-                ->where('stats_report_id', '=', $this->id)->delete();
-
-            DB::table('tmlp_games_data')
-                ->where('stats_report_id', '=', $this->id)->delete();
-            DB::table('tmlp_games')
-                ->where('stats_report_id', '=', $this->id)->delete();
-
-            DB::table('tmlp_registrations_data')
-                ->where('stats_report_id', '=', $this->id)->delete();
-            DB::table('tmlp_registrations')
-                ->where('stats_report_id', '=', $this->id)->delete();
-        } catch(\Exception $e) {
-            Log::error("Error clearing statsReport {$this->id}: " . $e->getMessage());
+                if (!$ignoreErrors) {
+                    $success = false;
+                }
+            }
         }
+
+        return $success;
     }
 
     public function scopeReportingDate($query, $date)
     {
+        if (is_object($date)) {
+            $date = $date->toDateString();
+        }
         return $query->whereReportingDate($date);
     }
 
@@ -112,4 +120,10 @@ class StatsReport extends Model {
     {
         return $this->belongsTo('TmlpStats\Quarter');
     }
+
+    public function globalReports()
+    {
+        return $this->belongsToMany('TmlpStats\GlobalReport', 'global_report_stats_report')->withTimestamps();
+    }
+
 }

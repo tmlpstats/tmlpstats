@@ -4,9 +4,18 @@ namespace TmlpStats\Http\Controllers;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Controllers\Controller;
 
-use Illuminate\Http\Request;
-
+use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
+use TmlpStats\User;
+use TmlpStats\StatsReport;
+use TmlpStats\CenterStatsData;
+use TmlpStats\Quarter;
+
+use Carbon\Carbon;
+
+use Auth;
+use Request;
+use Input;
 
 class AdminController extends Controller {
 
@@ -22,6 +31,145 @@ class AdminController extends Controller {
 
     public function index()
     {
-        return view('admin.dashboard');
+        $userHomeRegion = Auth::user()->homeRegion();
+        $defaultRegion = $userHomeRegion ?: 'NA';
+
+        $region = Request::has('region') ? Request::get('region') : $defaultRegion;
+
+        $allReports = StatsReport::currentQuarter($region)->orderBy('reporting_date', 'desc')->get();
+        if ($allReports->isEmpty()) {
+            $allReports = StatsReport::lastQuarter($region)->orderBy('reporting_date', 'desc')->get();
+        }
+
+        $today = Carbon::now();
+        $reportingDates = array();
+
+        if ($today->dayOfWeek == Carbon::FRIDAY) {
+            $reportingDates[$today->toDateString()] = $today->format('F j, Y');
+        }
+        foreach ($allReports as $report) {
+            $dateString = $report->reportingDate->toDateString();
+            $reportingDates[$dateString] = $report->reportingDate->format('F j, Y');
+        }
+
+        $reportingDate = null;
+        $reportingDateString = Input::has('stats_report')
+            ? Input::get('stats_report')
+            : '';
+
+        if ($reportingDateString && array_key_exists($reportingDateString, $reportingDates)) {
+            $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
+        } else if ($today->dayOfWeek == Carbon::FRIDAY) {
+            $reportingDate = $today;
+        } else if (!$reportingDates) {
+            $reportingDate = $reportingDates[0]->reportingDate;
+        } else {
+            $reportingDate = ImportManager::getExpectedReportDate();
+        }
+
+        $centers = Center::active()
+                         ->globalRegion($region)
+                         ->orderBy('local_region', 'asc')
+                         ->orderBy('name', 'asc')
+                         ->get();
+
+        $regionsData = array();
+
+        switch($region) {
+            case 'ANZ':
+                $regionsData[0]['displayName'] = 'Australia/New Zealand Region';
+                $regionsData[0]['validatedCount'] = 0;
+                $regionsData[0]['completeCount'] = 0;
+                $regionsData[0]['centersData'] = array();
+                break;
+            case 'EME':
+                $regionsData[0]['displayName'] = 'Europe/Middle East Region';
+                $regionsData[0]['validatedCount'] = 0;
+                $regionsData[0]['completeCount'] = 0;
+                $regionsData[0]['centersData'] = array();
+                break;
+            case 'IND':
+                $regionsData[0]['displayName'] = 'India Region';
+                $regionsData[0]['validatedCount'] = 0;
+                $regionsData[0]['completeCount'] = 0;
+                $regionsData[0]['centersData'] = array();
+                break;
+            case 'NA':
+            default:
+                $regionsData['East']['displayName'] = 'North America - Eastern Region';
+                $regionsData['East']['validatedCount'] = 0;
+                $regionsData['East']['completeCount'] = 0;
+                $regionsData['East']['centersData'] = array();
+
+                $regionsData['West']['displayName'] = 'North America - Western Region';
+                $regionsData['West']['validatedCount'] = 0;
+                $regionsData['West']['completeCount'] = 0;
+                $regionsData['West']['centersData'] = array();
+                break;
+        }
+
+        foreach ($centers as $center) {
+
+            $localRegion = $center->localRegion ?: 0;
+
+            $statsReport = $center->statsReports()->reportingDate($reportingDate->toDateString())->first();
+
+            $user = $statsReport
+                ? User::find($statsReport->user_id)
+                : null;
+
+            $actualData = $statsReport
+                ? CenterStatsData::actual()->reportingDate($reportingDate->toDateString())->statsReport($statsReport)->first()
+                : null;
+
+            $sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->sheetFilename)
+                ? route('downloadSheet', array($reportingDate->toDateString(), $center->sheetFilename))
+                : null;
+
+            $updatedAt = $statsReport
+                ? Carbon::createFromFormat('Y-m-d H:i:s', $statsReport->updatedAt, 'UTC')
+                : null;
+
+            if ($updatedAt) {
+                $updatedAt->setTimezone($center->timeZone);
+            }
+
+            $centerResults = array(
+                'name'          => $center->name,
+                'statsReportId' => $statsReport ? $statsReport->id : 0,
+                'localRegion'   => $center->localRegion,
+                'complete'      => $statsReport ? $statsReport->validated : false,
+                'locked'        => $statsReport ? $statsReport->locked : false,
+                'rating'        => $actualData ? $actualData->rating : '-',
+                'updatedAt'     => $updatedAt ? $updatedAt->format('M d, Y @ g:ia T') : '-',
+                'updatedBy'     => $user ? $user->firstName : '-',
+                'sheet'         => $statsReport ? $sheetUrl : null,
+            );
+
+            if ($statsReport && $statsReport->validated) {
+                $regionsData[$localRegion]['completeCount'] += 1;
+            }
+            $regionsData[$localRegion]['validatedCount'] += 1;
+
+            $regionsData[$localRegion]['centersData'][] = $centerResults;
+        }
+
+        foreach ($regionsData as &$sortRegion) {
+            usort($sortRegion['centersData'], array(get_class(), 'sortByComplete'));
+        }
+
+        return view('admin.dashboard')->with(['reportingDate' => $reportingDate,
+                                              'reportingDates' => $reportingDates,
+                                              'selectedRegion' => $region,
+                                              'regionsData' => $regionsData]);
+    }
+
+    protected static function sortByComplete($a, $b)
+    {
+        if ($a['complete'] != $b['complete']) {
+            return $a['complete'] ? -1 : 1; // reverse order to get sort in DESC order
+        } else {
+            return strcmp($a['name'], $b['name']);
+        }
     }
 }

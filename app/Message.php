@@ -659,6 +659,14 @@ class Message
                 '%%reportingDate%%',
             ),
         ),
+        'IMPORTDOC_STATS_REPORT_LOCKED' => array(
+            'type' => Message::ERROR,
+            'format' => "Stats report for %%centerName%% on %%reportingDate%% is locked and cannot be overwritten.",
+            'arguments' => array(
+                '%%centerName%%',
+                '%%reportingDate%%',
+            ),
+        ),
 
         // CenterStats Importer Errors
         'CENTERSTATS_WEEK_DATE_FORMAT_INVALID' => array(
