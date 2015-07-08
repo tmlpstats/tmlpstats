@@ -43,13 +43,6 @@
     </div>
 
     <div class="form-group">
-        {!! Form::label('stats_email', 'Time Zone:', ['class' => 'col-sm-2 control-label']) !!}
-        <div class="col-sm-5">
-            {!! Form::text('time_zone', null, ['class' => 'form-control']) !!}
-        </div>
-    </div>
-
-    <div class="form-group">
         {!! Form::label('sheet_filename', 'Sheet Filename:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-5">
             {!! Form::text('sheet_filename', null, ['class' => 'form-control']) !!}

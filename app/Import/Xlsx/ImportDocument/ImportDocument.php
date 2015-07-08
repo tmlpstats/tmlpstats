@@ -319,7 +319,7 @@ class ImportDocument extends ImportDocumentAbstract
     {
         $isValid = true;
 
-        if ($this->enforceVersion && $this->statsReport->spreadsheetVersion != $this->center->sheetVersion) {
+        if ($this->enforceVersion && $this->version != $this->center->sheetVersion) {
 
             $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_SPREADSHEET_VERSION_MISMATCH', $this->statsReport->spreadsheetVersion, $this->center->sheetVersion);
             $isValid = false;
@@ -353,16 +353,13 @@ class ImportDocument extends ImportDocumentAbstract
             return;
         }
 
-        // TODO: add option for someone to update validated sheets.
         $this->statsReport = StatsReport::firstOrCreate(array(
             'center_id'           => $this->center->id,
             'quarter_id'          => $this->quarter->id,
             'reporting_date'      => $this->reportingDate->toDateString(),
         ));
-        $this->statsReport->spreadsheetVersion = $this->version;
         $this->statsReport->userId = Auth::user()->id;
         $this->statsReport->save();
-        $this->statsReport->clear(); // Make sure there aren't any left over artifacts from the last run
 
         // Order matters here. TmlpRegistrations and ContactInfo search for team members
         // so ClassList must be loaded first
@@ -516,6 +513,15 @@ class ImportDocument extends ImportDocumentAbstract
     // Put work here that add/updates data based on valid values
     protected function postProcess($isValid)
     {
+        // Don't save anything if report is locked
+        if ($this->statsReport->locked) {
+            $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_STATS_REPORT_LOCKED', $this->center->name, $this->reportingDate->format("M d, Y"));
+            return;
+        }
+
+        // Make sure there aren't any left over artifacts from the last run
+        $this->statsReport->clear();
+
         if ($isValid) {
             foreach ($this->importers as $name => $importer) {
 
@@ -541,6 +547,8 @@ class ImportDocument extends ImportDocumentAbstract
                 }
             }
         }
+
+        $this->statsReport->spreadsheetVersion = $this->version;
         $this->statsReport->validated = $isValid;
         $this->statsReport->save();
     }

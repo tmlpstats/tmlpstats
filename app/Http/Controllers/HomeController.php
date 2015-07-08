@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Auth;
 use Session;
 use Request;
+use Input;
 
 class HomeController extends Controller {
 
@@ -46,10 +47,7 @@ class HomeController extends Controller {
 	{
 		$timezone = '';
 		if (Session::has('timezone')) {
-			$timezone = 'set';
-			date_default_timezone_set(Session::get('timezone'));
-		} else {
-			date_default_timezone_set('America/Los_Angeles');
+			$timezone =  Session::get('timezone');
 		}
 
 		$userHomeRegion = Auth::user()->homeRegion();
@@ -57,30 +55,36 @@ class HomeController extends Controller {
 
 		$region = Request::has('region') ? Request::get('region') : $defaultRegion;
 
-		$reportingDate = '';
-		if (Request::has('stats_report')) {
-			$statsReport = StatsReport::reportingDate(Request::get('stats_report'))->first();
-			if ($statsReport) {
-				$reportingDate = $statsReport->reportingDate;
-			}
-		}
-
-		if (!$reportingDate) {
-			$reportingDate = ImportManager::getExpectedReportDate();
-		}
-
 		$allReports = StatsReport::currentQuarter($region)->orderBy('reporting_date', 'desc')->get();
 		if ($allReports->isEmpty()) {
 			$allReports = StatsReport::lastQuarter($region)->orderBy('reporting_date', 'desc')->get();
 		}
 
-		$reportingDates = array();
-		foreach ($allReports as $report) {
-			$dateString = $report->reportingDate->toDateString();
-			$displayString = $report->reportingDate->format('M j, Y');
+		$today = Carbon::now();
+        $reportingDates = array();
 
-			$reportingDates[$dateString] = $displayString;
-		}
+        if ($today->dayOfWeek == Carbon::FRIDAY) {
+        	$reportingDates[$today->toDateString()] = $today->format('F j, Y');
+        }
+        foreach ($allReports as $report) {
+            $dateString = $report->reportingDate->toDateString();
+            $reportingDates[$dateString] = $report->reportingDate->format('F j, Y');
+        }
+
+        $reportingDate = null;
+        $reportingDateString = Input::has('stats_report')
+            ? Input::get('stats_report')
+            : '';
+
+        if ($reportingDateString && array_key_exists($reportingDateString, $reportingDates)) {
+        	$reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
+        } else if ($today->dayOfWeek == Carbon::FRIDAY) {
+        	$reportingDate = $today;
+        } else if (!$reportingDates) {
+        	$reportingDate = $reportingDates[0]->reportingDate;
+        } else {
+        	$reportingDate = ImportManager::getExpectedReportDate();
+        }
 
 		$centers = Center::active()
 						 ->globalRegion($region)
@@ -92,34 +96,34 @@ class HomeController extends Controller {
 
 		switch($region) {
 			case 'ANZ':
-				$regionsData[0]['displayName'] = 'Australia/New Zealand Region';
+				$regionsData[0]['displayName']    = 'Australia/New Zealand Region';
 				$regionsData[0]['validatedCount'] = 0;
-				$regionsData[0]['completeCount'] = 0;
-				$regionsData[0]['centersData'] = array();
+				$regionsData[0]['completeCount']  = 0;
+				$regionsData[0]['centersData']    = array();
 				break;
 			case 'EME':
-				$regionsData[0]['displayName'] = 'Europe/Middle East Region';
+				$regionsData[0]['displayName']    = 'Europe/Middle East Region';
 				$regionsData[0]['validatedCount'] = 0;
-				$regionsData[0]['completeCount'] = 0;
-				$regionsData[0]['centersData'] = array();
+				$regionsData[0]['completeCount']  = 0;
+				$regionsData[0]['centersData']    = array();
 				break;
 			case 'IND':
-				$regionsData[0]['displayName'] = 'India Region';
+				$regionsData[0]['displayName']    = 'India Region';
 				$regionsData[0]['validatedCount'] = 0;
-				$regionsData[0]['completeCount'] = 0;
-				$regionsData[0]['centersData'] = array();
+				$regionsData[0]['completeCount']  = 0;
+				$regionsData[0]['centersData']    = array();
 				break;
 			case 'NA':
 			default:
-				$regionsData['East']['displayName'] = 'North America - Eastern Region';
+				$regionsData['East']['displayName']    = 'North America - Eastern Region';
 				$regionsData['East']['validatedCount'] = 0;
-				$regionsData['East']['completeCount'] = 0;
-				$regionsData['East']['centersData'] = array();
+				$regionsData['East']['completeCount']  = 0;
+				$regionsData['East']['centersData']    = array();
 
-				$regionsData['West']['displayName'] = 'North America - Western Region';
+				$regionsData['West']['displayName']    = 'North America - Western Region';
 				$regionsData['West']['validatedCount'] = 0;
-				$regionsData['West']['completeCount'] = 0;
-				$regionsData['West']['centersData'] = array();
+				$regionsData['West']['completeCount']  = 0;
+				$regionsData['West']['centersData']    = array();
 				break;
 		}
 
@@ -143,8 +147,17 @@ class HomeController extends Controller {
 				|| (Auth::user()->hasRole('localStatistician') && Auth::user()->hasCenter($center->id))
 			) {
 				$sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->sheetFilename)
-								? route('downloadSheet', array($reportingDate->toDateString(), $center->sheetFilename))
-								: null;
+					? route('downloadSheet', array($reportingDate->toDateString(), $center->sheetFilename))
+					: null;
+			}
+
+			$updatedAt = $statsReport
+				? Carbon::createFromFormat('Y-m-d H:i:s', $statsReport->updatedAt, 'UTC')
+				: null;
+
+			if ($updatedAt) {
+				$localTimezone = $timezone ?: 'America/Los_Angeles';
+				$updatedAt->setTimezone($localTimezone);
 			}
 
 			$centerResults = array(
@@ -152,7 +165,7 @@ class HomeController extends Controller {
 				'localRegion' => $center->localRegion,
 				'complete'    => $statsReport ? $statsReport->validated : false,
 				'rating'      => $actualData ? $actualData->rating : '-',
-				'updatedAt'   => $statsReport ? date('M d, Y @ g:ia T', strtotime($statsReport->updatedAt . ' UTC')) : '-',
+				'updatedAt'   => $updatedAt ? $updatedAt->format('M j, Y @ g:ia T') : '-',
 				'updatedBy'   => $user ? $user->firstName : '-',
 				'sheet'       => $sheetUrl,
 			);
@@ -169,11 +182,11 @@ class HomeController extends Controller {
 			usort($sortRegion['centersData'], array(get_class(), 'sortByComplete'));
 		}
 
-		return view('home')->with(['reportingDate' => $reportingDate,
+		return view('home')->with(['reportingDate'  => $reportingDate,
 								   'reportingDates' => $reportingDates,
-								   'timezone' => $timezone,
+								   'timezone'	    => $timezone,
 								   'selectedRegion' => $region,
-								   'regionsData' => $regionsData]);
+								   'regionsData'	=> $regionsData]);
 	}
 
 	protected static function sortByComplete($a, $b)

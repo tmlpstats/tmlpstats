@@ -33,10 +33,6 @@
             <td>{{ $center->stats_email }}</td>
         </tr>
         <tr>
-            <th>Time Zone:</th>
-            <td>{{ $center->time_zone }}</td>
-        </tr>
-        <tr>
             <th>Sheet Filename:</th>
             <td>{{ $center->sheet_filename }}</td>
         </tr>

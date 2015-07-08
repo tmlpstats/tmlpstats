@@ -35,19 +35,17 @@ Route::filter('statistician', function()
 // Admin Area
 Route::when('admin/*', 'auth|admin');
 
-Route::get('admin/dashboard', 'AdminController@index');
+Route::match(['get', 'post'], 'admin/dashboard', 'AdminController@index');
 
 Route::get('admin/import', 'ImportController@import');
 Route::post('admin/import', 'ImportController@uploadImportSpreadsheet');
-
-// Route::get('admin/centers/import', 'CenterController@import');
-// Route::get('admin/quarters/import', 'QuarterController@import');
-// Route::get('admin/roles/import', 'RoleController@import');
 
 Route::resource('admin/centers', 'CenterController');
 Route::resource('admin/quarters', 'QuarterController');
 Route::resource('admin/users', 'UserController');
 Route::resource('admin/roles', 'RoleController');
+Route::resource('admin/statsreports', 'StatsReportController');
+Route::resource('admin/globalreports', 'GlobalReportController');
 
 // Import
 Route::when('import', 'auth|statistician');
@@ -72,7 +70,7 @@ Route::get('download/sheets/{date}/{center}', array('as' => 'downloadSheet', 'us
 ->where('center', '^\w+$');
 
 Route::match(['get', 'post'], 'home', 'HomeController@index');
-Route::get('home/timezone', 'HomeController@setTimezone');
+Route::post('home/timezone', 'HomeController@setTimezone');
 Route::get('/', 'WelcomeController@index');
 
 Route::controllers([
