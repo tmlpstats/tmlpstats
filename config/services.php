@@ -30,7 +30,8 @@ return [
 	],
 
 	'stripe' => [
-		'model'  => 'User',
+		'model'  => 'TmlpStats\User',
+		'key' => '',
 		'secret' => '',
 	],
 

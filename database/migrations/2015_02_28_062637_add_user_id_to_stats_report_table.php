@@ -28,7 +28,7 @@ class AddUserIdToStatsReportTable extends Migration {
 	{
 		Schema::table('stats_reports', function(Blueprint $table)
 		{
-			$table->dropForeign('user_id_foreign');
+			$table->dropForeign('stats_reports_user_id_foreign');
 			$table->dropColumn('user_id');
 		});
 	}

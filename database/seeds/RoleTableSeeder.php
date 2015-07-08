@@ -4,25 +4,12 @@ use TmlpStats\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
 
-class RoleTableSeeder extends Seeder {
+class RoleTableSeeder extends TmlpStats\Seeders\CsvSeederAbstract {
 
-    public function run()
+    protected $exportFile = "roles.csv";
+
+    protected function createObject($data)
     {
-        Model::unguard();
-
-        $roles = array(
-            'administrator',
-            'globalStatistician',
-            'programLeader',
-            'programMember',
-            'localStatistician',
-        );
-
-        foreach ($roles as $name) {
-            $role = array(
-                'name' => $name,
-            );
-            Role::create($role);
-        }
+        Role::create($data);
     }
 }
