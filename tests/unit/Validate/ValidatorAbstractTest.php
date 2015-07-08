@@ -1,5 +1,5 @@
 <?php
-namespace TmlpStatsTests\Validate;
+namespace TmlpStats\Tests\Validate;
 
 use TmlpStats\Message;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +21,7 @@ class ValidatorAbstractImplementation extends \TmlpStats\Validate\ValidatorAbstr
 
 class ValidatorAbstractTest extends ValidatorTestAbstract
 {
-    protected $testClass = 'TmlpStatsTests\Validate\ValidatorAbstractImplementation';
+    protected $testClass = 'TmlpStats\Tests\Validate\ValidatorAbstractImplementation';
 
     protected $dataFields = array();
 

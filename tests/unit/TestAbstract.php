@@ -1,5 +1,5 @@
 <?php
-namespace TmlpStatsTests;
+namespace TmlpStats\Tests;
 
 class TestAbstract extends \PHPUnit_Framework_TestCase
 {

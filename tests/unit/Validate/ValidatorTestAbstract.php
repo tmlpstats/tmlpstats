@@ -1,9 +1,9 @@
 <?php
-namespace TmlpStatsTests\Validate;
+namespace TmlpStats\Tests\Validate;
 
 use stdClass;
 
-class ValidatorTestAbstract extends \TmlpStatsTests\TestAbstract
+class ValidatorTestAbstract extends \TmlpStats\Tests\TestAbstract
 {
     //
     // populateValidators()

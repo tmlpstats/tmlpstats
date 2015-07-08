@@ -1,5 +1,5 @@
 <?php
-namespace TmlpStatsTests\Validate;
+namespace TmlpStats\Tests\Validate;
 
 use TmlpStats\Validate\ClassListValidator;
 use Carbon\Carbon;

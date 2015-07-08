@@ -1,11 +1,11 @@
 <?php
-namespace TmlpStatsTests\Validate;
+namespace TmlpStats\Tests\Validate;
 
 use stdClass;
 
 use TmlpStats\Validate\ValidatorFactory;
 
-class ValidatorFactoryTest extends \TmlpStatsTests\TestAbstract
+class ValidatorFactoryTest extends \TmlpStats\Tests\TestAbstract
 {
     protected $testClass = 'TmlpStats\Validate\ValidatorFactory';
 

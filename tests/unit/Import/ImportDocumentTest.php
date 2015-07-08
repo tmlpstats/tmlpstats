@@ -1,5 +1,5 @@
 <?php
-namespace TmlpStatsTests\Import;
+namespace TmlpStats\Tests\Import;
 
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\Message;
@@ -23,7 +23,7 @@ class ImporterStub
     }
 }
 
-class ImportDocumentTest extends \TmlpStatsTests\TestAbstract
+class ImportDocumentTest extends \TmlpStats\Tests\TestAbstract
 {
     protected $testClass = 'TmlpStats\Import\Xlsx\ImportDocument\ImportDocument';
 
