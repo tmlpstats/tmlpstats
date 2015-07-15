@@ -57,12 +57,12 @@ class AdminController extends Controller {
             ? Input::get('stats_report')
             : '';
 
-        if ($reportingDateString && array_key_exists($reportingDateString, $reportingDates)) {
+        if ($reportingDateString && isset($reportingDates[$reportingDateString])) {
             $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
         } else if ($today->dayOfWeek == Carbon::FRIDAY) {
             $reportingDate = $today;
-        } else if (!$reportingDates) {
-            $reportingDate = $reportingDates[0]->reportingDate;
+        } else if (!$reportingDate && $reportingDates) {
+            $reportingDate = $allReports[0]->reportingDate;
         } else {
             $reportingDate = ImportManager::getExpectedReportDate();
         }
@@ -112,7 +112,10 @@ class AdminController extends Controller {
 
             $localRegion = $center->localRegion ?: 0;
 
-            $statsReport = $center->statsReports()->reportingDate($reportingDate->toDateString())->first();
+            $statsReport = $center->statsReports()
+                                  ->reportingDate($reportingDate->toDateString())
+                                  ->orderBy('submitted_at', 'desc')
+                                  ->first();
 
             $user = $statsReport
                 ? User::find($statsReport->user_id)

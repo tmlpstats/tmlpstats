@@ -7,6 +7,7 @@ use TmlpStats\Import\ImportManager;
 
 use Carbon\Carbon;
 
+use Auth;
 use Request;
 
 class ImportController extends Controller {
@@ -19,6 +20,7 @@ class ImportController extends Controller {
 	public function index()
 	{
 		return view('import.index')->with([
+			'submitReport'            => Auth::user()->hasRole('globalStatistician'),
 			'showUploadForm'          => true,
 			'showReportCheckSettings' => true,
 			'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),
@@ -28,14 +30,24 @@ class ImportController extends Controller {
 	// Handle XLSX file uploads
 	public function uploadSpreadsheet(Request $request)
 	{
-		$manager = new ImportManager(Request::file('statsFiles'), Request::get('expectedReportDate'), (bool)(Request::get('ignoreVersion') == 0));
-		$manager->import();
+		$enforceVersion = (Request::get('ignoreVersion') != 1);
+
+		$submitReport = false;
+		if (Request::has('submitReport')) {
+			$submitReport = (Request::get('submitReport') == 1);
+		}
+
+		$manager = new ImportManager(Request::file('statsFiles'),
+									 Request::get('expectedReportDate'),
+									 $enforceVersion);
+		$manager->import($submitReport);
 
 		$results = $manager->getResults();
 
 		Request::flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
 		return view('import.index')->with([
+			'submitReport'            => Auth::user()->hasRole('globalStatistician'),
 			'showUploadForm'          => true,
 			'showReportCheckSettings' => true,
 			'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),

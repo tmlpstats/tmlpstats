@@ -76,12 +76,12 @@ class HomeController extends Controller {
             ? Input::get('stats_report')
             : '';
 
-        if ($reportingDateString && array_key_exists($reportingDateString, $reportingDates)) {
+        if ($reportingDateString && isset($reportingDates[$reportingDateString])) {
         	$reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
         } else if ($today->dayOfWeek == Carbon::FRIDAY) {
         	$reportingDate = $today;
-        } else if (!$reportingDates) {
-        	$reportingDate = $reportingDates[0]->reportingDate;
+        } else if (!$reportingDate && $reportingDates) {
+        	$reportingDate = $allReports[0]->reportingDate;
         } else {
         	$reportingDate = ImportManager::getExpectedReportDate();
         }
@@ -131,7 +131,10 @@ class HomeController extends Controller {
 
 			$localRegion = $center->localRegion ?: 0;
 
-			$statsReport = $center->statsReports()->reportingDate($reportingDate->toDateString())->first();
+			$statsReport = $center->statsReports()
+								  ->reportingDate($reportingDate->toDateString())
+								  ->orderBy('submitted_at', 'desc')
+								  ->first();
 
 			$user = $statsReport
 				? User::find($statsReport->user_id)
@@ -163,7 +166,8 @@ class HomeController extends Controller {
 			$centerResults = array(
 				'name'        => $center->name,
 				'localRegion' => $center->localRegion,
-				'complete'    => $statsReport ? $statsReport->validated : false,
+				'submitted'   => $statsReport ? $statsReport->isSubmitted() : false,
+				'validated'   => $statsReport ? $statsReport->isValidated() : false,
 				'rating'      => $actualData ? $actualData->rating : '-',
 				'updatedAt'   => $updatedAt ? $updatedAt->format('M j, Y @ g:ia T') : '-',
 				'updatedBy'   => $user ? $user->firstName : '-',
@@ -191,8 +195,8 @@ class HomeController extends Controller {
 
 	protected static function sortByComplete($a, $b)
 	{
-		if ($a['complete'] != $b['complete']) {
-			return $a['complete'] ? -1 : 1; // reverse order to get sort in DESC order
+		if ($a['validated'] != $b['validated']) {
+			return $a['validated'] ? -1 : 1; // reverse order to get sort in DESC order
 		} else {
 			return strcmp($a['name'], $b['name']);
 		}

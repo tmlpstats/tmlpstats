@@ -357,6 +357,7 @@ class ImportDocument extends ImportDocumentAbstract
             'center_id'           => $this->center->id,
             'quarter_id'          => $this->quarter->id,
             'reporting_date'      => $this->reportingDate->toDateString(),
+            'submitted_at'        => null,
         ));
         $this->statsReport->userId = Auth::user()->id;
         $this->statsReport->save();
@@ -543,14 +544,17 @@ class ImportDocument extends ImportDocumentAbstract
                         break;
 
                     default:
-                        continue; // No need to save
+                        break;
                 }
             }
         }
 
         $this->statsReport->spreadsheetVersion = $this->version;
         $this->statsReport->validated = $isValid;
+        $this->statsReport->submitted_at = Carbon::now();
         $this->statsReport->save();
+
+        $this->saved = true;
     }
 
     protected function getWeeklyStatsSheet()

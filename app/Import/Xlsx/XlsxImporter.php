@@ -33,11 +33,11 @@ class XlsxImporter
         $this->importDocument = $this->getNewImportDocument();
     }
 
-    public function import($validateReport = true)
+    public function import($saveReport = true)
     {
         if ($this->importDocument) {
 
-            return $this->importDocument->import($validateReport);
+            return $this->importDocument->import($saveReport);
         }
     }
     public function getImportDocument()

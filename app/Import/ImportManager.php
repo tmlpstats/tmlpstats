@@ -20,7 +20,7 @@ class ImportManager
     protected $files = array();
     protected $expectedDate = null;
     protected $enforceVersion = false;
-    protected $validateReport = true;
+    protected $saveReport = false;
 
     protected $results = array();
 
@@ -34,9 +34,9 @@ class ImportManager
         $this->enforceVersion = $enforceVersion;
     }
 
-    public function import($validateReport = true)
+    public function import($saveReport = false)
     {
-        $this->validateReport = $validateReport;
+        $this->saveReport = $saveReport;
         switch($this->dataType) {
 
             case 'xlsx':
@@ -81,7 +81,7 @@ class ImportManager
                 } else {
                     try {
                         $importer = ImporterFactory::build($this->dataType, $file->getRealPath(), $fileName, $this->expectedDate, $this->enforceVersion);
-                        $importer->import($this->validateReport);
+                        $importer->import($this->saveReport);
                         $doc = $importer->getImportDocument();
                     } catch(Exception $e) {
                         Log::error("Error processing '$fileName': " . $e->getMessage() . "\n" . $e->getTraceAsString());
@@ -106,7 +106,7 @@ class ImportManager
 
                 if ($doc->statsReport) {
 
-                    if ($doc->statsReport->isValidated()) {
+                    if ($doc->saved()) {
                         $this->archiveSheet($file,
                                             $doc->statsReport->reportingDate->toDateString(),
                                             $doc->statsReport->center->sheetFilename);

@@ -50,8 +50,8 @@ class GlobalReportController extends Controller {
         if ($allReports->isEmpty()) {
             $allReports = StatsReport::lastQuarter(null)
                                       ->groupBy('reporting_date')
-                                     ->orderBy('reporting_date', 'desc')
-                                     ->get();
+                                      ->orderBy('reporting_date', 'desc')
+                                      ->get();
         }
 
         $reportingDates = array();
@@ -96,12 +96,13 @@ class GlobalReportController extends Controller {
         $globalReport = GlobalReport::find($id);
 
         $statsReports = StatsReport::reportingDate($globalReport->reportingDate)
-                                   ->where('validated', '=', 1)
+                                   ->whereNotNull('submitted_at')
                                    ->get();
 
         $centers = array();
         foreach ($statsReports as $statsReport) {
-            if ($statsReport->globalReports()->find($globalReport->id)) {
+            if ($statsReport->globalReports()->find($globalReport->id)
+                || $globalReport->statsReports()->center($statsReport->center)->count() > 0) {
                 continue;
             }
             $centers[$statsReport->center->abbreviation] = $statsReport->center->name;
@@ -144,10 +145,14 @@ class GlobalReportController extends Controller {
                 if (Input::has('center')) {
                     $center = Center::abbreviation(Input::get('center'))->first();
                     $statsReport = StatsReport::reportingDate($globalReport->reportingDate)
+                                              ->orderBy('submitted_at', 'desc')
                                               ->center($center)
                                               ->first();
 
-                    if ($statsReport && !$globalReport->statsReports()->find($statsReport->id)) {
+                    if ($statsReport
+                        && !$globalReport->statsReports()->find($statsReport->id)
+                        && !$globalReport->statsReports()->center($statsReport->center)->first()
+                    ) {
                         $globalReport->statsReports()->attach([$statsReport->id]);
                     }
                 }

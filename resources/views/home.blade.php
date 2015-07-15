@@ -30,7 +30,7 @@
 								<tr>
 									<th>Center</th>
 									<th>Region</th>
-									<th style="text-align: center">Complete</th>
+									<th style="text-align: center">Submitted</th>
 									<th>Rating</th>
 									<th>Last Submitted</th>
 									<th>Last Submitted By</th>
@@ -39,10 +39,10 @@
 								</thead>
 								<tbody>
 								@foreach ($data['centersData'] as $name => $center)
-									<tr class="{{ $center['complete'] ? 'success' : 'danger' }}" >
+									<tr class="{{ $center['validated'] ? 'success' : 'danger' }}" >
 									<td>{{ $center['name'] }}</td>
 									<td>{{ $center['localRegion'] }}</td>
-									<td style="text-align: center"><span class="glyphicon {{ $center['complete'] ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span></td>
+									<td style="text-align: center"><span class="glyphicon {{ $center['submitted'] ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span></td>
 									<td>{{ $center['rating'] }}</td>
 									<td>{{ $center['updatedAt'] }}</td>
 									<td>{{ $center['updatedBy'] }}</td>

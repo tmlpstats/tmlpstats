@@ -63,12 +63,12 @@ class StatsReportController extends Controller {
             ? Input::get('stats_report')
             : '';
 
-        if ($reportingDateString && array_key_exists($reportingDateString, $reportingDates)) {
-        	$reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
+        if ($reportingDateString && isset($reportingDates[$reportingDateString])) {
+            $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
         } else if ($today->dayOfWeek == Carbon::FRIDAY) {
-        	$reportingDate = $today;
-        } else if (!$reportingDates) {
-        	$reportingDate = $reportingDates[0]->reportingDate;
+            $reportingDate = $today;
+        } else if (!$reportingDate && $reportingDates) {
+            $reportingDate = $allReports[0]->reportingDate;
         } else {
             $reportingDate = ImportManager::getExpectedReportDate();
         }
@@ -84,6 +84,7 @@ class StatsReportController extends Controller {
             $statsReportList[$center->name] = array(
                 'center' => $center,
                 'report' => StatsReport::reportingDate($reportingDate)
+                                       ->orderBy('submitted_at', 'desc')
                                        ->center($center)
                                        ->first(),
             );

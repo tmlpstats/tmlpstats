@@ -36,6 +36,11 @@ class StatsReport extends Model {
         return (bool) $this->validated;
     }
 
+    public function isSubmitted()
+    {
+        return $this->submitted_at !== null;
+    }
+
     // Flush all objects created by this report.
     public function clear()
     {
@@ -96,13 +101,22 @@ class StatsReport extends Model {
     public function scopeCurrentQuarter($query, $region)
     {
         $quarter = Quarter::findByDateAndRegion(Carbon::now(), $region);
+        if (!$quarter) {
+            return $query;
+        }
         return $query->whereQuarterId($quarter->id);
     }
 
     public function scopeLastQuarter($query, $region)
     {
         $currentQuarter = Quarter::findByDateAndRegion(Carbon::now(), $region);
+        if (!$currentQuarter) {
+            return $query;
+        }
         $lastQuarter = Quarter::findByDateAndRegion($currentQuarter->startWeekendDate, $region);
+        if (!$lastQuarter) {
+            return $query;
+        }
         return $query->whereQuarterId($lastQuarter->id);
     }
 
