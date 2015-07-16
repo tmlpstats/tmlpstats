@@ -20,7 +20,7 @@ class ImportController extends Controller {
 	public function index()
 	{
 		return view('import.index')->with([
-			'submitReport'            => Auth::user()->hasRole('globalStatistician'),
+			'submitReport'            => true,
 			'showUploadForm'          => true,
 			'showReportCheckSettings' => true,
 			'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),
@@ -47,7 +47,7 @@ class ImportController extends Controller {
 		Request::flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
 		return view('import.index')->with([
-			'submitReport'            => Auth::user()->hasRole('globalStatistician'),
+			'submitReport'            => true,
 			'showUploadForm'          => true,
 			'showReportCheckSettings' => true,
 			'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),
