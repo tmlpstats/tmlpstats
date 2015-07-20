@@ -19,13 +19,16 @@
 
 <ul>
 @foreach ($results['sheets'] as $sheet)
+<?php $center = $sheet['center'] ?: 'Unknown'; ?>
+<?php $reportingDate = $sheet['reportingDate'] ? $sheet['reportingDate']->format('M j, Y') : 'Unknown'; ?>
+<?php $sheetVersion = $sheet['sheetVersion'] ?: 'Unknown'; ?>
     <li class="<?= $sheet['result'] ?>">
-        <?= $sheet['center'].": ".$sheet['reportingDate']." - sheet v".$sheet['sheetVersion'] ?>
+        <?= $center.": ".$reportingDate." - sheet v".$sheetVersion ?>
         @if ($sheet['result'] != 'ok')
             <?php
             $messages = array();
             foreach($sheet['errors'] as $msg) {
-                if (array_key_exists('offset', $msg)) {
+                if (isset($msg['offset'])) {
                     $messages[$msg['section']][$msg['offset']]['offsetType'] = $msg['offsetType']; // ugly, but works
                     $messages[$msg['section']][$msg['offset']][] = $msg;
                 } else {
@@ -33,7 +36,7 @@
                 }
             }
             foreach($sheet['warnings'] as $msg) {
-                if (array_key_exists('offset', $msg)) {
+                if (isset($msg['offset'])) {
                     $messages[$msg['section']][$msg['offset']]['offsetType'] = $msg['offsetType']; // ugly, but works
                     $messages[$msg['section']][$msg['offset']][] = $msg;
                 } else {

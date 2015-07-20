@@ -141,7 +141,7 @@ class HomeController extends Controller {
 				: null;
 
 			$actualData = $statsReport
-				? CenterStatsData::actual()->reportingDate($reportingDate->toDateString())->statsReport($statsReport)->first()
+				? CenterStatsData::actual()->statsReport($statsReport)->reportingDate($reportingDate->toDateString())->first()
 				: null;
 
 			$sheetUrl = null;

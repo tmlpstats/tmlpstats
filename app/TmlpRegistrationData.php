@@ -35,6 +35,7 @@ class TmlpRegistrationData extends Model {
         'reason_withdraw',
         'travel',
         'room',
+        'stats_report_id',
     ];
 
     protected $dates = [

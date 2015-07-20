@@ -1,13 +1,13 @@
 <?php
 namespace TmlpStats\Import\Xlsx;
 
-use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
+use Exception;
 
 // This handles taking an uploaded file, validating that the data
 class XlsxImporter
 {
     protected $allowedFileTypes = array('xlsx', 'xlsm');
-    protected $importDocument = null;
+    protected $results = array();
 
     protected $file = '';
     protected $version = '';
@@ -17,37 +17,48 @@ class XlsxImporter
     public function __construct($filePath, $fileName, $expectedDate = null, $enforceVersion = true)
     {
         if (!is_file($filePath)) {
-            // TODO: log this condition
-            throw new \Exception("There was a problem processing '$fileName'. Please try again.");
+            throw new Exception("There was a problem processing '{$fileName}'. Please try again.");
         }
         if (!$this->isCorrectFileType($fileName)) {
 
-            throw new \Exception("Uploaded file '$fileName' is not in the correct file format. The following formats are supported: "
+            throw new Exception("Uploaded file '{$fileName}' is not in the correct file format. The following formats are supported: "
                                  . implode(', ', $this->allowedFileTypes));
         }
 
         $this->file = $filePath;
         $this->expectedDate = $expectedDate;
         $this->enforceVersion = $enforceVersion;
-
-        $this->importDocument = $this->getNewImportDocument();
     }
 
     public function import($saveReport = true)
     {
-        if ($this->importDocument) {
+        $doc = new ImportDocument\ImportDocument($this->file, $this->expectedDate, $this->enforceVersion);
+        $doc->import($saveReport);
 
-            return $this->importDocument->import($saveReport);
+        $this->results = array(
+            'statsReportId' => ($doc->statsReport) ? $doc->statsReport->id : null,
+            'centerId'      => ($doc->center) ? $doc->center->id : null,
+            'center'        => ($doc->center) ? $doc->center->name : null,
+            'reportingDate' => ($doc->reportingDate) ? $doc->reportingDate : null,
+            'sheetVersion'  => ($doc->version) ? $doc->version : null,
+            'sheetFilename' => ($doc->statsReport) ? $doc->statsReport->center->sheetFilename : null,
+            'saved'         => $doc->saved(),
+            'errors'        => $doc->messages['errors'],
+            'warnings'      => $doc->messages['warnings'],
+        );
+
+        if (count($this->results['errors']) > 0) {
+            $this->results['result'] = 'error';
+        } else if (count($this->results['warnings']) > 0) {
+            $this->results['result'] = 'warning';
+        } else {
+            $this->results['result'] = 'ok';
         }
     }
-    public function getImportDocument()
-    {
-        return $this->importDocument;
-    }
 
-    protected function getNewImportDocument()
+    public function getResults()
     {
-        return new ImportDocument($this->file, $this->expectedDate, $this->enforceVersion);
+        return $this->results;
     }
 
     protected function isCorrectFileType($fileName)

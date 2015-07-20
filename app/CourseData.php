@@ -25,6 +25,7 @@ class CourseData extends Model {
         'completed_standard_starts',
         'potentials',
         'registrations',
+        'stats_report_id',
     ];
 
     protected $dates = [

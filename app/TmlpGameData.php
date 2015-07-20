@@ -18,6 +18,7 @@ class TmlpGameData extends Model {
         'offset',
         'quarter_start_registered',
         'quarter_start_approved',
+        'stats_report_id',
     ];
 
     protected $dates = [

@@ -16,6 +16,7 @@ class CenterStatsData extends Model {
         'offset',
         'center_id',
         'quarter_id',
+        'stats_report_id',
     ];
 
     protected $dates = [
@@ -30,7 +31,11 @@ class CenterStatsData extends Model {
 
     public function scopeStatsReport($query, $statsReport)
     {
-        return $query->whereStatsReportId($statsReport->id);
+        if ($statsReport instanceof \TmlpStats\StatsReport) {
+            return $query->whereStatsReportId($statsReport->id);
+        } else {
+            return $query->whereStatsReportId(null);
+        }
     }
 
     public function scopeCenter($query, $center)

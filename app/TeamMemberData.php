@@ -31,6 +31,7 @@ class TeamMemberData extends Model {
         'gitw',
         'tdo',
         'additional_tdo',
+        'stats_report_id',
     ];
 
     protected $dates = [
