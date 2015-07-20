@@ -47,11 +47,11 @@ class StatsReportController extends Controller {
                                      ->get();
         }
 
-		$today = Carbon::now();
+        $today = Carbon::now();
         $reportingDates = array();
 
         if ($today->dayOfWeek == Carbon::FRIDAY) {
-        	$reportingDates[$today->toDateString()] = $today->format('F j, Y');
+            $reportingDates[$today->toDateString()] = $today->format('F j, Y');
         }
         foreach ($allReports as $report) {
             $dateString = $report->reportingDate->toDateString();

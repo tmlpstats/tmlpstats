@@ -12,54 +12,54 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller {
 
-	/**
-	 * Create a new controller instance.
-	 *
-	 * @return void
-	 */
-	public function __construct()
-	{
-		$this->middleware('auth');
-	}
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
 
-	/**
-	 * Display a listing of the resource.
-	 *
-	 * @return Response
-	 */
-	public function index()
-	{
-		$users = User::active()->orderby('first_name')->orderby('last_name')->get();
+    /**
+     * Display a listing of the resource.
+     *
+     * @return Response
+     */
+    public function index()
+    {
+        $users = User::active()->orderby('first_name')->orderby('last_name')->get();
 
         return view('users.index', compact('users'));
-	}
+    }
 
-	/**
-	 * Show the form for creating a new resource.
-	 *
-	 * @return Response
-	 */
-	public function create()
-	{
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return Response
+     */
+    public function create()
+    {
         $roles = Role::all();
 
         return view('users.create', compact('roles'));
-	}
+    }
 
-	/**
-	 * Store a newly created resource in storage.
-	 *
-	 * @return Response
-	 */
-	public function store(UserRequest $request)
-	{
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @return Response
+     */
+    public function store(UserRequest $request)
+    {
         $redirect = 'admin/users';
 
-		if (!$request->has('cancel')) {
+        if (!$request->has('cancel')) {
             return redirect($redirect);
         }
 
-    	$user = User::create($request->all());
+        $user = User::create($request->all());
 
         if ($request->has('roles')) {
             $user->updateRoles($request->get('roles'));
@@ -70,33 +70,33 @@ class UserController extends Controller {
         if ($request->has('require_password_reset')) {
             $user->requirePasswordReset = $request->get('require_password_reset') == true;
         }
-    	$user->save();
+        $user->save();
 
-		return redirect($redirect);
-	}
+        return redirect($redirect);
+    }
 
-	/**
-	 * Display the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function show($id)
-	{
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function show($id)
+    {
         $user = User::findOrFail($id);
         $roles = Role::all();
 
         return view('users.show', compact('user', 'roles'));
-	}
+    }
 
-	/**
-	 * Show the form for editing the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function edit($id)
-	{
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function edit($id)
+    {
         $user = User::findOrFail($id);
         $roles = Role::all();
         $centerList = Center::orderBy('global_region')->orderBy('name')->get();
@@ -106,24 +106,24 @@ class UserController extends Controller {
         }
 
         return view('users.edit', compact('user', 'roles', 'centers'));
-	}
+    }
 
-	/**
-	 * Update the specified resource in storage.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function update(UserRequest $request, $id)
-	{
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function update(UserRequest $request, $id)
+    {
         $redirect = 'admin/users/' . $id;
-   		if ($request->has('previous_url')) {
-        	$redirect = $request->get('previous_url');
+           if ($request->has('previous_url')) {
+            $redirect = $request->get('previous_url');
         }
 
-		if ($request->has('cancel')) {
-	        return redirect($redirect);
-	    }
+        if ($request->has('cancel')) {
+            return redirect($redirect);
+        }
 
         $user = User::findOrFail($id);
         $user->update($request->all());
@@ -134,27 +134,27 @@ class UserController extends Controller {
         if ($request->has('roles')) {
             $user->updateRoles($request->get('roles'));
         }
-    	if ($request->has('active')) {
-    		$user->active = $request->get('active') == true;
-    	}
-    	if ($request->has('require_password_reset')) {
-    		$user->requirePasswordReset = $request->get('require_password_reset') == true;
-    	}
+        if ($request->has('active')) {
+            $user->active = $request->get('active') == true;
+        }
+        if ($request->has('require_password_reset')) {
+            $user->requirePasswordReset = $request->get('require_password_reset') == true;
+        }
         $user->save();
 
         return redirect($redirect);
-	}
+    }
 
-	/**
-	 * Remove the specified resource from storage.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function destroy($id)
-	{
-		//
-	}
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
 
     public function showProfile()
     {

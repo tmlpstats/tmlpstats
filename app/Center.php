@@ -8,7 +8,7 @@ class Center extends Model {
 
     use CamelCaseModel;
 
-	protected $fillable = array(
+    protected $fillable = array(
         'name',
         'abbreviation',
         'team_name',

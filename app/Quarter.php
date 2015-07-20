@@ -9,7 +9,7 @@ class Quarter extends Model {
 
     use CamelCaseModel;
 
-	protected $fillable = array(
+    protected $fillable = array(
         'start_weekend_date',
         'end_weekend_date',
         'classroom1_date',
