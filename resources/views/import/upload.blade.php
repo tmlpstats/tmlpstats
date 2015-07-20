@@ -18,7 +18,7 @@
 
 
 <ul>
-@foreach ($results['sheets'] as $sheet)
+@foreach($results['sheets'] as $sheet)
 <?php $center = $sheet['center'] ?: 'Unknown'; ?>
 <?php $reportingDate = $sheet['reportingDate'] ? $sheet['reportingDate']->format('M j, Y') : 'Unknown'; ?>
 <?php $sheetVersion = $sheet['sheetVersion'] ?: 'Unknown'; ?>
@@ -27,7 +27,7 @@
         @if ($sheet['result'] != 'ok')
             <?php
             $messages = array();
-            foreach($sheet['errors'] as $msg) {
+            foreach ($sheet['errors'] as $msg) {
                 if (isset($msg['offset'])) {
                     $messages[$msg['section']][$msg['offset']]['offsetType'] = $msg['offsetType']; // ugly, but works
                     $messages[$msg['section']][$msg['offset']][] = $msg;
@@ -35,7 +35,7 @@
                     $messages[$msg['section']][0][] = $msg;
                 }
             }
-            foreach($sheet['warnings'] as $msg) {
+            foreach ($sheet['warnings'] as $msg) {
                 if (isset($msg['offset'])) {
                     $messages[$msg['section']][$msg['offset']]['offsetType'] = $msg['offsetType']; // ugly, but works
                     $messages[$msg['section']][$msg['offset']][] = $msg;
@@ -51,10 +51,10 @@
             }
             ?>
             <ul>
-                @foreach ($messages as $tabName => $tab)
+                @foreach($messages as $tabName => $tab)
                     <li>{{ ucfirst($tabName) }}
                         <ul>
-                        @foreach ($tab as $offset => $offsetMessages)
+                        @foreach($tab as $offset => $offsetMessages)
                             @if ($offset === 0)
                                 @foreach($offsetMessages as $msg)
                                     @if (is_array($msg))
@@ -81,7 +81,7 @@
     </li>
 @endforeach
 
-@foreach ($results['unknownFiles'] as $file)
+@foreach($results['unknownFiles'] as $file)
     <li>{{ $file }}</li>
 @endforeach
 </ul>

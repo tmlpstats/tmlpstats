@@ -82,14 +82,14 @@
 @section('scripts')
 <script type="text/javascript">
     $(document).ready(function() {
-        $("a.lock").click(function(){
+        $("a.lock").click(function() {
             $.ajax({
                 type: "PATCH",
                 data: "dataType=JSON&locked=" + $(this).find("i.fa").hasClass("fa-unlock"), // if it is currently unlocked, lock it,
                 beforeSend: function (request) {
                     request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
                 },
-                success: function(response){
+                success: function(response) {
                     if (response.success) {
                         $("#errors").hide();
 
@@ -111,14 +111,14 @@
             });
             return false; // Don't scroll to top
         });
-        $("a.remove").click(function(){
+        $("a.remove").click(function() {
             $.ajax({
                 type: "PATCH",
                 data: "dataType=JSON&remove=statsreport&id=" + $(this).closest('tr').attr('id'),
                 beforeSend: function (request) {
                     request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
                 },
-                success: function(response){
+                success: function(response) {
                     $("#errors span.message").text(response.message);
                     if (response.success) {
                         $("#errors").removeClass("alert-danger");

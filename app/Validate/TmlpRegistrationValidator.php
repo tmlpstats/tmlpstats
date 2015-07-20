@@ -304,7 +304,7 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         $maxAppOutDays = static::MAX_DAYS_TO_SEND_APPLICATION_OUT;
         $maxApplicationDays = static::MAX_DAYS_TO_APPROVE_APPLICATION;
 
-        if (is_null($data->wdDate)){
+        if (is_null($data->wdDate)) {
             // Make sure steps are taken in timely manner
             if (is_null($data->appOutDate)) {
                 if ($regDate && $regDate->lt($statsReport->reportingDate) && $regDate->diffInDays($statsReport->reportingDate) > $maxAppOutDays) {
@@ -407,9 +407,9 @@ class TmlpRegistrationValidator extends ValidatorAbstract
 
     public function getWeekendReg($data)
     {
-        if (!is_null($data->bef)){
+        if (!is_null($data->bef)) {
             return $data->bef;
-        } else if (!is_null($data->aft)){
+        } else if (!is_null($data->aft)) {
             return $data->aft;
         } else {
             return $data->dur;

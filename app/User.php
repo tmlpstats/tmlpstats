@@ -46,7 +46,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
     public function hasRole($name)
     {
-        foreach($this->roles as $role) {
+        foreach ($this->roles as $role) {
             if ($role->name == $name) {
                 return true;
             }
@@ -56,7 +56,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
     public function hasCenter($centerId)
     {
-        foreach($this->centers as $center) {
+        foreach ($this->centers as $center) {
             if ($center->id == $centerId) {
                 return true;
             }

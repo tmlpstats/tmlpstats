@@ -88,7 +88,7 @@ class ImportManager
                     $fileSaved = true;
                 }
 
-                if ($sheet['result'] == 'error'){
+                if ($sheet['result'] == 'error') {
                     $errorSheets[] = $sheet;
                 } else if ($sheet['result'] == 'warning') {
                     $warnSheets[] = $sheet;

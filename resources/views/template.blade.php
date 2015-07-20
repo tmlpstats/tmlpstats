@@ -46,7 +46,7 @@
     </div>
     <script type="text/javascript">
         // Enable hover dropdowns in nav menu
-        $(function(){
+        $(function() {
         $(".dropdown").hover(
             function() {
                 $('.dropdown-menu', this).stop( true, true ).fadeIn("fast");

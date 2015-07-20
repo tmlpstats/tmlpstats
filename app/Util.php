@@ -20,7 +20,7 @@ class Util
         if (count($parts) > 0) {
             $output = array_shift($parts);
         }
-        foreach($parts as $part) {
+        foreach ($parts as $part) {
 
             $output .= ucfirst($part);
         }
@@ -31,7 +31,7 @@ class Util
     {
         $object = new \stdClass;
 
-        foreach($array as $key => $value) {
+        foreach ($array as $key => $value) {
 
             $objectKey = static::camelCase($key);
             $object->$objectKey = $value;
@@ -44,7 +44,7 @@ class Util
         $new = new \stdClass;
         $properties = get_object_vars($object);
 
-        foreach($properties as $key => $value) {
+        foreach ($properties as $key => $value) {
 
             $newKey = static::camelCase($key);
             $new->$newKey = $value;

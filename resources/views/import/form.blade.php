@@ -49,18 +49,18 @@
 @section('scripts')
 <script type="text/javascript">
     $(function($) {
-        $("input[name='ignoreReportDate']").click(function(){
+        $("input[name='ignoreReportDate']").click(function() {
             if ($(this).is(':checked')) {
                 $('#expectedReportDate').attr("disabled", true);
             } else if ($(this).not(':checked')) {
                 $('#expectedReportDate').removeAttr("disabled");
             }
         });
-        $("#go").click(function(){
+        $("#go").click(function() {
             $("#updating").show();
             $("#results").hide();
         });
-        $("a.advanced").click(function(){
+        $("a.advanced").click(function() {
             if ($("#advanced-state").hasClass("glyphicon-menu-right")) {
                 $("#advanced-state").removeClass("glyphicon-menu-right");
                 $("#advanced-state").addClass("glyphicon-menu-down");

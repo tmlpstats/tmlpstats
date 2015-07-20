@@ -79,7 +79,7 @@ class ClassListImporter extends DataImporterAbstract
 
     protected function loadBlock($blockParams, $teamYear=NULL)
     {
-        foreach($blockParams[1] as $row) {
+        foreach ($blockParams[1] as $row) {
 
             $completionQuarterRow  = $blockParams[1][0] - 2;
             $completionQuarterDate = $this->reader->getCompletionQuarter($completionQuarterRow);

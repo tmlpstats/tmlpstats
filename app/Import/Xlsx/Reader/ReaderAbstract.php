@@ -108,7 +108,7 @@ abstract class ReaderAbstract
                         if (!is_null($value))
                         {
                             $value = preg_replace('/\D/', '', $value);
-                            if(preg_match('/^(\d\d\d)(\d\d\d)(\d\d\d\d)$/', $value, $matches))
+                            if (preg_match('/^(\d\d\d)(\d\d\d)(\d\d\d\d)$/', $value, $matches))
                             {
                                 $value = "({$matches[1]}) {$matches[2]}-{$matches[3]}";
                             }

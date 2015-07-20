@@ -69,7 +69,7 @@
 @section('scripts')
 <script type="text/javascript">
 	$(document).ready(function() {
-		if("<?php echo $timezone; ?>".length == 0){
+		if ("<?php echo $timezone; ?>".length == 0) {
 			var tz = jstz.determine();
 
 			if (typeof (tz) !== 'undefined') {

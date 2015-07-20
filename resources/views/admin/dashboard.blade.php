@@ -104,7 +104,7 @@
 @section('scripts')
 <script type="text/javascript">
     $(document).ready(function() {
-        $("a.lock").click(function(){
+        $("a.lock").click(function() {
             $.ajax({
                 type: "PATCH",
                 url: "statsreports/" + $(this).closest('tr').attr('id'),
@@ -112,7 +112,7 @@
                 beforeSend: function (request) {
                     request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
                 },
-                success: function(response){
+                success: function(response) {
                     if (response.success) {
                         $("#errors").hide();
 
@@ -134,14 +134,14 @@
             });
             return false; // Don't scroll to top
         });
-        $("a.delete").click(function(){
+        $("a.delete").click(function() {
             $.ajax({
                 type: "DELETE",
                 url: "statsreports/" + $(this).closest('tr').attr('id'),
                 beforeSend: function (request) {
                     request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
                 },
-                success: function(response){
+                success: function(response) {
                     $("#errors span.message").text(response.message);
                     if (response.success) {
                         $("#errors").removeClass("alert-danger");
@@ -158,7 +158,7 @@
                         $("#" + response.statsReport).removeClass("success");
                         $("#" + response.statsReport).addClass("danger");
 
-                        $("#" + response.statsReport).each(function(){
+                        $("#" + response.statsReport).each(function() {
                             $('td:nth-child(3)', this).html('<span class="glyphicon glyphicon-remove"></span>')
                                 .next().text('-') // Rating
                                 .next().text('-') // Submitted At
