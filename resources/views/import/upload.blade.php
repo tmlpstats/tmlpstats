@@ -18,7 +18,7 @@
 
 
 <ul>
-@foreach($results['sheets'] as $sheet)
+@foreach ($results['sheets'] as $sheet)
 <?php $center = $sheet['center'] ?: 'Unknown'; ?>
 <?php $reportingDate = $sheet['reportingDate'] ? $sheet['reportingDate']->format('M j, Y') : 'Unknown'; ?>
 <?php $sheetVersion = $sheet['sheetVersion'] ?: 'Unknown'; ?>
@@ -51,12 +51,12 @@
             }
             ?>
             <ul>
-                @foreach($messages as $tabName => $tab)
+                @foreach ($messages as $tabName => $tab)
                     <li>{{ ucfirst($tabName) }}
                         <ul>
-                        @foreach($tab as $offset => $offsetMessages)
+                        @foreach ($tab as $offset => $offsetMessages)
                             @if ($offset === 0)
-                                @foreach($offsetMessages as $msg)
+                                @foreach ($offsetMessages as $msg)
                                     @if (is_array($msg))
                                         <li class="{{ $msg['type'] }}">{{ $msg['message'] }}</li>
                                     @endif
@@ -64,7 +64,7 @@
                             @else
                             <li>{{ ucfirst($offsetMessages['offsetType']) . " " . $offset }}
                                 <ul>
-                                @foreach($offsetMessages as $msg)
+                                @foreach ($offsetMessages as $msg)
                                     @if (is_array($msg))
                                         <li class="{{ $msg['type'] }}">{{ $msg['message'] }}</li>
                                     @endif
@@ -81,7 +81,7 @@
     </li>
 @endforeach
 
-@foreach($results['unknownFiles'] as $file)
+@foreach ($results['unknownFiles'] as $file)
     <li>{{ $file }}</li>
 @endforeach
 </ul>

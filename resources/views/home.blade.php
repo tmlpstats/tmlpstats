@@ -83,7 +83,7 @@
                         request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
                     },
                     data: 'timezone=' + encodeURI(tz.name()),
-                    success: function(){
+                    success: function() {
                         location.reload();
                     }
                 });
