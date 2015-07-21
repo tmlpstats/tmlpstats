@@ -67,18 +67,17 @@ class CommCourseInfoImporter extends DataImporterAbstract
             }
 
             $courseData = CourseData::firstOrNew(array(
-                'center_id'      => $this->statsReport->center->id,
-                'quarter_id'     => $this->statsReport->quarter->id,
-                'course_id'      => $course->id,
-                'reporting_date' => $this->statsReport->reportingDate->toDateString(),
+                'center_id'       => $this->statsReport->center->id,
+                'quarter_id'      => $this->statsReport->quarter->id,
+                'course_id'       => $course->id,
+                'reporting_date'  => $this->statsReport->reportingDate->toDateString(),
+                'stats_report_id' => $this->statsReport->id,
             ));
 
             unset($courseInput['startDate']);
             unset($courseInput['type']);
 
             $courseData = $this->setValues($courseData, $courseInput);
-
-            $courseData->statsReportId = $this->statsReport->id;
             $courseData->save();
         }
     }

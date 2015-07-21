@@ -5,37 +5,37 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateCentersTable extends Migration {
 
-	/**
-	 * Run the migrations.
-	 *
-	 * @return void
-	 */
-	public function up()
-	{
-		Schema::create('centers', function(Blueprint $table)
-		{
-			$table->increments('id');
-			$table->string('name');
-			$table->string('abbreviation')->unique();
-			$table->string('team_name')->nullable();
-			$table->string('global_region');
-			$table->string('local_region');
-			$table->string('stats_email');
-			$table->string('active');
-			$table->string('sheet_filename');
-			$table->string('sheet_version');
-			$table->timestamps();
-		});
-	}
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('centers', function(Blueprint $table)
+        {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('abbreviation')->unique();
+            $table->string('team_name')->nullable();
+            $table->string('global_region');
+            $table->string('local_region');
+            $table->string('stats_email');
+            $table->string('active');
+            $table->string('sheet_filename');
+            $table->string('sheet_version');
+            $table->timestamps();
+        });
+    }
 
-	/**
-	 * Reverse the migrations.
-	 *
-	 * @return void
-	 */
-	public function down()
-	{
-		Schema::drop('centers');
-	}
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::drop('centers');
+    }
 
 }

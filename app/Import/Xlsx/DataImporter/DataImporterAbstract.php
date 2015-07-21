@@ -99,7 +99,7 @@ abstract class DataImporterAbstract
 
     protected function loadBlock($blockParams, $arg=NULL)
     {
-        foreach($blockParams[1] as $offset)
+        foreach ($blockParams[1] as $offset)
         {
             try {
                 $this->loadEntry($offset, $arg);

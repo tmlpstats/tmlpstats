@@ -99,6 +99,7 @@ class TmlpRegistrationImporter extends DataImporterAbstract
                 'center_id'            => $this->statsReport->center->id,
                 'quarter_id'           => $this->statsReport->quarter->id,
                 'tmlp_registration_id' => $incoming->id,
+                'stats_report_id'      => $this->statsReport->id,
             ));
 
             unset($incomingInput['firstName']);
@@ -113,7 +114,6 @@ class TmlpRegistrationImporter extends DataImporterAbstract
                 $incomingData->committedTeamMemberId = $teamMember->id;
             }
 
-            $incomingData->statsReportId = $this->statsReport->id;
             $incomingData->save();
         }
     }

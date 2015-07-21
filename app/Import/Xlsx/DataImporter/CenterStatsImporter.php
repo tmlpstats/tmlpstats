@@ -89,7 +89,7 @@ class CenterStatsImporter extends DataImporterAbstract
             'type'          => 'actual',
             'tdo'           => null,
         );
-        $hasActuals = true;
+        $isFutureWeek = $this->statsReport->reportingDate->lt(Carbon::createFromFormat('Y-m-d', $weekDate)->startOfDay());
 
         $rowHeaders = array('cap', 'cpc', 't1x', 't2x', 'gitw', 'lf');
         for ($i = 0; $i < count($rowHeaders); $i++) {
@@ -107,13 +107,11 @@ class CenterStatsImporter extends DataImporterAbstract
             }
             $promiseData[$field] = $promiseValue;
 
-            $actualValue = $this->reader->getGameValue($row, $actualCol);
-
-            if (!$hasActuals || $actualValue === null) {
-                $hasActuals = false;
+            if ($isFutureWeek) {
                 continue;
             }
 
+            $actualValue = $this->reader->getGameValue($row, $actualCol);
             if ($field == 'gitw') {
                 if ($actualValue <= 1) {
                     $actualValue = ((int)$actualValue) * 100;
@@ -125,7 +123,7 @@ class CenterStatsImporter extends DataImporterAbstract
         }
         $this->data[] = $promiseData;
 
-        if ($hasActuals) {
+        if (!$isFutureWeek) {
             $this->data[] = $actualData;
         }
     }
@@ -137,7 +135,7 @@ class CenterStatsImporter extends DataImporterAbstract
         // Calculate Rating
         foreach ($this->data as $week) {
 
-            $weekDate = Carbon::createFromFormat('Y-m-d', $week['reportingDate']);
+            $weekDate = Carbon::createFromFormat('Y-m-d', $week['reportingDate'])->startOfDay();
 
             $centerStats = CenterStats::firstOrNew(array(
                 'center_id'      => $this->statsReport->center->id,
@@ -147,10 +145,11 @@ class CenterStatsImporter extends DataImporterAbstract
 
             if ($week['type'] == 'promise') {
                 $promiseData = CenterStatsData::firstOrNew(array(
-                    'center_id'      => $this->statsReport->center->id,
-                    'quarter_id'     => $this->statsReport->quarter->id,
-                    'reporting_date' => $week['reportingDate'],
-                    'type'           => $week['type'],
+                    'center_id'       => $this->statsReport->center->id,
+                    'quarter_id'      => $this->statsReport->quarter->id,
+                    'reporting_date'  => $week['reportingDate'],
+                    'type'            => $week['type'],
+                    'stats_report_id' => $this->statsReport->id,
                 ));
 
                 unset($week['type']);
@@ -159,7 +158,6 @@ class CenterStatsImporter extends DataImporterAbstract
                     $promiseData = $this->setValues($promiseData, $week);
 
                     if (!$promiseData->exists) {
-                        $promiseData->statsReportId = $this->statsReport->id;
                         $promiseData->save();
 
                         $centerStats->promiseDataId = $promiseData->id;
@@ -177,10 +175,11 @@ class CenterStatsImporter extends DataImporterAbstract
             } else if ($week['type'] == 'actual') {
 
                 $actualData = CenterStatsData::firstOrNew(array(
-                    'center_id'      => $this->statsReport->center->id,
-                    'quarter_id'     => $this->statsReport->quarter->id,
-                    'reporting_date' => $week['reportingDate'],
-                    'type'           => $week['type'],
+                    'center_id'       => $this->statsReport->center->id,
+                    'quarter_id'      => $this->statsReport->quarter->id,
+                    'reporting_date'  => $week['reportingDate'],
+                    'type'            => $week['type'],
+                    'stats_report_id' => $this->statsReport->id,
                 ));
 
                 unset($week['type']);
@@ -193,7 +192,6 @@ class CenterStatsImporter extends DataImporterAbstract
                     $rating = $this->getRating($points);
 
                     $actualData->rating = "$rating ($points)";
-                    $actualData->statsReportId = $this->statsReport->id;
                     $actualData->save();
 
                     $centerStats->actualDataId = $actualData->id;
@@ -206,7 +204,7 @@ class CenterStatsImporter extends DataImporterAbstract
             }
 
             if ($weekDate->eq($this->statsReport->reportingDate)) {
-                $this->centerStats = $centerStats;
+                $this->centerStats = clone $centerStats;
             }
         }
     }

@@ -51,6 +51,6 @@ class ClassListReader extends ReaderAbstract
                 break;
             default:
         }
-        return Carbon::createFromFormat('F j, Y', "$newDateStr, $year");
+        return Carbon::createFromFormat('F j, Y', "$newDateStr, $year")->startOfDay();
     }
 }

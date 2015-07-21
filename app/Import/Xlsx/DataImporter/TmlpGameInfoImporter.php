@@ -55,16 +55,16 @@ class TmlpGameInfoImporter extends DataImporterAbstract
             }
 
             $gameData = TmlpGameData::firstOrNew(array(
-                'center_id'      => $this->statsReport->center->id,
-                'quarter_id'     => $this->statsReport->quarter->id,
-                'tmlp_game_id'   => $game->id,
-                'reporting_date' => $this->statsReport->reportingDate->toDateString(),
+                'center_id'       => $this->statsReport->center->id,
+                'quarter_id'      => $this->statsReport->quarter->id,
+                'tmlp_game_id'    => $game->id,
+                'reporting_date'  => $this->statsReport->reportingDate->toDateString(),
+                'stats_report_id' => $this->statsReport->id,
             ));
 
             unset($gameInput['type']);
             $this->setValues($gameData, $gameInput);
 
-            $gameData->statsReportId = $this->statsReport->id;
             $gameData->save();
         }
     }

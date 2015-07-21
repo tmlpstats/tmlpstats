@@ -28,6 +28,8 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
     protected $expectedDate = null;
     protected $enforceVersion = true;
 
+    protected $saved = false;
+
     protected $messages = array(
         'errors' => array(),
         'warnings' => array(),
@@ -45,28 +47,22 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
         $this->enforceVersion = $enforceVersion;
     }
 
-    public function import($validateReport = true)
+    public function import($saveReport = false)
     {
         $isValid = false;
         $this->process();
 
-
         if ($this->statsReport) {
-            if (!$validateReport || $this->validateReport()) {
-                $isValid =  true;
+            if ($this->validateReport() && $this->isValid()) {
+                $isValid = true;
             }
-            $this->postProcess($isValid);
 
-            if (defined('VALIDATE_ONLY') || !$isValid || !$this->isValid()) {
-                // Flush all data imported from this report. Keeps db clean from
-                // data left over from invalid sheets
-                $this->statsReport->clear();
+            if ($saveReport) {
+                $this->postProcess($isValid);
+            } else if (!$this->statsReport->locked) {
+                $this->statsReport->validated = $isValid;
+                $this->statsReport->save();
             }
-        }
-
-        // Check if there were any errors during import
-        if (!$this->isValid()) {
-            $isValid = false;
         }
 
         $this->normalizeMessages();
@@ -87,6 +83,11 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
     public function isValid()
     {
         return count($this->messages['errors']) == 0;
+    }
+
+    public function saved()
+    {
+        return $this->saved;
     }
 
     protected function validateReport()

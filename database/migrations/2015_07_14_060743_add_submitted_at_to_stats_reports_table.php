@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAccountabilitiesTable extends Migration {
+class AddSubmittedAtToStatsReportsTable extends Migration {
 
     /**
      * Run the migrations.
@@ -12,12 +12,9 @@ class CreateAccountabilitiesTable extends Migration {
      */
     public function up()
     {
-        Schema::create('accountabilities', function(Blueprint $table)
+        Schema::table('stats_reports', function(Blueprint $table)
         {
-            $table->increments('id');
-            $table->string('name')->unique();
-            $table->string('context');
-            $table->timestamps();
+            $table->timestamp('submitted_at')->nullable()->default(null);
         });
     }
 
@@ -28,7 +25,9 @@ class CreateAccountabilitiesTable extends Migration {
      */
     public function down()
     {
-        Schema::drop('accountabilities');
+        Schema::table('stats_reports', function(Blueprint $table)
+        {
+            $table->dropColumn('submitted_at');
+        });
     }
-
 }

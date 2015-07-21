@@ -79,7 +79,7 @@ class ClassListImporter extends DataImporterAbstract
 
     protected function loadBlock($blockParams, $teamYear=NULL)
     {
-        foreach($blockParams[1] as $row) {
+        foreach ($blockParams[1] as $row) {
 
             $completionQuarterRow  = $blockParams[1][0] - 2;
             $completionQuarterDate = $this->reader->getCompletionQuarter($completionQuarterRow);
@@ -147,10 +147,11 @@ class ClassListImporter extends DataImporterAbstract
             }
 
             $memberData = TeamMemberData::firstOrNew(array(
-                'center_id'      => $memberInput['centerId'],
-                'quarter_id'     => $this->statsReport->quarter->id,
-                'reporting_date' => $this->statsReport->reportingDate->toDateString(),
-                'team_member_id' => $member->id,
+                'center_id'       => $memberInput['centerId'],
+                'quarter_id'      => $this->statsReport->quarter->id,
+                'reporting_date'  => $this->statsReport->reportingDate->toDateString(),
+                'team_member_id'  => $member->id,
+                'stats_report_id' => $this->statsReport->id,
             ));
 
             // Unset unneeded data
@@ -161,8 +162,6 @@ class ClassListImporter extends DataImporterAbstract
             unset($memberInput['completionQuarter']);
 
             $memberData = $this->setValues($memberData, $memberInput);
-
-            $memberData->statsReportId = $this->statsReport->id;
             $memberData->save();
 
             if ($memberData->wd || $memberData->wbo || $memberData->xferOut) continue;
