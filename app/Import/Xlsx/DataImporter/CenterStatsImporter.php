@@ -89,7 +89,7 @@ class CenterStatsImporter extends DataImporterAbstract
             'type'          => 'actual',
             'tdo'           => null,
         );
-        $hasActuals = true;
+        $isFutureWeek = $this->statsReport->reportingDate->lt(Carbon::createFromFormat('Y-m-d', $weekDate)->startOfDay());
 
         $rowHeaders = array('cap', 'cpc', 't1x', 't2x', 'gitw', 'lf');
         for ($i = 0; $i < count($rowHeaders); $i++) {
@@ -107,13 +107,11 @@ class CenterStatsImporter extends DataImporterAbstract
             }
             $promiseData[$field] = $promiseValue;
 
-            $actualValue = $this->reader->getGameValue($row, $actualCol);
-
-            if (!$hasActuals || $actualValue === null) {
-                $hasActuals = false;
+            if ($isFutureWeek) {
                 continue;
             }
 
+            $actualValue = $this->reader->getGameValue($row, $actualCol);
             if ($field == 'gitw') {
                 if ($actualValue <= 1) {
                     $actualValue = ((int)$actualValue) * 100;
@@ -125,7 +123,7 @@ class CenterStatsImporter extends DataImporterAbstract
         }
         $this->data[] = $promiseData;
 
-        if ($hasActuals) {
+        if (!$isFutureWeek) {
             $this->data[] = $actualData;
         }
     }
