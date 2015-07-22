@@ -10,6 +10,8 @@ use TmlpStats\CenterStatsData;
 
 use Carbon\Carbon;
 
+use Log;
+
 class ClassListImporter extends DataImporterAbstract
 {
     protected $sheetId = ImportDocument::TAB_CLASS_LIST;
@@ -126,8 +128,7 @@ class ClassListImporter extends DataImporterAbstract
             $completionQuarter = Quarter::findByDateAndRegion($memberInput['completionQuarter'], $this->statsReport->center->globalRegion);
 
             if (!$completionQuarter) {
-                // TODO: error
-                echo "Completion quarter doesn't exist";
+                Log::error("Completion quarter '{$memberInput['completionQuarter']}' in region '{$this->statsReport->center->globalRegion}' doesn't exist");
                 continue;
             }
 
