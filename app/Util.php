@@ -67,7 +67,7 @@ class Util
     public static function parseUnknownDateFormat($dateStr)
     {
         $dateObj = null;
-        try{
+        try {
             if (preg_match("/^\d{5,}$/", $dateStr)) { // Unix timestamp
                 $dateObj = Carbon::createFromFormat('U', $dateStr);
             } else if (preg_match("/^\d\d-\d\d-\d\d\d\d$/", $dateStr)) { // 01-01-2015

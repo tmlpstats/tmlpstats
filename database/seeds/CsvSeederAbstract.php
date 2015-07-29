@@ -42,7 +42,7 @@ abstract class CsvSeederAbstract extends Seeder {
                 }
             }
 
-            try{
+            try {
                 $this->createObject($data);
             } catch (\Exception $e) {
                 // Ignore bad data
