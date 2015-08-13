@@ -392,14 +392,16 @@ class TmlpRegistrationValidator extends ValidatorAbstract
                 }
             }
 
+            // Disabling check 08/15. Ending this practice
+            //
             // Any approved incoming without travel AND rooming booked by 2 weeks before the end of the quarter
             // is considered in a Conversation To Withdraw
-            $twoWeeksBeforeWeekend = $statsReport->quarter->endWeekendDate->subWeeks(2);
-            if ($statsReport->reportingDate->gte($twoWeeksBeforeWeekend) && !is_null($data->appr)) {
-                if (is_null($data->travel) || is_null($data->room)) {
-                    $this->addMessage('TMLPREG_TRAVEL_ROOM_CTW_COMMENT_REVIEW');
-                }
-            }
+            // $twoWeeksBeforeWeekend = $statsReport->quarter->endWeekendDate->subWeeks(2);
+            // if ($statsReport->reportingDate->gte($twoWeeksBeforeWeekend) && !is_null($data->appr)) {
+            //     if (is_null($data->travel) || is_null($data->room)) {
+            //         $this->addMessage('TMLPREG_TRAVEL_ROOM_CTW_COMMENT_REVIEW');
+            //     }
+            // }
         }
 
         return $isValid;

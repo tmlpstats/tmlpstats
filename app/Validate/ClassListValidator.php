@@ -231,16 +231,18 @@ class ClassListValidator extends ValidatorAbstract
                     $this->addMessage('CLASSLIST_ROOM_COMMENT_REVIEW');                }
             }
 
+            // Disabling check 08/15. Ending this practice
+            //
             // Any team member without travel AND rooming booked by 2 weeks before the end of the quarter
             // is considered in a Conversation To Withdraw
-            $endDate = clone $statsReport->quarter->endWeekendDate;
-            $twoWeeksBeforeWeekend = $endDate->subWeeks(2);
-            if ($statsReport->reportingDate->gte($twoWeeksBeforeWeekend)) {
-                if ((is_null($data->travel) || is_null($data->room)) && is_null($data->ctw)) {
-                    $this->addMessage('CLASSLIST_TRAVEL_ROOM_CTW_MISSING');
-                    $isValid = false;
-                }
-            }
+            // $endDate = clone $statsReport->quarter->endWeekendDate;
+            // $twoWeeksBeforeWeekend = $endDate->subWeeks(2);
+            // if ($statsReport->reportingDate->gte($twoWeeksBeforeWeekend)) {
+            //     if ((is_null($data->travel) || is_null($data->room)) && is_null($data->ctw)) {
+            //         $this->addMessage('CLASSLIST_TRAVEL_ROOM_CTW_MISSING');
+            //         $isValid = false;
+            //     }
+            // }
         }
 
         return $isValid;
