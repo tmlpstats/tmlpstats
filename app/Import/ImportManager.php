@@ -47,13 +47,15 @@ class ImportManager
             $fileSaved = false;
 
             try {
-                $fileName = $file->getClientOriginalName();
                 if (!($file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile)) {
                     // If someone refreshes the page after submitting file, and the browser doesn't send the file contents,
                     // we end up with empty files.
                     $file = null;
                     throw new Exception("There was a problem uploading one of the files. Please try again.");
-                } else if (!$file->isValid()) {
+                }
+
+                $fileName = $file->getClientOriginalName();
+                if (!$file->isValid()) {
                     Log::error("Error uploading '$fileName': {$file->getError()}");
                     $file = null;
                     throw new Exception("There was a problem uploading '$fileName'. Please try again.");
