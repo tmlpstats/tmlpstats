@@ -54,8 +54,8 @@ class ImportManager
                     $file = null;
                     throw new Exception("There was a problem uploading one of the files. Please try again.");
                 } else if (!$file->isValid()) {
-                    $file = null;
                     Log::error("Error uploading '$fileName': {$file->getError()}");
+                    $file = null;
                     throw new Exception("There was a problem uploading '$fileName'. Please try again.");
                 }
 
