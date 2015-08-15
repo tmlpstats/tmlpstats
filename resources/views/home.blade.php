@@ -13,7 +13,7 @@
                         {!! Form::open(['url' => 'home', 'class' => 'form-horizontal']) !!}
                         <div class="form-group">
                             {!! Form::label('stats_report', 'Week:', ['class' => 'col-sm-1 control-label']) !!}
-                            <div class="col-sm-2">
+                            <div class="col-sm-3">
                                 {!! Form::select('stats_report', $reportingDates, $reportingDate->toDateString(), ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}
                             </div>
                         </div>
