@@ -97,6 +97,7 @@ class GlobalReportController extends Controller {
 
         $statsReports = StatsReport::reportingDate($globalReport->reportingDate)
                                    ->whereNotNull('submitted_at')
+                                   ->validated(true)
                                    ->get();
 
         $centers = array();
@@ -109,7 +110,7 @@ class GlobalReportController extends Controller {
         }
         asort($centers);
         if ($centers) {
-            $centers = array_merge(array('default' => 'Choose Center'), $centers);
+            $centers = array_merge(array('default' => 'Add Center'), $centers);
         } else {
             $centers = array('default' => 'No Reports Available');
         }
@@ -146,6 +147,7 @@ class GlobalReportController extends Controller {
                     $center = Center::abbreviation(Input::get('center'))->first();
                     $statsReport = StatsReport::reportingDate($globalReport->reportingDate)
                                               ->orderBy('submitted_at', 'desc')
+                                              ->validated(true)
                                               ->center($center)
                                               ->first();
 

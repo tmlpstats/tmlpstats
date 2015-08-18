@@ -93,6 +93,11 @@ class StatsReport extends Model {
         return $query->whereReportingDate($date);
     }
 
+    public function scopeValidated($query, $validated)
+    {
+        return $query->whereValidated($validated);
+    }
+
     public function scopeCenter($query, $center)
     {
         return $query->whereCenterId($center->id);

@@ -145,6 +145,7 @@ class HomeController extends Controller {
                 : null;
 
             $sheetUrl = null;
+            $reportUrl = null;
 
             if (Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator')
                 || (Auth::user()->hasRole('localStatistician') && Auth::user()->hasCenter($center->id))
@@ -152,7 +153,9 @@ class HomeController extends Controller {
                 $sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->sheetFilename)
                     ? route('downloadSheet', array($reportingDate->toDateString(), $center->sheetFilename))
                     : null;
+                $reportUrl = url("/admin/statsreports/{$statsReport->id}");
             }
+;
 
             $updatedAt = $statsReport
                 ? Carbon::createFromFormat('Y-m-d H:i:s', $statsReport->updatedAt, 'UTC')
@@ -172,6 +175,7 @@ class HomeController extends Controller {
                 'updatedAt'   => $updatedAt ? $updatedAt->format('M j, Y @ g:ia T') : '-',
                 'updatedBy'   => $user ? $user->firstName : '-',
                 'sheet'       => $sheetUrl,
+                'reportUrl'   => $reportUrl,
             );
 
             if ($statsReport && $statsReport->validated) {

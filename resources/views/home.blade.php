@@ -35,6 +35,7 @@
                                     <th>Last Submitted</th>
                                     <th>Last Submitted By</th>
                                     <th>&nbsp;</th>
+                                    <th>&nbsp;</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -46,6 +47,13 @@
                                     <td>{{ $center['rating'] }}</td>
                                     <td>{{ $center['updatedAt'] }}</td>
                                     <td>{{ $center['updatedBy'] }}</td>
+                                    <td style="text-align: center">
+                                    @if ($center['reportUrl'])
+                                        <a href="{{ $center['reportUrl'] }}" class="view" title="View" style="color: black">
+                                            <span class="glyphicon glyphicon-eye-open"></span>
+                                        </a>
+                                    @endif
+                                    </td>
                                     <td style="text-align: center">
                                     @if ($center['sheet'])
                                         <a href="{{ $center['sheet'] }}" title="Download" style="color: black"><span class="glyphicon glyphicon-cloud-download"></span></a>

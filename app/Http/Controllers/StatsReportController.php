@@ -5,6 +5,7 @@ use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\StatsReport;
 use TmlpStats\Center;
 use TmlpStats\Import\ImportManager;
+use TmlpStats\Import\Xlsx\XlsxImporter;
 
 use Illuminate\Http\Request;
 
@@ -42,7 +43,7 @@ class StatsReportController extends Controller {
                                  ->get();
         if ($allReports->isEmpty()) {
             $allReports = StatsReport::lastQuarter($selectedRegion)
-                                      ->groupBy('reporting_date')
+                                     ->groupBy('reporting_date')
                                      ->orderBy('reporting_date', 'desc')
                                      ->get();
         }
@@ -122,7 +123,22 @@ class StatsReportController extends Controller {
      */
     public function show($id)
     {
-        echo "Coming soon...";
+        $statsReport = StatsReport::find($id);
+        $sheet = array();
+
+        if ($statsReport) {
+
+            $sheetUrl = ImportManager::getSheetPath($statsReport->reportingDate->toDateString(), $statsReport->center->sheetFilename);
+
+            try {
+                $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
+                $importer->import(false);
+                $sheet = $importer->getResults();
+            } catch(Exception $e) {
+                Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            }
+        }
+        return view('statsreports.show', compact('statsReport', 'sheet'));
     }
 
     /**
