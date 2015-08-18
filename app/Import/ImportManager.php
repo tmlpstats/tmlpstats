@@ -5,6 +5,7 @@ use Carbon\Carbon;
 
 use Auth;
 use Log;
+use Mail;
 use Exception;
 
 // Required for importing multiple sheets
@@ -44,7 +45,9 @@ class ImportManager
 
         foreach ($this->files as $file) {
 
-            $fileSaved = false;
+            $exception = null;
+            $sheetPath = null;
+            $sheet = array();
 
             try {
                 if (!($file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile)) {
@@ -61,7 +64,6 @@ class ImportManager
                     throw new Exception("There was a problem uploading '$fileName'. Please try again.");
                 }
 
-                $sheet = array();
                 try {
                     $importer = new Xlsx\XlsxImporter($file->getRealPath(), $fileName, $this->expectedDate, $this->enforceVersion);
                     $importer->import($saveReport);
@@ -79,15 +81,14 @@ class ImportManager
                 if (isset($sheet['statsReportId'])) {
 
                     if ($sheet['saved']) {
-                        $this->archiveSheet($file,
-                                            $sheet['reportingDate']->toDateString(),
-                                            $sheet['sheetFilename']);
+                        $sheetPath = $this->archiveSheet($file,
+                                                         $sheet['reportingDate']->toDateString(),
+                                                         $sheet['sheetFilename']);
                     } else {
-                        $this->saveWorkingSheet($file,
-                                                $sheet['reportingDate']->toDateString(),
-                                                $sheet['sheetFilename']);
+                        $sheetPath = $this->saveWorkingSheet($file,
+                                                             $sheet['reportingDate']->toDateString(),
+                                                             $sheet['sheetFilename']);
                     }
-                    $fileSaved = true;
                 }
 
                 if ($sheet['result'] == 'error') {
@@ -101,13 +102,36 @@ class ImportManager
 
                 Log::error("Error processing file: " . $e->getMessage());
                 $unknownFiles[] = $e->getMessage();
+                $exception = $e;
             }
 
-            if (!$fileSaved && $file) {
+            if (!$sheetPath && $file) {
 
-                $this->saveWorkingSheet($file,
-                                        Carbon::now()->toDateString(),
-                                        $file->getClientOriginalName());
+                $sheetPath = $this->saveWorkingSheet($file,
+                                                     Carbon::now()->toDateString(),
+                                                     $file->getClientOriginalName());
+            }
+
+            if ($exception) {
+                $center = isset($sheet['center'])
+                    ? $sheet['center']
+                    : 'unknown';
+
+                $user = Auth::user()->email;
+                $time = Carbon::now()->format('Y-m-d H:i:s');
+
+                $body = "An exception was caught processing a sheet submitted by '{$user}' for {$center} center at {$time} UTC: '" . $exception->getMessage() . "'\n\n";
+                $body .= $exception->getTraceAsString() . "\n";
+                try {
+                    Mail::raw($body, function($message) use ($center, $sheetPath) {
+                        $message->to(env('ADMIN_EMAIL'))->subject("Exception processing sheet for {$center} center");
+                        if ($sheetPath) {
+                            $message->attach($sheetPath);
+                        }
+                    });
+                } catch (\Exception $e) {
+                    Log::error("Exception caught sending error email: " . $e->getMessage());
+                }
             }
         }
 
