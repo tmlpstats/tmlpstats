@@ -30,6 +30,11 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
+    <script type="text/javascript" src="{{ asset('/js/jquery.loading.js') }}"></script>
+    <link href="{{ asset('/css/jquery.loading.css') }}" rel="stylesheet">
+
+    <link href="{{ asset('/css/tmlpstats.css') }}" rel="stylesheet">
+
     <style type="text/css">
         body {
           padding-top: 50px;

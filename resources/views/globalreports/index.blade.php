@@ -2,7 +2,7 @@
 
 @section('content')
 <h2 class="sub-header">Global Reports</h2>
-<a href="{{ url('/admin/globalreports/create') }}">+ Add one</a>
+<a href="{{ url('/globalreports/create') }}">+ Add one</a>
 
 <div class="table-responsive">
     <table class="table table-hover">
@@ -18,7 +18,7 @@
         @foreach ($globalReports as $globalReport)
             <tr>
                 <td>
-                    <a href="{{ url('/admin/globalreports/'.$globalReport->id) }}">
+                    <a href="{{ url('/globalreports/'.$globalReport->id) }}">
                         {{ $globalReport->reportingDate->format('F j, Y') }}
                     </a>
                 </td>

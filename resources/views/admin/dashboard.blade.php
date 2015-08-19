@@ -6,8 +6,8 @@
     <li><a href="{{ url('/admin/centers') }}">View Centers</a></li>
     <li><a href="{{ url('/admin/quarters') }}">View Quarters</a></li>
     <li><a href="{{ url('/admin/users') }}">View Users</a></li>
-    <li><a href="{{ url('/admin/statsreports') }}">View Stats Reports</a></li>
-    <li><a href="{{ url('/admin/globalreports') }}">View Global Reports</a></li>
+    <li><a href="{{ url('/statsreports') }}">View Stats Reports</a></li>
+    <li><a href="{{ url('/globalreports') }}">View Global Reports</a></li>
     {{-- <li><a href="{{ url('/admin/import') }}">Import Previous Quarter Stats Sheets</a></li> --}}
 </ul>
 
@@ -71,7 +71,7 @@
                 </td>
                 <td style="text-align: center">
                     @if ($center['statsReportId'])
-                    <a href="{{ url('/admin/statsreports/' . $center['statsReportId']) }}" class="view" title="View" style="color: black">
+                    <a href="{{ url('/statsreports/' . $center['statsReportId']) }}" class="view" title="View" style="color: black">
                         <span class="glyphicon glyphicon-eye-open"></span>
                     </a>
                     @endif

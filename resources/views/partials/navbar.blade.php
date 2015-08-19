@@ -24,8 +24,8 @@
                   <li><a href="{{ url('/admin/users') }}">Users</a></li>
                   <li><a href="{{ url('/admin/centers') }}">Centers</a></li>
                   <li><a href="{{ url('/admin/quarters') }}">Quarters</a></li>
-                  <li><a href="{{ url('/admin/statsreports') }}">Stats Reports</a></li>
-                  <li><a href="{{ url('/admin/globalreports') }}">Global Reports</a></li>
+                  <li><a href="{{ url('/statsreports') }}">Stats Reports</a></li>
+                  <li><a href="{{ url('/globalreports') }}">Global Reports</a></li>
                   <!--<li><a href="{{ url('/admin/import') }}">Import Sheets</a></li>-->
                 </ul>
               </li>

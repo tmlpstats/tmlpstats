@@ -4,7 +4,7 @@
 
 @if ($statsReport)
 <h2>{{ $statsReport->center->name }} - {{ $statsReport->reportingDate->format('F j, Y') }}</h2>
-<a href="{{ url('/admin/statsreports') }}"><< See All</a><br/><br/>
+<a href="{{ url('/statsreports') }}"><< See All</a><br/><br/>
 
 <div class="table-responsive">
     <table class="table table-condensed table-striped">
@@ -30,6 +30,16 @@
             <td>{{ $statsReport->spreadsheet_version }}</td>
         </tr>
         <tr>
+            <th>Rating:</th>
+            <td>
+                @if ($statsReport->centerStats && $statsReport->centerStats->actualData)
+                    {{ $statsReport->centerStats->actualData->rating }}
+                @else
+                    -
+                @endif
+            </td>
+        </tr>
+<!--         <tr>
             <th>Locked:</th>
             <td><i class="fa {{ $statsReport->locked ? 'fa-lock' : 'fa-unlock' }}"></i></td>
         </tr>
@@ -40,10 +50,10 @@
 
                     Not in report
                 @else
-                    <a href="{{ url('/admin/globalreports/' . $statsReport->globalReports->first()->id ) }}">{{ $statsReport->globalReports()->first()->reportingDate->format('M j, Y') }}</a>
+                    <a href="{{ url('/globalreports/' . $statsReport->globalReports->first()->id ) }}">{{ $statsReport->globalReports()->first()->reportingDate->format('M j, Y') }}</a>
                 @endif
             </td>
-        </tr>
+        </tr> -->
     </table>
 </div>
 

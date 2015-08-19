@@ -5,7 +5,7 @@
 
 @include('errors.list')
 
-{!! Form::open(['url' => 'admin/statsreports', 'class' => 'form-horizontal']) !!}
+{!! Form::open(['url' => '/statsreports', 'class' => 'form-horizontal']) !!}
 
     @include('statsreports.form', ['submitButtonText' => 'Create'])
 

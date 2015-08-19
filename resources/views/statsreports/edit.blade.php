@@ -5,7 +5,7 @@
 
 @include('errors.list')
 
-{!! Form::model($statsReport, ['url' => 'admin/statsreports/' . $statsReport->reportingDate, 'method' => 'PUT', 'class' => 'form-horizontal']) !!}
+{!! Form::model($statsReport, ['url' => '/statsreports/' . $statsReport->reportingDate, 'method' => 'PUT', 'class' => 'form-horizontal']) !!}
 
     @include('statsreport.form', ['submitButtonText' => 'Update'])
 

@@ -66,7 +66,7 @@
                         </div>
                         @endforeach
                     @else
-                        Welcome to your dashboard. This will be the home of your TMLP stats experience. We're still in the process of creating it, but check back soon for some great new features.
+                        Welcome to your dashboard. If you think you should have access to this site, please contact your regional statistician.
                     @endif
                 </div>
             </div>
@@ -97,6 +97,11 @@
                 });
             }
         }
+    });
+    $(function($) {
+        $("a.view").click(function() {
+            $("body").loading();
+        });
     });
 </script>
 @endsection

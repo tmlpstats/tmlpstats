@@ -5,7 +5,7 @@
 
 @include('errors.list')
 
-{!! Form::open(['url' => 'admin/globalreports', 'class' => 'form-horizontal']) !!}
+{!! Form::open(['url' => '/globalreports', 'class' => 'form-horizontal']) !!}
 
     <div class="form-group">
         {!! Form::label('reporting_date', 'Reporting Date:', ['class' => 'col-sm-2 control-label']) !!}
@@ -15,7 +15,7 @@
     </div>
 
     <div class="btn-group col-sm-offset-2">
-        {!! link_to(url('admin/globalreports'), 'Cancel', ['class' => 'btn btn-default']) !!}
+        {!! link_to(url('/globalreports'), 'Cancel', ['class' => 'btn btn-default']) !!}
         {!! Form::submit('Create', ['class' => 'btn btn-default btn-primary']) !!}
     </div>
 

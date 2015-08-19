@@ -88,6 +88,7 @@ class StatsReportController extends Controller {
                                        ->orderBy('submitted_at', 'desc')
                                        ->center($center)
                                        ->first(),
+                'viewable' => $this->hasAccess($center->id, 'R'),
             );
         }
 
@@ -124,6 +125,11 @@ class StatsReportController extends Controller {
     public function show($id)
     {
         $statsReport = StatsReport::find($id);
+
+        if ($statsReport && !$this->hasAccess($statsReport->center->id, 'R')) {
+            return 'You do not have access to this report.';
+        }
+
         $sheet = array();
 
         if ($statsReport) {
@@ -149,7 +155,7 @@ class StatsReportController extends Controller {
      */
     public function edit($id)
     {
-        echo "Coming soon...";
+        return "Coming soon...";
     }
 
     /**
@@ -169,9 +175,15 @@ class StatsReportController extends Controller {
             'message'     => '',
         );
 
+        $statsReport = StatsReport::find($id);
+
+        if ($statsReport && !$this->hasAccess($statsReport->center->id, 'U')) {
+            $response['message'] = 'You do not have access to update this report.';
+            return $response;
+        }
+
         $locked = Input::get('locked', null);
         if ($locked !== null) {
-            $statsReport = StatsReport::find($id);
 
             if ($statsReport) {
                 $statsReport->locked = ($locked == false || $locked === 'false') ? false : true;
@@ -206,25 +218,50 @@ class StatsReportController extends Controller {
     public function destroy($id)
     {
         $userEmail = Auth::user()->email;
-        $success = false;
-        $message = '';
+        $response = array(
+            'statsReport' => $id,
+            'success'     => false,
+            'message'     => '',
+        );
 
         $statsReport = StatsReport::find($id);
 
+        if ($statsReport && !$this->hasAccess($statsReport->center->id, 'D')) {
+            $response['message'] = 'You do not have access to delete this report.';
+            return $response;
+        }
+
         if ($statsReport) {
             if ($statsReport->clear() && $statsReport->delete()) {
-                $success = true;
-                $message = 'Stats report deleted successfully.';
+                $response['success'] = true;
+                $response['message'] = 'Stats report deleted successfully.';
                 Log::info("User {$userEmail} deleted statsReport {$id}");
             } else {
-                $message = 'Unable to delete stats report.';
+                $response['message'] = 'Unable to delete stats report.';
                 Log::error("User {$userEmail} attempted to delete statsReport {$id}. Failed to clear or delete.");
             }
         } else {
-            $message = 'Unable to delete stats report.';
+            $response['message'] = 'Unable to delete stats report.';
             Log::error("User {$userEmail} attempted to delete statsReport {$id}. Not found.");
         }
 
-        return ['statsReport' => $id, 'success' => $success, 'message' => $message];
+        return $response;
+    }
+
+    // This is a really crappy authz. Need to address this properly
+    public function hasAccess($centerId, $permissions)
+    {
+        switch ($permissions) {
+            case 'R':
+                return (Auth::user()->hasRole('globalStatistician')
+                        || Auth::user()->hasRole('administrator')
+                        || (Auth::user()->hasRole('localStatistician') && Auth::user()->hasCenter($centerId)));
+            case 'C':
+            case 'U':
+            case 'D':
+            default:
+                return (Auth::user()->hasRole('globalStatistician')
+                        || Auth::user()->hasRole('administrator'));
+        }
     }
 }

@@ -11,6 +11,7 @@ use Carbon\Carbon;
 
 use Illuminate\Http\Request;
 use Input;
+use Auth;
 
 class GlobalReportController extends Controller {
 
@@ -32,6 +33,10 @@ class GlobalReportController extends Controller {
      */
     public function index()
     {
+        if (!$this->hasAccess('R')) {
+            return 'You do not have access to view these reports.';
+        }
+
         $globalReports = GlobalReport::orderBy('reporting_date', 'desc')->get();
         return view('globalreports.index', compact('globalReports'));
     }
@@ -43,6 +48,10 @@ class GlobalReportController extends Controller {
      */
     public function create()
     {
+        if (!$this->hasAccess('C')) {
+            return 'You do not have access to create new reports.';
+        }
+
         $allReports = StatsReport::currentQuarter(null)
                                  ->groupBy('reporting_date')
                                  ->orderBy('reporting_date', 'desc')
@@ -72,7 +81,11 @@ class GlobalReportController extends Controller {
      */
     public function store()
     {
-        $redirect = 'admin/globalreports';
+        if (!$this->hasAccess('C')) {
+            return 'You do not have access to save this report.';
+        }
+
+        $redirect = '/globalreports';
 
         if (Input::has('cancel')) {
             return redirect($redirect);
@@ -93,6 +106,10 @@ class GlobalReportController extends Controller {
      */
     public function show($id)
     {
+        if (!$this->hasAccess('R')) {
+            return 'You do not have access to view this report.';
+        }
+
         $globalReport = GlobalReport::find($id);
 
         $statsReports = StatsReport::reportingDate($globalReport->reportingDate)
@@ -127,7 +144,7 @@ class GlobalReportController extends Controller {
      */
     public function edit($id)
     {
-        return redirect('admin/globalreports/' . $id);
+        return redirect("/globalreports/{$id}");
     }
 
     /**
@@ -138,6 +155,10 @@ class GlobalReportController extends Controller {
      */
     public function update($id)
     {
+        if (!$this->hasAccess('U')) {
+            return 'You do not have access to update this report.';
+        }
+
         if (!Input::has('cancel')) {
 
             $globalReport = GlobalReport::find($id);
@@ -180,7 +201,7 @@ class GlobalReportController extends Controller {
             }
         }
 
-        $redirect = 'admin/globalreports/' . $id;
+        $redirect = "/globalreports/{$id}";
         if (Input::has('previous_url')) {
             $redirect = Input::has('previous_url');
         }
@@ -198,4 +219,17 @@ class GlobalReportController extends Controller {
         //
     }
 
+    // This is a really crappy authz. Need to address this properly
+    public function hasAccess($permissions)
+    {
+        switch ($permissions) {
+            case 'R':
+            case 'C':
+            case 'U':
+            case 'D':
+            default:
+                return (Auth::user()->hasRole('globalStatistician')
+                        || Auth::user()->hasRole('administrator'));
+        }
+    }
 }

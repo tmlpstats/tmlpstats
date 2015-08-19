@@ -2,7 +2,7 @@
 
 @section('content')
 <h2 class="sub-header">Stats Reports</h2>
-{!! Form::open(['url' => 'admin/statsreports', 'method' => 'GET', 'class' => 'form-horizontal']) !!}
+{!! Form::open(['url' => 'statsreports', 'method' => 'GET', 'class' => 'form-horizontal']) !!}
 <div class="form-group">
     {!! Form::label('stats_report', 'Week:', ['class' => 'col-sm-1 control-label']) !!}
     <div class="col-sm-2">
@@ -45,12 +45,16 @@
                     @endif
                 </td>
                 <td style="text-align: center">
-                    <a href="{{ url('/admin/statsreports/' . $statsReport->id) }}" class="view" title="View" style="color: black">
+                @if ($statsReportData['viewable'])
+                    <a href="{{ url('/statsreports/' . $statsReport->id) }}" class="view" title="View" style="color: black">
                         <span class="glyphicon glyphicon-eye-open"></span>
                     </a>
+                @endif
                 </td>
                 <td style="text-align: center">
-                    <a href="{{ url('/admin/statsreports/' . $statsReport->id . '/edit') }}" title="Edit" style="color: black"><span class="glyphicon glyphicon-edit"></span></a>
+                @if ($statsReportData['viewable'])
+                    <a href="{{ url('/statsreports/' . $statsReport->id . '/edit') }}" title="Edit" style="color: black"><span class="glyphicon glyphicon-edit"></span></a>
+                @endif
                 </td>
             </tr>
         @else
@@ -81,6 +85,11 @@
         $('#inactiveCenterTable').dataTable({
             "paging":    false,
             "searching": false
+        });
+    });
+    $(function($) {
+        $("a.view").click(function() {
+            $("body").loading();
         });
     });
 </script>

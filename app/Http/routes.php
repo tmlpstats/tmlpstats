@@ -44,8 +44,9 @@ Route::resource('admin/centers', 'CenterController');
 Route::resource('admin/quarters', 'QuarterController');
 Route::resource('admin/users', 'UserController');
 Route::resource('admin/roles', 'RoleController');
-Route::resource('admin/statsreports', 'StatsReportController');
-Route::resource('admin/globalreports', 'GlobalReportController');
+
+Route::resource('statsreports', 'StatsReportController');
+Route::resource('globalreports', 'GlobalReportController');
 
 // Import
 Route::when('import', 'auth|statistician');

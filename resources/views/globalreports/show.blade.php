@@ -3,7 +3,7 @@
 @section('content')
 
 <h2>Global Report - {{ $globalReport->reportingDate->format('F j, Y') }}</h2>
-<a href="{{ url('/admin/globalreports') }}"><< See All</a><br/><br/>
+<a href="{{ url('/globalreports') }}"><< See All</a><br/><br/>
 
 <div class="table-responsive">
 
@@ -33,7 +33,7 @@
         <tr>
             <th>Stats Reports:</th>
             <td>
-                {!! Form::open(['url' => 'admin/globalreports/' . $globalReport->id, 'method' => 'patch', 'class' => 'form-horizontal']) !!}
+                {!! Form::open(['url' => '/globalreports/' . $globalReport->id, 'method' => 'patch', 'class' => 'form-horizontal']) !!}
                     <div class="col-sm-3">
                         {!! Form::select('center', $centers, null, ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}
                     </div>

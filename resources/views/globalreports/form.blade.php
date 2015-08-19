@@ -7,6 +7,6 @@
     </div>
 
     <div class="btn-group col-sm-offset-2">
-        {!! link_to($submitButtonText == 'Create' ? url('admin/globalreports') : URL::previous(), 'Cancel', ['class' => 'btn btn-default']) !!}
+        {!! link_to($submitButtonText == 'Create' ? url('/globalreports') : URL::previous(), 'Cancel', ['class' => 'btn btn-default']) !!}
         {!! Form::submit($submitButtonText, ['class' => 'btn btn-default btn-primary']) !!}
     </div>

@@ -153,9 +153,8 @@ class HomeController extends Controller {
                 $sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->sheetFilename)
                     ? route('downloadSheet', array($reportingDate->toDateString(), $center->sheetFilename))
                     : null;
-                $reportUrl = url("/admin/statsreports/{$statsReport->id}");
+                $reportUrl = url("/statsreports/{$statsReport->id}");
             }
-;
 
             $updatedAt = $statsReport
                 ? Carbon::createFromFormat('Y-m-d H:i:s', $statsReport->updatedAt, 'UTC')

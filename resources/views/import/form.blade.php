@@ -39,7 +39,19 @@
 @endif
 
 {!! Form::submit('Go', ['id' => 'go', 'class' => 'btn btn-default btn-primary']) !!}
-<div id="updating" style="display:none"><br/><p>Please be patient. <span style="font-weight:bold">It may take up to 1 minute to complete.</span></div>
+<div id="updating" style="display:none">
+    <br/><p>Please be patient. <span style="font-weight:bold">It may take up to 1 minute to complete.</span>
+    <div class="loader">
+      <div class="duo duo1">
+        <div class="dot dot-a"></div>
+        <div class="dot dot-b"></div>
+      </div>
+      <div class="duo duo2">
+        <div class="dot dot-a"></div>
+        <div class="dot dot-b"></div>
+      </div>
+    </div>
+</div>
 
 {!! Form::hidden('submitReport', $submitReport) !!}
 {!! Form::close() !!}
