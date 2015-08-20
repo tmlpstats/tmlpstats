@@ -153,7 +153,9 @@ class HomeController extends Controller {
                 $sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->sheetFilename)
                     ? route('downloadSheet', array($reportingDate->toDateString(), $center->sheetFilename))
                     : null;
-                $reportUrl = url("/statsreports/{$statsReport->id}");
+                $reportUrl = $statsReport
+                    ? $url("/statsreports/{$statsReport->id}")
+                    : null;
             }
 
             $updatedAt = $statsReport
