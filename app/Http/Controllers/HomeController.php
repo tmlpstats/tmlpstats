@@ -154,7 +154,7 @@ class HomeController extends Controller {
                     ? route('downloadSheet', array($reportingDate->toDateString(), $center->sheetFilename))
                     : null;
                 $reportUrl = $statsReport
-                    ? $url("/statsreports/{$statsReport->id}")
+                    ? url("/statsreports/{$statsReport->id}")
                     : null;
             }
 
