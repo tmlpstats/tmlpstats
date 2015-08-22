@@ -33,7 +33,16 @@ cat << EOF | sudo tee -a /etc/php5/mods-available/xdebug.ini
 xdebug.scream=1
 xdebug.cli_colors=1
 xdebug.show_local_vars=1
+xdebug.remote_enable = 1
+xdebug.remote_port = 9000
+xdebug.remote_handler = "dbgp"
+xdebug.remote_mode = req
+xdebug.remote_connect_back = 1
+xdebug.remote_log="/var/log/xdebug/xdebug.log"
 EOF
+
+sudo mkdir /var/log/xdebug
+sudo chown www-data /var/log/xdebug
 
 echo "--- Turn PHP errors on ---"
 sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php5/apache2/php.ini
