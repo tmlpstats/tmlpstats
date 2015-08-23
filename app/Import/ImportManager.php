@@ -186,8 +186,6 @@ class ImportManager
                 }
 
                 try {
-                    throw new Exception("Error Processing Request", 1);
-
                     Mail::raw($body, function($message) use ($emails, $centerName, $sheetPath) {
                         // Only send email to centers in production
                         if (env('APP_ENV') === 'prod') {
