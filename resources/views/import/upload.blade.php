@@ -1,5 +1,20 @@
 <div id="results">
 
+@if (isset($results['messages']))
+    <br/>
+    @if (isset($results['messages']['success']))
+        @foreach ($results['messages']['success'] as $message)
+        <div class="alert alert-success" role="alert">{!! $message !!}</div>
+        @endforeach
+    @endif
+
+    @if (isset($results['messages']['error']))
+        @foreach ($results['messages']['error'] as $message)
+        <div class="alert alert-danger" role="alert">{!! $message !!}</div>
+        @endforeach
+    @endif
+@endif
+
 <h2>Imported <?= count($results['sheets']) ?> Sheets</h2>
 
 <div class="panel panel-default">

@@ -20,9 +20,29 @@ class ProgramTeamMember extends Model {
         'email',
     ];
 
+    public function scopeAccountability($query, $accountability)
+    {
+        return $query->whereAccountability($accountability);
+    }
+
+    public function scopeByCenter($query, $center)
+    {
+        return $query->whereCenterId($center->id);
+    }
+
+    public function scopeQuarter($query, $quarter)
+    {
+        return $query->whereQuarterId($quarter->id);
+    }
+
     public function center()
     {
         return $this->belongsTo('TmlpStats\Center');
+    }
+
+    public function quarter()
+    {
+        return $this->belongsTo('TmlpStats\Quarter');
     }
 
     public function teamMember()

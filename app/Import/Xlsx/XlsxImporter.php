@@ -35,6 +35,13 @@ class XlsxImporter
         $doc = new ImportDocument\ImportDocument($this->file, $this->expectedDate, $this->enforceVersion);
         $doc->import($saveReport);
 
+        $submittedAt = null;
+        if ($doc->saved() && $doc->statsReport) {
+            // convert timestamp to use center's local time
+            $submittedAt = clone $doc->statsReport->submittedAt;
+            $submittedAt->setTimezone($doc->statsReport->center->timeZone);
+        }
+
         $this->results = array(
             'statsReportId' => ($doc->statsReport) ? $doc->statsReport->id : null,
             'centerId'      => ($doc->center) ? $doc->center->id : null,
@@ -42,7 +49,7 @@ class XlsxImporter
             'reportingDate' => ($doc->reportingDate) ? $doc->reportingDate : null,
             'sheetVersion'  => ($doc->version) ? $doc->version : null,
             'sheetFilename' => ($doc->statsReport) ? $doc->statsReport->center->sheetFilename : null,
-            'saved'         => $doc->saved(),
+            'submittedAt'   => $submittedAt,
             'errors'        => $doc->messages['errors'],
             'warnings'      => $doc->messages['warnings'],
         );

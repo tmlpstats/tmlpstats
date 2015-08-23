@@ -56,6 +56,11 @@ class Quarter extends Model {
         return $query;
     }
 
+    public function programTeamMember()
+    {
+        return $this->hasMany('TmlpStats\ProgramTeamMember')->withTimestamps();
+    }
+
     public function statsReport()
     {
         return $this->hasMany('TmlpStats\StatsReport')->withTimestamps();
