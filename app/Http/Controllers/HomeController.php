@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
 use TmlpStats\User;
@@ -150,8 +151,8 @@ class HomeController extends Controller {
             if (Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator')
                 || (Auth::user()->hasRole('localStatistician') && Auth::user()->hasCenter($center->id))
             ) {
-                $sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->sheetFilename)
-                    ? route('downloadSheet', array($reportingDate->toDateString(), $center->sheetFilename))
+                $sheetUrl = $statsReport && XlsxArchiver::getInstance()->getSheetPath($statsReport)
+                    ? url("/statsreports/{$statsReport->id}/download")
                     : null;
                 $reportUrl = $statsReport
                     ? url("/statsreports/{$statsReport->id}")
@@ -163,8 +164,10 @@ class HomeController extends Controller {
                 : null;
 
             if ($updatedAt) {
-                $localTimezone = $timezone ?: 'America/Los_Angeles';
-                $updatedAt->setTimezone($localTimezone);
+                // $localTimezone = $timezone ?: 'America/Los_Angeles';
+                // $updatedAt->setTimezone($localTimezone);
+
+                $updatedAt->setTimezone($statsReport->center->timeZone);
             }
 
             $centerResults = array(
@@ -193,7 +196,7 @@ class HomeController extends Controller {
 
         return view('home')->with(['reportingDate'  => $reportingDate,
                                    'reportingDates' => $reportingDates,
-                                   'timezone'        => $timezone,
+                                   'timezone'       => $timezone,
                                    'selectedRegion' => $region,
                                    'regionsData'    => $regionsData]);
     }

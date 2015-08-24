@@ -1,6 +1,8 @@
 <?php
 namespace TmlpStats\Import;
 
+use TmlpStats\Import\Xlsx\XlsxArchiver;
+
 use TmlpStats\Center;
 use TmlpStats\Quarter;
 use Carbon\Carbon;
@@ -83,13 +85,9 @@ class ImportManager
                 if (isset($sheet['statsReportId'])) {
 
                     if ($sheet['submittedAt']) {
-                        $sheetPath = $this->archiveSheet($file,
-                                                         $sheet['reportingDate']->toDateString(),
-                                                         $sheet['sheetFilename']);
+                        $sheetPath = XlsxArchiver::getInstance()->archive($file, $sheet['statsReport']);
                     } else {
-                        $sheetPath = $this->saveWorkingSheet($file,
-                                                             $sheet['reportingDate']->toDateString(),
-                                                             $sheet['sheetFilename']);
+                        $sheetPath = XlsxArchiver::getInstance()->saveWorkingSheet($file, $sheet['statsReport']);
                     }
                 }
 
@@ -109,9 +107,7 @@ class ImportManager
 
             if (!$sheetPath && $file) {
 
-                $sheetPath = $this->saveWorkingSheet($file,
-                                                     Carbon::now()->toDateString(),
-                                                     $file->getClientOriginalName());
+                $sheetPath = XlsxArchiver::getInstance()->saveWorkingSheet($file);
             }
 
             if ($exception) {
@@ -237,90 +233,5 @@ class ImportManager
             $expectedDate = new Carbon('next friday');
         }
         return $expectedDate->startOfDay();
-    }
-
-    public static function getArchiveDirectory()
-    {
-        return storage_path() . "/app/archive/xlsx";
-    }
-
-    public static function getArchivedFilePath($reportingDate, $fileName)
-    {
-        $baseDir = static::getArchiveDirectory();
-
-        $name = "{$baseDir}/{$reportingDate}/{$fileName}";
-        if (strpos($name, '.xlsx') === false) {
-            $name .= '.xlsx';
-        }
-        return $name;
-    }
-
-    public static function getWorkingSheetFilePath($reportingDate, $fileName)
-    {
-        $baseDir = static::getArchiveDirectory();
-
-        $name = "{$baseDir}/working_files/{$reportingDate}/{$fileName}";
-        if (strpos($name, '.xlsx') === false) {
-            $name .= '.xlsx';
-        }
-        return $name;
-    }
-
-    public static function getSheetPath($reportingDate, $name)
-    {
-        $archivedFile = static::getArchivedFilePath($reportingDate, $name);
-
-        if (file_exists($archivedFile)) {
-            return $archivedFile;
-        }
-
-        $workingFile = static::getWorkingSheetFilePath($reportingDate, $name);
-
-        if (file_exists($workingFile)) {
-            return $workingFile;
-        }
-
-        return '';
-    }
-
-    public function archiveSheet($file, $reportingDate, $fileName)
-    {
-        $destination = static::getArchivedFilePath($reportingDate, $fileName);
-
-        return $this->saveFile($destination, $file);
-    }
-
-    protected function saveWorkingSheet($file, $reportingDate, $fileName)
-    {
-        $destination = static::getWorkingSheetFilePath($reportingDate, $fileName);
-
-        return $this->saveFile($destination, $file);
-    }
-
-    protected function saveFile($destinationPath, $sourceFile)
-    {
-        $savedFile = '';
-
-        if (!($sourceFile instanceof \Symfony\Component\HttpFoundation\File\UploadedFile)) {
-            Log::error('Unable to save file. Invalid file.');
-            return $savedFile;
-        }
-
-        $pathInfo = pathinfo($destinationPath);
-        $dir = $pathInfo['dirname'];
-        $fileName = $pathInfo['basename'];
-
-        if (is_dir($dir) || mkdir($dir, 0777, true)) {
-            try {
-                $sourceFile->move($dir, $fileName);
-                $savedFile = $destinationPath;
-            } catch (Exception $e) {
-                Log::error("Unable to save file '$destinationPath'. Caught exception moving file: {$e->getMessage()}.");
-            }
-        } else {
-            Log::error("Unable to save file '$destinationPath'. Failed to setup directory.");
-        }
-
-        return $savedFile;
     }
 }

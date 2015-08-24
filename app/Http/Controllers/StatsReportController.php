@@ -6,6 +6,7 @@ use TmlpStats\StatsReport;
 use TmlpStats\Center;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Import\Xlsx\XlsxImporter;
+use TmlpStats\Import\Xlsx\XlsxArchiver;
 
 use Illuminate\Http\Request;
 
@@ -14,6 +15,7 @@ use Carbon\Carbon;
 use Auth;
 use Input;
 use Log;
+use Response;
 
 class StatsReportController extends Controller {
 
@@ -134,17 +136,23 @@ class StatsReportController extends Controller {
 
         if ($statsReport) {
 
-            $sheetUrl = ImportManager::getSheetPath($statsReport->reportingDate->toDateString(), $statsReport->center->sheetFilename);
+            $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
 
             try {
                 $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
                 $importer->import(false);
                 $sheet = $importer->getResults();
+
             } catch(Exception $e) {
                 Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             }
+
+            $sheetUrl = $sheetUrl
+                ? url("/statsreports/{$statsReport->id}/download")
+                : null;
         }
-        return view('statsreports.show', compact('statsReport', 'sheet'));
+
+        return view('statsreports.show', compact('statsReport', 'sheet', 'sheetUrl'));
     }
 
     /**
@@ -246,6 +254,24 @@ class StatsReportController extends Controller {
         }
 
         return $response;
+    }
+
+    public function downloadSheet($id)
+    {
+        $statsReport = StatsReport::find($id);
+
+        $path = $statsReport
+            ? XlsxArchiver::getInstance()->getSheetPath($statsReport)
+            : null;
+
+        if ($path)
+        {
+            return Response::download($path, basename($path), [
+                'Content-Length: '. filesize($path)
+            ]);
+        } else {
+            abort(404);
+        }
     }
 
     // This is a really crappy authz. Need to address this properly

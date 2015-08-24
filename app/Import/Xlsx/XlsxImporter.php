@@ -44,6 +44,7 @@ class XlsxImporter
 
         $this->results = array(
             'statsReportId' => ($doc->statsReport) ? $doc->statsReport->id : null,
+            'statsReport'   => ($doc->statsReport) ? $doc->statsReport : null,
             'centerId'      => ($doc->center) ? $doc->center->id : null,
             'center'        => ($doc->center) ? $doc->center->name : null,
             'reportingDate' => ($doc->reportingDate) ? $doc->reportingDate : null,

@@ -39,6 +39,16 @@
                 @endif
             </td>
         </tr>
+        <tr>
+            <th>File:</th>
+            <td>
+                @if ($sheetUrl)
+                    <a href="{{ $sheetUrl }}">Download</a>
+                @else
+                    -
+                @endif
+            </td>
+        </tr>
 <!--         <tr>
             <th>Locked:</th>
             <td><i class="fa {{ $statsReport->locked ? 'fa-lock' : 'fa-unlock' }}"></i></td>

@@ -3,6 +3,7 @@ namespace TmlpStats\Http\Controllers;
 
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Controllers\Controller;
+use TmlpStats\Import\Xlsx\XlsxArchiver;
 
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
@@ -125,8 +126,8 @@ class AdminController extends Controller {
                 ? CenterStatsData::actual()->reportingDate($reportingDate->toDateString())->statsReport($statsReport)->first()
                 : null;
 
-            $sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->sheetFilename)
-                ? route('downloadSheet', array($reportingDate->toDateString(), $center->sheetFilename))
+            $sheetUrl = $statsReport && XlsxArchiver::getInstance()->getSheetPath($statsReport)
+                ? url("/statsreports/{$statsReport->id}/download")
                 : null;
 
             $updatedAt = $statsReport

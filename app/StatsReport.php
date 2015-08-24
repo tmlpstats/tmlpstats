@@ -23,6 +23,7 @@ class StatsReport extends Model {
 
     protected $dates = [
         'reporting_date',
+        'submitted_at',
     ];
 
     public function setReportingDateAttribute($value)
