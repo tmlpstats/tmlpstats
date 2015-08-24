@@ -6231,16 +6231,3 @@ label,
 .checkbox label {
   font-weight: 300;
 }
-
-
-
-
-.ok {
-    color: green !important;
-}
-.error {
-    color: red !important;
-}
-.warning {
-    color: orange !important;
-}

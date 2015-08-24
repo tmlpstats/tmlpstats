@@ -145,17 +145,10 @@ class ImportManager
 
                 $programManager         = $center->getProgramManager($quarter, $center->globalRegion);
                 $classroomLeader        = $center->getClassroomLeader($quarter, $center->globalRegion);
-                $t1TeamLeader           = $center->getT1TeamLeader($quarter, $center->globalRegion);
+                // $t1TeamLeader           = $center->getT1TeamLeader($quarter, $center->globalRegion);
                 $t2TeamLeader           = $center->getT2TeamLeader($quarter, $center->globalRegion);
                 $statistician           = $center->getStatistician($quarter, $center->globalRegion);
                 $statisticianApprentice = $center->getStatisticianApprentice($quarter, $center->globalRegion);
-
-                // TODO: Handle case where it's submitted with errors:
-
-                $body = "Hi {$user},\n\n";
-                $body .= "Thank you for submitting stats for team {$centerName}. We received them on {$time} your local time. Please find the submitted sheet attached.\n\n";
-                $body .= "Best,\n";
-                $body .= "Your regional statisticans\n";
 
                 $emails = array(
                     'center'                 => $center->statsEmail,
@@ -186,7 +179,8 @@ class ImportManager
                 }
 
                 try {
-                    Mail::raw($body, function($message) use ($emails, $centerName, $sheetPath) {
+                    Mail::send('emails.statssubmitted', ['user'=>$user, 'centerName'=>$centerName, 'time'=>$time, 'sheet'=>$sheet],
+                        function($message) use ($emails, $centerName, $sheetPath) {
                         // Only send email to centers in production
                         if (env('APP_ENV') === 'prod') {
                             $message->to($emails['center']);
