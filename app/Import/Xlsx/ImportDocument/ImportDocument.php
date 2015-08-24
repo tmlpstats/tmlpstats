@@ -551,7 +551,7 @@ class ImportDocument extends ImportDocumentAbstract
 
         $this->statsReport->spreadsheetVersion = $this->version;
         $this->statsReport->validated = $isValid;
-        $this->statsReport->submitted_at = Carbon::now();
+        $this->statsReport->submittedAt = $this->submittedAt ?: Carbon::now();
         $this->statsReport->save();
 
         $this->saved = true;

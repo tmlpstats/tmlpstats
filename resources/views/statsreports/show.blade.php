@@ -26,6 +26,18 @@
             <td>{{ $statsReport->center->stats_email }}</td>
         </tr>
         <tr>
+            <th>Submitted At:</th>
+            <td><?php
+                if ($statsReport->submittedAt) {
+                    $submittedAt = clone $statsReport->submittedAt;
+                    $submittedAt->setTimezone($statsReport->center->timeZone);
+                    echo $submittedAt->format('l, F jS \a\t g:ia T');
+                } else {
+                    echo '-';
+                }
+            ?></td>
+        </tr>
+        <tr>
             <th>Submitted Sheet Version:</th>
             <td>{{ $statsReport->spreadsheet_version }}</td>
         </tr>
