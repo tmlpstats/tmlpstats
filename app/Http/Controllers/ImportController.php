@@ -47,7 +47,7 @@ class ImportController extends Controller {
         Request::flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
         return view('import.index')->with([
-            'submitReport'            => true,
+            'submitReport'            => false,
             'showUploadForm'          => true,
             'showReportCheckSettings' => true,
             'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),

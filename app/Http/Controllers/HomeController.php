@@ -134,6 +134,7 @@ class HomeController extends Controller {
 
             $statsReport = $center->statsReports()
                                   ->reportingDate($reportingDate->toDateString())
+                                  ->whereNotNull('submitted_at')
                                   ->orderBy('submitted_at', 'desc')
                                   ->first();
 
@@ -159,16 +160,9 @@ class HomeController extends Controller {
                     : null;
             }
 
-            $updatedAt = $statsReport
-                ? Carbon::createFromFormat('Y-m-d H:i:s', $statsReport->updatedAt, 'UTC')
+            $submittedAt = $statsReport
+                ? Carbon::createFromFormat('Y-m-d H:i:s', $statsReport->submittedAt, $statsReport->center->timeZone)
                 : null;
-
-            if ($updatedAt) {
-                // $localTimezone = $timezone ?: 'America/Los_Angeles';
-                // $updatedAt->setTimezone($localTimezone);
-
-                $updatedAt->setTimezone($statsReport->center->timeZone);
-            }
 
             $centerResults = array(
                 'name'        => $center->name,
@@ -176,13 +170,13 @@ class HomeController extends Controller {
                 'submitted'   => $statsReport ? $statsReport->isSubmitted() : false,
                 'validated'   => $statsReport ? $statsReport->isValidated() : false,
                 'rating'      => $actualData ? $actualData->rating : '-',
-                'updatedAt'   => $updatedAt ? $updatedAt->format('M j, Y @ g:ia T') : '-',
+                'updatedAt'   => $submittedAt ? $submittedAt->format('M j, Y @ g:ia T') : '-',
                 'updatedBy'   => $user ? $user->firstName : '-',
                 'sheet'       => $sheetUrl,
                 'reportUrl'   => $reportUrl,
             );
 
-            if ($statsReport && $statsReport->validated) {
+            if ($statsReport && $statsReport->submittedAt) {
                 $regionsData[$localRegion]['completeCount'] += 1;
             }
             $regionsData[$localRegion]['validatedCount'] += 1;
@@ -191,7 +185,7 @@ class HomeController extends Controller {
         }
 
         foreach ($regionsData as &$sortRegion) {
-            usort($sortRegion['centersData'], array(get_class(), 'sortByComplete'));
+            usort($sortRegion['centersData'], array(get_class(), 'sortBySubmitted'));
         }
 
         return view('home')->with(['reportingDate'  => $reportingDate,
@@ -201,10 +195,10 @@ class HomeController extends Controller {
                                    'regionsData'    => $regionsData]);
     }
 
-    protected static function sortByComplete($a, $b)
+    protected static function sortBySubmitted($a, $b)
     {
-        if ($a['validated'] != $b['validated']) {
-            return $a['validated'] ? -1 : 1; // reverse order to get sort in DESC order
+        if ($a['submitted'] != $b['submitted']) {
+            return $a['submitted'] ? -1 : 1; // reverse order to get sort in DESC order
         } else {
             return strcmp($a['name'], $b['name']);
         }

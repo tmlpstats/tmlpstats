@@ -35,12 +35,9 @@ class XlsxImporter
         $doc = new ImportDocument\ImportDocument($this->file, $this->expectedDate, $this->enforceVersion);
         $doc->import($saveReport);
 
-        $submittedAt = null;
-        if ($doc->saved() && $doc->statsReport) {
-            // convert timestamp to use center's local time
-            $submittedAt = clone $doc->statsReport->submittedAt;
-            $submittedAt->setTimezone($doc->statsReport->center->timeZone);
-        }
+        $submittedAt = ($doc->saved() && $doc->statsReport)
+            ? $doc->statsReport->submittedAt
+            : null;
 
         $this->results = array(
             'statsReportId' => ($doc->statsReport) ? $doc->statsReport->id : null,

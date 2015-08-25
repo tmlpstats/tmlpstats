@@ -132,10 +132,25 @@ class ImportManager
                 }
             } else if ($sheet['submittedAt']) {
                 $centerName = $sheet['center'];
-                $user = ucfirst(Auth::user()->firstName);
-                $time = $sheet['submittedAt']->format('l, F jS \a\t g:ia');
-
                 $center = Center::name($centerName)->first();
+
+                $user = ucfirst(Auth::user()->firstName);
+
+                $sumittedAt = clone $sheet['submittedAt'];
+                $sumittedAt->setTimezone($center->timeZone);
+
+                // 7:00.59 PM local time on the reporting date.
+                $due = Carbon::create(
+                    $sheet['reportingDate']->year,
+                    $sheet['reportingDate']->month,
+                    $sheet['reportingDate']->day,
+                    19, 0, 59,
+                    $center->timeZone
+                );
+
+                $isLate = $sumittedAt->gt($due);
+                $due = $due->format('l, F jS \a\t g:ia');
+                $time = $sumittedAt->format('l, F jS \a\t g:ia');
 
                 $quarter = Quarter::findByDateAndRegion($sheet['reportingDate']);
 
@@ -175,7 +190,7 @@ class ImportManager
                 }
 
                 try {
-                    Mail::send('emails.statssubmitted', ['user'=>$user, 'centerName'=>$centerName, 'time'=>$time, 'sheet'=>$sheet],
+                    Mail::send('emails.statssubmitted', compact('user', 'centerName', 'time', 'sheet', 'isLate', 'due'),
                         function($message) use ($emails, $centerName, $sheetPath) {
                         // Only send email to centers in production
                         if (env('APP_ENV') === 'prod') {
