@@ -190,10 +190,10 @@ class StatsReportController extends Controller {
             return $response;
         }
 
-        $locked = Input::get('locked', null);
-        if ($locked !== null) {
+        if ($statsReport) {
+            $locked = Input::get('locked', null);
+            if ($locked !== null) {
 
-            if ($statsReport) {
                 $statsReport->locked = ($locked == false || $locked === 'false') ? false : true;
 
                 if ($statsReport->save()) {
@@ -206,12 +206,66 @@ class StatsReportController extends Controller {
                     Log::error("User {$userEmail} attempted to lock statsReport {$id}. Failed to lock.");
                 }
             } else {
-                $response['message'] = 'Unable to lock stats report.';
-                Log::error("User {$userEmail} attempted to lock statsReport {$id}. Not found.");
+                $response['message'] = 'Invalid value for locked.';
+                Log::error("User {$userEmail} attempted to lock statsReport {$id}. No value provided for locked. ");
             }
         } else {
-            $response['message'] = 'Invalid value for locked.';
-            Log::error("User {$userEmail} attempted to lock statsReport {$id}. No value provided for locked. ");
+            $response['message'] = 'Unable to update stats report.';
+            Log::error("User {$userEmail} attempted to lock statsReport {$id}. Not found.");
+        }
+
+        return $response;
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * Currently only supports updated locked property
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function submit($id)
+    {
+        $userEmail = Auth::user()->email;
+        $response = array(
+            'statsReport' => $id,
+            'success'     => false,
+            'message'     => '',
+        );
+
+        $statsReport = StatsReport::find($id);
+
+        if ($statsReport && !$this->hasAccess($statsReport->center->id, 'U')) {
+            $response['message'] = 'You do not have access to submit this report.';
+            return $response;
+        }
+
+        if ($statsReport) {
+            $submitReport = Input::get('submitReport', null);
+            if ($submitReport !== null) {
+
+                $statsReport->submittedAt = Carbon::now();
+                $statsReport->submitComment = Input::get('submitComment', null);
+
+                if ($statsReport->save()) {
+
+                    $response['success'] = true;
+                    $response['submittedAt'] = $statsReport->submittedAt->format('U');
+                    $response['emailResult'] = ImportManager::sendStatsSubmittedEmail($statsReport);
+
+                    Log::info("User {$userEmail} submitted statsReport {$id}");
+                } else {
+                    $response['message'] = 'Unable to submit stats report.';
+                    Log::error("User {$userEmail} attempted to submit statsReport {$id}. Failed to submit.");
+                }
+            } else {
+                $response['message'] = 'Invalid request.';
+                Log::error("User {$userEmail} attempted to submit statsReport {$id}. No value provided for submitReport. ");
+            }
+        } else {
+            $response['message'] = 'Unable to update stats report.';
+            Log::error("User {$userEmail} attempted to submit statsReport {$id}. Not found.");
         }
 
         return $response;
@@ -279,11 +333,11 @@ class StatsReportController extends Controller {
     {
         switch ($permissions) {
             case 'R':
+            case 'U':
                 return (Auth::user()->hasRole('globalStatistician')
                         || Auth::user()->hasRole('administrator')
                         || (Auth::user()->hasRole('localStatistician') && Auth::user()->hasCenter($centerId)));
             case 'C':
-            case 'U':
             case 'D':
             default:
                 return (Auth::user()->hasRole('globalStatistician')
