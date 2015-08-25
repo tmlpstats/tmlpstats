@@ -20,7 +20,7 @@ class ImportController extends Controller {
     public function index()
     {
         return view('import.index')->with([
-            'submitReport'            => true,
+            'submitReport'            => false,
             'showUploadForm'          => true,
             'showReportCheckSettings' => true,
             'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),
