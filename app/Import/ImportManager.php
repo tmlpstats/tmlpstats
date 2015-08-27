@@ -132,7 +132,7 @@ class ImportManager
                 }
             } else if ($sheet['submittedAt']) {
 
-                $result = $this->sendStatsSubmittedEmail($sheet['statsReport']);
+                $result = $this->sendStatsSubmittedEmail($sheet['statsReport'], $sheet);
                 if ($result !== false) {
                     $this->results['messages'] = $result;
                 }
@@ -156,7 +156,7 @@ class ImportManager
         return $expectedDate->startOfDay();
     }
 
-    public static function sendStatsSubmittedEmail($statsReport)
+    public static function sendStatsSubmittedEmail($statsReport, $sheet)
     {
         if (!$statsReport || !$statsReport->submittedAt) {
             return false;
@@ -186,7 +186,7 @@ class ImportManager
 
         $programManager         = $center->getProgramManager($quarter, $center->globalRegion);
         $classroomLeader        = $center->getClassroomLeader($quarter, $center->globalRegion);
-        // $t1TeamLeader           = $center->getT1TeamLeader($quarter, $center->globalRegion);
+        $t1TeamLeader           = $center->getT1TeamLeader($quarter, $center->globalRegion);
         $t2TeamLeader           = $center->getT2TeamLeader($quarter, $center->globalRegion);
         $statistician           = $center->getStatistician($quarter, $center->globalRegion);
         $statisticianApprentice = $center->getStatisticianApprentice($quarter, $center->globalRegion);
@@ -195,10 +195,10 @@ class ImportManager
             'center'                 => $center->statsEmail,
             'programManager'         => $programManager ? $programManager->email : null,
             'classroomLeader'        => $classroomLeader ? $classroomLeader->email : null,
-            // 't1TeamLeader'           => $t1TeamLeader ? $t1TeamLeader->email : null,
+            't1TeamLeader'           => $t1TeamLeader ? $t1TeamLeader->email : null,
             't2TeamLeader'           => $t2TeamLeader ? $t2TeamLeader->email : null,
-            // 'statistician'           => $statistician ? $statistician->email : null,
-            // 'statisticianApprentice' => $statisticianApprentice ? $statisticianApprentice->email : null,
+            'statistician'           => $statistician ? $statistician->email : null,
+            'statisticianApprentice' => $statisticianApprentice ? $statisticianApprentice->email : null,
             'regional'               => null,
         );
 
@@ -220,10 +220,11 @@ class ImportManager
         }
 
         $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+        $sheetName = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
         $centerName = $center->name;
         try {
             Mail::send('emails.statssubmitted', compact('user', 'centerName', 'time', 'sheet', 'isLate', 'due'),
-                function($message) use ($emails, $centerName, $sheetPath) {
+                function($message) use ($emails, $centerName, $sheetPath, $sheetName) {
                 // Only send email to centers in production
                 if (env('APP_ENV') === 'prod') {
                     $message->to($emails['center']);
@@ -237,27 +238,29 @@ class ImportManager
                     if ($emails['classroomLeader']) {
                         $message->cc($emails['classroomLeader']);
                     }
-                    // if ($emails['t1TeamLeader']) {
-                    //     $message->cc($emails['t1TeamLeader']);
-                    // }
+                    if ($emails['t1TeamLeader']) {
+                        $message->cc($emails['t1TeamLeader']);
+                    }
                     if ($emails['t2TeamLeader']) {
                         $message->cc($emails['t2TeamLeader']);
                     }
-                    // if ($emails['statistician']) {
-                    //     $message->cc($emails['statistician']);
-                    // }
-                    // if ($emails['statisticianApprentice']) {
-                    //     $message->cc($emails['statisticianApprentice']);
-                    // }
+                    if ($emails['statistician']) {
+                        $message->cc($emails['statistician']);
+                    }
+                    if ($emails['statisticianApprentice']) {
+                        $message->cc($emails['statisticianApprentice']);
+                    }
                 } else {
                     $message->to(env('ADMIN_EMAIL'));
                 }
 
                 $message->subject("Team {$centerName} Statistics Submitted");
-                $message->attach($sheetPath);
+                $message->attach($sheetPath, array(
+                    'as' => $sheetName,
+                ));
             });
             Log::info("Sent emails to the following people with team {$centerName}'s report: " . implode(', ', $emails));
-            $result['success'][] = "<span style='font-weight:bold'>Thank you.</span> We received your statistics and have sent a copy to " . implode(', ', $emails) . ". Please reply-all to that email if there is anything you need to communicate.";
+            $result['success'][] = "<span style='font-weight:bold'>Thank you.</span> We received your statistics and have sent a copy to <ul><li>" . implode('</li><li>', $emails) . "</li></ul> Please reply-all to that email if there is anything you need to communicate.";
         } catch (\Exception $e) {
             Log::error("Exception caught sending error email: " . $e->getMessage());
             $result['error'][] = "<span style='font-weight:bold'>Hold up.</span> There was a problem emailing your sheet to your team. Please email the sheet you just submitted to your Program Manager, Classroom Leader, T2 Team Leader, and Regional Statistician ({$emails['regional']}) using your center stats email ({$emails['center']}). <span style='font-weight:bold'>We did</span> receive your statistics.";

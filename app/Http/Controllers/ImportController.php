@@ -20,7 +20,7 @@ class ImportController extends Controller {
     public function index()
     {
         return view('import.index')->with([
-            'submitReport'            => false,
+            'submitReport'            => false, // Controls whether or not to show Submit button
             'showUploadForm'          => true,
             'showReportCheckSettings' => true,
             'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),
@@ -47,7 +47,7 @@ class ImportController extends Controller {
         Request::flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
         return view('import.index')->with([
-            'submitReport'            => false,
+            'submitReport'            => true, // Controls whether or not to show Submit button
             'showUploadForm'          => true,
             'showReportCheckSettings' => true,
             'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),

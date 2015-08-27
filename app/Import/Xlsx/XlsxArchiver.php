@@ -4,6 +4,7 @@ namespace TmlpStats\Import\Xlsx;
 use Carbon\Carbon;
 
 use Exception;
+use File;
 use Log;
 
 class XlsxArchiver
@@ -22,6 +23,22 @@ class XlsxArchiver
         $destination = $this->getArchivedFilePath($statsReport->reportingDate->toDateString(), $fileName);
 
         return $this->saveFile($destination, $file);
+    }
+
+    public function promoteWorkingSheet($statsReport)
+    {
+        $fileName = $this->getFileName(null, $statsReport);
+
+        $source = $this->getWorkingSheetFilePath($statsReport->reportingDate->toDateString(), $fileName);
+        $destination = $this->getArchivedFilePath($statsReport->reportingDate->toDateString(), $fileName);
+
+        if (File::exists($source)) {
+            File::move($source, $destination);
+            return true;
+        } else {
+            Log::error("Unable to move file {$source} to {$destination}");
+            return false;
+        }
     }
 
     public function saveWorkingSheet($file, $statsReport = null)
@@ -73,6 +90,11 @@ class XlsxArchiver
         return null;
     }
 
+    public function getDisplayFileName($statsReport)
+    {
+        return $statsReport->center->sheetFilename . "_" . $statsReport->reportingDate->toDateString() . ".xlsx";
+    }
+
     protected function getArchivedFilePath($reportingDate, $fileName)
     {
         $baseDir = $this->getArchiveDirectory();
@@ -103,15 +125,8 @@ class XlsxArchiver
                 ? $statsReport->center->sheetFilename
                 : null;
 
-            $date = $statsReport->submittedAt
-                ? clone $statsReport->submittedAt
-                : Carbon::now();
-
-            $date->setTimezone($statsReport->center->timeZone);
-            $dateString = $date->format('Y-m-d_H-i-s');
-
             if ($sheetName) {
-                $fileName = "{$sheetName}_{$dateString}.xlsx";
+                $fileName = "{$sheetName}_{$statsReport->id}.xlsx";
             }
         }
         if (!$fileName) {

@@ -38,7 +38,21 @@
 </div>
 @endif
 
-{!! Form::submit('Go', ['id' => 'go', 'class' => 'btn btn-default btn-primary']) !!}
+@if ($submitReport)
+<div class="alert alert-warning" role="alert">
+<strong>Don't Forget:</strong> Your sheet isn't submitted yet.  Click 'Submit' to send your completed sheet to your team and the regional stats team.
+</div>
+@else
+<div class="alert alert-info" role="alert">
+<strong>Helpful Hint:</strong> Click 'Validate' to make sure your sheet doesn't have any errors. Then click 'Submit' to send your completed sheet to your team and the regional stats team. You can validate as many times as you'd like before submitting.
+</div>
+@endif
+
+{!! Form::submit('Validate', ['id' => 'validate', 'class' => 'btn btn-primary']) !!}
+@if ($submitReport)
+&nbsp;&nbsp;
+{!! Form::button('Submit', ['id' => 'submit', 'class' => 'btn btn-success', 'data-toggle' => 'modal', 'data-target' => '#submitModel']) !!}
+@endif
 <div id="updating" style="display:none">
     <br/><p>Please be patient. <span style="font-weight:bold">It may take up to 1 minute to complete.</span>
     <div class="loader">
@@ -52,8 +66,72 @@
       </div>
     </div>
 </div>
+<div class="modal fade" id="submitModel" tabindex="-1" role="dialog" aria-labelledby="submitModelLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="submitModelLabel">Submit your stats</h4>
+            </div>
+            <div class="modal-body">
+                Clicking submit will send your stats to the regional stats team. We will also send a copy to your
+                <ul>
+                    <li>Program Manager</li>
+                    <li>Classroom Leader</li>
+                    <li>Team 2 Team Leader</li>
+                    <li>Team 1 Team Leader</li>
+                    <li>Statistician</li>
+                    <li>Statistician Apprentice</li>
+                </ul>
+                You can re-submit your stats before 7PM your local time on Friday.
+                <br/><br/>
+                {!! Form::open(['url' => $formAction]) !!}
+                <label for="comment" class="control-label">Comment:</label>
+                {!! Form::textarea('comment', null, ['class' => 'form-control', 'rows' => '10']) !!}
+                {!! Form::close() !!}
 
-{!! Form::hidden('submitReport', $submitReport) !!}
+                <div class="loader" id="submitLoading" style="display:none">
+                  <div class="duo duo1">
+                    <div class="dot dot-a"></div>
+                    <div class="dot dot-b"></div>
+                  </div>
+                  <div class="duo duo2">
+                    <div class="dot dot-a"></div>
+                    <div class="dot dot-b"></div>
+                  </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="submitStats">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="submitCompleteModel" tabindex="-1" role="dialog" aria-labelledby="submitCompleteModelLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="submitCompleteModelLabel">Your stats are submitted!</h4>
+            </div>
+            <div class="modal-body">
+                You have successfully submitted your stats! We received them at <span id="submitTime"></span>.
+
+                Check to make sure you received an email from TMLP Stats in your center's stats email.<br/><br/>
+
+                <div id="submitResult" class="alert" role="alert" style="display:none">
+                    <span class="message"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="submitteOk" data-dismiss="modal">Okay</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{!! Form::hidden('submitReport', false) !!}
 {!! Form::close() !!}
 
 
@@ -68,7 +146,7 @@
                 $('#expectedReportDate').removeAttr("disabled");
             }
         });
-        $("#go").click(function() {
+        $("#validate").click(function() {
             $("#updating").show();
             $("#results").hide();
         });
@@ -81,6 +159,37 @@
                 $("#advanced-state").addClass("glyphicon-menu-right");
             }
         });
+        $("#submitStats").click(function() {
+            $("#submitLoading").show();
+            $("textarea[name=comment]").hide();
+            $("#submitStats").attr("disabled", true);
+            $.ajax({
+                type: "POST",
+                url: "/tmlpstats/statsreports/{{ isset($results) && $results['sheets'] ? $results['sheets'][0]['statsReportId'] : 0 }}/submit",
+                data: "dataType=JSON&function=submit&comment=" + encodeURIComponent($("textarea[name=comment]").val()),
+                beforeSend: function (request) {
+                    request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
+                },
+                success: function(response) {
+                    $("#submitResult span.message").html(response.message);
+                    if (response.success) {
+                        $("#submitResult").removeClass("alert-danger");
+                        $("#submitResult").addClass("alert-success");
+                    } else {
+                        $("#submitResult").removeClass("alert-success");
+                        $("#submitResult").addClass("alert-danger");
+                    }
+                    $("#submitTime").text(response.submittedAt);
+                    $("#submitResult").show();
+                    $('#submitModel').modal('hide')
+                    $('#submitCompleteModel').modal('show')
+                }
+            });
+        });
+        $("#submitteOk").click(function() {
+            window.location.replace("{{ url('/') }}");
+        });
     });
 </script>
 @stop
+

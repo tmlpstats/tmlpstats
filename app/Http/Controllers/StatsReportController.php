@@ -242,17 +242,40 @@ class StatsReportController extends Controller {
         }
 
         if ($statsReport) {
-            $submitReport = Input::get('submitReport', null);
-            if ($submitReport !== null) {
+            $submitReport = Input::get('function', null);
+            if ($submitReport === 'submit') {
+
+                $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+
+                try {
+                    $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
+                    $importer->import(true);
+                    $sheet = $importer->getResults();
+
+                } catch(Exception $e) {
+                    Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+                }
 
                 $statsReport->submittedAt = Carbon::now();
-                $statsReport->submitComment = Input::get('submitComment', null);
+                $statsReport->submitComment = Input::get('comment', null);
 
                 if ($statsReport->save()) {
 
-                    $response['success'] = true;
-                    $response['submittedAt'] = $statsReport->submittedAt->format('U');
-                    $response['emailResult'] = ImportManager::sendStatsSubmittedEmail($statsReport);
+                    XlsxArchiver::getInstance()->promoteWorkingSheet($statsReport);
+
+                    $submittedAt = clone $statsReport->submittedAt;
+                    $submittedAt->setTimezone($statsReport->center->timeZone);
+
+                    $response['submittedAt'] = $submittedAt->format('h:i A');
+                    $result = ImportManager::sendStatsSubmittedEmail($statsReport, $sheet);
+
+                    if (isset($result['success'])) {
+                        $response['success'] = true;
+                        $response['message'] = $result['success'][0];
+                    } else {
+                        $response['success'] = false;
+                        $response['message'] = $result['error'][0];
+                    }
 
                     Log::info("User {$userEmail} submitted statsReport {$id}");
                 } else {
@@ -320,7 +343,8 @@ class StatsReportController extends Controller {
 
         if ($path)
         {
-            return Response::download($path, basename($path), [
+            $filename = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
+            return Response::download($path, $filename, [
                 'Content-Length: '. filesize($path)
             ]);
         } else {
