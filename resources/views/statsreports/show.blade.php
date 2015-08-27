@@ -44,8 +44,8 @@
         <tr>
             <th>Rating:</th>
             <td>
-                @if ($statsReport->centerStats && $statsReport->centerStats->actualData)
-                    {{ $statsReport->centerStats->actualData->rating }}
+                @if ($statsReport)
+                    {{ $statsReport->getRating() }}
                 @else
                     -
                 @endif
@@ -60,6 +60,10 @@
                     -
                 @endif
             </td>
+        </tr>
+        <tr>
+            <th>Submission Comment:</th>
+            <td>{{ $statsReport->submitComment }}</td>
         </tr>
 <!--         <tr>
             <th>Locked:</th>

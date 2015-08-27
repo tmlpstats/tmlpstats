@@ -142,10 +142,6 @@ class HomeController extends Controller {
                 ? User::find($statsReport->user_id)
                 : null;
 
-            $actualData = $statsReport
-                ? CenterStatsData::actual()->statsReport($statsReport)->reportingDate($reportingDate->toDateString())->first()
-                : null;
-
             $sheetUrl = null;
             $reportUrl = null;
 
@@ -169,7 +165,7 @@ class HomeController extends Controller {
                 'localRegion' => $center->localRegion,
                 'submitted'   => $statsReport ? $statsReport->isSubmitted() : false,
                 'validated'   => $statsReport ? $statsReport->isValidated() : false,
-                'rating'      => $actualData ? $actualData->rating : '-',
+                'rating'      => $statsReport ? $statsReport->getRating() : '-',
                 'updatedAt'   => $submittedAt ? $submittedAt->format('M j, Y @ g:ia T') : '-',
                 'updatedBy'   => $user ? $user->firstName : '-',
                 'sheet'       => $sheetUrl,

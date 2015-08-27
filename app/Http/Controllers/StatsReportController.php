@@ -142,7 +142,6 @@ class StatsReportController extends Controller {
                 $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
                 $importer->import(false);
                 $sheet = $importer->getResults();
-
             } catch(Exception $e) {
                 Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             }
@@ -251,7 +250,6 @@ class StatsReportController extends Controller {
                     $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
                     $importer->import(true);
                     $sheet = $importer->getResults();
-
                 } catch(Exception $e) {
                     Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
                 }

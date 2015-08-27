@@ -86,6 +86,12 @@ class StatsReport extends Model {
         return $success;
     }
 
+    public function getRating()
+    {
+        $centerStats = CenterStats::find($this->centerStatsId);
+        return $centerStats ? $centerStats->actualData->rating : null;
+    }
+
     public function scopeReportingDate($query, $date)
     {
         if (is_object($date)) {

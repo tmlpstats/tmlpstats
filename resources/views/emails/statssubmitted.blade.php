@@ -12,6 +12,14 @@ We received them on {{ $time }} your local time. Please find the submitted sheet
     You are not complete yet. Your regional statistician will review your sheet and declare you complete by 8:30 am your local time Saturday morning.<br/>
 @endif
 <br/>
+@if ($comment)
+    You provided the following comment:<br/>
+    -----<br/>
+    {{ $comment }}
+    <br/>
+    -----<br/>
+@endif
+<br/>
 @if ($sheet)
     @include('import.results', ['sheet' => $sheet, 'includeUl' => true])
 @endif

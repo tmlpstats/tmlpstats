@@ -122,10 +122,6 @@ class AdminController extends Controller {
                 ? User::find($statsReport->user_id)
                 : null;
 
-            $actualData = $statsReport
-                ? CenterStatsData::actual()->reportingDate($reportingDate->toDateString())->statsReport($statsReport)->first()
-                : null;
-
             $sheetUrl = $statsReport && XlsxArchiver::getInstance()->getSheetPath($statsReport)
                 ? url("/statsreports/{$statsReport->id}/download")
                 : null;
@@ -144,7 +140,7 @@ class AdminController extends Controller {
                 'localRegion'   => $center->localRegion,
                 'complete'      => $statsReport ? $statsReport->validated : false,
                 'locked'        => $statsReport ? $statsReport->locked : false,
-                'rating'        => $actualData ? $actualData->rating : '-',
+                'rating'        => $statsReport ? $statsReport->getRating() : '-',
                 'updatedAt'     => $updatedAt ? $updatedAt->format('M d, Y @ g:ia T') : '-',
                 'updatedBy'     => $user ? $user->firstName : '-',
                 'sheet'         => $statsReport ? $sheetUrl : null,

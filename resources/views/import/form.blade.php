@@ -40,11 +40,11 @@
 
 @if ($submitReport)
 <div class="alert alert-warning" role="alert">
-<strong>Don't Forget:</strong> Your sheet isn't submitted yet.  Click 'Submit' to send your completed sheet to your team and the regional stats team.
+<strong>Don't Forget:</strong> Your sheet isn't submitted yet.  Click 'Submit' to send your completed sheet to the regional stats team.
 </div>
 @else
 <div class="alert alert-info" role="alert">
-<strong>Helpful Hint:</strong> Click 'Validate' to make sure your sheet doesn't have any errors. Then click 'Submit' to send your completed sheet to your team and the regional stats team. You can validate as many times as you'd like before submitting.
+<strong>Helpful Hint:</strong> Click 'Validate' to check your sheet for errors. Then click 'Submit' to send your completed sheet to the regional stats team. You can validate as many times as you'd like before submitting.
 </div>
 @endif
 

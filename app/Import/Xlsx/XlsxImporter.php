@@ -17,7 +17,7 @@ class XlsxImporter
     public function __construct($filePath, $fileName, $expectedDate = null, $enforceVersion = true)
     {
         if (!is_file($filePath)) {
-            throw new Exception("There was a problem processing '{$filePath}'. Please try again.");
+            throw new Exception("There was a problem processing '{$fileName}'. Please try again.");
         }
         if (!$this->isCorrectFileType($fileName)) {
 
