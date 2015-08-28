@@ -34,22 +34,25 @@ class Handler extends ExceptionHandler {
      */
     public function report(Exception $e)
     {
-        $user = Auth::user()->email;
-        $center = Auth::user()->center
-            ? Auth::user()->center->name
-            : 'unknown';
-        $time = Carbon::now()->format('Y-m-d H:i:s');
+        // Ignore token expiration messages
+        if (!($e instanceof TokenMismatchException)) {
 
-        $body = "An exception was caught by '{$user}' from {$center} center at {$time} UTC: '" . $e->getMessage() . "'\n\n";
-        $body .= $e->getTraceAsString() . "\n";
-        try {
-            Mail::raw($body, function($message) use ($center) {
-                $message->to(env('ADMIN_EMAIL'))->subject("Exception processing sheet for {$center} center");
-            });
-        } catch (Exception $e) {
-            Log::error("Exception caught sending error email: " . $e->getMessage());
+            $user = Auth::user()->email;
+            $center = Auth::user()->center
+                ? Auth::user()->center->name
+                : 'unknown';
+            $time = Carbon::now()->format('Y-m-d H:i:s');
+
+            $body = "An exception was caught by '{$user}' from {$center} center at {$time} UTC: '" . $e->getMessage() . "'\n\n";
+            $body .= $e->getTraceAsString() . "\n";
+            try {
+                Mail::raw($body, function($message) use ($center) {
+                    $message->to(env('ADMIN_EMAIL'))->subject("Exception processing sheet for {$center} center in " . strtoupper(env('APP_ENV')));
+                });
+            } catch (Exception $e) {
+                Log::error("Exception caught sending error email: " . $e->getMessage());
+            }
         }
-
         return parent::report($e);
     }
 
