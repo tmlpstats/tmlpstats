@@ -56,9 +56,9 @@ class HomeController extends Controller {
 
         $region = Request::has('region') ? Request::get('region') : $defaultRegion;
 
-        $allReports = StatsReport::currentQuarter($region)->orderBy('reporting_date', 'desc')->get();
+        $allReports = StatsReport::currentQuarter($region)->submitted()->orderBy('reporting_date', 'desc')->get();
         if ($allReports->isEmpty()) {
-            $allReports = StatsReport::lastQuarter($region)->orderBy('reporting_date', 'desc')->get();
+            $allReports = StatsReport::lastQuarter($region)->submitted()->orderBy('reporting_date', 'desc')->get();
         }
 
         $today = Carbon::now();

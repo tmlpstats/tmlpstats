@@ -100,9 +100,18 @@ class StatsReport extends Model {
         return $query->whereReportingDate($date);
     }
 
-    public function scopeValidated($query, $validated)
+    public function scopeValidated($query, $validated = true)
     {
         return $query->whereValidated($validated);
+    }
+
+    public function scopeSubmitted($query, $submitted = true)
+    {
+        if ($submitted) {
+            return $query->whereNotNull('submitted_at');
+        } else {
+            return $query->whereNull('submitted_at');
+        }
     }
 
     public function scopeCenter($query, $center)
