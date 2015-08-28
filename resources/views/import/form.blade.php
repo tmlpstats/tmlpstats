@@ -99,6 +99,7 @@
                     <div class="dot dot-a"></div>
                     <div class="dot dot-b"></div>
                   </div>
+                  <br/>
                 </div>
             </div>
             <div class="modal-footer">
@@ -165,7 +166,7 @@
             $("#submitStats").attr("disabled", true);
             $.ajax({
                 type: "POST",
-                url: "/tmlpstats/statsreports/{{ isset($results) && $results['sheets'] ? $results['sheets'][0]['statsReportId'] : 0 }}/submit",
+                url: "{{ url('/statsreports/' . (isset($results) && $results['sheets'] ? $results['sheets'][0]['statsReportId'] : 0) . '/submit') }}",
                 data: "dataType=JSON&function=submit&comment=" + encodeURIComponent($("textarea[name=comment]").val()),
                 beforeSend: function (request) {
                     request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");

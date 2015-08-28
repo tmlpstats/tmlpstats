@@ -25,4 +25,4 @@ We received them on {{ $time }} your local time. Please find the submitted sheet
 @endif
 <br/>
 Best,<br/>
-Your regional statisticans<br/>
+Your Regional Statisticans<br/>
