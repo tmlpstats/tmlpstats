@@ -156,9 +156,11 @@ class HomeController extends Controller {
                     : null;
             }
 
-            $submittedAt = $statsReport
-                ? Carbon::createFromFormat('Y-m-d H:i:s', $statsReport->submittedAt, $statsReport->center->timeZone)
-                : null;
+            $submittedAt = null;
+            if ($statsReport) {
+                $submittedAt = $statsReport->submittedAt;
+                $submittedAt->setTimezone($statsReport->center->timeZone);
+            }
 
             $centerResults = array(
                 'name'        => $center->name,
