@@ -321,7 +321,7 @@ class ImportDocument extends ImportDocumentAbstract
 
         if ($this->enforceVersion && $this->version != $this->center->sheetVersion) {
 
-            $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_SPREADSHEET_VERSION_MISMATCH', $this->statsReport->spreadsheetVersion, $this->center->sheetVersion);
+            $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_SPREADSHEET_VERSION_MISMATCH', $this->version, $this->center->sheetVersion);
             $isValid = false;
         }
 
