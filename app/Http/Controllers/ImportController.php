@@ -30,6 +30,7 @@ class ImportController extends Controller {
     // Handle XLSX file uploads
     public function uploadSpreadsheet(Request $request)
     {
+        $user = Auth::user();
         $enforceVersion = (Request::get('ignoreVersion') != 1);
 
         $submitReport = false;
@@ -47,7 +48,7 @@ class ImportController extends Controller {
         Request::flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
         return view('import.index')->with([
-            'submitReport'            => true, // Controls whether or not to show Submit button
+            'submitReport'            => $user->getCenter()->globalRegion === 'NA', // Controls whether or not to show Submit button
             'showUploadForm'          => true,
             'showReportCheckSettings' => true,
             'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),
