@@ -35,14 +35,19 @@ class XlsxImporter
         $doc = new ImportDocument\ImportDocument($this->file, $this->expectedDate, $this->enforceVersion);
         $doc->import($saveReport);
 
+        $submittedAt = ($doc->saved() && $doc->statsReport)
+            ? $doc->statsReport->submittedAt
+            : null;
+
         $this->results = array(
             'statsReportId' => ($doc->statsReport) ? $doc->statsReport->id : null,
+            'statsReport'   => ($doc->statsReport) ? $doc->statsReport : null,
             'centerId'      => ($doc->center) ? $doc->center->id : null,
             'center'        => ($doc->center) ? $doc->center->name : null,
             'reportingDate' => ($doc->reportingDate) ? $doc->reportingDate : null,
             'sheetVersion'  => ($doc->version) ? $doc->version : null,
             'sheetFilename' => ($doc->statsReport) ? $doc->statsReport->center->sheetFilename : null,
-            'saved'         => $doc->saved(),
+            'submittedAt'   => $submittedAt,
             'errors'        => $doc->messages['errors'],
             'warnings'      => $doc->messages['warnings'],
         );

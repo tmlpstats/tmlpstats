@@ -23,6 +23,7 @@ class StatsReport extends Model {
 
     protected $dates = [
         'reporting_date',
+        'submitted_at',
     ];
 
     public function setReportingDateAttribute($value)
@@ -83,6 +84,12 @@ class StatsReport extends Model {
         }
 
         return $success;
+    }
+
+    public function getRating()
+    {
+        $centerStats = CenterStats::find($this->centerStatsId);
+        return $centerStats ? $centerStats->actualData->rating : null;
     }
 
     public function scopeReportingDate($query, $date)

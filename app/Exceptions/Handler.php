@@ -43,7 +43,7 @@ class Handler extends ExceptionHandler {
         $body = "An exception was caught by '{$user}' from {$center} center at {$time} UTC: '" . $e->getMessage() . "'\n\n";
         $body .= $e->getTraceAsString() . "\n";
         try {
-            Mail::raw($body, function($message) use ($center, $sheetPath) {
+            Mail::raw($body, function($message) use ($center) {
                 $message->to(env('ADMIN_EMAIL'))->subject("Exception processing sheet for {$center} center");
             });
         } catch (Exception $e) {

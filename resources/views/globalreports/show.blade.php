@@ -58,8 +58,8 @@
                             <td>{{ $statsReport->center->localRegion ?: '-' }}</td>
                             <td>{{ $statsReport->reportingDate->format('F j, Y') }}</td>
                             <td>
-                                @if ($statsReport->centerStats && $statsReport->centerStats->actualData)
-                                    {{ $statsReport->centerStats->actualData->rating }}
+                                @if ($statsReport)
+                                    {{ $statsReport->getRating() }}
                                 @else
                                     -
                                 @endif

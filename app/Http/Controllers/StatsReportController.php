@@ -6,6 +6,7 @@ use TmlpStats\StatsReport;
 use TmlpStats\Center;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Import\Xlsx\XlsxImporter;
+use TmlpStats\Import\Xlsx\XlsxArchiver;
 
 use Illuminate\Http\Request;
 
@@ -14,6 +15,7 @@ use Carbon\Carbon;
 use Auth;
 use Input;
 use Log;
+use Response;
 
 class StatsReportController extends Controller {
 
@@ -134,7 +136,7 @@ class StatsReportController extends Controller {
 
         if ($statsReport) {
 
-            $sheetUrl = ImportManager::getSheetPath($statsReport->reportingDate->toDateString(), $statsReport->center->sheetFilename);
+            $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
 
             try {
                 $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
@@ -143,8 +145,13 @@ class StatsReportController extends Controller {
             } catch(Exception $e) {
                 Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             }
+
+            $sheetUrl = $sheetUrl
+                ? url("/statsreports/{$statsReport->id}/download")
+                : null;
         }
-        return view('statsreports.show', compact('statsReport', 'sheet'));
+
+        return view('statsreports.show', compact('statsReport', 'sheet', 'sheetUrl'));
     }
 
     /**
@@ -182,10 +189,10 @@ class StatsReportController extends Controller {
             return $response;
         }
 
-        $locked = Input::get('locked', null);
-        if ($locked !== null) {
+        if ($statsReport) {
+            $locked = Input::get('locked', null);
+            if ($locked !== null) {
 
-            if ($statsReport) {
                 $statsReport->locked = ($locked == false || $locked === 'false') ? false : true;
 
                 if ($statsReport->save()) {
@@ -198,12 +205,88 @@ class StatsReportController extends Controller {
                     Log::error("User {$userEmail} attempted to lock statsReport {$id}. Failed to lock.");
                 }
             } else {
-                $response['message'] = 'Unable to lock stats report.';
-                Log::error("User {$userEmail} attempted to lock statsReport {$id}. Not found.");
+                $response['message'] = 'Invalid value for locked.';
+                Log::error("User {$userEmail} attempted to lock statsReport {$id}. No value provided for locked. ");
             }
         } else {
-            $response['message'] = 'Invalid value for locked.';
-            Log::error("User {$userEmail} attempted to lock statsReport {$id}. No value provided for locked. ");
+            $response['message'] = 'Unable to update stats report.';
+            Log::error("User {$userEmail} attempted to lock statsReport {$id}. Not found.");
+        }
+
+        return $response;
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * Currently only supports updated locked property
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function submit($id)
+    {
+        $userEmail = Auth::user()->email;
+        $response = array(
+            'statsReport' => $id,
+            'success'     => false,
+            'message'     => '',
+        );
+
+        $statsReport = StatsReport::find($id);
+
+        if ($statsReport && !$this->hasAccess($statsReport->center->id, 'U')) {
+            $response['message'] = 'You do not have access to submit this report.';
+            return $response;
+        }
+
+        if ($statsReport) {
+            $submitReport = Input::get('function', null);
+            if ($submitReport === 'submit') {
+
+                $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+
+                try {
+                    $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
+                    $importer->import(true);
+                    $sheet = $importer->getResults();
+                } catch(Exception $e) {
+                    Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+                }
+
+                $statsReport->submittedAt = Carbon::now();
+                $statsReport->submitComment = Input::get('comment', null);
+
+                if ($statsReport->save()) {
+
+                    XlsxArchiver::getInstance()->promoteWorkingSheet($statsReport);
+
+                    $submittedAt = clone $statsReport->submittedAt;
+                    $submittedAt->setTimezone($statsReport->center->timeZone);
+
+                    $response['submittedAt'] = $submittedAt->format('h:i A');
+                    $result = ImportManager::sendStatsSubmittedEmail($statsReport, $sheet);
+
+                    if (isset($result['success'])) {
+                        $response['success'] = true;
+                        $response['message'] = $result['success'][0];
+                    } else {
+                        $response['success'] = false;
+                        $response['message'] = $result['error'][0];
+                    }
+
+                    Log::info("User {$userEmail} submitted statsReport {$id}");
+                } else {
+                    $response['message'] = 'Unable to submit stats report.';
+                    Log::error("User {$userEmail} attempted to submit statsReport {$id}. Failed to submit.");
+                }
+            } else {
+                $response['message'] = 'Invalid request.';
+                Log::error("User {$userEmail} attempted to submit statsReport {$id}. No value provided for submitReport. ");
+            }
+        } else {
+            $response['message'] = 'Unable to update stats report.';
+            Log::error("User {$userEmail} attempted to submit statsReport {$id}. Not found.");
         }
 
         return $response;
@@ -248,16 +331,35 @@ class StatsReportController extends Controller {
         return $response;
     }
 
+    public function downloadSheet($id)
+    {
+        $statsReport = StatsReport::find($id);
+
+        $path = $statsReport
+            ? XlsxArchiver::getInstance()->getSheetPath($statsReport)
+            : null;
+
+        if ($path)
+        {
+            $filename = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
+            return Response::download($path, $filename, [
+                'Content-Length: '. filesize($path)
+            ]);
+        } else {
+            abort(404);
+        }
+    }
+
     // This is a really crappy authz. Need to address this properly
     public function hasAccess($centerId, $permissions)
     {
         switch ($permissions) {
             case 'R':
+            case 'U':
                 return (Auth::user()->hasRole('globalStatistician')
                         || Auth::user()->hasRole('administrator')
                         || (Auth::user()->hasRole('localStatistician') && Auth::user()->hasCenter($centerId)));
             case 'C':
-            case 'U':
             case 'D':
             default:
                 return (Auth::user()->hasRole('globalStatistician')

@@ -1,6 +1,10 @@
 <?php
 namespace TmlpStats\Import;
 
+use TmlpStats\Import\Xlsx\XlsxArchiver;
+
+use TmlpStats\Center;
+use TmlpStats\Quarter;
 use Carbon\Carbon;
 
 use Auth;
@@ -80,14 +84,10 @@ class ImportManager
 
                 if (isset($sheet['statsReportId'])) {
 
-                    if ($sheet['saved']) {
-                        $sheetPath = $this->archiveSheet($file,
-                                                         $sheet['reportingDate']->toDateString(),
-                                                         $sheet['sheetFilename']);
+                    if ($sheet['submittedAt']) {
+                        $sheetPath = XlsxArchiver::getInstance()->archive($file, $sheet['statsReport']);
                     } else {
-                        $sheetPath = $this->saveWorkingSheet($file,
-                                                             $sheet['reportingDate']->toDateString(),
-                                                             $sheet['sheetFilename']);
+                        $sheetPath = XlsxArchiver::getInstance()->saveWorkingSheet($file, $sheet['statsReport']);
                     }
                 }
 
@@ -107,9 +107,7 @@ class ImportManager
 
             if (!$sheetPath && $file) {
 
-                $sheetPath = $this->saveWorkingSheet($file,
-                                                     Carbon::now()->toDateString(),
-                                                     $file->getClientOriginalName());
+                $sheetPath = XlsxArchiver::getInstance()->saveWorkingSheet($file);
             }
 
             if ($exception) {
@@ -132,6 +130,12 @@ class ImportManager
                 } catch (\Exception $e) {
                     Log::error("Exception caught sending error email: " . $e->getMessage());
                 }
+            } else if ($sheet['submittedAt']) {
+
+                $result = $this->sendStatsSubmittedEmail($sheet['statsReport'], $sheet);
+                if ($result !== false) {
+                    $this->results['messages'] = $result;
+                }
             }
         }
 
@@ -152,88 +156,116 @@ class ImportManager
         return $expectedDate->startOfDay();
     }
 
-    public static function getArchiveDirectory()
+    public static function sendStatsSubmittedEmail($statsReport, $sheet)
     {
-        return storage_path() . "/app/archive/xlsx";
-    }
-
-    public static function getArchivedFilePath($reportingDate, $fileName)
-    {
-        $baseDir = static::getArchiveDirectory();
-
-        $name = "{$baseDir}/{$reportingDate}/{$fileName}";
-        if (strpos($name, '.xlsx') === false) {
-            $name .= '.xlsx';
-        }
-        return $name;
-    }
-
-    public static function getWorkingSheetFilePath($reportingDate, $fileName)
-    {
-        $baseDir = static::getArchiveDirectory();
-
-        $name = "{$baseDir}/working_files/{$reportingDate}/{$fileName}";
-        if (strpos($name, '.xlsx') === false) {
-            $name .= '.xlsx';
-        }
-        return $name;
-    }
-
-    public static function getSheetPath($reportingDate, $name)
-    {
-        $archivedFile = static::getArchivedFilePath($reportingDate, $name);
-
-        if (file_exists($archivedFile)) {
-            return $archivedFile;
+        if (!$statsReport || !$statsReport->submittedAt) {
+            return false;
         }
 
-        $workingFile = static::getWorkingSheetFilePath($reportingDate, $name);
+        $result = array();
 
-        if (file_exists($workingFile)) {
-            return $workingFile;
+        $user = ucfirst(Auth::user()->firstName);
+        $quarter = $statsReport->quarter;
+        $center = $statsReport->center;
+
+        $sumittedAt = clone $statsReport->submittedAt;
+        $sumittedAt->setTimezone($center->timeZone);
+
+        // 7:00.59 PM local time on the reporting date.
+        $due = Carbon::create(
+            $statsReport->reportingDate->year,
+            $statsReport->reportingDate->month,
+            $statsReport->reportingDate->day,
+            19, 0, 59,
+            $center->timeZone
+        );
+
+        $isLate = $sumittedAt->gt($due);
+        $due = $due->format('l, F jS \a\t g:ia');
+        $time = $sumittedAt->format('l, F jS \a\t g:ia');
+
+        $programManager         = $center->getProgramManager($quarter, $center->globalRegion);
+        $classroomLeader        = $center->getClassroomLeader($quarter, $center->globalRegion);
+        $t1TeamLeader           = $center->getT1TeamLeader($quarter, $center->globalRegion);
+        $t2TeamLeader           = $center->getT2TeamLeader($quarter, $center->globalRegion);
+        $statistician           = $center->getStatistician($quarter, $center->globalRegion);
+        $statisticianApprentice = $center->getStatisticianApprentice($quarter, $center->globalRegion);
+
+        $emails = array(
+            'center'                 => $center->statsEmail,
+            'programManager'         => $programManager ? $programManager->email : null,
+            'classroomLeader'        => $classroomLeader ? $classroomLeader->email : null,
+            't1TeamLeader'           => $t1TeamLeader ? $t1TeamLeader->email : null,
+            't2TeamLeader'           => $t2TeamLeader ? $t2TeamLeader->email : null,
+            'statistician'           => $statistician ? $statistician->email : null,
+            'statisticianApprentice' => $statisticianApprentice ? $statisticianApprentice->email : null,
+            'regional'               => null,
+        );
+
+        switch ($center->globalRegion) {
+            case 'NA':
+                $emails['regional'] = $center->localRegion == 'East'
+                    ? 'east.statistician@gmail.com'
+                    : 'west.statistician@gmail.com';
+                break;
+            case 'IND':
+                $emails['regional'] = 'india.statistician@gmail.com';
+                break;
+            case 'EME':
+                $emails['regional'] = 'eme.statistician@gmail.com';
+                break;
+            case 'ANZ':
+                $emails['regional'] = 'anz.statistician@gmail.com';
+                break;
         }
 
-        return '';
-    }
+        $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+        $sheetName = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
+        $centerName = $center->name;
+        $comment = $statsReport->submitComment;
+        try {
+            Mail::send('emails.statssubmitted', compact('user', 'centerName', 'time', 'sheet', 'isLate', 'due', 'comment'),
+                function($message) use ($emails, $centerName, $sheetPath, $sheetName) {
+                // Only send email to centers in production
+                if (env('APP_ENV') === 'prod') {
+                    $message->to($emails['center']);
 
-    public function archiveSheet($file, $reportingDate, $fileName)
-    {
-        $destination = static::getArchivedFilePath($reportingDate, $fileName);
+                    if ($emails['regional']) {
+                        $message->cc($emails['regional']);
+                    }
+                    if ($emails['programManager']) {
+                        $message->cc($emails['programManager']);
+                    }
+                    if ($emails['classroomLeader']) {
+                        $message->cc($emails['classroomLeader']);
+                    }
+                    if ($emails['t1TeamLeader']) {
+                        $message->cc($emails['t1TeamLeader']);
+                    }
+                    if ($emails['t2TeamLeader']) {
+                        $message->cc($emails['t2TeamLeader']);
+                    }
+                    if ($emails['statistician']) {
+                        $message->cc($emails['statistician']);
+                    }
+                    if ($emails['statisticianApprentice']) {
+                        $message->cc($emails['statisticianApprentice']);
+                    }
+                } else {
+                    $message->to(env('ADMIN_EMAIL'));
+                }
 
-        return $this->saveFile($destination, $file);
-    }
-
-    protected function saveWorkingSheet($file, $reportingDate, $fileName)
-    {
-        $destination = static::getWorkingSheetFilePath($reportingDate, $fileName);
-
-        return $this->saveFile($destination, $file);
-    }
-
-    protected function saveFile($destinationPath, $sourceFile)
-    {
-        $savedFile = '';
-
-        if (!($sourceFile instanceof \Symfony\Component\HttpFoundation\File\UploadedFile)) {
-            Log::error('Unable to save file. Invalid file.');
-            return $savedFile;
+                $message->subject("Team {$centerName} Statistics Submitted");
+                $message->attach($sheetPath, array(
+                    'as' => $sheetName,
+                ));
+            });
+            Log::info("Sent emails to the following people with team {$centerName}'s report: " . implode(', ', $emails));
+            $result['success'][] = "<span style='font-weight:bold'>Thank you.</span> We received your statistics and have sent a copy to <ul><li>" . implode('</li><li>', $emails) . "</li></ul> Please reply-all to that email if there is anything you need to communicate.";
+        } catch (\Exception $e) {
+            Log::error("Exception caught sending error email: " . $e->getMessage());
+            $result['error'][] = "<span style='font-weight:bold'>Hold up.</span> There was a problem emailing your sheet to your team. Please email the sheet you just submitted to your Program Manager, Classroom Leader, T2 Team Leader, and Regional Statistician ({$emails['regional']}) using your center stats email ({$emails['center']}). <span style='font-weight:bold'>We did</span> receive your statistics.";
         }
-
-        $pathInfo = pathinfo($destinationPath);
-        $dir = $pathInfo['dirname'];
-        $fileName = $pathInfo['basename'];
-
-        if (is_dir($dir) || mkdir($dir, 0777, true)) {
-            try {
-                $sourceFile->move($dir, $fileName);
-                $savedFile = $destinationPath;
-            } catch (Exception $e) {
-                Log::error("Unable to save file '$destinationPath'. Caught exception moving file: {$e->getMessage()}.");
-            }
-        } else {
-            Log::error("Unable to save file '$destinationPath'. Failed to setup directory.");
-        }
-
-        return $savedFile;
+        return $result;
     }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
 use TmlpStats\User;
@@ -133,15 +134,12 @@ class HomeController extends Controller {
 
             $statsReport = $center->statsReports()
                                   ->reportingDate($reportingDate->toDateString())
+                                  ->whereNotNull('submitted_at')
                                   ->orderBy('submitted_at', 'desc')
                                   ->first();
 
             $user = $statsReport
                 ? User::find($statsReport->user_id)
-                : null;
-
-            $actualData = $statsReport
-                ? CenterStatsData::actual()->statsReport($statsReport)->reportingDate($reportingDate->toDateString())->first()
                 : null;
 
             $sheetUrl = null;
@@ -150,36 +148,31 @@ class HomeController extends Controller {
             if (Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator')
                 || (Auth::user()->hasRole('localStatistician') && Auth::user()->hasCenter($center->id))
             ) {
-                $sheetUrl = ImportManager::getSheetPath($reportingDate->toDateString(), $center->sheetFilename)
-                    ? route('downloadSheet', array($reportingDate->toDateString(), $center->sheetFilename))
+                $sheetUrl = $statsReport && XlsxArchiver::getInstance()->getSheetPath($statsReport)
+                    ? url("/statsreports/{$statsReport->id}/download")
                     : null;
                 $reportUrl = $statsReport
                     ? url("/statsreports/{$statsReport->id}")
                     : null;
             }
 
-            $updatedAt = $statsReport
-                ? Carbon::createFromFormat('Y-m-d H:i:s', $statsReport->updatedAt, 'UTC')
+            $submittedAt = $statsReport
+                ? Carbon::createFromFormat('Y-m-d H:i:s', $statsReport->submittedAt, $statsReport->center->timeZone)
                 : null;
-
-            if ($updatedAt) {
-                $localTimezone = $timezone ?: 'America/Los_Angeles';
-                $updatedAt->setTimezone($localTimezone);
-            }
 
             $centerResults = array(
                 'name'        => $center->name,
                 'localRegion' => $center->localRegion,
                 'submitted'   => $statsReport ? $statsReport->isSubmitted() : false,
                 'validated'   => $statsReport ? $statsReport->isValidated() : false,
-                'rating'      => $actualData ? $actualData->rating : '-',
-                'updatedAt'   => $updatedAt ? $updatedAt->format('M j, Y @ g:ia T') : '-',
+                'rating'      => $statsReport ? $statsReport->getRating() : '-',
+                'updatedAt'   => $submittedAt ? $submittedAt->format('M j, Y @ g:ia T') : '-',
                 'updatedBy'   => $user ? $user->firstName : '-',
                 'sheet'       => $sheetUrl,
                 'reportUrl'   => $reportUrl,
             );
 
-            if ($statsReport && $statsReport->validated) {
+            if ($statsReport && $statsReport->submittedAt) {
                 $regionsData[$localRegion]['completeCount'] += 1;
             }
             $regionsData[$localRegion]['validatedCount'] += 1;
@@ -188,20 +181,20 @@ class HomeController extends Controller {
         }
 
         foreach ($regionsData as &$sortRegion) {
-            usort($sortRegion['centersData'], array(get_class(), 'sortByComplete'));
+            usort($sortRegion['centersData'], array(get_class(), 'sortBySubmitted'));
         }
 
         return view('home')->with(['reportingDate'  => $reportingDate,
                                    'reportingDates' => $reportingDates,
-                                   'timezone'        => $timezone,
+                                   'timezone'       => $timezone,
                                    'selectedRegion' => $region,
                                    'regionsData'    => $regionsData]);
     }
 
-    protected static function sortByComplete($a, $b)
+    protected static function sortBySubmitted($a, $b)
     {
-        if ($a['validated'] != $b['validated']) {
-            return $a['validated'] ? -1 : 1; // reverse order to get sort in DESC order
+        if ($a['submitted'] != $b['submitted']) {
+            return $a['submitted'] ? -1 : 1; // reverse order to get sort in DESC order
         } else {
             return strcmp($a['name'], $b['name']);
         }

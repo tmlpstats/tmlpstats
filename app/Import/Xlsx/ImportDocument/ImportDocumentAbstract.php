@@ -27,6 +27,7 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
     protected $version = null;
     protected $expectedDate = null;
     protected $enforceVersion = true;
+    protected $submittedAt = null;
 
     protected $saved = false;
 
@@ -50,6 +51,9 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
     public function import($saveReport = false)
     {
         $isValid = false;
+
+        $this->submittedAt = Carbon::now();
+
         $this->process();
 
         if ($this->statsReport) {

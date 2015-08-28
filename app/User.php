@@ -64,6 +64,13 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         return false;
     }
 
+    public function getCenter()
+    {
+        if ($this->centers) {
+            return $this->centers[0];
+        }
+    }
+
     public function homeRegion()
     {
         return count($this->centers) ? $this->centers[0]->globalRegion : null;
