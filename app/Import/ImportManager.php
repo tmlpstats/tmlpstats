@@ -255,6 +255,10 @@ class ImportManager
                     $message->to(env('ADMIN_EMAIL'));
                 }
 
+                if ($emails['regional']) {
+                    $message->replyTo($emails['regional']);
+                }
+
                 $message->subject("Team {$centerName} Statistics Submitted");
                 $message->attach($sheetPath, array(
                     'as' => $sheetName,
