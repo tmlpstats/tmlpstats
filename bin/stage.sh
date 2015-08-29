@@ -33,16 +33,21 @@ fi
 # Leave rollback as is. It should contain whatever was last deployed to production
 
 cd $SOURCE/
+echo "Pulling latest sources"
 git pull --rebase
 
+echo "Running composer"
 # Do actual deploy
 sed -i.bak 's/php artisan/php-cli artisan/g' composer.json # workaround issue with artisan an bluehost
 php-cli ~/common/composer.phar install --no-dev --optimize-autoloader
 mv composer.json.bak composer.json # clean up
 
+echo "Snapping the database"
 bin/snap.sh
 
+echo "Running migrations"
 php artisan migrate
 cd ../
 
+echo "Syncing files"
 rsync -av --delete --filter='protect .env' --filter='protect storage/framework/sessions/*' --filter='protect storage/logs/*' --filter='protect storage/app/*' --filter='protect public/error_log' --exclude='.git*' --exclude='composer.*' --exclude='readme.md' --exclude='.env.example' --exclude='bin' $SOURCE/ $DEST
