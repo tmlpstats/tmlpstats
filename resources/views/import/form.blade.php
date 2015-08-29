@@ -66,6 +66,24 @@
       </div>
     </div>
 </div>
+
+<div class="modal fade" id="selectFileModel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Choose file</h4>
+            </div>
+            <div class="modal-body">
+                <p>Please select a file before clicking Validate.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="submitModel" tabindex="-1" role="dialog" aria-labelledby="submitModelLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -148,6 +166,12 @@
             }
         });
         $("#validate").click(function() {
+
+            if (!$("input[type=file]").val()) {
+                $('#selectFileModel').modal('show');
+                return false;
+            }
+
             $("#updating").show();
             $("#results").hide();
         });
@@ -182,8 +206,8 @@
                     }
                     $("#submitTime").text(response.submittedAt);
                     $("#submitResult").show();
-                    $('#submitModel').modal('hide')
-                    $('#submitCompleteModel').modal('show')
+                    $('#submitModel').modal('hide');
+                    $('#submitCompleteModel').modal('show');
                 }
             });
         });
