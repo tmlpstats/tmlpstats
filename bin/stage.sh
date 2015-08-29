@@ -20,7 +20,7 @@
 #
 
 SOURCE='tmlpstats'
-DEST='../public_html/tmlpstats'
+DEST='../public_html/stage'
 ROLLBACK='rollback'
 
 if [ "$1" == "rollback" ]; then
@@ -30,15 +30,17 @@ if [ "$1" == "rollback" ]; then
     exit 0;
 fi
 
-# Setup rollback copy
-rm -rf $ROLLBACK
-cp -a $DEST $ROLLBACK
+# Leave rollback as is. It should contain whatever was last deployed to production
 
 # Do actual deploy
 cd $SOURCE/
 sed -i.bak 's/php artisan/php-cli artisan/g' composer.json # workaround issue with artisan an bluehost
 php-cli ~/common/composer.phar install --no-dev --optimize-autoloader
 mv composer.json.bak composer.json # clean up
+
+./snap.sh
+
+php artisan migrate
 cd ../
 
 rsync -av --delete --filter='protect .env' --filter='protect storage/framework/sessions/*' --filter='protect storage/logs/*' --filter='protect storage/app/*' --filter='protect public/error_log' --exclude='.git*' --exclude='composer.*' --exclude='readme.md' --exclude='.env.example' --exclude='bin' $SOURCE/ $DEST

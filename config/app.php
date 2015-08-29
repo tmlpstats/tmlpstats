@@ -150,6 +150,7 @@ return [
          * 3rd Party Service Providers...
          */
         'Eloquence\EloquenceServiceProvider',
+        'Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider',
     ],
 
     /*
