@@ -32,8 +32,10 @@ fi
 
 # Leave rollback as is. It should contain whatever was last deployed to production
 
-# Do actual deploy
 cd $SOURCE/
+git pull --rebase
+
+# Do actual deploy
 sed -i.bak 's/php artisan/php-cli artisan/g' composer.json # workaround issue with artisan an bluehost
 php-cli ~/common/composer.phar install --no-dev --optimize-autoloader
 mv composer.json.bak composer.json # clean up
