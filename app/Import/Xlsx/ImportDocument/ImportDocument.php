@@ -379,7 +379,14 @@ class ImportDocument extends ImportDocumentAbstract
 
         $this->center = Center::name($centerName)->first();
         if (!$this->center) {
-            $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_CENTER_NOT_FOUND', $centerName);
+            $centerListObjects = Center::globalRegion(Auth::user()->homeRegion())->orderBy('name')->get();
+            $centerList = array();
+
+            foreach ($centerListObjects as $center) {
+                $centerList[] = $center->name;
+            }
+
+            $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_CENTER_NOT_FOUND', $centerName, implode(', ', $centerList));
         } else if (!$this->center->active) {
             $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_CENTER_INACTIVE', $centerName);
         }

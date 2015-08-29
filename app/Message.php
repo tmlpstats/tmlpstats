@@ -446,7 +446,7 @@ class Message
         ),
         'CLASSLIST_XFER_COMMENT_MISSING' => array(
             'type' => Message::ERROR,
-            'format' => "Add a comment specifying the date of transfer and the center they transfered to/from.",
+            'format' => "Add a comment specifying the date of transfer and the center they transferred to/from.",
             'arguments' => array(),
         ),
         'CLASSLIST_WD_WBO_ONLY_ONE' => array(
@@ -619,9 +619,10 @@ class Message
 
         'IMPORTDOC_CENTER_NOT_FOUND' => array(
             'type' => Message::ERROR,
-            'format' => "Could not find center '%%centerName%%'. The name may not match our list or this sheet may be an invalid/corrupt.",
+            'format' => "Could not find center '%%centerName%%'. The name may not match our list or this sheet may be an invalid/corrupt. Make sure the center name is the same as one in this list: %%centerList%%.",
             'arguments' => array(
                 '%%centerName%%',
+                '%%centerList%%',
             ),
         ),
         'IMPORTDOC_CENTER_INACTIVE' => array(
