@@ -40,7 +40,7 @@ sed -i.bak 's/php artisan/php-cli artisan/g' composer.json # workaround issue wi
 php-cli ~/common/composer.phar install --no-dev --optimize-autoloader
 mv composer.json.bak composer.json # clean up
 
-./snap.sh
+bin/snap.sh
 
 php artisan migrate
 cd ../
