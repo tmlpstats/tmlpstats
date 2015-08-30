@@ -46,7 +46,7 @@ mv composer.json.bak composer.json # clean up
 echo ""
 echo "Running migrations"
 cd $DEST/
-php artisan migrate
+php-cli artisan migrate
 
 echo ""
 echo "Syncing files"

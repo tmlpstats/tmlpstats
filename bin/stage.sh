@@ -55,7 +55,7 @@ rsync -av --delete $PROD/storage/app/* $DEST/storage/app/
 echo ""
 echo "Running migrations"
 cd $DEST/
-php artisan migrate
+php-cli artisan migrate
 
 
 echo ""
