@@ -21,6 +21,7 @@
 
 SOURCE='tmlpstats'
 DEST='../public_html/stage'
+PROD='../public_html/tmlpstats'
 ROLLBACK='rollback'
 
 if [ "$1" == "rollback" ]; then
@@ -48,10 +49,25 @@ echo "Snapping the database"
 bin/snap.sh
 
 echo ""
+echo "Copying file archive"
+rsync -av --delete $PROD/storage/app/* $DEST/storage/app/
+
+echo ""
 echo "Running migrations"
 php artisan migrate
 cd ../
 
 echo ""
 echo "Syncing files"
-rsync -av --delete --filter='protect .env' --filter='protect storage/framework/sessions/*' --filter='protect storage/logs/*' --filter='protect storage/app/*' --filter='protect public/error_log' --exclude='.git*' --exclude='composer.*' --exclude='readme.md' --exclude='.env.example' --exclude='bin' $SOURCE/ $DEST
+rsync -av --delete --filter='protect .env' \
+                   --filter='protect storage/framework/sessions/*' \
+                   --filter='protect storage/logs/*' \
+                   --filter='protect storage/app/*' \
+                   --filter='protect public/error_log' \
+                   --exclude='.git*' \
+                   --exclude='composer.*' \
+                   --exclude='readme.md' \
+                   --exclude='.env.example' \
+                   --exclude='.editorconfig' \
+                   --exclude='bin' \
+                   $SOURCE/ $DEST

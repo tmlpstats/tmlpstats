@@ -50,4 +50,16 @@ cd ../
 
 echo ""
 echo "Syncing files"
-rsync -av --delete --filter='protect .env' --filter='protect storage/framework/sessions/*' --filter='protect storage/logs/*' --filter='protect storage/app/*' --filter='protect public/error_log' --exclude='.git*' --exclude='composer.*' --exclude='readme.md' --exclude='.env.example' --exclude='bin' $SOURCE/ $DEST
+rsync -av --delete --filter='protect .env' \
+                   --filter='protect storage/framework/sessions/*' \
+                   --filter='protect storage/logs/*' \
+                   --filter='protect storage/app/*' \
+                   --filter='protect public/error_log' \
+                   --exclude='.git*' \
+                   --exclude='composer.*' \
+                   --exclude='readme.md' \
+                   --exclude='.env.example' \
+                   --exclude='.editorconfig' \
+                   --exclude='bin' \
+                   $SOURCE/ $DEST
+
