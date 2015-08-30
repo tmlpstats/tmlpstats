@@ -19,9 +19,9 @@
 #       $ ./deploy.sh rollback
 #
 
-SOURCE='~/tmlpstats.git/tmlpstats'
-DEST='~/public_html/tmlpstats'
-ROLLBACK='~/tmlpstats.git/rollback'
+SOURCE="$HOME/tmlpstats.git/tmlpstats"
+DEST="$HOME/public_html/tmlpstats"
+ROLLBACK="$HOME/tmlpstats.git/rollback"
 
 if [ "$1" == "rollback" ]; then
 
@@ -45,8 +45,8 @@ mv composer.json.bak composer.json # clean up
 
 echo ""
 echo "Running migrations"
+cd $DEST/
 php artisan migrate
-cd ../
 
 echo ""
 echo "Syncing files"
