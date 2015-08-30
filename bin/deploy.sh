@@ -19,9 +19,9 @@
 #       $ ./deploy.sh rollback
 #
 
-SOURCE='tmlpstats'
-DEST='../public_html/tmlpstats'
-ROLLBACK='rollback'
+SOURCE='~/tmlpstats.git/tmlpstats'
+DEST='~/public_html/tmlpstats'
+ROLLBACK='~/tmlpstats.git/rollback'
 
 if [ "$1" == "rollback" ]; then
 

@@ -19,10 +19,10 @@
 #       $ ./deploy.sh rollback
 #
 
-SOURCE='tmlpstats'
-DEST='../public_html/stage'
-PROD='../public_html/tmlpstats'
-ROLLBACK='rollback'
+SOURCE='~/tmlpstats.git/tmlpstats'
+DEST='~/public_html/stage'
+PROD='~/public_html/tmlpstats'
+ROLLBACK='~/tmlpstats.git/rollback'
 
 if [ "$1" == "rollback" ]; then
 
@@ -46,7 +46,7 @@ mv composer.json.bak composer.json # clean up
 
 echo ""
 echo "Snapping the database"
-bin/snap.sh
+$SOURCE/bin/snap.sh
 
 echo ""
 echo "Copying file archive"
@@ -54,8 +54,9 @@ rsync -av --delete $PROD/storage/app/* $DEST/storage/app/
 
 echo ""
 echo "Running migrations"
+cd $DEST/
 php artisan migrate
-cd ../
+
 
 echo ""
 echo "Syncing files"
