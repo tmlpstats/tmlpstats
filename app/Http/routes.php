@@ -43,6 +43,11 @@ Route::resource('admin/quarters', 'QuarterController');
 Route::resource('admin/users', 'UserController');
 Route::resource('admin/roles', 'RoleController');
 
+// User Profiles
+//Route::get('profile', 'UserControler@showProfile');
+//Route::post('profile', 'UserControler@updateProfile');
+
+// Stats Reports
 Route::resource('statsreports', 'StatsReportController');
 Route::get('statsreports/{id}/download', 'StatsReportController@downloadSheet');
 Route::post('statsreports/{id}/submit', 'StatsReportController@submit');

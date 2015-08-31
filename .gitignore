@@ -3,3 +3,5 @@
 .env
 .DS_STORE
 .idea
+_ide_helper.php
+_ide_helper_models.php
