@@ -1,10 +1,9 @@
 <?php
 
 use TmlpStats\Accountability;
-use Illuminate\Database\Seeder;
-use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Seeders\CsvSeederAbstract;
 
-class AccountabilityTableSeeder extends TmlpStats\Seeders\CsvSeederAbstract {
+class AccountabilityTableSeeder extends CsvSeederAbstract {
 
     protected $exportFile = "accountabilities.csv";
 

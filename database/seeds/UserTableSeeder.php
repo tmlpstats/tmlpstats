@@ -1,10 +1,9 @@
 <?php
 
 use TmlpStats\User;
-use Illuminate\Database\Seeder;
-use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Seeders\CsvSeederAbstract;
 
-class UserTableSeeder extends TmlpStats\Seeders\CsvSeederAbstract {
+class UserTableSeeder extends CsvSeederAbstract {
 
     protected $exportFile = "users.csv";
 

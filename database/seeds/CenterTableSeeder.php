@@ -1,10 +1,9 @@
 <?php
 
 use TmlpStats\Center;
-use Illuminate\Database\Seeder;
-use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Seeders\CsvSeederAbstract;
 
-class CenterTableSeeder extends TmlpStats\Seeders\CsvSeederAbstract {
+class CenterTableSeeder extends CsvSeederAbstract {
 
     protected $exportFile = "centers.csv";
 

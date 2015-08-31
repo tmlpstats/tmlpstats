@@ -1,10 +1,9 @@
 <?php
 
 use TmlpStats\Quarter;
-use Illuminate\Database\Seeder;
-use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Seeders\CsvSeederAbstract;
 
-class QuarterTableSeeder extends TmlpStats\Seeders\CsvSeederAbstract {
+class QuarterTableSeeder extends CsvSeederAbstract {
 
     protected $exportFile = 'quarters.csv';
 

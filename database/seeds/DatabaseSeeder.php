@@ -7,8 +7,6 @@ class DatabaseSeeder extends Seeder {
 
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
     public function run()
     {
@@ -20,7 +18,6 @@ class DatabaseSeeder extends Seeder {
         $this->call('AccountabilityTableSeeder');
 
         try {
-            // Not checked in to github, and will not be available in prod
             $this->call('UserTableSeeder');
             $this->call('RoleUserTableSeeder');
             $this->call('CenterUserTableSeeder');
@@ -37,8 +34,11 @@ class DatabaseSeeder extends Seeder {
             $this->call('TmlpRegistrationTableSeeder');
             $this->call('TmlpRegistrationDataTableSeeder');
             $this->call('StatsReportTableSeeder');
+
+            if (env('APP_ENV') === 'local') {
+                $this->call('DefaultAdminSeeder');
+            }
         } catch (\ReflectionException $e) {
-            // var_dump($e);
             throw $e;
         }
     }
