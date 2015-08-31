@@ -108,11 +108,33 @@ SESSION_DRIVER=file
 QUEUE_DRIVER=sync
 
 MAIL_DRIVER=smtp
-MAIL_HOST=mailtrap.io
+MAIL_HOST=localhost
 MAIL_PORT=2525
 MAIL_USERNAME=null
 MAIL_PASSWORD=null" > /vagrant/tmlpstats/.env
 
+echo "--- Fake email service ---"
+sudo sh -c "cat > /etc/init/fake-email.conf" <<EOF
+description	"Debug Email"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+respawn
+respawn limit 10 5
+umask 022
+console none
+
+script
+	while [ ! -d /vagrant/tmlpstats ]; do
+		echo "waiting for tmlpstats directory availability..."
+		sleep 1
+	done
+
+	python -m smtpd -n -c DebuggingServer localhost:2525 | tee -a /vagrant/tmlpstats/email-output.log
+end script
+EOF
+sudo start fake-email || true
 
 echo "--- Run Composer Install ---"
 curl -sS http://getcomposer.org/installer | php
