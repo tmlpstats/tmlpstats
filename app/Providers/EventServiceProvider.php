@@ -17,6 +17,9 @@ class EventServiceProvider extends ServiceProvider {
         'event.name' => [
             'EventListener',
         ],
+        'auth.login' => [
+            'TmlpStats\Handlers\Events\AuthLoginEventHandler',
+        ],
     ];
 
     /**
@@ -28,11 +31,6 @@ class EventServiceProvider extends ServiceProvider {
     public function boot(DispatcherContract $events)
     {
         parent::boot($events);
-
-        // Event::listen('auth.login', function($user) {
-        //     $user->last_login_at = Carbon::now();
-        //     $user->save();
-        // });
     }
 
 }
