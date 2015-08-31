@@ -1,10 +1,9 @@
 <?php
 
 use TmlpStats\Role;
-use Illuminate\Database\Seeder;
-use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Seeders\CsvSeederAbstract;
 
-class RoleTableSeeder extends TmlpStats\Seeders\CsvSeederAbstract {
+class RoleTableSeeder extends CsvSeederAbstract {
 
     protected $exportFile = "roles.csv";
 

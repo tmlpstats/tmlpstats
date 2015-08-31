@@ -1,10 +1,9 @@
 <?php
 
 use TmlpStats\TmlpGame;
-use Illuminate\Database\Seeder;
-use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Seeders\CsvSeederAbstract;
 
-class TmlpGameTableSeeder extends TmlpStats\Seeders\CsvSeederAbstract {
+class TmlpGameTableSeeder extends CsvSeederAbstract {
 
     protected $exportFile = "tmlp_games.csv";
 

@@ -8,6 +8,7 @@ use Illuminate\Session\TokenMismatchException;
 
 use Carbon\Carbon;
 
+use App;
 use Auth;
 use Log;
 use Mail;
@@ -35,7 +36,7 @@ class Handler extends ExceptionHandler {
     public function report(Exception $e)
     {
         // Ignore token expiration messages
-        if (!($e instanceof TokenMismatchException)) {
+        if (!($e instanceof TokenMismatchException) && !App::runningInConsole()) {
 
             $user = Auth::user()->email;
             $center = Auth::user()->center

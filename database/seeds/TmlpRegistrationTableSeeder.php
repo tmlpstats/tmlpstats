@@ -1,10 +1,9 @@
 <?php
 
 use TmlpStats\TmlpRegistration;
-use Illuminate\Database\Seeder;
-use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Seeders\CsvSeederAbstract;
 
-class TmlpRegistrationTableSeeder extends TmlpStats\Seeders\CsvSeederAbstract {
+class TmlpRegistrationTableSeeder extends CsvSeederAbstract {
 
     protected $exportFile = "tmlp_registrations.csv";
 
