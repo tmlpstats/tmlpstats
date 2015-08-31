@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+set -o errexit
+trap 'echo $0 Got error on line ${LINENO} ${$?}' ERR
+
+# Ensure current working directory
+MY_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd)
+cd "$MY_DIR"
+
 echo "--- Installing applications and setting them up ---"
 
 # VM is configured in host-only mode. If you decide to connect this machine to the internet,
@@ -45,8 +52,8 @@ sudo mkdir /var/log/xdebug
 sudo chown www-data /var/log/xdebug
 
 echo "--- Turn PHP errors on ---"
-sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php5/apache2/php.ini
-sed -i "s/display_errors = .*/display_errors = On/" /etc/php5/apache2/php.ini
+sudo sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php5/apache2/php.ini
+sudo sed -i "s/display_errors = .*/display_errors = On/" /etc/php5/apache2/php.ini
 
 
 
