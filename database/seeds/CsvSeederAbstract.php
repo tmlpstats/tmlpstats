@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 abstract class CsvSeederAbstract extends Seeder {
 
-    protected $exportPath = '../../../export';
+    protected $exportPath = '../../export';
     protected $exportFile = '';
 
     abstract protected function createObject($data);

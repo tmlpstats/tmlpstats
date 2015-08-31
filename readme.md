@@ -10,13 +10,6 @@ $ cd ~/dev
 $ git clone <repo url>
 ```
 
-### Setup Symlinks
-```
-$ cd ~/dev
-$ ln -s tmlpstats/bin/Vagrantfile VagrantFile
-$ ln -s tmlpstats/bin/bootstrap.sh bootstrap.sh
-```
-
 ### Setup for Database Seeding
 If you have an export of the database, the provisioning will seed the database for you. Generate a CSV export
 of the database, and copy the files into `~/dev/export/`. Note, the export should be a collection of files named
