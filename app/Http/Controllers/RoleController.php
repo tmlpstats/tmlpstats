@@ -3,9 +3,6 @@ namespace TmlpStats\Http\Controllers;
 
 use TmlpStats\Role;
 use TmlpStats\Http\Requests;
-use TmlpStats\Http\Controllers\Controller;
-
-use Illuminate\Http\Request;
 
 class RoleController extends Controller {
 

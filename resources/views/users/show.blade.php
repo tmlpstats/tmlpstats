@@ -10,7 +10,7 @@
     <table class="table table-condensed table-striped">
         <tr>
             <th>Name:</th>
-            <td>{{ $user->first_name }} {{ $user->last_name }}</td>
+            <td>{{ $user->firstName }} {{ $user->lastName }}</td>
         </tr>
         <tr>
             <th>Email:</th>
@@ -21,12 +21,12 @@
             <td>{{ $user->phone ? $user->formatPhone() : '-' }}</td>
         </tr>
         <tr>
-            <th>Roles:</th>
-            <td>{{ implode(', ', array_fetch($user->roles->toArray(), 'name')) }}</td>
+            <th>Role:</th>
+            <td>{{ $user->role ? $user->role->display : '' }}</td>
         </tr>
         <tr>
             <th>Center:</th>
-            <td>{{ implode(', ', array_fetch($user->centers->toArray(), 'name')) }}</td>
+            <td>{{ $user->center ? $user->center->name : '' }}</td>
         </tr>
         <tr>
             <th>Active:</th>

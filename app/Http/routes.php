@@ -39,7 +39,7 @@ Route::get('admin/import', 'ImportController@import');
 Route::post('admin/import', 'ImportController@uploadImportSpreadsheet');
 
 Route::resource('admin/centers', 'CenterController');
-Route::resource('admin/quarters', 'QuarterController');
+//Route::resource('admin/quarters', 'QuarterController');
 Route::resource('admin/users', 'UserController');
 Route::resource('admin/roles', 'RoleController');
 

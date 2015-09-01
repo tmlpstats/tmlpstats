@@ -1,11 +1,13 @@
 <?php
 namespace TmlpStats;
 
+use TmlpStats\CenterStatsData;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class CenterStats extends Model {
-
+// TODO: delete me after migration
+class CenterStats extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = [
@@ -22,6 +24,16 @@ class CenterStats extends Model {
     {
         $date = $this->asDateTime($value);
         $this->attributes['reporting_date'] = $date->toDateString();
+    }
+
+    public function scopePromise($query, $data)
+    {
+        return $query->wherePromiseDataId($data->id);
+    }
+
+    public function scopeActual($query, $data)
+    {
+        return $query->whereActualDataId($data->id);
     }
 
     public function promiseData()

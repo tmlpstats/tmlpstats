@@ -1,65 +1,81 @@
 <?php
 namespace TmlpStats;
 
+use TmlpStats\Center;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class CenterStatsData extends Model {
-
+class CenterStatsData extends Model
+{
     use CamelCaseModel;
 
     protected $table = 'center_stats_data';
 
+    protected $center = null;
+
     protected $fillable = [
         'reporting_date',
-        'type',
-        'offset',
-        'center_id',
-        'quarter_id',
         'stats_report_id',
+        'type',
+        'cap',
+        'cpc',
+        't1x',
+        't2x',
+        'gitw',
+        'lf',
+        'tdo',
+        'points',
+        'program_manager_attending_weekend',
+        'classroom_leader_attending_weekend',
     ];
 
     protected $dates = [
         'reporting_date',
     ];
 
-    public function setReportingDateAttribute($value)
-    {
-        $date = $this->asDateTime($value);
-        $this->attributes['reporting_date'] = $date->toDateString();
-    }
-
-    public function scopeStatsReport($query, $statsReport)
-    {
-        if ($statsReport instanceof \TmlpStats\StatsReport) {
-            return $query->whereStatsReportId($statsReport->id);
-        } else {
-            return $query->whereStatsReportId(null);
-        }
-    }
-
-    public function scopeCenter($query, $center)
-    {
-        return $query->whereCenterId($center->id);
-    }
-
-    public function scopeReportingDate($query, $date)
-    {
-        return $query->whereReportingDate($date);
-    }
-
     public function scopeActual($query)
     {
         return $query->whereType('actual');
     }
 
-    public function centerStats()
+    public function scopePromise($query)
     {
-        // Only true for Actuals
-        if ($this->type == 'actual') {
-            return $this->belongsTo('TmlpStats\CenterStats');
-        } else {
-            throw new \Exception('Center Stats Data of type promise does not have a belongsTo relationship with Center Stats');
-        }
+        return $query->whereType('promise');
+    }
+
+    public function scopeByCenter($query, Center $center)
+    {
+        $this->center = $center;
+
+        return $query->whereIn('stats_report_id', function ($query) use ($center) {
+            $query->select('id')
+                ->from('stats_reports')
+                ->whereCenterId($center->id);
+        });
+    }
+
+    public function scopeByQuarter($query, Quarter $quarter)
+    {
+        return $query->whereIn('stats_report_id', function ($query) use ($quarter) {
+            $query->select('id')
+                ->from('stats_reports')
+                ->whereQuarterId($quarter->id);
+        });
+    }
+
+    public function scopeReportingDate($query, Carbon $date)
+    {
+        return $query->whereReportingDate($date);
+    }
+
+    public function scopeByStatsReport($query, StatsReport $statsReport)
+    {
+        return $query->whereStatsReportId($statsReport->id);
+    }
+
+    public function statsReport()
+    {
+        return $this->belongsTo('TmlpStats\StatsReport');
     }
 }

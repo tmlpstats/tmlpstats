@@ -25,8 +25,18 @@
         <tr>
             <td><a href="{{ url('/admin/centers/'.$center->abbreviation) }}">{{ $center->name }}</a></td>
             <td>{{ $center->teamName }}</td>
-            <td>{{ $center->globalRegion }}</td>
-            <td>{{ $center->localRegion }}</td>
+            <td><?php
+                $region = $center->getGlobalRegion();
+                if ($region) {
+                    echo $region->name;
+                }
+            ?></td>
+            <td><?php
+                $region = $center->getLocalRegion();
+                if ($region) {
+                    echo $region->name;
+                }
+            ?></td>
             <td>{{ $center->statsEmail }}</td>
             <td><span class="glyphicon {{ $center->active ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span></td>
             <td><a href="{{ url('/admin/centers/' . $center->abbreviation . '/edit') }}">Edit</a></td>
@@ -54,10 +64,20 @@
         @if (!$center->active)
         <tr>
             <td><a href="{{ url('/admin/centers/'.$center->abbreviation) }}">{{ $center->name }}</a></td>
-            <td>{{ $center->team_name }}</td>
-            <td>{{ $center->global_region }}</td>
-            <td>{{ $center->local_region }}</td>
-            <td>{{ $center->stats_email }}</td>
+            <td>{{ $center->teamName }}</td>
+            <td><?php
+                $region = $center->getGlobalRegion();
+                if ($region) {
+                    echo $region->name;
+                }
+            ?></td>
+            <td><?php
+                $region = $center->getLocalRegion();
+                if ($region) {
+                    echo $region->name;
+                }
+            ?></td>
+            <td>{{ $center->statsEmail }}</td>
             <td><span class="glyphicon {{ $center->active ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span></td>
             <td><a href="{{ url('/admin/centers/' . $center->abbreviation . '/edit') }}">Edit</a></td>
         </tr>

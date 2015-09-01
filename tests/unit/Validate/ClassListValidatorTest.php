@@ -1175,7 +1175,7 @@ class ClassListValidatorTest extends ValidatorTestAbstract
         $statsReport->quarter = new stdClass;
 
         $statsReport->reportingDate = Carbon::createFromDate(2015, 3, 13);
-        $statsReport->quarter->classroom2Date = Carbon::createFromDate(2015, 4, 17);
+        $statsReport->quarter->classroom1Date = Carbon::createFromDate(2015, 4, 17);
         $statsReport->quarter->endWeekendDate = Carbon::createFromDate(2015, 5, 29);
 
         $statsReportOnClassroom2 = clone $statsReport;
@@ -1342,76 +1342,78 @@ class ClassListValidatorTest extends ValidatorTestAbstract
                 false,
             ),
 
-            // 2 Weeks before End, travel not set, ctw set
-            array(
-                $this->arrayToObject(array(
-                    'wd'       => null,
-                    'wbo'      => null,
-                    'xferOut'  => null,
-                    'ctw'      => 1,
-                    'travel'   => null,
-                    'room'     => 'Y',
-                    'comment'  => 'Booked by 5/5/15',
-                )),
-                $statsReportLast2Weeks,
-                array(
-                    'CLASSLIST_TRAVEL_COMMENT_REVIEW',
-                ),
-                true,
-            ),
-            // 2 Weeks before End, room not set, ctw set
-            array(
-                $this->arrayToObject(array(
-                    'wd'       => null,
-                    'wbo'      => null,
-                    'xferOut'  => null,
-                    'ctw'      => 1,
-                    'travel'   => 'Y',
-                    'room'     => null,
-                    'comment'  => 'Booked by 5/5/15',
-                )),
-                $statsReportLast2Weeks,
-                array(
-                    'CLASSLIST_ROOM_COMMENT_REVIEW',
-                ),
-                true,
-            ),
-            // 2 Weeks before End, travel & ctw not set
-            array(
-                $this->arrayToObject(array(
-                    'wd'       => null,
-                    'wbo'      => null,
-                    'xferOut'  => null,
-                    'ctw'      => null,
-                    'travel'   => null,
-                    'room'     => 'Y',
-                    'comment'  => 'Booked by 5/5/15',
-                )),
-                $statsReportLast2Weeks,
-                array(
-                    'CLASSLIST_TRAVEL_COMMENT_REVIEW',
-                    'CLASSLIST_TRAVEL_ROOM_CTW_MISSING',
-                ),
-                false,
-            ),
-            // 2 Weeks before End, room & ctw not set
-            array(
-                $this->arrayToObject(array(
-                    'wd'       => null,
-                    'wbo'      => null,
-                    'xferOut'  => null,
-                    'ctw'      => null,
-                    'travel'   => 'Y',
-                    'room'     => null,
-                    'comment'  => 'Booked by 5/5/15',
-                )),
-                $statsReportLast2Weeks,
-                array(
-                    'CLASSLIST_ROOM_COMMENT_REVIEW',
-                    'CLASSLIST_TRAVEL_ROOM_CTW_MISSING',
-                ),
-                false,
-            ),
+// DISABLING THIS TESTS AS THIS CHECK IS CURRENT DISABLED IN VALIDATOR
+//
+//            // 2 Weeks before End, travel not set, ctw set
+//            array(
+//                $this->arrayToObject(array(
+//                    'wd'       => null,
+//                    'wbo'      => null,
+//                    'xferOut'  => null,
+//                    'ctw'      => 1,
+//                    'travel'   => null,
+//                    'room'     => 'Y',
+//                    'comment'  => 'Booked by 5/5/15',
+//                )),
+//                $statsReportLast2Weeks,
+//                array(
+//                    'CLASSLIST_TRAVEL_COMMENT_REVIEW',
+//                ),
+//                true,
+//            ),
+//            // 2 Weeks before End, room not set, ctw set
+//            array(
+//                $this->arrayToObject(array(
+//                    'wd'       => null,
+//                    'wbo'      => null,
+//                    'xferOut'  => null,
+//                    'ctw'      => 1,
+//                    'travel'   => 'Y',
+//                    'room'     => null,
+//                    'comment'  => 'Booked by 5/5/15',
+//                )),
+//                $statsReportLast2Weeks,
+//                array(
+//                    'CLASSLIST_ROOM_COMMENT_REVIEW',
+//                ),
+//                true,
+//            ),
+//            // 2 Weeks before End, travel & ctw not set
+//            array(
+//                $this->arrayToObject(array(
+//                    'wd'       => null,
+//                    'wbo'      => null,
+//                    'xferOut'  => null,
+//                    'ctw'      => null,
+//                    'travel'   => null,
+//                    'room'     => 'Y',
+//                    'comment'  => 'Booked by 5/5/15',
+//                )),
+//                $statsReportLast2Weeks,
+//                array(
+//                    'CLASSLIST_TRAVEL_COMMENT_REVIEW',
+//                    'CLASSLIST_TRAVEL_ROOM_CTW_MISSING',
+//                ),
+//                false,
+//            ),
+//            // 2 Weeks before End, room & ctw not set
+//            array(
+//                $this->arrayToObject(array(
+//                    'wd'       => null,
+//                    'wbo'      => null,
+//                    'xferOut'  => null,
+//                    'ctw'      => null,
+//                    'travel'   => 'Y',
+//                    'room'     => null,
+//                    'comment'  => 'Booked by 5/5/15',
+//                )),
+//                $statsReportLast2Weeks,
+//                array(
+//                    'CLASSLIST_ROOM_COMMENT_REVIEW',
+//                    'CLASSLIST_TRAVEL_ROOM_CTW_MISSING',
+//                ),
+//                false,
+//            ),
         );
     }
 }

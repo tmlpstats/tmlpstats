@@ -13,6 +13,8 @@ class Kernel extends ConsoleKernel {
      */
     protected $commands = [
         'TmlpStats\Console\Commands\Inspire',
+        'TmlpStats\Console\Commands\FlushTablesCommand',
+        'TmlpStats\Console\Commands\ClearTablesCommand',
     ];
 
     /**

@@ -1,7 +1,11 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use Carbon\Carbon;
+use TmlpStats\Center;
+use TmlpStats\GlobalReport;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
+use TmlpStats\Quarter;
 use TmlpStats\TmlpGame;
 use TmlpStats\TmlpGameData;
 
@@ -14,11 +18,11 @@ class TmlpGameInfoImporter extends DataImporterAbstract
 
     protected function populateSheetRanges()
     {
-        $this->blockT1X[] = $this->excelRange('A','K');
-        $this->blockT1X[] = $this->excelRange(30,31);
+        $this->blockT1X[] = $this->excelRange('A', 'K');
+        $this->blockT1X[] = $this->excelRange(30, 31);
 
-        $this->blockT2X[] = $this->excelRange('A','K');
-        $this->blockT2X[] = $this->excelRange(38,39);
+        $this->blockT2X[] = $this->excelRange('A', 'K');
+        $this->blockT2X[] = $this->excelRange(38, 39);
     }
 
     protected function load()
@@ -31,7 +35,7 @@ class TmlpGameInfoImporter extends DataImporterAbstract
 
     protected function loadEntry($row, $type)
     {
-        if ($this->reader->isEmptyCell($row,'B')) return;
+        if ($this->reader->isEmptyCell($row, 'B')) return;
 
         $this->data[] = array(
             'offset'                 => $row,
@@ -45,27 +49,58 @@ class TmlpGameInfoImporter extends DataImporterAbstract
     {
         foreach ($this->data as $gameInput) {
 
-            $game = TmlpGame::firstOrNew(array(
-                'center_id' => $this->statsReport->center->id,
-                'type'      => $gameInput['type'],
-            ));
-            if ($game->statsReportId == null) {
-                $game->statsReportId = $this->statsReport->id;
-                $game->save();
+            $gameData = $this->getGameData($gameInput['type'], $this->statsReport->center, $this->statsReport->quarter);
+
+            if ($gameData) {
+                // Only import once
+                continue;
             }
 
             $gameData = TmlpGameData::firstOrNew(array(
-                'center_id'       => $this->statsReport->center->id,
-                'quarter_id'      => $this->statsReport->quarter->id,
-                'tmlp_game_id'    => $game->id,
-                'reporting_date'  => $this->statsReport->reportingDate->toDateString(),
+                'type'            => $gameInput['type'],
                 'stats_report_id' => $this->statsReport->id,
             ));
 
             unset($gameInput['type']);
+            unset($gameInput['offset']);
+
             $this->setValues($gameData, $gameInput);
 
             $gameData->save();
         }
+    }
+
+    public function getGameData($type, Center $center, Quarter $quarter = null)
+    {
+        if (!$quarter) {
+            $quarter = Quarter::byRegion($center->region)
+                ->date(Carbon::now()->startOfDay())
+                ->first();
+
+            $quarter->setRegion($center->region);
+        }
+
+        $firstWeek = $quarter->startWeekendDate->addWeek();
+
+        $globalReport = null;
+
+        // Don't reuse game data on the first week, as they may change between submits
+        if ($this->statsReport->reportingDate->ne($firstWeek)) {
+            $globalReport = GlobalReport::reportingDate($firstWeek)->first();
+        }
+
+        if ($globalReport) {
+            $statsReport = $globalReport->statsReports()->byCenter($center)->first();
+        } else {
+            $statsReport = $this->statsReport;
+        }
+
+        if (!$statsReport) {
+            return null;
+        }
+
+        return TmlpGameData::type($type)
+            ->byStatsReport($statsReport)
+            ->first();
     }
 }

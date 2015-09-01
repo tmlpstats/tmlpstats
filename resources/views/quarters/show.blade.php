@@ -2,7 +2,7 @@
 
 @section('content')
 
-<h1>{{ $quarter->distinction }} Quarter <small>{{ $quarter->location }}</small></h1>
+<h1>{{ $quarter->distinction }} Quarter <small>{{ $quarter->regionQuarterDetails->location }}</small></h1>
 <a href="{{ url('/admin/quarters') }}"><< See All</a><br/><br/>
 <a href="{{ url('/admin/quarters/' . $quarter->id . '/edit') }}">Edit</a>
 
@@ -14,7 +14,7 @@
         </tr>
         <tr>
             <th>City:</th>
-            <td>{{ $quarter->location }}</td>
+            <td>{{ $quarter->regionQuarterDetails->location }}</td>
         </tr>
         <tr>
             <th>Distinction:</th>
@@ -22,23 +22,23 @@
         </tr>
         <tr>
             <th>Quarter Start:</th>
-            <td>{{ $quarter->start_weekend_date->format('M d, Y') }}</td>
+            <td>{{ $quarter->startWeekendDate->format('M d, Y') }}</td>
         </tr>
         <tr>
             <th>Classroom 1:</th>
-            <td>{{ $quarter->classroom1_date->format('M d, Y') }}</td>
+            <td>{{ $quarter->classroom1Date->format('M d, Y') }}</td>
         </tr>
         <tr>
             <th>Classroom 2:</th>
-            <td>{{ $quarter->classroom2_date->format('M d, Y') }}</td>
+            <td>{{ $quarter->classroom2Date->format('M d, Y') }}</td>
         </tr>
         <tr>
             <th>Classroom 3:</th>
-            <td>{{ $quarter->classroom3_date->format('M d, Y') }}</td>
+            <td>{{ $quarter->classroom3Date->format('M d, Y') }}</td>
         </tr>
         <tr>
             <th>Quarter End:</th>
-            <td>{{ $quarter->end_weekend_date->format('M d, Y') }}</td>
+            <td>{{ $quarter->endWeekendDate->format('M d, Y') }}</td>
         </tr>
     </table>
 </div>

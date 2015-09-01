@@ -1,18 +1,20 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use TmlpStats\Center;
+use TmlpStats\GlobalReport;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\CenterStats;
 use TmlpStats\CenterStatsData;
-use TmlpStats\Util;
+use TmlpStats\Quarter;
 
 use Carbon\Carbon;
+use TmlpStats\StatsReport;
 
 class CenterStatsImporter extends DataImporterAbstract
 {
     protected $sheetId = ImportDocument::TAB_WEEKLY_STATS;
 
-    protected $centerStats = null;
     protected $weeks = array();
 
     protected $blockClassroom1 = array();
@@ -22,22 +24,17 @@ class CenterStatsImporter extends DataImporterAbstract
 
     protected function populateSheetRanges()
     {
-        $this->blockClassroom1[] = $this->excelRange('C','L');
-        $this->blockClassroom1[] = $this->excelRange(4,11);
+        $this->blockClassroom1[] = $this->excelRange('C', 'L');
+        $this->blockClassroom1[] = $this->excelRange(4, 11);
 
-        $this->blockClassroom2[] = $this->excelRange('Q','Z');
-        $this->blockClassroom2[] = $this->excelRange(4,11);
+        $this->blockClassroom2[] = $this->excelRange('Q', 'Z');
+        $this->blockClassroom2[] = $this->excelRange(4, 11);
 
-        $this->blockClassroom3[] = $this->excelRange('C','L');
-        $this->blockClassroom3[] = $this->excelRange(14,21);
+        $this->blockClassroom3[] = $this->excelRange('C', 'L');
+        $this->blockClassroom3[] = $this->excelRange(14, 21);
 
-        $this->blockClassroom4[] = $this->excelRange('Q','Z');
-        $this->blockClassroom4[] = $this->excelRange(14,21);
-    }
-
-    public function getCenterStats()
-    {
-        return $this->centerStats;
+        $this->blockClassroom4[] = $this->excelRange('Q', 'Z');
+        $this->blockClassroom4[] = $this->excelRange(14, 21);
     }
 
     protected function load()
@@ -52,10 +49,10 @@ class CenterStatsImporter extends DataImporterAbstract
 
     protected function loadBlock($blockParams, $args = null)
     {
-        for ($week = 0; $week < count($blockParams[0]); $week+=2) {
+        for ($week = 0; $week < count($blockParams[0]); $week += 2) {
             try {
                 $this->loadEntry($week, $blockParams);
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $this->addMessage('EXCEPTION_LOADING_ENTRY', $week, $e->getMessage());
             }
         }
@@ -63,9 +60,9 @@ class CenterStatsImporter extends DataImporterAbstract
 
     protected function loadEntry($week, $blockParams)
     {
-        $promiseCol    = $blockParams[0][$week];
-        $actualCol     = $blockParams[0][$week+1];
-        $weekCol       = $blockParams[0][$week];
+        $promiseCol = $blockParams[0][$week];
+        $actualCol = $blockParams[0][$week + 1];
+        $weekCol = $blockParams[0][$week];
         $blockStartRow = $blockParams[1][0];
 
         $weekDate = $this->reader->getWeekDate($blockStartRow, $weekCol);
@@ -95,7 +92,7 @@ class CenterStatsImporter extends DataImporterAbstract
         for ($i = 0; $i < count($rowHeaders); $i++) {
             $field = $rowHeaders[$i];
 
-            $row = $blockParams[1][$i+2]; // skip 2 title rows
+            $row = $blockParams[1][$i + 2]; // skip 2 title rows
 
             $promiseValue = $this->reader->getGameValue($row, $promiseCol);
             if ($field == 'gitw') {
@@ -130,83 +127,123 @@ class CenterStatsImporter extends DataImporterAbstract
 
     public function postProcess()
     {
-        $isSecondClassroom = $this->statsReport->reportingDate->eq($this->statsReport->quarter->classroom2Date);
+        $isRepromiseWeek = $this->statsReport->reportingDate->eq($this->statsReport->quarter->classroom2Date);
 
-        // Calculate Rating
         foreach ($this->data as $week) {
+
+            if ($week['type'] != 'promise') {
+                continue;
+            }
+
+            $weekDate = Carbon::createFromFormat('Y-m-d', $week['reportingDate'])->startOfDay();
+            $promiseData = $this->getPromiseData($weekDate, $this->statsReport->center, $this->statsReport->quarter);
+
+            if (!$promiseData || ($isRepromiseWeek && $weekDate->gt($this->statsReport->reportingDate))) {
+
+                $promiseData = CenterStatsData::firstOrNew(array(
+                    'type'            => $week['type'],
+                    'reporting_date'  => $week['reportingDate'],
+                    'stats_report_id' => $this->statsReport->id,
+                ));
+                unset($week['offset']);
+                unset($week['type']);
+
+                $promiseData = $this->setValues($promiseData, $week);
+                $promiseData->points = null;
+                $promiseData->save();
+            }
+        }
+
+        foreach ($this->data as $week) {
+
+            if ($week['type'] != 'actual') {
+                continue;
+            }
 
             $weekDate = Carbon::createFromFormat('Y-m-d', $week['reportingDate'])->startOfDay();
 
-            $centerStats = CenterStats::firstOrNew(array(
-                'center_id'      => $this->statsReport->center->id,
-                'quarter_id'     => $this->statsReport->quarter->id,
-                'reporting_date' => $week['reportingDate'],
+            $actualData = $this->getActualData($weekDate, $this->statsReport->center);
+            // Always allow setting this week
+            if ($actualData && $this->statsReport->reportDate->ne($weekDate)) {
+                continue;
+            }
+
+            $promiseData = $this->getPromiseData($weekDate, $this->statsReport->center, $this->statsReport->quarter);
+
+            $actualData = CenterStatsData::firstOrNew(array(
+                'type'            => $week['type'],
+                'reporting_date'  => $week['reportingDate'],
+                'stats_report_id' => $this->statsReport->id,
             ));
 
-            if ($week['type'] == 'promise') {
-                $promiseData = CenterStatsData::firstOrNew(array(
-                    'center_id'       => $this->statsReport->center->id,
-                    'quarter_id'      => $this->statsReport->quarter->id,
-                    'reporting_date'  => $week['reportingDate'],
-                    'type'            => $week['type'],
-                    'stats_report_id' => $this->statsReport->id,
-                ));
+            unset($week['offset']);
+            unset($week['type']);
 
-                unset($week['type']);
+            if ($this->statsReport->reportingDate->eq($weekDate)) {
 
-                if (!$promiseData->exists || ($isSecondClassroom && $weekDate->gt($this->statsReport->reportingDate))) {
-                    $promiseData = $this->setValues($promiseData, $week);
-
-                    if (!$promiseData->exists) {
-                        $promiseData->save();
-
-                        $centerStats->promiseDataId = $promiseData->id;
-                    } else if ($promiseData->isDirty()) {
-                        $newPromiseData = $promiseData->replicate();
-
-                        $newPromiseData->statsReportId = $this->statsReport->id;
-                        $newPromiseData->save();
-
-                        $centerStats->revokedPromiseDataId = $promiseData->id;
-                        $centerStats->promiseDataId = $newPromiseData->id;
-                    }
-
-                }
-            } else if ($week['type'] == 'actual') {
-
-                $actualData = CenterStatsData::firstOrNew(array(
-                    'center_id'       => $this->statsReport->center->id,
-                    'quarter_id'      => $this->statsReport->quarter->id,
-                    'reporting_date'  => $week['reportingDate'],
-                    'type'            => $week['type'],
-                    'stats_report_id' => $this->statsReport->id,
-                ));
-
-                unset($week['type']);
-
-                if (!$actualData->exists || $this->statsReport->reportingDate->eq($weekDate)) {
-
-                    $actualData = $this->setValues($actualData, $week);
-
-                    $points = $this->calculatePoints($promiseData, $actualData);
-                    $rating = $this->getRating($points);
-
-                    $actualData->rating = "$rating ($points)";
-                    $actualData->save();
-
-                    $centerStats->actualDataId = $actualData->id;
-                }
-            }
-
-            if ($centerStats->isDirty()) {
-                $centerStats->statsReportId = $this->statsReport->id;
-                $centerStats->save();
-            }
-
-            if ($weekDate->eq($this->statsReport->reportingDate)) {
-                $this->centerStats = clone $centerStats;
+                $actualData = $this->setValues($actualData, $week);
+                $actualData->points = $this->calculatePoints($promiseData, $actualData);
+                $actualData->save();
             }
         }
+    }
+
+    public function getPromiseData(Carbon $date, Center $center, Quarter $quarter = null)
+    {
+        if (!$quarter) {
+            $quarter = Quarter::byRegion($center->region)
+                ->date($date)
+                ->first();
+
+            $quarter->setRegion($center->region);
+        }
+
+        $firstWeek = $quarter->startWeekendDate->addWeek();
+
+        $globalReport = null;
+
+        // Don't reuse promises on the first week, as they may change between submits
+        if ($this->statsReport->reportingDate->ne($firstWeek)) {
+
+            if ($this->statsReport->reportingDate->gt($quarter->classroom2Date) && $date->gt($quarter->classroom2Date)) {
+                $globalReport = GlobalReport::reportingDate($quarter->classroom2Date)->first();
+            } else {
+                $globalReport = GlobalReport::reportingDate($firstWeek)->first();
+            }
+        }
+
+        if ($globalReport) {
+            $statsReport = $globalReport->statsReports()->byCenter($center)->first();
+        } else {
+            $statsReport = $this->statsReport;
+        }
+
+        if (!$statsReport) {
+            return null;
+        }
+
+        return CenterStatsData::promise()
+            ->reportingDate($date)
+            ->byStatsReport($statsReport)
+            ->first();
+    }
+
+    public function getActualData(Carbon $date, Center $center)
+    {
+        $globalReport = GlobalReport::reportingDate($date)->first();
+        $statsReport = null;
+        if ($globalReport) {
+            $statsReport = $globalReport->statsReports()->byCenter($center)->first();
+        }
+
+        if (!$statsReport) {
+            return null;
+        }
+
+        return CenterStatsData::actual()
+            ->reportingDate($date)
+            ->byStatsReport($statsReport)
+            ->first();
     }
 
     public function calculatePoints($promises, $actuals)
@@ -239,20 +276,5 @@ class CenterStatsImporter extends DataImporterAbstract
             $points += $gamePoints;
         }
         return $points;
-    }
-
-    public function getRating($points)
-    {
-        if ($points == 28) {
-            return "Powerful";
-        } else if ($points >= 22) {
-            return "High Performing";
-        } else if ($points >= 16) {
-            return "Effective";
-        } else if ($points >= 9) {
-            return "Marginally Effective";
-        } else {
-            return "Ineffective";
-        }
     }
 }
