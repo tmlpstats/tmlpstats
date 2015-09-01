@@ -4,23 +4,28 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class Role extends Model {
+class Region extends Model {
 
     use CamelCaseModel;
 
     protected $fillable = array(
+        'abbreviation',
         'name',
-        'display',
     );
+
+    public function scopeAbbreviation($query, $abbreviation)
+    {
+        return $query->whereAbbreviation($abbreviation);
+    }
 
     public function scopeName($query, $name)
     {
         return $query->whereName($name);
     }
 
-    public function users()
+    public function parent()
     {
-        return $this->belongsToMany('TmlpStats\User', 'role_user')->withTimestamps();
+        return $this->hasOne('TmlpStats\Region', 'id', 'parent_id');
     }
 
 }

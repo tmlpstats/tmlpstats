@@ -4,23 +4,19 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class Role extends Model {
+class WithdrawCode extends Model {
 
     use CamelCaseModel;
 
     protected $fillable = array(
-        'name',
+        'code',
         'display',
+        'description',
     );
 
-    public function scopeName($query, $name)
+    public function scopeCode($query, $name)
     {
         return $query->whereName($name);
-    }
-
-    public function users()
-    {
-        return $this->belongsToMany('TmlpStats\User', 'role_user')->withTimestamps();
     }
 
 }

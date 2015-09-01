@@ -24,22 +24,23 @@ class DatabaseSeeder extends Seeder {
 
             $this->call('CenterStatsDataTableSeeder');
             $this->call('CenterStatsTableSeeder');
-            $this->call('TeamMemberTableSeeder');
-            $this->call('TeamMemberDataTableSeeder');
-            $this->call('CourseTableSeeder');
-            $this->call('CourseDataTableSeeder');
-            $this->call('TmlpGameTableSeeder');
-            $this->call('TmlpGameDataTableSeeder');
-            $this->call('ProgramTeamMemberTableSeeder');
-            $this->call('TmlpRegistrationTableSeeder');
-            $this->call('TmlpRegistrationDataTableSeeder');
+//            $this->call('TeamMemberTableSeeder');
+//            $this->call('TeamMemberDataTableSeeder');
+//            $this->call('CourseTableSeeder');
+//            $this->call('CourseDataTableSeeder');
+//            $this->call('TmlpGameTableSeeder');
+//            $this->call('TmlpGameDataTableSeeder');
+//            $this->call('ProgramTeamMemberTableSeeder');
+//            $this->call('TmlpRegistrationTableSeeder');
+//            $this->call('TmlpRegistrationDataTableSeeder');
             $this->call('StatsReportTableSeeder');
 
-            if (env('APP_ENV') === 'local') {
-                $this->call('DefaultAdminSeeder');
-            }
+//            if (env('APP_ENV') === 'local') {
+//                $this->call('DefaultAdminSeeder');
+//            }
         } catch (\ReflectionException $e) {
             throw $e;
         }
     }
 }
+

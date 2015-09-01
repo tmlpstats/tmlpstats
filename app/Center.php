@@ -12,12 +12,12 @@ class Center extends Model {
         'name',
         'abbreviation',
         'team_name',
-        'global_region',
-        'local_region',
+        'region_id',
         'stats_email',
+        'active',
         'sheet_filename',
         'sheet_version',
-        'active',
+        'time_zone',
     );
 
     protected $casts = array(
@@ -54,10 +54,12 @@ class Center extends Model {
         return $this->getAccountable('Statistician Apprentice', $quarter);
     }
 
+    // TODO: port this to new user scheme
     public function getAccountable($accountability, $quarter = null)
     {
         if (!$quarter) {
-            $quarter = Quarter::current($this->globalRegion)->first();
+            $quarter = Quarter::current()->first();
+            $quarter->setRegion($this->region);
         }
 
         return ProgramTeamMember::byCenter($this)
@@ -66,14 +68,14 @@ class Center extends Model {
                                 ->first();
     }
 
-    public function scopeAbbreviation($query, $abbr)
-    {
-        return $query->whereAbbreviation($abbr);
-    }
-
     public function scopeName($query, $name)
     {
         return $query->whereName($name);
+    }
+
+    public function scopeAbbreviation($query, $abbr)
+    {
+        return $query->whereAbbreviation($abbr);
     }
 
     public function scopeActive($query)
@@ -81,18 +83,23 @@ class Center extends Model {
         return $query->whereActive(true);
     }
 
-    public function scopeGlobalRegion($query, $region)
+    public function scopeRegion($query, $region)
     {
-        return $query->whereGlobalRegion($region);
+        return $query->whereRegionId($region->id);
     }
 
-    public function users()
+    public function people()
     {
-        return $this->belongsToMany('TmlpStats\User', 'center_user')->withTimestamps();
+        return $this->belongsToMany('TmlpStats\Person')->withTimestamps();
     }
 
     public function statsReports()
     {
         return $this->hasMany('TmlpStats\StatsReport');
+    }
+
+    public function region()
+    {
+        return $this->hasOne('TmlpStats\StatsReport');
     }
 }

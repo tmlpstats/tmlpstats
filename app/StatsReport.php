@@ -8,22 +8,31 @@ use Carbon\Carbon;
 
 use DB;
 use Log;
-use TmlpStats\Quarter;
 
 class StatsReport extends Model {
 
     use CamelCaseModel;
 
     protected $fillable = [
+        'reporting_date',
         'center_id',
         'quarter_id',
-        'reporting_date',
-        'spreadsheet_version',
+        'user_id',
+        'version',
+        'validated',
+        'locked',
+        'submitted_at',
+        'submit_comment',
     ];
 
     protected $dates = [
         'reporting_date',
         'submitted_at',
+    ];
+
+    protected $casts = [
+        'validated' => 'boolean',
+        'locked' => 'boolean',
     ];
 
     public function setReportingDateAttribute($value)
@@ -42,6 +51,7 @@ class StatsReport extends Model {
         return $this->submitted_at !== null;
     }
 
+    // TODO: Need to address this with new schema
     // Flush all objects created by this report.
     public function clear()
     {
@@ -86,18 +96,35 @@ class StatsReport extends Model {
         return $success;
     }
 
+    public function getPoints()
+    {
+        $data = CenterStatsData::actual()->statsReport($this->id);
+        return $data ? $data->points : null;
+    }
+
     public function getRating()
     {
-        $centerStats = CenterStats::find($this->centerStatsId);
-        return $centerStats ? $centerStats->actualData->rating : null;
+        $points = $this->getPoints();
+
+        if ($points == 28) {
+            return "Powerful";
+        } else if ($points >= 22) {
+            return "High Performing";
+        } else if ($points >= 16) {
+            return "Effective";
+        } else if ($points >= 9) {
+            return "Marginally Effective";
+        } else {
+            return "Ineffective";
+        }
     }
 
     public function scopeReportingDate($query, $date)
     {
-        if (is_object($date)) {
+        if ($date instanceof \Carbon\Carbon) {
             $date = $date->toDateString();
         }
-        return $query->whereReportingDate($date);
+        return $query->whereReportingDate($date->toDateString());
     }
 
     public function scopeValidated($query, $validated = true)
@@ -141,11 +168,6 @@ class StatsReport extends Model {
         return $query->whereQuarterId($lastQuarter->id);
     }
 
-    public function centerStats()
-    {
-        return $this->hasOne('TmlpStats\CenterStats');
-    }
-
     public function center()
     {
         return $this->belongsTo('TmlpStats\Center');
@@ -156,9 +178,38 @@ class StatsReport extends Model {
         return $this->belongsTo('TmlpStats\Quarter');
     }
 
+    public function user()
+    {
+        return $this->hasOne('TmlpStats\User');
+    }
+
     public function globalReports()
     {
         return $this->belongsToMany('TmlpStats\GlobalReport', 'global_report_stats_report')->withTimestamps();
     }
 
+    public function courseData()
+    {
+        return $this->hasMany('TmlpStats\CourseData');
+    }
+
+    public function teamMemberData()
+    {
+        return $this->hasMany('TmlpStats\TeamMemberData');
+    }
+
+    public function teamRegistrationData()
+    {
+        return $this->hasMany('TmlpStats\TeamRegistrationData');
+    }
+
+    public function centerStatsData()
+    {
+        return $this->hasMany('TmlpStats\CenterStatsData');
+    }
+
+    public function tmlpGamesData()
+    {
+        return $this->hasMany('TmlpStats\TmlpGamesData');
+    }
 }

@@ -18,6 +18,16 @@ class Course extends Model {
         'start_date',
     ];
 
+    public function scopeCap($query)
+    {
+        return $query->whereType('CAP');
+    }
+
+    public function scopeCpc($query)
+    {
+        return $query->whereType('CPC');
+    }
+
     public function center()
     {
         return $this->belongsTo('TmlpStats\Center');

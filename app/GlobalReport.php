@@ -14,14 +14,23 @@ class GlobalReport extends Model {
     protected $fillable = [
         'reporting_date',
         'quarter_id',
+        'user_id',
+        'locked',
     ];
 
     protected $dates = [
         'reporting_date',
     ];
 
+    protected $casts = [
+        'locked' => 'boolean',
+    ];
+
     public function scopeReportingDate($query, $date)
     {
+        if ($date instanceof \Carbon\Carbon) {
+            $date = $date->toDateString();
+        }
         return $query->whereReportingDate($date);
     }
 

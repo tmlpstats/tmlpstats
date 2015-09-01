@@ -9,17 +9,39 @@ class TeamMember extends Model {
     use CamelCaseModel;
 
     protected $fillable = [
-        'first_name',
-        'last_name',
+        'person_id',
         'team_year',
-        'accountability',
-        'center_id',
-        'completion_quarter_id',
+        'incoming_quarter_id',
+        'is_reviewer',
     ];
 
-    public function center()
+    protected $casts = array(
+        'is_reviewer' => 'boolean',
+    );
+
+    public function scopeTeamYear($query, $teamYear)
     {
-        return $this->belongsTo('TmlpStats\Center');
+        return $query->whereTeamYear($teamYear);
+    }
+
+    public function scopeIncomingQuarter($query, $quarter)
+    {
+        return $query->whereIncomingQuarterId($quarter->id);
+    }
+
+    public function scopeReviewer($query, $reviewer = true)
+    {
+        return $query->whereIsReviewer($reviewer);
+    }
+
+    public function person()
+    {
+        return $this->belongsTo('TmlpStats\Person');
+    }
+
+    public function incomingQuarter()
+    {
+        return $this->hasOne('TmlpStats\Quarter');
     }
 
     public function teamMemberData()

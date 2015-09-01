@@ -11,80 +11,61 @@ class TmlpRegistrationData extends Model {
     protected $table = 'tmlp_registrations_data';
 
     protected $fillable = [
-        'reporting_date',
-        'center_id',
-        'quarter_id',
+        'stats_report_id',
         'tmlp_registration_id',
-        'offset',
-        'bef',
-        'dur',
-        'aft',
-        'weekend_reg',
-        'app_out',
+        'reg_date',
         'app_out_date',
-        'app_in',
         'app_in_date',
-        'appr',
         'appr_date',
-        'wd',
         'wd_date',
-        'committed_team_member_name',
+        'withdraw_code_id',
         'committed_team_member_id',
         'comment',
-        'incoming_weekend',
-        'reason_withdraw',
+        'incoming_quarter_id',
         'travel',
         'room',
-        'stats_report_id',
     ];
 
     protected $dates = [
-        'reporting_date',
+        'reg_date',
         'app_out_date',
         'app_in_date',
         'appr_date',
         'wd_date',
     ];
 
-    public function setReportingDateAttribute($value)
+    public function scopeApproved($query)
     {
-        $date = $this->asDateTime($value);
-        $this->attributes['reporting_date'] = $date->toDateString();
+        return $query->whereNotNull('appr_date');
     }
 
-    public function center()
+    public function scopeWithdrawn($query)
     {
-        return $this->belongsTo('TmlpStats\Center');
+        return $query->whereNotNull('wd_date');
     }
 
-    public function quarter()
+    public function scopeIncomingQuarter($query, $quarter)
     {
-        return $this->belongsTo('TmlpStats\Quarter');
+        return $query->whereIncomingQuarterId($quarter->id);
+    }
+
+    public function statsReport()
+    {
+        return $this->belongsTo('TmlpStats\StatsReport');
+    }
+
+    public function withdrawCode()
+    {
+        return $this->hasOne('TmlpStats\WithdrawCode');
+    }
+
+    public function incomingQuarter()
+    {
+        return $this->belongsTo('TmlpStats\Quarter', 'id', 'incoming_quarter_id');
     }
 
     public function registration()
     {
         return $this->belongsTo('TmlpStats\TmlpRegistration');
-    }
-
-    public function scopeReportingDate($query, $date)
-    {
-        $dateStr = '';
-        if (Util::isCarbonDate($date)) {
-            $dateStr = $date->toDateString();
-        } else {
-            $dateStr = $date;
-        }
-        return $query->where('reporting_date', '=', $dateStr);
-    }
-
-    public function scopeCenter($query, $center)
-    {
-        return $query->where('center_id', '=', $center->id);
-    }
-
-    public function scopeIncomingWeekend($query, $weekend)
-    {
-        return $query->where('incoming_weekend', '=', $weekend);
     }
 }

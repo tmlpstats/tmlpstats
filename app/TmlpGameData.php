@@ -11,38 +11,44 @@ class TmlpGameData extends Model {
     protected $table = 'tmlp_games_data';
 
     protected $fillable = [
-        'center_id',
-        'quarter_id',
-        'reporting_date',
-        'tmlp_game_id',
-        'offset',
+        'stats_report_id',
+        'type',
         'quarter_start_registered',
         'quarter_start_approved',
-        'stats_report_id',
     ];
 
-    protected $dates = [
-        'reporting_date',
-    ];
-
-    public function setReportingDateAttribute($value)
+    public function scopeIncomingT1($query)
     {
-        $date = $this->asDateTime($value);
-        $this->attributes['reporting_date'] = $date->toDateString();
+        return $query->whereType('Incoming T1');
     }
 
-    public function center()
+    public function scopeIncomingT2($query)
     {
-        return $this->belongsTo('TmlpStats\Center');
+        return $query->whereType('Incoming T2');
     }
 
-    public function quarter()
+    public function scopeFutureT1($query)
     {
-        return $this->belongsTo('TmlpStats\Quarter');
+        return $query->whereType('Future T1');
     }
 
-    public function game()
+    public function scopeFutureT2($query)
     {
-        return $this->belongsTo('TmlpStats\TmlpGame');
+        return $query->whereType('Future T2');
+    }
+
+    public function scopeT1($query)
+    {
+        return $query->where('type', 'like', '% T1');
+    }
+
+    public function scopeT2($query)
+    {
+        return $query->where('type', 'like', '% T2');
+    }
+
+    public function statsReport()
+    {
+        return $this->belongsTo('TmlpStats\StatsReport');
     }
 }

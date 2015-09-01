@@ -11,12 +11,19 @@ class CenterStatsData extends Model {
     protected $table = 'center_stats_data';
 
     protected $fillable = [
+        'stats_report_id',
         'reporting_date',
         'type',
-        'offset',
-        'center_id',
-        'quarter_id',
-        'stats_report_id',
+        'cap',
+        'cpc',
+        't1x',
+        't2x',
+        'gitw',
+        'lf',
+        'tdo',
+        'points',
+        'program_manager_attending_weekend',
+        'classroom_leader_attending_weekend',
     ];
 
     protected $dates = [
@@ -31,20 +38,14 @@ class CenterStatsData extends Model {
 
     public function scopeStatsReport($query, $statsReport)
     {
-        if ($statsReport instanceof \TmlpStats\StatsReport) {
-            return $query->whereStatsReportId($statsReport->id);
-        } else {
-            return $query->whereStatsReportId(null);
-        }
-    }
-
-    public function scopeCenter($query, $center)
-    {
-        return $query->whereCenterId($center->id);
+        return $query->whereStatsReportId($statsReport->id);
     }
 
     public function scopeReportingDate($query, $date)
     {
+        if ($date instanceof \Carbon\Carbon) {
+            $date = $date->toDateString();
+        }
         return $query->whereReportingDate($date);
     }
 
@@ -53,13 +54,13 @@ class CenterStatsData extends Model {
         return $query->whereType('actual');
     }
 
-    public function centerStats()
+    public function scopePromise($query)
     {
-        // Only true for Actuals
-        if ($this->type == 'actual') {
-            return $this->belongsTo('TmlpStats\CenterStats');
-        } else {
-            throw new \Exception('Center Stats Data of type promise does not have a belongsTo relationship with Center Stats');
-        }
+        return $query->whereType('promise');
+    }
+
+    public function statsReport()
+    {
+        return $this->belongsTo('TmlpStats\StatsReport')->withTimestamps();
     }
 }

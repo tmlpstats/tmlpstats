@@ -9,44 +9,43 @@ class TmlpRegistration extends Model {
     use CamelCaseModel;
 
     protected $fillable = [
-        'center_id',
-        'first_name',
-        'last_name',
-        'reg_date',
-        'incoming_team_year',
+        'person_id',
+        'team_year',
+        'incoming_quarter_id',
         'is_reviewer',
     ];
-
-    protected $dates = array(
-        'reg_date',
-    );
 
     protected $casts = array(
         'is_reviewer' => 'boolean',
     );
 
-    public function center()
+    public function scopeTeamYear($query, $teamYear)
     {
-        return $this->belongsTo('TmlpStats\Center');
+        return $query->whereTeamYear($teamYear);
+    }
+
+    public function scopeIncomingQuarter($query, $quarter)
+    {
+        return $query->whereIncomingQuarterId($quarter->id);
+    }
+
+    public function scopeReviewer($query, $reviewer = true)
+    {
+        return $query->whereIsReviewer($reviewer);
+    }
+
+    public function person()
+    {
+        return $this->belongsTo('TmlpStats\Person');
+    }
+
+    public function incomingQuarter()
+    {
+        return $this->belongsTo('TmlpStats\Quarter', 'id', 'incoming_quarter_id');
     }
 
     public function registrationData()
     {
         return $this->hasMany('TmlpStats\TmlpRegistrationData');
-    }
-
-    public function scopeCenter($query, $center)
-    {
-        return $query->where('center_id', '=', $center->id);
-    }
-
-    public function scopeTeam1Incoming($query)
-    {
-        return $query->where('incoming_team_year', '=', '1');
-    }
-
-    public function scopeTeam2Incoming($query)
-    {
-        return $query->where('incoming_team_year', '=', '2');
     }
 }

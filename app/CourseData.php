@@ -11,11 +11,8 @@ class CourseData extends Model {
     protected $table = 'courses_data';
 
     protected $fillable = [
-        'center_id',
-        'quarter_id',
-        'reporting_date',
+        'stats_report_id',
         'course_id',
-        'offset',
         'quarter_start_ter',
         'quarter_start_standard_starts',
         'quarter_start_xfer',
@@ -25,31 +22,20 @@ class CourseData extends Model {
         'completed_standard_starts',
         'potentials',
         'registrations',
-        'stats_report_id',
     ];
 
-    protected $dates = [
-        'reporting_date',
-    ];
-
-    public function setReportingDateAttribute($value)
+    public function scopeStatsReport($query, $statsReport)
     {
-        $date = $this->asDateTime($value);
-        $this->attributes['reporting_date'] = $date->toDateString();
+        return $query->whereStatsReportId($statsReport->id);
     }
 
-    public function center()
+    public function statsReport()
     {
-        return $this->belongsTo('TmlpStats\Center');
-    }
-
-    public function quarter()
-    {
-        return $this->belongsTo('TmlpStats\Quarter');
+        return $this->belongsTo('TmlpStats\StatsReport');
     }
 
     public function course()
     {
-        return $this->hasOne('TmlpStats\Course');
+        return $this->belongsTo('TmlpStats\Course');
     }
 }

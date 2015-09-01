@@ -27,15 +27,21 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     protected $fillable = [
         'email',
         'password',
-        'first_name',
-        'last_name',
-        'phone',
+        'person_id',
+        'role_id',
+        'active',
+        'require_password_reset',
+        'last_login_at',
     ];
 
-    protected $casts = array(
+    protected $casts = [
         'active' => 'boolean',
-    );
+        'require_password_reset' => 'boolean',
+    ];
 
+    protected $dates = [
+        'last_login_at' => 'date',
+    ];
 
     /**
      * The attributes excluded from the model's JSON form.
@@ -46,66 +52,22 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
     public function hasRole($name)
     {
-        foreach ($this->roles as $role) {
-            if ($role->name == $name) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function hasCenter($centerId)
-    {
-        foreach ($this->centers as $center) {
-            if ($center->id == $centerId) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function getCenter()
-    {
-        if ($this->centers) {
-            return $this->centers[0];
-        }
+        return ($this->role->name === $name);
     }
 
     public function homeRegion()
     {
-        return count($this->centers) ? $this->centers[0]->globalRegion : null;
+        return $this->center ? $this->center->region : null;
     }
 
-    public function updateRoles($roles)
+    public function getCenter()
     {
-        foreach ($roles as $roleId) {
-            $role = Role::find($roleId);
-
-            if ($role && !$this->hasRole($role->name)) {
-                $this->roles()->attach($roleId);
-            }
-        }
-        foreach ($this->roles as $existingRole) {
-            if (!in_array($existingRole->id, $roles)) {
-                $this->roles()->detach($existingRole->id);
-            }
-        }
+        return $this->person->center;
     }
 
-    public function updateCenters($centers)
+    public function setRole($role)
     {
-        foreach ($this->centers as $existingCenter) {
-            if (!in_array($existingCenter->id, $centers)) {
-                $this->centers()->detach($existingCenter->id);
-            }
-        }
-        foreach ($centers as $centerAbbr) {
-            $center = Center::abbreviation($centerAbbr)->first();
-
-            if ($center && !$this->hasCenter($center->id)) {
-                $this->centers()->attach($center->id);
-            }
-        }
+        $this->roleId = $role->id;
     }
 
     public function formatPhone()
@@ -120,15 +82,5 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     public function scopeActive($query)
     {
         return $query->where('active', '=', '1');
-    }
-
-    public function roles()
-    {
-        return $this->belongsToMany('TmlpStats\Role', 'role_user')->withTimestamps();
-    }
-
-    public function centers()
-    {
-        return $this->belongsToMany('TmlpStats\Center', 'center_user')->withTimestamps();
     }
 }

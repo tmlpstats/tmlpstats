@@ -5,64 +5,111 @@ use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Carbon\Carbon;
 
+use DB;
+use Exception;
+
 class Quarter extends Model {
 
     use CamelCaseModel;
 
     protected $fillable = array(
-        'start_weekend_date',
-        'end_weekend_date',
-        'classroom1_date',
-        'classroom2_date',
-        'classroom3_date',
-        'location',
-        'distinction',
-        'global_region',
-        'local_region',
+        't1_distinction',
+        't2_distinction',
+        'quarter_number',
+        'year',
     );
 
-    protected $dates = [
-        'start_weekend_date',
-        'end_weekend_date',
-        'classroom1_date',
-        'classroom2_date',
-        'classroom3_date',
-    ];
+    protected $region = null;
+    protected $quarterRegion = null;
 
-    public static function findByDateAndRegion($date, $region = null)
+    public function setRegion($region)
     {
-        $query = static::where('start_weekend_date', '<', $date->toDateString())
-                       ->where('end_weekend_date', '>=', $date->toDateString());
-        if ($region !== null) {
-            $query->where('global_region', $region);
+        if (!$this->region) {
+            // TODO: barf
         }
-        return $query->first();
+
+        $this->region = $region;
+
+        $this->quarterRegion = DB::table('quarter_region')
+                                 ->where('quarter_id', $this->id)
+                                 ->where('region_id', $this->region)
+                                 ->first();
     }
 
-    public function scopePresentAndFuture($query)
+    public function getStartWeekendDate()
+    {
+        if (!$this->quarterRegion) {
+            throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
+        }
+        return Carbon::createFromFormat('Y-m-d', $this->quarterRegion->startWeekendDate);
+    }
+
+    public function getEndWeekendDate()
+    {
+        if (!$this->quarterRegion) {
+            throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
+        }
+        return Carbon::createFromFormat('Y-m-d', $this->quarterRegion->endWeekendDate);
+    }
+
+    public function getClassroom1Date()
+    {
+        if (!$this->quarterRegion) {
+            throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
+        }
+        return Carbon::createFromFormat('Y-m-d', $this->quarterRegion->classroom1Date);
+    }
+
+    public function getClassroom2Date()
+    {
+        if (!$this->quarterRegion) {
+            throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
+        }
+        return Carbon::createFromFormat('Y-m-d', $this->quarterRegion->classroom2Date);
+    }
+
+    public function getClassroom3Date()
+    {
+        if (!$this->quarterRegion) {
+            throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
+        }
+        return Carbon::createFromFormat('Y-m-d', $this->quarterRegion->classroom3Date);
+    }
+
+    public static function filterByDate($date)
+    {
+        return static::where('start_weekend_date', '<', $date->toDateString())
+                     ->where('end_weekend_date', '>=', $date->toDateString());
+    }
+
+    public function scopeQuarterNumber($query, $number)
+    {
+        return $query->whereQuarterNumber($number);
+    }
+
+    public function scopeYear($query, $year)
+    {
+        return $query->where('year', $year);
+    }
+
+    public function scopeRegion($query, $region)
+    {
+        return $query->where('region_id', $region->id);
+    }
+
+    public function scopePresentAndFuture($query, $region)
     {
         return $query->where('end_weekend_date', '>=', Carbon::now()->startOfDay());
     }
 
-    public function scopeCurrent($query, $region = null)
+    public function scopeCurrent($query, $region)
     {
-        $query = $query->where('start_weekend_date', '<', Carbon::now()->startOfDay())
-                       ->where('end_weekend_date', '>=', Carbon::now()->startOfDay());
-
-        if ($region !== null) {
-            $query = $query->where('global_region', $region);
-        }
-
-        return $query;
-    }
-
-    public function programTeamMember()
-    {
-        return $this->hasMany('TmlpStats\ProgramTeamMember')->withTimestamps();
+        return $query->where('start_weekend_date', '<', Carbon::now()->startOfDay())
+                     ->where('end_weekend_date', '>=', Carbon::now()->startOfDay());
     }
 
     public function statsReport()
     {
-        return $this->hasMany('TmlpStats\StatsReport')->withTimestamps();
+        return $this->hasMany('TmlpStats\StatsReport');
     }
 }
