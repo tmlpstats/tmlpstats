@@ -5,25 +5,24 @@ This repo includes a Vagrant configuration to make development easier.
 
 ### Clone Repo
 ```
-$ mkdir ~/dev
 $ cd ~/dev
-$ git clone <repo url>
+$ git clone https://github.com/pdarg/tmlpstats
 ```
 
 ### Setup for Database Seeding
-If you have an export of the database, the provisioning will seed the database for you. Generate a CSV export
-of the database, and copy the files into `~/dev/export/`. Note, the export should be a collection of files named
-after the table they contain.
+If you have an export of the database, the provisioning will seed the database for you. Generate a CSV export of the database, and copy the files into `~/dev/tmlpstats/export/`. Note, the export should be a collection of files named after the table they contain.
+
 You can also snap the database after provisioning using Laravel's artisan migrate command:
 ```
+$ vagrant ssh
+<inside vagrant VM>
 $ cd /vagrant/tmlpstats
 $ php artisan migrate:refresh --seed
-
 ```
 
 ### Start Your dev VM
 ```
-$ cd ~/dev
+$ cd ~/dev/tmlpstats
 $ vagrant up
 ```
 Wait for the scripts to complete. This will take a while the first time since Vagrant has to download the base image.
