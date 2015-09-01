@@ -11,6 +11,7 @@ use TmlpStats\CenterStatsData;
 use Carbon\Carbon;
 
 use Log;
+use TmlpStats\WithdrawCode;
 
 class ClassListImporter extends DataImporterAbstract
 {
@@ -33,35 +34,35 @@ class ClassListImporter extends DataImporterAbstract
     protected function populateSheetRanges()
     {
         $t1q4 = $this->findRange(25, 'Team 1 Completing', 'Team 2 Completing');
-        $this->blockT1Q4[] = $this->excelRange('A','S');
+        $this->blockT1Q4[] = $this->excelRange('A', 'S');
         $this->blockT1Q4[] = $this->excelRange($t1q4['start'] + 1, $t1q4['end']);
 
         $t2q4 = $this->findRange($t1q4['end'], 'Team 2 Completing', 'Current Team Completing');
-        $this->blockT2Q4[] = $this->excelRange('A','S');
+        $this->blockT2Q4[] = $this->excelRange('A', 'S');
         $this->blockT2Q4[] = $this->excelRange($t2q4['start'] + 1, $t2q4['end']);
 
         $t1q3 = $this->findRange($t2q4['end'], 'Team 1 Completing', 'Team 2 Completing');
-        $this->blockT1Q3[] = $this->excelRange('A','S');
+        $this->blockT1Q3[] = $this->excelRange('A', 'S');
         $this->blockT1Q3[] = $this->excelRange($t1q3['start'] + 1, $t1q3['end']);
 
         $t2q3 = $this->findRange($t1q3['end'], 'Team 2 Completing', 'Current Team Completing');
-        $this->blockT2Q3[] = $this->excelRange('A','S');
+        $this->blockT2Q3[] = $this->excelRange('A', 'S');
         $this->blockT2Q3[] = $this->excelRange($t2q3['start'] + 1, $t2q3['end']);
 
         $t1q2 = $this->findRange($t2q3['end'], 'Team 1 Completing', 'Team 2 Completing');
-        $this->blockT1Q2[] = $this->excelRange('A','S');
+        $this->blockT1Q2[] = $this->excelRange('A', 'S');
         $this->blockT1Q2[] = $this->excelRange($t1q2['start'] + 1, $t1q2['end']);
 
         $t2q2 = $this->findRange($t1q2['end'], 'Team 2 Completing', 'Current Team Completing');
-        $this->blockT2Q2[] = $this->excelRange('A','S');
+        $this->blockT2Q2[] = $this->excelRange('A', 'S');
         $this->blockT2Q2[] = $this->excelRange($t2q2['start'] + 1, $t2q2['end']);
 
         $t1q1 = $this->findRange($t2q2['end'], 'Team 1 Completing', 'Team 2 Completing');
-        $this->blockT1Q1[] = $this->excelRange('A','S');
+        $this->blockT1Q1[] = $this->excelRange('A', 'S');
         $this->blockT1Q1[] = $this->excelRange($t1q1['start'] + 1, $t1q1['end']);
 
         $t2q1 = $this->findRange($t1q1['end'], 'Team 2 Completing', 'Please e-mail the completed performance report to your Regional Statistician(s)');
-        $this->blockT2Q1[] = $this->excelRange('A','S');
+        $this->blockT2Q1[] = $this->excelRange('A', 'S');
         $this->blockT2Q1[] = $this->excelRange($t2q1['start'] + 1, $t2q1['end'] - 4);
     }
 
@@ -79,11 +80,11 @@ class ClassListImporter extends DataImporterAbstract
         $this->loadBlock($this->blockT2Q1, 2);
     }
 
-    protected function loadBlock($blockParams, $teamYear=NULL)
+    protected function loadBlock($blockParams, $teamYear = NULL)
     {
         foreach ($blockParams[1] as $row) {
 
-            $completionQuarterRow  = $blockParams[1][0] - 2;
+            $completionQuarterRow = $blockParams[1][0] - 2;
             $completionQuarterDate = $this->reader->getCompletionQuarter($completionQuarterRow);
             $this->loadEntry($row, array($teamYear, $completionQuarterDate));
         }
@@ -91,7 +92,7 @@ class ClassListImporter extends DataImporterAbstract
 
     protected function loadEntry($row, $args)
     {
-        if ($this->reader->isEmptyCell($row,'A')) return;
+        if ($this->reader->isEmptyCell($row, 'A')) return;
 
         $this->data[] = array(
             'centerId'          => $this->statsReport->center->id,
@@ -125,35 +126,63 @@ class ClassListImporter extends DataImporterAbstract
 
         foreach ($this->data as $memberInput) {
 
-            $completionQuarter = Quarter::findByDateAndRegion($memberInput['completionQuarter'], $this->statsReport->center->globalRegion);
+            $completionQuarter = Quarter::byRegion($this->statsReport->center->region)
+                ->date($memberInput['completionQuarter'])
+                ->first();
 
             if (!$completionQuarter) {
                 Log::error("Completion quarter '{$memberInput['completionQuarter']}' in region '{$this->statsReport->center->globalRegion}' doesn't exist");
                 continue;
             }
 
+            $incomingQuarter = Quarter::year($completionQuarter->year - 1)
+                ->quarterNumber($completionQuarter->quarterNumber)
+                ->first();
+
             $member = TeamMember::firstOrNew(array(
-                'center_id'             => $memberInput['centerId'],
-                'first_name'            => $memberInput['firstName'],
-                'last_name'             => trim(str_replace('.', '', $memberInput['lastName'])),
-                'team_year'             => $memberInput['teamYear'],
-                'completion_quarter_id' => $completionQuarter->id,
+                'center_id'           => $memberInput['centerId'],
+                'first_name'          => $memberInput['firstName'],
+                'last_name'           => trim(str_replace('.', '', $memberInput['lastName'])),
+                'team_year'           => $memberInput['teamYear'],
+                'incoming_quarter_id' => $incomingQuarter->id,
             ));
-            $member->accountability = $memberInput['accountability'];
-            if ($member->statsReportId === null) {
-                $member->statsReportId = $this->statsReport->id;
-            }
+
+            // For now, we'll drop this and only keep the ones we get from the Contact Info tab
+            // $member->accountability = $memberInput['accountability'];
+
             if ($member->isDirty()) {
                 $member->save();
             }
 
             $memberData = TeamMemberData::firstOrNew(array(
-                'center_id'       => $memberInput['centerId'],
-                'quarter_id'      => $this->statsReport->quarter->id,
-                'reporting_date'  => $this->statsReport->reportingDate->toDateString(),
                 'team_member_id'  => $member->id,
                 'stats_report_id' => $this->statsReport->id,
             ));
+
+            if ($memberInput['wd']) {
+                // TODO: Handle error gracefully
+                $withdrawCode = WithdrawCode::code(substr($memberInput['wd'], 2))->first();
+                $memberInput['withdraw_code_id'] = $withdrawCode->id;
+            } else if ($memberInput['wbo']) {
+                $withdrawCode = WithdrawCode::code('WB')->first();
+                $memberInput['withdraw_code_id'] = $withdrawCode->id;
+            }
+
+            if ($memberInput['wknd']) {
+                $memberInput['at_weekend'] = true;
+            }
+
+            $memberInput['xferOut'] = $memberInput['xferOut'] ? true : false;
+            $memberInput['xferIn'] = $memberInput['xferIn'] ? true : false;
+            $memberInput['ctw'] = $memberInput['ctw'] ? true : false;
+            $memberInput['rereg'] = $memberInput['rereg'] ? true : false;
+            $memberInput['excep'] = $memberInput['excep'] ? true : false;
+
+            $memberInput['travel'] = strtoupper($memberInput['travel']) === 'Y' ? true : false;
+            $memberInput['room'] = strtoupper($memberInput['room']) === 'Y' ? true : false;
+
+            $memberInput['gitw'] = strtoupper($memberInput['gitw']) === 'E' ? true : false;
+            $memberInput['tdo'] = strtoupper($memberInput['tdo']) === 'Y' ? true : false;
 
             // Unset unneeded data
             unset($memberInput['centerId']);
@@ -161,13 +190,18 @@ class ClassListImporter extends DataImporterAbstract
             unset($memberInput['lastName']);
             unset($memberInput['teamYear']);
             unset($memberInput['completionQuarter']);
+            unset($memberInput['offset']);
+            unset($memberInput['accountability']);
+            unset($memberInput['wbo']);
+            unset($memberInput['wd']);
+            unset($memberInput['wknd']);
 
             $memberData = $this->setValues($memberData, $memberInput);
             $memberData->save();
 
-            if ($memberData->wd || $memberData->wbo || $memberData->xferOut) continue;
+            if ($memberData->withdrawCodeId || $memberData->xferOut) continue;
 
-            $tdo = preg_match('/^y$/i', $memberData->tdo) ? 1 : 0;
+            $tdo = $memberData->tdo ? 1 : 0;
             if ($tdo > 0) {
                 $totalTdos += $tdo;
                 $totalTeamMembersDoingTdo++;
@@ -175,20 +209,18 @@ class ClassListImporter extends DataImporterAbstract
             $totalTeamMembers++;
         }
 
-        $centerStats = CenterStats::where('center_id', '=', $this->statsReport->center->id)
-                                  ->where('reporting_date', '=', $this->statsReport->reportingDate->toDateString())
-                                  ->first();
+        $data = CenterStatsData::actual()
+            ->byStatsReport($this->statsReport)
+            ->reportingDate($this->statsReport->reportingDate)
+            ->first();
 
-        if ($centerStats) {
-            $data = CenterStatsData::find($centerStats->actualDataId);
-            if ($data) {
-                $tdoActual = 0;
-                if ($totalTeamMembers > 0) {
-                    $tdoActual = round(($totalTeamMembersDoingTdo/$totalTeamMembers)*100);
-                }
-                $data->tdo = $tdoActual;
-                $data->save();
+        if ($data) {
+            $tdoActual = 0;
+            if ($totalTeamMembers > 0) {
+                $tdoActual = round(($totalTeamMembersDoingTdo / $totalTeamMembers) * 100);
             }
+            $data->tdo = $tdoActual;
+            $data->save();
         }
     }
 }

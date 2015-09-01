@@ -27,6 +27,12 @@ class ContactInfoValidator extends ValidatorAbstract
             $emailValidator = v::alwaysValid();
         }
 
+        // Skip rows with names == NA or N/A
+        if (preg_match('/^N\/?A$/i', $data->name)) {
+            return;
+        }
+        $this->dataValidators['name']           = v::string()->regex('/^(.+)\s([^\s]+)$/i');
+
         $this->dataValidators['name']           = v::string()->regex('/^(.+)\s([^\s]+)$/i');
         $this->dataValidators['accountability'] = v::in($accountabilities);
         $this->dataValidators['phone']          = v::phone();

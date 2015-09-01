@@ -4,43 +4,66 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class TeamMemberData extends Model {
-
+class TeamMemberData extends Model
+{
     use CamelCaseModel;
 
     protected $table = 'team_members_data';
 
     protected $fillable = [
-        'reporting_date',
-        'center_id',
-        'quarter_id',
+        'stats_report_id',
         'team_member_id',
-        'offset',
-        'wknd',
+        'at_weekend',
         'xfer_out',
         'xfer_in',
         'ctw',
-        'wd',
-        'wbo',
+        'withdraw_code_id',
         'rereg',
         'excep',
-        'reason_withdraw',
         'travel',
         'room',
         'comment',
+        'accountability_id',
         'gitw',
         'tdo',
-        'additional_tdo',
-        'stats_report_id',
     ];
 
-    protected $dates = [
-        'reporting_date',
+    protected $casts = [
+        'at_weekend' => 'boolean',
+        'xfer_out'   => 'boolean',
+        'xfer_in'    => 'boolean',
+        'ctw'        => 'boolean',
+        'rereg'      => 'boolean',
+        'room'       => 'boolean',
     ];
 
-    public function setReportingDateAttribute($value)
+    public function scopeByStatsReport($query, StatsReport $statsReport)
     {
-        $date = $this->asDateTime($value);
-        $this->attributes['reporting_date'] = $date->toDateString();
+        return $query->whereStatsReportId($statsReport->id);
+    }
+
+    public function scopeWithdrawn($query)
+    {
+        return $query->whereNotNull('withdraw_code_id');
+    }
+
+    public function statsReport()
+    {
+        return $this->belongsTo('TmlpStats\StatsReport');
+    }
+
+    public function withdrawCode()
+    {
+        return $this->hasOne('TmlpStats\WithdrawCode');
+    }
+
+    public function accountability()
+    {
+        return $this->belongsTo('TmlpStats\Accountability');
+    }
+
+    public function teamMember()
+    {
+        return $this->belongsTo('TmlpStats\TeamMember');
     }
 }

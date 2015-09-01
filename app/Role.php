@@ -4,12 +4,13 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class Role extends Model {
-
+class Role extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = array(
         'name',
+        'display',
     );
 
     public function scopeName($query, $name)
@@ -21,5 +22,4 @@ class Role extends Model {
     {
         return $this->belongsToMany('TmlpStats\User', 'role_user')->withTimestamps();
     }
-
 }

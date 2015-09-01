@@ -28,7 +28,6 @@ class UserRequest extends Request {
             'last_name'              => 'required|max:255',
             'phone'                  => 'regex:/^[\s\d\+\-\.]+$/',
             'email'                  => 'required|email|max:255|unique:users,id,'.$this->route('id'), // only enforce unique when id is not value provided
-            'is_admin'               => 'boolean',
             'require_password_reset' => 'boolean',
             'active'                 => 'boolean',
         ];

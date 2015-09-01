@@ -56,26 +56,20 @@ class CommCourseInfoImporter extends DataImporterAbstract
     {
         foreach ($this->data as $courseInput) {
 
-            $course = Course::firstOrNew(array(
+            $course = Course::firstOrCreate(array(
                 'center_id'  => $this->statsReport->center->id,
                 'start_date' => $courseInput['startDate'],
                 'type'       => $courseInput['type'],
             ));
-            if ($course->statsReportId === null) {
-                $course->statsReportId = $this->statsReport->id;
-                $course->save();
-            }
 
             $courseData = CourseData::firstOrNew(array(
-                'center_id'       => $this->statsReport->center->id,
-                'quarter_id'      => $this->statsReport->quarter->id,
                 'course_id'       => $course->id,
-                'reporting_date'  => $this->statsReport->reportingDate->toDateString(),
                 'stats_report_id' => $this->statsReport->id,
             ));
 
             unset($courseInput['startDate']);
             unset($courseInput['type']);
+            unset($courseInput['offset']);
 
             $courseData = $this->setValues($courseData, $courseInput);
             $courseData->save();

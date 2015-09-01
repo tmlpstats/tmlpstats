@@ -34,12 +34,18 @@
             <?php $center = $statsReportData['center']; ?>
             <tr class="{{ $statsReport->validated ? 'success' : 'danger' }}" >
                 <td>{{ $centerName }}</td>
-                <td>{{ $center->globalRegion }}</td>
-                <td>{{ $center->localRegion ?: '-' }}</td>
+                <td><?php
+                    $region = $center->getGlobalRegion();
+                    echo ($region) ? $region->name : '-'
+                ?></td>
+                <td><?php
+                    $region = $center->getLocalRegion();
+                    echo ($region) ? $region->name : '-'
+                ?></td>
                 <td>{{ $statsReport->reportingDate->format('F j, Y') }}</td>
                 <td>
                     @if ($statsReport)
-                        {{ $statsReport->getRating() }}
+                        {{ $statsReport->getRating() }} ({{ $statsReport->getPoints() }})
                     @else
                         -
                     @endif
@@ -61,8 +67,14 @@
             <?php $center = $statsReportData['center']; ?>
             <tr class="danger">
                 <td>{{ $centerName }}</td>
-                <td>{{ $center->globalRegion }}</td>
-                <td>{{ $center->localRegion ?: '-' }}</td>
+                <td><?php
+                    $region = $center->getGlobalRegion();
+                    echo ($region) ? $region->name : '-'
+                ?></td>
+                <td><?php
+                    $region = $center->getLocalRegion();
+                    echo ($region) ? $region->name : '-'
+                ?></td>
                 <td>-</td>
                 <td>-</td>
                 <td></td>

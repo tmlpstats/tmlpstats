@@ -51,7 +51,8 @@ abstract class CsvSeederAbstract extends Seeder {
             }
         }
         if ($droppedCount) {
-            echo "Dropped $droppedCount of $i rows from {$this->exportFile}\n";
+            $total = $i - 1;
+            echo "Dropped {$droppedCount} of {$total} rows from {$this->exportFile}\n";
         }
     }
 }

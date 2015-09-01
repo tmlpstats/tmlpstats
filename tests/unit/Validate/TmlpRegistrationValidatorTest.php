@@ -2316,7 +2316,7 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
         $statsReport->quarter = new stdClass;
 
         $statsReport->reportingDate = Carbon::createFromDate(2015, 5, 8);
-        $statsReport->quarter->classroom2Date = Carbon::createFromDate(2015, 4, 17);
+        $statsReport->quarter->classroom1Date = Carbon::createFromDate(2015, 4, 17);
 
         return array(
             // validateTravel Passes When Before Second Classroom
@@ -2425,7 +2425,7 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
         $statsReport->quarter = new stdClass;
 
         $statsReport->reportingDate = Carbon::createFromDate(2015, 5, 8);
-        $statsReport->quarter->classroom2Date = Carbon::createFromDate(2015, 4, 17);
+        $statsReport->quarter->classroom1Date = Carbon::createFromDate(2015, 4, 17);
         $statsReport->quarter->endWeekendDate = Carbon::createFromDate(2015, 5, 29);
 
         $statsReportLastTwoWeeks = clone $statsReport;
@@ -2471,7 +2471,7 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'appr'            => 1,
                 )),
                 $statsReportLastTwoWeeks,
-                array('TMLPREG_TRAVEL_COMMENT_REVIEW', 'TMLPREG_TRAVEL_ROOM_CTW_COMMENT_REVIEW'),
+                array('TMLPREG_TRAVEL_COMMENT_REVIEW'/*, 'TMLPREG_TRAVEL_ROOM_CTW_COMMENT_REVIEW'*/),
                 true,
             ),
             // ValidateTravel Throws Warning When Missing Room In Last 2 Weeks
@@ -2485,7 +2485,7 @@ class TmlpRegistrationValidatorTest extends ValidatorTestAbstract
                     'appr'            => 1,
                 )),
                 $statsReportLastTwoWeeks,
-                array('TMLPREG_ROOM_COMMENT_REVIEW', 'TMLPREG_TRAVEL_ROOM_CTW_COMMENT_REVIEW'),
+                array('TMLPREG_ROOM_COMMENT_REVIEW'/*, 'TMLPREG_TRAVEL_ROOM_CTW_COMMENT_REVIEW'*/),
                 true,
             ),
         );

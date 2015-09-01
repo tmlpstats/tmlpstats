@@ -2,11 +2,11 @@
 namespace TmlpStats\Http\Controllers;
 
 use TmlpStats\Http\Requests;
-use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
 
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
+use TmlpStats\Region;
 use TmlpStats\User;
 use TmlpStats\StatsReport;
 use TmlpStats\CenterStatsData;
@@ -31,9 +31,16 @@ class AdminController extends Controller {
     public function index()
     {
         $userHomeRegion = Auth::user()->homeRegion();
-        $defaultRegion = $userHomeRegion ?: 'NA';
+        $defaultRegion = $userHomeRegion ?: Region::abbreviation('NA')->first();
 
-        $region = Request::has('region') ? Request::get('region') : $defaultRegion;
+        $region = Request::has('region')
+            ? Region::abbreviation(Request::get('region'))->first()
+            : $defaultRegion;
+
+        // Make sure we have a global region
+        if ($region->parentId) {
+            $region = $region->parent;
+        }
 
         $allReports = StatsReport::currentQuarter($region)->orderBy('reporting_date', 'desc')->get();
         if ($allReports->isEmpty()) {
@@ -66,15 +73,16 @@ class AdminController extends Controller {
             $reportingDate = ImportManager::getExpectedReportDate();
         }
 
+        $reportingDate = $reportingDate->startOfDay();
+
         $centers = Center::active()
-                         ->globalRegion($region)
-                         ->orderBy('local_region', 'asc')
+                         ->byRegion($region)
                          ->orderBy('name', 'asc')
                          ->get();
 
         $regionsData = array();
 
-        switch($region) {
+        switch($region->abbreviation) {
             case 'ANZ':
                 $regionsData[0]['displayName'] = 'Australia/New Zealand Region';
                 $regionsData[0]['validatedCount'] = 0;
@@ -109,10 +117,11 @@ class AdminController extends Controller {
 
         foreach ($centers as $center) {
 
-            $localRegion = $center->localRegion ?: 0;
+            $localRegion = $center->getLocalRegion();
+            $localRegion = $localRegion ? $localRegion->abbreviation : 0;
 
             $statsReport = $center->statsReports()
-                                  ->reportingDate($reportingDate->toDateString())
+                                  ->reportingDate($reportingDate)
                                   ->orderBy('submitted_at', 'desc')
                                   ->first();
 
@@ -129,7 +138,7 @@ class AdminController extends Controller {
                 : null;
 
             if ($updatedAt) {
-                $updatedAt->setTimezone($center->timeZone);
+                $updatedAt->setTimezone($center->timezone);
             }
 
             $centerResults = array(
@@ -158,7 +167,7 @@ class AdminController extends Controller {
 
         return view('admin.dashboard')->with(['reportingDate' => $reportingDate,
                                               'reportingDates' => $reportingDates,
-                                              'selectedRegion' => $region,
+                                              'selectedRegion' => $region->abbreviation,
                                               'regionsData' => $regionsData]);
     }
 

@@ -2,10 +2,13 @@
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
+use TmlpStats\Person;
+use TmlpStats\Quarter;
 use TmlpStats\TmlpRegistration;
 use TmlpStats\TmlpRegistrationData;
 use TmlpStats\TeamMember;
 use TmlpStats\Util;
+use TmlpStats\WithdrawCode;
 
 class TmlpRegistrationImporter extends DataImporterAbstract
 {
@@ -74,45 +77,81 @@ class TmlpRegistrationImporter extends DataImporterAbstract
     {
         foreach ($this->data as $incomingInput) {
 
+            if ($incomingInput['incomingTeamYear'] == 'R') {
+                $incomingInput['teamYear'] = 2;
+            } else {
+                $incomingInput['teamYear'] = $incomingInput['incomingTeamYear'];
+            }
+
             $incoming = TmlpRegistration::firstOrNew(array(
                 'first_name' => $incomingInput['firstName'],
                 'last_name'  => $incomingInput['lastName'],
                 'center_id'  => $this->statsReport->center->id,
                 'reg_date'   => $incomingInput['regDate'],
+                'team_year'  => $incomingInput['teamYear'],
             ));
-            if ($incoming->statsReportId === null) {
-                $incoming->statsReportId = $this->statsReport->id;
-            }
-            if ($incoming->incomingTeamYear === null) {
 
-                if ($incomingInput['incomingTeamYear'] == 'R') {
-                    $incoming->incomingTeamYear = 2;
-                    $incoming->isReviewer = true;
-                } else {
-                    $incoming->incomingTeamYear = $incomingInput['incomingTeamYear'];
-                }
+            if ($incoming->teamYear === 2 && $incomingInput['incomingTeamYear'] === 'R') {
+                $incoming->isReviewer = true;
             }
             $incoming->save();
 
             $incomingData = TmlpRegistrationData::firstOrNew(array(
-                'reporting_date'       => $this->statsReport->reportingDate->toDateString(),
-                'center_id'            => $this->statsReport->center->id,
-                'quarter_id'           => $this->statsReport->quarter->id,
                 'tmlp_registration_id' => $incoming->id,
                 'stats_report_id'      => $this->statsReport->id,
             ));
 
-            unset($incomingInput['firstName']);
-            unset($incomingInput['lastName']);
-            unset($incomingInput['regDate']);
-            unset($incomingInput['incomingTeamYear']);
+            $withdrawCodeId = null;
+            if ($incomingInput['wd']) {
+                $code = substr($incomingInput['wd'], 2);
+                $withdrawCode = WithdrawCode::code($code)->first();
+                $incomingData->withdrawCodeId = $withdrawCode ? $withdrawCode->id : null;
+            }
 
-            $incomingData = $this->setValues($incomingData, $incomingInput);
+            $thisQuarter = $this->statsReport->quarter;
+            if ($incomingInput['incomingWeekend'] === 'current') {
+                $quarterNumber = ($thisQuarter->quarterNumber + 1) % 5;
+            } else {
+                $quarterNumber = ($thisQuarter->quarterNumber + 2) % 5;
+            }
 
-            $teamMember = $this->getTeamMember($incomingData->committedTeamMemberName);
+            $quarterNumber = $quarterNumber ?: 1; // no quarter 0
+
+            $year = ($quarterNumber === 1)
+                ? $thisQuarter->year + 1
+                : $thisQuarter->year;
+
+            $nextQuarter = Quarter::year($year)->quarterNumber($quarterNumber)->first();
+
+            if ($nextQuarter) {
+                $incomingData->incomingQuarterId = $nextQuarter->id;
+            }
+
+            $incomingInput['travel'] = $incomingInput['travel'] ? true : false;
+            $incomingInput['room'] = $incomingInput['room'] ? true : false;
+
+            $teamMember = $this->getTeamMember($incomingInput['committedTeamMemberName']);
             if ($teamMember) {
                 $incomingData->committedTeamMemberId = $teamMember->id;
             }
+
+            unset($incomingInput['firstName']);
+            unset($incomingInput['lastName']);
+            unset($incomingInput['teamYear']);
+            unset($incomingInput['incomingTeamYear']);
+            unset($incomingInput['offset']);
+            unset($incomingInput['bef']);
+            unset($incomingInput['dur']);
+            unset($incomingInput['aft']);
+            unset($incomingInput['weekendReg']);
+            unset($incomingInput['appOut']);
+            unset($incomingInput['appIn']);
+            unset($incomingInput['appr']);
+            unset($incomingInput['wd']);
+            unset($incomingInput['committedTeamMemberName']);
+            unset($incomingInput['incomingWeekend']);
+
+            $incomingData = $this->setValues($incomingData, $incomingInput);
 
             $incomingData->save();
         }
@@ -120,11 +159,18 @@ class TmlpRegistrationImporter extends DataImporterAbstract
 
     protected function getTeamMember($name)
     {
+        if (!$name) {
+            return null;
+        }
         $nameParts = Util::getNameParts($name);
 
-        return TeamMember::where('center_id', '=', $this->statsReport->center->id)
-                         ->where('first_name', '=', $nameParts['firstName'])
-                         ->where('last_name', '=', $nameParts['lastName'])
-                         ->first();
+        $person = Person::firstName($nameParts['firstName'])
+            ->lastName($nameParts['lastName'])
+            ->byCenter($this->statsReport->center)
+            ->first();
+
+        return $person
+            ? TeamMember::byPerson($person)->first()
+            : null;
     }
 }

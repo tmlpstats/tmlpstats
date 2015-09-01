@@ -7,6 +7,7 @@ abstract class ImportDocument
     protected $quarter = NULL;
     protected $reportingDate = NULL;
     protected $statsReport = NULL;
+    protected $globalReport = NULL;
 
     public function __get($name)
     {

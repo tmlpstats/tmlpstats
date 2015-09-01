@@ -54,12 +54,18 @@
                     @foreach ($globalReport->statsReports as $statsReport)
                         <tr id="{{ $statsReport->id }}" >
                             <td>{{ $statsReport->center->name }}</td>
-                            <td>{{ $statsReport->center->globalRegion }}</td>
-                            <td>{{ $statsReport->center->localRegion ?: '-' }}</td>
+                            <td><?php
+                                $region = $statsReport->center->getGlobalRegion();
+                                echo ($region) ? $region->name : '-'
+                            ?></td>
+                            <td><?php
+                                $region = $statsReport->center->getLocalRegion();
+                                echo ($region) ? $region->name : '-'
+                            ?></td>
                             <td>{{ $statsReport->reportingDate->format('F j, Y') }}</td>
                             <td>
                                 @if ($statsReport)
-                                    {{ $statsReport->getRating() }}
+                                    {{ $statsReport->getRating() }} ({{ $statsReport->getPoints() }})
                                 @else
                                     -
                                 @endif

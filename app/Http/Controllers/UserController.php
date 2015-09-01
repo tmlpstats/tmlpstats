@@ -1,14 +1,14 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use DB;
 use TmlpStats\User;
 use TmlpStats\Role;
 use TmlpStats\Center;
+use TmlpStats\Person;
+use TmlpStats\Region;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Requests\UserRequest;
-use TmlpStats\Http\Controllers\Controller;
-
-use Illuminate\Http\Request;
 
 class UserController extends Controller {
 
@@ -27,7 +27,12 @@ class UserController extends Controller {
      */
     public function index()
     {
-        $users = User::active()->orderby('first_name')->orderby('last_name')->get();
+        $users = User::active()
+            ->select('users.*', 'people.first_name', 'people.last_name', 'people.phone', 'people.email')
+            ->join('people', 'people.id', '=', 'users.person_id')
+            ->orderby('people.first_name')
+            ->orderby('people.last_name')
+            ->get();
 
         return view('users.index', compact('users'));
     }
@@ -39,9 +44,33 @@ class UserController extends Controller {
      */
     public function create()
     {
-        $roles = Role::all();
+        $rolesObjects = Role::all();
 
-        return view('users.create', compact('roles'));
+        $roles = array();
+        foreach ($rolesObjects as $role) {
+            $roles[$role->id] = $role->display;
+        }
+
+        $centerList = DB::table('centers')
+            ->select('centers.*', DB::raw('regions.name as regionName'), 'regions.parent_id')
+            ->join('regions', 'regions.id', '=', 'centers.region_id')
+            ->get();
+
+        $centers = array();
+        foreach ($centerList as $center) {
+            $parent = ($center->parent_id)
+                ? Region::find($center->parent_id)
+                : null;
+
+            $regionName = ($parent)
+                ? $parent->name
+                : $center->regionName;
+
+            $centers[$center->abbreviation] = "{$regionName} - {$center->name}";
+        }
+        asort($centers);
+
+        return view('users.create', compact('centers', 'roles'));
     }
 
     /**
@@ -53,14 +82,28 @@ class UserController extends Controller {
     {
         $redirect = 'admin/users';
 
-        if (!$request->has('cancel')) {
+        if ($request->has('cancel')) {
             return redirect($redirect);
         }
 
-        $user = User::create($request->all());
+        $input = $request->all();
 
-        if ($request->has('roles')) {
-            $user->updateRoles($request->get('roles'));
+        $person = Person::create($input);
+        $input['person_id'] = $person->id;
+
+        $user = User::create($input);
+
+        if ($request->has('center')) {
+            $center = Center::abbreviation($request->get('center'))->first();
+            if ($center) {
+                $user->setCenter($center);
+            }
+        }
+        if ($request->has('role')) {
+            $role = Role::find($request->get('role'));
+            if ($role) {
+                $user->roleId = $role->id;
+            }
         }
         if ($request->has('active')) {
             $user->active = $request->get('active') == true;
@@ -82,9 +125,8 @@ class UserController extends Controller {
     public function show($id)
     {
         $user = User::findOrFail($id);
-        $roles = Role::all();
 
-        return view('users.show', compact('user', 'roles'));
+        return view('users.show', compact('user'));
     }
 
     /**
@@ -96,12 +138,31 @@ class UserController extends Controller {
     public function edit($id)
     {
         $user = User::findOrFail($id);
-        $roles = Role::all();
-        $centerList = Center::orderBy('global_region')->orderBy('name')->get();
+        $rolesObjects = Role::all();
+
+        $roles = array();
+        foreach ($rolesObjects as $role) {
+            $roles[$role->id] = $role->display;
+        }
+
+        $centerList = DB::table('centers')
+            ->select('centers.*', DB::raw('regions.name as regionName'), 'regions.parent_id')
+            ->join('regions', 'regions.id', '=', 'centers.region_id')
+            ->get();
+
         $centers = array();
         foreach ($centerList as $center) {
-            $centers[$center->abbreviation] = "{$center->globalRegion} - {$center->name}";
+            $parent = ($center->parent_id)
+                ? Region::find($center->parent_id)
+                : null;
+
+            $regionName = ($parent)
+                ? $parent->name
+                : $center->regionName;
+
+            $centers[$center->abbreviation] = "{$regionName} - {$center->name}";
         }
+        asort($centers);
 
         return view('users.edit', compact('user', 'roles', 'centers'));
     }
@@ -127,10 +188,22 @@ class UserController extends Controller {
         $user->update($request->all());
 
         if ($request->has('center')) {
-            $user->updateCenters(array($request->get('center')));
+            $center = Center::abbreviation($request->get('center'))->first();
+            if ($center) {
+                $user->setCenter($center);
+            }
         }
-        if ($request->has('roles')) {
-            $user->updateRoles($request->get('roles'));
+        if ($request->has('role')) {
+            $role = Role::find($request->get('role'));
+            if ($role) {
+                $user->roleId = $role->id;
+            }
+        }
+        if ($request->has('phone')) {
+            $user->setPhone($request->get('phone'));
+        }
+        if ($request->has('email')) {
+            $user->setEmail($request->get('email'));
         }
         if ($request->has('active')) {
             $user->active = $request->get('active') == true;

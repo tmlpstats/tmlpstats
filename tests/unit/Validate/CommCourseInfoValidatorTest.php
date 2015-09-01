@@ -769,7 +769,7 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
                 array(
                     array('COMMCOURSE_CURRENT_XFER_LESS_THAN_QSTART_XFER', 0, 2),
                 ),
-                false,
+                true,
             ),
         );
     }

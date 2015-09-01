@@ -4,76 +4,88 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class Center extends Model {
-
+class Center extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = array(
         'name',
         'abbreviation',
         'team_name',
-        'global_region',
-        'local_region',
+        'region_id',
         'stats_email',
+        'active',
         'sheet_filename',
         'sheet_version',
-        'active',
+        'timezone',
     );
 
     protected $casts = array(
-        'active' => 'bool'
+        'active' => 'bool',
     );
 
-    public function getProgramManager($quarter = null)
+    public function getProgramManager()
     {
-        return $this->getAccountable('Program Manager', $quarter);
+        return $this->getAccountable('programManager');
     }
 
-    public function getClassroomLeader($quarter = null)
+    public function getClassroomLeader()
     {
-        return $this->getAccountable('Classroom Leader', $quarter);
+        return $this->getAccountable('classroomLeader');
     }
 
-    public function getT1TeamLeader($quarter = null)
+    public function getT1TeamLeader()
     {
-        return $this->getAccountable('Team 1 Team Leader', $quarter);
+        return $this->getAccountable('team1TeamLeader');
     }
 
-    public function getT2TeamLeader($quarter = null)
+    public function getT2TeamLeader()
     {
-        return $this->getAccountable('Team 2 Team Leader', $quarter);
+        return $this->getAccountable('team2TeamLeader');
     }
 
-    public function getMailingList($quarter = null)
+    public function getMailingList()
     {
-        return $this->getAccountable('Team Mailing List', $quarter);
+        return $this->getAccountable('teamMailingList');
     }
 
-    public function getStatistician($quarter = null)
+    public function getStatistician()
     {
-        return $this->getAccountable('Statistician', $quarter);
+        return $this->getAccountable('teamStatistician');
     }
 
-    public function getStatisticianApprentice($quarter = null)
+    public function getStatisticianApprentice()
     {
-        return $this->getAccountable('Statistician Apprentice', $quarter);
+        return $this->getAccountable('teamStatisticianApprentice');
     }
 
-    public function getAccountable($accountability, $quarter = null)
+    public function getAccountable($accountability)
     {
-        if (!$quarter) {
-            $quarter = Quarter::current($this->globalRegion)->first();
+        if ($accountability === null) {
+            return null;
         }
 
-        return ProgramTeamMember::byCenter($this)
-                                ->quarter($quarter)
-                                ->accountability($accountability)
-                                ->first();
+        return Person::byAccountability($accountability)
+            ->byCenter($this)
+            ->first();
     }
 
-    public function scopeAbbreviation($query, $abbr)
+    public function getGlobalRegion()
     {
-        return $query->whereAbbreviation($abbr);
+        if ($this->region && $this->region->parentId === null) {
+            return $this->region;
+        } else {
+            return Region::find($this->region->parentId);
+        }
+    }
+
+    public function getLocalRegion()
+    {
+        if ($this->region && $this->region->parentId !== null) {
+            return $this->region;
+        } else {
+            return null;
+        }
     }
 
     public function scopeName($query, $name)
@@ -81,23 +93,38 @@ class Center extends Model {
         return $query->whereName($name);
     }
 
+    public function scopeAbbreviation($query, $abbr)
+    {
+        return $query->whereAbbreviation($abbr);
+    }
+
     public function scopeActive($query)
     {
         return $query->whereActive(true);
     }
 
-    public function scopeGlobalRegion($query, $region)
+    public function scopeByRegion($query, Region $region)
     {
-        return $query->whereGlobalRegion($region);
+        return $query->whereIn('region_id', function ($query) use ($region) {
+            $query->select('id')
+                ->from('regions')
+                ->where('id', $region->id)
+                ->orWhere('parent_id', $region->id);
+        });
     }
 
-    public function users()
+    public function people()
     {
-        return $this->belongsToMany('TmlpStats\User', 'center_user')->withTimestamps();
+        return $this->belongsToMany('TmlpStats\Person')->withTimestamps();
     }
 
     public function statsReports()
     {
         return $this->hasMany('TmlpStats\StatsReport');
+    }
+
+    public function region()
+    {
+        return $this->belongsTo('TmlpStats\Region');
     }
 }

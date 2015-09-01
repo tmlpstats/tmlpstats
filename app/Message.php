@@ -396,8 +396,8 @@ class Message
             ),
         ),
         'COMMCOURSE_CURRENT_XFER_LESS_THAN_QSTART_XFER' => array(
-            'type' => Message::ERROR,
-            'format' => "Current Transfer in from Earlier (%%currentXfer%%) cannot be less than the Quarter Starting Transfer in from Earlier (%%quarterStartXfer%%)",
+            'type' => Message::WARNING,
+            'format' => "Current Transfer in from Earlier (%%currentXfer%%) is less than the Quarter Starting Transfer in from Earlier (%%quarterStartXfer%%). This should only be possible if some who previously transferred was withdrawn as a registration error.",
             'arguments' => array(
                 '%%currentXfer%%',
                 '%%quarterStartXfer%%',
