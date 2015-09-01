@@ -18,13 +18,18 @@ class CreateCentersTable extends Migration {
             $table->string('name');
             $table->string('abbreviation')->unique();
             $table->string('team_name')->nullable();
-            $table->string('global_region');
-            $table->string('local_region');
-            $table->string('stats_email');
-            $table->string('active');
+            $table->integer('region_id')->unsigned();
+            $table->string('stats_email')->nullable();
+            $table->boolean('active')->default(true);
             $table->string('sheet_filename');
             $table->string('sheet_version');
+            $table->string('time_zone');
             $table->timestamps();
+        });
+
+        Schema::table('centers', function(Blueprint $table)
+        {
+            $table->foreign('region_id')->references('id')->on('regions');
         });
     }
 

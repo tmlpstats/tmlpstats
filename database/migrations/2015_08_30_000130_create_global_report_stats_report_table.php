@@ -16,9 +16,11 @@ class CreateGlobalReportStatsReportTable extends Migration {
         {
             $table->integer('stats_report_id')->unsigned()->index();
             $table->integer('global_report_id')->unsigned()->index();
-
             $table->timestamps();
+        });
 
+        Schema::table('global_report_stats_report', function(Blueprint $table)
+        {
             $table->foreign('stats_report_id')->references('id')->on('stats_reports')->onDelete('cascade');
             $table->foreign('global_report_id')->references('id')->on('global_reports')->onDelete('cascade');
         });

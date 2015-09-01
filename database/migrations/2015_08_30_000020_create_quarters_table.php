@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAccountabilitiesTable extends Migration {
+class CreateQuartersTable extends Migration {
 
     /**
      * Run the migrations.
@@ -12,11 +12,12 @@ class CreateAccountabilitiesTable extends Migration {
      */
     public function up()
     {
-        Schema::create('accountabilities', function(Blueprint $table)
+        Schema::create('quarters', function(Blueprint $table)
         {
             $table->increments('id');
-            $table->string('name')->unique();
-            $table->string('context');
+            $table->string('t1_distinction');
+            $table->string('t2_distinction');
+            $table->integer('quarter_number');
             $table->timestamps();
         });
     }
@@ -28,7 +29,7 @@ class CreateAccountabilitiesTable extends Migration {
      */
     public function down()
     {
-        Schema::drop('accountabilities');
+        Schema::drop('quarters');
     }
 
 }

@@ -15,21 +15,17 @@ class CreateTmlpRegistrationsTable extends Migration {
         Schema::create('tmlp_registrations', function(Blueprint $table)
         {
             $table->increments('id');
-            $table->string('first_name');
-            $table->string('last_name')->nullable();
-            $table->date('reg_date')->nullable();
-            $table->string('incoming_team_year');
+            $table->integer('person_id')->unsigned();
+            $table->integer('team_year');
+            $table->integer('incoming_quarter_id')->unsigned();
             $table->boolean('is_reviewer')->default(false);
-            $table->integer('center_id')->unsigned();
-            $table->integer('stats_report_id')->unsigned()->nullable();
             $table->timestamps();
         });
 
         Schema::table('tmlp_registrations', function(Blueprint $table)
         {
-            $table->foreign('center_id')->references('id')->on('centers');
-            // Not adding a foreign key for stats_reports because there's a circular reference. Adding stats_report
-            // to make it easier to delete all data added by a stats_report if it fails validation
+            $table->foreign('person_id')->references('id')->on('persons');
+            $table->foreign('incoming_quarter_id')->references('id')->on('quarters');
         });
     }
 
