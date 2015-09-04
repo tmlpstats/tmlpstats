@@ -27,7 +27,7 @@ sudo debconf-set-selections <<< "mysql-server mysql-server/root_password passwor
 sudo debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MYSQL_PASS"
 
 echo "--- Installing base packages ---"
-sudo apt-get install -y vim curl python-software-properties > /dev/null 2>&1
+sudo apt-get install -y git vim curl python-software-properties > /dev/null 2>&1
 sudo add-apt-repository -y ppa:ondrej/php5-oldstable > /dev/null 2>&1
 
 sudo apt-get update > /dev/null 2>&1
