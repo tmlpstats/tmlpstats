@@ -11,5 +11,8 @@ Vagrant.configure("2") do |config|
   config.vm.network "private_network", ip: "192.168.56.102"
 
   # Using NFS because VirtualBox's shared drive feature a super slow
+  # For more, see  https://docs.vagrantup.com/v2/synced-folders/basic_usage.html
+  # Need to disable the default folder, else it will interfear with /vagrant/tmlpstats
+  config.vm.synced_folder ".", "/vagrant", disabled: true
   config.vm.synced_folder ".", "/vagrant/tmlpstats", :nfs => true
 end
