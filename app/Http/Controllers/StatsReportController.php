@@ -233,14 +233,15 @@ class StatsReportController extends Controller {
 
         $statsReport = StatsReport::find($id);
 
-        if ($statsReport && !$this->hasAccess($statsReport->center->id, 'U')) {
-            $response['message'] = 'You do not have access to submit this report.';
-            return $response;
-        }
-
         if ($statsReport) {
-            $submitReport = Input::get('function', null);
-            if ($submitReport === 'submit') {
+
+            if (!$this->hasAccess($statsReport->center->id, 'U')) {
+                $response['message'] = 'You do not have access to submit this report.';
+                return $response;
+            }
+
+            $action = Input::get('function', null);
+            if ($action === 'submit') {
 
                 $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
 

@@ -121,7 +121,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="submitStatsCancel">Cancel</button>
                 <button type="button" class="btn btn-success" id="submitStats">Submit</button>
             </div>
         </div>
@@ -210,6 +210,11 @@
                     $('#submitCompleteModel').modal('show');
                 }
             });
+        });
+        $("#submitStatsCancel").click(function() {
+            $("textarea[name=comment]").show();
+            $("#submitLoading").hide();
+            $("#submitStats").attr("disabled", false);
         });
         $("#submitteOk").click(function() {
             window.location.replace("{{ url('/') }}");
