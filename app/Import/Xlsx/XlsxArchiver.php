@@ -33,10 +33,19 @@ class XlsxArchiver
         $destination = $this->getArchivedFilePath($statsReport->reportingDate->toDateString(), $fileName);
 
         if (File::exists($source)) {
-            File::move($source, $destination);
-            return true;
+
+            $pathInfo = pathinfo($destination);
+            $dir = $pathInfo['dirname'];
+
+            if (is_dir($dir) || mkdir($dir, 0777, true)) {
+                File::move($source, $destination);
+                return true;
+            } else {
+                Log::error("Unable to move file {$source} to {$destination}. Could not create destination directory.");
+            }
+            return false;
         } else {
-            Log::error("Unable to move file {$source} to {$destination}");
+            Log::error("Unable to move file {$source} to {$destination}. Source file not found.");
             return false;
         }
     }
@@ -58,28 +67,28 @@ class XlsxArchiver
         $fileName = $this->getFileName(null, $statsReport);
 
         if ($statsReport->submittedAt) {
-            // New loction with date in file name
+            // New location with date in file name
             $archivedFile = $this->getArchivedFilePath($statsReport->reportingDate->toDateString(), $fileName);
 
             if (file_exists($archivedFile)) {
                 return $archivedFile;
             }
 
-            // Old loction with no dates in file name
+            // Old location with no dates in file name
             $archivedFile = $this->getArchivedFilePath($statsReport->reportingDate->toDateString(), $statsReport->center->sheetFilename);
 
             if (file_exists($archivedFile)) {
                 return $archivedFile;
             }
         } else {
-            // New loction with date in file name
+            // New location with date in file name
             $workingFile = $this->getWorkingSheetFilePath($statsReport->reportingDate->toDateString(), $fileName);
 
             if (file_exists($workingFile)) {
                 return $workingFile;
             }
 
-            // Old loction with no dates in file name
+            // Old location with no dates in file name
             $workingFile = $this->getWorkingSheetFilePath($statsReport->reportingDate->toDateString(), $statsReport->center->sheetFilename);
 
             if (file_exists($workingFile)) {

@@ -24,6 +24,7 @@ abstract class CsvSeederAbstract extends Seeder {
         }
 
         if (count($csv) <= 1) {
+            echo "No entries to import\n";
             return;
         }
 
