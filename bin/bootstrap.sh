@@ -111,7 +111,9 @@ MAIL_DRIVER=smtp
 MAIL_HOST=localhost
 MAIL_PORT=2525
 MAIL_USERNAME=null
-MAIL_PASSWORD=null" > /vagrant/tmlpstats/.env
+MAIL_PASSWORD=null
+
+ADMIN_EMAIL=noreply@tmlpstats.com" > /vagrant/tmlpstats/.env
 
 echo "--- Fake email service ---"
 sudo sh -c "cat > /etc/init/fake-email.conf" <<EOF
