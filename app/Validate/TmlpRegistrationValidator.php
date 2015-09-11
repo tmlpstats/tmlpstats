@@ -372,7 +372,7 @@ class TmlpRegistrationValidator extends ValidatorAbstract
         }
 
         $statsReport = $this->getStatsReport();
-        if ($statsReport->reportingDate->gt($statsReport->quarter->classroom2Date)) {
+        if ($statsReport->reportingDate->gt($statsReport->quarter->classroom1Date)) {
             if (is_null($data->travel)) {
                 // Error if no comment provided, warning to look at it otherwise
                 if (is_null($data->comment)) {
