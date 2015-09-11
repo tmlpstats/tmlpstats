@@ -15,12 +15,16 @@ class CreateGlobalReportsTable extends Migration {
         Schema::create('global_reports', function(Blueprint $table)
         {
             $table->increments('id');
-            $table->date('reporting_date');
+            $table->date('reporting_date')->index();
             $table->integer('quarter_id')->unsigned();
-            $table->integer('locked')->tinyInteger()->default(0);
             $table->integer('user_id')->unsigned()->nullable();
+            $table->boolean('locked')->default(0);
             $table->timestamps();
+        });
 
+        Schema::table('global_reports', function(Blueprint $table)
+        {
+            $table->foreign('quarter_id')->references('id')->on('quarters');
             $table->foreign('user_id')->references('id')->on('users');
         });
     }
