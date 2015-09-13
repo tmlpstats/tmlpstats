@@ -19,6 +19,11 @@ class TeamMember extends Model {
         'is_reviewer' => 'boolean',
     );
 
+    public function getIncomingQuarter()
+    {
+        return Quarter::find($this->incomingQuarterId);
+    }
+
     public function scopeTeamYear($query, $teamYear)
     {
         return $query->whereTeamYear($teamYear);
@@ -37,11 +42,6 @@ class TeamMember extends Model {
     public function person()
     {
         return $this->belongsTo('TmlpStats\Person');
-    }
-
-    public function incomingQuarter()
-    {
-        return $this->hasOne('TmlpStats\Quarter');
     }
 
     public function teamMemberData()

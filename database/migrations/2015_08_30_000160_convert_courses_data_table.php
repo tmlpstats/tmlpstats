@@ -14,8 +14,8 @@ class ConvertCoursesDataTable extends Migration
     public function up()
     {
         Schema::table('courses_data', function (Blueprint $table) {
-            $table->dropForeign('center_id');
-            $table->dropForeign('quarter_id');
+            $table->dropIndex('courses_data_center_id_foreign');
+            $table->dropIndex('courses_data_quarter_id_foreign');
 
             $table->dropColumn('reporting_date');
             $table->dropColumn('offset');
@@ -24,7 +24,7 @@ class ConvertCoursesDataTable extends Migration
         });
 
         Schema::table('courses_data', function (Blueprint $table) {
-            $table->integer('stats_report_id')->unsigned()->index();
+            $table->index('stats_report_id');
             $table->foreign('stats_report_id')->references('id')->on('stats_reports');
         });
     }

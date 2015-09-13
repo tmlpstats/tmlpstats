@@ -36,16 +36,16 @@ class ConvertQuartersTable extends Migration
                 : Region::abbreviation($quarter->globalRegion)->first();
 
             $quarterRegionId = DB::table('quarter_region')->insertGetId([
-                'quarter_id' => $quarter->id,
-                'region_id' => $region->id,
-                'location' => $quarter->location,
+                'quarter_id'         => $quarter->id,
+                'region_id'          => $region->id,
+                'location'           => $quarter->location,
                 'start_weekend_date' => $quarter->startWeekendDate,
-                'end_weekend_date' => $quarter->endWeekendDate,
-                'classroom1_date' => $quarter->classroom1Date,
-                'classroom2_date' => $quarter->classroom2Date,
-                'classroom3_date' => $quarter->classroom3Date,
-                'created_at' => DB::raw('NOW()'),
-                'updated_at' => DB::raw('NOW()'),
+                'end_weekend_date'   => $quarter->endWeekendDate,
+                'classroom1_date'    => $quarter->classroom1Date,
+                'classroom2_date'    => $quarter->classroom2Date,
+                'classroom3_date'    => $quarter->classroom3Date,
+                'created_at'         => DB::raw('NOW()'),
+                'updated_at'         => DB::raw('NOW()'),
             ]);
 
             $quarter->t1Distinction = $quarter->distinction;
@@ -81,8 +81,8 @@ class ConvertQuartersTable extends Migration
             }
 
             $newQuarter = Quarter::year($quarter->year)
-                                 ->quarterNumber($quarter->quarterNumber)
-                                 ->first();
+                ->quarterNumber($quarter->quarterNumber)
+                ->first();
             if ($newQuarter && $newQuarter->id != $quarter->id) {
                 DB::table('quarter_region')
                     ->where('quarter_id', $quarter->id)
@@ -92,6 +92,21 @@ class ConvertQuartersTable extends Migration
                 $quarter->deleteMe = true;
             }
             $quarter->save();
+        }
+
+        $backQuarters = array(
+            array('Completion', 1, 2013),
+            array('Relatedness', 2, 2013),
+            array('Possibility', 3, 2013),
+            array('Opportunity', 4, 2013),
+            array('Action', 1, 2014),
+        );
+        foreach ($backQuarters as $quarter) {
+            Quarter::create([
+                't1_distinction' => $quarter[0],
+                'quarter_number' => $quarter[1],
+                'year'           => $quarter[2],
+            ]);
         }
 
         Schema::table('quarters', function (Blueprint $table) {

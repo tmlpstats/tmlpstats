@@ -28,8 +28,9 @@ class ConvertStatsReportsTable extends Migration
             }
             $activeCenterStats[] = $report->centerStatsId;
         }
+        $total = DB::table('center_stats')->count();
         $query = DB::table('center_stats')->whereNotIn('id', $activeCenterStats);
-        echo "Removing " . $query->count() . " entries from CenterStats\n";
+        echo "Removing " . $query->count() . "/{$total} entries from CenterStats\n";
         $query->delete();
 
         $centerStatsList = DB::table('center_stats')->get();
@@ -47,16 +48,16 @@ class ConvertStatsReportsTable extends Migration
                 $activeCenterStatsData[] = $centerStats->actual_data_id;
             }
         }
+        $total = DB::table('center_stats_data')->count();
         $query = DB::table('center_stats_data')->whereNotIn('id', $activeCenterStatsData);
-        echo "Removing " . $query->count() . " entries from CenterStatsData\n";
+        echo "Removing " . $query->count() . "/{$total} entries from CenterStatsData\n";
         $query->delete();
 
         Schema::table('stats_reports', function (Blueprint $table) {
-            $table->dropForeign('stats_reports_center_stats_id_foreign');
-            $table->dropForeign('stats_reports_reporting_statistician_id_foreign');
+            $table->dropIndex('stats_reports_center_stats_id_foreign');
+            $table->dropIndex('stats_reports_reporting_statistician_id_foreign');
         });
     }
-
 
     /**
      * Reverse the migrations.

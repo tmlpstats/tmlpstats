@@ -1,9 +1,12 @@
 <?php
 
+use TmlpStats\Person;
+use TmlpStats\TmlpRegistration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTmlpRegistrationsTable extends Migration {
+class ConvertTmlpRegistrationsTable extends Migration
+{
 
     /**
      * Run the migrations.
@@ -12,20 +15,38 @@ class CreateTmlpRegistrationsTable extends Migration {
      */
     public function up()
     {
-        Schema::create('tmlp_registrations', function(Blueprint $table)
-        {
-            $table->increments('id');
-            $table->integer('person_id')->unsigned();
-            $table->integer('team_year');
-            $table->integer('incoming_quarter_id')->unsigned();
-            $table->boolean('is_reviewer')->default(false);
-            $table->timestamps();
+        Schema::table('tmlp_registrations', function (Blueprint $table) {
+            $table->integer('person_id')->unsigned()->after('id');
+            $table->integer('team_year')->after('person_id');
+            $table->integer('incoming_quarter_id')->unsigned()->nullable()->after('team_year');
         });
 
-        Schema::table('tmlp_registrations', function(Blueprint $table)
-        {
-            $table->foreign('person_id')->references('id')->on('persons');
+        $registrations = TmlpRegistration::all();
+        foreach ($registrations as $incoming) {
+            $person = Person::create([
+                'first_name' => $incoming->firstName,
+                'last_name'  => $incoming->lastName,
+                'center_id'  => $incoming->centerId ?: null,
+            ]);
+
+            $incoming->personId = $person->id;
+            $incoming->teamYear = $incoming->incomingTeamYear;
+
+            $incoming->save();
+        }
+
+        Schema::table('tmlp_registrations', function (Blueprint $table) {
+            $table->foreign('person_id')->references('id')->on('people');
             $table->foreign('incoming_quarter_id')->references('id')->on('quarters');
+
+            $table->dropIndex('tmlp_registrations_center_id_foreign');
+
+            $table->dropColumn('first_name');
+            $table->dropColumn('last_name');
+//            $table->dropColumn('reg_date');
+            $table->dropColumn('incoming_team_year');
+            $table->dropColumn('center_id');
+            $table->dropColumn('stats_report_id');
         });
     }
 
@@ -36,7 +57,7 @@ class CreateTmlpRegistrationsTable extends Migration {
      */
     public function down()
     {
-        Schema::drop('tmlp_registrations');
+        //
     }
 
 }

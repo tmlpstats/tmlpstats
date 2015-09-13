@@ -16,12 +16,15 @@ class ConvertCenterStatsDataTable extends Migration
     public function up()
     {
         Schema::table('center_stats_data', function (Blueprint $table) {
-            $table->integer('points');
-            $table->integer('program_manager_attending_weekend')->unsigned()->default(0);
-            $table->integer('classroom_leader_attending_weekend')->unsigned()->default(0);
+            $table->integer('points')->after('stats_report_id');
+            $table->integer('program_manager_attending_weekend')->unsigned()->default(0)->after('points');
+            $table->integer('classroom_leader_attending_weekend')->unsigned()->default(0)->after('program_manager_attending_weekend');
         });
 
         $centerStatsData = CenterStatsData::all();
+
+        $deleted = 0;
+        $total = $centerStatsData->count();
         foreach ($centerStatsData as $data) {
             $statsReport = StatsReport::find($data->statsReportId);
             if (!$statsReport) {
@@ -37,6 +40,8 @@ class ConvertCenterStatsDataTable extends Migration
             $data->classroomLeaderAttendingWeekend = $statsReport->classroomLeaderAttendingWeekend;
             $data->save();
         }
+        $total = DB::table('center_stats_data')->count();
+        echo "Removing {$deleted}/{$total} entries from CenterStatsData\n";
 
         Schema::table('stats_reports', function (Blueprint $table) {
             $table->dropColumn('program_manager_attending_weekend');
@@ -45,11 +50,11 @@ class ConvertCenterStatsDataTable extends Migration
 
         Schema::table('center_stats_data', function (Blueprint $table) {
             // Do this after cleaning up the data
-            $table->integer('stats_report_id')->index();
+            $table->index('stats_report_id');
             $table->foreign('stats_report_id')->references('id')->on('stats_reports');
 
-            $table->dropForeign('center_id');
-            $table->dropForeign('quarter_id');
+            $table->dropIndex('center_stats_data_center_id_foreign');
+            $table->dropIndex('center_stats_data_quarter_id_foreign');
 
             $table->dropColumn('rating');
             $table->dropColumn('offset');
@@ -57,6 +62,7 @@ class ConvertCenterStatsDataTable extends Migration
             $table->dropColumn('quarter_id');
         });
     }
+
 
     /**
      * Reverse the migrations.

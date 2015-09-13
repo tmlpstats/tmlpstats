@@ -16,7 +16,7 @@ class WithdrawCode extends Model {
 
     public function scopeCode($query, $name)
     {
-        return $query->whereName($name);
+        return $query->whereCode($name);
     }
 
 }

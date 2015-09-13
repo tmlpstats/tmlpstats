@@ -1,11 +1,11 @@
 <?php
 
-use DB;
+use TmlpStats\WithdrawCode;
 use TmlpStats\TeamMemberData;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTeamMembersDataTable extends Migration
+class ConvertTeamMembersDataTable extends Migration
 {
 
     /**
@@ -16,7 +16,9 @@ class CreateTeamMembersDataTable extends Migration
     public function up()
     {
         Schema::create('team_members_data_tmp', function (Blueprint $table) {
+            $table->increments('id');
             $table->integer('stats_report_id')->unsigned()->index();
+            $table->integer('team_member_id')->unsigned()->index();
             $table->boolean('at_weekend')->default(true);
             $table->boolean('xfer_out')->default(false);
             $table->boolean('xfer_in')->default(false);
@@ -39,33 +41,49 @@ class CreateTeamMembersDataTable extends Migration
         });
 
         $teamMemberData = TeamMemberData::all();
+        $total = 0;
+        $dropped = 0;
+
+        $insertData = array();
         foreach ($teamMemberData as $data) {
-            $newData = DB::table('team_member_data_tmp')->insert([
-                'stats_report_id' => $data->statsReport->id,
-                'team_member_id'  => $data->teamMember->id,
-                'at_weekend'      => !($data->xferIn),
-                'xfer_out'        => $data->xferOut,
-                'xfer_in'         => $data->xferIn,
-                'ctw'             => $data->ctw,
-                'rereg'           => $data->rereg,
-                'excep'           => $data->excep,
-                'travel'          => $data->travel,
-                'room'            => $data->room,
-                'comment'         => $data->comment,
-                'gitw'            => $data->gitw,
-                'tdo'             => $data->tdo + $data->additionalTdo,
+            $total++;
+            // Drop orphan data
+            if (!$data->statsReport || !$data->teamMember) {
+                $dropped++;
+                continue;
+            }
+
+            $withdrawCodeId = null;
+            if ($data->wd && (is_numeric($data->wd[0]) || $data->wd[0] === 'R')) {
+                $code = substr($data->wd, 2);
+                $withdrawCode = WithdrawCode::code($code)->first();
+                $withdrawCodeId = $withdrawCode ? $withdrawCode->id : null;
+            }
+
+            DB::table('team_members_data_tmp')->insert([
+                'stats_report_id'  => $data->statsReportId,
+                'team_member_id'   => $data->teamMemberId,
+                'at_weekend'       => !($data->xferIn),
+                'xfer_out'         => (bool)$data->xferOut,
+                'xfer_in'          => (bool)$data->xferIn,
+                'ctw'              => (bool)$data->ctw,
+                'rereg'            => (bool)$data->rereg,
+                'excep'            => (bool)$data->excep,
+                'travel'           => (bool)$data->travel,
+                'room'             => (bool)$data->room,
+                'comment'          => $data->comment,
+                'gitw'             => $data->gitw === 'E',
+                'tdo'              => $data->tdo + $data->additionalTdo,
+                'withdraw_code_id' => $withdrawCodeId,
             ]);
-            // TODO: convert WD code to a withdraw_code
-//            'withdraw_code_id' => $data->,
-            // TODO: skip?
-//            'accountability_id' => $data->,
         }
+        echo "Removing {$dropped}/{$total} entries from TeamMemberData\n";
 
         Schema::table('team_members_data', function (Blueprint $table) {
             $table->drop();
         });
         Schema::table('team_members_data_tmp', function (Blueprint $table) {
-            $table->rename('team_members_data_tmp', 'team_members_data');
+            $table->rename('team_members_data');
         });
     }
 

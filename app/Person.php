@@ -67,7 +67,7 @@ class Person extends Model {
 
     public function accountabilities()
     {
-        return $this->belongsToMany('TmlpStats\Accountability', 'accountability_user')->withTimestamps();
+        return $this->belongsToMany('TmlpStats\Accountability', 'accountability_person')->withTimestamps();
     }
 
     public function center()

@@ -16,7 +16,7 @@ class ConvertCentersTable extends Migration
     public function up()
     {
         Schema::table('centers', function (Blueprint $table) {
-            $table->integer('region_id')->unsigned();
+            $table->integer('region_id')->unsigned()->after('team_name');
         });
 
         $centers = Center::all();
@@ -29,7 +29,7 @@ class ConvertCentersTable extends Migration
                 if (!$globalRegion) {
                     $globalRegion = Region::create([
                         'abbreviation' => $center->globalRegion,
-                        'name' => $center->globalRegion,
+                        'name'         => $center->globalRegion,
                     ]);
                 }
                 $center->regionId = $globalRegion->id;
@@ -40,7 +40,7 @@ class ConvertCentersTable extends Migration
                 if (!$localRegion) {
                     $localRegion = Region::create([
                         'abbreviation' => $center->localRegion,
-                        'name' => $center->localRegion,
+                        'name'         => $center->localRegion,
                     ]);
                 }
                 $localRegion->parentId = $globalRegion->id;
