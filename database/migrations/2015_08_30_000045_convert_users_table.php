@@ -56,8 +56,6 @@ class ConvertUsersTable extends Migration
             $user->save();
         }
 
-        // ALTER TABLE users MODIFY person_id INT(11) NOT NULL;
-
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('first_name');
             $table->dropColumn('last_name');

@@ -26,7 +26,6 @@ class ConvertQuartersTable extends Migration
             $table->boolean('delete_me')->default(false);
 
             $table->dropUnique(array('global_region', 'local_region', 'start_weekend_date'));
-//            $table->unique(array('quarter_number','year'));
         });
 
         $quarters = Quarter::all();
@@ -35,7 +34,7 @@ class ConvertQuartersTable extends Migration
                 ? Region::abbreviation($quarter->localRegion)->first()
                 : Region::abbreviation($quarter->globalRegion)->first();
 
-            $quarterRegionId = DB::table('quarter_region')->insertGetId([
+            DB::table('region_quarter_details')->insert([
                 'quarter_id'         => $quarter->id,
                 'region_id'          => $region->id,
                 'location'           => $quarter->location,
@@ -73,7 +72,7 @@ class ConvertQuartersTable extends Migration
                         break;
                     case 10:
                     case 11:
-                    case 13:
+                    case 12:
                         $quarter->quarterNumber = 4;
                         break;
                 }
@@ -84,11 +83,10 @@ class ConvertQuartersTable extends Migration
                 ->quarterNumber($quarter->quarterNumber)
                 ->first();
             if ($newQuarter && $newQuarter->id != $quarter->id) {
-                DB::table('quarter_region')
+                DB::table('region_quarter_details')
                     ->where('quarter_id', $quarter->id)
                     ->where('region_id', $region->id)
                     ->update(array('quarter_id' => $newQuarter->id));
-                // TODO: delete any deleteMes
                 $quarter->deleteMe = true;
             }
             $quarter->save();
@@ -110,6 +108,7 @@ class ConvertQuartersTable extends Migration
         }
 
         Schema::table('quarters', function (Blueprint $table) {
+
             $table->dropColumn('distinction');
             $table->dropColumn('location');
             $table->dropColumn('start_weekend_date');

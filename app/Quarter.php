@@ -1,6 +1,8 @@
 <?php
 namespace TmlpStats;
 
+use TmlpStats\Region;
+use TmlpStats\RegionQuarterDetails;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Carbon\Carbon;
@@ -8,8 +10,8 @@ use Carbon\Carbon;
 use DB;
 use Exception;
 
-class Quarter extends Model {
-
+class Quarter extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = array(
@@ -20,66 +22,59 @@ class Quarter extends Model {
     );
 
     protected $region = null;
-    protected $quarterRegion = null;
+    protected $regionQuarterDetails = null;
 
     public function setRegion($region)
     {
         if (!$this->region) {
-            // TODO: barf
+            throw new Exception('Cannot set empty region.');
         }
 
         $this->region = $region;
 
-        $this->quarterRegion = DB::table('quarter_region')
-                                 ->where('quarter_id', $this->id)
-                                 ->where('region_id', $this->region)
-                                 ->first();
+        $this->regionQuarterDetails = RegionQuarterDetails::quarter($this)
+            ->region($this->region)
+            ->first();
     }
 
     public function getStartWeekendDate()
     {
-        if (!$this->quarterRegion) {
+        if (!$this->regionQuarterDetails) {
             throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
         }
-        return Carbon::createFromFormat('Y-m-d', $this->quarterRegion->startWeekendDate);
+        return Carbon::createFromFormat('Y-m-d', $this->regionQuarterDetails->startWeekendDate);
     }
 
     public function getEndWeekendDate()
     {
-        if (!$this->quarterRegion) {
+        if (!$this->regionQuarterDetails) {
             throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
         }
-        return Carbon::createFromFormat('Y-m-d', $this->quarterRegion->endWeekendDate);
+        return Carbon::createFromFormat('Y-m-d', $this->regionQuarterDetails->endWeekendDate);
     }
 
     public function getClassroom1Date()
     {
-        if (!$this->quarterRegion) {
+        if (!$this->regionQuarterDetails) {
             throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
         }
-        return Carbon::createFromFormat('Y-m-d', $this->quarterRegion->classroom1Date);
+        return Carbon::createFromFormat('Y-m-d', $this->regionQuarterDetails->classroom1Date);
     }
 
     public function getClassroom2Date()
     {
-        if (!$this->quarterRegion) {
+        if (!$this->regionQuarterDetails) {
             throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
         }
-        return Carbon::createFromFormat('Y-m-d', $this->quarterRegion->classroom2Date);
+        return Carbon::createFromFormat('Y-m-d', $this->regionQuarterDetails->classroom2Date);
     }
 
     public function getClassroom3Date()
     {
-        if (!$this->quarterRegion) {
+        if (!$this->regionQuarterDetails) {
             throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
         }
-        return Carbon::createFromFormat('Y-m-d', $this->quarterRegion->classroom3Date);
-    }
-
-    public static function filterByDate($date)
-    {
-        return static::where('start_weekend_date', '<', $date->toDateString())
-                     ->where('end_weekend_date', '>=', $date->toDateString());
+        return Carbon::createFromFormat('Y-m-d', $this->regionQuarterDetails->classroom3Date);
     }
 
     public function scopeQuarterNumber($query, $number)
@@ -92,20 +87,53 @@ class Quarter extends Model {
         return $query->where('year', $year);
     }
 
-    public function scopeRegion($query, $region)
+    public function scopeRegion($query, Region $region)
     {
-        return $query->where('region_id', $region->id);
+        $this->region = $region;
+        return $query->whereIn('id', function($query) use ($region) {
+            $query->select('quarter_id')
+                ->from('region_quarter_details')
+                ->where('region_id', $region->id)
+                ->orWhere('region_id', $region->parentId);
+        });
     }
 
-    public function scopePresentAndFuture($query, $region)
+    public function scopeDate($query, Carbon $date)
     {
-        return $query->where('end_weekend_date', '>=', Carbon::now()->startOfDay());
+        $query->whereIn('id', function($query) use ($date) {
+            $query->select('quarter_id')
+                ->from('region_quarter_details')
+                ->where('start_weekend_date', '<', $date->startOfDay()->toDateString())
+                ->where('end_weekend_date', '>=', $date->startOfDay()->toDateString());
+
+            if ($this->region) {
+                $query->where(function($query) {
+                    $query->where('region_id', $this->region->id)
+                        ->orWhere('region_id', $this->region->parentId);
+                });
+            }
+        });
     }
 
-    public function scopeCurrent($query, $region)
+    public function scopeCurrent($query)
     {
-        return $query->where('start_weekend_date', '<', Carbon::now()->startOfDay())
-                     ->where('end_weekend_date', '>=', Carbon::now()->startOfDay());
+        $date = Carbon::now();
+        return $query->whereIn('id', function ($query) use ($date) {
+            $query->select('quarter_id')
+                ->from('region_quarter_details')
+                ->where('start_weekend_date', '<', $date->startOfDay())
+                ->where('end_weekend_date', '>=', $date->startOfDay());
+        });
+    }
+
+    public function scopePresentAndFuture($query)
+    {
+        $date = Carbon::now();
+        return $query->whereIn('id', function ($query) use ($date) {
+            $query->select('quarter_id')
+                ->from('region_quarter_details')
+                ->where('end_weekend_date', '>=', $date->startOfDay());
+        });
     }
 
     public function statsReport()

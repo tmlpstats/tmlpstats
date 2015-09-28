@@ -17,6 +17,7 @@ class ConvertCentersTable extends Migration
     {
         Schema::table('centers', function (Blueprint $table) {
             $table->integer('region_id')->unsigned()->after('team_name');
+            $table->string('timezone')->after('sheet_version');
         });
 
         $centers = Center::all();
@@ -48,12 +49,14 @@ class ConvertCentersTable extends Migration
 
                 $center->regionId = $localRegion->id;
             }
+            $center->timezone = $center->timeZone; // make timezone name consistent with DateTime
             $center->save();
         }
 
         Schema::table('centers', function (Blueprint $table) {
             $table->dropColumn('global_region');
             $table->dropColumn('local_region');
+            $table->dropColumn('time_zone');
 
             $table->foreign('region_id')->references('id')->on('regions');
         });

@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateQuarterRegionTable extends Migration
+class CreateRegionQuarterDetailsTable extends Migration
 {
 
     /**
@@ -13,7 +13,7 @@ class CreateQuarterRegionTable extends Migration
      */
     public function up()
     {
-        Schema::create('quarter_region', function (Blueprint $table) {
+        Schema::create('region_quarter_details', function (Blueprint $table) {
             $table->integer('quarter_id')->unsigned()->index();
             $table->integer('region_id')->unsigned()->index();
             $table->string('location', 128);
@@ -23,11 +23,11 @@ class CreateQuarterRegionTable extends Migration
             $table->date('classroom2_date')->nullable();
             $table->date('classroom3_date')->nullable();
             $table->timestamps();
-
-            $table->unique(array('quarter_id', 'region_id', 'start_weekend_date'));
         });
 
-        Schema::table('quarter_region', function (Blueprint $table) {
+        Schema::table('region_quarter_details', function (Blueprint $table) {
+            $table->unique(array('quarter_id', 'region_id', 'start_weekend_date'), 'region_quarter_start_weekend_date_unique');
+
             $table->foreign('quarter_id')->references('id')->on('quarters');
             $table->foreign('region_id')->references('id')->on('regions');
         });
@@ -40,7 +40,7 @@ class CreateQuarterRegionTable extends Migration
      */
     public function down()
     {
-        Schema::drop('quarter_region');
+        Schema::drop('region_quarter_details');
     }
 
 }

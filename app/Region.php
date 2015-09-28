@@ -27,5 +27,4 @@ class Region extends Model {
     {
         return $this->hasOne('TmlpStats\Region', 'id', 'parent_id');
     }
-
 }

@@ -3,7 +3,8 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class ConvertAccountabilitiesTable extends Migration {
+class ConvertAccountabilitiesTable extends Migration
+{
 
     /**
      * Run the migrations.
@@ -12,8 +13,7 @@ class ConvertAccountabilitiesTable extends Migration {
      */
     public function up()
     {
-        Schema::table('accountabilities', function(Blueprint $table)
-        {
+        Schema::table('accountabilities', function (Blueprint $table) {
             $table->string('display')->after('context');
         });
     }
@@ -25,8 +25,7 @@ class ConvertAccountabilitiesTable extends Migration {
      */
     public function down()
     {
-        Schema::table('accountabilities', function(Blueprint $table)
-        {
+        Schema::table('accountabilities', function (Blueprint $table) {
             $table->dropColumn('display');
         });
     }

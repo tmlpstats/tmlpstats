@@ -24,7 +24,12 @@
     <div class="form-group">
         {!! Form::label('global_region', 'Global Region:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-5">
-            {!! Form::select('global_region', ['NA'=>'NA', 'EME'=>'EME', 'ANZ'=>'ANZ'], 'NA', ['class' => 'form-control']) !!}
+            {!! Form::select('global_region', [
+                'ANZ' => 'Australia/New Zealand',
+                'EME' => 'Europe/Middle East',
+                'IND' => 'India',
+                'NA'  => 'North America'
+            ], 'NA', ['class' => 'form-control']) !!}
         </div>
     </div>
 

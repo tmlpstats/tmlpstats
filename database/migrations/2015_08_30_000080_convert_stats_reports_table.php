@@ -1,5 +1,7 @@
 <?php
 
+use Carbon\Carbon;
+use TmlpStats\Quarter;
 use TmlpStats\CenterStats;
 use TmlpStats\StatsReport;
 use Illuminate\Database\Schema\Blueprint;
@@ -7,7 +9,6 @@ use Illuminate\Database\Migrations\Migration;
 
 class ConvertStatsReportsTable extends Migration
 {
-
     /**
      * Run the migrations.
      *
@@ -23,10 +24,27 @@ class ConvertStatsReportsTable extends Migration
         // DATA PRUNING: Remove unreferenced CenterStats objects
         $activeCenterStats = array();
         foreach (StatsReport::all() as $report) {
+
+            $quarter = Quarter::region($report->center->region)
+                ->date($report->reportingDate)
+                ->first();
+            $report->quarterId = $quarter->id;
+            $report->save();
+
             if (!$report->centerStatsId) {
                 continue;
             }
-            $activeCenterStats[] = $report->centerStatsId;
+
+            $centerStatsId = $report->centerStatsId;
+            $centerStats = CenterStats::find($centerStatsId);
+            if (!$centerStats) {
+                continue;
+            } else {
+                $centerStats->statsReportId = $report->id;
+                $centerStats->save();
+            }
+
+            $activeCenterStats[] = $centerStatsId;
         }
         $total = DB::table('center_stats')->count();
         $query = DB::table('center_stats')->whereNotIn('id', $activeCenterStats);
@@ -56,6 +74,8 @@ class ConvertStatsReportsTable extends Migration
         Schema::table('stats_reports', function (Blueprint $table) {
             $table->dropIndex('stats_reports_center_stats_id_foreign');
             $table->dropIndex('stats_reports_reporting_statistician_id_foreign');
+
+            $table->dropColumn('center_stats_id');
         });
     }
 

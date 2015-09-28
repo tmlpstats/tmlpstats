@@ -1,6 +1,7 @@
 <?php
 
 use TmlpStats\StatsReport;
+use TmlpStats\CenterStats;
 use TmlpStats\CenterStatsData;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -21,15 +22,29 @@ class ConvertCenterStatsDataTable extends Migration
             $table->integer('classroom_leader_attending_weekend')->unsigned()->default(0)->after('program_manager_attending_weekend');
         });
 
-        $centerStatsData = CenterStatsData::all();
-
         $deleted = 0;
-        $total = $centerStatsData->count();
+        $centerStatsData = CenterStatsData::all();
         foreach ($centerStatsData as $data) {
-            $statsReport = StatsReport::find($data->statsReportId);
+
+            // We're only copying data for actual data rows
+            if ($data->type !== 'actual') {
+                continue;
+            }
+
+            $centerStats = CenterStats::actual($data)->first();
+            if (!$centerStats) {
+                // DATA PRUNING: Drop rows that aren't paired with a report
+                $deleted++;
+                $data->delete();
+                continue;
+            }
+
+            $statsReport = StatsReport::find($centerStats->statsReportId);
             if (!$statsReport) {
                 // DATA PRUNING: Drop rows that aren't paired with a report
+                $deleted++;
                 $data->delete();
+                continue;
             }
 
             if ($data->rating && preg_match("/\((\d+)\)/", $data->rating, $matches)) {
@@ -40,8 +55,10 @@ class ConvertCenterStatsDataTable extends Migration
             $data->classroomLeaderAttendingWeekend = $statsReport->classroomLeaderAttendingWeekend;
             $data->save();
         }
-        $total = DB::table('center_stats_data')->count();
-        echo "Removing {$deleted}/{$total} entries from CenterStatsData\n";
+        if ($deleted) {
+            $total = $centerStatsData->count();
+            echo "Removing {$deleted}/{$total} entries from CenterStatsData\n";
+        }
 
         Schema::table('stats_reports', function (Blueprint $table) {
             $table->dropColumn('program_manager_attending_weekend');
@@ -49,17 +66,23 @@ class ConvertCenterStatsDataTable extends Migration
         });
 
         Schema::table('center_stats_data', function (Blueprint $table) {
-            // Do this after cleaning up the data
-            $table->index('stats_report_id');
-            $table->foreign('stats_report_id')->references('id')->on('stats_reports');
-
             $table->dropIndex('center_stats_data_center_id_foreign');
             $table->dropIndex('center_stats_data_quarter_id_foreign');
 
+            $table->dropColumn('reporting_date');
             $table->dropColumn('rating');
             $table->dropColumn('offset');
             $table->dropColumn('center_id');
             $table->dropColumn('quarter_id');
+            $table->dropColumn('stats_report_id');
+        });
+
+        Schema::table('center_stats', function (Blueprint $table) {
+            $table->dropIndex('center_stats_center_id_foreign');
+            $table->dropIndex('center_stats_quarter_id_foreign');
+
+            $table->dropColumn('quarter_id');
+            $table->dropColumn('center_id');
         });
     }
 

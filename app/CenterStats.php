@@ -1,11 +1,12 @@
 <?php
 namespace TmlpStats;
 
+use TmlpStats\CenterStatsData;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class CenterStats extends Model {
-
+class CenterStats extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = [
@@ -22,6 +23,21 @@ class CenterStats extends Model {
     {
         $date = $this->asDateTime($value);
         $this->attributes['reporting_date'] = $date->toDateString();
+    }
+
+    public function scopePromise($query, CenterStatsData $data)
+    {
+        return $query->wherePromiseDataId($data->id);
+    }
+
+    public function scopeRevokedPromise($query, CenterStatsData $data)
+    {
+        return $query->whereRevokedPromiseDataId($data->id);
+    }
+
+    public function scopeActual($query, CenterStatsData $data)
+    {
+        return $query->whereActualDataId($data->id);
     }
 
     public function promiseData()

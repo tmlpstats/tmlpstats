@@ -100,6 +100,6 @@ class Center extends Model {
 
     public function region()
     {
-        return $this->hasOne('TmlpStats\StatsReport');
+        return $this->belongsTo('TmlpStats\Region');
     }
 }

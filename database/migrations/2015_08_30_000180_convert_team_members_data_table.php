@@ -40,11 +40,9 @@ class ConvertTeamMembersDataTable extends Migration
             $table->foreign('accountability_id')->references('id')->on('accountabilities');
         });
 
-        $teamMemberData = TeamMemberData::all();
         $total = 0;
         $dropped = 0;
-
-        $insertData = array();
+        $teamMemberData = TeamMemberData::all();
         foreach ($teamMemberData as $data) {
             $total++;
             // Drop orphan data

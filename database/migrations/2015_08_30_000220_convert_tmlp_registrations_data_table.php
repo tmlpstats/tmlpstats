@@ -1,5 +1,7 @@
 <?php
 
+use TmlpStats\StatsReport;
+use TmlpStats\Quarter;
 use TmlpStats\TmlpRegistration;
 use TmlpStats\TmlpRegistrationData;
 use TmlpStats\WithdrawCode;
@@ -46,6 +48,26 @@ class ConvertTmlpRegistrationsDataTable extends Migration
                 $code = substr($data->wd, 2);
                 $withdrawCode = WithdrawCode::code($code)->first();
                 $withdrawCodeId = $withdrawCode ? $withdrawCode->id : null;
+            }
+
+            $statsReport = StatsReport::find($data->statsReportId);
+            $thisQuarter = $statsReport->quarter;
+            if ($data->incomingWeekend === 'current') {
+                $quarterNumber = ($thisQuarter->quarterNumber + 1) % 5;
+            } else {
+                $quarterNumber = ($thisQuarter->quarterNumber + 2) % 5;
+            }
+
+            $quarterNumber = $quarterNumber ?: 1; // no quarter 0
+
+            $year = ($quarterNumber === 1)
+                ? $thisQuarter->year + 1
+                : $thisQuarter->year;
+
+            $nextQuarter = Quarter::year($year)->quarterNumber($quarterNumber)->first();
+
+            if ($nextQuarter) {
+                $data->incomingQuarterId = $nextQuarter->id;
             }
 
             $data->regDate = $registration->regDate;
