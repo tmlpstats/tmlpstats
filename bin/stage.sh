@@ -48,7 +48,7 @@ echo ""
 echo "Snapping the database"
 cp $HOME/tmlpstats.git/.my.cnf $HOME/.my.cnf
 $SOURCE/bin/snap.sh
-rm $HOME/.my.cnf
+rm -f $HOME/.my.cnf
 
 echo ""
 echo "Copying file archive"
