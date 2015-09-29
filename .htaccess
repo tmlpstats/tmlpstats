@@ -2,4 +2,4 @@
   RewriteEngine On
   RewriteCond %{REQUEST_URI} !^/public/* [NC]
   RewriteRule ^(.*)$ - [F,L]
-</IfModule>i
+</IfModule>
