@@ -4,7 +4,7 @@
 
 @if ($statsReport)
 <h2>{{ $statsReport->center->name }} - {{ $statsReport->reportingDate->format('F j, Y') }}</h2>
-<a href="{{ url('/statsreports') }}"><< See All</a><br/><br/>
+<!-- <a href="{{ url('/statsreports') }}"><< See All</a><br/><br/> -->
 
 <div class="table-responsive">
     <table class="table table-condensed table-striped">
