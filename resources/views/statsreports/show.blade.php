@@ -15,9 +15,20 @@
         <tr>
             <th>Region:</th>
             <td>
+                <?php
+                $region = $statsReport->center->getLocalRegion();
+                if ($region) {
+                    echo $region->name;
+                }
+                ?>
                 {{ $statsReport->center->global_region }}
-                @if ($statsReport->center->local_region)
-                 - {{ $statsReport->center->local_region }}
+                @if ($statsReport->center->getLocalRegion())
+                 - <?php
+                    $region = $statsReport->center->getLocalRegion();
+                    if ($region) {
+                        echo $region->name;
+                    }
+                 ?>
                 @endif
             </td>
         </tr>

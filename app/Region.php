@@ -23,6 +23,11 @@ class Region extends Model {
         return $query->whereName($name);
     }
 
+    public function scopeParent($query, Region $parent)
+    {
+        return $query->whereParentId($parent->id);
+    }
+
     public function parent()
     {
         return $this->hasOne('TmlpStats\Region', 'id', 'parent_id');

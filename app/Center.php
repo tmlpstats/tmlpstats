@@ -68,6 +68,24 @@ class Center extends Model {
                                 ->first();
     }
 
+    public function getGlobalRegion()
+    {
+        if ($this->region && $this->region->parentId === null) {
+            return $this->region;
+        } else {
+            return Region::find($this->region->parentId);
+        }
+    }
+
+    public function getLocalRegion()
+    {
+        if ($this->region && $this->region->parentId !== null) {
+            return $this->region;
+        } else {
+            return null;
+        }
+    }
+
     public function scopeName($query, $name)
     {
         return $query->whereName($name);

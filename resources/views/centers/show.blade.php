@@ -18,19 +18,29 @@
         </tr>
         <tr>
             <th>Team Name:</th>
-            <td>{{ $center->team_name }}</td>
+            <td>{{ $center->teamName }}</td>
         </tr>
         <tr>
             <th>Global Region:</th>
-            <td>{{ $center->global_region }}</td>
+            <td><?php
+                $region = $center->getGlobalRegion();
+                if ($region) {
+                    echo $region->name;
+                }
+            ?></td>
         </tr>
         <tr>
             <th>Local Region:</th>
-            <td>{{ $center->local_region }}</td>
+            <td><?php
+                $region = $center->getLocalRegion();
+                if ($region) {
+                    echo $region->name;
+                }
+            ?></td>
         </tr>
         <tr>
             <th>Stats Email:</th>
-            <td>{{ $center->stats_email }}</td>
+            <td>{{ $center->statsEmail }}</td>
         </tr>
         <tr>
             <th>Time Zone:</th>
@@ -38,11 +48,11 @@
         </tr>
         <tr>
             <th>Sheet Filename:</th>
-            <td>{{ $center->sheet_filename }}</td>
+            <td>{{ $center->sheetFilename }}</td>
         </tr>
         <tr>
             <th>Sheet Version:</th>
-            <td>{{ $center->sheet_version }}</td>
+            <td>{{ $center->sheetVersion }}</td>
         </tr>
         <tr>
             <th>Active:</th>
