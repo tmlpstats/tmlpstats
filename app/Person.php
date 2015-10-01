@@ -32,7 +32,7 @@ class Person extends Model {
 
     public function homeRegion()
     {
-        return count($this->centers) ? $this->centers[0]->globalRegion : null;
+        return $this->center ? $this->center->region : null;
     }
 
     public function updateAccountbilities($accountabilities)
@@ -72,6 +72,6 @@ class Person extends Model {
 
     public function center()
     {
-        return $this->hasOne('TmlpStats\Center');
+        return $this->belongsTo('TmlpStats\Center');
     }
 }

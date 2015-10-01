@@ -50,6 +50,21 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
      */
     protected $hidden = ['password', 'remember_token'];
 
+    public function __get($name)
+    {
+        switch ($name) {
+            case 'firstName':
+            case 'lastName':
+            case 'phone':
+            case 'email':
+            case 'center':
+                return $this->person->$name;
+            default:
+                return parent::__get($name);
+        }
+    }
+
+
     public function hasRole($name)
     {
         return ($this->role->name === $name);
@@ -57,30 +72,56 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
     public function homeRegion()
     {
-        return $this->center ? $this->center->region : null;
+        return $this->person->center ? $this->person->center->region : null;
     }
 
-    public function getCenter()
+    public function setCenter($center)
     {
-        return $this->person->center;
+        $person = $this->person;
+        $person->centerId = $center->id;
+        $person->save();
     }
 
-    public function setRole($role)
+    public function setPhone($phone)
     {
-        $this->roleId = $role->id;
+        $person = $this->person;
+        $person->phone = $phone;
+        $person->save();
+    }
+
+    public function setEmail($email)
+    {
+        $person = $this->person;
+        $person->email = $email;
+        $person->save();
     }
 
     public function formatPhone()
     {
         // TODO: This handles the standard 10 digit North American phone number. Update to handle international formats
-        if (isset($this->phone) && preg_match('/^(\d\d\d)[\s\.\-]?(\d\d\d)[\s\.\-]?(\d\d\d\d)$/', $this->phone, $matches)) {
+        if (isset($this->person->phone) && preg_match('/^(\d\d\d)[\s\.\-]?(\d\d\d)[\s\.\-]?(\d\d\d\d)$/', $this->person->phone, $matches)) {
             return "({$matches[1]}) {$matches[2]}-{$matches[3]}";
         }
-        return $this->phone;
+        return $this->person->phone;
     }
 
-    public function scopeActive($query)
+    public function scopeActive($query, $active = true)
     {
-        return $query->where('active', '=', '1');
+        return $query->whereActive($active);
+    }
+
+    public function scopeRole($query, Role $role)
+    {
+        return $query->whereRoleId($role->id);
+    }
+
+    public function person()
+    {
+        return $this->belongsTo('TmlpStats\Person');
+    }
+
+    public function role()
+    {
+        return $this->belongsTo('TmlpStats\Role');
     }
 }
