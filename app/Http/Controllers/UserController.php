@@ -1,9 +1,11 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use DB;
 use TmlpStats\User;
 use TmlpStats\Role;
 use TmlpStats\Center;
+use TmlpStats\Region;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Requests\UserRequest;
 use TmlpStats\Http\Controllers\Controller;
@@ -97,10 +99,22 @@ class UserController extends Controller {
     {
         $user = User::findOrFail($id);
         $roles = Role::all();
-        $centerList = Center::orderBy('global_region')->orderBy('name')->get();
+
+        $centerList = DB::table('centers')
+            ->join('regions', 'regions.id', '=', 'centers.region_id')
+            ->select('centers.*', DB::raw('regions.name as regionName'), 'regions.parent_id')
+            ->orderBy('regions.name')
+            ->orderBy('centers.name')
+            ->get();
+
         $centers = array();
         foreach ($centerList as $center) {
-            $centers[$center->abbreviation] = "{$center->globalRegion} - {$center->name}";
+
+            $regionName = ($center->parent_id)
+                ? Region::find($center->parent_id)->regionName
+                : $center->regionName;
+
+            $centers[$center->abbreviation] = "{$regionName} - {$center->name}";
         }
 
         return view('users.edit', compact('user', 'roles', 'centers'));

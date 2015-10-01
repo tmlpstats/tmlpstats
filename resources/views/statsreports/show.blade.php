@@ -21,7 +21,6 @@
                     echo $region->name;
                 }
                 ?>
-                {{ $statsReport->center->global_region }}
                 @if ($statsReport->center->getLocalRegion())
                  - <?php
                     $region = $statsReport->center->getLocalRegion();
@@ -34,7 +33,7 @@
         </tr>
         <tr>
             <th>Stats Email:</th>
-            <td>{{ $statsReport->center->stats_email }}</td>
+            <td>{{ $statsReport->center->statsEmail }}</td>
         </tr>
         <tr>
             <th>Submitted At:</th>
@@ -50,7 +49,7 @@
         </tr>
         <tr>
             <th>Submitted Sheet Version:</th>
-            <td>{{ $statsReport->spreadsheet_version }}</td>
+            <td>{{ $statsReport->spreadsheetVersion }}</td>
         </tr>
         <tr>
             <th>Rating:</th>
