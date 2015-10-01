@@ -1,7 +1,7 @@
 @extends('template')
 
 @section('content')
-<h2>{{ $quarter->start_weekend_date->format('M Y') }} - {{ $quarter->location }} Quarter</h2>
+<h2>{{ $quarter->startWeekendDate->format('M Y') }} - {{ $quarter->regionQuarterDetails->location }} Quarter</h2>
 
 
 @include('errors.list')

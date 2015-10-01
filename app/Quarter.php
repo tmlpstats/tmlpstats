@@ -24,9 +24,29 @@ class Quarter extends Model
     protected $region = null;
     protected $regionQuarterDetails = null;
 
+    public function __get($name)
+    {
+        switch ($name) {
+            case 'startWeekendDate':
+            case 'endWeekendDate':
+            case 'classroom1Date':
+            case 'classroom2Date':
+            case 'classroom3Date':
+                if ($this->region && !$this->regionQuarterDetails) {
+                    $this->setRegion($this->region);
+                }
+                if (!$this->regionQuarterDetails) {
+                    throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
+                }
+                return Carbon::createFromFormat('Y-m-d', $this->regionQuarterDetails->$name);
+            default:
+                return parent::$name;
+        }
+    }
+
     public function setRegion($region)
     {
-        if (!$this->region) {
+        if (!$region) {
             throw new Exception('Cannot set empty region.');
         }
 
@@ -35,46 +55,6 @@ class Quarter extends Model
         $this->regionQuarterDetails = RegionQuarterDetails::quarter($this)
             ->region($this->region)
             ->first();
-    }
-
-    public function getStartWeekendDate()
-    {
-        if (!$this->regionQuarterDetails) {
-            throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
-        }
-        return Carbon::createFromFormat('Y-m-d', $this->regionQuarterDetails->startWeekendDate);
-    }
-
-    public function getEndWeekendDate()
-    {
-        if (!$this->regionQuarterDetails) {
-            throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
-        }
-        return Carbon::createFromFormat('Y-m-d', $this->regionQuarterDetails->endWeekendDate);
-    }
-
-    public function getClassroom1Date()
-    {
-        if (!$this->regionQuarterDetails) {
-            throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
-        }
-        return Carbon::createFromFormat('Y-m-d', $this->regionQuarterDetails->classroom1Date);
-    }
-
-    public function getClassroom2Date()
-    {
-        if (!$this->regionQuarterDetails) {
-            throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
-        }
-        return Carbon::createFromFormat('Y-m-d', $this->regionQuarterDetails->classroom2Date);
-    }
-
-    public function getClassroom3Date()
-    {
-        if (!$this->regionQuarterDetails) {
-            throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
-        }
-        return Carbon::createFromFormat('Y-m-d', $this->regionQuarterDetails->classroom3Date);
     }
 
     public function scopeQuarterNumber($query, $number)
@@ -90,6 +70,8 @@ class Quarter extends Model
     public function scopeRegion($query, Region $region)
     {
         $this->region = $region;
+
+        // This may end up being redundant
         return $query->whereIn('id', function($query) use ($region) {
             $query->select('quarter_id')
                 ->from('region_quarter_details')
@@ -100,7 +82,7 @@ class Quarter extends Model
 
     public function scopeDate($query, Carbon $date)
     {
-        $query->whereIn('id', function($query) use ($date) {
+        return $query->whereIn('id', function($query) use ($date) {
             $query->select('quarter_id')
                 ->from('region_quarter_details')
                 ->where('start_weekend_date', '<', $date->startOfDay()->toDateString())
@@ -123,6 +105,13 @@ class Quarter extends Model
                 ->from('region_quarter_details')
                 ->where('start_weekend_date', '<', $date->startOfDay())
                 ->where('end_weekend_date', '>=', $date->startOfDay());
+
+            if ($this->region) {
+                $query->where(function($query) {
+                    $query->where('region_id', $this->region->id)
+                        ->orWhere('region_id', $this->region->parentId);
+                });
+            }
         });
     }
 
@@ -133,6 +122,13 @@ class Quarter extends Model
             $query->select('quarter_id')
                 ->from('region_quarter_details')
                 ->where('end_weekend_date', '>=', $date->startOfDay());
+
+            if ($this->region) {
+                $query->where(function($query) {
+                    $query->where('region_id', $this->region->id)
+                        ->orWhere('region_id', $this->region->parentId);
+                });
+            }
         });
     }
 
