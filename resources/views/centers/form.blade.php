@@ -50,7 +50,7 @@
     <div class="form-group">
         {!! Form::label('stats_email', 'Time Zone:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-5">
-            {!! Form::text('time_zone', null, ['class' => 'form-control']) !!}
+            {!! Form::text('timezone', null, ['class' => 'form-control']) !!}
         </div>
     </div>
 

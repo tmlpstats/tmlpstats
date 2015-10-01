@@ -17,7 +17,7 @@ class Center extends Model {
         'active',
         'sheet_filename',
         'sheet_version',
-        'time_zone',
+        'timezone',
     );
 
     protected $casts = array(

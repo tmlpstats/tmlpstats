@@ -129,7 +129,7 @@ class AdminController extends Controller {
                 : null;
 
             if ($updatedAt) {
-                $updatedAt->setTimezone($center->timeZone);
+                $updatedAt->setTimezone($center->timezone);
             }
 
             $centerResults = array(

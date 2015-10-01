@@ -30,7 +30,7 @@
             <td><?php
                 if ($statsReport->submittedAt) {
                     $submittedAt = clone $statsReport->submittedAt;
-                    $submittedAt->setTimezone($statsReport->center->timeZone);
+                    $submittedAt->setTimezone($statsReport->center->timezone);
                     echo $submittedAt->format('l, F jS \a\t g:ia T');
                 } else {
                     echo '-';

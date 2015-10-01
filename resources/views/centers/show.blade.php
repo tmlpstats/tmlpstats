@@ -34,7 +34,7 @@
         </tr>
         <tr>
             <th>Time Zone:</th>
-            <td>{{ $center->time_zone }}</td>
+            <td>{{ $center->timezone }}</td>
         </tr>
         <tr>
             <th>Sheet Filename:</th>

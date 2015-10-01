@@ -261,7 +261,7 @@ class StatsReportController extends Controller {
                     XlsxArchiver::getInstance()->promoteWorkingSheet($statsReport);
 
                     $submittedAt = clone $statsReport->submittedAt;
-                    $submittedAt->setTimezone($statsReport->center->timeZone);
+                    $submittedAt->setTimezone($statsReport->center->timezone);
 
                     $response['submittedAt'] = $submittedAt->format('h:i A');
                     $result = ImportManager::sendStatsSubmittedEmail($statsReport, $sheet);

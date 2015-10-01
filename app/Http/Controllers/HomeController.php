@@ -157,7 +157,7 @@ class HomeController extends Controller {
             $submittedAt = null;
             if ($statsReport) {
                 $submittedAt = $statsReport->submittedAt;
-                $submittedAt->setTimezone($statsReport->center->timeZone);
+                $submittedAt->setTimezone($statsReport->center->timezone);
             }
 
             $centerResults = array(
