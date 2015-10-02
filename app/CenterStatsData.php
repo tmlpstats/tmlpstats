@@ -36,8 +36,22 @@ class CenterStatsData extends Model
         return $query->whereType('promise');
     }
 
+    public function scopeStatsReport($query, StatsReport $statsReport)
+    {
+        return $query->where('id', function($query) use ($statsReport) {
+            $query->select('actual_data_id')
+                ->from('center_stats')
+                ->where('stats_report_id', $statsReport->id);
+        });
+    }
+
     public function centerStats()
     {
         return $this->belongsTo('TmlpStats\CenterStats');
+    }
+
+    public function statsReport()
+    {
+        return $this->belongsTo('TmlpStats\StatsReport');
     }
 }

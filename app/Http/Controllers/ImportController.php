@@ -47,8 +47,13 @@ class ImportController extends Controller {
 
         Request::flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
+        $showSubmit = false;
+        if ($user->center->getGlobalRegion()->abbreviation === 'NA') {
+            $showSubmit = true;
+        }
+
         return view('import.index')->with([
-            'submitReport'            => $user->getCenter()->globalRegion === 'NA', // Controls whether or not to show Submit button
+            'submitReport'            => $showSubmit, // Controls whether or not to show Submit button
             'showUploadForm'          => true,
             'showReportCheckSettings' => true,
             'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),

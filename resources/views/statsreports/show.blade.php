@@ -49,13 +49,13 @@
         </tr>
         <tr>
             <th>Submitted Sheet Version:</th>
-            <td>{{ $statsReport->spreadsheetVersion }}</td>
+            <td>{{ $statsReport->version }}</td>
         </tr>
         <tr>
             <th>Rating:</th>
             <td>
-                @if ($statsReport)
-                    {{ $statsReport->getRating() }}
+                @if ($statsReport && $statsReport->getPoints() !== null)
+                    {{ $statsReport->getRating() }} ({{ $statsReport->getPoints() }})
                 @else
                     -
                 @endif

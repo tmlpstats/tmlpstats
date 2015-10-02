@@ -64,6 +64,10 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         }
     }
 
+    public function hasAccountability($name)
+    {
+        return $this->person->hasAccountability($name);
+    }
 
     public function hasRole($name)
     {

@@ -38,9 +38,9 @@ class Quarter extends Model
                 if (!$this->regionQuarterDetails) {
                     throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
                 }
-                return Carbon::createFromFormat('Y-m-d', $this->regionQuarterDetails->$name);
+                return $this->regionQuarterDetails->$name;
             default:
-                return parent::$name;
+                return parent::__get($name);
         }
     }
 
@@ -52,8 +52,8 @@ class Quarter extends Model
 
         $this->region = $region;
 
-        $this->regionQuarterDetails = RegionQuarterDetails::quarter($this)
-            ->region($this->region)
+        $this->regionQuarterDetails = RegionQuarterDetails::byQuarter($this)
+            ->byRegion($this->region)
             ->first();
     }
 

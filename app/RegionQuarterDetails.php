@@ -33,17 +33,20 @@ class RegionQuarterDetails extends Model
         'classroom3_date',
     );
 
-    public function scopeQuarter($query, Quarter $quarter)
+    public function scopeByQuarter($query, Quarter $quarter)
     {
         return $query->whereQuarterId($quarter->id);
     }
 
-    public function scopeRegion($query, Region $region)
+    public function scopeByRegion($query, Region $region)
     {
-        return $query->whereRegionId($region->id);
+        return $query->where(function($query) use ($region) {
+            $query->where('region_id', $region->id)
+                ->orWhere('region_id', $region->parentId);
+        });
     }
 
-    public function scopeDate($query, Carbon $date)
+    public function scopeByDate($query, Carbon $date)
     {
         return $query->where('start_weekend_date', '<', $date->startOfDay())
             ->where('end_weekend_date', '>=', $date->startOfDay());

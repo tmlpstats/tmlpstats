@@ -2,6 +2,8 @@
 
 use TmlpStats\Http\Inputs;
 use TmlpStats\Http\Controllers\Controller;
+
+use TmlpStats\Region;
 use TmlpStats\StatsReport;
 use TmlpStats\Center;
 use TmlpStats\Import\ImportManager;
@@ -34,7 +36,10 @@ class StatsReportController extends Controller {
      */
     public function index()
     {
-        $selectedRegion = Input::has('region') ? Input::get('region') : Auth::user()->homeRegion();
+        $userRegion = Input::has('region')
+            ? Region::abbreviation(Input::get('region'))->first()
+            : null;
+        $selectedRegion = $userRegion ? $userRegion->name : Auth::user()->homeRegion();
         $selectedRegion = $selectedRegion ?: 'NA';
 
         $allReports = StatsReport::currentQuarter($selectedRegion)
@@ -75,8 +80,7 @@ class StatsReportController extends Controller {
         }
 
         $centers = Center::active()
-                         ->globalRegion($selectedRegion)
-                         ->orderBy('local_region', 'asc')
+                         ->region($selectedRegion)
                          ->orderBy('name', 'asc')
                          ->get();
 

@@ -101,9 +101,15 @@ class Center extends Model {
         return $query->whereActive(true);
     }
 
-    public function scopeRegion($query, $region)
+    public function scopeRegion($query, Region $region)
     {
-        return $query->whereRegionId($region->id);
+        return $query->whereIn('region_id', function($query) use ($region) {
+            $query->select('id')
+                ->from('regions')
+                ->where('id', $region->id)
+                ->orWhere('parent_id', $region->id);
+        });
+
     }
 
     public function people()

@@ -1,6 +1,8 @@
 <?php
 namespace TmlpStats;
 
+use TmlpStats\Quarter;
+use TmlpStats\CenterStatsData;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
@@ -34,6 +36,16 @@ class StatsReport extends Model {
         'validated' => 'boolean',
         'locked' => 'boolean',
     ];
+
+    public function __get($name)
+    {
+        if ($name === 'quarter') {
+            $quarter = parent::__get('quarter');
+            $quarter->setRegion($this->center->region);
+            return $quarter;
+        }
+        return parent::__get($name);
+    }
 
     public function setReportingDateAttribute($value)
     {
@@ -98,13 +110,17 @@ class StatsReport extends Model {
 
     public function getPoints()
     {
-        $data = CenterStatsData::actual()->statsReport($this->id);
+        $data = CenterStatsData::actual()->statsReport($this)->first();
         return $data ? $data->points : null;
     }
 
     public function getRating()
     {
         $points = $this->getPoints();
+
+        if ($points === null) {
+            return null;
+        }
 
         if ($points == 28) {
             return "Powerful";
@@ -121,10 +137,10 @@ class StatsReport extends Model {
 
     public function scopeReportingDate($query, $date)
     {
-        if ($date instanceof \Carbon\Carbon) {
+        if ($date instanceof Carbon) {
             $date = $date->toDateString();
         }
-        return $query->whereReportingDate($date->toDateString());
+        return $query->whereReportingDate($date);
     }
 
     public function scopeValidated($query, $validated = true)
@@ -141,14 +157,14 @@ class StatsReport extends Model {
         }
     }
 
-    public function scopeCenter($query, $center)
+    public function scopeCenter($query, Center $center)
     {
         return $query->whereCenterId($center->id);
     }
 
     public function scopeCurrentQuarter($query, $region)
     {
-        $quarter = Quarter::findByDateAndRegion(Carbon::now(), $region);
+        $quarter = Quarter::region($region)->date(Carbon::now())->first();
         if (!$quarter) {
             return $query;
         }
@@ -157,11 +173,11 @@ class StatsReport extends Model {
 
     public function scopeLastQuarter($query, $region)
     {
-        $currentQuarter = Quarter::findByDateAndRegion(Carbon::now(), $region);
+        $currentQuarter = Quarter::region($region)->date(Carbon::now())->first();
         if (!$currentQuarter) {
             return $query;
         }
-        $lastQuarter = Quarter::findByDateAndRegion($currentQuarter->startWeekendDate, $region);
+        $lastQuarter = Quarter::region($region)->date($currentQuarter->startWeekendDate)->first();
         if (!$lastQuarter) {
             return $query;
         }

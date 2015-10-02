@@ -36,14 +36,14 @@ class GlobalReport extends Model {
 
     public function scopeCurrentQuarter($query, $region)
     {
-        $quarter = Quarter::findByDateAndRegion(Carbon::now(), $region);
+        $quarter = Quarter::region($region)->date(Carbon::now())->first();
         return $query->whereQuarterId($quarter->id);
     }
 
     public function scopeLastQuarter($query, $region)
     {
-        $currentQuarter = Quarter::findByDateAndRegion(Carbon::now(), $region);
-        $lastQuarter = Quarter::findByDateAndRegion($currentQuarter->startWeekendDate, $region);
+        $currentQuarter = Quarter::region($region)->date(Carbon::now())->first();
+        $lastQuarter = Quarter::region($region)->date($currentQuarter->startWeekendDate)->first();
         return $query->whereQuarterId($lastQuarter->id);
     }
 
