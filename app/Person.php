@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats;
 
+use TmlpStats\Center;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Auth\Passwords\CanResetPassword;
@@ -20,35 +21,41 @@ class Person extends Model {
         'center_id',
     ];
 
-    public function hasAccountability($name)
+    public function hasAccountability(Accountability $accountability)
     {
-        foreach ($this->accountabilities as $accountability) {
-            if ($accountability->name == $name) {
+        foreach ($this->accountabilities as $myAccountability) {
+            if ($myAccountability->id == $accountability->id) {
                 return true;
             }
         }
         return false;
     }
 
+    public function addAccountability(Accountability $accountability)
+    {
+        if (!$this->hasAccountability($accountability->name)){
+            $this->accountabilities()->attach($accountability->id);
+        }
+    }
+
+    // This isn't complete. Fix it when we need it
+//    public function setAccountbilities($accountabilities)
+//    {
+//        foreach ($accountabilities as $accountability) {
+//            if (!$this->hasAccountbility($accountability)) {
+//                $this->accountabilities()->attach($accountability->id);
+//            }
+//        }
+//        foreach ($this->accountabilities as $existingAccountbility) {
+//            if (!in_array($existingAccountbility->id, $accountabilities)) {
+//                $this->accountabilities()->detach($existingAccountbility->id);
+//            }
+//        }
+//    }
+
     public function homeRegion()
     {
         return $this->center ? $this->center->region : null;
-    }
-
-    public function updateAccountbilities($accountabilities)
-    {
-        foreach ($accountabilities as $accountabilityId) {
-            $accountability = Accountbility::find($accountabilityId);
-
-            if ($accountability && !$this->hasAccountbility($accountability->name)) {
-                $this->accountabilities()->attach($accountabilityId);
-            }
-        }
-        foreach ($this->accountabilities as $existingAccountbility) {
-            if (!in_array($existingAccountbility->id, $accountabilities)) {
-                $this->accountabilities()->detach($existingAccountbility->id);
-            }
-        }
     }
 
     public function formatPhone()
@@ -60,7 +67,17 @@ class Person extends Model {
         return $this->phone;
     }
 
-    public function scopeCenter($query, $center)
+    public function scopeFirstName($query, $name)
+    {
+        return $query->whereFirstName($name);
+    }
+
+    public function scopeLastName($query, $name)
+    {
+        return $query->whereLastName($name);
+    }
+
+    public function scopeCenter($query, Center $center)
     {
         return $query->whereCenterId($center->id);
     }

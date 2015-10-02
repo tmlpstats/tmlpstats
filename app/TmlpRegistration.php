@@ -4,8 +4,8 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class TmlpRegistration extends Model {
-
+class TmlpRegistration extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = [
@@ -18,6 +18,20 @@ class TmlpRegistration extends Model {
     protected $casts = array(
         'is_reviewer' => 'boolean',
     );
+
+    public static function firstOrNew(array $attributes)
+    {
+        $person = Person::firstOrCreate([
+            'center_id'  => $attributes['center_id'],
+            'first_name' => $attributes['first_name'],
+            'last_name'  => $attributes['last_name'],
+        ]);
+
+        return static::firstOrNew([
+            'reg_date'  => $attributes['regDate'],
+            'person_id' => $person->id,
+        ]);
+    }
 
     public function scopeTeamYear($query, $teamYear)
     {

@@ -50,23 +50,11 @@ class GlobalReportController extends Controller {
             return 'You do not have access to create new reports.';
         }
 
-        $allReports = StatsReport::currentQuarter(null)
-                                 ->groupBy('reporting_date')
-                                 ->orderBy('reporting_date', 'desc')
-                                 ->get();
-        if ($allReports->isEmpty()) {
-            $allReports = StatsReport::lastQuarter(null)
-                                      ->groupBy('reporting_date')
-                                      ->orderBy('reporting_date', 'desc')
-                                      ->get();
-        }
-
         $reportingDates = array();
-        $friday = new Carbon('this friday');
-        $reportingDates[$friday->toDateString()] = $friday->format('F j, Y');
-        foreach ($allReports as $report) {
-            $dateString = $report->reportingDate->toDateString();
-            $reportingDates[$dateString] = $report->reportingDate->format('F j, Y');
+        $week = new Carbon('this friday');
+        while ($week->gt(Carbon::now()->subWeeks(8))) {
+            $reportingDates[$week->toDateString()] = $week->format('F j, Y');
+            $week->subWeek();
         }
 
         return view('globalreports.create', compact('reportingDates'));
@@ -89,9 +77,8 @@ class GlobalReportController extends Controller {
             return redirect($redirect);
         }
 
-        $globalReport = null;
         if (Input::has('reporting_date')) {
-            $globalReport = GlobalReport::create(array('reporting_date' => Input::get('reporting_date')));
+            GlobalReport::create(array('reporting_date' => Input::get('reporting_date')));
         }
         return redirect($redirect);
     }

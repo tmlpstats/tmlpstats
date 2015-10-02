@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats;
 
+use TmlpStats\Region;
 use TmlpStats\Quarter;
 use TmlpStats\CenterStatsData;
 use Illuminate\Database\Eloquent\Model;
@@ -162,7 +163,7 @@ class StatsReport extends Model {
         return $query->whereCenterId($center->id);
     }
 
-    public function scopeCurrentQuarter($query, $region)
+    public function scopeCurrentQuarter($query, Region $region = null)
     {
         $quarter = Quarter::region($region)->date(Carbon::now())->first();
         if (!$quarter) {
@@ -171,7 +172,7 @@ class StatsReport extends Model {
         return $query->whereQuarterId($quarter->id);
     }
 
-    public function scopeLastQuarter($query, $region)
+    public function scopeLastQuarter($query, Region $region = null)
     {
         $currentQuarter = Quarter::region($region)->date(Carbon::now())->first();
         if (!$currentQuarter) {

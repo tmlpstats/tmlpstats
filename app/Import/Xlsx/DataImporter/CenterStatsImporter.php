@@ -188,10 +188,7 @@ class CenterStatsImporter extends DataImporterAbstract
 
                     $actualData = $this->setValues($actualData, $week);
 
-                    $points = $this->calculatePoints($promiseData, $actualData);
-                    $rating = $this->getRating($points);
-
-                    $actualData->rating = "$rating ($points)";
+                    $actualData->points = $this->calculatePoints($promiseData, $actualData);
                     $actualData->save();
 
                     $centerStats->actualDataId = $actualData->id;
@@ -239,20 +236,5 @@ class CenterStatsImporter extends DataImporterAbstract
             $points += $gamePoints;
         }
         return $points;
-    }
-
-    public function getRating($points)
-    {
-        if ($points == 28) {
-            return "Powerful";
-        } else if ($points >= 22) {
-            return "High Performing";
-        } else if ($points >= 16) {
-            return "Effective";
-        } else if ($points >= 9) {
-            return "Marginally Effective";
-        } else {
-            return "Ineffective";
-        }
     }
 }

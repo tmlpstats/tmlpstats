@@ -1,6 +1,8 @@
 <?php
 namespace TmlpStats;
 
+use TmlpStats\Region;
+use TmlpStats\StatsReport;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
@@ -26,21 +28,26 @@ class GlobalReport extends Model {
         'locked' => 'boolean',
     ];
 
+    public function addCenterReport(StatsReport $report)
+    {
+        $this->statsReports()->attach($report->id);
+    }
+
     public function scopeReportingDate($query, $date)
     {
-        if ($date instanceof \Carbon\Carbon) {
+        if ($date instanceof Carbon) {
             $date = $date->toDateString();
         }
         return $query->whereReportingDate($date);
     }
 
-    public function scopeCurrentQuarter($query, $region)
+    public function scopeCurrentQuarter($query, Region $region)
     {
         $quarter = Quarter::region($region)->date(Carbon::now())->first();
         return $query->whereQuarterId($quarter->id);
     }
 
-    public function scopeLastQuarter($query, $region)
+    public function scopeLastQuarter($query, Region $region)
     {
         $currentQuarter = Quarter::region($region)->date(Carbon::now())->first();
         $lastQuarter = Quarter::region($region)->date($currentQuarter->startWeekendDate)->first();

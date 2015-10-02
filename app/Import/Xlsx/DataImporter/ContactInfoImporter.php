@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use TmlpStats\Accountability;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\ProgramTeamMember;
 use TmlpStats\TeamMember;
@@ -85,39 +86,26 @@ class ContactInfoImporter extends DataImporterAbstract
 
             $nameParts = Util::getNameParts($leader['name']);
 
-            $member = ProgramTeamMember::firstOrNew(array(
+            $member = Person::firstOrNew(array(
                 'center_id'      => $this->statsReport->center->id,
-                'quarter_id'     => $this->statsReport->quarter->id,
-                'accountability' => $leader['accountability'],
                 'first_name'     => $nameParts['firstName'],
                 'last_name'      => $nameParts['lastName'],
             ));
 
+            // TODO: Handle error gracefully
+            $accountability = Accountability::name($leader['accountability'])->first();
+            $member->addAccountability($accountability);
+
             unset($leader['name']);
+            unset($leader['offset']);
+            unset($leader['accountability']);
 
             $this->setValues($member, $leader);
 
-            if ($member->teamMember === null) {
-                $teamMember = $this->getTeamMember($member);
-                if ($teamMember) {
-                    $member->teamMemberId = $teamMember->id;
-                }
-            }
-            if ($member->statsReportId === null) {
-                $member->statsReportId = $this->statsReport->id;
-            }
             if (!$member->exists || $member->isDirty()) {
                 $member->save();
             }
         }
-    }
-
-    protected function getTeamMember($programTeamMember)
-    {
-        return TeamMember::where('center_id', '=', $this->statsReport->center->id)
-                         ->where('first_name', '=', $programTeamMember->firstName)
-                         ->where('last_name', '=', $programTeamMember->lastName)
-                         ->first();
     }
 
     protected function populateSheetRanges() { } // no blocks to load in this sheet

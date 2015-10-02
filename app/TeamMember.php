@@ -1,10 +1,13 @@
 <?php
 namespace TmlpStats;
 
+use TmlpStats\Quarter;
+use TmlpStats\Person;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class TeamMember extends Model {
+class TeamMember extends Model
+{
 
     use CamelCaseModel;
 
@@ -19,6 +22,21 @@ class TeamMember extends Model {
         'is_reviewer' => 'boolean',
     );
 
+    public static function firstOrNew(array $attributes)
+    {
+        $person = Person::firstOrCreate([
+            'center_id'  => $attributes['center_id'],
+            'first_name' => $attributes['first_name'],
+            'last_name'  => $attributes['last_name'],
+        ]);
+
+        return static::firstOrNew([
+            'team_year'           => $attributes['team_year'],
+            'incoming_quarter_id' => $attributes['incoming_quarter_id'],
+            'person_id'           => $person->id,
+        ]);
+    }
+
     public function getIncomingQuarter()
     {
         return Quarter::find($this->incomingQuarterId);
@@ -29,9 +47,14 @@ class TeamMember extends Model {
         return $query->whereTeamYear($teamYear);
     }
 
-    public function scopeIncomingQuarter($query, $quarter)
+    public function scopeIncomingQuarter($query, Quarter $quarter)
     {
         return $query->whereIncomingQuarterId($quarter->id);
+    }
+
+    public function scopePerson($query, Person $person)
+    {
+        return $query->whereIncomingQuarterId($person->id);
     }
 
     public function scopeReviewer($query, $reviewer = true)

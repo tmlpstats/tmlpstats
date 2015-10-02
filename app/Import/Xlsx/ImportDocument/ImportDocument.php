@@ -542,17 +542,21 @@ class ImportDocument extends ImportDocumentAbstract
 
                 // Update the Stats Report after post processing
                 switch ($name) {
-
-                    case 'centerStats':
-                        $centerStats = $importer->getCenterStats();
-                        $this->statsReport->centerStatsId = $centerStats ? $centerStats->id : null;
-                        break;
-
                     case 'contactInfo':
                         $reportingStatistician = $importer->getReportingStatistician();
+
+                        $centerStats = $this->statsReport->centerStats()
+                            ->reportingDate($this->statsReport->reportingDate)
+                            ->first();
+
+                        if ($centerStats) {
+                            $centerStats->actualData->programManagerAttendingWeekend = $importer->getProgramManagerAttendingWeekend();
+                            $centerStats->actualData->classroomLeaderAttendingWeekend = $importer->getClassroomLeaderAttendingWeekend();
+
+                            $centerStats->actualData->save();
+                        }
+
                         $this->statsReport->reportingStatisticianId = $reportingStatistician ? $reportingStatistician->id : null;
-                        $this->statsReport->programManagerAttendingWeekend = $importer->getProgramManagerAttendingWeekend();
-                        $this->statsReport->classroomLeaderAttendingWeekend = $importer->getClassroomLeaderAttendingWeekend();
                         break;
 
                     default:
@@ -565,6 +569,11 @@ class ImportDocument extends ImportDocumentAbstract
         $this->statsReport->validated = $isValid;
         $this->statsReport->submittedAt = $this->submittedAt ?: Carbon::now();
         $this->statsReport->save();
+
+        $this->globalReport = GlobalReport::firstOrCreate([
+            'reporting_date' => $this->reportingDate,
+        ]);
+        $this->globalReport->addCenterReport($this->statsReport);
 
         $this->saved = true;
     }
