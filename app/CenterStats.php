@@ -1,11 +1,13 @@
 <?php
 namespace TmlpStats;
 
+use TmlpStats\CenterStatsData;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class CenterStats extends Model {
-
+// TODO: delete me after migration
+class CenterStats extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = [

@@ -6,8 +6,8 @@ use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
 use TmlpStats\User;
 use TmlpStats\StatsReport;
-use TmlpStats\CenterStatsData;
 use TmlpStats\Quarter;
+use TmlpStats\Region;
 
 use Carbon\Carbon;
 
@@ -50,9 +50,16 @@ class HomeController extends Controller {
         }
 
         $userHomeRegion = Auth::user()->homeRegion();
-        $defaultRegion = $userHomeRegion ?: 'NA';
+        $defaultRegion = $userHomeRegion ?: Region::abbreviation('NA')->first();
 
-        $region = Request::has('region') ? Request::get('region') : $defaultRegion;
+        $region = Request::has('region')
+            ? Region::abbreviation(Request::get('region'))->first()
+            : $defaultRegion;
+
+        // Make sure we have a global region
+        if ($region->parentId) {
+            $region = $region->parent;
+        }
 
         $allReports = StatsReport::currentQuarter($region)->submitted()->orderBy('reporting_date', 'desc')->get();
         if ($allReports->isEmpty()) {
@@ -86,14 +93,13 @@ class HomeController extends Controller {
         }
 
         $centers = Center::active()
-                         ->globalRegion($region)
-                         ->orderBy('local_region', 'asc')
+                         ->byRegion($region)
                          ->orderBy('name', 'asc')
                          ->get();
 
         $regionsData = array();
 
-        switch($region) {
+        switch($region->abbreviation) {
             case 'ANZ':
                 $regionsData[0]['displayName']    = 'Australia/New Zealand Region';
                 $regionsData[0]['validatedCount'] = 0;
@@ -128,10 +134,11 @@ class HomeController extends Controller {
 
         foreach ($centers as $center) {
 
-            $localRegion = $center->localRegion ?: 0;
+            $localRegion = $center->getLocalRegion();
+            $localRegion = $localRegion ? $localRegion->name : 0;
 
             $statsReport = $center->statsReports()
-                                  ->reportingDate($reportingDate->toDateString())
+                                  ->reportingDate($reportingDate)
                                   ->whereNotNull('submitted_at')
                                   ->orderBy('submitted_at', 'desc')
                                   ->first();
@@ -157,7 +164,7 @@ class HomeController extends Controller {
             $submittedAt = null;
             if ($statsReport) {
                 $submittedAt = $statsReport->submittedAt;
-                $submittedAt->setTimezone($statsReport->center->timeZone);
+                $submittedAt->setTimezone($statsReport->center->timezone);
             }
 
             $centerResults = array(
@@ -187,7 +194,7 @@ class HomeController extends Controller {
         return view('home')->with(['reportingDate'  => $reportingDate,
                                    'reportingDates' => $reportingDates,
                                    'timezone'       => $timezone,
-                                   'selectedRegion' => $region,
+                                   'selectedRegion' => $region->abbreviation,
                                    'regionsData'    => $regionsData]);
     }
 

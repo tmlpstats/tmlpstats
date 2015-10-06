@@ -4,45 +4,61 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class TmlpGameData extends Model {
-
+class TmlpGameData extends Model
+{
     use CamelCaseModel;
 
     protected $table = 'tmlp_games_data';
 
     protected $fillable = [
-        'center_id',
-        'quarter_id',
-        'reporting_date',
-        'tmlp_game_id',
-        'offset',
+        'stats_report_id',
+        'type',
         'quarter_start_registered',
         'quarter_start_approved',
-        'stats_report_id',
     ];
 
-    protected $dates = [
-        'reporting_date',
-    ];
-
-    public function setReportingDateAttribute($value)
+    public function scopeType($query, $type)
     {
-        $date = $this->asDateTime($value);
-        $this->attributes['reporting_date'] = $date->toDateString();
+        return $query->whereType($type);
     }
 
-    public function center()
+    public function scopeIncomingT1($query)
     {
-        return $this->belongsTo('TmlpStats\Center');
+        return $query->whereType('Incoming T1');
     }
 
-    public function quarter()
+    public function scopeIncomingT2($query)
     {
-        return $this->belongsTo('TmlpStats\Quarter');
+        return $query->whereType('Incoming T2');
     }
 
-    public function game()
+    public function scopeFutureT1($query)
     {
-        return $this->belongsTo('TmlpStats\TmlpGame');
+        return $query->whereType('Future T1');
+    }
+
+    public function scopeFutureT2($query)
+    {
+        return $query->whereType('Future T2');
+    }
+
+    public function scopeT1($query)
+    {
+        return $query->where('type', 'like', '% T1');
+    }
+
+    public function scopeT2($query)
+    {
+        return $query->where('type', 'like', '% T2');
+    }
+
+    public function scopeByStatsReport($query, StatsReport $statsReport)
+    {
+        return $query->whereStatsReportId($statsReport->id);
+    }
+
+    public function statsReport()
+    {
+        return $this->belongsTo('TmlpStats\StatsReport');
     }
 }

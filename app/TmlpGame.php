@@ -4,6 +4,7 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
+// TODO: delete me after migration
 class TmlpGame extends Model {
 
     use CamelCaseModel;

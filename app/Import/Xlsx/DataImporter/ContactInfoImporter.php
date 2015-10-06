@@ -1,7 +1,9 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use TmlpStats\Accountability;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
+use TmlpStats\Person;
 use TmlpStats\ProgramTeamMember;
 use TmlpStats\TeamMember;
 use TmlpStats\Util;
@@ -43,7 +45,7 @@ class ContactInfoImporter extends DataImporterAbstract
         $this->t1tl                  = $this->loadEntry(8);
         $this->statistician          = $this->loadEntry(9);
         $this->apprentice            = $this->loadEntry(10);
-        $this->reportingStatistician = $this->loadReportingStatistician();
+//        $this->reportingStatistician = $this->loadReportingStatistician();
         $this->loadProgramLeadersAttendingWeekend();
     }
 
@@ -85,39 +87,48 @@ class ContactInfoImporter extends DataImporterAbstract
 
             $nameParts = Util::getNameParts($leader['name']);
 
-            $member = ProgramTeamMember::firstOrNew(array(
+            $member = Person::firstOrNew(array(
                 'center_id'      => $this->statsReport->center->id,
-                'quarter_id'     => $this->statsReport->quarter->id,
-                'accountability' => $leader['accountability'],
                 'first_name'     => $nameParts['firstName'],
                 'last_name'      => $nameParts['lastName'],
             ));
 
+            // TODO: Handle error gracefully
+            $accountability = Accountability::name($this->mapAccountabilities($leader['accountability']))->first();
+            if ($accountability) {
+                $member->addAccountability($accountability);
+            }
+
             unset($leader['name']);
+            unset($leader['offset']);
+            unset($leader['accountability']);
 
             $this->setValues($member, $leader);
 
-            if ($member->teamMember === null) {
-                $teamMember = $this->getTeamMember($member);
-                if ($teamMember) {
-                    $member->teamMemberId = $teamMember->id;
-                }
-            }
-            if ($member->statsReportId === null) {
-                $member->statsReportId = $this->statsReport->id;
-            }
             if (!$member->exists || $member->isDirty()) {
                 $member->save();
             }
         }
     }
 
-    protected function getTeamMember($programTeamMember)
-    {
-        return TeamMember::where('center_id', '=', $this->statsReport->center->id)
-                         ->where('first_name', '=', $programTeamMember->firstName)
-                         ->where('last_name', '=', $programTeamMember->lastName)
-                         ->first();
+    protected function mapAccountabilities($displayString) {
+
+        switch ($displayString) {
+            case 'Program Manager':
+                return 'programManager';
+            case 'Classroom Leader':
+                return 'classroomLeader';
+            case 'Team 1 Team Leader':
+                return 'team1TeamLeader';
+            case 'Team 2 Team Leader':
+                return 'team2TeamLeader';
+            case 'Statistician':
+                return 'teamStatistician';
+            case 'Statistician Apprentice':
+                return 'teamStatisticianApprentice';
+            default:
+                return null;
+        }
     }
 
     protected function populateSheetRanges() { } // no blocks to load in this sheet

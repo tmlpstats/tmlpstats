@@ -169,7 +169,7 @@ class ImportManager
         $center = $statsReport->center;
 
         $sumittedAt = clone $statsReport->submittedAt;
-        $sumittedAt->setTimezone($center->timeZone);
+        $sumittedAt->setTimezone($center->timezone);
 
         // 7:00.59 PM local time on the reporting date.
         $due = Carbon::create(
@@ -177,7 +177,7 @@ class ImportManager
             $statsReport->reportingDate->month,
             $statsReport->reportingDate->day,
             19, 0, 59,
-            $center->timeZone
+            $center->timezone
         );
 
         $isLate = $sumittedAt->gt($due);

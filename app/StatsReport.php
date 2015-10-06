@@ -1,30 +1,48 @@
 <?php
 namespace TmlpStats;
 
+use TmlpStats\Quarter;
+use TmlpStats\CenterStatsData;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
 use Carbon\Carbon;
 
-use DB;
-use Log;
-use TmlpStats\Quarter;
-
-class StatsReport extends Model {
-
+class StatsReport extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = [
+        'reporting_date',
         'center_id',
         'quarter_id',
-        'reporting_date',
-        'spreadsheet_version',
+        'user_id',
+        'version',
+        'validated',
+        'locked',
+        'submitted_at',
+        'submit_comment',
     ];
 
     protected $dates = [
         'reporting_date',
         'submitted_at',
     ];
+
+    protected $casts = [
+        'validated' => 'boolean',
+        'locked'    => 'boolean',
+    ];
+
+    public function __get($name)
+    {
+        if ($name === 'quarter') {
+            $quarter = parent::__get('quarter');
+            $quarter->setRegion($this->center->region);
+            return $quarter;
+        }
+        return parent::__get($name);
+    }
 
     public function setReportingDateAttribute($value)
     {
@@ -34,7 +52,7 @@ class StatsReport extends Model {
 
     public function isValidated()
     {
-        return (bool) $this->validated;
+        return (bool)$this->validated;
     }
 
     public function isSubmitted()
@@ -42,61 +60,35 @@ class StatsReport extends Model {
         return $this->submitted_at !== null;
     }
 
-    // Flush all objects created by this report.
-    public function clear()
+    public function getPoints()
     {
-        // Do not clear if locked!
-        if ($this->locked) {
-            return false;
-        }
-
-        $success = true;
-        $tables = array(
-        //  Table Name                Ignore errors encountered while deleting
-            'center_stats'            => false,
-            'center_stats_data'       => false,
-            'courses_data'            => false,
-            'courses'                 => true,
-            'program_team_members'    => false,
-            'team_members_data'       => false,
-            'team_members'            => true,
-            'tmlp_games_data'         => false,
-            'tmlp_games'              => true,
-            'tmlp_registrations_data' => false,
-            'tmlp_registrations'      => true,
-        );
-
-        $this->centerStatsId = null;
-        $this->reportingStatisticianId = null;
-        $this->save();
-
-        foreach ($tables as $table => $ignoreErrors) {
-            try {
-                DB::table($table)->where('stats_report_id', '=', $this->id)
-                                 ->delete();
-            } catch(\Exception $e) {
-                Log::error("Error clearing statsReport {$this->id} from $table table: " . $e->getMessage());
-
-                if (!$ignoreErrors) {
-                    $success = false;
-                }
-            }
-        }
-
-        return $success;
+        $data = CenterStatsData::actual()->byStatsReport($this)->first();
+        return $data ? $data->points : null;
     }
 
     public function getRating()
     {
-        $centerStats = CenterStats::find($this->centerStatsId);
-        return $centerStats ? $centerStats->actualData->rating : null;
+        $points = $this->getPoints();
+
+        if ($points === null) {
+            return null;
+        }
+
+        if ($points == 28) {
+            return "Powerful";
+        } else if ($points >= 22) {
+            return "High Performing";
+        } else if ($points >= 16) {
+            return "Effective";
+        } else if ($points >= 9) {
+            return "Marginally Effective";
+        } else {
+            return "Ineffective";
+        }
     }
 
-    public function scopeReportingDate($query, $date)
+    public function scopeReportingDate($query, Carbon $date)
     {
-        if (is_object($date)) {
-            $date = $date->toDateString();
-        }
         return $query->whereReportingDate($date);
     }
 
@@ -114,36 +106,31 @@ class StatsReport extends Model {
         }
     }
 
-    public function scopeCenter($query, $center)
+    public function scopeByCenter($query, Center $center)
     {
         return $query->whereCenterId($center->id);
     }
 
-    public function scopeCurrentQuarter($query, $region)
+    public function scopeCurrentQuarter($query, Region $region = null)
     {
-        $quarter = Quarter::findByDateAndRegion(Carbon::now(), $region);
+        $quarter = Quarter::byRegion($region)->date(Carbon::now())->first();
         if (!$quarter) {
             return $query;
         }
         return $query->whereQuarterId($quarter->id);
     }
 
-    public function scopeLastQuarter($query, $region)
+    public function scopeLastQuarter($query, Region $region = null)
     {
-        $currentQuarter = Quarter::findByDateAndRegion(Carbon::now(), $region);
+        $currentQuarter = Quarter::byRegion($region)->date(Carbon::now())->first();
         if (!$currentQuarter) {
             return $query;
         }
-        $lastQuarter = Quarter::findByDateAndRegion($currentQuarter->startWeekendDate, $region);
+        $lastQuarter = Quarter::byRegion($region)->date($currentQuarter->startWeekendDate)->first();
         if (!$lastQuarter) {
             return $query;
         }
         return $query->whereQuarterId($lastQuarter->id);
-    }
-
-    public function centerStats()
-    {
-        return $this->hasOne('TmlpStats\CenterStats');
     }
 
     public function center()
@@ -156,9 +143,38 @@ class StatsReport extends Model {
         return $this->belongsTo('TmlpStats\Quarter');
     }
 
+    public function user()
+    {
+        return $this->hasOne('TmlpStats\User');
+    }
+
     public function globalReports()
     {
         return $this->belongsToMany('TmlpStats\GlobalReport', 'global_report_stats_report')->withTimestamps();
     }
 
+    public function courseData()
+    {
+        return $this->hasMany('TmlpStats\CourseData');
+    }
+
+    public function teamMemberData()
+    {
+        return $this->hasMany('TmlpStats\TeamMemberData');
+    }
+
+    public function teamRegistrationData()
+    {
+        return $this->hasMany('TmlpStats\TeamRegistrationData');
+    }
+
+    public function centerStatsData()
+    {
+        return $this->hasMany('TmlpStats\CenterStatsData');
+    }
+
+    public function tmlpGamesData()
+    {
+        return $this->hasMany('TmlpStats\TmlpGamesData');
+    }
 }

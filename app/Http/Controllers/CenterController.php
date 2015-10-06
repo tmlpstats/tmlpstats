@@ -2,9 +2,9 @@
 namespace TmlpStats\Http\Controllers;
 
 use TmlpStats\Center;
+use TmlpStats\Region;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Requests\CenterRequest;
-use TmlpStats\Http\Controllers\Controller;
 
 class CenterController extends Controller {
 
@@ -46,7 +46,20 @@ class CenterController extends Controller {
     public function store(CenterRequest $request)
     {
         if (!$request->has('cancel')) {
-            Center::create($request->all());
+
+            $input = $request->all();
+
+            if($request->has('global_region') || $request->has('local_region')) {
+
+                $region = (!$request->has('local_region') || $request->get('global_region') !== 'NA')
+                    ? Region::abbreviation($request->get('global_region'))->first()
+                    : Region::abbreviation($request->get('local_region'))->first();
+                if ($region) {
+                    $input['region_id'] = $region->id;
+                }
+            }
+
+            Center::create($input);
         }
 
         return redirect('admin/centers');
@@ -90,14 +103,26 @@ class CenterController extends Controller {
             $center = Center::where('abbreviation', '=', $id)->firstOrFail();
 
             $input = $request->all();
+
             if (!$request->has('active')) {
                 $input['active'] = false;
             }
+
+            if($request->has('global_region') || $request->has('local_region')) {
+
+                $region = (!$request->has('local_region') || $request->get('global_region') !== 'NA')
+                    ? Region::abbreviation($request->get('global_region'))->first()
+                    : Region::abbreviation($request->get('local_region'))->first();
+                if ($region) {
+                    $input['region_id'] = $region->id;
+                }
+            }
+
             $center->update($input);
         }
 
         $redirect = 'admin/centers/' . $id;
-           if ($request->has('previous_url')) {
+        if ($request->has('previous_url')) {
             $redirect = $request->get('previous_url');
         }
         return redirect($redirect);
