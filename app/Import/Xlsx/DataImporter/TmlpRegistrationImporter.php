@@ -169,7 +169,7 @@ class TmlpRegistrationImporter extends DataImporterAbstract
             ->first();
 
         return $person
-            ? TeamMember::person($person)
+            ? TeamMember::person($person)->first()
             : null;
     }
 }

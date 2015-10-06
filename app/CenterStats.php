@@ -26,21 +26,6 @@ class CenterStats extends Model
         $this->attributes['reporting_date'] = $date->toDateString();
     }
 
-    public function scopePromise($query, CenterStatsData $data)
-    {
-        return $query->wherePromiseDataId($data->id);
-    }
-
-    public function scopeRevokedPromise($query, CenterStatsData $data)
-    {
-        return $query->whereRevokedPromiseDataId($data->id);
-    }
-
-    public function scopeActual($query, CenterStatsData $data)
-    {
-        return $query->whereActualDataId($data->id);
-    }
-
     public function promiseData()
     {
         return $this->hasOne('TmlpStats\CenterStatsData', 'id', 'promise_data_id');

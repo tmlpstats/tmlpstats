@@ -4,8 +4,8 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class TmlpRegistrationData extends Model {
-
+class TmlpRegistrationData extends Model
+{
     use CamelCaseModel;
 
     protected $table = 'tmlp_registrations_data';
@@ -44,7 +44,7 @@ class TmlpRegistrationData extends Model {
         return $query->whereNotNull('wd_date');
     }
 
-    public function scopeIncomingQuarter($query, $quarter)
+    public function scopeIncomingQuarter($query, Quarter $quarter)
     {
         return $query->whereIncomingQuarterId($quarter->id);
     }

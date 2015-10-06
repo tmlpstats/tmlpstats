@@ -8,7 +8,6 @@ use Eloquence\Database\Traits\CamelCaseModel;
 
 class TeamMember extends Model
 {
-
     use CamelCaseModel;
 
     protected $fillable = [

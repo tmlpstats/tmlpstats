@@ -8,8 +8,8 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class User extends Model implements AuthenticatableContract, CanResetPasswordContract {
-
+class User extends Model implements AuthenticatableContract, CanResetPasswordContract
+{
     use Authenticatable, CanResetPassword, CamelCaseModel;
 
     /**
@@ -35,7 +35,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     ];
 
     protected $casts = [
-        'active' => 'boolean',
+        'active'                 => 'boolean',
         'require_password_reset' => 'boolean',
     ];
 

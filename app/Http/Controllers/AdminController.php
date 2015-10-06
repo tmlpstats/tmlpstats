@@ -2,7 +2,6 @@
 namespace TmlpStats\Http\Controllers;
 
 use TmlpStats\Http\Requests;
-use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
 
 use TmlpStats\Import\ImportManager;
@@ -112,7 +111,7 @@ class AdminController extends Controller {
             $localRegion = $center->localRegion ?: 0;
 
             $statsReport = $center->statsReports()
-                                  ->reportingDate($reportingDate->toDateString())
+                                  ->reportingDate($reportingDate)
                                   ->orderBy('submitted_at', 'desc')
                                   ->first();
 

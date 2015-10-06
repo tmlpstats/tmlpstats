@@ -8,8 +8,8 @@ use Eloquence\Database\Traits\CamelCaseModel;
 use Carbon\Carbon;
 use TmlpStats\Quarter;
 
-class GlobalReport extends Model {
-
+class GlobalReport extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = [
@@ -36,25 +36,9 @@ class GlobalReport extends Model {
         $this->statsReports()->attach($report->id);
     }
 
-    public function scopeReportingDate($query, $date)
+    public function scopeReportingDate($query, Carbon $date)
     {
-        if ($date instanceof Carbon) {
-            $date = $date->toDateString();
-        }
         return $query->whereReportingDate($date);
-    }
-
-    public function scopeCurrentQuarter($query, Region $region)
-    {
-        $quarter = Quarter::region($region)->date(Carbon::now())->first();
-        return $query->whereQuarterId($quarter->id);
-    }
-
-    public function scopeLastQuarter($query, Region $region)
-    {
-        $currentQuarter = Quarter::region($region)->date(Carbon::now())->first();
-        $lastQuarter = Quarter::region($region)->date($currentQuarter->startWeekendDate)->first();
-        return $query->whereQuarterId($lastQuarter->id);
     }
 
     public function quarter()

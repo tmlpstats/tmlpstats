@@ -4,8 +4,8 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class Region extends Model {
-
+class Region extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = array(

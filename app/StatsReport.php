@@ -8,11 +8,8 @@ use Eloquence\Database\Traits\CamelCaseModel;
 
 use Carbon\Carbon;
 
-use DB;
-use Log;
-
-class StatsReport extends Model {
-
+class StatsReport extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = [
@@ -34,7 +31,7 @@ class StatsReport extends Model {
 
     protected $casts = [
         'validated' => 'boolean',
-        'locked' => 'boolean',
+        'locked'    => 'boolean',
     ];
 
     public function __get($name)
@@ -55,7 +52,7 @@ class StatsReport extends Model {
 
     public function isValidated()
     {
-        return (bool) $this->validated;
+        return (bool)$this->validated;
     }
 
     public function isSubmitted()
@@ -90,11 +87,8 @@ class StatsReport extends Model {
         }
     }
 
-    public function scopeReportingDate($query, $date)
+    public function scopeReportingDate($query, Carbon $date)
     {
-        if ($date instanceof Carbon) {
-            $date = $date->toDateString();
-        }
         return $query->whereReportingDate($date);
     }
 

@@ -1,7 +1,6 @@
 <?php namespace TmlpStats\Http\Controllers;
 
 use TmlpStats\Http\Inputs;
-use TmlpStats\Http\Controllers\Controller;
 
 use TmlpStats\Region;
 use TmlpStats\StatsReport;
@@ -9,8 +8,6 @@ use TmlpStats\Center;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Import\Xlsx\XlsxImporter;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
-
-use Illuminate\Http\Request;
 
 use Carbon\Carbon;
 
@@ -39,8 +36,8 @@ class StatsReportController extends Controller {
         $userRegion = Input::has('region')
             ? Region::abbreviation(Input::get('region'))->first()
             : null;
-        $selectedRegion = $userRegion ? $userRegion->name : Auth::user()->homeRegion();
-        $selectedRegion = $selectedRegion ?: 'NA';
+        $selectedRegion = $userRegion ?: Auth::user()->homeRegion();
+        $selectedRegion = $selectedRegion ?: Region::abbreviation('NA')->first();
 
         $allReports = StatsReport::currentQuarter($selectedRegion)
                                  ->groupBy('reporting_date')

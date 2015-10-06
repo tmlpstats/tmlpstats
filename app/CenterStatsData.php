@@ -15,6 +15,7 @@ class CenterStatsData extends Model
     protected $center = null;
 
     protected $fillable = [
+        'reporting_date',
         'stats_report_id',
         'type',
         'cap',
@@ -47,7 +48,7 @@ class CenterStatsData extends Model
     {
         $this->center = $center;
 
-        return $query->whereIn('stats_report_id', function($query) use ($center) {
+        return $query->whereIn('stats_report_id', function ($query) use ($center) {
             $query->select('id')
                 ->from('stats_reports')
                 ->whereCenterId($center->id);
@@ -56,14 +57,14 @@ class CenterStatsData extends Model
 
     public function scopeQuarter($query, Quarter $quarter)
     {
-        return $query->whereIn('stats_report_id', function($query) use ($quarter) {
+        return $query->whereIn('stats_report_id', function ($query) use ($quarter) {
             $query->select('id')
                 ->from('stats_reports')
                 ->whereQuarterId($quarter->id);
         });
     }
 
-    public function scopeReportingDate($query, $date)
+    public function scopeReportingDate($query, Carbon $date)
     {
         return $query->whereReportingDate($date);
     }
@@ -71,11 +72,6 @@ class CenterStatsData extends Model
     public function scopeStatsReport($query, StatsReport $statsReport)
     {
         return $query->whereStatsReportId($statsReport->id);
-    }
-
-    public function centerStats()
-    {
-        return $this->belongsTo('TmlpStats\CenterStats');
     }
 
     public function statsReport()

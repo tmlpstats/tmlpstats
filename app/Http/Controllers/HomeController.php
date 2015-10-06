@@ -138,7 +138,7 @@ class HomeController extends Controller {
             $localRegion = $localRegion ? $localRegion->name : 0;
 
             $statsReport = $center->statsReports()
-                                  ->reportingDate($reportingDate->toDateString())
+                                  ->reportingDate($reportingDate)
                                   ->whereNotNull('submitted_at')
                                   ->orderBy('submitted_at', 'desc')
                                   ->first();

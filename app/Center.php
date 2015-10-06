@@ -4,8 +4,8 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class Center extends Model {
-
+class Center extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = array(
@@ -21,47 +21,42 @@ class Center extends Model {
     );
 
     protected $casts = array(
-        'active' => 'bool'
+        'active' => 'bool',
     );
 
     public function getProgramManager()
     {
-        return Person::accountability('programManager')
-            ->byCenter($this)
-            ->first();
+        return $this->getAccountable('programManager');
     }
 
     public function getClassroomLeader()
     {
-        return Person::accountability('classroomLeader')
-            ->byCenter($this)
-            ->first();
+        return $this->getAccountable('classroomLeader');
     }
 
     public function getT1TeamLeader()
     {
-        return Person::accountability('team1TeamLeader')
-            ->byCenter($this)
-            ->first();
+        return $this->getAccountable('team1TeamLeader');
     }
 
     public function getT2TeamLeader()
     {
-        return Person::accountability('team2TeamLeader')
-            ->byCenter($this)
-            ->first();
+        return $this->getAccountable('team2TeamLeader');
     }
 
     public function getStatistician()
     {
-        return Person::accountability('teamStatistician')
-            ->byCenter($this)
-            ->first();
+        return $this->getAccountable('teamStatistician');
     }
 
     public function getStatisticianApprentice()
     {
-        return Person::accountability('teamStatisticianApprentice')
+        return $this->getAccountable('teamStatisticianApprentice');
+    }
+
+    public function getAccountable($accountability)
+    {
+        return Person::accountability($accountability)
             ->byCenter($this)
             ->first();
     }
@@ -101,7 +96,7 @@ class Center extends Model {
 
     public function scopeRegion($query, Region $region)
     {
-        return $query->whereIn('region_id', function($query) use ($region) {
+        return $query->whereIn('region_id', function ($query) use ($region) {
             $query->select('id')
                 ->from('regions')
                 ->where('id', $region->id)

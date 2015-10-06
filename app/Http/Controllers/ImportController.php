@@ -2,10 +2,7 @@
 namespace TmlpStats\Http\Controllers;
 
 use TmlpStats\Http\Requests;
-use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\Import\ImportManager;
-
-use Carbon\Carbon;
 
 use Auth;
 use Request;
@@ -47,6 +44,7 @@ class ImportController extends Controller {
 
         Request::flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
+        // This is where we set which region's are allowed to submit stats online
         $showSubmit = false;
         if ($user->center->getGlobalRegion()->abbreviation === 'NA') {
             $showSubmit = true;

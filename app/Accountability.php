@@ -4,8 +4,8 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class Accountability extends Model {
-
+class Accountability extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = array(
@@ -28,5 +28,4 @@ class Accountability extends Model {
     {
         return $this->belongsToMany('TmlpStats\Person', 'accountability_person')->withTimestamps();
     }
-
 }

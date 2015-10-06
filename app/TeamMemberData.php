@@ -4,8 +4,8 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class TeamMemberData extends Model {
-
+class TeamMemberData extends Model
+{
     use CamelCaseModel;
 
     protected $table = 'team_members_data';
@@ -30,11 +30,11 @@ class TeamMemberData extends Model {
 
     protected $casts = [
         'at_weekend' => 'boolean',
-        'xfer_out' => 'boolean',
-        'xfer_in' => 'boolean',
-        'ctw' => 'boolean',
-        'rereg' => 'boolean',
-        'room' => 'boolean',
+        'xfer_out'   => 'boolean',
+        'xfer_in'    => 'boolean',
+        'ctw'        => 'boolean',
+        'rereg'      => 'boolean',
+        'room'       => 'boolean',
     ];
 
     public function scopeWithdrawn($query)

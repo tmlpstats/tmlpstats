@@ -5,7 +5,6 @@ use TmlpStats\Center;
 use TmlpStats\Region;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Requests\CenterRequest;
-use TmlpStats\Http\Controllers\Controller;
 
 class CenterController extends Controller {
 

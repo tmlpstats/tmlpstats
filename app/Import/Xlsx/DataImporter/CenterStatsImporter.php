@@ -132,7 +132,7 @@ class CenterStatsImporter extends DataImporterAbstract
         foreach ($this->data as $week) {
 
             $weekDate = Carbon::createFromFormat('Y-m-d', $week['reportingDate'])->startOfDay();
-            $promiseData = $this->getPromiseData($this->statsReport->center, $weekDate, $this->statsReport->quarter);
+            $promiseData = $this->getPromiseData($weekDate, $this->statsReport->center, $this->statsReport->quarter);
 
             if ($week['type'] == 'promise') {
                 if (!$promiseData || ($isRepromiseWeek && $weekDate->gt($this->statsReport->reportingDate))) {
@@ -151,7 +151,7 @@ class CenterStatsImporter extends DataImporterAbstract
 
             } else if ($week['type'] == 'actual') {
 
-                $actualData = $this->getActualData($this->statsReport->center, $weekDate);
+                $actualData = $this->getActualData($weekDate, $this->statsReport->center);
                 if ($actualData) {
                     continue;
                 }
@@ -175,7 +175,7 @@ class CenterStatsImporter extends DataImporterAbstract
         }
     }
 
-    public function getPromiseData(Center $center, Carbon $date, Quarter $quarter = null)
+    public function getPromiseData(Carbon $date, Center $center, Quarter $quarter = null)
     {
         if (!$quarter) {
             $quarter = Quarter::region($center->region)
@@ -201,12 +201,12 @@ class CenterStatsImporter extends DataImporterAbstract
         }
 
         return CenterStatsData::promise()
-            ->reportingDate($date->toDateString())
+            ->reportingDate($date)
             ->statsReport($statsReport)
             ->first();
     }
 
-    public function getActualData(Center $center, Carbon $date)
+    public function getActualData(Carbon $date, Center $center)
     {
         $globalReport = GlobalReport::reportingDate($date)->first();
         if (!$globalReport) {
@@ -219,7 +219,7 @@ class CenterStatsImporter extends DataImporterAbstract
         }
 
         return CenterStatsData::actual()
-            ->reportingDate($date->toDateString())
+            ->reportingDate($date)
             ->statsReport($statsReport)
             ->first();
     }

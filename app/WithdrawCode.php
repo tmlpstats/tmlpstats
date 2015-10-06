@@ -4,8 +4,8 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class WithdrawCode extends Model {
-
+class WithdrawCode extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = array(
@@ -18,5 +18,4 @@ class WithdrawCode extends Model {
     {
         return $query->whereCode($name);
     }
-
 }

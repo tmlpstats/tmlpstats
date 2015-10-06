@@ -1,15 +1,12 @@
 <?php namespace TmlpStats\Http\Controllers;
 
 use TmlpStats\Http\Requests;
-use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\GlobalReport;
 use TmlpStats\StatsReport;
 use TmlpStats\Center;
-use TmlpStats\Import\ImportManager;
 
 use Carbon\Carbon;
 
-use Illuminate\Http\Request;
 use Input;
 use Auth;
 

@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use Carbon\Carbon;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\TmlpGame;
 use TmlpStats\TmlpGameData;
@@ -44,6 +45,14 @@ class TmlpGameInfoImporter extends DataImporterAbstract
     public function postProcess()
     {
         foreach ($this->data as $gameInput) {
+
+            $gameData = $this->getGameData($gameInput['type'], $this->statsReport->center, $this->statsReport->quarter);
+
+            if ($gameData) {
+                // Only import once
+                continue;
+            }
+
             $gameData = TmlpGameData::firstOrNew(array(
                 'type'            => $gameInput['type'],
                 'stats_report_id' => $this->statsReport->id,
@@ -56,5 +65,31 @@ class TmlpGameInfoImporter extends DataImporterAbstract
 
             $gameData->save();
         }
+    }
+
+    public function getGameData($type, Center $center, Quarter $quarter = null)
+    {
+        if (!$quarter) {
+            $quarter = Quarter::region($center->region)
+                ->date(Carbon::now()->startOfDay())
+                ->first();
+
+            $quarter->setRegion($center->region);
+        }
+
+        $globalReport = GlobalReport::reportingDate($quarter->startWeekendDate->addWeek())->first();
+
+        if (!$globalReport) {
+            return null;
+        }
+
+        $statsReport = $globalReport->statsReports()->byCenter($center)->first();
+        if (!$statsReport) {
+            return null;
+        }
+
+        return TmlpGameData::type($type)
+            ->statsReport($statsReport)
+            ->first();
     }
 }

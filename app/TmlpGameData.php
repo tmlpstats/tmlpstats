@@ -4,8 +4,8 @@ namespace TmlpStats;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class TmlpGameData extends Model {
-
+class TmlpGameData extends Model
+{
     use CamelCaseModel;
 
     protected $table = 'tmlp_games_data';
@@ -16,6 +16,11 @@ class TmlpGameData extends Model {
         'quarter_start_registered',
         'quarter_start_approved',
     ];
+
+    public function scopeType($query, $type)
+    {
+        return $query->whereType($type);
+    }
 
     public function scopeIncomingT1($query)
     {

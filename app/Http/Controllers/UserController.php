@@ -9,9 +9,6 @@ use TmlpStats\Person;
 use TmlpStats\Region;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Requests\UserRequest;
-use TmlpStats\Http\Controllers\Controller;
-
-use Illuminate\Http\Request;
 
 class UserController extends Controller {
 

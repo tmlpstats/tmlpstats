@@ -5,8 +5,8 @@ use TmlpStats\Center;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class Person extends Model {
-
+class Person extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = [
@@ -29,25 +29,17 @@ class Person extends Model {
 
     public function addAccountability(Accountability $accountability)
     {
-        if (!$this->hasAccountability($accountability)){
+        if (!$this->hasAccountability($accountability)) {
             $this->accountabilities()->attach($accountability->id);
         }
     }
 
-    // This isn't complete. Fix it when we need it
-//    public function setAccountbilities($accountabilities)
-//    {
-//        foreach ($accountabilities as $accountability) {
-//            if (!$this->hasAccountbility($accountability)) {
-//                $this->accountabilities()->attach($accountability->id);
-//            }
-//        }
-//        foreach ($this->accountabilities as $existingAccountbility) {
-//            if (!in_array($existingAccountbility->id, $accountabilities)) {
-//                $this->accountabilities()->detach($existingAccountbility->id);
-//            }
-//        }
-//    }
+    public function removeAccountability(Accountability $accountability)
+    {
+        if ($this->hasAccountability($accountability)) {
+            $this->accountabilities()->detach($accountability->id);
+        }
+    }
 
     public function homeRegion()
     {

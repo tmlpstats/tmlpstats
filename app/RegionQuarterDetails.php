@@ -40,7 +40,7 @@ class RegionQuarterDetails extends Model
 
     public function scopeByRegion($query, Region $region)
     {
-        return $query->where(function($query) use ($region) {
+        return $query->where(function ($query) use ($region) {
             $query->where('region_id', $region->id)
                 ->orWhere('region_id', $region->parentId);
         });

@@ -33,13 +33,13 @@ class Quarter extends Model
             case 'classroom2Date':
             case 'classroom3Date':
                 // TODO: uncomment me. needed for migration
-                if ($this->region && !$this->regionQuarterDetails) {
-                    $this->setRegion($this->region);
-                }
-                if (!$this->regionQuarterDetails) {
-                    throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
-                }
-                return $this->regionQuarterDetails->$name;
+//                if ($this->region && !$this->regionQuarterDetails) {
+//                    $this->setRegion($this->region);
+//                }
+//                if (!$this->regionQuarterDetails) {
+//                    throw new Exception('Cannot call ' . __FUNCTION__ . ' before setting region.');
+//                }
+//                return $this->regionQuarterDetails->$name;
             default:
                 return parent::__get($name);
         }
@@ -73,7 +73,7 @@ class Quarter extends Model
         $this->region = $region;
 
         // This may end up being redundant
-        return $query->whereIn('id', function($query) use ($region) {
+        return $query->whereIn('id', function ($query) use ($region) {
             $query->select('quarter_id')
                 ->from('region_quarter_details')
                 ->where('region_id', $region->id)
@@ -83,14 +83,14 @@ class Quarter extends Model
 
     public function scopeDate($query, Carbon $date)
     {
-        return $query->whereIn('id', function($query) use ($date) {
+        return $query->whereIn('id', function ($query) use ($date) {
             $query->select('quarter_id')
                 ->from('region_quarter_details')
                 ->where('start_weekend_date', '<', $date->startOfDay()->toDateString())
                 ->where('end_weekend_date', '>=', $date->startOfDay()->toDateString());
 
             if ($this->region) {
-                $query->where(function($query) {
+                $query->where(function ($query) {
                     $query->where('region_id', $this->region->id)
                         ->orWhere('region_id', $this->region->parentId);
                 });
@@ -108,7 +108,7 @@ class Quarter extends Model
                 ->where('end_weekend_date', '>=', $date->startOfDay());
 
             if ($this->region) {
-                $query->where(function($query) {
+                $query->where(function ($query) {
                     $query->where('region_id', $this->region->id)
                         ->orWhere('region_id', $this->region->parentId);
                 });
@@ -125,7 +125,7 @@ class Quarter extends Model
                 ->where('end_weekend_date', '>=', $date->startOfDay());
 
             if ($this->region) {
-                $query->where(function($query) {
+                $query->where(function ($query) {
                     $query->where('region_id', $this->region->id)
                         ->orWhere('region_id', $this->region->parentId);
                 });
