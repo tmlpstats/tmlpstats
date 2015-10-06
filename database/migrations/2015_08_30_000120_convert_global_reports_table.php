@@ -49,8 +49,8 @@ class ConvertGlobalReportsTable extends Migration
                         if ($date->toDateString() === '2015-08-28') {
 
                             $promises = CenterStatsData::promise()
-                                ->center($statsReport->center)
-                                ->quarter($statsReport->quarter)
+                                ->byCenter($statsReport->center)
+                                ->byQuarter($statsReport->quarter)
                                 ->get();
 
                             foreach ($promises as $promise) {

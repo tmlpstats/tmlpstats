@@ -51,7 +51,7 @@ class TeamMember extends Model
         return $query->whereIncomingQuarterId($quarter->id);
     }
 
-    public function scopePerson($query, Person $person)
+    public function scopeByPerson($query, Person $person)
     {
         return $query->whereIncomingQuarterId($person->id);
     }

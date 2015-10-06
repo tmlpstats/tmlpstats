@@ -48,6 +48,11 @@ class TmlpRegistration extends Model
         return $query->whereIsReviewer($reviewer);
     }
 
+    public function scopeByPerson($query, Person $person)
+    {
+        return $query->wherePersonId($person->id);
+    }
+
     public function person()
     {
         return $this->belongsTo('TmlpStats\Person');

@@ -23,7 +23,7 @@ class Region extends Model
         return $query->whereName($name);
     }
 
-    public function scopeParent($query, Region $parent)
+    public function scopeByParent($query, Region $parent)
     {
         return $query->whereParentId($parent->id);
     }

@@ -118,7 +118,12 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         return $query->whereActive($active);
     }
 
-    public function scopeRole($query, Role $role)
+    public function scopeByPerson($query, Person $person)
+    {
+        return $query->wherePersonId($person->id);
+    }
+
+    public function scopeByRole($query, Role $role)
     {
         return $query->whereRoleId($role->id);
     }

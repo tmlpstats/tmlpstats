@@ -41,11 +41,6 @@ class GlobalReport extends Model
         return $query->whereReportingDate($date);
     }
 
-    public function quarter()
-    {
-        return $this->belongsTo('TmlpStats\Quarter');
-    }
-
     public function updatedByUser()
     {
         return $this->hasOne('TmlpStats\User');

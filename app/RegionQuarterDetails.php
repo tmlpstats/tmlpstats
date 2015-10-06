@@ -46,7 +46,7 @@ class RegionQuarterDetails extends Model
         });
     }
 
-    public function scopeByDate($query, Carbon $date)
+    public function scopeDate($query, Carbon $date)
     {
         return $query->where('start_weekend_date', '<', $date->startOfDay())
             ->where('end_weekend_date', '>=', $date->startOfDay());

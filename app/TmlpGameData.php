@@ -52,6 +52,11 @@ class TmlpGameData extends Model
         return $query->where('type', 'like', '% T2');
     }
 
+    public function scopeByStatsReport($query, StatsReport $statsReport)
+    {
+        return $query->whereStatsReportId($statsReport->id);
+    }
+
     public function statsReport()
     {
         return $this->belongsTo('TmlpStats\StatsReport');

@@ -126,7 +126,7 @@ class ClassListImporter extends DataImporterAbstract
 
         foreach ($this->data as $memberInput) {
 
-            $completionQuarter = Quarter::region($this->statsReport->center->region)
+            $completionQuarter = Quarter::byRegion($this->statsReport->center->region)
                 ->date($memberInput['completionQuarter'])
                 ->first();
 
@@ -208,7 +208,7 @@ class ClassListImporter extends DataImporterAbstract
         }
 
         $data = CenterStatsData::actual()
-            ->statsReport($this->statsReport)
+            ->byStatsReport($this->statsReport)
             ->reportingDate($this->statsReport->reportingDate)
             ->first();
 

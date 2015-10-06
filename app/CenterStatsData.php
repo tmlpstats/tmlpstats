@@ -44,7 +44,7 @@ class CenterStatsData extends Model
         return $query->whereType('promise');
     }
 
-    public function scopeCenter($query, Center $center)
+    public function scopeByCenter($query, Center $center)
     {
         $this->center = $center;
 
@@ -55,7 +55,7 @@ class CenterStatsData extends Model
         });
     }
 
-    public function scopeQuarter($query, Quarter $quarter)
+    public function scopeByQuarter($query, Quarter $quarter)
     {
         return $query->whereIn('stats_report_id', function ($query) use ($quarter) {
             $query->select('id')
@@ -69,7 +69,7 @@ class CenterStatsData extends Model
         return $query->whereReportingDate($date);
     }
 
-    public function scopeStatsReport($query, StatsReport $statsReport)
+    public function scopeByStatsReport($query, StatsReport $statsReport)
     {
         return $query->whereStatsReportId($statsReport->id);
     }

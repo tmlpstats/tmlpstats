@@ -70,7 +70,7 @@ class Person extends Model
         return $query->whereCenterId($center->id);
     }
 
-    public function scopeAccountability($query, $accountability)
+    public function scopeByAccountability($query, $accountability)
     {
         return $query->whereHas('accountabilities', function ($query) use ($accountability) {
             $query->whereName($accountability);

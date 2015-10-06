@@ -433,7 +433,7 @@ class ImportDocument extends ImportDocumentAbstract
             // No need to throw error, one has already been logged
             return;
         }
-        $this->quarter = Quarter::region($this->center->region)
+        $this->quarter = Quarter::byRegion($this->center->region)
             ->date($this->reportingDate)
             ->first();
         if (!$this->quarter) {
@@ -545,7 +545,7 @@ class ImportDocument extends ImportDocumentAbstract
                         $reportingStatistician = $importer->getReportingStatistician();
 
                         $actual = CenterStatsData::actual()
-                            ->statsReport($this->statsReport)
+                            ->byStatsReport($this->statsReport)
                             ->reportingDate($this->statsReport->reportingDate)
                             ->first();
                         if ($actual) {

@@ -62,7 +62,7 @@ class StatsReport extends Model
 
     public function getPoints()
     {
-        $data = CenterStatsData::actual()->statsReport($this)->first();
+        $data = CenterStatsData::actual()->byStatsReport($this)->first();
         return $data ? $data->points : null;
     }
 
@@ -113,7 +113,7 @@ class StatsReport extends Model
 
     public function scopeCurrentQuarter($query, Region $region = null)
     {
-        $quarter = Quarter::region($region)->date(Carbon::now())->first();
+        $quarter = Quarter::byRegion($region)->date(Carbon::now())->first();
         if (!$quarter) {
             return $query;
         }
@@ -122,11 +122,11 @@ class StatsReport extends Model
 
     public function scopeLastQuarter($query, Region $region = null)
     {
-        $currentQuarter = Quarter::region($region)->date(Carbon::now())->first();
+        $currentQuarter = Quarter::byRegion($region)->date(Carbon::now())->first();
         if (!$currentQuarter) {
             return $query;
         }
-        $lastQuarter = Quarter::region($region)->date($currentQuarter->startWeekendDate)->first();
+        $lastQuarter = Quarter::byRegion($region)->date($currentQuarter->startWeekendDate)->first();
         if (!$lastQuarter) {
             return $query;
         }

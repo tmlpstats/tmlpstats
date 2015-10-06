@@ -165,11 +165,11 @@ class TmlpRegistrationImporter extends DataImporterAbstract
 
         $person = Person::firstName($nameParts['firstName'])
             ->lastName($nameParts['lastName'])
-            ->center($this->statsReport->center)
+            ->byCenter($this->statsReport->center)
             ->first();
 
         return $person
-            ? TeamMember::person($person)->first()
+            ? TeamMember::byPerson($person)->first()
             : null;
     }
 }

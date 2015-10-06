@@ -178,7 +178,7 @@ class CenterStatsImporter extends DataImporterAbstract
     public function getPromiseData(Carbon $date, Center $center, Quarter $quarter = null)
     {
         if (!$quarter) {
-            $quarter = Quarter::region($center->region)
+            $quarter = Quarter::byRegion($center->region)
                 ->date($date)
                 ->first();
 
@@ -202,7 +202,7 @@ class CenterStatsImporter extends DataImporterAbstract
 
         return CenterStatsData::promise()
             ->reportingDate($date)
-            ->statsReport($statsReport)
+            ->byStatsReport($statsReport)
             ->first();
     }
 
@@ -220,7 +220,7 @@ class CenterStatsImporter extends DataImporterAbstract
 
         return CenterStatsData::actual()
             ->reportingDate($date)
-            ->statsReport($statsReport)
+            ->byStatsReport($statsReport)
             ->first();
     }
 

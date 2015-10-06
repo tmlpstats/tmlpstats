@@ -18,6 +18,11 @@ class Course extends Model
         'start_date',
     ];
 
+    public function scopeType($query, $type)
+    {
+        return $query->whereType($type);
+    }
+
     public function scopeCap($query)
     {
         return $query->whereType('CAP');
@@ -26,6 +31,11 @@ class Course extends Model
     public function scopeCpc($query)
     {
         return $query->whereType('CPC');
+    }
+
+    public function scopeByCenter($query, Center $center)
+    {
+        return $query->whereCenterId($center->id);
     }
 
     public function center()

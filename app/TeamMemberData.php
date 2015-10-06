@@ -37,6 +37,11 @@ class TeamMemberData extends Model
         'room'       => 'boolean',
     ];
 
+    public function scopeByStatsReport($query, StatsReport $statsReport)
+    {
+        return $query->whereStatsReportId($statsReport->id);
+    }
+
     public function scopeWithdrawn($query)
     {
         return $query->whereNotNull('withdraw_code_id');

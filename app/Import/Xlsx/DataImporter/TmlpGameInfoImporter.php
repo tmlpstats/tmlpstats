@@ -70,7 +70,7 @@ class TmlpGameInfoImporter extends DataImporterAbstract
     public function getGameData($type, Center $center, Quarter $quarter = null)
     {
         if (!$quarter) {
-            $quarter = Quarter::region($center->region)
+            $quarter = Quarter::byRegion($center->region)
                 ->date(Carbon::now()->startOfDay())
                 ->first();
 
@@ -89,7 +89,7 @@ class TmlpGameInfoImporter extends DataImporterAbstract
         }
 
         return TmlpGameData::type($type)
-            ->statsReport($statsReport)
+            ->byStatsReport($statsReport)
             ->first();
     }
 }

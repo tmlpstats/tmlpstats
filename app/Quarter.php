@@ -68,7 +68,7 @@ class Quarter extends Model
         return $query->where('year', $year);
     }
 
-    public function scopeRegion($query, Region $region)
+    public function scopeByRegion($query, Region $region)
     {
         $this->region = $region;
 

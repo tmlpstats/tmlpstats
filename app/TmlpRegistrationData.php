@@ -49,6 +49,11 @@ class TmlpRegistrationData extends Model
         return $query->whereIncomingQuarterId($quarter->id);
     }
 
+    public function scopeByStatsReport($query, StatsReport $statsReport)
+    {
+        return $query->whereStatsReportId($statsReport->id);
+    }
+
     public function statsReport()
     {
         return $this->belongsTo('TmlpStats\StatsReport');

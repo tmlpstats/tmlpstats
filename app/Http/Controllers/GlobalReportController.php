@@ -10,9 +10,8 @@ use Carbon\Carbon;
 use Input;
 use Auth;
 
-class GlobalReportController extends Controller {
-
-
+class GlobalReportController extends Controller
+{
     /**
      * Create a new controller instance.
      */
@@ -83,7 +82,7 @@ class GlobalReportController extends Controller {
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function show($id)
@@ -95,14 +94,15 @@ class GlobalReportController extends Controller {
         $globalReport = GlobalReport::find($id);
 
         $statsReports = StatsReport::reportingDate($globalReport->reportingDate)
-                                   ->whereNotNull('submitted_at')
-                                   ->validated(true)
-                                   ->get();
+            ->whereNotNull('submitted_at')
+            ->validated(true)
+            ->get();
 
         $centers = array();
         foreach ($statsReports as $statsReport) {
             if ($statsReport->globalReports()->find($globalReport->id)
-                || $globalReport->statsReports()->byCenter($statsReport->center)->count() > 0) {
+                || $globalReport->statsReports()->byCenter($statsReport->center)->count() > 0
+            ) {
                 continue;
             }
             $centers[$statsReport->center->abbreviation] = $statsReport->center->name;
@@ -115,13 +115,13 @@ class GlobalReportController extends Controller {
         }
 
         return view('globalreports.show', compact('globalReport',
-                                                  'centers'));
+            'centers'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function edit($id)
@@ -132,7 +132,7 @@ class GlobalReportController extends Controller {
     /**
      * Update the specified resource in storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function update($id)
@@ -149,14 +149,14 @@ class GlobalReportController extends Controller {
                 if (Input::has('center')) {
                     $center = Center::abbreviation(Input::get('center'))->first();
                     $statsReport = StatsReport::reportingDate($globalReport->reportingDate)
-                                              ->orderBy('submitted_at', 'desc')
-                                              ->validated(true)
-                                              ->center($center)
-                                              ->first();
+                        ->byCenter($center)
+                        ->validated(true)
+                        ->orderBy('submitted_at', 'desc')
+                        ->first();
 
                     if ($statsReport
                         && !$globalReport->statsReports()->find($statsReport->id)
-                        && !$globalReport->statsReports()->center($statsReport->center)->first()
+                        && !$globalReport->statsReports()->byCenter($statsReport->center)->first()
                     ) {
                         $globalReport->statsReports()->attach([$statsReport->id]);
                     }
@@ -172,7 +172,7 @@ class GlobalReportController extends Controller {
                 }
                 if (Input::has('remove')) {
                     if (Input::get('remove') == 'statsreport' && Input::has('id')) {
-                        $id = (int) Input::get('id');
+                        $id = (int)Input::get('id');
                         $globalReport->statsReports()->detach($id);
 
                         if (Input::has('dataType') && Input::get('dataType') == 'JSON') {
@@ -193,7 +193,7 @@ class GlobalReportController extends Controller {
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function destroy($id)
@@ -211,7 +211,7 @@ class GlobalReportController extends Controller {
             case 'D':
             default:
                 return (Auth::user()->hasRole('globalStatistician')
-                        || Auth::user()->hasRole('administrator'));
+                    || Auth::user()->hasRole('administrator'));
         }
     }
 }

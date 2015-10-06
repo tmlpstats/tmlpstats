@@ -56,7 +56,7 @@ class Center extends Model
 
     public function getAccountable($accountability)
     {
-        return Person::accountability($accountability)
+        return Person::byAccountability($accountability)
             ->byCenter($this)
             ->first();
     }
@@ -94,7 +94,7 @@ class Center extends Model
         return $query->whereActive(true);
     }
 
-    public function scopeRegion($query, Region $region)
+    public function scopeByRegion($query, Region $region)
     {
         return $query->whereIn('region_id', function ($query) use ($region) {
             $query->select('id')
@@ -102,7 +102,6 @@ class Center extends Model
                 ->where('id', $region->id)
                 ->orWhere('parent_id', $region->id);
         });
-
     }
 
     public function people()

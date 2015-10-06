@@ -24,7 +24,7 @@ class CourseData extends Model
         'registrations',
     ];
 
-    public function scopeStatsReport($query, $statsReport)
+    public function scopeByStatsReport($query, $statsReport)
     {
         return $query->whereStatsReportId($statsReport->id);
     }

@@ -93,7 +93,7 @@ class HomeController extends Controller {
         }
 
         $centers = Center::active()
-                         ->region($region)
+                         ->byRegion($region)
                          ->orderBy('name', 'asc')
                          ->get();
 
