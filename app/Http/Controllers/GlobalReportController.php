@@ -94,7 +94,7 @@ class GlobalReportController extends Controller
         $globalReport = GlobalReport::find($id);
 
         $statsReports = StatsReport::reportingDate($globalReport->reportingDate)
-            ->whereNotNull('submitted_at')
+            ->submitted()
             ->validated(true)
             ->get();
 

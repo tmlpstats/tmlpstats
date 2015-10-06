@@ -139,7 +139,7 @@ class HomeController extends Controller {
 
             $statsReport = $center->statsReports()
                                   ->reportingDate($reportingDate)
-                                  ->whereNotNull('submitted_at')
+                                  ->submitted()
                                   ->orderBy('submitted_at', 'desc')
                                   ->first();
 
