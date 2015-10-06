@@ -30,7 +30,7 @@ class TeamMember extends Model
             'last_name'  => $attributes['last_name'],
         ]);
 
-        return static::firstOrNew([
+        return parent::firstOrNew([
             'team_year'           => $attributes['team_year'],
             'incoming_quarter_id' => $attributes['incoming_quarter_id'],
             'person_id'           => $person->id,

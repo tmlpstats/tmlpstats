@@ -3,6 +3,7 @@ namespace TmlpStats\Import\Xlsx\DataImporter;
 
 use TmlpStats\Accountability;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
+use TmlpStats\Person;
 use TmlpStats\ProgramTeamMember;
 use TmlpStats\TeamMember;
 use TmlpStats\Util;
@@ -44,7 +45,7 @@ class ContactInfoImporter extends DataImporterAbstract
         $this->t1tl                  = $this->loadEntry(8);
         $this->statistician          = $this->loadEntry(9);
         $this->apprentice            = $this->loadEntry(10);
-        $this->reportingStatistician = $this->loadReportingStatistician();
+//        $this->reportingStatistician = $this->loadReportingStatistician();
         $this->loadProgramLeadersAttendingWeekend();
     }
 
@@ -93,8 +94,10 @@ class ContactInfoImporter extends DataImporterAbstract
             ));
 
             // TODO: Handle error gracefully
-            $accountability = Accountability::name($leader['accountability'])->first();
-            $member->addAccountability($accountability);
+            $accountability = Accountability::name($this->mapAccountabilities($leader['accountability']))->first();
+            if ($accountability) {
+                $member->addAccountability($accountability);
+            }
 
             unset($leader['name']);
             unset($leader['offset']);
@@ -105,6 +108,26 @@ class ContactInfoImporter extends DataImporterAbstract
             if (!$member->exists || $member->isDirty()) {
                 $member->save();
             }
+        }
+    }
+
+    protected function mapAccountabilities($displayString) {
+
+        switch ($displayString) {
+            case 'Program Manager':
+                return 'programManager';
+            case 'Classroom Leader':
+                return 'classroomLeader';
+            case 'Team 1 Team Leader':
+                return 'team1TeamLeader';
+            case 'Team 2 Team Leader':
+                return 'team2TeamLeader';
+            case 'Statistician':
+                return 'teamStatistician';
+            case 'Statistician Apprentice':
+                return 'teamStatisticianApprentice';
+            default:
+                return null;
         }
     }
 

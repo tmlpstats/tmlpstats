@@ -30,6 +30,7 @@ class Cleanup extends Migration
         Schema::drop('tmlp_games');
         Schema::drop('center_user');
         Schema::drop('role_user');
+        Schema::drop('center_stats');
     }
 
     /**

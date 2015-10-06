@@ -2,11 +2,7 @@
 namespace TmlpStats;
 
 use TmlpStats\Center;
-use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Auth\Passwords\CanResetPassword;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Eloquence\Database\Traits\CamelCaseModel;
 
 class Person extends Model {
@@ -33,7 +29,7 @@ class Person extends Model {
 
     public function addAccountability(Accountability $accountability)
     {
-        if (!$this->hasAccountability($accountability->name)){
+        if (!$this->hasAccountability($accountability)){
             $this->accountabilities()->attach($accountability->id);
         }
     }
@@ -77,9 +73,16 @@ class Person extends Model {
         return $query->whereLastName($name);
     }
 
-    public function scopeCenter($query, Center $center)
+    public function scopeByCenter($query, Center $center)
     {
         return $query->whereCenterId($center->id);
+    }
+
+    public function scopeAccountability($query, $accountability)
+    {
+        return $query->whereHas('accountabilities', function ($query) use ($accountability) {
+            $query->whereName($accountability);
+        });
     }
 
     public function accountabilities()

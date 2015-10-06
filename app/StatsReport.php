@@ -1,7 +1,6 @@
 <?php
 namespace TmlpStats;
 
-use TmlpStats\Region;
 use TmlpStats\Quarter;
 use TmlpStats\CenterStatsData;
 use Illuminate\Database\Eloquent\Model;
@@ -64,51 +63,6 @@ class StatsReport extends Model {
         return $this->submitted_at !== null;
     }
 
-    // TODO: Need to address this with new schema
-    // Flush all objects created by this report.
-    public function clear()
-    {
-        // Do not clear if locked!
-        if ($this->locked) {
-            return false;
-        }
-
-        $success = true;
-        $tables = array(
-        //  Table Name                Ignore errors encountered while deleting
-            'center_stats'            => false,
-            'center_stats_data'       => false,
-            'courses_data'            => false,
-            'courses'                 => true,
-            'program_team_members'    => false,
-            'team_members_data'       => false,
-            'team_members'            => true,
-            'tmlp_games_data'         => false,
-            'tmlp_games'              => true,
-            'tmlp_registrations_data' => false,
-            'tmlp_registrations'      => true,
-        );
-
-        $this->centerStatsId = null;
-        $this->reportingStatisticianId = null;
-        $this->save();
-
-        foreach ($tables as $table => $ignoreErrors) {
-            try {
-                DB::table($table)->where('stats_report_id', '=', $this->id)
-                                 ->delete();
-            } catch(\Exception $e) {
-                Log::error("Error clearing statsReport {$this->id} from $table table: " . $e->getMessage());
-
-                if (!$ignoreErrors) {
-                    $success = false;
-                }
-            }
-        }
-
-        return $success;
-    }
-
     public function getPoints()
     {
         $data = CenterStatsData::actual()->statsReport($this)->first();
@@ -158,7 +112,7 @@ class StatsReport extends Model {
         }
     }
 
-    public function scopeCenter($query, Center $center)
+    public function scopeByCenter($query, Center $center)
     {
         return $query->whereCenterId($center->id);
     }

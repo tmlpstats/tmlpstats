@@ -2,10 +2,13 @@
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
+use TmlpStats\Person;
+use TmlpStats\Quarter;
 use TmlpStats\TmlpRegistration;
 use TmlpStats\TmlpRegistrationData;
 use TmlpStats\TeamMember;
 use TmlpStats\Util;
+use TmlpStats\WithdrawCode;
 
 class TmlpRegistrationImporter extends DataImporterAbstract
 {
@@ -81,13 +84,13 @@ class TmlpRegistrationImporter extends DataImporterAbstract
                 'reg_date'   => $incomingInput['regDate'],
             ));
 
-            if ($incoming->incomingTeamYear === null) {
+            if ($incoming->teamYear === null) {
 
                 if ($incomingInput['incomingTeamYear'] == 'R') {
-                    $incoming->incomingTeamYear = 2;
+                    $incoming->teamYear = 2;
                     $incoming->isReviewer = true;
                 } else {
-                    $incoming->incomingTeamYear = $incomingInput['incomingTeamYear'];
+                    $incoming->teamYear = $incomingInput['incomingTeamYear'];
                 }
             }
             $incoming->save();
@@ -96,10 +99,6 @@ class TmlpRegistrationImporter extends DataImporterAbstract
                 'tmlp_registration_id' => $incoming->id,
                 'stats_report_id'      => $this->statsReport->id,
             ));
-
-
-
-
 
             $withdrawCodeId = null;
             if ($incomingInput['wd']) {
@@ -126,6 +125,9 @@ class TmlpRegistrationImporter extends DataImporterAbstract
             if ($nextQuarter) {
                 $incomingData->incomingQuarterId = $nextQuarter->id;
             }
+
+            $incomingInput['travel'] = $incomingInput['travel'] ? true : false;
+            $incomingInput['room'] = $incomingInput['room'] ? true : false;
 
             unset($incomingInput['firstName']);
             unset($incomingInput['lastName']);
@@ -156,11 +158,14 @@ class TmlpRegistrationImporter extends DataImporterAbstract
 
     protected function getTeamMember($name)
     {
+        if (!$name) {
+            return null;
+        }
         $nameParts = Util::getNameParts($name);
 
         $person = Person::firstName($nameParts['firstName'])
             ->lastName($nameParts['lastName'])
-            ->center($this->statsReport->center->id)
+            ->center($this->statsReport->center)
             ->first();
 
         return $person

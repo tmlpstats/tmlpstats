@@ -105,7 +105,7 @@ class GlobalReportController extends Controller {
         $centers = array();
         foreach ($statsReports as $statsReport) {
             if ($statsReport->globalReports()->find($globalReport->id)
-                || $globalReport->statsReports()->center($statsReport->center)->count() > 0) {
+                || $globalReport->statsReports()->byCenter($statsReport->center)->count() > 0) {
                 continue;
             }
             $centers[$statsReport->center->abbreviation] = $statsReport->center->name;

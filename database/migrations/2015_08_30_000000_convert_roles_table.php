@@ -1,5 +1,7 @@
 <?php
 
+use TmlpStats\Role;
+use TmlpStats\Util;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
@@ -16,6 +18,12 @@ class ConvertRolesTable extends Migration
         Schema::table('roles', function (Blueprint $table) {
             $table->string('display')->after('name');
         });
+
+        $roles = Role::all();
+        foreach ($roles as $role) {
+            $role->display = ucwords(Util::toWords($role->name));
+            $role->save();
+        }
     }
 
     /**

@@ -27,8 +27,8 @@ class TmlpRegistration extends Model
             'last_name'  => $attributes['last_name'],
         ]);
 
-        return static::firstOrNew([
-            'reg_date'  => $attributes['regDate'],
+        return parent::firstOrNew([
+            'reg_date'  => $attributes['reg_date'],
             'person_id' => $person->id,
         ]);
     }

@@ -58,6 +58,11 @@ class ConvertTeamMembersDataTable extends Migration
                 $withdrawCodeId = $withdrawCode ? $withdrawCode->id : null;
             }
 
+            if ($data->wbo) {
+                $withdrawCode = WithdrawCode::code('WB')->first();
+                $withdrawCodeId = $withdrawCode ? $withdrawCode->id : null;
+            }
+
             DB::table('team_members_data_tmp')->insert([
                 'stats_report_id'  => $data->statsReportId,
                 'team_member_id'   => $data->teamMemberId,

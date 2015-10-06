@@ -48,6 +48,7 @@ class ConvertQuartersTable extends Migration
             ]);
 
             $quarter->t1Distinction = $quarter->distinction;
+            $quarter->t2Distinction = $this->getT2Distinction($quarter->distinction);
 
             $startDate = $quarter->startWeekendDate;
             if ($startDate) {
@@ -102,6 +103,7 @@ class ConvertQuartersTable extends Migration
         foreach ($backQuarters as $quarter) {
             Quarter::create([
                 't1_distinction' => $quarter[0],
+                't2_distinction' => $this->getT2Distinction($quarter[0]),
                 'quarter_number' => $quarter[1],
                 'year'           => $quarter[2],
             ]);
@@ -131,4 +133,21 @@ class ConvertQuartersTable extends Migration
         // from backup
     }
 
+    protected function getT2Distinction($t1Distinction)
+    {
+        switch ($t1Distinction) {
+            case 'Relatedness':
+                return 'Generosity';
+            case 'Possibility':
+                return 'Integrity';
+            case 'Opportunity':
+                return 'Listening';
+            case 'Action':
+                return 'Responsibility';
+            case 'Completion':
+                return 'Completion';
+            default:
+                return null;
+        }
+    }
 }

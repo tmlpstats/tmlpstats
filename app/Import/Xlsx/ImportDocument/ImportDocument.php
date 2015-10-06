@@ -1,6 +1,8 @@
 <?php
 namespace TmlpStats\Import\Xlsx\ImportDocument;
 
+use TmlpStats\CenterStatsData;
+use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
 use TmlpStats\Center;
 use TmlpStats\StatsReport;
@@ -532,9 +534,6 @@ class ImportDocument extends ImportDocumentAbstract
             return;
         }
 
-        // Make sure there aren't any left over artifacts from the last run
-        $this->statsReport->clear();
-
         if ($isValid) {
             foreach ($this->importers as $name => $importer) {
 
@@ -545,15 +544,14 @@ class ImportDocument extends ImportDocumentAbstract
                     case 'contactInfo':
                         $reportingStatistician = $importer->getReportingStatistician();
 
-                        $centerStats = $this->statsReport->centerStats()
+                        $actual = CenterStatsData::actual()
+                            ->statsReport($this->statsReport)
                             ->reportingDate($this->statsReport->reportingDate)
                             ->first();
-
-                        if ($centerStats) {
-                            $centerStats->actualData->programManagerAttendingWeekend = $importer->getProgramManagerAttendingWeekend();
-                            $centerStats->actualData->classroomLeaderAttendingWeekend = $importer->getClassroomLeaderAttendingWeekend();
-
-                            $centerStats->actualData->save();
+                        if ($actual) {
+                            $actual->programManagerAttendingWeekend = $importer->getProgramManagerAttendingWeekend();
+                            $actual->classroomLeaderAttendingWeekend = $importer->getClassroomLeaderAttendingWeekend();
+                            $actual->save();
                         }
 
                         $this->statsReport->reportingStatisticianId = $reportingStatistician ? $reportingStatistician->id : null;

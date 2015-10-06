@@ -159,26 +159,47 @@ class ClassListImporter extends DataImporterAbstract
                 'stats_report_id' => $this->statsReport->id,
             ));
 
+            if ($memberInput['wd']) {
+                // TODO: Handle error gracefully
+                $withdrawCode = WithdrawCode::code(substr($memberInput['wd'], 2))->first();
+                $memberInput['withdraw_code_id'] = $withdrawCode->id;
+            } else if ($memberInput['wbo']) {
+                $withdrawCode = WithdrawCode::code('WB')->first();
+                $memberInput['withdraw_code_id'] = $withdrawCode->id;
+            }
+
+            if ($memberInput['wknd']) {
+                $memberInput['at_weekend'] = true;
+            }
+
+            $memberInput['xferOut'] = $memberInput['xferOut'] ? true : false;
+            $memberInput['xferIn'] = $memberInput['xferIn'] ? true : false;
+            $memberInput['ctw'] = $memberInput['ctw'] ? true : false;
+            $memberInput['rereg'] = $memberInput['rereg'] ? true : false;
+            $memberInput['excep'] = $memberInput['excep'] ? true : false;
+            $memberInput['travel'] = $memberInput['travel'] ? true : false;
+            $memberInput['room'] = $memberInput['room'] ? true : false;
+            $memberInput['gitw'] = $memberInput['gitw'] ? true : false;
+            $memberInput['tdo'] = $memberInput['tdo'] ? true : false;
+
             // Unset unneeded data
             unset($memberInput['centerId']);
             unset($memberInput['firstName']);
             unset($memberInput['lastName']);
             unset($memberInput['teamYear']);
             unset($memberInput['completionQuarter']);
-
-            if ($memberInput['wd']) {
-                // TODO: Handle error gracefully
-                $withdrawCode = WithdrawCode::code(substr($memberInput['wd'], 2))->first();
-                $memberInput['withdraw_code_id'] = $withdrawCode->id;
-                unset($memberInput['wd']);
-            }
+            unset($memberInput['offset']);
+            unset($memberInput['accountability']);
+            unset($memberInput['wbo']);
+            unset($memberInput['wd']);
+            unset($memberInput['wknd']);
 
             $memberData = $this->setValues($memberData, $memberInput);
             $memberData->save();
 
-            if ($memberData->withdrawCodeId || $memberData->wbo || $memberData->xferOut) continue;
+            if ($memberData->withdrawCodeId || $memberData->xferOut) continue;
 
-            $tdo = preg_match('/^y$/i', $memberData->tdo) ? 1 : 0;
+            $tdo = $memberData->tdo ? 1 : 0;
             if ($tdo > 0) {
                 $totalTdos += $tdo;
                 $totalTeamMembersDoingTdo++;
@@ -186,20 +207,18 @@ class ClassListImporter extends DataImporterAbstract
             $totalTeamMembers++;
         }
 
-        $centerStats = CenterStats::where('center_id', '=', $this->statsReport->center->id)
-            ->where('reporting_date', '=', $this->statsReport->reportingDate->toDateString())
+        $data = CenterStatsData::actual()
+            ->statsReport($this->statsReport)
+            ->reportingDate($this->statsReport->reportingDate)
             ->first();
 
-        if ($centerStats) {
-            $data = CenterStatsData::find($centerStats->actualDataId);
-            if ($data) {
-                $tdoActual = 0;
-                if ($totalTeamMembers > 0) {
-                    $tdoActual = round(($totalTeamMembersDoingTdo / $totalTeamMembers) * 100);
-                }
-                $data->tdo = $tdoActual;
-                $data->save();
+        if ($data) {
+            $tdoActual = 0;
+            if ($totalTeamMembers > 0) {
+                $tdoActual = round(($totalTeamMembersDoingTdo / $totalTeamMembers) * 100);
             }
+            $data->tdo = $tdoActual;
+            $data->save();
         }
     }
 }

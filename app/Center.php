@@ -24,48 +24,46 @@ class Center extends Model {
         'active' => 'bool'
     );
 
-    public function getProgramManager($quarter = null)
+    public function getProgramManager()
     {
-        return $this->getAccountable('Program Manager', $quarter);
+        return Person::accountability('programManager')
+            ->byCenter($this)
+            ->first();
     }
 
-    public function getClassroomLeader($quarter = null)
+    public function getClassroomLeader()
     {
-        return $this->getAccountable('Classroom Leader', $quarter);
+        return Person::accountability('classroomLeader')
+            ->byCenter($this)
+            ->first();
     }
 
-    public function getT1TeamLeader($quarter = null)
+    public function getT1TeamLeader()
     {
-        return $this->getAccountable('Team 1 Team Leader', $quarter);
+        return Person::accountability('team1TeamLeader')
+            ->byCenter($this)
+            ->first();
     }
 
-    public function getT2TeamLeader($quarter = null)
+    public function getT2TeamLeader()
     {
-        return $this->getAccountable('Team 2 Team Leader', $quarter);
+        return Person::accountability('team2TeamLeader')
+            ->byCenter($this)
+            ->first();
     }
 
-    public function getStatistician($quarter = null)
+    public function getStatistician()
     {
-        return $this->getAccountable('Statistician', $quarter);
+        return Person::accountability('teamStatistician')
+            ->byCenter($this)
+            ->first();
     }
 
-    public function getStatisticianApprentice($quarter = null)
+    public function getStatisticianApprentice()
     {
-        return $this->getAccountable('Statistician Apprentice', $quarter);
-    }
-
-    // TODO: port this to new user scheme
-    public function getAccountable($accountability, $quarter = null)
-    {
-        if (!$quarter) {
-            $quarter = Quarter::current()->first();
-            $quarter->setRegion($this->region);
-        }
-
-        return ProgramTeamMember::byCenter($this)
-                                ->quarter($quarter)
-                                ->accountability($accountability)
-                                ->first();
+        return Person::accountability('teamStatisticianApprentice')
+            ->byCenter($this)
+            ->first();
     }
 
     public function getGlobalRegion()

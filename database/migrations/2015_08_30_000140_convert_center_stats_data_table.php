@@ -17,7 +17,7 @@ class ConvertCenterStatsDataTable extends Migration
     public function up()
     {
         Schema::table('center_stats_data', function (Blueprint $table) {
-            $table->integer('points')->after('stats_report_id');
+            $table->integer('points')->after('lf');
             $table->integer('program_manager_attending_weekend')->unsigned()->default(0)->after('points');
             $table->integer('classroom_leader_attending_weekend')->unsigned()->default(0)->after('program_manager_attending_weekend');
         });
@@ -63,18 +63,17 @@ class ConvertCenterStatsDataTable extends Migration
         Schema::table('stats_reports', function (Blueprint $table) {
             $table->dropColumn('program_manager_attending_weekend');
             $table->dropColumn('classroom_leader_attending_weekend');
+            $table->dropColumn('center_stats_id');
         });
 
         Schema::table('center_stats_data', function (Blueprint $table) {
             $table->dropIndex('center_stats_data_center_id_foreign');
             $table->dropIndex('center_stats_data_quarter_id_foreign');
 
-            $table->dropColumn('reporting_date');
             $table->dropColumn('rating');
             $table->dropColumn('offset');
             $table->dropColumn('center_id');
             $table->dropColumn('quarter_id');
-            $table->dropColumn('stats_report_id');
         });
 
         Schema::table('center_stats', function (Blueprint $table) {

@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats;
 
+use TmlpStats\Center;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
@@ -10,6 +11,8 @@ class CenterStatsData extends Model
     use CamelCaseModel;
 
     protected $table = 'center_stats_data';
+
+    protected $center = null;
 
     protected $fillable = [
         'stats_report_id',
@@ -26,6 +29,10 @@ class CenterStatsData extends Model
         'classroom_leader_attending_weekend',
     ];
 
+    protected $dates = [
+        'reporting_date',
+    ];
+
     public function scopeActual($query)
     {
         return $query->whereType('actual');
@@ -36,13 +43,34 @@ class CenterStatsData extends Model
         return $query->whereType('promise');
     }
 
+    public function scopeCenter($query, Center $center)
+    {
+        $this->center = $center;
+
+        return $query->whereIn('stats_report_id', function($query) use ($center) {
+            $query->select('id')
+                ->from('stats_reports')
+                ->whereCenterId($center->id);
+        });
+    }
+
+    public function scopeQuarter($query, Quarter $quarter)
+    {
+        return $query->whereIn('stats_report_id', function($query) use ($quarter) {
+            $query->select('id')
+                ->from('stats_reports')
+                ->whereQuarterId($quarter->id);
+        });
+    }
+
+    public function scopeReportingDate($query, $date)
+    {
+        return $query->whereReportingDate($date);
+    }
+
     public function scopeStatsReport($query, StatsReport $statsReport)
     {
-        return $query->where('id', function($query) use ($statsReport) {
-            $query->select('actual_data_id')
-                ->from('center_stats')
-                ->where('stats_report_id', $statsReport->id);
-        });
+        return $query->whereStatsReportId($statsReport->id);
     }
 
     public function centerStats()

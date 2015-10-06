@@ -6,7 +6,6 @@ use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
 use TmlpStats\User;
 use TmlpStats\StatsReport;
-use TmlpStats\CenterStatsData;
 use TmlpStats\Quarter;
 use TmlpStats\Region;
 

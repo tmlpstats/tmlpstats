@@ -32,6 +32,7 @@ class Quarter extends Model
             case 'classroom1Date':
             case 'classroom2Date':
             case 'classroom3Date':
+                // TODO: uncomment me. needed for migration
                 if ($this->region && !$this->regionQuarterDetails) {
                     $this->setRegion($this->region);
                 }

@@ -1,7 +1,6 @@
 <?php
 namespace TmlpStats;
 
-use TmlpStats\Region;
 use TmlpStats\StatsReport;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
@@ -30,6 +29,10 @@ class GlobalReport extends Model {
 
     public function addCenterReport(StatsReport $report)
     {
+        $existingReport = $this->statsReports()->byCenter($report->center)->first();
+        if ($existingReport) {
+            $this->statsReports()->detach($existingReport->id);
+        }
         $this->statsReports()->attach($report->id);
     }
 

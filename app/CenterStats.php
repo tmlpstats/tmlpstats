@@ -5,6 +5,7 @@ use TmlpStats\CenterStatsData;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
+// TODO: delete me after migration
 class CenterStats extends Model
 {
     use CamelCaseModel;

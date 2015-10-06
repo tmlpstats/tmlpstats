@@ -17,8 +17,8 @@ class ConvertTeamMembersTable extends Migration
     public function up()
     {
         Schema::table('team_members', function (Blueprint $table) {
-            $table->integer('person_id')->unsigned()->index()->after('completion_quarter_id');
-            $table->boolean('is_reviewer')->default(false)->after('person_id');
+            $table->integer('person_id')->unsigned()->index()->after('id');
+            $table->boolean('is_reviewer')->default(false)->after('completion_quarter_id');
             $table->renameColumn('completion_quarter_id', 'incoming_quarter_id');
         });
 

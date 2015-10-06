@@ -58,6 +58,10 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
             case 'phone':
             case 'email':
             case 'center':
+                // TODO: remove me. needed for migration
+                if (!$this->person) {
+                    return parent::__get($name);
+                }
                 return $this->person->$name;
             default:
                 return parent::__get($name);
