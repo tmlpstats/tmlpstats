@@ -168,30 +168,44 @@ class ImportManager
         $quarter = $statsReport->quarter;
         $center = $statsReport->center;
 
-        $sumittedAt = clone $statsReport->submittedAt;
-        $sumittedAt->setTimezone($center->timeZone);
+        $submittedAt = clone $statsReport->submittedAt;
+        $submittedAt->setTimezone($center->timeZone);
 
-        // 7:00.59 PM local time on the reporting date.
-        $due = Carbon::create(
-            $statsReport->reportingDate->year,
-            $statsReport->reportingDate->month,
-            $statsReport->reportingDate->day,
-            19, 0, 59,
-            $center->timeZone
-        );
+        if ($statsReport->reportingDate->eq($statsReport->quarter->classroom2Date)) {
+            // Stats are due by 11:59 PM at the second classroom
+            // 11:59.59 PM local time on the reporting date.
+            $due = Carbon::create(
+                $statsReport->reportingDate->year,
+                $statsReport->reportingDate->month,
+                $statsReport->reportingDate->day,
+                23, 59, 59,
+                $center->timeZone
+            );
+        } else {
+            // Stats are due by 7:00 PM every other week
+            // 7:00.59 PM local time on the reporting date.
+            $due = Carbon::create(
+                $statsReport->reportingDate->year,
+                $statsReport->reportingDate->month,
+                $statsReport->reportingDate->day,
+                19, 0, 59,
+                $center->timeZone
+            );
+        }
 
-        $isLate = $sumittedAt->gt($due);
+        $isLate = $submittedAt->gt($due);
         $due = $due->format('l, F jS \a\t g:ia');
-        $time = $sumittedAt->format('l, F jS \a\t g:ia');
+        $time = $submittedAt->format('l, F jS \a\t g:ia');
 
-        $programManager         = $center->getProgramManager($quarter, $center->globalRegion);
-        $classroomLeader        = $center->getClassroomLeader($quarter, $center->globalRegion);
-        $t1TeamLeader           = $center->getT1TeamLeader($quarter, $center->globalRegion);
-        $t2TeamLeader           = $center->getT2TeamLeader($quarter, $center->globalRegion);
-        $statistician           = $center->getStatistician($quarter, $center->globalRegion);
-        $statisticianApprentice = $center->getStatisticianApprentice($quarter, $center->globalRegion);
+        $programManager         = $center->getProgramManager($quarter);
+        $classroomLeader        = $center->getClassroomLeader($quarter);
+        $t1TeamLeader           = $center->getT1TeamLeader($quarter);
+        $t2TeamLeader           = $center->getT2TeamLeader($quarter);
+        $statistician           = $center->getStatistician($quarter);
+        $statisticianApprentice = $center->getStatisticianApprentice($quarter);
+        $t2Statistician         = $center->getT2Statistician($quarter);
 
-        $emails = array(
+        $emailMap = array(
             'center'                 => $center->statsEmail,
             'programManager'         => $programManager ? $programManager->email : null,
             'classroomLeader'        => $classroomLeader ? $classroomLeader->email : null,
@@ -199,8 +213,17 @@ class ImportManager
             't2TeamLeader'           => $t2TeamLeader ? $t2TeamLeader->email : null,
             'statistician'           => $statistician ? $statistician->email : null,
             'statisticianApprentice' => $statisticianApprentice ? $statisticianApprentice->email : null,
+            't2Statistician'         => $t2Statistician ? $t2Statistician->email : null,
             'regional'               => null,
         );
+
+        $emails = array();
+        foreach ($emailMap as $accountability => $email) {
+            if ($email) {
+                $emails[] = $email;
+            }
+        }
+        $emails = array_unique($emails);
 
         switch ($center->globalRegion) {
             case 'NA':
@@ -225,31 +248,18 @@ class ImportManager
         $comment = $statsReport->submitComment;
         try {
             Mail::send('emails.statssubmitted', compact('user', 'centerName', 'time', 'sheet', 'isLate', 'due', 'comment'),
-                function($message) use ($emails, $centerName, $sheetPath, $sheetName) {
+                function($message) use ($emails, $emailMap, $centerName, $sheetPath, $sheetName) {
                 // Only send email to centers in production
                 if (env('APP_ENV') === 'prod') {
-                    $message->to($emails['center']);
 
-                    if ($emails['regional']) {
-                        $message->cc($emails['regional']);
+                    if ($emailMap['center']) {
+                        $message->to($emailMap['center']);
+                    } else {
+                        $message->to($emailMap['statistician']);
                     }
-                    if ($emails['programManager']) {
-                        $message->cc($emails['programManager']);
-                    }
-                    if ($emails['classroomLeader']) {
-                        $message->cc($emails['classroomLeader']);
-                    }
-                    if ($emails['t1TeamLeader']) {
-                        $message->cc($emails['t1TeamLeader']);
-                    }
-                    if ($emails['t2TeamLeader']) {
-                        $message->cc($emails['t2TeamLeader']);
-                    }
-                    if ($emails['statistician']) {
-                        $message->cc($emails['statistician']);
-                    }
-                    if ($emails['statisticianApprentice']) {
-                        $message->cc($emails['statisticianApprentice']);
+
+                    foreach ($emails as $email) {
+                        $message->cc($email);
                     }
                 } else {
                     $message->to(env('ADMIN_EMAIL'));
