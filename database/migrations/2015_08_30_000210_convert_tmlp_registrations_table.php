@@ -18,7 +18,6 @@ class ConvertTmlpRegistrationsTable extends Migration
         Schema::table('tmlp_registrations', function (Blueprint $table) {
             $table->integer('person_id')->unsigned()->after('id');
             $table->integer('team_year')->after('person_id');
-            $table->integer('incoming_quarter_id')->unsigned()->nullable()->after('team_year');
         });
 
         $registrations = TmlpRegistration::all();
@@ -37,7 +36,6 @@ class ConvertTmlpRegistrationsTable extends Migration
 
         Schema::table('tmlp_registrations', function (Blueprint $table) {
             $table->foreign('person_id')->references('id')->on('people');
-            $table->foreign('incoming_quarter_id')->references('id')->on('quarters');
 
             $table->dropIndex('tmlp_registrations_center_id_foreign');
 

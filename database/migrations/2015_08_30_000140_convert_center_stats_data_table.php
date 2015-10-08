@@ -17,7 +17,7 @@ class ConvertCenterStatsDataTable extends Migration
     public function up()
     {
         Schema::table('center_stats_data', function (Blueprint $table) {
-            $table->integer('points')->after('lf');
+            $table->integer('points')->nullable()->after('lf');
             $table->integer('program_manager_attending_weekend')->unsigned()->default(0)->after('points');
             $table->integer('classroom_leader_attending_weekend')->unsigned()->default(0)->after('program_manager_attending_weekend');
         });

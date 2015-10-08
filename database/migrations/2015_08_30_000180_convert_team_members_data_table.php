@@ -17,7 +17,6 @@ class ConvertTeamMembersDataTable extends Migration
     {
         Schema::create('team_members_data_tmp', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('stats_report_id')->unsigned()->index();
             $table->integer('team_member_id')->unsigned()->index();
             $table->boolean('at_weekend')->default(true);
             $table->boolean('xfer_out')->default(false);
@@ -32,6 +31,7 @@ class ConvertTeamMembersDataTable extends Migration
             $table->integer('accountability_id')->unsigned()->nullable();
             $table->boolean('gitw')->default(0);
             $table->integer('tdo')->default(0);
+            $table->integer('stats_report_id')->unsigned()->index();
             $table->timestamps();
 
             $table->foreign('stats_report_id')->references('id')->on('stats_reports');

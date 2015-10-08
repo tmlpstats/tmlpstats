@@ -78,8 +78,8 @@ class HomeController extends Controller {
         }
 
         $reportingDate = null;
-        $reportingDateString = Input::has('stats_report')
-            ? Input::get('stats_report')
+        $reportingDateString = Input::has('reportingDate')
+            ? Input::get('reportingDate')
             : '';
 
         if ($reportingDateString && isset($reportingDates[$reportingDateString])) {
@@ -91,6 +91,8 @@ class HomeController extends Controller {
         } else {
             $reportingDate = ImportManager::getExpectedReportDate();
         }
+
+        $reportingDate = $reportingDate->startOfDay();
 
         $centers = Center::active()
                          ->byRegion($region)
@@ -169,7 +171,7 @@ class HomeController extends Controller {
 
             $centerResults = array(
                 'name'        => $center->name,
-                'localRegion' => $center->localRegion,
+                'localRegion' => $localRegion,
                 'submitted'   => $statsReport ? $statsReport->isSubmitted() : false,
                 'validated'   => $statsReport ? $statsReport->isValidated() : false,
                 'rating'      => $statsReport ? $statsReport->getRating() : '-',

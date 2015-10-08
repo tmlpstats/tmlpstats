@@ -26,6 +26,6 @@ class Accountability extends Model
 
     public function people()
     {
-        return $this->belongsToMany('TmlpStats\Person', 'accountability_person')->withTimestamps();
+        return $this->belongsToMany('TmlpStats\Person', 'accountability_person', 'accountability_id', 'person_id')->withTimestamps();
     }
 }

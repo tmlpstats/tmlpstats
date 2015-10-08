@@ -177,10 +177,12 @@ class ClassListImporter extends DataImporterAbstract
             $memberInput['ctw'] = $memberInput['ctw'] ? true : false;
             $memberInput['rereg'] = $memberInput['rereg'] ? true : false;
             $memberInput['excep'] = $memberInput['excep'] ? true : false;
-            $memberInput['travel'] = $memberInput['travel'] ? true : false;
-            $memberInput['room'] = $memberInput['room'] ? true : false;
-            $memberInput['gitw'] = $memberInput['gitw'] ? true : false;
-            $memberInput['tdo'] = $memberInput['tdo'] ? true : false;
+
+            $memberInput['travel'] = strtoupper($memberInput['travel']) === 'Y' ? true : false;
+            $memberInput['room'] = strtoupper($memberInput['room']) === 'Y' ? true : false;
+
+            $memberInput['gitw'] = strtoupper($memberInput['gitw']) === 'E' ? true : false;
+            $memberInput['tdo'] = strtoupper($memberInput['tdo']) === 'Y' ? true : false;
 
             // Unset unneeded data
             unset($memberInput['centerId']);

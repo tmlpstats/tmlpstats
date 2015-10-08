@@ -126,6 +126,8 @@ class StatsReport extends Model
         if (!$currentQuarter) {
             return $query;
         }
+        $currentQuarter->setRegion($region);
+
         $lastQuarter = Quarter::byRegion($region)->date($currentQuarter->startWeekendDate)->first();
         if (!$lastQuarter) {
             return $query;

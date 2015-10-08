@@ -129,9 +129,13 @@ class TmlpRegistrationImporter extends DataImporterAbstract
             $incomingInput['travel'] = $incomingInput['travel'] ? true : false;
             $incomingInput['room'] = $incomingInput['room'] ? true : false;
 
+            $teamMember = $this->getTeamMember($incomingInput['committedTeamMemberName']);
+            if ($teamMember) {
+                $incomingData->committedTeamMemberId = $teamMember->id;
+            }
+
             unset($incomingInput['firstName']);
             unset($incomingInput['lastName']);
-            unset($incomingInput['regDate']);
             unset($incomingInput['incomingTeamYear']);
             unset($incomingInput['offset']);
             unset($incomingInput['bef']);
@@ -146,11 +150,6 @@ class TmlpRegistrationImporter extends DataImporterAbstract
             unset($incomingInput['incomingWeekend']);
 
             $incomingData = $this->setValues($incomingData, $incomingInput);
-
-            $teamMember = $this->getTeamMember($incomingData->committedTeamMemberName);
-            if ($teamMember) {
-                $incomingData->committedTeamMemberId = $teamMember->id;
-            }
 
             $incomingData->save();
         }

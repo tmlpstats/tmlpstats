@@ -87,7 +87,7 @@ class ContactInfoImporter extends DataImporterAbstract
 
             $nameParts = Util::getNameParts($leader['name']);
 
-            $member = Person::firstOrNew(array(
+            $member = Person::firstOrCreate(array(
                 'center_id'      => $this->statsReport->center->id,
                 'first_name'     => $nameParts['firstName'],
                 'last_name'      => $nameParts['lastName'],
@@ -95,7 +95,7 @@ class ContactInfoImporter extends DataImporterAbstract
 
             // TODO: Handle error gracefully
             $accountability = Accountability::name($this->mapAccountabilities($leader['accountability']))->first();
-            if ($accountability) {
+            if ($accountability && !$member->hasAccountability($accountability)) {
                 $member->addAccountability($accountability);
             }
 

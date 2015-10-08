@@ -2,7 +2,10 @@
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
 use Carbon\Carbon;
+use TmlpStats\Center;
+use TmlpStats\GlobalReport;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
+use TmlpStats\Quarter;
 use TmlpStats\TmlpGame;
 use TmlpStats\TmlpGameData;
 
@@ -77,13 +80,21 @@ class TmlpGameInfoImporter extends DataImporterAbstract
             $quarter->setRegion($center->region);
         }
 
-        $globalReport = GlobalReport::reportingDate($quarter->startWeekendDate->addWeek())->first();
+        $firstWeek = $quarter->startWeekendDate->addWeek();
 
-        if (!$globalReport) {
-            return null;
+        $globalReport = null;
+
+        // Don't reuse game data on the first week, as they may change between submits
+        if ($this->statsReport->reportingDate->ne($firstWeek)) {
+            $globalReport = GlobalReport::reportingDate($firstWeek)->first();
         }
 
-        $statsReport = $globalReport->statsReports()->byCenter($center)->first();
+        if ($globalReport) {
+            $statsReport = $globalReport->statsReports()->byCenter($center)->first();
+        } else {
+            $statsReport = $this->statsReport;
+        }
+
         if (!$statsReport) {
             return null;
         }

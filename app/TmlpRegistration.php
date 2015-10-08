@@ -12,12 +12,17 @@ class TmlpRegistration extends Model
         'person_id',
         'team_year',
         'incoming_quarter_id',
+        'reg_date',
         'is_reviewer',
     ];
 
-    protected $casts = array(
+    protected $dates = [
+        'reg_date',
+    ];
+
+    protected $casts = [
         'is_reviewer' => 'boolean',
-    );
+    ];
 
     public static function firstOrNew(array $attributes)
     {
