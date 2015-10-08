@@ -44,6 +44,11 @@ class Center extends Model {
         return $this->getAccountable('Team 2 Team Leader', $quarter);
     }
 
+    public function getT2Statistician($quarter = null)
+    {
+        return $this->getAccountable('Team 2 Statistician', $quarter);
+    }
+
     public function getStatistician($quarter = null)
     {
         return $this->getAccountable('Statistician', $quarter);
