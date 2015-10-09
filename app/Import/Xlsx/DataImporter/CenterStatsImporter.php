@@ -163,7 +163,8 @@ class CenterStatsImporter extends DataImporterAbstract
             $weekDate = Carbon::createFromFormat('Y-m-d', $week['reportingDate'])->startOfDay();
 
             $actualData = $this->getActualData($weekDate, $this->statsReport->center);
-            if ($actualData) {
+            // Always allow setting this week
+            if ($actualData && $this->statsReport->reportDate->ne($weekDate)) {
                 continue;
             }
 
@@ -230,10 +231,9 @@ class CenterStatsImporter extends DataImporterAbstract
     public function getActualData(Carbon $date, Center $center)
     {
         $globalReport = GlobalReport::reportingDate($date)->first();
+        $statsReport = null;
         if ($globalReport) {
             $statsReport = $globalReport->statsReports()->byCenter($center)->first();
-        } else {
-            $statsReport = $this->statsReport;
         }
 
         if (!$statsReport) {
