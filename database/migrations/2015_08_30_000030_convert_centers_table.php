@@ -31,6 +31,7 @@ class ConvertCentersTable extends Migration
                     $globalRegion = Region::create([
                         'abbreviation' => $center->globalRegion,
                         'name'         => $center->globalRegion,
+                        'email'        => $this->getRegionEmail($center->globalRegion),
                     ]);
                 }
                 $center->regionId = $globalRegion->id;
@@ -42,6 +43,7 @@ class ConvertCentersTable extends Migration
                     $localRegion = Region::create([
                         'abbreviation' => $center->localRegion,
                         'name'         => $center->localRegion,
+                        'email'        => $this->getRegionEmail($center->localRegion),
                     ]);
                 }
                 $localRegion->parentId = $globalRegion->id;
@@ -60,6 +62,26 @@ class ConvertCentersTable extends Migration
 
             $table->foreign('region_id')->references('id')->on('regions');
         });
+    }
+
+    protected function getRegionEmail($abbreviation)
+    {
+        switch ($abbreviation) {
+            case 'East':
+                return 'east.statistician@gmail.com';
+            case 'West':
+                return 'west.statistician@gmail.com';
+            case 'NA':
+                return 'na.statistician@gmail.com';
+            case 'IND':
+                return 'india.statistician@gmail.com';
+            case 'EME':
+                return 'eme.statistician@gmail.com';
+            case 'ANZ':
+                return 'anz.statistician@gmail.com';
+            default:
+                return null;
+        }
     }
 
     /**

@@ -17,6 +17,7 @@ class CreateRegionsTable extends Migration
             $table->increments('id');
             $table->string('abbreviation')->unique();
             $table->string('name');
+            $table->string('email')->nullable();
             $table->integer('parent_id')->unsigned()->nullable();
             $table->timestamps();
         });

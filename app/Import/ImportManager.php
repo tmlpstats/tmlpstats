@@ -199,25 +199,8 @@ class ImportManager
             't2TeamLeader'           => $t2TeamLeader ? $t2TeamLeader->email : null,
             'statistician'           => $statistician ? $statistician->email : null,
             'statisticianApprentice' => $statisticianApprentice ? $statisticianApprentice->email : null,
-            'regional'               => null,
+            'regional'               => $center->region->email,
         );
-
-        switch ($center->globalRegion) {
-            case 'NA':
-                $emails['regional'] = $center->localRegion == 'East'
-                    ? 'east.statistician@gmail.com'
-                    : 'west.statistician@gmail.com';
-                break;
-            case 'IND':
-                $emails['regional'] = 'india.statistician@gmail.com';
-                break;
-            case 'EME':
-                $emails['regional'] = 'eme.statistician@gmail.com';
-                break;
-            case 'ANZ':
-                $emails['regional'] = 'anz.statistician@gmail.com';
-                break;
-        }
 
         $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
         $sheetName = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
