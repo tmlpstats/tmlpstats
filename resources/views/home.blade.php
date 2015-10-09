@@ -7,14 +7,14 @@
                 <div class="panel-heading">Dashboard</div>
 
                 <div class="panel-body">
-                    @if (Auth::user()->hasRole('localStatistician') || Auth::user()->hasRole('globalStatistician'))
+                    @if (Auth::user()->hasRole('localStatistician') || Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator'))
                         <h1>Results for Week Ending {{ $reportingDate->format('F j, Y') }}</h1>
 
                         {!! Form::open(['url' => 'home', 'class' => 'form-horizontal']) !!}
                         <div class="form-group">
-                            {!! Form::label('stats_report', 'Week:', ['class' => 'col-sm-1 control-label']) !!}
+                            {!! Form::label('reportingDate', 'Week:', ['class' => 'col-sm-1 control-label']) !!}
                             <div class="col-sm-3">
-                                {!! Form::select('stats_report', $reportingDates, $reportingDate->toDateString(), ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}
+                                {!! Form::select('reportingDate', $reportingDates, $reportingDate->toDateString(), ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}
                             </div>
                         </div>
 

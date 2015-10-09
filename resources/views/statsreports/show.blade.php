@@ -15,22 +15,32 @@
         <tr>
             <th>Region:</th>
             <td>
-                {{ $statsReport->center->global_region }}
-                @if ($statsReport->center->local_region)
-                 - {{ $statsReport->center->local_region }}
+                <?php
+                $region = $statsReport->center->getLocalRegion();
+                if ($region) {
+                    echo $region->name;
+                }
+                ?>
+                @if ($statsReport->center->getLocalRegion())
+                 - <?php
+                    $region = $statsReport->center->getLocalRegion();
+                    if ($region) {
+                        echo $region->name;
+                    }
+                 ?>
                 @endif
             </td>
         </tr>
         <tr>
             <th>Stats Email:</th>
-            <td>{{ $statsReport->center->stats_email }}</td>
+            <td>{{ $statsReport->center->statsEmail }}</td>
         </tr>
         <tr>
             <th>Submitted At:</th>
             <td><?php
                 if ($statsReport->submittedAt) {
                     $submittedAt = clone $statsReport->submittedAt;
-                    $submittedAt->setTimezone($statsReport->center->timeZone);
+                    $submittedAt->setTimezone($statsReport->center->timezone);
                     echo $submittedAt->format('l, F jS \a\t g:ia T');
                 } else {
                     echo '-';
@@ -39,13 +49,13 @@
         </tr>
         <tr>
             <th>Submitted Sheet Version:</th>
-            <td>{{ $statsReport->spreadsheet_version }}</td>
+            <td>{{ $statsReport->version }}</td>
         </tr>
         <tr>
             <th>Rating:</th>
             <td>
-                @if ($statsReport)
-                    {{ $statsReport->getRating() }}
+                @if ($statsReport && $statsReport->getPoints() !== null)
+                    {{ $statsReport->getRating() }} ({{ $statsReport->getPoints() }})
                 @else
                     -
                 @endif

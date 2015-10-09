@@ -1,6 +1,8 @@
 <?php
 namespace TmlpStats\Import\Xlsx\ImportDocument;
 
+use TmlpStats\CenterStatsData;
+use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
 use TmlpStats\Center;
 use TmlpStats\StatsReport;
@@ -431,9 +433,14 @@ class ImportDocument extends ImportDocumentAbstract
             // No need to throw error, one has already been logged
             return;
         }
-        $this->quarter = Quarter::findByDateAndRegion($this->reportingDate, $this->center->globalRegion);
+        $this->quarter = Quarter::byRegion($this->center->region)
+            ->date($this->reportingDate)
+            ->first();
         if (!$this->quarter) {
             $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_QUARTER_NOT_FOUND', $this->reportingDate->toDateString());
+        } else {
+            // TODO: figure out how to not have to do this
+            $this->quarter->setRegion($this->center->region);
         }
     }
 
@@ -527,9 +534,6 @@ class ImportDocument extends ImportDocumentAbstract
             return;
         }
 
-        // Make sure there aren't any left over artifacts from the last run
-        $this->statsReport->clear();
-
         if ($isValid) {
             foreach ($this->importers as $name => $importer) {
 
@@ -537,17 +541,20 @@ class ImportDocument extends ImportDocumentAbstract
 
                 // Update the Stats Report after post processing
                 switch ($name) {
-
-                    case 'centerStats':
-                        $centerStats = $importer->getCenterStats();
-                        $this->statsReport->centerStatsId = $centerStats ? $centerStats->id : null;
-                        break;
-
                     case 'contactInfo':
                         $reportingStatistician = $importer->getReportingStatistician();
+
+                        $actual = CenterStatsData::actual()
+                            ->byStatsReport($this->statsReport)
+                            ->reportingDate($this->statsReport->reportingDate)
+                            ->first();
+                        if ($actual) {
+                            $actual->programManagerAttendingWeekend = $importer->getProgramManagerAttendingWeekend();
+                            $actual->classroomLeaderAttendingWeekend = $importer->getClassroomLeaderAttendingWeekend();
+                            $actual->save();
+                        }
+
                         $this->statsReport->reportingStatisticianId = $reportingStatistician ? $reportingStatistician->id : null;
-                        $this->statsReport->programManagerAttendingWeekend = $importer->getProgramManagerAttendingWeekend();
-                        $this->statsReport->classroomLeaderAttendingWeekend = $importer->getClassroomLeaderAttendingWeekend();
                         break;
 
                     default:
@@ -556,10 +563,15 @@ class ImportDocument extends ImportDocumentAbstract
             }
         }
 
-        $this->statsReport->spreadsheetVersion = $this->version;
+        $this->statsReport->version = $this->version;
         $this->statsReport->validated = $isValid;
         $this->statsReport->submittedAt = $this->submittedAt ?: Carbon::now();
         $this->statsReport->save();
+
+        $this->globalReport = GlobalReport::firstOrCreate([
+            'reporting_date' => $this->reportingDate,
+        ]);
+        $this->globalReport->addCenterReport($this->statsReport);
 
         $this->saved = true;
     }

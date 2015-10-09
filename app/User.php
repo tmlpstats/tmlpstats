@@ -8,8 +8,8 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class User extends Model implements AuthenticatableContract, CanResetPasswordContract {
-
+class User extends Model implements AuthenticatableContract, CanResetPasswordContract
+{
     use Authenticatable, CanResetPassword, CamelCaseModel;
 
     /**
@@ -27,15 +27,21 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     protected $fillable = [
         'email',
         'password',
-        'first_name',
-        'last_name',
-        'phone',
+        'person_id',
+        'role_id',
+        'active',
+        'require_password_reset',
+        'last_login_at',
     ];
 
-    protected $casts = array(
-        'active' => 'boolean',
-    );
+    protected $casts = [
+        'active'                 => 'boolean',
+        'require_password_reset' => 'boolean',
+    ];
 
+    protected $dates = [
+        'last_login_at' => 'date',
+    ];
 
     /**
      * The attributes excluded from the model's JSON form.
@@ -44,91 +50,91 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
      */
     protected $hidden = ['password', 'remember_token'];
 
+    public function __get($name)
+    {
+        switch ($name) {
+            case 'firstName':
+            case 'lastName':
+            case 'phone':
+            case 'email':
+            case 'center':
+                // TODO: remove me. needed for migration
+                if (!$this->person) {
+                    return parent::__get($name);
+                }
+                return $this->person->$name;
+            default:
+                return parent::__get($name);
+        }
+    }
+
+    public function hasAccountability($name)
+    {
+        return $this->person->hasAccountability($name);
+    }
+
     public function hasRole($name)
     {
-        foreach ($this->roles as $role) {
-            if ($role->name == $name) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function hasCenter($centerId)
-    {
-        foreach ($this->centers as $center) {
-            if ($center->id == $centerId) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function getCenter()
-    {
-        if ($this->centers) {
-            return $this->centers[0];
-        }
+        return ($this->role->name === $name);
     }
 
     public function homeRegion()
     {
-        return count($this->centers) ? $this->centers[0]->globalRegion : null;
+        return $this->person->center ? $this->person->center->region : null;
     }
 
-    public function updateRoles($roles)
+    public function setCenter($center)
     {
-        foreach ($roles as $roleId) {
-            $role = Role::find($roleId);
-
-            if ($role && !$this->hasRole($role->name)) {
-                $this->roles()->attach($roleId);
-            }
-        }
-        foreach ($this->roles as $existingRole) {
-            if (!in_array($existingRole->id, $roles)) {
-                $this->roles()->detach($existingRole->id);
-            }
-        }
+        $person = $this->person;
+        $person->centerId = $center->id;
+        $person->save();
     }
 
-    public function updateCenters($centers)
+    public function setPhone($phone)
     {
-        foreach ($this->centers as $existingCenter) {
-            if (!in_array($existingCenter->id, $centers)) {
-                $this->centers()->detach($existingCenter->id);
-            }
-        }
-        foreach ($centers as $centerAbbr) {
-            $center = Center::abbreviation($centerAbbr)->first();
+        $person = $this->person;
+        $person->phone = $phone;
+        $person->save();
+    }
 
-            if ($center && !$this->hasCenter($center->id)) {
-                $this->centers()->attach($center->id);
-            }
-        }
+    public function setEmail($email)
+    {
+        $person = $this->person;
+        $person->email = $email;
+        $person->save();
     }
 
     public function formatPhone()
     {
         // TODO: This handles the standard 10 digit North American phone number. Update to handle international formats
-        if (isset($this->phone) && preg_match('/^(\d\d\d)[\s\.\-]?(\d\d\d)[\s\.\-]?(\d\d\d\d)$/', $this->phone, $matches)) {
+        if (isset($this->person->phone) && preg_match('/^(\d\d\d)[\s\.\-]?(\d\d\d)[\s\.\-]?(\d\d\d\d)$/', $this->person->phone, $matches)) {
             return "({$matches[1]}) {$matches[2]}-{$matches[3]}";
         }
-        return $this->phone;
+        return $this->person->phone;
     }
 
-    public function scopeActive($query)
+    public function scopeActive($query, $active = true)
     {
-        return $query->where('active', '=', '1');
+        return $query->whereActive($active);
     }
 
-    public function roles()
+    public function scopeByPerson($query, Person $person)
     {
-        return $this->belongsToMany('TmlpStats\Role', 'role_user')->withTimestamps();
+        return $query->wherePersonId($person->id);
     }
 
-    public function centers()
+    public function scopeByRole($query, Role $role)
     {
-        return $this->belongsToMany('TmlpStats\Center', 'center_user')->withTimestamps();
+        return $query->whereRoleId($role->id);
+    }
+
+    public function person()
+    {
+        return $this->belongsTo('TmlpStats\Person');
+    }
+
+    public function role()
+    {
+        return $this->belongsTo('TmlpStats\Role');
     }
 }

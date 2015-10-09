@@ -1,25 +1,69 @@
 <?php
 namespace TmlpStats;
 
+use TmlpStats\Quarter;
+use TmlpStats\Person;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
-class TeamMember extends Model {
-
+class TeamMember extends Model
+{
     use CamelCaseModel;
 
     protected $fillable = [
-        'first_name',
-        'last_name',
+        'person_id',
         'team_year',
-        'accountability',
-        'center_id',
-        'completion_quarter_id',
+        'incoming_quarter_id',
+        'is_reviewer',
     ];
 
-    public function center()
+    protected $casts = array(
+        'is_reviewer' => 'boolean',
+    );
+
+    public static function firstOrNew(array $attributes)
     {
-        return $this->belongsTo('TmlpStats\Center');
+        $person = Person::firstOrCreate([
+            'center_id'  => $attributes['center_id'],
+            'first_name' => $attributes['first_name'],
+            'last_name'  => $attributes['last_name'],
+        ]);
+
+        return parent::firstOrNew([
+            'team_year'           => $attributes['team_year'],
+            'incoming_quarter_id' => $attributes['incoming_quarter_id'],
+            'person_id'           => $person->id,
+        ]);
+    }
+
+    public function getIncomingQuarter()
+    {
+        return Quarter::find($this->incomingQuarterId);
+    }
+
+    public function scopeTeamYear($query, $teamYear)
+    {
+        return $query->whereTeamYear($teamYear);
+    }
+
+    public function scopeIncomingQuarter($query, Quarter $quarter)
+    {
+        return $query->whereIncomingQuarterId($quarter->id);
+    }
+
+    public function scopeByPerson($query, Person $person)
+    {
+        return $query->wherePersonId($person->id);
+    }
+
+    public function scopeReviewer($query, $reviewer = true)
+    {
+        return $query->whereIsReviewer($reviewer);
+    }
+
+    public function person()
+    {
+        return $this->belongsTo('TmlpStats\Person');
     }
 
     public function teamMemberData()

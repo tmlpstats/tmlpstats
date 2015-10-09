@@ -179,7 +179,7 @@ class ImportManager
                 $statsReport->reportingDate->month,
                 $statsReport->reportingDate->day,
                 23, 59, 59,
-                $center->timeZone
+                $center->timezone
             );
         } else {
             // Stats are due by 7:00 PM every other week
@@ -189,7 +189,7 @@ class ImportManager
                 $statsReport->reportingDate->month,
                 $statsReport->reportingDate->day,
                 19, 0, 59,
-                $center->timeZone
+                $center->timezone
             );
         }
 
@@ -214,7 +214,7 @@ class ImportManager
             'statistician'           => $statistician ? $statistician->email : null,
             'statisticianApprentice' => $statisticianApprentice ? $statisticianApprentice->email : null,
             'mailingList'            => $mailingList ? $mailingList->email : null,
-            'regional'               => null,
+            'regional'               => $center->region->email,
         );
 
         $emails = array();
@@ -233,23 +233,6 @@ class ImportManager
             }
         }
         $emails = array_unique($emails);
-
-        switch ($center->globalRegion) {
-            case 'NA':
-                $emails['regional'] = $center->localRegion == 'East'
-                    ? 'east.statistician@gmail.com'
-                    : 'west.statistician@gmail.com';
-                break;
-            case 'IND':
-                $emails['regional'] = 'india.statistician@gmail.com';
-                break;
-            case 'EME':
-                $emails['regional'] = 'eme.statistician@gmail.com';
-                break;
-            case 'ANZ':
-                $emails['regional'] = 'anz.statistician@gmail.com';
-                break;
-        }
 
         $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
         $sheetName = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);

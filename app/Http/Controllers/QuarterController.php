@@ -4,7 +4,6 @@ namespace TmlpStats\Http\Controllers;
 use TmlpStats\Quarter;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Requests\QuarterRequest;
-use TmlpStats\Http\Controllers\Controller;
 
 class QuarterController extends Controller {
 
