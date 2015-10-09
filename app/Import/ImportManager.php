@@ -274,8 +274,8 @@ class ImportManager
                     $message->to(env('ADMIN_EMAIL'));
                 }
 
-                if ($emails['regional']) {
-                    $message->replyTo($emails['regional']);
+                if ($emailMap['regional']) {
+                    $message->replyTo($emailMap['regional']);
                 }
 
                 $message->subject("Team {$centerName} Statistics Submitted");
