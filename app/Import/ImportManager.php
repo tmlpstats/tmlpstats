@@ -203,7 +203,7 @@ class ImportManager
         $t2TeamLeader           = $center->getT2TeamLeader($quarter);
         $statistician           = $center->getStatistician($quarter);
         $statisticianApprentice = $center->getStatisticianApprentice($quarter);
-        $t2Statistician         = $center->getT2Statistician($quarter);
+        $mailingList            = $center->getMailingList($quarter);
 
         $emailMap = array(
             'center'                 => $center->statsEmail,
@@ -213,13 +213,22 @@ class ImportManager
             't2TeamLeader'           => $t2TeamLeader ? $t2TeamLeader->email : null,
             'statistician'           => $statistician ? $statistician->email : null,
             'statisticianApprentice' => $statisticianApprentice ? $statisticianApprentice->email : null,
-            't2Statistician'         => $t2Statistician ? $t2Statistician->email : null,
+            'mailingList'            => $mailingList ? $mailingList->email : null,
             'regional'               => null,
         );
 
         $emails = array();
         foreach ($emailMap as $accountability => $email) {
-            if ($email) {
+
+            if (!$email) {
+                continue;
+            }
+
+            if ($accountability === 'mailingList') {
+                // TODO: Make me better
+                // This is a hack to allow adding an arbitrary number of extra emails to the list
+                $emails = array_merge($emails, explode(',', $email));
+            } else {
                 $emails[] = $email;
             }
         }
