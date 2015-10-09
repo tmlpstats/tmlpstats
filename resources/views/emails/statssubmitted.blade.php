@@ -9,7 +9,7 @@ We received them on {{ $time }} your local time. Please find the submitted sheet
 @if (isset($sheet['errors']) && $sheet['errors'])
     Your sheet contained errors. Please review the errors below and correct them for your report next week. If you have any questions please reach out to your regional statistician.<br/>
 @else
-    You are not complete yet. Your regional statistician will review your sheet and declare you complete by 10:00 am your local time Saturday morning.<br/>
+    You are not complete yet. Your regional statistician will review your sheet and declare you complete by {{ $respondByTime }} your local time Saturday morning.<br/>
 @endif
 <br/>
 @if ($comment)

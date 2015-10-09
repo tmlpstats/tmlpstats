@@ -234,11 +234,14 @@ class ImportManager
         }
         $emails = array_unique($emails);
 
+        $respondByTime = '10:00 am';
+
         switch ($center->globalRegion) {
             case 'NA':
                 $emails['regional'] = $center->localRegion == 'East'
                     ? 'east.statistician@gmail.com'
                     : 'west.statistician@gmail.com';
+                $respondByTime = '12:00 pm';
                 break;
             case 'IND':
                 $emails['regional'] = 'india.statistician@gmail.com';
@@ -256,7 +259,7 @@ class ImportManager
         $centerName = $center->name;
         $comment = $statsReport->submitComment;
         try {
-            Mail::send('emails.statssubmitted', compact('user', 'centerName', 'time', 'sheet', 'isLate', 'due', 'comment'),
+            Mail::send('emails.statssubmitted', compact('user', 'centerName', 'time', 'sheet', 'isLate', 'due', 'comment', 'respondByTime'),
                 function($message) use ($emails, $emailMap, $centerName, $sheetPath, $sheetName) {
                 // Only send email to centers in production
                 if (env('APP_ENV') === 'prod') {
