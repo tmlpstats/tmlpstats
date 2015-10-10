@@ -25,7 +25,7 @@ PROD="/var/www/tmlpstats.com"
 ROLLBACK="$HOME/tmlpstats.rollback"
 
 if [ "$1" == "rollback" ]; then
-    rsync -av --delete $ROLLBACK/ $DEST
+    rsync -av --delete --filter='protect storage/framework/down' $ROLLBACK/ $DEST
     exit 0;
 fi
 
@@ -57,6 +57,7 @@ echo ""
 echo "Syncing files"
 rsync -av --delete --filter='protect .env' \
                    --filter='protect storage/framework/sessions/*' \
+                   --filter='storage/framework/down' \
                    --filter='protect storage/logs/*' \
                    --filter='protect storage/app/*' \
                    --filter='protect public/error_log' \

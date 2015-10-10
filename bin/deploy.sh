@@ -24,7 +24,7 @@ DEST="/var/www/tmlpstats.com"
 ROLLBACK="$HOME/tmlpstats.rollback"
 
 if [ "$1" == "rollback" ]; then
-    rsync -av --delete $ROLLBACK/ $DEST
+    rsync -av --delete --filter='protect storage/framework/down' $ROLLBACK/ $DEST
     exit 0;
 fi
 
@@ -32,7 +32,7 @@ fi
 echo ""
 echo "Backing up for rollback"
 rm -rf $ROLLBACK
-rsync -aq $DEST/ $ROLLBACK
+rsync -aq --exclude='storage/framework/down' $DEST/ $ROLLBACK
 
 # Do actual deploy
 echo ""
@@ -49,6 +49,7 @@ echo ""
 echo "Syncing files"
 rsync -av --delete --filter='protect .env' \
                    --filter='protect storage/framework/sessions/*' \
+                   --filter='protect storage/framework/down' \
                    --filter='protect storage/logs/*' \
                    --filter='protect storage/app/*' \
                    --filter='protect public/error_log' \
