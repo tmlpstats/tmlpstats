@@ -16,6 +16,8 @@
 
     # Only force SSL in production
     RewriteCond %{SERVER_PORT} 80
-    RewriteCond %{HTTP_HOST} ^tmlp.launchpointinternational.com$
+    RewriteCond %{HTTP_HOST} ^tmlpstats.com$ [OR]
+    RewriteCond %{HTTP_HOST} ^www.tmlpstats.com$ [OR]
+    RewriteCond %{HTTP_HOST} ^stage.tmlpstats.com$
     RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R,L]
 </IfModule>

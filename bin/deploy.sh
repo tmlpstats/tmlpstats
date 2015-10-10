@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Setup:
 #   1) Install composer
@@ -19,34 +19,29 @@
 #       $ ./deploy.sh rollback
 #
 
-SOURCE="$HOME/tmlpstats.git/tmlpstats"
-DEST="$HOME/public_html/tmlpstats"
-ROLLBACK="$HOME/tmlpstats.git/rollback"
+SOURCE="$HOME/tmlpstats.git"
+DEST="/var/www/tmlpstats.com"
+ROLLBACK="$HOME/tmlpstats.rollback"
 
 if [ "$1" == "rollback" ]; then
-
-    rm -rf $DEST/*
-    cp -a $ROLLBACK/* $DEST/
+    rsync -av --delete $ROLLBACK/ $DEST
     exit 0;
 fi
 
 # Setup rollback copy
 rm -rf $ROLLBACK
-cp -a $DEST $ROLLBACK
+rsync -av $DEST/ $ROLLBACK
 
 # Do actual deploy
-cd $SOURCE/
-
 echo ""
 echo "Running composer"
-sed -i.bak 's/php artisan/php-cli artisan/g' composer.json # workaround issue with artisan an bluehost
-php-cli ~/common/composer.phar install --no-dev --optimize-autoloader
-mv composer.json.bak composer.json # clean up
+cd $SOURCE/
+php composer install --no-dev --optimize-autoloader
 
 echo ""
 echo "Running migrations"
 cd $DEST/
-php-cli artisan migrate
+php artisan migrate
 
 echo ""
 echo "Syncing files"
@@ -61,5 +56,10 @@ rsync -av --delete --filter='protect .env' \
                    --exclude='.env.example' \
                    --exclude='.editorconfig' \
                    --exclude='bin' \
+                   --exclude='tests' \
+                   --exclude='Vagrantfile' \
+                   --exclude='gulpfile.js' \
+                   --exclude='package.json' \
+                   --exclude='phpspec.yml' \
+                   --exclude='phpunit.xml' \
                    $SOURCE/ $DEST
-

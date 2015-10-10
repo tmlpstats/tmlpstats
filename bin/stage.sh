@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Setup:
 #   1) Install composer
@@ -19,15 +19,13 @@
 #       $ ./deploy.sh rollback
 #
 
-SOURCE="$HOME/tmlpstats.git/tmlpstats"
-DEST="$HOME/public_html/stage"
-PROD="$HOME/public_html/tmlpstats"
-ROLLBACK="$HOME/tmlpstats.git/rollback"
+SOURCE="$HOME/tmlpstats.git"
+DEST="/var/www/stage.tmlpstats.com"
+PROD="/var/www/tmlpstats.com"
+ROLLBACK="$HOME/tmlpstats.rollback"
 
 if [ "$1" == "rollback" ]; then
-
-    rm -rf $DEST/*
-    cp -a $ROLLBACK/* $DEST/
+    rsync -av --delete $ROLLBACK/ $DEST
     exit 0;
 fi
 
@@ -40,15 +38,11 @@ git pull --rebase
 echo ""
 echo "Running composer"
 # Do actual deploy
-sed -i.bak 's/php artisan/php-cli artisan/g' composer.json # workaround issue with artisan an bluehost
-php-cli ~/common/composer.phar install --no-dev --optimize-autoloader
-mv composer.json.bak composer.json # clean up
+php composer install --no-dev --optimize-autoloader
 
 echo ""
 echo "Snapping the database"
-cp $HOME/tmlpstats.git/.my.cnf $HOME/.my.cnf
 $SOURCE/bin/snap.sh
-rm -f $HOME/.my.cnf
 
 echo ""
 echo "Copying file archive"
@@ -57,8 +51,7 @@ rsync -av --delete $PROD/storage/app/* $DEST/storage/app/
 echo ""
 echo "Running migrations"
 cd $DEST/
-php-cli artisan migrate
-
+php artisan migrate
 
 echo ""
 echo "Syncing files"
@@ -73,4 +66,10 @@ rsync -av --delete --filter='protect .env' \
                    --exclude='.env.example' \
                    --exclude='.editorconfig' \
                    --exclude='bin' \
+                   --exclude='tests' \
+                   --exclude='Vagrantfile' \
+                   --exclude='gulpfile.js' \
+                   --exclude='package.json' \
+                   --exclude='phpspec.yml' \
+                   --exclude='phpunit.xml' \
                    $SOURCE/ $DEST
