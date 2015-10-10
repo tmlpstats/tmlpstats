@@ -73,3 +73,7 @@ rsync -av --delete --filter='protect .env' \
                    --exclude='phpspec.yml' \
                    --exclude='phpunit.xml' \
                    $SOURCE/ $DEST
+
+echo ""
+echo "Fixing file permisssions"
+sudo chmod -R o+w $DEST/storage
