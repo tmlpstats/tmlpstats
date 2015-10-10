@@ -30,7 +30,7 @@ fi
 
 # Setup rollback copy
 rm -rf $ROLLBACK
-rsync -av $DEST/ $ROLLBACK
+rsync -aq $DEST/ $ROLLBACK
 
 # Do actual deploy
 echo ""
