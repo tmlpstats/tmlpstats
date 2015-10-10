@@ -23,8 +23,12 @@ SOURCE="$HOME/tmlpstats.git"
 DEST="/var/www/tmlpstats.com"
 ROLLBACK="$HOME/tmlpstats.rollback"
 
+cd $DEST/
+php artisan down
+
 if [ "$1" == "rollback" ]; then
     rsync -av --delete --filter='protect storage/framework/down' $ROLLBACK/ $DEST
+    php artisan up
     exit 0;
 fi
 
@@ -53,20 +57,22 @@ rsync -av --delete --filter='protect .env' \
                    --filter='protect storage/logs/*' \
                    --filter='protect storage/app/*' \
                    --filter='protect public/error_log' \
-                   --exclude='.git*' \
-                   --exclude='composer.*' \
-                   --exclude='readme.md' \
-                   --exclude='.env.example' \
-                   --exclude='.editorconfig' \
                    --exclude='bin' \
                    --exclude='tests' \
-                   --exclude='Vagrantfile' \
+                   --exclude='.editorconfig' \
+                   --exclude='.env.example' \
+                   --exclude='.git*' \
+                   --exclude='composer.*' \
                    --exclude='gulpfile.js' \
                    --exclude='package.json' \
                    --exclude='phpspec.yml' \
                    --exclude='phpunit.xml' \
+                   --exclude='readme.md' \
+                   --exclude='Vagrantfile' \
                    $SOURCE/ $DEST
 
 echo ""
 echo "Fixing file permisssions"
 sudo chmod -R o+w $DEST/storage
+
+php artisan up

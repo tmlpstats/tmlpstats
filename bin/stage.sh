@@ -57,22 +57,22 @@ echo ""
 echo "Syncing files"
 rsync -av --delete --filter='protect .env' \
                    --filter='protect storage/framework/sessions/*' \
-                   --filter='storage/framework/down' \
+                   --filter='protect storage/framework/down' \
                    --filter='protect storage/logs/*' \
                    --filter='protect storage/app/*' \
                    --filter='protect public/error_log' \
-                   --exclude='.git*' \
-                   --exclude='composer.*' \
-                   --exclude='readme.md' \
-                   --exclude='.env.example' \
-                   --exclude='.editorconfig' \
                    --exclude='bin' \
                    --exclude='tests' \
-                   --exclude='Vagrantfile' \
+                   --exclude='.editorconfig' \
+                   --exclude='.env.example' \
+                   --exclude='.git*' \
+                   --exclude='composer.*' \
                    --exclude='gulpfile.js' \
                    --exclude='package.json' \
                    --exclude='phpspec.yml' \
                    --exclude='phpunit.xml' \
+                   --exclude='readme.md' \
+                   --exclude='Vagrantfile' \
                    $SOURCE/ $DEST
 
 echo ""
