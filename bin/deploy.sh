@@ -29,6 +29,8 @@ if [ "$1" == "rollback" ]; then
 fi
 
 # Setup rollback copy
+echo ""
+echo "Backing up for rollback"
 rm -rf $ROLLBACK
 rsync -aq $DEST/ $ROLLBACK
 
