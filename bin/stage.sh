@@ -38,7 +38,7 @@ git pull --rebase
 echo ""
 echo "Running composer"
 # Do actual deploy
-php composer install --no-dev --optimize-autoloader
+composer install --no-dev --optimize-autoloader
 
 echo ""
 echo "Snapping the database"

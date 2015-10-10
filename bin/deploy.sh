@@ -36,7 +36,7 @@ rsync -av $DEST/ $ROLLBACK
 echo ""
 echo "Running composer"
 cd $SOURCE/
-php composer install --no-dev --optimize-autoloader
+composer install --no-dev --optimize-autoloader
 
 echo ""
 echo "Running migrations"
