@@ -87,7 +87,7 @@ class Util
             } else {
                 $dateObj = Carbon::createFromFormat('U', strtotime($dateStr));
             }
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             Log::error("Unable to parse date '$dateStr'.");
         }
         return $dateObj ? $dateObj->startOfDay() : null;
@@ -102,7 +102,7 @@ class Util
     {
         $parts = array(
             'firstName' => '',
-            'lastName' => '',
+            'lastName'  => '',
         );
 
         if (strpos($name, '/') !== false) {

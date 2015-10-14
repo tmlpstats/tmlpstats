@@ -27,8 +27,8 @@ class CenterRequest extends Request {
             'name'           => 'required|max:255',
             'abbreviation'   => 'required|max:5|unique:centers,id,'.$this->request->get('id'), // only enforce unique when id is not value provided
             'team_name'      => 'string|max:255',
-            'global_region'  => 'in:NA, EME, ANZ',
-            'local_region'   => 'in:East, West',
+            'global_region'  => 'in:NA,EME,ANZ,IND',
+            'local_region'   => 'in:East,West',
             'stats_email'    => 'email',
             'sheet_filename' => 'string|max:255',
             'sheet_version'  => 'string|max:255|required_with:sheet_filename',

@@ -141,7 +141,6 @@ class CommCourseInfoValidator extends ValidatorAbstract
             if ($data->currentXfer < (int)$data->quarterStartXfer) {
 
                 $this->addMessage('COMMCOURSE_CURRENT_XFER_LESS_THAN_QSTART_XFER', $data->currentXfer, $data->quarterStartXfer);
-                $isValid = false;
             }
         }
 

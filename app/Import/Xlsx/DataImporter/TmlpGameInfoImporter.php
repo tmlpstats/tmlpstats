@@ -1,7 +1,13 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use Carbon\Carbon;
+use DB;
+use TmlpStats\Center;
+use TmlpStats\GlobalReport;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
+use TmlpStats\Quarter;
+use TmlpStats\StatsReport;
 use TmlpStats\TmlpGame;
 use TmlpStats\TmlpGameData;
 
@@ -14,11 +20,11 @@ class TmlpGameInfoImporter extends DataImporterAbstract
 
     protected function populateSheetRanges()
     {
-        $this->blockT1X[] = $this->excelRange('A','K');
-        $this->blockT1X[] = $this->excelRange(30,31);
+        $this->blockT1X[] = $this->excelRange('A', 'K');
+        $this->blockT1X[] = $this->excelRange(30, 31);
 
-        $this->blockT2X[] = $this->excelRange('A','K');
-        $this->blockT2X[] = $this->excelRange(38,39);
+        $this->blockT2X[] = $this->excelRange('A', 'K');
+        $this->blockT2X[] = $this->excelRange(38, 39);
     }
 
     protected function load()
@@ -31,7 +37,7 @@ class TmlpGameInfoImporter extends DataImporterAbstract
 
     protected function loadEntry($row, $type)
     {
-        if ($this->reader->isEmptyCell($row,'B')) return;
+        if ($this->reader->isEmptyCell($row, 'B')) return;
 
         $this->data[] = array(
             'offset'                 => $row,
@@ -45,27 +51,82 @@ class TmlpGameInfoImporter extends DataImporterAbstract
     {
         foreach ($this->data as $gameInput) {
 
-            $game = TmlpGame::firstOrNew(array(
-                'center_id' => $this->statsReport->center->id,
-                'type'      => $gameInput['type'],
-            ));
-            if ($game->statsReportId == null) {
-                $game->statsReportId = $this->statsReport->id;
-                $game->save();
+            $gameData = $this->getGameData($gameInput['type'], $this->statsReport->center, $this->statsReport->quarter);
+
+            if ($gameData) {
+                // Only import once
+                continue;
             }
 
             $gameData = TmlpGameData::firstOrNew(array(
-                'center_id'       => $this->statsReport->center->id,
-                'quarter_id'      => $this->statsReport->quarter->id,
-                'tmlp_game_id'    => $game->id,
-                'reporting_date'  => $this->statsReport->reportingDate->toDateString(),
+                'type'            => $gameInput['type'],
                 'stats_report_id' => $this->statsReport->id,
             ));
 
             unset($gameInput['type']);
+            unset($gameInput['offset']);
+
             $this->setValues($gameData, $gameInput);
 
             $gameData->save();
         }
+    }
+
+    public function getGameData($type, Center $center, Quarter $quarter)
+    {
+        $firstWeek = clone $quarter->startWeekendDate;
+        $firstWeek->addWeek();
+
+        $globalReport = null;
+        $statsReport = null;
+
+        // Don't reuse game data on the first week, as they may change between submits
+        if ($this->statsReport->reportingDate->ne($firstWeek)) {
+            $globalReport = GlobalReport::reportingDate($firstWeek)->first();
+        }
+
+        if ($globalReport) {
+            $statsReport = $globalReport->statsReports()->byCenter($center)->first();
+        }
+
+        // If not, search from the beginning until we find it
+        if (!$statsReport) {
+            $statsReport = $this->findFirstWeek($center, $quarter, $type);
+        }
+
+        if (!$statsReport || $statsReport->reportingDate->eq($this->statsReport->reportingDate)) {
+            return null;
+        }
+
+        return TmlpGameData::type($type)
+            ->byStatsReport($statsReport)
+            ->first();
+    }
+
+    protected $gamesStatsReport = null;
+    public function findFirstWeek(Center $center, Quarter $quarter, $type)
+    {
+        // Promises should all be saved during the same week. Let's remember where we found the
+        // last one.
+        if ($this->gamesStatsReport) {
+            return $this->gamesStatsReport;
+        }
+
+        $statsReportResult = DB::table('stats_reports')
+            ->select('stats_reports.id')
+            ->join('tmlp_games_data', 'tmlp_games_data.stats_report_id', '=', 'stats_reports.id')
+            ->join('global_report_stats_report', 'global_report_stats_report.stats_report_id', '=', 'stats_reports.id')
+            ->join('global_reports', 'global_reports.id', '=', 'global_report_stats_report.global_report_id')
+            ->where('stats_reports.center_id', '=', $center->id)
+            ->where('global_reports.reporting_date', '>', $quarter->startWeekendDate)
+            ->where('tmlp_games_data.type', '=', $type)
+            ->orderBy('global_reports.reporting_date', 'ASC')
+            ->first();
+
+        if ($statsReportResult) {
+            $this->gamesStatsReport = StatsReport::find($statsReportResult->id);
+        }
+
+        return $this->gamesStatsReport;
     }
 }

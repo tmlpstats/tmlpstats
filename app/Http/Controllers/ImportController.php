@@ -2,10 +2,7 @@
 namespace TmlpStats\Http\Controllers;
 
 use TmlpStats\Http\Requests;
-use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\Import\ImportManager;
-
-use Carbon\Carbon;
 
 use Auth;
 use Request;
@@ -49,7 +46,7 @@ class ImportController extends Controller {
 
         // Controls whether or not to show Submit button
         $showReport = false;
-        if ($user->getCenter()->globalRegion === 'NA' || $user->getCenter()->globalRegion === 'EME') {
+        if ($user->center->getGlobalRegion()->abbreviation === 'NA' || $user->center->getGlobalRegion()->abbreviation  === 'EME') {
             $showReport = true;
         }
 
@@ -66,22 +63,27 @@ class ImportController extends Controller {
     public function import()
     {
         return view('admin.import')->with([
+            'submitReport'            => false, // Controls whether or not to show Submit button
             'showUploadForm'          => true,
             'showReportCheckSettings' => false,
         ]);
     }
 
-    // Handle XLSX file uploads for import (no validation)
-    public function uploadImportSpreadsheet(Request $request)
+    // Handle XLSX file uploads
+    public function uploadImportSpreadsheet()
     {
-        $manager = new ImportManager(Request::file('statsFiles'));
-        $manager->import(false);
-
+        $manager = new ImportManager(Request::file('statsFiles'), null, false);
+        $manager->setSkipEmail(true);
+        $manager->import(true);
         $results = $manager->getResults();
 
+        Request::flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
+
         return view('admin.import')->with([
+            'submitReport'            => false, // Controls whether or not to show Submit button
             'showUploadForm'          => true,
             'showReportCheckSettings' => false,
+            'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),
             'results'                 => $results,
         ]);
     }

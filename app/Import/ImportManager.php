@@ -23,6 +23,7 @@ class ImportManager
     protected $files = array();
     protected $expectedDate = null;
     protected $enforceVersion = false;
+    protected $skipEmail = false;
 
     protected $results = array();
 
@@ -33,6 +34,11 @@ class ImportManager
             $this->expectedDate = Carbon::createFromFormat('Y-m-d', $expectedDate)->startOfDay();
         }
         $this->enforceVersion = $enforceVersion;
+    }
+
+    public function setSkipEmail($skip = true)
+    {
+        $this->skipEmail = $skip;
     }
 
     public function getResults()
@@ -72,9 +78,9 @@ class ImportManager
                     $importer = new Xlsx\XlsxImporter($file->getRealPath(), $fileName, $this->expectedDate, $this->enforceVersion);
                     $importer->import($saveReport);
                     $sheet = $importer->getResults();
-                } catch(Exception $e) {
+                } catch (Exception $e) {
                     Log::error("Error processing '$fileName': " . $e->getMessage() . "\n" . $e->getTraceAsString());
-                    throw new Exception("There was an error processing '$fileName': ".$e->getMessage());
+                    throw new Exception("There was an error processing '$fileName': " . $e->getMessage());
                 }
 
                 $user = Auth::user()->email;
@@ -98,7 +104,7 @@ class ImportManager
                 } else {
                     $successSheets[] = $sheet;
                 }
-            } catch(Exception $e) {
+            } catch (Exception $e) {
 
                 Log::error("Error processing file: " . $e->getMessage());
                 $unknownFiles[] = $e->getMessage();
@@ -121,7 +127,7 @@ class ImportManager
                 $body = "An exception was caught processing a sheet submitted by '{$user}' for {$center} center at {$time} UTC: '" . $exception->getMessage() . "'\n\n";
                 $body .= $exception->getTraceAsString() . "\n";
                 try {
-                    Mail::raw($body, function($message) use ($center, $sheetPath) {
+                    Mail::raw($body, function ($message) use ($center, $sheetPath) {
                         $message->to(env('ADMIN_EMAIL'))->subject("Exception processing sheet for {$center} center");
                         if ($sheetPath) {
                             $message->attach($sheetPath);
@@ -130,6 +136,8 @@ class ImportManager
                 } catch (\Exception $e) {
                     Log::error("Exception caught sending error email: " . $e->getMessage());
                 }
+            } else if ($this->skipEmail) {
+                // Don't send the email.
             } else if ($sheet['submittedAt']) {
 
                 $result = $this->sendStatsSubmittedEmail($sheet['statsReport'], $sheet);
@@ -179,7 +187,7 @@ class ImportManager
                 $statsReport->reportingDate->month,
                 $statsReport->reportingDate->day,
                 23, 59, 59,
-                $center->timeZone
+                $center->timezone
             );
         } else {
             // Stats are due by 7:00 PM every other week
@@ -189,7 +197,7 @@ class ImportManager
                 $statsReport->reportingDate->month,
                 $statsReport->reportingDate->day,
                 19, 0, 59,
-                $center->timeZone
+                $center->timezone
             );
         }
 
@@ -214,7 +222,7 @@ class ImportManager
             'statistician'           => $statistician ? $statistician->email : null,
             'statisticianApprentice' => $statisticianApprentice ? $statisticianApprentice->email : null,
             'mailingList'            => $mailingList ? $mailingList->email : null,
-            'regional'               => null,
+            'regional'               => $center->region->email,
         );
 
         $emails = array();
@@ -236,7 +244,7 @@ class ImportManager
 
         $respondByTime = '10:00 am';
 
-        switch ($center->globalRegion) {
+        switch ($center->getGlobalRegion()->abbreviation) {
             case 'NA':
                 $emails['regional'] = $center->localRegion == 'East'
                     ? 'east.statistician@gmail.com'

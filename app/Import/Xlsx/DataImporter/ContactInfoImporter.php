@@ -1,33 +1,39 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use TmlpStats\Accountability;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
+use TmlpStats\Person;
 use TmlpStats\ProgramTeamMember;
 use TmlpStats\TeamMember;
 use TmlpStats\Util;
+
+use Log;
 
 class ContactInfoImporter extends DataImporterAbstract
 {
     protected $sheetId = ImportDocument::TAB_LOCAL_TEAM_CONTACT;
 
-    protected $reportingStatistician           = NULL;
-    protected $programManager                  = NULL;
-    protected $classroomLeader                 = NULL;
-    protected $t2tl                            = NULL;
-    protected $t1tl                            = NULL;
-    protected $statistician                    = NULL;
-    protected $apprentice                      = NULL;
-    protected $programManagerAttendingWeekend  = NULL;
+    protected $reportingStatistician = NULL;
+    protected $programManager = NULL;
+    protected $classroomLeader = NULL;
+    protected $t2tl = NULL;
+    protected $t1tl = NULL;
+    protected $statistician = NULL;
+    protected $apprentice = NULL;
+    protected $programManagerAttendingWeekend = NULL;
     protected $classroomLeaderAttendingWeekend = NULL;
 
     public function getReportingStatistician()
     {
         return $this->reportingStatistician;
     }
+
     public function getProgramManagerAttendingWeekend()
     {
         return $this->programManagerAttendingWeekend;
     }
+
     public function getClassroomLeaderAttendingWeekend()
     {
         return $this->classroomLeaderAttendingWeekend;
@@ -37,13 +43,13 @@ class ContactInfoImporter extends DataImporterAbstract
     {
         $this->reader = $this->getReader($this->sheet);
 
-        $this->programManager        = $this->loadEntry(5);
-        $this->classroomLeader       = $this->loadEntry(6);
-        $this->t2tl                  = $this->loadEntry(7);
-        $this->t1tl                  = $this->loadEntry(8);
-        $this->statistician          = $this->loadEntry(9);
-        $this->apprentice            = $this->loadEntry(10);
-        $this->reportingStatistician = $this->loadReportingStatistician();
+        $this->programManager = $this->loadEntry(5);
+        $this->classroomLeader = $this->loadEntry(6);
+        $this->t2tl = $this->loadEntry(7);
+        $this->t1tl = $this->loadEntry(8);
+        $this->statistician = $this->loadEntry(9);
+        $this->apprentice = $this->loadEntry(10);
+//        $this->reportingStatistician = $this->loadReportingStatistician();
         $this->loadProgramLeadersAttendingWeekend();
     }
 
@@ -58,16 +64,16 @@ class ContactInfoImporter extends DataImporterAbstract
         );
     }
 
-    protected function loadReportingStatistician()
-    {
-        $this->data[] = array(
-            'offset'         => $this->reader->getReportingStatisticianNameRow(),
-            'accountability' => 'Reporting Statistician',
-            'name'           => $this->reader->getReportingStatisticianName(),
-            'phone'          => $this->reader->getReportingStatisticianPhone(),
-            'email'          => $this->statsReport->center->statsEmail,
-        );
-    }
+//    protected function loadReportingStatistician()
+//    {
+//        $this->data[] = array(
+//            'offset'         => $this->reader->getReportingStatisticianNameRow(),
+//            'accountability' => 'Reporting Statistician',
+//            'name'           => $this->reader->getReportingStatisticianName(),
+//            'phone'          => $this->reader->getReportingStatisticianPhone(),
+//            'email'          => $this->statsReport->center->statsEmail,
+//        );
+//    }
 
     protected function loadProgramLeadersAttendingWeekend()
     {
@@ -79,46 +85,94 @@ class ContactInfoImporter extends DataImporterAbstract
     {
         foreach ($this->data as $leader) {
 
+            $accountability = Accountability::name($this->mapAccountabilities($leader['accountability']))->first();
+
             if ($leader['name'] === NULL || strtoupper($leader['name']) == 'NA' || strtoupper($leader['name']) == 'N/A') {
+
+                $currentAccountable = $this->statsReport->center->getAccountable($accountability);
+                if ($currentAccountable) {
+                    $currentAccountable->removeAccountability($accountability);
+                }
                 continue;
             }
 
             $nameParts = Util::getNameParts($leader['name']);
 
-            $member = ProgramTeamMember::firstOrNew(array(
-                'center_id'      => $this->statsReport->center->id,
-                'quarter_id'     => $this->statsReport->quarter->id,
-                'accountability' => $leader['accountability'],
-                'first_name'     => $nameParts['firstName'],
-                'last_name'      => $nameParts['lastName'],
-            ));
+            $member = null;
+
+            $possibleMembers = Person::firstName($nameParts['firstName'])
+                ->lastName($nameParts['lastName'])
+                ->byCenter($this->statsReport->center)
+                ->get();
+
+            if ($possibleMembers->count() == 1) {
+                $member = $possibleMembers->first();
+            } else if ($possibleMembers->count() > 1) {
+                $sameEmailMembers = $possibleMembers->where('email', '=', $leader['email'])->get();
+
+                if ($sameEmailMembers->count() == 1) {
+                    $member = $sameEmailMembers->first();
+                } else {
+                    $teamMembers = $possibleMembers->where('identifier', 'LIKE', 'q:%')->get();
+                    if ($teamMembers->count() == 1) {
+                        $member = $teamMembers->first();
+                    }
+                }
+            }
+
+            if (!$member) {
+                $member = Person::create([
+                    'center_id'     => $this->statsReport->center->id,
+                    'first_name'    => $nameParts['firstName'],
+                    'last_name'     => $nameParts['lastName'],
+                ]);
+            }
+
+            if ($accountability && !$member->hasAccountability($accountability)) {
+
+                $currentAccountable = $this->statsReport->center->getAccountable($accountability);
+                if ($currentAccountable) {
+                    $currentAccountable->removeAccountability($accountability);
+                }
+                $member->addAccountability($accountability);
+            } else if (!$accountability) {
+                Log::error("Unable to find accountability '{$leader['accountability']}' for center {$this->statsReport->center->id}");
+            }
 
             unset($leader['name']);
+            unset($leader['offset']);
+            unset($leader['accountability']);
 
             $this->setValues($member, $leader);
 
-            if ($member->teamMember === null) {
-                $teamMember = $this->getTeamMember($member);
-                if ($teamMember) {
-                    $member->teamMemberId = $teamMember->id;
-                }
-            }
-            if ($member->statsReportId === null) {
-                $member->statsReportId = $this->statsReport->id;
-            }
             if (!$member->exists || $member->isDirty()) {
                 $member->save();
             }
         }
     }
 
-    protected function getTeamMember($programTeamMember)
+    protected function mapAccountabilities($displayString)
     {
-        return TeamMember::where('center_id', '=', $this->statsReport->center->id)
-                         ->where('first_name', '=', $programTeamMember->firstName)
-                         ->where('last_name', '=', $programTeamMember->lastName)
-                         ->first();
+
+        switch ($displayString) {
+            case 'Program Manager':
+                return 'programManager';
+            case 'Classroom Leader':
+                return 'classroomLeader';
+            case 'Team 1 Team Leader':
+                return 'team1TeamLeader';
+            case 'Team 2 Team Leader':
+                return 'team2TeamLeader';
+            case 'Statistician':
+                return 'teamStatistician';
+            case 'Statistician Apprentice':
+                return 'teamStatisticianApprentice';
+            default:
+                return null;
+        }
     }
 
-    protected function populateSheetRanges() { } // no blocks to load in this sheet
+    protected function populateSheetRanges()
+    {
+    } // no blocks to load in this sheet
 }
