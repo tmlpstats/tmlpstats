@@ -38,8 +38,8 @@ class Handler extends ExceptionHandler {
         // Ignore token expiration messages
         if (!($e instanceof TokenMismatchException) && !App::runningInConsole()) {
 
-            $user = Auth::user()->email;
-            $center = Auth::user()->center
+            $user = Auth::user() ? Auth::user()->email : 'unknown';
+            $center = Auth::user() && Auth::user()->center
                 ? Auth::user()->center->name
                 : 'unknown';
             $time = Carbon::now()->format('Y-m-d H:i:s');

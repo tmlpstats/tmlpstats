@@ -13,9 +13,4 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
-
-    # Only force SSL in production
-    RewriteCond %{SERVER_PORT} 80
-    RewriteCond %{HTTP_HOST} ^tmlp.launchpointinternational.com$
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R,L]
 </IfModule>
