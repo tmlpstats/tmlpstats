@@ -174,7 +174,7 @@ class HomeController extends Controller {
                 'localRegion' => $localRegion,
                 'submitted'   => $statsReport ? $statsReport->isSubmitted() : false,
                 'validated'   => $statsReport ? $statsReport->isValidated() : false,
-                'rating'      => $statsReport ? $statsReport->getRating() : '-',
+                'rating'      => $statsReport ? $statsReport->getRating() . " (" . $statsReport->getPoints() . " pts)" : '-',
                 'updatedAt'   => $submittedAt ? $submittedAt->format('M j, Y @ g:ia T') : '-',
                 'updatedBy'   => $user ? $user->firstName : '-',
                 'sheet'       => $sheetUrl,

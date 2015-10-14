@@ -77,6 +77,10 @@ class ImportController extends Controller {
         $manager->import(true);
         $results = $manager->getResults();
 
+        if (Request::has('json')) {
+            return json_encode($results);
+        }
+
         Request::flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
         return view('admin.import')->with([
