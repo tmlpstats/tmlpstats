@@ -108,12 +108,12 @@ class ContactInfoImporter extends DataImporterAbstract
             if ($possibleMembers->count() == 1) {
                 $member = $possibleMembers->first();
             } else if ($possibleMembers->count() > 1) {
-                $sameEmailMembers = $possibleMembers->where('email', '=', $leader['email'])->get();
+                $sameEmailMembers = $possibleMembers->where('email', '=', $leader['email']);
 
                 if ($sameEmailMembers->count() == 1) {
                     $member = $sameEmailMembers->first();
                 } else {
-                    $teamMembers = $possibleMembers->where('identifier', 'LIKE', 'q:%')->get();
+                    $teamMembers = $possibleMembers->where('identifier', 'LIKE', 'q:%');
                     if ($teamMembers->count() == 1) {
                         $member = $teamMembers->first();
                     }
