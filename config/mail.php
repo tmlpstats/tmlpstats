@@ -28,7 +28,7 @@ return [
     |
     */
 
-    'host' => env('MAIL_HOST', 'smtp.launchpointinternational.com'),
+    'host' => env('MAIL_HOST', 'smtp.tmlpstats.com'),
 
     /*
     |--------------------------------------------------------------------------
@@ -54,7 +54,7 @@ return [
     |
     */
 
-    'from' => ['address' => 'tmlpstats@launchpointinternational.com', 'name' => 'TMLP Stats'],
+    'from' => ['address' => 'noreply@tmlpstats.com', 'name' => 'TMLP Stats'],
 
     /*
     |--------------------------------------------------------------------------
