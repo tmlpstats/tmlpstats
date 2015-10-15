@@ -93,11 +93,6 @@ class Util
         return $dateObj ? $dateObj->startOfDay() : null;
     }
 
-    public static function isCarbonDate($date)
-    {
-        return get_class($date) == "Carbon\Carbon";
-    }
-
     public static function getNameParts($name)
     {
         $parts = array(

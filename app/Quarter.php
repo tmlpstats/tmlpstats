@@ -32,11 +32,6 @@ class Quarter extends Model
             case 'classroom1Date':
             case 'classroom2Date':
             case 'classroom3Date':
-                // TODO: remove check. needed for migration
-                if (\DB::table('migrations')->whereMigration('2015_08_30_000400_cleanup')->count() == 0) {
-                    return parent::__get($name);
-                }
-
                 if ($this->region && !$this->regionQuarterDetails) {
                     $this->setRegion($this->region);
                 }
