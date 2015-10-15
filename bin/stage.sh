@@ -42,7 +42,16 @@ composer install --no-dev --optimize-autoloader
 
 echo ""
 echo "Snapping the database"
+# Setup up temporary .my.cnf file
+echo "[mysqldump]" > $HOME/.my.cnf
+grep 'DB_USERNAME=' $PROD/.env | awk -F= '{print "user="$2}' >> $HOME/.my.cnf
+grep 'DB_PASSWORD=' $PROD/.env | awk -F= '{print "password="$2}' >> $HOME/.my.cnf
+echo "[mysql]" >> $HOME/.my.cnf
+grep 'DB_USERNAME=' $DEST/.env | awk -F= '{print "user="$2}' >> $HOME/.my.cnf
+grep 'DB_PASSWORD=' $DEST/.env | awk -F= '{print "password="$2}' >> $HOME/.my.cnf
+
 $SOURCE/bin/snap.sh
+rm -f $HOME/.my.cnf
 
 echo ""
 echo "Copying file archive"
