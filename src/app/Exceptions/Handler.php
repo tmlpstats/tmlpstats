@@ -22,7 +22,8 @@ class Handler extends ExceptionHandler {
      * @var array
      */
     protected $dontReport = [
-        'Symfony\Component\HttpKernel\Exception\HttpException'
+        'Symfony\Component\HttpKernel\Exception\HttpException',
+        'Illuminate\Session\TokenMismatchException'
     ];
 
     /**
@@ -36,7 +37,7 @@ class Handler extends ExceptionHandler {
     public function report(Exception $e)
     {
         // Ignore token expiration messages
-        if (!($e instanceof TokenMismatchException) && !App::runningInConsole()) {
+        if (!App::runningInConsole()) {
 
             $user = Auth::user() ? Auth::user()->email : 'unknown';
             $center = Auth::user() && Auth::user()->center
@@ -44,14 +45,14 @@ class Handler extends ExceptionHandler {
                 : 'unknown';
             $time = Carbon::now()->format('Y-m-d H:i:s');
 
-            $body = "An exception was caught by '{$user}' from {$center} center at {$time} UTC: '" . $e->getMessage() . "'\n\n";
-            $body .= $e->getTraceAsString() . "\n";
+            $body = "An exception was caught by '{$user}' from {$center} center at {$time} UTC:\n\n";
+            $body .= "$e";
             try {
                 Mail::raw($body, function($message) use ($center) {
                     $message->to(env('ADMIN_EMAIL'))->subject("Exception processing sheet for {$center} center in " . strtoupper(env('APP_ENV')));
                 });
-            } catch (Exception $e) {
-                Log::error("Exception caught sending error email: " . $e->getMessage());
+            } catch (Exception $ex) {
+                Log::error("Exception caught sending error email: " . $ex->getMessage());
             }
         }
         return parent::report($e);
