@@ -35,7 +35,7 @@ echo "[mysql]" >> $HOME/.my.cnf
 grep 'DB_USERNAME=' $DEST/.env | awk -F= '{print "user="$2}' >> $HOME/.my.cnf
 grep 'DB_PASSWORD=' $DEST/.env | awk -F= '{print "password="$2}' >> $HOME/.my.cnf
 
-$SOURCE/bin/snap.sh
+$SOURCE/../bin/snap.sh
 rm -f $HOME/.my.cnf
 
 echo ""
