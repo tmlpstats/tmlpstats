@@ -1,0 +1,3 @@
+#!/bin/bash
+
+$HOME/tmlpstats.git/bin/deploy.sh $@
