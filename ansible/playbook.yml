@@ -1,0 +1,125 @@
+---
+- hosts: all
+  vars:
+    mysql_user: root
+    mysql_pass: password
+    db_user: vagrant_dev_tmlp
+    db_pass: SuperSecretCode!
+    db_main: vagrant_dev_tmlpstats
+  sudo: true
+  tasks:
+
+  - name: create /var/www
+    file: path=/var/www state=directory
+
+  - name: install misc packages
+    apt: name={{ item }} state=latest
+    with_items:
+      - git
+      - curl
+      - unzip
+      - vim
+      - wget
+      - htop
+      - sendmail
+
+
+  # Memcached
+
+  - name: ensure memcached is installed
+    apt: name=memcached state=latest
+
+  # Apache2
+
+  - name: ensure apache is installed
+    apt: name=apache2 state=present
+
+  # Apache2: Enable Modules
+
+  - name: enabled mod_rewrite
+    apache2_module: name=rewrite state=present
+
+  # Apache2: Setup VHost configs
+
+  - copy: src=/vagrant/ansible/templates/etc/apache2/sites-available/vagrant.tmlpstats.conf dest=/etc/apache2/sites-available/vagrant.tmlpstats.conf
+    notify: restart apache
+
+  - file: src=/etc/apache2/sites-available/vagrant.tmlpstats.conf dest=/etc/apache2/sites-enabled/vagrant.tmlpstats.conf state=link
+    notify: restart apache
+
+  - file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
+    notify: restart apache
+
+  - file: path=/etc/apache2/sites-enabled/default-ssl.conf state=absent
+    notify: restart apache
+
+  # Apache2: Update Settings
+
+  - lineinfile: dest=/etc/apache2/conf-available/security.conf regexp='^ServerTokens ' line='ServerTokens Prod' state=present
+    notify: restart apache
+
+  - lineinfile: dest=/etc/apache2/conf-available/security.conf regexp='^ServerSignature ' line='ServerSignature Off' state=present
+    notify: restart apache
+
+  # MySQL
+
+  - name: install MySQL
+    apt: name={{ item }} state=latest
+    with_items:
+      - mysql-server-5.5
+      - mysql-client-5.5
+
+  - name: add mysql user
+    mysql_user: name={{ db_user }}
+                host=localhost
+                password={{ db_pass }} priv=*.*:ALL,GRANT
+                login_user={{ mysql_user }}
+                login_password=
+
+  - name: create mysql databases
+    mysql_db: name={{ item }}
+              state=present
+    with_items:
+      - "{{ db_main }}"
+
+  # - name: import database
+  #   mysql_db: state=import name={{ db_main }} target=/vagrant/export/tmlpstats_stage_2015-10-15.sql
+
+  # PHP: Setup PHP 5.6
+  - name: add php5.6 ppa
+    apt_repository: repo='ppa:ondrej/php5-5.6'
+
+  - name: install PHP5 packages
+    apt: name={{ item }} state=latest
+    with_items:
+      - php5
+      - libapache2-mod-php5
+      - php5-cli
+      - php5-dev
+      - php5-mysql
+      - php5-mcrypt
+      - php5-gd
+      - php5-curl
+      - php5-xdebug
+      - php5-memcache
+      - php5-memcached
+
+  # Xdebug
+
+  - file: path=/var/log/xdebug state=directory owner=www-data
+  - copy: src=/vagrant/ansible/templates/etc/php5/mods-available/xdebug.ini dest=/etc/php5/mods-available/xdebug.ini
+    notify: restart apache
+
+
+  # Finalize
+  - name: make sure apache is running
+    action: service name=apache2 state=started enabled=true
+
+  - file: src=/vagrant/src dest=/var/www/tmlpstats.com state=link
+
+  handlers:
+    - name: restart apache
+      action: service name=apache2 state=restarted
+    - name: restart mysql
+      action: service name=mysql state=restarted
+

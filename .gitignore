@@ -1,4 +1,4 @@
-/vendor
+/src/vendor
 /node_modules
 .env
 .vagrant/
@@ -8,3 +8,5 @@ _ide_helper.php
 _ide_helper_models.php
 export/
 email-output.log
+ansible/templates/etc/ssl
+ansible/templates/home/ubuntu/bin/sync

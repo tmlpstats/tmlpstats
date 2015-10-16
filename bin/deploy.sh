@@ -1,25 +1,10 @@
 #!/usr/bin/env bash
 
-# Setup:
-#   1) Install composer
-#       $ mkdir ~/common
-#       $ cd ~/common
-#       $ curl -sS https://getcomposer.org/installer | /ramdisk/php/54/bin/php54-cli
-#
-# Deploy Process:
-#    1) Pull latest changes from github
-#       $ cd tmlpstats
-#       $ git pull
-#    2) Run deploy script
-#       $ cd ..
-#       $ ./deploy.sh
-#
-# Rollback Process:
-#    1) Run deploy script with rollback option
-#       $ ./deploy.sh rollback
+##
+# Deploy website
 #
 
-SOURCE="$HOME/tmlpstats.git"
+SOURCE="$HOME/tmlpstats.git/src"
 DEST="/var/www/tmlpstats.com"
 ROLLBACK="$HOME/tmlpstats.rollback"
 

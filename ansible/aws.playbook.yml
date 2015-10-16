@@ -1,0 +1,213 @@
+---
+- hosts: all
+  vars:
+    home_path: /home/ubuntu
+    mysql_user: root
+    db_user: website
+    db_main: tmlpstats_main
+    db_stage: tmlpstats_stage
+  sudo: true
+  tasks:
+
+  - name: create {{ home_path }}/.website
+    file: path={{ home_path }}/.website state=directory
+
+  - name: create /var/www
+    file: path=/var/www state=directory
+
+  - name: install misc packages
+    apt: name={{ item }} state=latest
+    with_items:
+      - git
+      - curl
+      - unzip
+      - vim
+      - wget
+      - htop
+      - sendmail
+
+  # Memcached
+
+  - name: ensure memcached is installed
+    apt: name=memcached state=latest
+
+  # Apache2
+
+  - name: ensure apache is installed
+    apt: name=apache2 state=present
+
+  # Apache2 Modules
+
+  - name: enabled mod_rewrite
+    apache2_module: name=rewrite state=present
+
+  - name: enabled mod_ssl
+    apache2_module: name=ssl state=present
+
+  # Setup VHost configs
+
+  - copy: src=/vagrant/ansible/templates/etc/apache2/sites-available/vagrant.tmlpstats.conf dest=/etc/apache2/sites-available/vagrant.tmlpstats.conf
+    notify: restart apache
+
+  - file: src=/etc/apache2/sites-available/vagrant.tmlpstats.conf dest=/etc/apache2/sites-enabled/vagrant.tmlpstats.conf state=link
+    notify: restart apache
+
+  - copy: src=/vagrant/ansible/templates/etc/apache2/sites-available/tmlpstats.conf dest=/etc/apache2/sites-available/tmlpstats.conf
+    notify: restart apache
+
+  - copy: src=/vagrant/ansible/templates/etc/apache2/sites-available/stage.tmlpstats.conf dest=/etc/apache2/sites-available/stage.tmlpstats.conf
+    notify: restart apache
+
+  - copy: src=/vagrant/ansible/templates/etc/apache2/sites-available/tmlpstats.conf dest=/etc/apache2/sites-available/tmlpstats.conf
+    notify: restart apache
+
+  - file: src=/etc/apache2/sites-available/tmlpstats.conf dest=/etc/apache2/sites-enabled/tmlpstats.conf state=link
+    notify: restart apache
+
+  - file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
+    notify: restart apache
+
+  - file: path=/etc/apache2/sites-enabled/default-ssl.conf state=absent
+    notify: restart apache
+
+  # Setup SSL keys
+
+  - copy: src=/vagrant/ansible/templates/etc/ssl/certs/stage.tmlpstats.com.pem dest=/etc/ssl/certs/stage.tmlpstats.com.pem mode=0644
+    notify: restart apache
+
+  - copy: src=/vagrant/ansible/templates/etc/ssl/certs/tmlpstats.com.pem dest=/etc/ssl/certs/tmlpstats.com.pem mode=0644
+    notify: restart apache
+
+  - copy: src=/vagrant/ansible/templates/etc/ssl/private/tmlpstats.com.key dest=/etc/ssl/private/tmlpstats.com.key mode=0400
+    notify: restart apache
+
+  # Update Apache settings
+
+  - lineinfile: dest=/etc/apache2/conf-available/security.conf regexp='^ServerTokens ' line='ServerTokens Prod' state=present
+    notify: restart apache
+
+  - lineinfile: dest=/etc/apache2/conf-available/security.conf regexp='^ServerSignature ' line='ServerSignature Off' state=present
+    notify: restart apache
+
+  # MySQL
+
+  - name: install MySQL
+    apt: name={{ item }} state=latest
+    with_items:
+      - mysql-server-5.5
+      - mysql-client-5.5
+
+  - name: Generate MySQL Root Password
+    command: "cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9!@#$%^&*()_+?><~' | fold -w 32 | head -n 1"
+    register: mysql_pass
+
+  - name: Generate MySQL User Password
+    command: "cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9!@#$%^&*()_+?><~' | fold -w 32 | head -n 1"
+    register: db_pass
+
+  - name: update mysql root passwd
+    mysql_user: name=root host={{ item }} password={{ mysql_pass.stdout }}
+    with_items:
+      - 127.0.0.1
+      - ::1
+      - localhost
+
+  - name: copy user my.cnf file with root passwd credentials
+    template: src==/vagrant/ansible/templates/home/ubuntu/my.cnf.j2 dest=/root/.my.cnf owner=root group=root mode=0600
+
+  - name: delete anonymous mysql user
+    mysql_user: name="" state=absent
+
+  - name: remove mysql test database
+    mysql_db: name=test state=absent
+
+
+
+
+
+  - name: add mysql user
+    mysql_user: name={{ db_user }}
+                host=localhost
+                password={{ db_pass }} priv=*.*:ALL,GRANT
+                login_user={{ mysql_user }}
+                login_password=
+
+  - name: create mysql databases
+    mysql_db: name={{ item }}
+              state=present
+    with_items:
+      - "{{ db_main }}"
+      - "{{ db_stage }}"
+
+  - file: path=/etc/mysql/conf.d state=directory
+
+  # Custom MySQL Config settings (low memory footprint for AWS)
+  - lineinfile: dest=/etc/mysql/my.cnf regexp='^key_buffer\s*=' line='key_buffer = 8M' state=present
+    notify: restart mysql
+
+  - lineinfile: dest=/etc/mysql/my.cnf regexp='^max_connections\s*=' line='max_connections = 30' state=present
+    notify: restart mysql
+
+  - lineinfile: dest=/etc/mysql/my.cnf regexp='^query_cache_size\s*=' line='query_cache_size = 8M' state=present
+    notify: restart mysql
+
+  - lineinfile: dest=/etc/mysql/my.cnf regexp='^query_cache_limit\s*=' line='query_cache_limit = 512K' state=present
+    notify: restart mysql
+
+  - lineinfile: dest=/etc/mysql/my.cnf regexp='^thread_stack\s*=' line='thread_stack = 128K' state=present
+    notify: restart mysql
+
+  - lineinfile: dest=/etc/mysql/my.cnf regexp='^performance_schema\s*=' line='performance_schema = 0' state=present
+    notify: restart mysql
+
+  # PHP 5.6
+  - name: add php5.6 ppa
+    apt_repository: repo='ppa:ondrej/php5-5.6'
+
+  - name: install PHP5 packages
+    apt: name={{ item }} state=latest
+    with_items:
+      - php5
+      - libapache2-mod-php5
+      - php5-cli
+      - php5-dev
+      - php5-mysql
+      - php5-mcrypt
+      - php5-gd
+      - php5-curl
+      - php5-xdebug
+      - php5-memcache
+      - php5-memcached
+
+  # Xdebug
+
+  - file: path=/var/log/xdebug state=directory owner=www-data
+  - copy: src=/vagrant/ansible/templates/etc/php5/mods-available/xdebug.ini dest=/etc/php5/mods-available/xdebug.ini
+    notify: restart apache
+
+
+  # Finalize
+  - name: make sure apache is running
+    action: service name=apache2 state=started enabled=true
+
+  - name: Checking out Git Repo
+    git: repo=git@github.com:pdarg/tmlpstats.git dest=/home/ubuntu/tmlpstats.git
+
+  - file: src={{ home_path }}/tmlpstats.git/bin/{{ item }} dest={{ home_path }}/bin/{{ item }} state=link
+    with_items:
+    - stage
+    - deploy
+
+
+
+  - file: path={{ item }} owner=vagrant group=vagrant mode=0777 state=directory
+    with_items:
+      - /var/www/tmlpstats.com/storage
+      - /var/www/tmlpstats.com/bootstrap/cache
+
+  handlers:
+    - name: restart apache
+      action: service name=apache2 state=restarted
+    - name: restart mysql
+      action: service name=mysql state=restarted
+
