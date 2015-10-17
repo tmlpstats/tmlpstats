@@ -3,7 +3,7 @@
 echo ""
 echo "Installing Ansible"
 sudo apt-get update
-sudo apt-get install -y python-pip python-dev python-pycurl python-mysqldb
+sudo apt-get install -y build-essential python-pip python-dev python-pycurl python-mysqldb
 sudo pip install ansible
 
 sudo mkdir -p /etc/ansible
