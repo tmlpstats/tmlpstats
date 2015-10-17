@@ -75,7 +75,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
     public function hasRole($name)
     {
-        return ($this->role->name === $name);
+        return ($this->role && $this->role->name === $name);
     }
 
     public function homeRegion()

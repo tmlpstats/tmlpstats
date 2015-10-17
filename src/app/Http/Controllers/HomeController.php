@@ -153,7 +153,7 @@ class HomeController extends Controller {
             $reportUrl = null;
 
             if (Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator')
-                || (Auth::user()->hasRole('localStatistician') && Auth::user()->hasCenter($center->id))
+                || (Auth::user()->hasRole('localStatistician') && Auth::user()->center->id === $center->id)
             ) {
                 $sheetUrl = $statsReport && XlsxArchiver::getInstance()->getSheetPath($statsReport)
                     ? url("/statsreports/{$statsReport->id}/download")

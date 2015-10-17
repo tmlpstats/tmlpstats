@@ -39,14 +39,18 @@ class AuthController extends Controller
      */
     public function validator(array $data)
     {
+        $messages = [
+            'password.regex' => 'The password must contain at least one upper case letter, one lower case letter, and one number.',
+        ];
+
         return Validator::make($data, [
             'first_name'  => 'required|max:255',
             'last_name'   => 'required|max:255',
             'phone'       => 'regex:/^[\s\d\+\-\.]+$/',
             'email'       => 'required|email|max:255|unique:users',
-            'password'    => 'required|confirmed|min:6',
+            'password'    => 'required|confirmed|min:8|max:4096|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
             'invite_code' => 'required|in:GloabalStatisticiansRock2015,GlobalStatisticiansRock2015',
-        ]);
+        ], $messages);
     }
 
     /**

@@ -361,7 +361,7 @@ class StatsReportController extends Controller
             case 'U':
                 return (Auth::user()->hasRole('globalStatistician')
                     || Auth::user()->hasRole('administrator')
-                    || (Auth::user()->hasRole('localStatistician') && Auth::user()->hasCenter($centerId)));
+                    || (Auth::user()->hasRole('localStatistician') && Auth::user()->center->id === $centerId));
             case 'C':
             case 'D':
             default:
