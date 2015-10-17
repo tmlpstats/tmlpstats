@@ -27,8 +27,8 @@ class AppServiceProvider extends ServiceProvider {
     public function register()
     {
         $this->app->bind(
-            'Illuminate\Contracts\Auth\Registrar',
-            'TmlpStats\Services\Registrar'
+            \Illuminate\Contracts\Auth\Registrar::class,
+            \TmlpStats\Services\Registrar::class
         );
     }
 

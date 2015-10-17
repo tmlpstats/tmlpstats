@@ -2,9 +2,12 @@
 namespace TmlpStats\Exceptions;
 
 use Exception;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
-use Illuminate\Session\TokenMismatchException;
 
 use Carbon\Carbon;
 
@@ -12,7 +15,6 @@ use App;
 use Auth;
 use Log;
 use Mail;
-use Redirect;
 
 class Handler extends ExceptionHandler {
 
@@ -22,8 +24,9 @@ class Handler extends ExceptionHandler {
      * @var array
      */
     protected $dontReport = [
-        'Symfony\Component\HttpKernel\Exception\HttpException',
-        'Illuminate\Session\TokenMismatchException'
+        HttpException::class,
+        ModelNotFoundException::class,
+        TokenMismatchException::class,
     ];
 
     /**
@@ -67,19 +70,14 @@ class Handler extends ExceptionHandler {
      */
     public function render($request, Exception $e)
     {
-        if ($this->isHttpException($e))
-        {
-            return $this->renderHttpException($e);
-        }
-        else if ($e instanceof TokenMismatchException)
-        {
+        if ($e instanceof ModelNotFoundException) {
+            $e = new NotFoundHttpException($e->getMessage(), $e);
+        } else if ($e instanceof TokenMismatchException) {
             // Probably a session expiration. Redirect to login
             return redirect('auth/login')->with('message','Your session has expired. Please try logging in again.');
         }
-        else
-        {
-            return parent::render($request, $e);
-        }
+
+        return parent::render($request, $e);
     }
 
 }
