@@ -31,7 +31,6 @@ class ContactInfoValidator extends ValidatorAbstract
         if (preg_match('/^N\/?A$/i', $data->name)) {
             return;
         }
-        $this->dataValidators['name']           = v::string()->regex('/^(.+)\s([^\s]+)$/i');
 
         $this->dataValidators['name']           = v::string()->regex('/^(.+)\s([^\s]+)$/i');
         $this->dataValidators['accountability'] = v::in($accountabilities);
