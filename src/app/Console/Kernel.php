@@ -12,9 +12,9 @@ class Kernel extends ConsoleKernel {
      * @var array
      */
     protected $commands = [
-        'TmlpStats\Console\Commands\Inspire',
-        'TmlpStats\Console\Commands\FlushTablesCommand',
-        'TmlpStats\Console\Commands\ClearTablesCommand',
+        Commands\Inspire::class,
+        Commands\FlushTablesCommand::class,
+        Commands\ClearTablesCommand::class,
     ];
 
     /**
