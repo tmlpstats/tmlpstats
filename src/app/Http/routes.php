@@ -51,6 +51,7 @@ Route::resource('admin/roles', 'RoleController');
 Route::resource('statsreports', 'StatsReportController');
 Route::get('statsreports/{id}/download', 'StatsReportController@downloadSheet');
 Route::post('statsreports/{id}/submit', 'StatsReportController@submit');
+Route::get('statsreports/{id}/results', 'StatsReportController@getResults');
 
 Route::resource('globalreports', 'GlobalReportController');
 

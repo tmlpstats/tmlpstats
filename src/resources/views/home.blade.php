@@ -98,10 +98,5 @@
             }
         }
     });
-    $(function($) {
-        $("a.view").click(function() {
-            $("body").loading();
-        });
-    });
 </script>
 @endsection
