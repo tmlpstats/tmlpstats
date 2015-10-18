@@ -23,90 +23,32 @@
     <h2>{{ $statsReport->center->name }} - {{ $statsReport->reportingDate->format('F j, Y') }}</h2>
     <a href="{{ url('/home') }}"><< See All</a><br/><br/>
 
-    <div class="table-responsive">
-        <table class="table table-condensed table-striped">
-            <tr>
-                <th>Center:</th>
-                <td>{{ $statsReport->center->name }}</td>
-            </tr>
-            <tr>
-                <th>Region:</th>
-                <td>
-                    <?php
-                    $region = $statsReport->center->getLocalRegion();
-                    if ($region) {
-                        echo $region->name;
-                    }
-                    ?>
-                    @if ($statsReport->center->getLocalRegion())
-                        - <?php
-                        $region = $statsReport->center->getLocalRegion();
-                        if ($region) {
-                            echo $region->name;
-                        }
-                        ?>
-                    @endif
-                </td>
-            </tr>
-            <tr>
-                <th>Stats Email:</th>
-                <td>{{ $statsReport->center->statsEmail }}</td>
-            </tr>
-            <tr>
-                <th>Submitted At:</th>
-                <td><?php
-                    if ($statsReport->submittedAt) {
-                        $submittedAt = clone $statsReport->submittedAt;
-                        $submittedAt->setTimezone($statsReport->center->timezone);
-                        echo $submittedAt->format('l, F jS \a\t g:ia T');
-                    } else {
-                        echo '-';
-                    }
-                    ?></td>
-            </tr>
-            <tr>
-                <th>Submitted Sheet Version:</th>
-                <td>{{ $statsReport->version }}</td>
-            </tr>
-            <tr>
-                <th>Rating:</th>
-                <td>
-                    @if ($statsReport && $statsReport->getPoints() !== null)
-                        {{ $statsReport->getRating() }} ({{ $statsReport->getPoints() }})
-                    @else
-                        -
-                    @endif
-                </td>
-            </tr>
-            <tr>
-                <th>File:</th>
-                <td>
-                    @if ($sheetUrl)
-                        <a href="{{ $sheetUrl }}">Download</a>
-                    @else
-                        <span style="font-style: italic">Sheet not available</span>
-                    @endif
-                </td>
-            </tr>
-            <tr>
-                <th>Submission Comment:</th>
-                <td>{{ $statsReport->submitComment }}</td>
-            </tr>
-        </table>
+    {!! Form::open(['url' => "statsreports", 'method' => 'GET', 'class' => 'form-horizontal', 'id' => 'reportSelectorForm']) !!}
+    <div class="form-group">
+        {!! Form::label('report_id', 'Other Reports:', ['class' => 'col-sm-1 control-label']) !!}
+        <div class="col-sm-3">
+            {!! Form::select('report_id', $otherStatsReports, $statsReport->id, ['class' => 'form-control reportSelector']) !!}
+        </div>
     </div>
+    {!! Form::close() !!}
+
 
     <div id="content">
         <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
-            <li class="active"><a href="#centerstats-tab" data-toggle="tab">Center Stats</a></li>
+            <li class="active"><a href="#overview-tab" data-toggle="tab">Overview</a></li>
+            <li><a href="#results-tab" data-toggle="tab">Validation Results</a></li>
+            <li><a href="#centerstats-tab" data-toggle="tab">Center Stats</a></li>
             <li><a href="#tmlpregistrations-tab" data-toggle="tab">TMLP Registrations</a></li>
             <li><a href="#classlist-tab" data-toggle="tab">Class List</a></li>
             <li><a href="#courses-tab" data-toggle="tab">Courses</a></li>
             <li><a href="#contactinfo-tab" data-toggle="tab">Contact Info</a></li>
-            <li><a href="#results-tab" data-toggle="tab">Validation Results</a></li>
         </ul>
 
         <div class="tab-content">
-            <div class="tab-pane active" id="centerstats-tab">
+            <div class="tab-pane active" id="overview-tab">
+                @include('statsreports.details.overview', ['statsReport' => $statsReport, 'sheetUrl' => $sheetUrl])
+            </div>
+            <div class="tab-pane" id="centerstats-tab">
                 @include('statsreports.details.centerstats', ['centerStatsData' => $centerStatsData])
             </div>
             <div class="tab-pane" id="tmlpregistrations-tab">
@@ -140,6 +82,12 @@
                 success: function(response) {
                     $("#results-container").html(response);
                 }
+            });
+
+            $('select.reportSelector').change(function() {
+                var baseUrl = "{{ url('statsreports') }}";
+                var newReport = $('.reportSelector option:selected').val();
+                window.location.replace(baseUrl + '/' + newReport);
             });
         });
     </script>
