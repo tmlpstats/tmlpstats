@@ -40,6 +40,7 @@
           padding-top: 50px;
         }
     </style>
+    @yield('headers')
   </head>
   <body>
     @include('partials.navbar')

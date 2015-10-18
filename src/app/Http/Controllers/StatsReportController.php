@@ -1,7 +1,12 @@
 <?php namespace TmlpStats\Http\Controllers;
 
+use TmlpStats\Accountability;
+use TmlpStats\CenterStatsData;
+use TmlpStats\CourseData;
+use TmlpStats\GlobalReport;
 use TmlpStats\Http\Inputs;
 
+use TmlpStats\Quarter;
 use TmlpStats\Region;
 use TmlpStats\StatsReport;
 use TmlpStats\Center;
@@ -12,12 +17,17 @@ use TmlpStats\Import\Xlsx\XlsxArchiver;
 use Carbon\Carbon;
 
 use Auth;
+use DB;
 use Input;
 use Log;
 use Response;
+use TmlpStats\TeamMemberData;
+use TmlpStats\TmlpRegistrationData;
 
 class StatsReportController extends Controller
 {
+    protected $statsReport = null;
+
     /**
      * Create a new controller instance.
      */
@@ -136,26 +146,151 @@ class StatsReportController extends Controller
         }
 
         $sheet = array();
+        $sheetUrl = '';
 
         if ($statsReport) {
 
-            $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+            $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
 
-            try {
-                $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
-                $importer->import(false);
-                $sheet = $importer->getResults();
-            } catch (Exception $e) {
-                Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            if ($sheetPath) {
+                $sheetUrl = $sheetPath
+                    ? url("/statsreports/{$statsReport->id}/download")
+                    : null;
             }
 
-            $sheetUrl = $sheetUrl
-                ? url("/statsreports/{$statsReport->id}/download")
-                : null;
+            $this->statsReport = $statsReport;
+
+            // Center Stats
+            $week = clone $statsReport->quarter->startWeekendDate;
+            $week->addWeek();
+            $centerStatsData = array();
+            while ($week->lte($statsReport->quarter->endWeekendDate)) {
+
+                if ($week->lte($statsReport->quarter->classroom1Date)) {
+                    $classroom = 0;
+                } else if ($week->lte($statsReport->quarter->classroom2Date)) {
+                    $classroom = 1;
+                } else if ($week->lte($statsReport->quarter->classroom3Date)) {
+                    $classroom = 2;
+                } else {
+                    $classroom = 3;
+                }
+
+                $centerStatsData[$classroom][$week->toDateString()]['promise'] = $this->getPromiseData($week, $statsReport->center, $statsReport->quarter);
+
+                if ($week->lte($statsReport->reportingDate)) {
+                    $centerStatsData[$classroom][$week->toDateString()]['actual'] = $this->getActualData($week, $statsReport->center, $statsReport->quarter);
+                }
+
+                $week->addWeek();
+            }
+
+            $nextQuarter = $statsReport->quarter->getNextQuarter();
+
+            // Tmlp Registrations
+            $tmlpRegistrations = array();
+            $registrationsData = TmlpRegistrationData::byStatsReport($statsReport)->with('registration')->get();
+            foreach ($registrationsData as $data) {
+                if ($data->incomingQuarterId !== $nextQuarter->id) {
+                    $tmlpRegistrations['future'][] = $data;
+                } else if ($data->registration->teamYear == 1) {
+                    $tmlpRegistrations['team1'][] = $data;
+                } else {
+                    $tmlpRegistrations['team2'][] = $data;
+                }
+            }
+
+            // Team Members
+            $teamMembers = array();
+            $memberData = TeamMemberData::byStatsReport($statsReport)->with('teamMember')->get();
+            foreach ($memberData as $data) {
+                if ($data->teamMember->teamYear == 1) {
+                    $teamMembers['team1'][] = $data;
+                } else {
+                    $teamMembers['team2'][] = $data;
+                }
+            }
+
+            // Courses
+            $courses = array();
+            $courseData = CourseData::byStatsReport($statsReport)->with('course')->get();
+            foreach ($courseData as $data) {
+                if ($data->course->type == 'CAP') {
+                    $courses['CAP'][] = $data;
+                } else {
+                    $courses['CPC'][] = $data;
+                }
+            }
+
+            // Contacts
+            $contacts = array();
+            $accountabilities = array(
+                'programManager',
+                'classroomLeader',
+                'team1TeamLeader',
+                'team2TeamLeader',
+                'teamStatistician',
+                'teamStatisticianApprentice',
+            );
+            foreach ($accountabilities as $accountability) {
+                $accountabilityObj = Accountability::name($accountability)->first();
+                $contacts[$accountabilityObj->display] = $statsReport->center->getAccountable($accountability);
+            }
         }
 
-        return view('statsreports.show', compact('statsReport', 'sheet', 'sheetUrl'));
+        return view('statsreports.show', compact(
+            'statsReport',
+            'sheetUrl',
+            'sheet',
+            'centerStatsData',
+            'tmlpRegistrations',
+            'teamMembers',
+            'courses',
+            'contacts'
+        ));
     }
+
+
+    public function getResults($id)
+    {
+        $statsReport = StatsReport::find($id);
+
+        if ($statsReport && !$this->hasAccess($statsReport->center->id, 'R')) {
+            return 'You do not have access to this report.';
+        }
+
+        $sheet = array();
+        $sheetUrl = '';
+
+        if ($statsReport) {
+
+            $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+
+            if ($sheetPath) {
+                try {
+                    $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, false);
+                    $importer->import(false);
+                    $sheet = $importer->getResults();
+                } catch (Exception $e) {
+                    Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+                }
+
+                $sheetUrl = $sheetPath
+                    ? url("/statsreports/{$statsReport->id}/download")
+                    : null;
+            }
+        }
+        $includeUl = true;
+        return view('import.results', compact(
+            'statsReport',
+            'sheetUrl',
+            'sheet',
+            'includeUl'
+        ));
+    }
+
+
+
 
     /**
      * Show the form for editing the specified resource.
@@ -368,5 +503,97 @@ class StatsReportController extends Controller
                 return (Auth::user()->hasRole('globalStatistician')
                     || Auth::user()->hasRole('administrator'));
         }
+    }
+
+    // TODO: Refactor this so we're not reusing basically the same code as in importer
+    public function getPromiseData(Carbon $date, Center $center, Quarter $quarter)
+    {
+        $globalReport = null;
+        $statsReport = null;
+
+        $firstWeek = clone $quarter->startWeekendDate;
+        $firstWeek->addWeek();
+
+        // Usually, promises will be saved in the global report for the expected week
+        if ($this->statsReport->reportingDate->gte($quarter->classroom2Date) && $date->gt($quarter->classroom2Date)) {
+            $globalReport = GlobalReport::reportingDate($quarter->classroom2Date)->first();
+        } else {
+            $globalReport = GlobalReport::reportingDate($firstWeek)->first();
+        }
+
+        // If there was a global report from those weeks, look there
+        if ($globalReport) {
+            $statsReport = $globalReport->statsReports()->byCenter($center)->first();
+        }
+
+        // It it wasn't found in the expected week, search all weeks from the beginning until
+        // we find it
+        if (!$statsReport) {
+            $statsReport = $this->findFirstWeek($center, $quarter, 'promise');
+        }
+
+        // If we can't find one, or if the only one we could find is from this week
+        if (!$statsReport) {
+            return null;
+        }
+
+        return CenterStatsData::promise()
+            ->reportingDate($date)
+            ->byStatsReport($statsReport)
+            ->first();
+    }
+
+    // TODO: Refactor this so we're not reusing basically the same code as in importer
+    protected $promiseStatsReport = null;
+    public function findFirstWeek(Center $center, Quarter $quarter, $type)
+    {
+        // Promises should all be saved during the same week. Let's remember where we found the
+        // last one.
+        if ($this->promiseStatsReport) {
+            return $this->promiseStatsReport;
+        }
+
+        $statsReportResult = DB::table('stats_reports')
+            ->select('stats_reports.id')
+            ->join('center_stats_data', 'center_stats_data.stats_report_id', '=', 'stats_reports.id')
+            ->join('global_report_stats_report', 'global_report_stats_report.stats_report_id', '=', 'stats_reports.id')
+            ->join('global_reports', 'global_reports.id', '=', 'global_report_stats_report.global_report_id')
+            ->where('stats_reports.center_id', '=', $center->id)
+            ->where('global_reports.reporting_date', '>', $quarter->startWeekendDate)
+            ->where('center_stats_data.type', '=', $type)
+            ->orderBy('global_reports.reporting_date', 'ASC')
+            ->first();
+
+        if ($statsReportResult) {
+            $this->promiseStatsReport = StatsReport::find($statsReportResult->id);
+        }
+
+        return $this->promiseStatsReport;
+    }
+
+    // TODO: Refactor this so we're not reusing basically the same code as in importer
+    public function getActualData(Carbon $date, Center $center, Quarter $quarter)
+    {
+        $statsReport = null;
+
+        // First, check if it's in the official report from the actual date
+        $globalReport = GlobalReport::reportingDate($date)->first();
+        if ($globalReport) {
+            $statsReport = $globalReport->statsReports()->byCenter($center)->first();
+        }
+
+        // If not, search from the beginning until we find it
+        if (!$statsReport) {
+            $statsReport = $this->findFirstWeek($center, $quarter, 'actual');
+        }
+
+        if (!$statsReport) {
+            return null;
+        }
+
+        return CenterStatsData::actual()
+            ->reportingDate($date)
+            ->byStatsReport($statsReport)
+            ->first();
     }
 }
