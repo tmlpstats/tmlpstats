@@ -237,10 +237,28 @@ class StatsReportController extends Controller
                 $accountabilityObj = Accountability::name($accountability)->first();
                 $contacts[$accountabilityObj->display] = $statsReport->center->getAccountable($accountability);
             }
+
+            // Other Stats Reports
+            $otherStatsReports = array();
+            $searchWeek = clone $statsReport->quarter->startWeekendDate;
+
+            $searchWeek->addWeek();
+
+            while ($searchWeek->lte($statsReport->quarter->endWeekendDate)) {
+                $globalReport = GlobalReport::reportingDate($searchWeek)->first();
+                if ($globalReport) {
+                    $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
+                    if ($report) {
+                        $otherStatsReports[$report->id] = $report->reportingDate->format('M d, Y');
+                    }
+                }
+                $searchWeek->addWeek();
+            }
         }
 
         return view('statsreports.show', compact(
             'statsReport',
+            'otherStatsReports',
             'sheetUrl',
             'sheet',
             'centerStatsData',
