@@ -2,14 +2,17 @@
 
 @section('headers')
     <style type="text/css">
-        td.centerStatsFrame {
-            padding: 10px;
-        }
         table.centerStatsTable {
             width: 95%;
         }
         .centerStatsTable th, .centerStatsTable td {
             text-align: center;
+        }
+        .centerStatsTable td {
+             width: 4em;
+        }
+        table {
+            empty-cells: show;
         }
     </style>
 @endsection
