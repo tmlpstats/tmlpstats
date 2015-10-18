@@ -124,22 +124,7 @@
             <div class="tab-pane" id="results-tab">
                 <h4>Results:</h4>
                 <div id="results-container">
-                    @if ($sheetUrl)
-                        <div id="updating">
-                            <div class="loader">
-                                <div class="duo duo1">
-                                    <div class="dot dot-a"></div>
-                                    <div class="dot dot-b"></div>
-                                </div>
-                                <div class="duo duo2">
-                                    <div class="dot dot-a"></div>
-                                    <div class="dot dot-b"></div>
-                                </div>
-                            </div>
-                        </div>
-                    @else
-                        <p>Results not available.</p>
-                    @endif
+                    @include('partials.loading')
                 </div>
             </div>
         </div>
@@ -149,7 +134,6 @@
         jQuery(document).ready(function ($) {
             $('#tabs').tab();
 
-            @if ($sheetUrl)
             $.ajax({
                 type: "GET",
                 url: "{{ url('/statsreports/' . $statsReport->id . '/results') }}",
@@ -157,7 +141,6 @@
                     $("#results-container").html(response);
                 }
             });
-            @endif
         });
     </script>
 

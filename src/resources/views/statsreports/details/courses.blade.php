@@ -25,15 +25,15 @@
                     <tr>
                         <td>{{ $courseData->course->center->name }}</td>
                         <td>{{ $courseData->course->startDate->format('m/j/y') }}</td>
-                        <td>{{ $courseData->quarterStartTer }}</td>
-                        <td>{{ $courseData->quarterStartStandardStarts }}</td>
-                        <td>{{ $courseData->quarterStartXfer }}</td>
-                        <td>{{ $courseData->currentTer }}</td>
-                        <td>{{ $courseData->currentStandardStarts }}</td>
-                        <td>{{ $courseData->currentXfer }}</td>
-                        <td>{{ $courseData->completedStandardStarts }}</td>
-                        <td>{{ $courseData->potentials }}</td>
-                        <td>{{ $courseData->registrations }}</td>
+                        <td style="text-align: center">{{ $courseData->quarterStartTer }}</td>
+                        <td style="text-align: center">{{ $courseData->quarterStartStandardStarts }}</td>
+                        <td style="text-align: center">{{ $courseData->quarterStartXfer }}</td>
+                        <td style="text-align: center">{{ $courseData->currentTer }}</td>
+                        <td style="text-align: center">{{ $courseData->currentStandardStarts }}</td>
+                        <td style="text-align: center">{{ $courseData->currentXfer }}</td>
+                        <td style="text-align: center">{{ $courseData->completedStandardStarts }}</td>
+                        <td style="text-align: center">{{ $courseData->potentials }}</td>
+                        <td style="text-align: center">{{ $courseData->registrations }}</td>
                     </tr>
                 @endforeach
             </tbody>

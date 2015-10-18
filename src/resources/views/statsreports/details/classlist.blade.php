@@ -25,9 +25,9 @@
                     <tr>
                         <td>{{ $memberData->firstName }}</td>
                         <td>{{ $memberData->lastName }}</td>
-                        <td>Q{{ $memberData->teamMember->quarterNumber }}</td>
-                        <td>{{ $memberData->gitw ? 'E' : 'I' }}</td>
-                        <td>{{ $memberData->tdo ? 'Y' : 'N' }}</td>
+                        <td style="text-align: center">Q{{ $memberData->teamMember->quarterNumber }}</td>
+                        <td style="text-align: center">{{ $memberData->gitw ? 'E' : 'I' }}</td>
+                        <td style="text-align: center">{{ $memberData->tdo ? 'Y' : 'N' }}</td>
                         @if ($memberData->withdrawCode)
                             <td title="{{ $memberData->withdrawCode->display }}">{{ $memberData->withdrawCode->code }}</td>
                         @else
@@ -45,10 +45,13 @@
                             }
                             ?></td>
                         <td>{{ $memberData->comment }}</td>
-                        <td>{{ $memberData->travel ? 'Yes' : '' }}</td>
-                        <td>{{ $memberData->room ? 'Yes' : '' }}</td>
+                        <td style="text-align: center">{{ $memberData->travel ? 'Yes' : '' }}</td>
+                        <td style="text-align: center">{{ $memberData->room ? 'Yes' : '' }}</td>
                         <td><?php
                             $special = array();
+                            if (!$memberData->atWeekend) {
+                                $special[] = "Not at weekend";
+                            }
                             if ($memberData->xferOut) {
                                 $special[] = "Xfer Out";
                             }
