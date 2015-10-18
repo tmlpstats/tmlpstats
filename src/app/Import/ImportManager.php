@@ -249,7 +249,6 @@ class ImportManager
                 $emails['regional'] = $center->localRegion == 'East'
                     ? 'east.statistician@gmail.com'
                     : 'west.statistician@gmail.com';
-                $respondByTime = '12:00 pm';
                 break;
             case 'IND':
                 $emails['regional'] = 'india.statistician@gmail.com';
