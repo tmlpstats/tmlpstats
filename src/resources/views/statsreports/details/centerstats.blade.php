@@ -12,8 +12,8 @@ foreach ($centerStatsData as $chunk) {
     <table>
         @for ($k = 0; $k < 2; $k++)
             <tr>
-                @for ($j = 0; $j < 2; $j++)
-                    <td class="centerStatsFrame">
+                @for ($j = $k; $j < $k+2; $j++)
+                    <td>
                         <table class="table table-condensed table-bordered table-striped centerStatsTable">
                             <thead>
                                 <tr>
@@ -40,6 +40,9 @@ foreach ($centerStatsData as $chunk) {
                                 </tr>
                             </thead>
                             <tbody>
+                            <?php
+                                $pointsTotal = 0;
+                            ?>
                             @foreach (['cap','cpc','t1x','t2x','gitw','lf'] as $game)
                                 <?php
                                     $percent = null;
@@ -62,21 +65,26 @@ foreach ($centerStatsData as $chunk) {
                                     <td>{{ ($percent !== null) ? "{$percent}%" : '' }}</td>
                                     <td><?php
                                         if ($percent !== null) {
+                                            $points = 0;
                                             if ($percent == 100) {
-                                                echo ($game == 'cap') ? 8 : 4;
+                                                $points = ($game == 'cap') ? 8 : 4;
                                             } else if ($percent >= 90) {
-                                                echo ($game == 'cap') ? 6 : 3;
+                                                $points = ($game == 'cap') ? 6 : 3;
                                             } else if ($percent >= 80) {
-                                                echo ($game == 'cap') ? 4 : 2;
+                                                $points = ($game == 'cap') ? 4 : 2;
                                             } else if ($percent >= 75) {
-                                                echo ($game == 'cap') ? 2 : 1;
-                                            } else {
-                                                echo 0;
+                                                $points = ($game == 'cap') ? 2 : 1;
                                             }
+                                            $pointsTotal += $points;
+                                            echo $points;
                                         }
                                     ?></td>
                                 </tr>
                             @endforeach
+                            <tr>
+                                <th colspan="{{ $maxCount * 2 + 2 }}" style="text-align: right">Total:</th>
+                                <th>{{ $pointsTotal }}</th>
+                            </tr>
                             </tbody>
                         </table>
                     </td>
