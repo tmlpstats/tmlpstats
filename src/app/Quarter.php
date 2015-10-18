@@ -45,6 +45,18 @@ class Quarter extends Model
         }
     }
 
+    public function getNextQuarter()
+    {
+        $quarterNumber = ($this->quarterNumber + 1) % 5;
+        $quarterNumber = $quarterNumber ?: 1; // no quarter 0
+
+        $year = ($quarterNumber === 1)
+            ? $this->year + 1
+            : $this->year;
+
+        return Quarter::year($year)->quarterNumber($quarterNumber)->first();
+    }
+
     public function setRegion($region)
     {
         if (!$region) {

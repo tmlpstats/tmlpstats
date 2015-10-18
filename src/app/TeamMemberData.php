@@ -37,6 +37,18 @@ class TeamMemberData extends Model
         'room'       => 'boolean',
     ];
 
+    public function __get($name)
+    {
+        switch ($name) {
+
+            case 'firstName':
+            case 'lastName':
+                return $this->teamMember->person->$name;
+            default:
+                return parent::__get($name);
+        }
+    }
+
     public function scopeByStatsReport($query, StatsReport $statsReport)
     {
         return $query->whereStatsReportId($statsReport->id);
@@ -54,7 +66,7 @@ class TeamMemberData extends Model
 
     public function withdrawCode()
     {
-        return $this->hasOne('TmlpStats\WithdrawCode');
+        return $this->belongsTo('TmlpStats\WithdrawCode');
     }
 
     public function accountability()

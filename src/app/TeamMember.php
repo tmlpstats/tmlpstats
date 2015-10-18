@@ -21,6 +21,34 @@ class TeamMember extends Model
         'is_reviewer' => 'boolean',
     );
 
+    public function __get($name)
+    {
+        switch ($name) {
+
+            case 'firstName':
+            case 'lastName':
+                return $this->person->$name;
+            case 'quarterNumber':
+
+                $thisQuarter = Quarter::byRegion($this->person->center->region)
+                    ->current()
+                    ->first();
+
+                if (!$thisQuarter) {
+                    return null;
+                }
+
+                $quarterNumber = $thisQuarter->quarterNumber;
+                if ($thisQuarter->quarterNumber <= $this->incomingQuarter->quarterNumber) {
+                    $quarterNumber += 4;
+                }
+
+                return $quarterNumber - $this->incomingQuarter->quarterNumber;
+            default:
+                return parent::__get($name);
+        }
+    }
+
     public static function firstOrNew(array $attributes)
     {
         $center = Center::find($attributes['center_id']);
@@ -71,6 +99,11 @@ class TeamMember extends Model
     public function person()
     {
         return $this->belongsTo('TmlpStats\Person');
+    }
+
+    public function incomingQuarter()
+    {
+        return $this->belongsTo('TmlpStats\Quarter', 'incoming_quarter_id', 'id');
     }
 
     public function teamMemberData()

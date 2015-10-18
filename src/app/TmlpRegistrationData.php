@@ -34,6 +34,18 @@ class TmlpRegistrationData extends Model
         'wd_date',
     ];
 
+    public function __get($name)
+    {
+        switch ($name) {
+
+            case 'firstName':
+            case 'lastName':
+                return $this->registration->person->$name;
+            default:
+                return parent::__get($name);
+        }
+    }
+
     public function scopeApproved($query)
     {
         return $query->whereNotNull('appr_date');
@@ -61,7 +73,12 @@ class TmlpRegistrationData extends Model
 
     public function withdrawCode()
     {
-        return $this->hasOne('TmlpStats\WithdrawCode');
+        return $this->belongsTo('TmlpStats\WithdrawCode');
+    }
+
+    public function committedTeamMember()
+    {
+        return $this->belongsTo('TmlpStats\TeamMember', 'committed_team_member_id', 'id');
     }
 
     public function incomingQuarter()
@@ -71,6 +88,6 @@ class TmlpRegistrationData extends Model
 
     public function registration()
     {
-        return $this->belongsTo('TmlpStats\TmlpRegistration');
+        return $this->belongsTo('TmlpStats\TmlpRegistration', 'tmlp_registration_id', 'id');
     }
 }
