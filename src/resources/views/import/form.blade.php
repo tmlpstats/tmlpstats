@@ -55,16 +55,8 @@
 @endif
 <div id="updating" style="display:none">
     <br/><p>Please be patient. <span style="font-weight:bold">It may take up to 1 minute to complete.</span>
-    <div class="loader">
-      <div class="duo duo1">
-        <div class="dot dot-a"></div>
-        <div class="dot dot-b"></div>
-      </div>
-      <div class="duo duo2">
-        <div class="dot dot-a"></div>
-        <div class="dot dot-b"></div>
-      </div>
-    </div>
+
+    @include('partials.loading')
 </div>
 
 <div class="modal fade" id="selectFileModel">
@@ -108,17 +100,7 @@
                 {!! Form::textarea('comment', null, ['class' => 'form-control', 'rows' => '10']) !!}
                 {!! Form::close() !!}
 
-                <div class="loader" id="submitLoading" style="display:none">
-                  <div class="duo duo1">
-                    <div class="dot dot-a"></div>
-                    <div class="dot dot-b"></div>
-                  </div>
-                  <div class="duo duo2">
-                    <div class="dot dot-a"></div>
-                    <div class="dot dot-b"></div>
-                  </div>
-                  <br/>
-                </div>
+                @include('partials.loading', ['show' => false, 'id' => 'submitLoading'])
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal" id="submitStatsCancel">Cancel</button>

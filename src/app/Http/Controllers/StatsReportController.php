@@ -1,15 +1,18 @@
 <?php namespace TmlpStats\Http\Controllers;
 
+use TmlpStats\Http\Inputs;
+
 use TmlpStats\Accountability;
+use TmlpStats\Center;
 use TmlpStats\CenterStatsData;
 use TmlpStats\CourseData;
 use TmlpStats\GlobalReport;
-use TmlpStats\Http\Inputs;
-
 use TmlpStats\Quarter;
 use TmlpStats\Region;
 use TmlpStats\StatsReport;
-use TmlpStats\Center;
+use TmlpStats\TeamMemberData;
+use TmlpStats\TmlpRegistrationData;
+
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Import\Xlsx\XlsxImporter;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
@@ -21,8 +24,6 @@ use DB;
 use Input;
 use Log;
 use Response;
-use TmlpStats\TeamMemberData;
-use TmlpStats\TmlpRegistrationData;
 
 class StatsReportController extends Controller
 {
@@ -250,13 +251,12 @@ class StatsReportController extends Controller
         ));
     }
 
-
     public function getResults($id)
     {
         $statsReport = StatsReport::find($id);
 
         if ($statsReport && !$this->hasAccess($statsReport->center->id, 'R')) {
-            return 'You do not have access to this report.';
+            return '<p>You do not have access to this report.</p>';
         }
 
         $sheet = array();
@@ -280,6 +280,11 @@ class StatsReportController extends Controller
                     : null;
             }
         }
+
+        if (!$sheetUrl) {
+            return '<p>Results not available.</p>';
+        }
+
         $includeUl = true;
         return view('import.results', compact(
             'statsReport',
@@ -288,9 +293,6 @@ class StatsReportController extends Controller
             'includeUl'
         ));
     }
-
-
-
 
     /**
      * Show the form for editing the specified resource.
