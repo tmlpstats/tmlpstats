@@ -11,6 +11,7 @@ use Auth;
 use Log;
 use Mail;
 use Exception;
+use TmlpStats\Setting;
 
 // Required for importing multiple sheets
 ini_set('max_execution_time', 240);
@@ -179,6 +180,7 @@ class ImportManager
         $submittedAt = clone $statsReport->submittedAt;
         $submittedAt->setTimezone($center->timeZone);
 
+        // TODO: make this configurable
         if ($statsReport->reportingDate->eq($statsReport->quarter->classroom2Date)) {
             // Stats are due by 11:59 PM at the second classroom
             // 11:59.59 PM local time on the reporting date.
@@ -211,7 +213,6 @@ class ImportManager
         $t2TeamLeader           = $center->getT2TeamLeader($quarter);
         $statistician           = $center->getStatistician($quarter);
         $statisticianApprentice = $center->getStatisticianApprentice($quarter);
-        $mailingList            = $center->getMailingList($quarter);
 
         $emailMap = array(
             'center'                 => $center->statsEmail,
@@ -221,9 +222,13 @@ class ImportManager
             't2TeamLeader'           => $t2TeamLeader ? $t2TeamLeader->email : null,
             'statistician'           => $statistician ? $statistician->email : null,
             'statisticianApprentice' => $statisticianApprentice ? $statisticianApprentice->email : null,
-            'mailingList'            => $mailingList ? $mailingList->email : null,
             'regional'               => $center->region->email,
         );
+
+        $mailingList = Setting::get('centerReportMailingList', $center);
+        if ($mailingList) {
+            $emailMap['mailingList'] = $mailingList->value;
+        }
 
         $emails = array();
         foreach ($emailMap as $accountability => $email) {
@@ -232,9 +237,7 @@ class ImportManager
                 continue;
             }
 
-            if ($accountability === 'mailingList') {
-                // TODO: Make me better
-                // This is a hack to allow adding an arbitrary number of extra emails to the list
+            if (strpos($email, ',') !== false) {
                 $emails = array_merge($emails, explode(',', $email));
             } else {
                 $emails[] = $email;
@@ -242,24 +245,12 @@ class ImportManager
         }
         $emails = array_unique($emails);
 
-        $respondByTime = '10:00 am';
-
-        switch ($center->getGlobalRegion()->abbreviation) {
-            case 'NA':
-                $emails['regional'] = $center->localRegion == 'East'
-                    ? 'east.statistician@gmail.com'
-                    : 'west.statistician@gmail.com';
-                break;
-            case 'IND':
-                $emails['regional'] = 'india.statistician@gmail.com';
-                break;
-            case 'EME':
-                $emails['regional'] = 'eme.statistician@gmail.com';
-                break;
-            case 'ANZ':
-                $emails['regional'] = 'anz.statistician@gmail.com';
-                break;
+        $respondByTime = Setting::get('centerReportRespondByTime', $center);
+        if (!$respondByTime) {
+            $respondByTime = '10:00 am';
         }
+
+        $emails['regional'] = $center->region->email;
 
         $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
         $sheetName = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
