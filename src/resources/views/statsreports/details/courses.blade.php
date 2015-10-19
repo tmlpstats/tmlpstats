@@ -1,5 +1,4 @@
 <div class="table-responsive">
-    <h3>Courses</h3>
     @foreach ($courses as $type => $group)
         <table class="table table-condensed table-striped">
             <thead>

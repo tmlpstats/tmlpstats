@@ -51,7 +51,14 @@ Route::resource('admin/roles', 'RoleController');
 Route::resource('statsreports', 'StatsReportController');
 Route::get('statsreports/{id}/download', 'StatsReportController@downloadSheet');
 Route::post('statsreports/{id}/submit', 'StatsReportController@submit');
+
 Route::get('statsreports/{id}/results', 'StatsReportController@getResults');
+Route::get('statsreports/{id}/centerstats', 'StatsReportController@getCenterStats');
+Route::get('statsreports/{id}/classlist', 'StatsReportController@getTeamMembers');
+Route::get('statsreports/{id}/tmlpregistrations', 'StatsReportController@getTmlpRegistrations');
+Route::get('statsreports/{id}/courses', 'StatsReportController@getCourses');
+Route::get('statsreports/{id}/contactinfo', 'StatsReportController@getContacts');
+
 
 Route::resource('globalreports', 'GlobalReportController');
 

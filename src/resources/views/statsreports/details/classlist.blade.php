@@ -1,5 +1,4 @@
 <div class="table-responsive">
-    <h3>Team Members</h3>
     @foreach ($teamMembers as $groupName => $group)
         <table class="table table-condensed table-striped">
             <thead>

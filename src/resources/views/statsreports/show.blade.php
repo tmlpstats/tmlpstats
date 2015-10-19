@@ -49,22 +49,37 @@
                 @include('statsreports.details.overview', ['statsReport' => $statsReport, 'sheetUrl' => $sheetUrl])
             </div>
             <div class="tab-pane" id="centerstats-tab">
-                @include('statsreports.details.centerstats', ['centerStatsData' => $centerStatsData])
+                <h3>Center Stats</h3>
+                <div id="centerstats-container">
+                    @include('partials.loading')
+                </div>
             </div>
             <div class="tab-pane" id="tmlpregistrations-tab">
-                @include('statsreports.details.tmlpregistrations', ['tmlpRegistrations' => $tmlpRegistrations])
+                <h3>Team Registrations</h3>
+                <div id="tmlpregistrations-container">
+                    @include('partials.loading')
+                </div>
             </div>
             <div class="tab-pane" id="classlist-tab">
-                @include('statsreports.details.classlist', ['teamMembers' => $teamMembers])
+                <h3>Team Members</h3>
+                <div id="classlist-container">
+                    @include('partials.loading')
+                </div>
             </div>
             <div class="tab-pane" id="courses-tab">
-                @include('statsreports.details.courses', ['courses' => $courses])
+                <h3>Courses</h3>
+                <div id="courses-container">
+                    @include('partials.loading')
+                </div>
             </div>
             <div class="tab-pane" id="contactinfo-tab">
-                @include('statsreports.details.contactinfo', ['contacts' => $contacts])
+                <h3>Contact Info</h3>
+                <div id="contactinfo-container">
+                    @include('partials.loading')
+                </div>
             </div>
             <div class="tab-pane" id="results-tab">
-                <h4>Results:</h4>
+                <h3>Results:</h3>
                 <div id="results-container">
                     @include('partials.loading')
                 </div>
@@ -76,6 +91,13 @@
         jQuery(document).ready(function ($) {
             $('#tabs').tab();
 
+            $('select.reportSelector').change(function() {
+                var baseUrl = "{{ url('statsreports') }}";
+                var newReport = $('.reportSelector option:selected').val();
+                window.location.replace(baseUrl + '/' + newReport);
+            });
+
+            // Fetch Validation Results
             $.ajax({
                 type: "GET",
                 url: "{{ url('/statsreports/' . $statsReport->id . '/results') }}",
@@ -84,10 +106,49 @@
                 }
             });
 
-            $('select.reportSelector').change(function() {
-                var baseUrl = "{{ url('statsreports') }}";
-                var newReport = $('.reportSelector option:selected').val();
-                window.location.replace(baseUrl + '/' + newReport);
+            // Fetch Center Stats data
+            $.ajax({
+                type: "GET",
+                url: "{{ url('/statsreports/' . $statsReport->id . '/centerstats') }}",
+                success: function(response) {
+                    $("#centerstats-container").html(response);
+                }
+            });
+
+            // Fetch Classlist
+            $.ajax({
+                type: "GET",
+                url: "{{ url('/statsreports/' . $statsReport->id . '/classlist') }}",
+                success: function(response) {
+                    $("#classlist-container").html(response);
+                }
+            });
+
+            // Fetch Team Registrations
+            $.ajax({
+                type: "GET",
+                url: "{{ url('/statsreports/' . $statsReport->id . '/tmlpregistrations') }}",
+                success: function(response) {
+                    $("#tmlpregistrations-container").html(response);
+                }
+            });
+
+            // Fetch Courses
+            $.ajax({
+                type: "GET",
+                url: "{{ url('/statsreports/' . $statsReport->id . '/courses') }}",
+                success: function(response) {
+                    $("#courses-container").html(response);
+                }
+            });
+
+            // Fetch Contact Info
+            $.ajax({
+                type: "GET",
+                url: "{{ url('/statsreports/' . $statsReport->id . '/contactinfo') }}",
+                success: function(response) {
+                    $("#contactinfo-container").html(response);
+                }
             });
         });
     </script>

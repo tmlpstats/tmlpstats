@@ -8,7 +8,6 @@ foreach ($centerStatsData as $chunk) {
 }
 ?>
 <div class="table-responsive">
-    <h3>Center Stats</h3>
     <table>
         @for ($k = 0; $k < 2; $k++)
             <tr>
