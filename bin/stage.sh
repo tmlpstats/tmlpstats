@@ -43,11 +43,6 @@ echo "Copying file archive"
 rsync -av --delete $PROD/storage/app/* $DEST/storage/app/
 
 echo ""
-echo "Running migrations"
-cd $DEST/
-php artisan migrate
-
-echo ""
 echo "Syncing files"
 rsync -av --delete --filter='protect .env' \
                    --filter='protect storage/framework/sessions/*' \
@@ -68,6 +63,11 @@ rsync -av --delete --filter='protect .env' \
                    --exclude='readme.md' \
                    --exclude='Vagrantfile' \
                    $SOURCE/ $DEST
+
+echo ""
+echo "Running migrations"
+cd $DEST/
+php artisan migrate
 
 echo ""
 echo "Fixing file permisssions"
