@@ -1,6 +1,5 @@
 <?php namespace TmlpStats\Http\Controllers;
 
-use App;
 use TmlpStats\Http\Inputs;
 
 use TmlpStats\Accountability;
@@ -20,14 +19,17 @@ use TmlpStats\Import\Xlsx\XlsxArchiver;
 
 use Carbon\Carbon;
 
+use App;
 use Auth;
-use DB;
+use Cache;
 use Input;
 use Log;
 use Response;
+use View;
 
 class StatsReportController extends Controller
 {
+    const CACHE_TTL = 60;
     /**
      * Create a new controller instance.
      */
@@ -145,7 +147,6 @@ class StatsReportController extends Controller
             return 'You do not have access to this report.';
         }
 
-        $sheet = array();
         $sheetUrl = '';
 
         if ($statsReport) {
@@ -399,67 +400,107 @@ class StatsReportController extends Controller
 
     public function getCenterStats($id)
     {
-        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($id);
+        $cacheKey = 'statsReport:centerstats:' . $id;
+        $view = Cache::get($cacheKey);
 
-        if (!$centerStatsData) {
-            return '<p>Center Stats not available.</p>';
+        if (!$view) {
+            $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($id);
+
+            if (!$centerStatsData) {
+                return '<p>Center Stats not available.</p>';
+            }
+
+            $view = View::make('statsreports.details.centerstats', compact(
+                'centerStatsData'
+            ))->render();
         }
+        Cache::put($cacheKey, $view, static::CACHE_TTL);
 
-        return view('statsreports.details.centerstats', compact(
-            'centerStatsData'
-        ));
+        return $view;
     }
 
     public function getTeamMembers($id)
     {
-        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($id);
+        $cacheKey = 'statsReport:classlist:' . $id;
+        $view = Cache::get($cacheKey);
 
-        if (!$teamMembers) {
-            return '<p>Team Members not available.</p>';
+        if (!$view) {
+            $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($id);
+
+            if (!$teamMembers) {
+                return '<p>Team Members not available.</p>';
+            }
+
+            $view = View::make('statsreports.details.classlist', compact(
+                'teamMembers'
+            ))->render();
         }
+        Cache::put($cacheKey, $view, static::CACHE_TTL);
 
-        return view('statsreports.details.classlist', compact(
-            'teamMembers'
-        ));
+        return $view;
     }
 
     public function getTmlpRegistrations($id)
     {
-        $tmlpRegistrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
+        $cacheKey = 'statsReport:tmlpregistrations:' . $id;
+        $view = Cache::get($cacheKey);
 
-        if (!$tmlpRegistrations) {
-            return '<p>TMLP Registrations not available.</p>';
+        if (!$view) {
+            $tmlpRegistrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
+
+            if (!$tmlpRegistrations) {
+                return '<p>TMLP Registrations not available.</p>';
+            }
+
+            $view = View::make('statsreports.details.tmlpregistrations', compact(
+                'tmlpRegistrations'
+            ))->render();
         }
+        Cache::put($cacheKey, $view, static::CACHE_TTL);
 
-        return view('statsreports.details.tmlpregistrations', compact(
-            'tmlpRegistrations'
-        ));
+        return $view;
     }
 
     public function getCourses($id)
     {
-        $courses = App::make(CoursesController::class)->getByStatsReport($id);
+        $cacheKey = 'statsReport:courses:' . $id;
+        $view = Cache::get($cacheKey);
 
-        if (!$courses) {
-            return '<p>Courses not available.</p>';
+        if (!$view) {
+            $courses = App::make(CoursesController::class)->getByStatsReport($id);
+
+            if (!$courses) {
+                return '<p>Courses not available.</p>';
+            }
+
+            $view = View::make('statsreports.details.courses', compact(
+                'courses'
+            ))->render();
         }
+        Cache::put($cacheKey, $view, static::CACHE_TTL);
 
-        return view('statsreports.details.courses', compact(
-            'courses'
-        ));
+        return $view;
     }
 
     public function getContacts($id)
     {
-        $contacts = App::make(ContactsController::class)->getByStatsReport($id);
+        $cacheKey = 'statsReport:contact:' . $id;
+        $view = Cache::get($cacheKey);
 
-        if (!$contacts) {
-            return '<p>Contracts not available.</p>';
+        if (!$view) {
+            $contacts = App::make(ContactsController::class)->getByStatsReport($id);
+
+            if (!$contacts) {
+                $view =  '<p>Contacts not available.</p>';
+            } else {
+                $view = View::make('statsreports.details.contactinfo', compact(
+                    'contacts'
+                ))->render();
+            }
         }
+        Cache::put($cacheKey, $view, static::CACHE_TTL);
 
-        return view('statsreports.details.contactinfo', compact(
-            'contacts'
-        ));
+        return $view;
     }
 
     public function getResults($id)
@@ -478,13 +519,19 @@ class StatsReportController extends Controller
             $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
 
             if ($sheetPath) {
-                try {
-                    $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, false);
-                    $importer->import(false);
-                    $sheet = $importer->getResults();
-                } catch (Exception $e) {
-                    Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+
+                $cacheKey = 'statsReport:validation:' . sha1($sheetPath);
+                $sheet = Cache::get($cacheKey);
+                if (!$sheet) {
+                    try {
+                        $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, false);
+                        $importer->import(false);
+                        $sheet = $importer->getResults();
+                    } catch (Exception $e) {
+                        Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+                    }
                 }
+                Cache::put($cacheKey, $sheet, static::CACHE_TTL);
 
                 $sheetUrl = $sheetPath
                     ? url("/statsreports/{$statsReport->id}/download")
