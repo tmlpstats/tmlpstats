@@ -183,99 +183,6 @@ class StatsReportController extends Controller
         ));
     }
 
-    public function getCenterStats($id)
-    {
-        $controller = new CenterStatsController();
-        $centerStatsData = $controller->callAction('getByStatsReport', ['id' => $id]);
-
-        return view('statsreports.details.centerstats', compact(
-            'centerStatsData'
-        ));
-    }
-
-    public function getTeamMembers($id)
-    {
-        $controller = new TeamMembersController();
-        $teamMembers = $controller->callAction('getByStatsReport', ['id' => $id]);
-
-        return view('statsreports.details.classlist', compact(
-            'teamMembers'
-        ));
-    }
-
-    public function getTmlpRegistrations($id)
-    {
-        $controller = new TmlpRegistrationsController();
-        $tmlpRegistrations = $controller->callAction('getByStatsReport', ['id' => $id]);
-
-        return view('statsreports.details.tmlpregistrations', compact(
-            'tmlpRegistrations'
-        ));
-    }
-
-    public function getCourses($id)
-    {
-        $controller = new CoursesController();
-        $courses = $controller->callAction('getByStatsReport', ['id' => $id]);
-
-        return view('statsreports.details.courses', compact(
-            'courses'
-        ));
-    }
-
-    public function getContacts($id)
-    {
-        $controller = new ContactsController();
-        $contacts = $controller->callAction('getByStatsReport', ['id' => $id]);
-
-        return view('statsreports.details.contactinfo', compact(
-            'contacts'
-        ));
-    }
-
-    public function getResults($id)
-    {
-        $statsReport = StatsReport::find($id);
-
-        if ($statsReport && !$this->hasAccess($statsReport->center->id, 'R')) {
-            return '<p>You do not have access to this report.</p>';
-        }
-
-        $sheet = array();
-        $sheetUrl = '';
-
-        if ($statsReport) {
-
-            $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
-
-            if ($sheetPath) {
-                try {
-                    $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, false);
-                    $importer->import(false);
-                    $sheet = $importer->getResults();
-                } catch (Exception $e) {
-                    Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
-                }
-
-                $sheetUrl = $sheetPath
-                    ? url("/statsreports/{$statsReport->id}/download")
-                    : null;
-            }
-        }
-
-        if (!$sheetUrl) {
-            return '<p>Results not available.</p>';
-        }
-
-        $includeUl = true;
-        return view('import.results', compact(
-            'statsReport',
-            'sheetUrl',
-            'sheet',
-            'includeUl'
-        ));
-    }
-
     /**
      * Show the form for editing the specified resource.
      *
@@ -487,5 +394,114 @@ class StatsReportController extends Controller
                 return (Auth::user()->hasRole('globalStatistician')
                     || Auth::user()->hasRole('administrator'));
         }
+    }
+
+
+    public function getCenterStats($id)
+    {
+        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($id);
+
+        if (!$centerStatsData) {
+            return '<p>Center Stats not available.</p>';
+        }
+
+        return view('statsreports.details.centerstats', compact(
+            'centerStatsData'
+        ));
+    }
+
+    public function getTeamMembers($id)
+    {
+        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($id);
+
+        if (!$teamMembers) {
+            return '<p>Team Members not available.</p>';
+        }
+
+        return view('statsreports.details.classlist', compact(
+            'teamMembers'
+        ));
+    }
+
+    public function getTmlpRegistrations($id)
+    {
+        $tmlpRegistrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
+
+        if (!$tmlpRegistrations) {
+            return '<p>TMLP Registrations not available.</p>';
+        }
+
+        return view('statsreports.details.tmlpregistrations', compact(
+            'tmlpRegistrations'
+        ));
+    }
+
+    public function getCourses($id)
+    {
+        $courses = App::make(CoursesController::class)->getByStatsReport($id);
+
+        if (!$courses) {
+            return '<p>Courses not available.</p>';
+        }
+
+        return view('statsreports.details.courses', compact(
+            'courses'
+        ));
+    }
+
+    public function getContacts($id)
+    {
+        $contacts = App::make(ContactsController::class)->getByStatsReport($id);
+
+        if (!$contacts) {
+            return '<p>Contracts not available.</p>';
+        }
+
+        return view('statsreports.details.contactinfo', compact(
+            'contacts'
+        ));
+    }
+
+    public function getResults($id)
+    {
+        $statsReport = StatsReport::find($id);
+
+        if ($statsReport && !$this->hasAccess($statsReport->center->id, 'R')) {
+            return '<p>You do not have access to this report.</p>';
+        }
+
+        $sheet = array();
+        $sheetUrl = '';
+
+        if ($statsReport) {
+
+            $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+
+            if ($sheetPath) {
+                try {
+                    $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, false);
+                    $importer->import(false);
+                    $sheet = $importer->getResults();
+                } catch (Exception $e) {
+                    Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+                }
+
+                $sheetUrl = $sheetPath
+                    ? url("/statsreports/{$statsReport->id}/download")
+                    : null;
+            }
+        }
+
+        if (!$sheetUrl) {
+            return '<p>Results not available.</p>';
+        }
+
+        $includeUl = true;
+        return view('import.results', compact(
+            'statsReport',
+            'sheetUrl',
+            'sheet',
+            'includeUl'
+        ));
     }
 }
