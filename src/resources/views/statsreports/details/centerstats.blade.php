@@ -54,7 +54,9 @@ foreach ($centerStatsData as $chunk) {
                                         <td>{{ isset($data['actual']) ? $data['actual']->$game : '&nbsp;' }}{{ (isset($data['actual']) && $game == 'gitw') ? '%' : '' }}</td>
                                         <?php
                                             if (isset($data['actual'])) {
-                                                $percent = max(min(round(($data['actual']->$game/$data['promise']->$game) * 100), 100), 0);
+                                                $percent = $data['promise']->$game
+                                                    ? max(min(round(($data['actual']->$game/$data['promise']->$game) * 100), 100), 0)
+                                                    : 0;
                                             }
                                         ?>
                                     @endforeach
