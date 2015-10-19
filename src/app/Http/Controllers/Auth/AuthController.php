@@ -68,6 +68,10 @@ class AuthController extends Controller
             'last_name'  => $data['last_name'],
             'email'      => $data['email'],
         ]);
+        if (isset($data['phone'])) {
+            $person->phone = $data['phone'];
+            $person->save();
+        }
 
         return User::create([
             'person_id' => $person->id,
