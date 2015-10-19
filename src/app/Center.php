@@ -44,11 +44,6 @@ class Center extends Model
         return $this->getAccountable('team2TeamLeader');
     }
 
-    public function getMailingList()
-    {
-        return $this->getAccountable('teamMailingList');
-    }
-
     public function getStatistician()
     {
         return $this->getAccountable('teamStatistician');
