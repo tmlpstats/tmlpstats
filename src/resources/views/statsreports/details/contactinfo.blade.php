@@ -1,5 +1,4 @@
 <div class="table-responsive">
-    <h3>Contact Info</h3>
     <table class="table table-condensed table-striped">
         <thead>
         <tr>

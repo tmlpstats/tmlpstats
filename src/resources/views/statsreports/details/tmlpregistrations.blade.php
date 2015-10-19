@@ -1,5 +1,4 @@
 <div class="table-responsive">
-    <h3>Team Registrations</h3>
     @foreach ($tmlpRegistrations as $groupName => $group)
         <table class="table table-condensed table-striped">
             <thead>
