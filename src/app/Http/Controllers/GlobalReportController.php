@@ -92,30 +92,46 @@ class GlobalReportController extends Controller
         }
 
         $globalReport = GlobalReport::find($id);
+        $statsReports = $globalReport->statsReports()->get();
 
-        $statsReports = StatsReport::reportingDate($globalReport->reportingDate)
-            ->submitted()
-            ->validated(true)
-            ->get();
-
-        $centers = array();
+        $totalPoints = 0;
+        $centerPoints = array();
         foreach ($statsReports as $statsReport) {
-            if ($statsReport->globalReports()->find($globalReport->id)
-                || $globalReport->statsReports()->byCenter($statsReport->center)->count() > 0
-            ) {
-                continue;
-            }
-            $centers[$statsReport->center->abbreviation] = $statsReport->center->name;
+
+            $reportPoints = $statsReport->getPoints();
+            $centerPoints[$reportPoints][] = $statsReport;
+            $totalPoints += $reportPoints;
         }
-        asort($centers);
+        ksort($centerPoints);
+
+
+        $points = $centerPoints
+            ? round($totalPoints/count($centerPoints))
+            : 0;
+
+        $rating = StatsReport::pointsToRating($points);
+
+        $centerReports = array();
+        foreach ($centerPoints as $points => $reports) {
+            foreach ($reports as $report) {
+                $centerReports[$report->getRating()][] = $report;
+            }
+        }
+
+        $centers = $this->getStatsReportsNotOnList($globalReport);
         if ($centers) {
             $centers = array_merge(array('default' => 'Add Center'), $centers);
         } else {
             $centers = array('default' => 'No Reports Available');
         }
 
-        return view('globalreports.show', compact('globalReport',
-            'centers'));
+        return view('globalreports.show', compact(
+            'globalReport',
+            'centerReports',
+            'centers',
+            'rating',
+            'points'
+        ));
     }
 
     /**
@@ -213,5 +229,27 @@ class GlobalReportController extends Controller
                 return (Auth::user()->hasRole('globalStatistician')
                     || Auth::user()->hasRole('administrator'));
         }
+    }
+
+    public function getStatsReportsNotOnList(GlobalReport $globalReport)
+    {
+        $statsReports = StatsReport::reportingDate($globalReport->reportingDate)
+            ->submitted()
+            ->validated(true)
+            ->get();
+
+        $centers = array();
+        foreach ($statsReports as $statsReport) {
+
+            if ($statsReport->globalReports()->find($globalReport->id)
+                || $globalReport->statsReports()->byCenter($statsReport->center)->count() > 0
+            ) {
+                continue;
+            }
+
+            $centers[$statsReport->center->abbreviation] = $statsReport->center->name;
+        }
+        asort($centers);
+        return $centers;
     }
 }

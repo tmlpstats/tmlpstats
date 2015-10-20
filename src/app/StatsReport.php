@@ -74,6 +74,11 @@ class StatsReport extends Model
             return null;
         }
 
+        return static::pointsToRating($points);
+    }
+
+    public static function pointsToRating($points)
+    {
         if ($points == 28) {
             return "Powerful";
         } else if ($points >= 22) {
