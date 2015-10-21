@@ -94,8 +94,10 @@
                     <dd>{{ $teamWithdraws['team2'] }}</dd>
                     <dt>Total:</dt>
                     <dd>{{ $teamWithdraws['total'] }}</dd>
+                    @if ($teamWithdraws['ctw'])
                     <dt>In Conversation:</dt>
                     <dd>{{ $teamWithdraws['ctw'] }}</dd>
+                    @endif
                 </dl>
             @endif
         </div>
