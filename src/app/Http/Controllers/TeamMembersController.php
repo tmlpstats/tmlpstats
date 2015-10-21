@@ -122,6 +122,7 @@ class TeamMembersController extends Controller
                 'team1' => 0,
                 'team2' => 0,
                 'total' => 0,
+                'ctw'   => 0,
                 'codes' => [],
             ];
 
@@ -149,6 +150,8 @@ class TeamMembersController extends Controller
                         } else {
                             $withdraws['codes'][$data->withdrawCode->display] = 1;
                         }
+                    } else if ($data->ctw) {
+                        $withdraws['ctw']++;
                     }
                 } else {
                     $teamMembers['team2'][] = $data;
@@ -171,6 +174,8 @@ class TeamMembersController extends Controller
                         } else {
                             $withdraws['codes'][$data->withdrawCode->display] = 1;
                         }
+                    } else if ($data->ctw) {
+                        $withdraws['ctw']++;
                     }
                 }
             }
