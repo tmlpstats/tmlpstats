@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel {
         Commands\Inspire::class,
         Commands\FlushTablesCommand::class,
         Commands\ClearTablesCommand::class,
+        Commands\ReportsWiki::class,
     ];
 
     /**
