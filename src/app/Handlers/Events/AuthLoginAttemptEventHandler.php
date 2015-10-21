@@ -6,7 +6,7 @@ use Request;
 use TmlpStats\User;
 use Carbon\Carbon;
 
-class AuthLoginEventHandler
+class AuthLoginAttemptEventHandler
 {
 
     /**
@@ -22,11 +22,8 @@ class AuthLoginEventHandler
      *
      * @param  User $user
      */
-    public function handle(User $user)
+    public function handle(array $input)
     {
-        $user->lastLoginAt = Carbon::now();
-        $user->save();
-
-        Log::info("User {$user->id} logged in from " . Request::ip());
+        Log::info("User attempted login for {$input['email']} from " . Request::ip());
     }
 }
