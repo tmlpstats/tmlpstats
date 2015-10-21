@@ -35,7 +35,7 @@
 ?>
 <div class="table-responsive">
     <h4>{{ $rating }} - {{ $points }} points</h4>
-    <table class="table table-condensed table-bordered" style="width: 700px">
+    <table class="table table-condensed table-bordered ratingsTable" style="width: 700px">
         <thead>
         <th style="text-align: center; width: 10em;">Category</th>
         <th style="text-align: center;">Points</th>
@@ -45,13 +45,23 @@
         @foreach ($centerReports as $rating => $statsReports)
             <?php $count = 0; ?>
             @foreach ($statsReports as $report)
-                <tr>
+                <tr class="points">
                     @if ($count === 0)
                         <?php $count++; ?>
                         <td style="vertical-align: middle; text-align: center;" rowspan="{{ count($centerReports[$rating]) }}">{{ $rating }}</td>
                     @endif
-                    <td style="background-color: {{ $ratingColors[$report->getPoints()] }}; vertical-align: middle; text-align: center; font-weight: bold;">{{ $report->getPoints() }}</td>
-                    <td>{{ $report->center->name }}</td>
+                    <td style="background-color: {{ $ratingColors[$report->getPoints()] }}; vertical-align: middle; text-align: center; font-weight: bold;">
+                        <a href="{{ url("/statsreports/{$report->id}") }}">
+                        <div class="meter">
+                            <span style="width: {{ round(($report->getPoints()/28)*100) }}%">{{ $report->getPoints() }}</span>
+                        </div>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{{ url("/statsreports/{$report->id}") }}">
+                            <div style="margin-left: 5px">{{ $report->center->name }}</div>
+                        </a>
+                    </td>
                 </tr>
             @endforeach
         @endforeach
