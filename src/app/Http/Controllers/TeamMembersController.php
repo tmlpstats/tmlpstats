@@ -2,6 +2,7 @@
 
 namespace TmlpStats\Http\Controllers;
 
+use Cache;
 use Illuminate\Http\Request;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Controllers\Controller;
@@ -86,27 +87,115 @@ class TeamMembersController extends Controller
         //
     }
 
-
     public function getByStatsReport($id)
     {
-        $statsReport = StatsReport::find($id);
+        $cacheKey = "statsReport{$id}:teammembers";
+        $teamMembers = Cache::get($cacheKey);
 
-        $this->statsReport = $statsReport;
+        if (!$teamMembers) {
+            $statsReport = StatsReport::find($id);
 
-        if (!$statsReport) {
-            return null;
-        }
+            $this->statsReport = $statsReport;
 
-        // Team Members
-        $teamMembers = array();
-        $memberData = TeamMemberData::byStatsReport($statsReport)->with('teamMember')->get();
-        foreach ($memberData as $data) {
-            if ($data->teamMember->teamYear == 1) {
-                $teamMembers['team1'][] = $data;
-            } else {
-                $teamMembers['team2'][] = $data;
+            if (!$statsReport) {
+                return null;
             }
+
+            $teamMembers = [
+                'team1' => [],
+                'team2' => [],
+            ];
+
+            $tdo = [
+                'team1' => 0,
+                'team2' => 0,
+                'total' => 0,
+            ];
+
+            $gitw = [
+                'team1' => 0,
+                'team2' => 0,
+                'total' => 0,
+            ];
+
+            $withdraws = [
+                'team1' => 0,
+                'team2' => 0,
+                'total' => 0,
+                'ctw'   => 0,
+                'codes' => [],
+            ];
+
+            // Team Members
+            $memberData = TeamMemberData::byStatsReport($statsReport)->with('teamMember')->get();
+            foreach ($memberData as $data) {
+                if ($data->teamMember->teamYear == 1) {
+                    $teamMembers['team1'][] = $data;
+
+                    if ($data->tdo) {
+                        $tdo['team1']++;
+                        $tdo['total']++;
+                    }
+
+                    if ($data->gitw) {
+                        $gitw['team1']++;
+                        $gitw['total']++;
+                    }
+
+                    if ($data->withdrawCode) {
+                        $withdraws['team1']++;
+                        $withdraws['total']++;
+                        if (isset($withdraws['codes'][$data->withdrawCode->display])) {
+                            $withdraws['codes'][$data->withdrawCode->display]++;
+                        } else {
+                            $withdraws['codes'][$data->withdrawCode->display] = 1;
+                        }
+                    } else if ($data->ctw) {
+                        $withdraws['ctw']++;
+                    }
+                } else {
+                    $teamMembers['team2'][] = $data;
+
+                    if ($data->tdo) {
+                        $tdo['team2']++;
+                        $tdo['total']++;
+                    }
+
+                    if ($data->gitw) {
+                        $gitw['team2']++;
+                        $gitw['total']++;
+                    }
+
+                    if ($data->withdrawCode) {
+                        $withdraws['team2']++;
+                        $withdraws['total']++;
+                        if (isset($withdraws['codes'][$data->withdrawCode->display])) {
+                            $withdraws['codes'][$data->withdrawCode->display]++;
+                        } else {
+                            $withdraws['codes'][$data->withdrawCode->display] = 1;
+                        }
+                    } else if ($data->ctw) {
+                        $withdraws['ctw']++;
+                    }
+                }
+            }
+
+            $t1Total = count($teamMembers['team1']) - $withdraws['team1'];
+            $t2Total = count($teamMembers['team2']) - $withdraws['team2'];
+
+            $tdo['team1'] = round(($tdo['team1'] / ($t1Total)) * 100);
+            $tdo['team2'] = round(($tdo['team2'] / ($t2Total)) * 100);
+            $tdo['total'] = round(($tdo['total'] / ($t1Total + $t2Total)) * 100);
+
+            $gitw['team1'] = round(($gitw['team1'] / ($t1Total)) * 100);
+            $gitw['team2'] = round(($gitw['team2'] / ($t2Total)) * 100);
+            $gitw['total'] = round(($gitw['total'] / ($t1Total + $t2Total)) * 100);
+
+            $teamMembers['tdo'] = $tdo;
+            $teamMembers['gitw'] = $gitw;
+            $teamMembers['withdraws'] = $withdraws;
         }
+        Cache::put($cacheKey, $teamMembers, static::CACHE_TTL);
 
         return $teamMembers;
     }

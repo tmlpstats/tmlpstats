@@ -52,6 +52,7 @@ Route::resource('statsreports', 'StatsReportController');
 Route::get('statsreports/{id}/download', 'StatsReportController@downloadSheet');
 Route::post('statsreports/{id}/submit', 'StatsReportController@submit');
 
+Route::get('statsreports/{id}/summary', 'StatsReportController@getSummary');
 Route::get('statsreports/{id}/results', 'StatsReportController@getResults');
 Route::get('statsreports/{id}/centerstats', 'StatsReportController@getCenterStats');
 Route::get('statsreports/{id}/classlist', 'StatsReportController@getTeamMembers');

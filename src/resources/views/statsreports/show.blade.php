@@ -11,8 +11,20 @@
         .centerStatsTable td {
              width: 4em;
         }
+
+        .centerStatsSummaryTable th, .centerStatsSummaryTable td {
+            text-align: center;
+            width: 4em;
+        }
+        table.centerStatsSummaryTable {
+            width: 400px;
+        }
         table {
             empty-cells: show;
+        }
+
+        .table-hover>tbody>tr:hover>td, .table-hover>tbody>tr:hover>th {
+            background-color: #DDDDDD;
         }
     </style>
 @endsection
@@ -32,30 +44,39 @@
     </div>
     {!! Form::close() !!}
 
-
     <div id="content">
         <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
-            <li class="active"><a href="#overview-tab" data-toggle="tab">Overview</a></li>
-            <li><a href="#results-tab" data-toggle="tab">Validation Results</a></li>
-            <li><a href="#centerstats-tab" data-toggle="tab">Center Stats</a></li>
-            <li><a href="#tmlpregistrations-tab" data-toggle="tab">TMLP Registrations</a></li>
+            <li class="active"><a href="#summary-tab" data-toggle="tab">Weekly Summary</a></li>
+            <li><a href="#overview-tab" data-toggle="tab">Report Details</a></li>
+            <li><a href="#centerstats-tab" data-toggle="tab">Center Games</a></li>
+            <li><a href="#tmlpregistrations-tab" data-toggle="tab">Applications</a></li>
             <li><a href="#classlist-tab" data-toggle="tab">Class List</a></li>
             <li><a href="#courses-tab" data-toggle="tab">Courses</a></li>
             <li><a href="#contactinfo-tab" data-toggle="tab">Contact Info</a></li>
         </ul>
 
         <div class="tab-content">
-            <div class="tab-pane active" id="overview-tab">
+            <div class="tab-pane active" id="summary-tab">
+                <h3>Week Summary</h3>
+                <div id="summary-container">
+                    @include('partials.loading')
+                </div>
+            </div>
+            <div class="tab-pane" id="overview-tab">
                 @include('statsreports.details.overview', ['statsReport' => $statsReport, 'sheetUrl' => $sheetUrl])
+                <h3>Results</h3>
+                <div id="results-container">
+                    @include('partials.loading')
+                </div>
             </div>
             <div class="tab-pane" id="centerstats-tab">
-                <h3>Center Stats</h3>
+                <h3>Center Games</h3>
                 <div id="centerstats-container">
                     @include('partials.loading')
                 </div>
             </div>
             <div class="tab-pane" id="tmlpregistrations-tab">
-                <h3>Team Registrations</h3>
+                <h3>Applications</h3>
                 <div id="tmlpregistrations-container">
                     @include('partials.loading')
                 </div>
@@ -78,12 +99,6 @@
                     @include('partials.loading')
                 </div>
             </div>
-            <div class="tab-pane" id="results-tab">
-                <h3>Results:</h3>
-                <div id="results-container">
-                    @include('partials.loading')
-                </div>
-            </div>
         </div>
     </div>
 
@@ -95,6 +110,15 @@
                 var baseUrl = "{{ url('statsreports') }}";
                 var newReport = $('.reportSelector option:selected').val();
                 window.location.replace(baseUrl + '/' + newReport);
+            });
+
+            // Fetch Summary
+            $.ajax({
+                type: "GET",
+                url: "{{ url('/statsreports/' . $statsReport->id . '/summary') }}",
+                success: function(response) {
+                    $("#summary-container").html(response);
+                }
             });
 
             // Fetch Validation Results

@@ -1,5 +1,6 @@
 <?php namespace TmlpStats\Http\Controllers;
 
+use Exception;
 use TmlpStats\Http\Inputs;
 
 use TmlpStats\Accountability;
@@ -29,7 +30,6 @@ use View;
 
 class StatsReportController extends Controller
 {
-    const CACHE_TTL = 60;
     /**
      * Create a new controller instance.
      */
@@ -276,6 +276,7 @@ class StatsReportController extends Controller
             if ($action === 'submit') {
 
                 $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+                $sheet = [];
 
                 try {
                     $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
@@ -289,6 +290,9 @@ class StatsReportController extends Controller
                 $statsReport->submitComment = Input::get('comment', null);
 
                 if ($statsReport->save()) {
+                    // Cache the validation results so we don't have to regenerate
+                    $cacheKey = "statsReport{$id}:validation";
+                    Cache::put($cacheKey, $sheet, static::CACHE_TTL);
 
                     XlsxArchiver::getInstance()->promoteWorkingSheet($statsReport);
 
@@ -398,109 +402,116 @@ class StatsReportController extends Controller
     }
 
 
+    public function getSummary($id)
+    {
+        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($id);
+
+        if (!$centerStatsData) {
+            return '<p>Center Stats not available.</p>';
+        }
+
+        $statsReport = StatsReport::find($id);
+        $statsReportDateString = $statsReport->reportingDate->toDateString();
+
+        $date = null;
+        $data = null;
+        foreach ($centerStatsData as $section => $weeks) {
+            foreach ($weeks as $dateString => $weekData) {
+                if ($dateString == $statsReportDateString) {
+                    $date = $dateString;
+                    $data = $weekData;
+                    break;
+                }
+            }
+        }
+
+        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($id);
+        $tdo = $teamMembers['tdo'];
+        $gitw = $teamMembers['gitw'];
+        $teamWithdraws = $teamMembers['withdraws'];
+
+        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
+        $applications = $registrations['applications'];
+        $applicationWithdraws = $registrations['withdraws'];
+
+        $courses = App::make(CoursesController::class)->getByStatsReport($id);
+        $completedCourses = $courses['completedThisWeek'];
+
+        return view('statsreports.details.summary', compact(
+            'data',
+            'date',
+            'tdo',
+            'gitw',
+            'applications',
+            'teamWithdraws',
+            'applicationWithdraws',
+            'completedCourses'
+        ));
+    }
+
     public function getCenterStats($id)
     {
-        $cacheKey = 'statsReport:centerstats:' . $id;
-        $view = Cache::get($cacheKey);
+        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($id);
 
-        if (!$view) {
-            $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($id);
-
-            if (!$centerStatsData) {
-                return '<p>Center Stats not available.</p>';
-            }
-
-            $view = View::make('statsreports.details.centerstats', compact(
-                'centerStatsData'
-            ))->render();
+        if (!$centerStatsData) {
+            return '<p>Center Stats not available.</p>';
         }
-        Cache::put($cacheKey, $view, static::CACHE_TTL);
 
-        return $view;
+        return view('statsreports.details.centerstats', compact(
+            'centerStatsData'
+        ));
     }
 
     public function getTeamMembers($id)
     {
-        $cacheKey = 'statsReport:classlist:' . $id;
-        $view = Cache::get($cacheKey);
+        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($id);
 
-        if (!$view) {
-            $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($id);
-
-            if (!$teamMembers) {
-                return '<p>Team Members not available.</p>';
-            }
-
-            $view = View::make('statsreports.details.classlist', compact(
-                'teamMembers'
-            ))->render();
+        if (!$teamMembers) {
+            return '<p>Team Members not available.</p>';
         }
-        Cache::put($cacheKey, $view, static::CACHE_TTL);
 
-        return $view;
+        return view('statsreports.details.classlist', compact(
+            'teamMembers'
+        ));
     }
 
     public function getTmlpRegistrations($id)
     {
-        $cacheKey = 'statsReport:tmlpregistrations:' . $id;
-        $view = Cache::get($cacheKey);
+        $tmlpRegistrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
 
-        if (!$view) {
-            $tmlpRegistrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
-
-            if (!$tmlpRegistrations) {
-                return '<p>TMLP Registrations not available.</p>';
-            }
-
-            $view = View::make('statsreports.details.tmlpregistrations', compact(
-                'tmlpRegistrations'
-            ))->render();
+        if (!$tmlpRegistrations) {
+            return '<p>TMLP Registrations not available.</p>';
         }
-        Cache::put($cacheKey, $view, static::CACHE_TTL);
 
-        return $view;
+        return view('statsreports.details.tmlpregistrations', compact(
+            'tmlpRegistrations'
+        ));
     }
 
     public function getCourses($id)
     {
-        $cacheKey = 'statsReport:courses:' . $id;
-        $view = Cache::get($cacheKey);
+        $courses = App::make(CoursesController::class)->getByStatsReport($id);
 
-        if (!$view) {
-            $courses = App::make(CoursesController::class)->getByStatsReport($id);
-
-            if (!$courses) {
-                return '<p>Courses not available.</p>';
-            }
-
-            $view = View::make('statsreports.details.courses', compact(
-                'courses'
-            ))->render();
+        if (!$courses) {
+            return '<p>Courses not available.</p>';
         }
-        Cache::put($cacheKey, $view, static::CACHE_TTL);
 
-        return $view;
+        return view('statsreports.details.courses', compact(
+            'courses'
+        ));
     }
 
     public function getContacts($id)
     {
-        $cacheKey = 'statsReport:contact:' . $id;
-        $view = Cache::get($cacheKey);
+        $contacts = App::make(ContactsController::class)->getByStatsReport($id);
 
-        if (!$view) {
-            $contacts = App::make(ContactsController::class)->getByStatsReport($id);
-
-            if (!$contacts) {
-                $view =  '<p>Contacts not available.</p>';
-            } else {
-                $view = View::make('statsreports.details.contactinfo', compact(
-                    'contacts'
-                ))->render();
-            }
+        if (!$contacts) {
+            return '<p>Contacts not available.</p>';
         }
-        Cache::put($cacheKey, $view, static::CACHE_TTL);
 
-        return $view;
+        return view('statsreports.details.contactinfo', compact(
+            'contacts'
+        ));
     }
 
     public function getResults($id)
@@ -520,7 +531,7 @@ class StatsReportController extends Controller
 
             if ($sheetPath) {
 
-                $cacheKey = 'statsReport:validation:' . sha1($sheetPath);
+                $cacheKey = "statsReport{$id}:validation";
                 $sheet = Cache::get($cacheKey);
                 if (!$sheet) {
                     try {

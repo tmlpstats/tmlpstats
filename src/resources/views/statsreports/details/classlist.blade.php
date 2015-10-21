@@ -1,6 +1,11 @@
 <div class="table-responsive">
     @foreach ($teamMembers as $groupName => $group)
-        <table class="table table-condensed table-striped">
+        <?php
+            if (!in_array($groupName, ['team1', 'team2'])) {
+                continue;
+            }
+        ?>
+        <table class="table table-condensed table-striped table-hover">
             <thead>
                 <tr>
                     <th colspan="14">{{ ucwords($groupName) }}</th>

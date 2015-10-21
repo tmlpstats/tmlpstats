@@ -9,4 +9,5 @@ abstract class Controller extends BaseController {
 
     use DispatchesCommands, ValidatesRequests;
 
+    const CACHE_TTL = 60;
 }
