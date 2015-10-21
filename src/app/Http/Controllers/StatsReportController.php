@@ -148,6 +148,7 @@ class StatsReportController extends Controller
         }
 
         $sheetUrl = '';
+        $globalReport = null;
 
         if ($statsReport) {
 
@@ -175,10 +176,13 @@ class StatsReportController extends Controller
                 }
                 $searchWeek->addWeek();
             }
+
+            $globalReport = GlobalReport::reportingDate($statsReport->reportingDate)->first();
         }
 
         return view('statsreports.show', compact(
             'statsReport',
+            'globalReport',
             'otherStatsReports',
             'sheetUrl'
         ));

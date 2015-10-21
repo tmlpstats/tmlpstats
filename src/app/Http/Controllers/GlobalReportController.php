@@ -1,5 +1,6 @@
 <?php namespace TmlpStats\Http\Controllers;
 
+use App;
 use TmlpStats\Http\Requests;
 use TmlpStats\GlobalReport;
 use TmlpStats\StatsReport;
@@ -104,6 +105,7 @@ class GlobalReportController extends Controller
         }
         ksort($centerPoints);
 
+        $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($id);
 
         $points = $centerPoints
             ? round($totalPoints/count($centerPoints))
@@ -130,7 +132,8 @@ class GlobalReportController extends Controller
             'centerReports',
             'centers',
             'rating',
-            'points'
+            'points',
+            'globalReportData'
         ));
     }
 

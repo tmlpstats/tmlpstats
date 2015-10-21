@@ -33,13 +33,19 @@
 
 @if ($statsReport)
     <h2>{{ $statsReport->center->name }} - {{ $statsReport->reportingDate->format('F j, Y') }}</h2>
-    <a href="{{ url('/home') }}"><< See All</a><br/><br/>
+    <a href="{{ \URL::previous() }}"><< See All</a><br/><br/>
 
     {!! Form::open(['url' => "statsreports", 'method' => 'GET', 'class' => 'form-horizontal', 'id' => 'reportSelectorForm']) !!}
     <div class="form-group">
-        {!! Form::label('report_id', 'Other Reports:', ['class' => 'col-sm-1 control-label']) !!}
+        {!! Form::label('report_id', 'Other Reports:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-3">
             {!! Form::select('report_id', $otherStatsReports, $statsReport->id, ['class' => 'form-control reportSelector']) !!}
+
+            @if ($globalReport)
+                <br/>
+                <a href="{{ url("globalreports/{$globalReport->id}") }}">View Regional Report</a>
+                <br/><br/>
+            @endif
         </div>
     </div>
     {!! Form::close() !!}
@@ -63,6 +69,7 @@
                 </div>
             </div>
             <div class="tab-pane" id="overview-tab">
+                <h3>Report Details</h3>
                 @include('statsreports.details.overview', ['statsReport' => $statsReport, 'sheetUrl' => $sheetUrl])
                 <h3>Results</h3>
                 <div id="results-container">

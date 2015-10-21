@@ -39,7 +39,7 @@ class CenterStatsController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -50,7 +50,7 @@ class CenterStatsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -61,7 +61,7 @@ class CenterStatsController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -72,8 +72,8 @@ class CenterStatsController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request $request
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -84,7 +84,7 @@ class CenterStatsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
@@ -92,7 +92,54 @@ class CenterStatsController extends Controller
         //
     }
 
+    public function getByGlobalReport($id)
+    {
+        $cacheKey = "globalreport{$id}:centerstats";
+        $globalReportData = Cache::get($cacheKey);
+
+        if (!$globalReportData) {
+
+            $globalReport = GlobalReport::find($id);
+
+            if (!$globalReport) {
+                return null;
+            }
+
+            $statsReports = $globalReport->statsReports()->get();
+
+            $count = count($statsReports);
+            $globalReportData = [];
+            foreach ($statsReports as $statsReport) {
+                $centerStatsData = $this->getByStatsReport($statsReport->id);
+                foreach ($centerStatsData as $section => $sectionData) {
+                    foreach ($sectionData as $date => $week) {
+                        foreach ($week as $type => $data) {
+                            foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
+                                if (!isset($globalReportData[$section][$date][$type][$game])) {
+                                    $globalReportData[$section][$date][$type][$game] = 0;
+                                }
+                                $globalReportData[$section][$date][$type][$game] += $data->$game;
+                            }
+                        }
+                    }
+                }
+            }
+            foreach ($globalReportData as $section => $sectionData) {
+                foreach ($sectionData as $date => $week) {
+                    foreach ($week as $type => $data) {
+                        $val = $data['gitw'];
+                        $globalReportData[$section][$date][$type]['gitw'] = round($val/$count);
+                    }
+                }
+            }
+        }
+        Cache::put($cacheKey, $globalReportData, static::CACHE_TTL);
+
+        return $globalReportData;
+    }
+
     protected $statsReport = null;
+
     public function getByStatsReport($id)
     {
         $cacheKey = "statsReport{$id}:centerstats";
@@ -177,6 +224,7 @@ class CenterStatsController extends Controller
 
     // TODO: Refactor this so we're not reusing basically the same code as in importer
     protected $promiseStatsReport = null;
+
     public function findFirstWeek(Center $center, Quarter $quarter, $type)
     {
         // Promises should all be saved during the same week. Let's remember where we found the
