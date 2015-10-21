@@ -2,6 +2,7 @@
 
 namespace TmlpStats\Http\Controllers;
 
+use Cache;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
@@ -91,45 +92,47 @@ class CenterStatsController extends Controller
         //
     }
 
-
-
-
-
     protected $statsReport = null;
     public function getByStatsReport($id)
     {
-        $statsReport = StatsReport::find($id);
+        $cacheKey = "statsReport{$id}:centerstats";
+        $centerStatsData = Cache::get($cacheKey);
 
-        $this->statsReport = $statsReport;
+        if (!$centerStatsData) {
+            $statsReport = StatsReport::find($id);
 
-        if (!$statsReport) {
-            return null;
-        }
+            $this->statsReport = $statsReport;
 
-        // Center Stats
-        $week = clone $statsReport->quarter->startWeekendDate;
-        $week->addWeek();
-        $centerStatsData = array();
-        while ($week->lte($statsReport->quarter->endWeekendDate)) {
-
-            if ($week->lte($statsReport->quarter->classroom1Date)) {
-                $classroom = 0;
-            } else if ($week->lte($statsReport->quarter->classroom2Date)) {
-                $classroom = 1;
-            } else if ($week->lte($statsReport->quarter->classroom3Date)) {
-                $classroom = 2;
-            } else {
-                $classroom = 3;
+            if (!$statsReport) {
+                return null;
             }
 
-            $centerStatsData[$classroom][$week->toDateString()]['promise'] = $this->getPromiseData($week, $statsReport->center, $statsReport->quarter);
-
-            if ($week->lte($statsReport->reportingDate)) {
-                $centerStatsData[$classroom][$week->toDateString()]['actual'] = $this->getActualData($week, $statsReport->center, $statsReport->quarter);
-            }
-
+            // Center Stats
+            $week = clone $statsReport->quarter->startWeekendDate;
             $week->addWeek();
+            $centerStatsData = array();
+            while ($week->lte($statsReport->quarter->endWeekendDate)) {
+
+                if ($week->lte($statsReport->quarter->classroom1Date)) {
+                    $classroom = 0;
+                } else if ($week->lte($statsReport->quarter->classroom2Date)) {
+                    $classroom = 1;
+                } else if ($week->lte($statsReport->quarter->classroom3Date)) {
+                    $classroom = 2;
+                } else {
+                    $classroom = 3;
+                }
+
+                $centerStatsData[$classroom][$week->toDateString()]['promise'] = $this->getPromiseData($week, $statsReport->center, $statsReport->quarter);
+
+                if ($week->lte($statsReport->reportingDate)) {
+                    $centerStatsData[$classroom][$week->toDateString()]['actual'] = $this->getActualData($week, $statsReport->center, $statsReport->quarter);
+                }
+
+                $week->addWeek();
+            }
         }
+        Cache::put($cacheKey, $centerStatsData, static::CACHE_TTL);
 
         return $centerStatsData;
     }

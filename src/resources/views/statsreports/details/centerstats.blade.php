@@ -13,7 +13,7 @@ foreach ($centerStatsData as $chunk) {
             <tr>
                 @for ($j = $k; $j < $k+2; $j++)
                     <td>
-                        <table class="table table-condensed table-bordered table-striped centerStatsTable">
+                        <table class="table table-condensed table-bordered table-striped table-hover centerStatsTable">
                             <thead>
                                 <tr>
                                     <th rowspan="2">&nbsp;</th>
