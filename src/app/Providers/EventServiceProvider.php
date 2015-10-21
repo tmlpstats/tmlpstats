@@ -20,6 +20,12 @@ class EventServiceProvider extends ServiceProvider {
         'auth.login' => [
             'TmlpStats\Handlers\Events\AuthLoginEventHandler',
         ],
+        'auth.logout' => [
+            'TmlpStats\Handlers\Events\AuthLogoutEventHandler',
+        ],
+        'auth.attempt' => [
+            'TmlpStats\Handlers\Events\AuthLoginAttemptEventHandler',
+        ],
     ];
 
     /**
