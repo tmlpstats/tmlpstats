@@ -31,14 +31,14 @@ class Setting extends Model
         $setting = null;
 
         if ($center) {
-            $setting = Settings::byCenter($center)
+            $setting = Setting::byCenter($center)
                 ->name($name)
                 ->active()
                 ->first();
         }
 
         if (!$setting) {
-            $setting = Settings::whereNull('center_id')
+            $setting = Setting::whereNull('center_id')
                 ->name($name)
                 ->active()
                 ->first();
