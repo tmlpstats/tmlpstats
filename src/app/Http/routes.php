@@ -62,6 +62,8 @@ Route::get('statsreports/{id}/contactinfo', 'StatsReportController@getContacts')
 
 
 Route::resource('globalreports', 'GlobalReportController');
+Route::get('globalreports/{id}/ratingsummary', 'GlobalReportController@getRatingSummary');
+Route::get('globalreports/{id}/regionalstats', 'GlobalReportController@getRegionalStats');
 
 // Import
 Route::when('import', 'auth|statistician');
