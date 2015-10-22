@@ -55,8 +55,8 @@
             <li class="active"><a href="#summary-tab" data-toggle="tab">Weekly Summary</a></li>
             <li><a href="#overview-tab" data-toggle="tab">Report Details</a></li>
             <li><a href="#centerstats-tab" data-toggle="tab">Center Games</a></li>
-            <li><a href="#tmlpregistrations-tab" data-toggle="tab">Applications</a></li>
-            <li><a href="#classlist-tab" data-toggle="tab">Class List</a></li>
+            <li><a href="#classlist-tab" data-toggle="tab">Team Members</a></li>
+            <li><a href="#tmlpregistrations-tab" data-toggle="tab">Team Expansion</a></li>
             <li><a href="#courses-tab" data-toggle="tab">Courses</a></li>
             <li><a href="#contactinfo-tab" data-toggle="tab">Contact Info</a></li>
         </ul>
@@ -82,15 +82,15 @@
                     @include('partials.loading')
                 </div>
             </div>
-            <div class="tab-pane" id="tmlpregistrations-tab">
-                <h3>Applications</h3>
-                <div id="tmlpregistrations-container">
-                    @include('partials.loading')
-                </div>
-            </div>
             <div class="tab-pane" id="classlist-tab">
                 <h3>Team Members</h3>
                 <div id="classlist-container">
+                    @include('partials.loading')
+                </div>
+            </div>
+            <div class="tab-pane" id="tmlpregistrations-tab">
+                <h3>Team Expansion</h3>
+                <div id="tmlpregistrations-container">
                     @include('partials.loading')
                 </div>
             </div>

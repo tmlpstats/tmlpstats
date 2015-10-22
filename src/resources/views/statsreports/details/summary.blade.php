@@ -27,12 +27,13 @@
                     ?>
                     <tr>
                         <th>{{ strtoupper($game) }}</th>
-                        <td class="info" style="font-weight: bold">{{ $data['promise']->$game }}{{ ($game == 'gitw') ? '%' : '' }}</td>
+                        <td class="info"
+                            style="font-weight: bold">{{ $data['promise']->$game }}{{ ($game == 'gitw') ? '%' : '' }}</td>
                         <td style="font-weight: bold">{{ isset($data['actual']) ? $data['actual']->$game : '&nbsp;' }}{{ (isset($data['actual']) && $game == 'gitw') ? '%' : '' }}</td>
                         <?php
                         if (isset($data['actual'])) {
                             $percent = $data['promise']->$game
-                                ? max(min(round(($data['actual']->$game/$data['promise']->$game) * 100), 100), 0)
+                                ? max(min(round(($data['actual']->$game / $data['promise']->$game) * 100), 100), 0)
                                 : 0;
                             $gap = $data['promise']->$game - $data['actual']->$game;
                         }
@@ -95,8 +96,8 @@
                     <dt>Total:</dt>
                     <dd>{{ $teamWithdraws['total'] }}</dd>
                     @if ($teamWithdraws['ctw'])
-                    <dt>In Conversation:</dt>
-                    <dd>{{ $teamWithdraws['ctw'] }}</dd>
+                        <dt>In Conversation:</dt>
+                        <dd>{{ $teamWithdraws['ctw'] }}</dd>
                     @endif
                 </dl>
             @endif
@@ -141,23 +142,23 @@
             @endif
 
             @if ($completedCourses)
-            <h4>Course Results:</h4>
-            <dl class="dl-horizontal">
-                @foreach ($completedCourses as $courseData)
-                <dt>{{ $courseData->course->type }} - {{ $courseData->course->startDate->format('M j') }}
-                    <dl class="dl-horizontal">
-                        <dt>Standard Starts:</dt>
-                        <dd>{{ $courseData->currentStandardStarts }}</dd>
-                        <dt>Registration Fulfillment:</dt>
-                        <dd>{{ round(($courseData->currentStandardStarts/$courseData->currentTer)*100) }}%</dd>
-                        <dt>Registration Effectiveness:</dt>
-                        <dd>{{ $courseData->potentials ? round(($courseData->registrations/$courseData->potentials)*100) : 0 }}%</dd>
-                        <dt>Registered:</dt>
-                        <dd>{{ $courseData->registrations }}</dd>
-                    </dl>
-                </dt>
-                @endforeach
-            </dl>
+                <h4>Course Results:</h4>
+                <dl class="dl-horizontal">
+                    @foreach ($completedCourses as $courseData)
+                        <span style="text-decoration: underline">{{ $courseData->course->type }}
+                            - {{ $courseData->course->startDate->format('M j') }}</span>
+                        <dl class="dl-horizontal">
+                            <dt>Standard Starts:</dt>
+                            <dd>{{ $courseData->currentStandardStarts }}</dd>
+                            <dt>Reg Fulfillment:</dt>
+                            <dd>{{ round(($courseData->currentStandardStarts / $courseData->currentTer) * 100) }}%</dd>
+                            <dt>Reg Effectiveness:</dt>
+                            <dd>{{ $courseData->potentials ? round(($courseData->registrations / $courseData->potentials) * 100) : 0 }}%</dd>
+                            <dt>Registrations:</dt>
+                            <dd>{{ $courseData->registrations }}</dd>
+                        </dl>
+                    @endforeach
+                </dl>
             @endif
         </div>
     </div>

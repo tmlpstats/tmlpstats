@@ -61,13 +61,13 @@
         <div class="tab-pane active" id="ratingsummary-tab">
             <h3>Ratings Summary</h3>
             <div id="ratingsummary-container">
-                @include('globalreports.details.ratingsummary', compact('ratings', 'points', 'centerReports'))
+                @include('partials.loading')
             </div>
         </div>
         <div class="tab-pane" id="regionalstats-tab">
             <h3>Regional Games</h3>
             <div id="regionalstats-container">
-                @include('globalreports.details.regionalstats', compact('globalReportData'))
+                @include('partials.loading')
             </div>
         </div>
         <div class="tab-pane" id="statsreports-tab">
@@ -76,4 +76,27 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    jQuery(document).ready(function ($) {
+        $('#tabs').tab();
+
+        // Fetch Rating Summary
+        $.ajax({
+            type: "GET",
+            url: "{{ url('/globalreports/' . $globalReport->id . '/ratingsummary') }}",
+            success: function(response) {
+                $("#ratingsummary-container").html(response);
+            }
+        });
+        // Fetch Regional Stats
+        $.ajax({
+            type: "GET",
+            url: "{{ url('/globalreports/' . $globalReport->id . '/regionalstats') }}",
+            success: function(response) {
+                $("#regionalstats-container").html(response);
+            }
+        });
+    });
+</script>
 @endsection

@@ -93,32 +93,6 @@ class GlobalReportController extends Controller
         }
 
         $globalReport = GlobalReport::find($id);
-        $statsReports = $globalReport->statsReports()->get();
-
-        $totalPoints = 0;
-        $centerPoints = array();
-        foreach ($statsReports as $statsReport) {
-
-            $reportPoints = $statsReport->getPoints();
-            $centerPoints[$reportPoints][] = $statsReport;
-            $totalPoints += $reportPoints;
-        }
-        ksort($centerPoints);
-
-        $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($id);
-
-        $points = $centerPoints
-            ? round($totalPoints/count($centerPoints))
-            : 0;
-
-        $rating = StatsReport::pointsToRating($points);
-
-        $centerReports = array();
-        foreach ($centerPoints as $points => $reports) {
-            foreach ($reports as $report) {
-                $centerReports[$report->getRating()][] = $report;
-            }
-        }
 
         $centers = $this->getStatsReportsNotOnList($globalReport);
         if ($centers) {
@@ -129,11 +103,7 @@ class GlobalReportController extends Controller
 
         return view('globalreports.show', compact(
             'globalReport',
-            'centerReports',
-            'centers',
-            'rating',
-            'points',
-            'globalReportData'
+            'centers'
         ));
     }
 
@@ -254,5 +224,54 @@ class GlobalReportController extends Controller
         }
         asort($centers);
         return $centers;
+    }
+
+
+
+    public function getRatingSummary($id)
+    {
+        if (!$this->hasAccess('R')) {
+            return 'You do not have access to view this report.';
+        }
+
+        $globalReport = GlobalReport::find($id);
+        $statsReports = $globalReport->statsReports()->get();
+
+        $totalPoints = 0;
+        $centerPoints = array();
+        foreach ($statsReports as $statsReport) {
+
+            $reportPoints = $statsReport->getPoints();
+            $centerPoints[$reportPoints][] = $statsReport;
+            $totalPoints += $reportPoints;
+        }
+        ksort($centerPoints);
+
+        $points = $centerPoints
+            ? round($totalPoints/count($centerPoints))
+            : 0;
+
+        $rating = StatsReport::pointsToRating($points);
+
+        $centerReports = array();
+        foreach ($centerPoints as $points => $reports) {
+            foreach ($reports as $report) {
+                $centerReports[$report->getRating()][] = $report;
+            }
+        }
+
+        return view('globalreports.details.ratingsummary', compact(
+            'centerReports',
+            'rating',
+            'points'
+        ));
+    }
+
+    public function getRegionalStats($id)
+    {
+        $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($id);
+        return view('globalreports.details.regionalstats', compact(
+            'globalReportData'
+        ));
     }
 }
