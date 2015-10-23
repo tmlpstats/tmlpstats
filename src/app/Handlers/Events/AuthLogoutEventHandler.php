@@ -21,8 +21,11 @@ class AuthLogoutEventHandler
      *
      * @param  User $user
      */
-    public function handle(User $user)
+    public function handle(User $user = null)
     {
-        Log::info("User {$user->id} logged out");
+        // We can only log it if the session hasn't already expired
+        if ($user) {
+            Log::info("User {$user->id} logged out");
+        }
     }
 }

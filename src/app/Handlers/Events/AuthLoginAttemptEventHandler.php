@@ -20,7 +20,7 @@ class AuthLoginAttemptEventHandler
     /**
      * Handle the event.
      *
-     * @param  User $user
+     * @param  array $input
      */
     public function handle(array $input)
     {

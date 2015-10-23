@@ -41,11 +41,7 @@ Route::post('admin/import', 'ImportController@uploadImportSpreadsheet');
 Route::resource('admin/centers', 'CenterController');
 //Route::resource('admin/quarters', 'QuarterController');
 Route::resource('admin/users', 'UserController');
-Route::resource('admin/roles', 'RoleController');
-
-// User Profiles
-//Route::get('profile', 'UserControler@showProfile');
-//Route::post('profile', 'UserControler@updateProfile');
+//Route::resource('admin/roles', 'RoleController');
 
 // Stats Reports
 Route::resource('statsreports', 'StatsReportController');
