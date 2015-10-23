@@ -409,13 +409,17 @@ class StatsReportController extends Controller
 
     public function getSummary($id)
     {
+        $statsReport = StatsReport::find($id);
+        if (!$statsReport->isValidated()) {
+            return '<p>This report did not pass validation. See Report Details for more information.</p>';
+        }
+
         $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($id);
 
         if (!$centerStatsData) {
             return '<p>Center Stats not available.</p>';
         }
 
-        $statsReport = StatsReport::find($id);
         $statsReportDateString = $statsReport->reportingDate->toDateString();
 
         $date = null;
@@ -456,6 +460,11 @@ class StatsReportController extends Controller
 
     public function getCenterStats($id)
     {
+        $statsReport = StatsReport::find($id);
+        if (!$statsReport->isValidated()) {
+            return '<p>This report did not pass validation. See Report Details for more information.</p>';
+        }
+
         $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($id);
 
         if (!$centerStatsData) {
@@ -469,6 +478,11 @@ class StatsReportController extends Controller
 
     public function getTeamMembers($id)
     {
+        $statsReport = StatsReport::find($id);
+        if (!$statsReport->isValidated()) {
+            return '<p>This report did not pass validation. See Report Details for more information.</p>';
+        }
+
         $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($id);
 
         if (!$teamMembers) {
@@ -482,6 +496,11 @@ class StatsReportController extends Controller
 
     public function getTmlpRegistrations($id)
     {
+        $statsReport = StatsReport::find($id);
+        if (!$statsReport->isValidated()) {
+            return '<p>This report did not pass validation. See Report Details for more information.</p>';
+        }
+
         $tmlpRegistrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
 
         if (!$tmlpRegistrations) {
@@ -495,6 +514,11 @@ class StatsReportController extends Controller
 
     public function getCourses($id)
     {
+        $statsReport = StatsReport::find($id);
+        if (!$statsReport->isValidated()) {
+            return '<p>This report did not pass validation. See Report Details for more information.</p>';
+        }
+
         $courses = App::make(CoursesController::class)->getByStatsReport($id);
 
         if (!$courses) {
@@ -508,6 +532,11 @@ class StatsReportController extends Controller
 
     public function getContacts($id)
     {
+        $statsReport = StatsReport::find($id);
+        if (!$statsReport->isValidated()) {
+            return '<p>This report did not pass validation. See Report Details for more information.</p>';
+        }
+
         $contacts = App::make(ContactsController::class)->getByStatsReport($id);
 
         if (!$contacts) {
