@@ -206,8 +206,11 @@ class GlobalReportController extends Controller
     {
         switch ($permissions) {
             case 'R':
-            case 'C':
+                return (Auth::user()->hasRole('globalStatistician')
+                    || Auth::user()->hasRole('administrator')
+                    || Auth::user()->hasRole('localStatistician'));
             case 'U':
+            case 'C':
             case 'D':
             default:
                 return (Auth::user()->hasRole('globalStatistician')

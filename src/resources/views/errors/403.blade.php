@@ -19,7 +19,7 @@
         <div class="col-md-12">
             <div class="error-template">
                 <h1>Oops!</h1>
-                <h2>403 Not Found</h2>
+                <h2>403 Not Allowed</h2>
                 <div class="error-details">
                     {{ $error ?: "Sorry, you don't have access to view this page!" }}
                 </div>
