@@ -245,10 +245,8 @@ class ImportManager
         }
         $emails = array_unique($emails);
 
-        $respondByTime = Setting::get('centerReportRespondByTime', $center);
-        if (!$respondByTime) {
-            $respondByTime = '10:00 am';
-        }
+        $respondByTimeSetting = Setting::get('centerReportRespondByTime', $center);
+        $respondByTime = $respondByTimeSetting ? $respondByTimeSetting->value : '10:00 am';
 
         $emails['regional'] = $center->region->email;
 
