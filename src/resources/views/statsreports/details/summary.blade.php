@@ -1,8 +1,4 @@
-<?php
-    $pointsTotal = 0;
-?>
 <div class="container-fluid">
-
     <div class="row">
         <div class="col-md-5">
             <table class="table table-condensed table-bordered table-striped centerStatsSummaryTable">
@@ -20,10 +16,13 @@
                 </tr>
                 </thead>
                 <tbody>
+                <?php
+                    $pointsTotal = null;
+                ?>
                 @foreach (['cap','cpc','t1x','t2x','gitw','lf'] as $game)
                     <?php
-                    $percent = null;
-                    $gap = null;
+                        $percent = null;
+                        $gap = null;
                     ?>
                     <tr>
                         <th>{{ strtoupper($game) }}</th>
@@ -59,8 +58,9 @@
                     </tr>
                 @endforeach
                 <tr>
-                    <th colspan="5" style="text-align: right">Total:</th>
-                    <th>{{ $pointsTotal }}</th>
+                    <th colspan="4" style="text-align: center">{{ ($pointsTotal !== null) ? \TmlpStats\StatsReport::pointsToRating($pointsTotal) : 'heyyo' }}</th>
+                    <th style="text-align: right">Total:</th>
+                    <th>{{ ($pointsTotal !== null) ? $pointsTotal : '' }}</th>
                 </tr>
                 </tbody>
             </table>

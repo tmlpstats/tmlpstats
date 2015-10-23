@@ -1,10 +1,6 @@
 <div class="table-responsive">
     <table class="table table-condensed table-striped">
         <tr>
-            <th>Center:</th>
-            <td>{{ $statsReport->center->name }}</td>
-        </tr>
-        <tr>
             <th>Region:</th>
             <td>
                 @if ($statsReport->center->getLocalRegion())
@@ -48,7 +44,7 @@
             <th>Rating:</th>
             <td>
                 @if ($statsReport && $statsReport->getPoints() !== null)
-                    {{ $statsReport->getRating() }} ({{ $statsReport->getPoints() }})
+                    {{ $statsReport->getRating() }} ({{ $statsReport->getPoints() }}pts)
                 @else
                     -
                 @endif
