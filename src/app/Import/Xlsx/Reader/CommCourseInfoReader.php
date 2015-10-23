@@ -4,6 +4,7 @@ namespace TmlpStats\Import\Xlsx\Reader;
 class CommCourseInfoReader extends ReaderAbstract
 {
     protected $dataMap = array(
+        'location'                   => array('col' => 'A'),
         'startDate'                  => array('col' => 'B', 'format' => 'date'),
         'quarterStartTer'            => array('col' => 'C'),
         'quarterStartStandardStarts' => array('col' => 'D'),

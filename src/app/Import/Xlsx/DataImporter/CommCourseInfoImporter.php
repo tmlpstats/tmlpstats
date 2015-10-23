@@ -39,6 +39,7 @@ class CommCourseInfoImporter extends DataImporterAbstract
         $this->data[] = array(
             'type'                       => $type,
             'offset'                     => $row,
+            'location'                   => $this->reader->getLocation($row),
             'startDate'                  => $this->reader->getStartDate($row),
             'quarterStartTer'            => $this->reader->getQuarterStartTer($row),
             'quarterStartStandardStarts' => $this->reader->getQuarterStartStandardStarts($row),
@@ -62,6 +63,11 @@ class CommCourseInfoImporter extends DataImporterAbstract
                 'type'       => $courseInput['type'],
             ));
 
+            if ($course->location != $courseInput['location']) {
+                $course->location = $courseInput['location'];
+                $course->save();
+            }
+
             $courseData = CourseData::firstOrNew(array(
                 'course_id'       => $course->id,
                 'stats_report_id' => $this->statsReport->id,
@@ -70,6 +76,7 @@ class CommCourseInfoImporter extends DataImporterAbstract
             unset($courseInput['startDate']);
             unset($courseInput['type']);
             unset($courseInput['offset']);
+            unset($courseInput['location']);
 
             $courseData = $this->setValues($courseData, $courseInput);
             $courseData->save();

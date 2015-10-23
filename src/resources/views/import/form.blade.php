@@ -199,7 +199,7 @@
             $("#submitStats").attr("disabled", false);
         });
         $("#submitteOk").click(function() {
-            window.location.replace("{{ url('/') }}");
+            window.location.replace("{{ (isset($results) && $results['sheets'] && $results['sheets'][0]['statsReportId']) ? url("statsreports/{$results['sheets'][0]['statsReportId']}") : url('/') }}");
         });
     });
 </script>

@@ -27,8 +27,8 @@
             <tbody>
                 @foreach($group as $courseData)
                     <tr>
-                        <td>{{ $courseData->course->center->name }}</td>
-                        <td style="border-right: 2px solid #DDD;">{{ $courseData->course->startDate->format("M j, y") }}</td>
+                        <td>{{ $courseData->course->location ?: $courseData->course->center->name }}</td>
+                        <td style="border-right: 2px solid #DDD;">{{ $courseData->course->startDate->format("M j, Y") }}</td>
                         <td style="text-align: center">{{ $courseData->quarterStartTer }}</td>
                         <td style="text-align: center">{{ $courseData->quarterStartStandardStarts }}</td>
                         <td style="border-right: 2px solid #DDD; text-align: center">{{ $courseData->quarterStartXfer }}</td>

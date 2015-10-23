@@ -18,6 +18,7 @@ class CommCourseInfoValidator extends ValidatorAbstract
         $types = array('CAP', 'CPC');
 
         $this->dataValidators['startDate']                  = v::date('Y-m-d');
+        $this->dataValidators['location']                   = v::when(v::nullValue(), v::alwaysValid(), v::string());
         $this->dataValidators['type']                       = v::in($types);
         $this->dataValidators['quarterStartTer']            = $positiveIntNotNullValidator;
         $this->dataValidators['quarterStartStandardStarts'] = $positiveIntNotNullValidator;
