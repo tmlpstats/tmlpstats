@@ -181,13 +181,18 @@ class TeamMembersController extends Controller
             $t1Total = count($teamMembers['team1']) - $withdraws['team1'];
             $t2Total = count($teamMembers['team2']) - $withdraws['team2'];
 
-            $tdo['team1'] = round(($tdo['team1'] / ($t1Total)) * 100);
-            $tdo['team2'] = round(($tdo['team2'] / ($t2Total)) * 100);
-            $tdo['total'] = round(($tdo['total'] / ($t1Total + $t2Total)) * 100);
-
-            $gitw['team1'] = round(($gitw['team1'] / ($t1Total)) * 100);
-            $gitw['team2'] = round(($gitw['team2'] / ($t2Total)) * 100);
-            $gitw['total'] = round(($gitw['total'] / ($t1Total + $t2Total)) * 100);
+            if ($t1Total) {
+                $tdo['team1'] = round(($tdo['team1'] / ($t1Total)) * 100);
+                $gitw['team1'] = round(($gitw['team1'] / ($t1Total)) * 100);
+            }
+            if ($t2Total) {
+                $tdo['team2'] = round(($tdo['team2'] / ($t2Total)) * 100);
+                $gitw['team2'] = round(($gitw['team2'] / ($t2Total)) * 100);
+            }
+            if ($t1Total + $t2Total) {
+                $tdo['total'] = round(($tdo['total'] / ($t1Total + $t2Total)) * 100);
+                $gitw['total'] = round(($gitw['total'] / ($t1Total + $t2Total)) * 100);
+            }
 
             $teamMembers['tdo'] = $tdo;
             $teamMembers['gitw'] = $gitw;

@@ -117,7 +117,9 @@ class CenterStatsController extends Controller
                                 if (!isset($globalReportData[$section][$date][$type][$game])) {
                                     $globalReportData[$section][$date][$type][$game] = 0;
                                 }
-                                $globalReportData[$section][$date][$type][$game] += $data->$game;
+                                if ($data) {
+                                    $globalReportData[$section][$date][$type][$game] += $data->$game;
+                                }
                             }
                         }
                     }
