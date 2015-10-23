@@ -40,7 +40,8 @@ class Handler extends ExceptionHandler {
     public function report(Exception $e)
     {
         // Ignore token expiration messages
-        if (!App::runningInConsole()) {
+
+        if ($this->shouldReport($e) && !App::runningInConsole()) {
 
             $user = Auth::user() ? Auth::user()->email : 'unknown';
             $center = Auth::user() && Auth::user()->center
@@ -58,7 +59,7 @@ class Handler extends ExceptionHandler {
                 Log::error("Exception caught sending error email: " . $ex->getMessage());
             }
         }
-        return parent::report($e);
+        parent::report($e);
     }
 
     /**
