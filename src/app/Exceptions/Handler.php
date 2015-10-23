@@ -35,7 +35,6 @@ class Handler extends ExceptionHandler {
      * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
      *
      * @param  \Exception  $e
-     * @return void
      */
     public function report(Exception $e)
     {
@@ -49,9 +48,13 @@ class Handler extends ExceptionHandler {
             $time = Carbon::now()->format('Y-m-d H:i:s');
 
             $body = "An exception was caught by '{$user}' from {$center} center at {$time} UTC:\n\n";
+            $body .= "Request details:\n";
+            $body .= "    Method: '{$_SERVER['REQUEST_METHOD']}'\n";
+            $body .= "    Uri: '{$_SERVER['REQUEST_URI']}'\n";
+            $body .= "    Query: '{$_SERVER['QUERY_STRING']}'\n\n";
             $body .= "$e";
             try {
-                Mail::raw($body, function($message) use ($center) {
+                Mail::raw($body, function ($message) use ($center) {
                     $message->to(env('ADMIN_EMAIL'))->subject("Exception processing sheet for {$center} center in " . strtoupper(env('APP_ENV')));
                 });
             } catch (Exception $ex) {
