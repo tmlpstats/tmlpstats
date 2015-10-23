@@ -144,7 +144,8 @@ class StatsReportController extends Controller
         $statsReport = StatsReport::find($id);
 
         if ($statsReport && !$this->hasAccess($statsReport->center->id, 'R')) {
-            return 'You do not have access to this report.';
+            $error = 'You do not have access to this report.';
+            return  Response::view('errors.403', compact('error'), 403);
         }
 
         $sheetUrl = '';
@@ -523,7 +524,8 @@ class StatsReportController extends Controller
         $statsReport = StatsReport::find($id);
 
         if ($statsReport && !$this->hasAccess($statsReport->center->id, 'R')) {
-            return '<p>You do not have access to this report.</p>';
+            $error = 'You do not have access to this report.';
+            return  Response::view('errors.403', compact('error'), 403);
         }
 
         $sheet = array();

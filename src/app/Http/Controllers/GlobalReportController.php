@@ -30,7 +30,8 @@ class GlobalReportController extends Controller
     public function index()
     {
         if (!$this->hasAccess('R')) {
-            return 'You do not have access to view these reports.';
+            $error = 'You do not have access to view these reports.';
+            return  Response::view('errors.403', compact('error'), 403);
         }
 
         $globalReports = GlobalReport::orderBy('reporting_date', 'desc')->get();
@@ -45,7 +46,8 @@ class GlobalReportController extends Controller
     public function create()
     {
         if (!$this->hasAccess('C')) {
-            return 'You do not have access to create new reports.';
+            $error = 'You do not have access to create new reports.';
+            return  Response::view('errors.403', compact('error'), 403);
         }
 
         $reportingDates = array();
@@ -66,7 +68,8 @@ class GlobalReportController extends Controller
     public function store()
     {
         if (!$this->hasAccess('C')) {
-            return 'You do not have access to save this report.';
+            $error = 'You do not have access to save this report.';
+            return  Response::view('errors.403', compact('error'), 403);
         }
 
         $redirect = '/globalreports';
@@ -90,7 +93,8 @@ class GlobalReportController extends Controller
     public function show($id)
     {
         if (!$this->hasAccess('R')) {
-            return 'You do not have access to view this report.';
+            $error = 'You do not have access to view this report.';
+            return  Response::view('errors.403', compact('error'), 403);
         }
 
         $globalReport = GlobalReport::find($id);
@@ -132,7 +136,8 @@ class GlobalReportController extends Controller
     public function update($id)
     {
         if (!$this->hasAccess('U')) {
-            return 'You do not have access to update this report.';
+            $error = 'You do not have access to update this report.';
+            return  Response::view('errors.403', compact('error'), 403);
         }
 
         if (!Input::has('cancel')) {
@@ -236,7 +241,8 @@ class GlobalReportController extends Controller
     public function getRatingSummary($id)
     {
         if (!$this->hasAccess('R')) {
-            return 'You do not have access to view this report.';
+            $error = 'You do not have access to view this report.';
+            return  Response::view('errors.403', compact('error'), 403);
         }
 
         $globalReport = GlobalReport::find($id);
