@@ -58,7 +58,7 @@
                     </tr>
                 @endforeach
                 <tr>
-                    <th colspan="4" style="text-align: center">{{ ($pointsTotal !== null) ? \TmlpStats\StatsReport::pointsToRating($pointsTotal) : 'heyyo' }}</th>
+                    <th colspan="4" style="text-align: center">{{ ($pointsTotal !== null) ? \TmlpStats\StatsReport::pointsToRating($pointsTotal) : '' }}</th>
                     <th style="text-align: right">Total:</th>
                     <th>{{ ($pointsTotal !== null) ? $pointsTotal : '' }}</th>
                 </tr>

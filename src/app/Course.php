@@ -12,6 +12,7 @@ class Course extends Model
         'center_id',
         'start_date',
         'type',
+        'location',
     ];
 
     protected $dates = [
@@ -31,6 +32,11 @@ class Course extends Model
     public function scopeCpc($query)
     {
         return $query->whereType('CPC');
+    }
+
+    public function scopeLocation($query, $location)
+    {
+        return $query->whereLocation($location);
     }
 
     public function scopeByCenter($query, Center $center)
