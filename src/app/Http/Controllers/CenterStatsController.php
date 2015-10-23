@@ -109,6 +109,11 @@ class CenterStatsController extends Controller
             $count = count($statsReports);
             $globalReportData = [];
             foreach ($statsReports as $statsReport) {
+
+                if (!$statsReport->isValidated()) {
+                    continue;
+                }
+
                 $centerStatsData = $this->getByStatsReport($statsReport->id);
                 foreach ($centerStatsData as $section => $sectionData) {
                     foreach ($sectionData as $date => $week) {

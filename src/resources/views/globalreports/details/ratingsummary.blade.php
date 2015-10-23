@@ -45,7 +45,6 @@
         @foreach ($rows as $rating => $statsReports)
             <?php $count = 0; ?>
             @foreach ($statsReports as $report)
-                <?php if ($report->points === null) continue; ?>
                 <tr class="points">
                     @if ($count === 0)
                         <?php $count++; ?>

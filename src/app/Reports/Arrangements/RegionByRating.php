@@ -18,6 +18,10 @@ class RegionByRating extends BaseArrangement {
         $centerPoints = array();
         foreach ($statsReports as $statsReport) {
 
+            if (!$statsReport->isValidated()) {
+                continue;
+            }
+
             $reportPoints = $statsReport->getPoints();
             $centerPoints[$reportPoints][] = $statsReport;
             $totalPoints += $reportPoints;
