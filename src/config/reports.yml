@@ -24,6 +24,14 @@ scopes:
   unknown:
     required_params: {}
 
+arrangements:
+  RegionByRating:
+    name: Region by rating
+    scope: regional
+    desc: >
+      Used to build the cool chart of all the teams in color groupings by rating.
+      Teams are shown ordered by their points, and grouped into buckets by each
+      rating level: "Ineffective", "Effective", etc.
 
 reports:
   # --- Local Statistician
