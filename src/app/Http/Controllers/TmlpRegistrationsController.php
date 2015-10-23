@@ -95,8 +95,6 @@ class TmlpRegistrationsController extends Controller
         if (!$tmlpRegistrations) {
             $statsReport = StatsReport::find($id);
 
-            $this->statsReport = $statsReport;
-
             if (!$statsReport) {
                 return null;
             }
@@ -212,7 +210,7 @@ class TmlpRegistrationsController extends Controller
             $tmlpRegistrations['applications'] = $applications;
             $tmlpRegistrations['withdraws'] = $withdraws;
         }
-        Cache::put($cacheKey, $tmlpRegistrations, static::CACHE_TTL);
+        Cache::tags(["statsReport{$id}"])->put($cacheKey, $tmlpRegistrations, static::STATS_REPORT_CACHE_TTL);
 
         return $tmlpRegistrations;
     }

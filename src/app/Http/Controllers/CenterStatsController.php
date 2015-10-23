@@ -10,7 +10,6 @@ use TmlpStats\Center;
 use TmlpStats\CenterStatsData;
 use TmlpStats\GlobalReport;
 use TmlpStats\Http\Requests;
-use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\Quarter;
 use TmlpStats\StatsReport;
 
@@ -133,7 +132,7 @@ class CenterStatsController extends Controller
                 }
             }
         }
-        Cache::put($cacheKey, $globalReportData, static::CACHE_TTL);
+        Cache::tags(["globalReport{$id}"])->put($cacheKey, $globalReportData, static::CACHE_TTL);
 
         return $globalReportData;
     }
@@ -179,7 +178,7 @@ class CenterStatsController extends Controller
                 $week->addWeek();
             }
         }
-        Cache::put($cacheKey, $centerStatsData, static::CACHE_TTL);
+        Cache::tags(["statsReport{$id}"])->put($cacheKey, $centerStatsData, static::STATS_REPORT_CACHE_TTL);
 
         return $centerStatsData;
     }

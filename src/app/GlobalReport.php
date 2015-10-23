@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats;
 
+use Cache;
 use TmlpStats\StatsReport;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
@@ -34,6 +35,8 @@ class GlobalReport extends Model
             $this->statsReports()->detach($existingReport->id);
         }
         $this->statsReports()->attach($report->id);
+
+        Cache::tags(["globalReport{$this->id}"])->flush();
     }
 
     public function scopeReportingDate($query, Carbon $date)

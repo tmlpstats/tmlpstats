@@ -96,8 +96,6 @@ class CoursesController extends Controller
         if (!$courses) {
             $statsReport = StatsReport::find($id);
 
-            $this->statsReport = $statsReport;
-
             if (!$statsReport) {
                 return null;
             }
@@ -131,7 +129,7 @@ class CoursesController extends Controller
 
             $courses['completedThisWeek'] = $completedCourses;
         }
-        Cache::put($cacheKey, $courses, static::CACHE_TTL);
+        Cache::tags(["statsReport{$id}"])->put($cacheKey, $courses, static::STATS_REPORT_CACHE_TTL);
 
         return $courses;
     }

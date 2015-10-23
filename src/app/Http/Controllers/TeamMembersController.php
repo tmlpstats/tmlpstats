@@ -95,8 +95,6 @@ class TeamMembersController extends Controller
         if (!$teamMembers) {
             $statsReport = StatsReport::find($id);
 
-            $this->statsReport = $statsReport;
-
             if (!$statsReport) {
                 return null;
             }
@@ -195,7 +193,7 @@ class TeamMembersController extends Controller
             $teamMembers['gitw'] = $gitw;
             $teamMembers['withdraws'] = $withdraws;
         }
-        Cache::put($cacheKey, $teamMembers, static::CACHE_TTL);
+        Cache::tags(["statsReport{$id}"])->put($cacheKey, $teamMembers, static::STATS_REPORT_CACHE_TTL);
 
         return $teamMembers;
     }
