@@ -6,6 +6,7 @@ use TmlpStats\Http\Requests;
 use TmlpStats\GlobalReport;
 use TmlpStats\StatsReport;
 use TmlpStats\Center;
+use TmlpStats\Reports\Arrangements;
 
 use Carbon\Carbon;
 
@@ -253,34 +254,10 @@ class GlobalReportController extends Controller
 
         $statsReports = $globalReport->statsReports()->get();
 
-        $totalPoints = 0;
-        $centerPoints = array();
-        foreach ($statsReports as $statsReport) {
-
-            $reportPoints = $statsReport->getPoints();
-            $centerPoints[$reportPoints][] = $statsReport;
-            $totalPoints += $reportPoints;
-        }
-        ksort($centerPoints);
-
-        $points = $centerPoints
-            ? round($totalPoints/count($centerPoints))
-            : 0;
-
-        $rating = StatsReport::pointsToRating($points);
-
-        $centerReports = array();
-        foreach ($centerPoints as $points => $reports) {
-            foreach ($reports as $report) {
-                $centerReports[$report->getRating()][] = $report;
-            }
-        }
-
-        return view('globalreports.details.ratingsummary', compact(
-            'centerReports',
-            'rating',
-            'points'
-        ));
+        // TODO don't force passing the data in in the future
+        $a = new Arrangements\RegionByRating($statsReports);
+        $data = $a->compose();
+        return view('globalreports.details.ratingsummary', $data);
     }
 
     public function getRegionalStats($id)
