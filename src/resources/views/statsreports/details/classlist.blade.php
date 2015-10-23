@@ -48,7 +48,7 @@
                                 echo implode(', ', $accountabilityNames);
                             }
                             ?></td>
-                        <td>{{ $memberData->comment }}</td>
+                        <td>{{ is_numeric($memberData->comment) ? TmlpStats\Util::getExcelDate($memberData->comment)->format('M j, Y') : $memberData->comment }}</td>
                         <td style="text-align: center">{{ $memberData->travel ? 'Yes' : '' }}</td>
                         <td style="text-align: center">{{ $memberData->room ? 'Yes' : '' }}</td>
                         <td><?php
