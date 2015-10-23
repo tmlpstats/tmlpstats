@@ -2,6 +2,7 @@
 
 namespace TmlpStats\Http\Controllers;
 
+use Cache;
 use Illuminate\Http\Request;
 use TmlpStats\Accountability;
 use TmlpStats\Http\Requests;
@@ -89,28 +90,32 @@ class ContactsController extends Controller
 
     public function getByStatsReport($id)
     {
-        $statsReport = StatsReport::find($id);
+        $cacheKey = "statsReport{$id}:contacts";
+        $contacts = Cache::get($cacheKey);
 
-        $this->statsReport = $statsReport;
+        if (!$contacts) {
+            $statsReport = StatsReport::find($id);
 
-        if (!$statsReport) {
-            return null;
+            if (!$statsReport) {
+                return null;
+            }
+
+            // Contacts
+            $contacts = array();
+            $accountabilities = array(
+                'programManager',
+                'classroomLeader',
+                'team1TeamLeader',
+                'team2TeamLeader',
+                'teamStatistician',
+                'teamStatisticianApprentice',
+            );
+            foreach ($accountabilities as $accountability) {
+                $accountabilityObj = Accountability::name($accountability)->first();
+                $contacts[$accountabilityObj->display] = $statsReport->center->getAccountable($accountability);
+            }
         }
-
-        // Contacts
-        $contacts = array();
-        $accountabilities = array(
-            'programManager',
-            'classroomLeader',
-            'team1TeamLeader',
-            'team2TeamLeader',
-            'teamStatistician',
-            'teamStatisticianApprentice',
-        );
-        foreach ($accountabilities as $accountability) {
-            $accountabilityObj = Accountability::name($accountability)->first();
-            $contacts[$accountabilityObj->display] = $statsReport->center->getAccountable($accountability);
-        }
+        Cache::tags(["statsReport{$id}"])->put($cacheKey, $contacts, static::STATS_REPORT_CACHE_TTL);
 
         return $contacts;
     }

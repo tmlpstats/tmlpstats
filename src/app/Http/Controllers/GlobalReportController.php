@@ -1,6 +1,7 @@
 <?php namespace TmlpStats\Http\Controllers;
 
 use App;
+use Response;
 use TmlpStats\Http\Requests;
 use TmlpStats\GlobalReport;
 use TmlpStats\StatsReport;
@@ -93,6 +94,10 @@ class GlobalReportController extends Controller
         }
 
         $globalReport = GlobalReport::find($id);
+        if (!$globalReport) {
+            $error = 'Report not found.';
+            return  Response::view('errors.404', compact('error'), 404);
+        }
 
         $centers = $this->getStatsReportsNotOnList($globalReport);
         if ($centers) {
@@ -235,6 +240,11 @@ class GlobalReportController extends Controller
         }
 
         $globalReport = GlobalReport::find($id);
+        if (!$globalReport) {
+            $error = 'Report not found.';
+            return  Response::view('errors.404', compact('error'), 404);
+        }
+
         $statsReports = $globalReport->statsReports()->get();
 
         $totalPoints = 0;

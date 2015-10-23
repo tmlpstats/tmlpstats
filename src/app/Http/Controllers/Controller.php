@@ -10,4 +10,5 @@ abstract class Controller extends BaseController {
     use DispatchesCommands, ValidatesRequests;
 
     const CACHE_TTL = 60;
+    const STATS_REPORT_CACHE_TTL = 2 * 24 * 60;
 }
