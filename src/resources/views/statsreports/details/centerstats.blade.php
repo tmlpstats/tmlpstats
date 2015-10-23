@@ -40,7 +40,7 @@ foreach ($centerStatsData as $chunk) {
                             </thead>
                             <tbody>
                             <?php
-                                $pointsTotal = 0;
+                                $pointsTotal = null;
                             ?>
                             @foreach (['cap','cpc','t1x','t2x','gitw','lf'] as $game)
                                 <?php
@@ -83,8 +83,9 @@ foreach ($centerStatsData as $chunk) {
                                 </tr>
                             @endforeach
                             <tr>
-                                <th colspan="{{ $maxCount * 2 + 2 }}" style="text-align: right">Total:</th>
-                                <th>{{ $pointsTotal }}</th>
+                                <th colspan="{{ $maxCount * 2 + 1 }}" style="text-align: center">{{ ($pointsTotal !== null) ? \TmlpStats\StatsReport::pointsToRating($pointsTotal) : '' }}</th>
+                                <th style="text-align: right">Total:</th>
+                                <th>{{ ($pointsTotal !== null) ? $pointsTotal : '' }}</th>
                             </tr>
                             </tbody>
                         </table>
