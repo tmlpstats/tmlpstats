@@ -304,7 +304,7 @@ class StatsReportController extends Controller
                     $submittedAt = clone $statsReport->submittedAt;
                     $submittedAt->setTimezone($statsReport->center->timezone);
 
-                    $response['submittedAt'] = $submittedAt->format('h:i A');
+                    $response['submittedAt'] = $submittedAt->format('g:i A');
                     $result = ImportManager::sendStatsSubmittedEmail($statsReport, $sheet);
 
                     if (isset($result['success'])) {
