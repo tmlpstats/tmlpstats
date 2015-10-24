@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use Cache;
 use TmlpStats\Http\Requests;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
 
@@ -179,4 +180,48 @@ class AdminController extends Controller {
             return strcmp($a['name'], $b['name']);
         }
     }
+
+    public function status()
+    {
+        $sessions = $this->getActiveSessions();
+
+        return view('admin.status')->with(compact('sessions'));
+    }
+
+    public function getActiveSessions()
+    {
+        $user = Auth::user();
+        $activeUsers = User::where('id', '<>', $user->id)
+            ->where('last_login_at', '>', Carbon::now()->subMinutes(120))
+            ->get();
+        $sessions = [];
+
+        foreach ($activeUsers as $user) {
+            $key = "activeUser{$user->id}";
+            $data = Cache::tags('activeUsers')->get($key);
+            if ($data) {
+                $data['start'] = Carbon::createFromFormat('U', $data['start']);
+                $data['start']->setTimezone($user->center->timezone);
+                if (isset($data['end'])) {
+                    $data['end'] = Carbon::createFromFormat('U', $data['end']);
+                    $data['end']->setTimezone($user->center->timezone);
+                } else {
+                    $data['end'] = null;
+                }
+                foreach ($data['previousRequests'] as &$request) {
+                    $request['start'] = Carbon::createFromFormat('U', $request['start']);
+                    $request['start']->setTimezone($user->center->timezone);
+                    if (isset($request['end'])) {
+                        $request['end'] = Carbon::createFromFormat('U', $request['end']);
+                        $request['end']->setTimezone($user->center->timezone);
+                    } else {
+                        $request['end'] = null;
+                    }
+                }
+                $sessions[] = array_merge(['user' => $user], $data);
+            }
+        }
+        return $sessions;
+    }
+
 }
