@@ -76,7 +76,7 @@
         </div>
         <div class="tab-pane" id="statsreports-tab">
             <h3>Center Reports</h3>
-            @include('globalreports.details.statsreports', ['globalReport' => $globalReport])
+            @include('globalreports.details.statsreports', compact('globalReport', 'region'))
         </div>
     </div>
 </div>

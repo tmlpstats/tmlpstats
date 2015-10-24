@@ -1,5 +1,7 @@
+@if (!$globalReport->statsReports)
+    <p>No report information available.</p>
+@else
 <div class="table-responsive">
-
     <div id="errors" class="alert alert-danger" role="alert" style="display:none">
         <a href="#" class="close" data-dismiss="alert">&times;</a>
         <span class="message-prefix" style="font-weight:bold">Error: </span>
@@ -24,17 +26,19 @@
                     </thead>
                     <tbody>
                     @foreach ($globalReport->statsReports as $statsReport)
+                        @if  ($statsReport->center->inRegion($region))
                         <tr id="{{ $statsReport->id }}" >
                             <td><a href="{{ url("/statsreports/{$statsReport->id}") }}">{{ $statsReport->center->name }}</a></td>
                             <td>{{ $statsReport->center->region->name }}</td>
                             <td>
-                                @if ($statsReport)
+                                @if ($statsReport->isValidated())
                                     {{ $statsReport->getRating() }} ({{ $statsReport->getPoints() }})
                                 @else
                                     -
                                 @endif
                             </td>
                         </tr>
+                        @endif
                     @endforeach
                     </tbody>
                 </table>
@@ -42,3 +46,4 @@
         </tr>
     </table>
 </div>
+@endif
