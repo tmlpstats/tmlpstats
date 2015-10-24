@@ -10,7 +10,7 @@
     </div>
 </div>
 
-@include('partials.regions')
+@include('partials.regions', ['selectedRegion' => $selectedRegion->abbreviation])
 {!! Form::close() !!}
 <br/><br/>
 

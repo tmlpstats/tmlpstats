@@ -14,6 +14,25 @@ class Region extends Model
         'email',
     );
 
+    public function isGlobalRegion()
+    {
+        return $this->parentId === null;
+    }
+
+    public function getParentGlobalRegion()
+    {
+        if ($this->parentId) {
+            return $this->parent;
+        }
+        return $this;
+    }
+
+    public function inRegion(Region $region)
+    {
+        return ($region->id == $this->id
+            || $region->id == $this->parentId);
+    }
+
     public function scopeAbbreviation($query, $abbreviation)
     {
         return $query->whereAbbreviation($abbreviation);

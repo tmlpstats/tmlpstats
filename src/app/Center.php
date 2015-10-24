@@ -67,16 +67,16 @@ class Center extends Model
 
     public function getGlobalRegion()
     {
-        if ($this->region && $this->region->parentId === null) {
+        if ($this->region->isGlobalRegion()) {
             return $this->region;
         } else {
-            return Region::find($this->region->parentId);
+            return $this->region->getParentGlobalRegion();
         }
     }
 
     public function getLocalRegion()
     {
-        if ($this->region && $this->region->parentId !== null) {
+        if (!$this->region->isGlobalRegion()) {
             return $this->region;
         } else {
             return null;
@@ -85,8 +85,7 @@ class Center extends Model
 
     public function inRegion(Region $region)
     {
-        return ($region->id == $this->region->id
-            || $region->id == $this->region->parent_id);
+        return  $this->region->inRegion($region);
     }
 
     public function scopeName($query, $name)

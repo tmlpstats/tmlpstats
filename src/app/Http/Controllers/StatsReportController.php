@@ -9,7 +9,6 @@ use TmlpStats\CenterStatsData;
 use TmlpStats\CourseData;
 use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
-use TmlpStats\Region;
 use TmlpStats\StatsReport;
 use TmlpStats\TeamMemberData;
 use TmlpStats\TmlpRegistrationData;
@@ -26,7 +25,6 @@ use Cache;
 use Input;
 use Log;
 use Response;
-use View;
 
 class StatsReportController extends Controller
 {
@@ -45,11 +43,7 @@ class StatsReportController extends Controller
      */
     public function index()
     {
-        $userRegion = Input::has('region')
-            ? Region::abbreviation(Input::get('region'))->first()
-            : null;
-        $selectedRegion = $userRegion ?: Auth::user()->homeRegion();
-        $selectedRegion = $selectedRegion ?: Region::abbreviation('NA')->first();
+        $selectedRegion = $this->getRegion();
 
         $allReports = StatsReport::currentQuarter($selectedRegion)
             ->groupBy('reporting_date')
@@ -105,10 +99,12 @@ class StatsReportController extends Controller
             );
         }
 
-        return view('statsreports.index', compact('statsReportList',
+        return view('statsreports.index', compact(
+            'statsReportList',
             'reportingDates',
             'reportingDate',
-            'selectedRegion'));
+            'selectedRegion'
+        ));
     }
 
     /**
