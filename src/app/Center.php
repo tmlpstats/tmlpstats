@@ -83,6 +83,12 @@ class Center extends Model
         }
     }
 
+    public function inRegion(Region $region)
+    {
+        return ($region->id == $this->region->id
+            || $region->id == $this->region->parent_id);
+    }
+
     public function scopeName($query, $name)
     {
         return $query->whereName($name);

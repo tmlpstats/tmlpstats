@@ -1,9 +1,11 @@
 <?php namespace TmlpStats\Http\Controllers;
 
 use App;
+use Request;
 use Response;
 use TmlpStats\Http\Requests;
 use TmlpStats\GlobalReport;
+use TmlpStats\Region;
 use TmlpStats\StatsReport;
 use TmlpStats\Center;
 use TmlpStats\Reports\Arrangements;
@@ -104,16 +106,11 @@ class GlobalReportController extends Controller
             return  Response::view('errors.404', compact('error'), 404);
         }
 
-        $centers = $this->getStatsReportsNotOnList($globalReport);
-        if ($centers) {
-            $centers = array_merge(array('default' => 'Add Center'), $centers);
-        } else {
-            $centers = array('default' => 'No Reports Available');
-        }
+        $region = $this->getRegion();
 
         return view('globalreports.show', compact(
             'globalReport',
-            'centers'
+            'region'
         ));
     }
 
@@ -255,19 +252,37 @@ class GlobalReportController extends Controller
             return  Response::view('errors.404', compact('error'), 404);
         }
 
+        $region = $this->getRegion();
+
         $statsReports = $globalReport->statsReports()->get();
 
         // TODO don't force passing the data in in the future
-        $a = new Arrangements\RegionByRating($statsReports);
+        $a = new Arrangements\RegionByRating([$statsReports, $region]);
         $data = $a->compose();
         return view('globalreports.details.ratingsummary', $data);
     }
 
     public function getRegionalStats($id)
     {
-        $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($id);
+        $region = $this->getRegion();
+
+        $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($id, $region);
         return view('globalreports.details.regionalstats', compact(
             'globalReportData'
         ));
+    }
+
+    public function getRegion()
+    {
+        $region = null;
+        if (Request::has('region')) {
+            $region = Region::abbreviation(Request::get('region'))->first();
+        }
+
+        if (!$region) {
+            $region = Auth::user()->center->region;
+        }
+
+        return $region;
     }
 }
