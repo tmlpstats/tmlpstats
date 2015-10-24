@@ -49,17 +49,7 @@ class HomeController extends Controller {
             $timezone =  Session::get('timezone');
         }
 
-        $userHomeRegion = Auth::user()->homeRegion();
-        $defaultRegion = $userHomeRegion ?: Region::abbreviation('NA')->first();
-
-        $region = Request::has('region')
-            ? Region::abbreviation(Request::get('region'))->first()
-            : $defaultRegion;
-
-        // Make sure we have a global region
-        if ($region->parentId) {
-            $region = $region->parent;
-        }
+        $region = $this->getRegion();
 
         $allReports = StatsReport::currentQuarter($region)->submitted()->orderBy('reporting_date', 'desc')->get();
         if ($allReports->isEmpty()) {

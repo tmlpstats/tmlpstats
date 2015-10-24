@@ -106,7 +106,7 @@ class GlobalReportController extends Controller
             return  Response::view('errors.404', compact('error'), 404);
         }
 
-        $region = $this->getRegion();
+        $region = $this->getRegion(true);
 
         return view('globalreports.show', compact(
             'globalReport',
@@ -252,7 +252,7 @@ class GlobalReportController extends Controller
             return  Response::view('errors.404', compact('error'), 404);
         }
 
-        $region = $this->getRegion();
+        $region = $this->getRegion(true);
 
         $statsReports = $globalReport->statsReports()->get();
 
@@ -264,25 +264,11 @@ class GlobalReportController extends Controller
 
     public function getRegionalStats($id)
     {
-        $region = $this->getRegion();
+        $region = $this->getRegion(true);
 
         $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($id, $region);
         return view('globalreports.details.regionalstats', compact(
             'globalReportData'
         ));
-    }
-
-    public function getRegion()
-    {
-        $region = null;
-        if (Request::has('region')) {
-            $region = Region::abbreviation(Request::get('region'))->first();
-        }
-
-        if (!$region) {
-            $region = Auth::user()->center->region;
-        }
-
-        return $region;
     }
 }

@@ -18,12 +18,12 @@
               @endif
               @if (Auth::user()->hasRole('administrator'))
               <li class="dropdown {{ Request::is('admin') || Request::is('admin/*') ? 'active' : '' }}">
-                <a href="{{ url('/admin/dashboard') }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Admin <span class="caret"></span></a>
+                <a {{-- href="{{ url('/admin/dashboard') }}" --}} class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Admin <span class="caret"></span></a>
                 <ul class="dropdown-menu" role="menu">
-                  <li><a href="{{ url('/admin/dashboard') }}">Dashboard</a></li>
+{{--                  <li><a href="{{ url('/admin/dashboard') }}">Dashboard</a></li>--}}
                   <li><a href="{{ url('/admin/users') }}">Users</a></li>
                   <li><a href="{{ url('/admin/centers') }}">Centers</a></li>
-                  <li><a href="{{ url('/admin/quarters') }}">Quarters</a></li>
+{{--                  <li><a href="{{ url('/admin/quarters') }}">Quarters</a></li>--}}
                   <li><a href="{{ url('/statsreports') }}">Stats Reports</a></li>
                   <li><a href="{{ url('/globalreports') }}">Global Reports</a></li>
                   <li><a href="{{ url('/admin/import') }}">Import Sheets</a></li>
