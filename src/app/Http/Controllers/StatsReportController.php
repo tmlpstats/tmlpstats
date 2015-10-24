@@ -563,7 +563,7 @@ class StatsReportController extends Controller
             if ($sheetPath) {
 
                 $cacheKey = "statsReport{$id}:validation";
-                $sheet = Cache::get($cacheKey);
+                $sheet = (static::USE_CACHE) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
                 if (!$sheet) {
                     try {
                         $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, false);
@@ -573,7 +573,7 @@ class StatsReportController extends Controller
                         Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
                     }
                 }
-                Cache::put($cacheKey, $sheet, static::CACHE_TTL);
+                Cache::tags(["statsReport{$id}"])->put($cacheKey, $sheet, static::STATS_REPORT_CACHE_TTL);
 
                 $sheetUrl = $sheetPath
                     ? url("/statsreports/{$statsReport->id}/download")
