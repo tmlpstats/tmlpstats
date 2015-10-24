@@ -12,22 +12,13 @@ class RegionByRating extends BaseArrangement
      *      summary:
      *         rating, points
      */
-    public function build($data)
+    public function build($statsReports)
     {
-        list($statsReports, $region) = $data;
         $totalPoints = 0;
 
         // Phase 1: loop all stats reports in this region making a subarray by points.
         $centerPoints = array();
         foreach ($statsReports as $statsReport) {
-
-            if (!$statsReport->isValidated()) {
-                continue;
-            }
-
-            if ($region && !$statsReport->center->inRegion($region)) {
-                continue;
-            }
 
             $reportPoints = $statsReport->getPoints();
             $centerPoints[$reportPoints][] = $statsReport;

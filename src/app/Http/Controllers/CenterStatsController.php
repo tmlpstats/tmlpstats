@@ -108,20 +108,14 @@ class CenterStatsController extends Controller
                 return null;
             }
 
-            $statsReports = $globalReport->statsReports()->get();
+            $statsReports = $globalReport->statsReports()
+                ->validated()
+                ->byRegion($region)
+                ->get();
 
             $count = count($statsReports);
             $globalReportData = [];
             foreach ($statsReports as $statsReport) {
-
-                if (!$statsReport->isValidated()) {
-                    continue;
-                }
-
-                if ($region && !$statsReport->center->inRegion($region)) {
-                    continue;
-                }
-
                 $centerStatsData = $this->getByStatsReport($statsReport->id);
                 foreach ($centerStatsData as $section => $sectionData) {
                     foreach ($sectionData as $date => $week) {

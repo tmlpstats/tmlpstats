@@ -254,10 +254,13 @@ class GlobalReportController extends Controller
 
         $region = $this->getRegion(true);
 
-        $statsReports = $globalReport->statsReports()->get();
+        $statsReports = $globalReport->statsReports()
+            ->validated()
+            ->byRegion($region)
+            ->get();
 
         // TODO don't force passing the data in in the future
-        $a = new Arrangements\RegionByRating([$statsReports, $region]);
+        $a = new Arrangements\RegionByRating($statsReports);
         $data = $a->compose();
         return view('globalreports.details.ratingsummary', $data);
     }
