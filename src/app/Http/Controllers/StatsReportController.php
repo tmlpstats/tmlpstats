@@ -297,7 +297,7 @@ class StatsReportController extends Controller
                 if ($statsReport->save()) {
                     // Cache the validation results so we don't have to regenerate
                     $cacheKey = "statsReport{$id}:validation";
-                    Cache::put($cacheKey, $sheet, static::CACHE_TTL);
+                    Cache::tags(["statsReport{$id}"])->put($cacheKey, $sheet, static::CACHE_TTL);
 
                     XlsxArchiver::getInstance()->promoteWorkingSheet($statsReport);
 

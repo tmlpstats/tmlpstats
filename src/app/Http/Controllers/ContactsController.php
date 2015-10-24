@@ -91,7 +91,7 @@ class ContactsController extends Controller
     public function getByStatsReport($id)
     {
         $cacheKey = "statsReport{$id}:contacts";
-        $contacts = Cache::get($cacheKey);
+        $contacts = Cache::tags(["statsReport{$id}"])->get($cacheKey);
 
         if (!$contacts) {
             $statsReport = StatsReport::find($id);
