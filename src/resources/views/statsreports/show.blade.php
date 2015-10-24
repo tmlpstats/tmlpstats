@@ -43,7 +43,7 @@
 
             @if ($globalReport)
                 <br/>
-                <a href="{{ url("globalreports/{$globalReport->id}") }}">View Regional Report</a>
+                <a href="{{ url("globalreports/{$globalReport->id}?region={$statsReport->center->region->abbreviation}") }}">View Regional Report</a>
                 <br/><br/>
             @endif
         </div>

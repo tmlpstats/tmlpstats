@@ -47,8 +47,12 @@
 
 @section('content')
 
-<h2>Global Report - {{ $globalReport->reportingDate->format('F j, Y') }}</h2>
+<h2>{{ $region ? $region->name : 'Global' }} Report - {{ $globalReport->reportingDate->format('F j, Y') }}</h2>
 <a href="{{ \URL::previous() }}"><< See All</a><br/><br/>
+
+{!! Form::open(['url' => "globalreports/{$globalReport->id}", 'method' => 'GET', 'class' => 'form-horizontal', 'id' => 'reportSelectorForm']) !!}
+@include('partials.regions', ['selectedRegion' => $region->abbreviation, 'includeLocalRegions' => true])
+{!! Form::close() !!}
 
 <div id="content">
     <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
@@ -72,7 +76,7 @@
         </div>
         <div class="tab-pane" id="statsreports-tab">
             <h3>Center Reports</h3>
-            @include('globalreports.details.statsreports', ['globalReport' => $globalReport, 'centers' => $centers])
+            @include('globalreports.details.statsreports', ['globalReport' => $globalReport])
         </div>
     </div>
 </div>
@@ -84,7 +88,7 @@
         // Fetch Rating Summary
         $.ajax({
             type: "GET",
-            url: "{{ url('/globalreports/' . $globalReport->id . '/ratingsummary') }}",
+            url: "{{ url("/globalreports/{$globalReport->id}/ratingsummary?region={$region->abbreviation}") }}",
             success: function(response) {
                 $("#ratingsummary-container").html(response);
             }
@@ -92,7 +96,7 @@
         // Fetch Regional Stats
         $.ajax({
             type: "GET",
-            url: "{{ url('/globalreports/' . $globalReport->id . '/regionalstats') }}",
+            url: "{{ url("/globalreports/{$globalReport->id}/regionalstats?region={$region->abbreviation}") }}",
             success: function(response) {
                 $("#regionalstats-container").html(response);
             }

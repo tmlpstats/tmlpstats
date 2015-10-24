@@ -11,6 +11,7 @@ use TmlpStats\CenterStatsData;
 use TmlpStats\GlobalReport;
 use TmlpStats\Http\Requests;
 use TmlpStats\Quarter;
+use TmlpStats\Region;
 use TmlpStats\StatsReport;
 
 class CenterStatsController extends Controller
@@ -91,9 +92,12 @@ class CenterStatsController extends Controller
         //
     }
 
-    public function getByGlobalReport($id)
+    public function getByGlobalReport($id, Region $region = null)
     {
-        $cacheKey = "globalreport{$id}:centerstats";
+        $cacheKey = $region === null
+            ? "globalreport{$id}:centerstats"
+            : "globalreport{$id}:region{$region->id}:centerstats";
+
         $globalReportData = Cache::tags(["globalReport{$id}"])->get($cacheKey);
 
         if (!$globalReportData) {
@@ -111,6 +115,10 @@ class CenterStatsController extends Controller
             foreach ($statsReports as $statsReport) {
 
                 if (!$statsReport->isValidated()) {
+                    continue;
+                }
+
+                if ($region && !$statsReport->center->inRegion($region)) {
                     continue;
                 }
 

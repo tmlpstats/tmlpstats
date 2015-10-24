@@ -2,23 +2,30 @@
 
 use TmlpStats\StatsReport;
 
-class RegionByRating extends BaseArrangement {
+class RegionByRating extends BaseArrangement
+{
 
-	/* Builds a breakdown of all the centers in a region by rating
-	 * @param $statsReports: an array of stats reports.
-	 * @return
-	 *      rows: ordered associative array of Rating => [centers with this rating by points]
-	 *      summary:
-	 *         rating, points
-	 */
-	public function build($statsReports) {
-		$totalPoints = 0;
+    /* Builds a breakdown of all the centers in a region by rating
+     * @param $statsReports: an array of stats reports.
+     * @return
+     *      rows: ordered associative array of Rating => [centers with this rating by points]
+     *      summary:
+     *         rating, points
+     */
+    public function build($data)
+    {
+        list($statsReports, $region) = $data;
+        $totalPoints = 0;
 
-		// Phase 1: loop all stats reports in this region making a subarray by points.
+        // Phase 1: loop all stats reports in this region making a subarray by points.
         $centerPoints = array();
         foreach ($statsReports as $statsReport) {
 
             if (!$statsReport->isValidated()) {
+                continue;
+            }
+
+            if ($region && !$statsReport->center->inRegion($region)) {
                 continue;
             }
 
@@ -29,7 +36,7 @@ class RegionByRating extends BaseArrangement {
         ksort($centerPoints); // sort by rating points
 
         $points = $centerPoints
-            ? round($totalPoints/count($centerPoints))
+            ? round($totalPoints / count($centerPoints))
             : 0;
 
         // Phase 2: loop the sorted-by-points array and now group by rating.
@@ -41,11 +48,11 @@ class RegionByRating extends BaseArrangement {
         }
 
         return [
-            'rows' => $centerReports,
+            'rows'    => $centerReports,
             'summary' => [
-            	'rating' => StatsReport::pointsToRating($points), // text rating; e.g. "Ineffective"
-            	'points' => $points
+                'rating' => StatsReport::pointsToRating($points), // text rating; e.g. "Ineffective"
+                'points' => $points,
             ],
         ];
-	}
+    }
 }
