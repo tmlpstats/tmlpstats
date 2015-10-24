@@ -250,6 +250,11 @@ class ImportManager
 
         $emails['regional'] = $center->region->email;
 
+        if (env('MAIL_DRIVER') === 'log') {
+            // Don't dump HTML into the logs
+            $sheet = [];
+        }
+
         $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
         $sheetName = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
         $centerName = $center->name;
@@ -278,9 +283,12 @@ class ImportManager
                 }
 
                 $message->subject("Team {$centerName} Statistics Submitted");
-                $message->attach($sheetPath, array(
-                    'as' => $sheetName,
-                ));
+
+                if (env('MAIL_DRIVER') !== 'log') {
+                    $message->attach($sheetPath, array(
+                        'as' => $sheetName,
+                    ));
+                }
             });
             if (env('APP_ENV') === 'prod') {
                 Log::info("Sent emails to the following people with team {$centerName}'s report: " . implode(', ', $emails));
