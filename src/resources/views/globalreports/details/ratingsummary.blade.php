@@ -33,6 +33,10 @@
         '#00FF00',
     ];
 ?>
+
+@if (!$rows)
+    <p>No raitings information available.</p>
+@else
 <div class="table-responsive">
     <h4>{{ $summary['rating'] }} - {{ $summary['points'] }} points</h4>
     <table class="table table-condensed table-bordered ratingsTable" style="width: 700px">
@@ -68,3 +72,4 @@
         </tbody>
     </table>
 </div>
+@endif

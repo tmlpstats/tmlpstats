@@ -7,6 +7,9 @@ foreach ($globalReportData as $chunk) {
     }
 }
 ?>
+@if (!$globalReportData)
+<p>No game information available.</p>
+@else
 <div class="table-responsive">
     <table>
         @for ($k = 0; $k < 2; $k++)
@@ -95,3 +98,4 @@ foreach ($globalReportData as $chunk) {
         @endfor
     </table>
 </div>
+@endif
