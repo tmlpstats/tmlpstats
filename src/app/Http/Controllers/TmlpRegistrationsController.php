@@ -90,7 +90,7 @@ class TmlpRegistrationsController extends Controller
     public function getByStatsReport($id)
     {
         $cacheKey = "statsReport{$id}:tmlpregistrations";
-        $tmlpRegistrations = Cache::get($cacheKey);
+        $tmlpRegistrations = Cache::tags(["statsReport{$id}"])->get($cacheKey);
 
         if (!$tmlpRegistrations) {
             $statsReport = StatsReport::find($id);
