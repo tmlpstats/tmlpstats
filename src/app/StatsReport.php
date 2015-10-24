@@ -92,6 +92,24 @@ class StatsReport extends Model
         }
     }
 
+    public function scopeByRegion($query, Region $region)
+    {
+        $childRegions = $region->getChildRegions();
+        $searchRegionIds = [];
+        if ($childRegions) {
+            foreach ($childRegions as $child) {
+                $searchRegionIds[] = $child->id;
+            }
+        }
+        $searchRegionIds[] = $region->id;
+
+        return $query->whereIn('center_id', function ($query) use ($searchRegionIds) {
+            $query->select('id')
+                ->from('centers')
+                ->whereIn('region_id', $searchRegionIds);
+        });
+    }
+
     public function scopeReportingDate($query, Carbon $date)
     {
         return $query->whereReportingDate($date);

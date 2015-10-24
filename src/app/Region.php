@@ -33,6 +33,15 @@ class Region extends Model
             || $region->id == $this->parentId);
     }
 
+    public function getChildRegions()
+    {
+        if (!$this->isGlobalRegion()) {
+            return null;
+        } else {
+            return Region::byParent($this)->get();
+        }
+    }
+
     public function scopeAbbreviation($query, $abbreviation)
     {
         return $query->whereAbbreviation($abbreviation);
