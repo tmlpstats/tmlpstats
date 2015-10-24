@@ -14,6 +14,7 @@ abstract class Controller extends BaseController {
 
     const CACHE_TTL = 60;
     const STATS_REPORT_CACHE_TTL = 7 * 24 * 60;
+    const USE_CACHE = true;
 
     public function getRegion($includeLocalRegions = false)
     {

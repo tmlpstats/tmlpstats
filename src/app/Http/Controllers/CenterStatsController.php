@@ -98,7 +98,7 @@ class CenterStatsController extends Controller
             ? "globalreport{$id}:centerstats"
             : "globalreport{$id}:region{$region->id}:centerstats";
 
-        $globalReportData = Cache::tags(["globalReport{$id}"])->get($cacheKey);
+        $globalReportData = (static::USE_CACHE) ? Cache::tags(["globalReport{$id}"])->get($cacheKey) : false;
 
         if (!$globalReportData) {
 
@@ -151,7 +151,7 @@ class CenterStatsController extends Controller
     public function getByStatsReport($id)
     {
         $cacheKey = "statsReport{$id}:centerstats";
-        $centerStatsData = Cache::tags(["statsReport{$id}"])->get($cacheKey);
+        $centerStatsData = (static::USE_CACHE) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
 
         if (!$centerStatsData) {
             $statsReport = StatsReport::find($id);
