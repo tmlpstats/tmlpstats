@@ -178,7 +178,7 @@ class ImportManager
         $center = $statsReport->center;
 
         $submittedAt = clone $statsReport->submittedAt;
-        $submittedAt->setTimezone($center->timeZone);
+        $submittedAt->setTimezone($center->timezone);
 
         // TODO: make this configurable
         if ($statsReport->reportingDate->eq($statsReport->quarter->classroom2Date)) {
@@ -282,11 +282,16 @@ class ImportManager
                     'as' => $sheetName,
                 ));
             });
-            Log::info("Sent emails to the following people with team {$centerName}'s report: " . implode(', ', $emails));
-            $result['success'][] = "<span style='font-weight:bold'>Thank you.</span> We received your statistics and have sent a copy to <ul><li>" . implode('</li><li>', $emails) . "</li></ul> Please reply-all to that email if there is anything you need to communicate.";
+            if (env('APP_ENV') === 'prod') {
+                Log::info("Sent emails to the following people with team {$centerName}'s report: " . implode(', ', $emails));
+                $result['success'][] = "<span style='font-weight:bold'>Thank you.</span> We received your statistics and have sent a copy to <ul><li>" . implode('</li><li>', $emails) . "</li></ul> Please reply-all to that email if there is anything you need to communicate.";
+            } else {
+                Log::info("Sent emails to the following people with team {$centerName}'s report: " . env('ADMIN_EMAIL'));
+                $result['success'][] = "<span style='font-weight:bold'>Thank you.</span> We received your statistics and would have sent a copy to <ul><li>" . implode('</li><li>', $emails) . "</li></ul> Since this is development, we sent it to " . env('ADMIN_EMAIL') . " instead.";
+            }
         } catch (\Exception $e) {
             Log::error("Exception caught sending error email: " . $e->getMessage());
-            $result['error'][] = "<span style='font-weight:bold'>Hold up.</span> There was a problem emailing your sheet to your team. Please email the sheet you just submitted to your Program Manager, Classroom Leader, T2 Team Leader, and Regional Statistician ({$emails['regional']}) using your center stats email ({$emails['center']}). <span style='font-weight:bold'>We did</span> receive your statistics.";
+            $result['error'][] = "<span style='font-weight:bold'>Hold up.</span> There was a problem emailing your sheet to your team. Please email the sheet you just submitted to your Program Manager, Classroom Leader, T2 Team Leader, and Regional Statistician ({$emailMap['regional']}) using your center stats email ({$emailMap['center']}). <span style='font-weight:bold'>We did</span> receive your statistics.";
         }
         return $result;
     }
