@@ -1,69 +1,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-5">
-            <table class="table table-condensed table-bordered table-striped centerStatsSummaryTable">
-                <thead>
-                <tr>
-                    <th rowspan="2">&nbsp;</th>
-                    <th colspan="5">{{ Carbon\Carbon::createFromFormat('Y-m-d', $date)->format('M j') }}</th>
-                </tr>
-                <tr>
-                    <th class="info">P</th>
-                    <th>A</th>
-                    <th>Gap</th>
-                    <th>%</th>
-                    <th>Pts</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php
-                    $pointsTotal = null;
-                ?>
-                @foreach (['cap','cpc','t1x','t2x','gitw','lf'] as $game)
-                    <?php
-                        $percent = null;
-                        $gap = null;
-                    ?>
-                    <tr>
-                        <th>{{ strtoupper($game) }}</th>
-                        <td class="info"
-                            style="font-weight: bold">{{ $data['promise']->$game }}{{ ($game == 'gitw') ? '%' : '' }}</td>
-                        <td style="font-weight: bold">{{ isset($data['actual']) ? $data['actual']->$game : '&nbsp;' }}{{ (isset($data['actual']) && $game == 'gitw') ? '%' : '' }}</td>
-                        <?php
-                        if (isset($data['actual'])) {
-                            $percent = $data['promise']->$game
-                                ? max(min(round(($data['actual']->$game / $data['promise']->$game) * 100), 100), 0)
-                                : 0;
-                            $gap = $data['promise']->$game - $data['actual']->$game;
-                        }
-                        ?>
-                        <td>{{ ($gap !== null) ? $game == 'gitw' ? "{$gap}%" : "{$gap}" : '' }}</td>
-                        <td>{{ ($percent !== null) ? "{$percent}%" : '' }}</td>
-                        <td><?php
-                            if ($percent !== null) {
-                                $points = 0;
-                                if ($percent == 100) {
-                                    $points = ($game == 'cap') ? 8 : 4;
-                                } else if ($percent >= 90) {
-                                    $points = ($game == 'cap') ? 6 : 3;
-                                } else if ($percent >= 80) {
-                                    $points = ($game == 'cap') ? 4 : 2;
-                                } else if ($percent >= 75) {
-                                    $points = ($game == 'cap') ? 2 : 1;
-                                }
-                                $pointsTotal += $points;
-                                echo $points;
-                            }
-                            ?></td>
-                    </tr>
-                @endforeach
-                <tr>
-                    <th colspan="4" style="text-align: center">{{ ($pointsTotal !== null) ? \TmlpStats\StatsReport::pointsToRating($pointsTotal) : '' }}</th>
-                    <th style="text-align: right">Total:</th>
-                    <th>{{ ($pointsTotal !== null) ? $pointsTotal : '' }}</th>
-                </tr>
-                </tbody>
-            </table>
+            @include('reports.centergames.week', compact('reportData'))
         </div>
         <div class="col-md-3">
             <h4>TDO Attendance:</h4>

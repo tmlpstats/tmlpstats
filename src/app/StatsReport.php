@@ -77,6 +77,22 @@ class StatsReport extends Model
         return static::pointsToRating($points);
     }
 
+    public static function pointsByPercent($percent, $game)
+    {
+        $points = 0;
+
+        if ($percent == 100) {
+            $points = 4;
+        } else if ($percent >= 90) {
+            $points = 3;
+        } else if ($percent >= 80) {
+            $points = 2;
+        } else if ($percent >= 75) {
+            $points = 1;
+        }
+
+        return ($game == 'cap') ? $points * 2 : $points;
+    }
     public static function pointsToRating($points)
     {
         if ($points == 28) {
