@@ -33,22 +33,31 @@
 
 @if ($statsReport)
     <h2>{{ $statsReport->center->name }} - {{ $statsReport->reportingDate->format('F j, Y') }}</h2>
-    <a href="{{ \URL::previous() }}"><< See All</a><br/><br/>
+    <a href="{{ url('/home') }}"><< See All</a><br/><br/>
 
-    {!! Form::open(['url' => "statsreports", 'method' => 'GET', 'class' => 'form-horizontal', 'id' => 'reportSelectorForm']) !!}
-    <div class="form-group">
-        {!! Form::label('report_id', 'Other Reports:', ['class' => 'col-sm-2 control-label']) !!}
-        <div class="col-sm-3">
-            {!! Form::select('report_id', $otherStatsReports, $statsReport->id, ['class' => 'form-control reportSelector']) !!}
-
-            @if ($globalReport)
-                <br/>
-                <a href="{{ url("globalreports/{$globalReport->id}?region={$statsReport->center->region->abbreviation}") }}">View Regional Report</a>
-                <br/><br/>
-            @endif
+    <div class="table-responsive" style="overflow: hidden">
+        {!! Form::open(['url' => "statsreports", 'method' => 'GET', 'class' => 'form-horizontal', 'id' => 'reportSelectorForm']) !!}
+        <div class="row">
+            <div class="col-md-3" style="align-content: center">
+                {!! Form::label('report_id', 'Other Weekly Reports:', ['class' => 'control-label']) !!}
+            </div>
+            <div class="col-md-9"></div>
         </div>
+        <div class="row">
+            <div class="col-md-3" style="align-content: center">
+                {!! Form::select('report_id', $otherStatsReports, $statsReport->id, ['class' => 'form-control reportSelector']) !!}
+            </div>
+            <div class="col-md-3">
+                @if ($globalReport)
+                    <a class="btn btn-primary" href="{{ url("globalreports/{$globalReport->id}?region={$statsReport->center->region->abbreviation}") }}">View Regional Report</a>
+                @endif
+            </div>
+            <div class="col-md-6"></div>
+        </div>
+        {!! Form::close() !!}
     </div>
-    {!! Form::close() !!}
+    <br />
+    <br />
 
     <div id="content">
         <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">

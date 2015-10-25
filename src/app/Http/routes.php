@@ -69,8 +69,18 @@ Route::get('import', 'ImportController@index');
 Route::post('import', 'ImportController@uploadSpreadsheet');
 
 Route::match(['get', 'post'], 'home', 'HomeController@index');
-Route::post('home/timezone', 'HomeController@setTimezone');
 Route::get('/', 'WelcomeController@index');
+
+Route::post('home/clientsettings', function () {
+    // Save the user's timezone
+    if (Request::has('timezone')) {
+        Session::put('timezone', Request::get('timezone'));
+    }
+    // Save the user's locale
+    if (Request::has('locale')) {
+        Session::put('locale', Request::get('locale'));
+    }
+});
 
 Route::controllers([
     'auth' => 'Auth\AuthController',
