@@ -173,8 +173,10 @@ class CenterStatsController extends Controller
 
             $centerStatsData = [];
             if ($onlyThisDate) {
+                // Get only the data for the requested date
                 $centerStatsData = $this->getWeekData($onlyThisDate, $statsReport->center, $statsReport->quarter);
             } else {
+                // Get all weeks for stats report
                 $week = clone $statsReport->quarter->startWeekendDate;
                 $week->addWeek();
                 while ($week->lte($statsReport->quarter->endWeekendDate)) {
@@ -246,6 +248,32 @@ class CenterStatsController extends Controller
     }
 
     // TODO: Refactor this so we're not reusing basically the same code as in importer
+    public function getActualData(Carbon $date, Center $center, Quarter $quarter)
+    {
+        $statsReport = null;
+
+        // First, check if it's in the official report from the actual date
+        $globalReport = GlobalReport::reportingDate($date)->first();
+        if ($globalReport) {
+            $statsReport = $globalReport->statsReports()->byCenter($center)->first();
+        }
+
+        // If not, search from the beginning until we find it
+        if (!$statsReport) {
+            $statsReport = $this->findFirstWeek($center, $quarter, 'actual');
+        }
+
+        if (!$statsReport) {
+            return null;
+        }
+
+        return CenterStatsData::actual()
+            ->reportingDate($date)
+            ->byStatsReport($statsReport)
+            ->first();
+    }
+
+    // TODO: Refactor this so we're not reusing basically the same code as in importer
     protected $promiseStatsReport = null;
 
     public function findFirstWeek(Center $center, Quarter $quarter, $type)
@@ -272,31 +300,5 @@ class CenterStatsController extends Controller
         }
 
         return $this->promiseStatsReport;
-    }
-
-    // TODO: Refactor this so we're not reusing basically the same code as in importer
-    public function getActualData(Carbon $date, Center $center, Quarter $quarter)
-    {
-        $statsReport = null;
-
-        // First, check if it's in the official report from the actual date
-        $globalReport = GlobalReport::reportingDate($date)->first();
-        if ($globalReport) {
-            $statsReport = $globalReport->statsReports()->byCenter($center)->first();
-        }
-
-        // If not, search from the beginning until we find it
-        if (!$statsReport) {
-            $statsReport = $this->findFirstWeek($center, $quarter, 'actual');
-        }
-
-        if (!$statsReport) {
-            return null;
-        }
-
-        return CenterStatsData::actual()
-            ->reportingDate($date)
-            ->byStatsReport($statsReport)
-            ->first();
     }
 }

@@ -9,8 +9,12 @@
         {!! Form::select('stats_report', $reportingDates, $reportingDate->toDateString(), ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}
     </div>
 </div>
-
-@include('partials.regions', ['selectedRegion' => $selectedRegion->abbreviation])
+<div class="form-group">
+    {!! Form::label('region', 'Region:', ['class' => 'col-sm-1 control-label']) !!}
+    <div class="col-sm-3">
+        @include('partials.forms.regions', ['selectedRegion' => $selectedRegion->abbreviation])
+    </div>
+</div>
 {!! Form::close() !!}
 <br/><br/>
 

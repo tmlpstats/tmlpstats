@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TMLP Stats</title>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script type="text/javascript" src="{{ asset('/js/jquery-2.1.4.min.js') }}"></script>
 
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script type="text/javascript" src="{{ asset('/js/bootstrap.min.js') }}"></script>
@@ -26,8 +26,8 @@
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
     <script type="text/javascript" src="{{ asset('/js/jquery.loading.js') }}"></script>
@@ -37,36 +37,49 @@
 
     <style type="text/css">
         body {
-          padding-top: 50px;
+            padding-top: 50px;
         }
     </style>
     @yield('headers')
-  </head>
-  <body>
+</head>
+<body>
     @include('partials.navbar')
 
     <div class="container">
-
-      @yield('content')
-
+        @yield('content')
     </div>
-    <script type="text/javascript">
-        // Enable hover dropdowns in nav menu
-        $(function() {
-        $(".dropdown").hover(
-            function() {
-                $('.dropdown-menu', this).stop( true, true ).fadeIn("fast");
-                $(this).toggleClass('open');
-                $('b', this).toggleClass("caret caret-up");
-            },
-            function() {
-                $('.dropdown-menu', this).stop( true, true ).fadeOut("fast");
-                $(this).toggleClass('open');
-                $('b', this).toggleClass("caret caret-up");
-            });
-        });
-    </script>
+
     @yield('scripts')
 
-  </body>
+    @if (!Session::has('timezone') || !Session::has('locale'))
+        <script type="text/javascript">
+            $(document).ready(function () {
+                var tz = jstz.determine();
+                var locale = navigator.language;
+
+                var data = {};
+                if (typeof (tz) !== 'undefined') {
+                    data.timezone = tz.name();
+                }
+                if (locale) {
+                    data.locale = navigator.language;
+                }
+
+                if (!$.isEmptyObject(data)) {
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ url('/home/clientsettings') }}",
+                        beforeSend: function (request) {
+                            request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
+                        },
+                        data: $.param(data),
+                        success: function () {
+                            location.reload();
+                        }
+                    });
+                }
+            });
+        </script>
+    @endif
+</body>
 </html>

@@ -198,11 +198,4 @@ class HomeController extends Controller {
             return strcmp($a['name'], $b['name']);
         }
     }
-
-    public function setTimezone()
-    {
-        if (Request::has('timezone')) {
-            Session::put('timezone', Request::get('timezone'));
-        }
-    }
 }

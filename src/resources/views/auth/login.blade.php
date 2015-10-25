@@ -36,7 +36,7 @@
 
     <div class="form-group">
         <div class="col-md-6 col-md-offset-4">
-            {!! Form::submit('Login', ['class' => 'btn btn-default btn-primary']) !!}
+            {!! Form::submit('Login', ['class' => 'btn btn-default btn-success']) !!}
 
             <a href="{!! url('/password/email') !!}">Forgot Your Password?</a>
         </div>

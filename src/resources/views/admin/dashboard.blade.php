@@ -22,8 +22,12 @@
             {!! Form::select('stats_report', $reportingDates, $reportingDate->toDateString(), ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}
         </div>
     </div>
-
-    @include('partials.regions')
+    <div class="form-group">
+        {!! Form::label('region', 'Region:', ['class' => 'col-sm-1 control-label']) !!}
+        <div class="col-sm-3">
+            @include('partials.forms.regions')
+        </div>
+    </div>
     {!! Form::close() !!}
 
     <div id="errors" class="alert alert-danger" role="alert" style="display:none">
