@@ -1,14 +1,13 @@
 <?php namespace TmlpStats\Http\Controllers;
 
-use Exception;
-use TmlpStats\Http\Inputs;
-
 use TmlpStats\Accountability;
 use TmlpStats\Center;
 use TmlpStats\CenterStatsData;
 use TmlpStats\CourseData;
 use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
+use TmlpStats\Reports\Arrangements\GamesByMilestone;
+use TmlpStats\Reports\Arrangements\GamesByWeek;
 use TmlpStats\StatsReport;
 use TmlpStats\TeamMemberData;
 use TmlpStats\TmlpRegistrationData;
@@ -22,6 +21,7 @@ use Carbon\Carbon;
 use App;
 use Auth;
 use Cache;
+use Exception;
 use Input;
 use Log;
 use Response;
@@ -410,25 +410,16 @@ class StatsReportController extends Controller
             return '<p>This report did not pass validation. See Report Details for more information.</p>';
         }
 
-        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($id);
-
+        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($id, $statsReport->reportingDate);
         if (!$centerStatsData) {
             return '<p>Center Stats not available.</p>';
         }
 
-        $statsReportDateString = $statsReport->reportingDate->toDateString();
+        $a = new GamesByWeek($centerStatsData);
+        $centerStatsData = $a->compose();
 
-        $date = null;
-        $data = null;
-        foreach ($centerStatsData as $section => $weeks) {
-            foreach ($weeks as $dateString => $weekData) {
-                if ($dateString == $statsReportDateString) {
-                    $date = $dateString;
-                    $data = $weekData;
-                    break;
-                }
-            }
-        }
+        $date = $statsReport->reportingDate->toDateString();
+        $reportData = $centerStatsData['reportData'][$date];
 
         $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($id);
         $tdo = $teamMembers['tdo'];
@@ -443,7 +434,7 @@ class StatsReportController extends Controller
         $completedCourses = $courses['completedThisWeek'];
 
         return view('statsreports.details.summary', compact(
-            'data',
+            'reportData',
             'date',
             'tdo',
             'gitw',
@@ -467,9 +458,13 @@ class StatsReportController extends Controller
             return '<p>Center Stats not available.</p>';
         }
 
-        return view('statsreports.details.centerstats', compact(
-            'centerStatsData'
-        ));
+        $a = new GamesByWeek($centerStatsData);
+        $weeklyData = $a->compose();
+
+        $a = new GamesByMilestone(['weeks' => $weeklyData['reportData'], 'quarter' => $statsReport->quarter]);
+        $data = $a->compose();
+
+        return view('reports.centergames.milestones', $data);
     }
 
     public function getTeamMembers($id)

@@ -5,7 +5,10 @@ use Request;
 use Response;
 use TmlpStats\Http\Requests;
 use TmlpStats\GlobalReport;
+use TmlpStats\Quarter;
 use TmlpStats\Region;
+use TmlpStats\Reports\Arrangements\GamesByMilestone;
+use TmlpStats\Reports\Arrangements\GamesByWeek;
 use TmlpStats\StatsReport;
 use TmlpStats\Center;
 use TmlpStats\Reports\Arrangements;
@@ -237,8 +240,6 @@ class GlobalReportController extends Controller
         return $centers;
     }
 
-
-
     public function getRatingSummary($id)
     {
         if (!$this->hasAccess('R')) {
@@ -268,10 +269,18 @@ class GlobalReportController extends Controller
     public function getRegionalStats($id)
     {
         $region = $this->getRegion(true);
+        $globalReport = GlobalReport::find($id);
+
+        $quarter = Quarter::byRegion($region)->date($globalReport->reportingDate)->first();
+        $quarter->setRegion($region);
 
         $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($id, $region);
-        return view('globalreports.details.regionalstats', compact(
-            'globalReportData'
-        ));
+
+        $a = new GamesByWeek($globalReportData);
+        $weeklyData = $a->compose();
+
+        $a = new GamesByMilestone(['weeks' => $weeklyData['reportData'], 'quarter' => $quarter]);
+        $data = $a->compose();
+        return view('reports.centergames.milestones', $data);
     }
 }

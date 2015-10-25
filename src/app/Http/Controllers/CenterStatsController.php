@@ -97,13 +97,11 @@ class CenterStatsController extends Controller
         $cacheKey = $region === null
             ? "globalreport{$id}:centerstats"
             : "globalreport{$id}:region{$region->id}:centerstats";
-
         $globalReportData = (static::USE_CACHE) ? Cache::tags(["globalReport{$id}"])->get($cacheKey) : false;
 
         if (!$globalReportData) {
 
             $globalReport = GlobalReport::find($id);
-
             if (!$globalReport) {
                 return null;
             }
@@ -113,31 +111,40 @@ class CenterStatsController extends Controller
                 ->byRegion($region)
                 ->get();
 
-            $count = count($statsReports);
-            $globalReportData = [];
+            $cumulativeData = [];
             foreach ($statsReports as $statsReport) {
                 $centerStatsData = $this->getByStatsReport($statsReport->id);
-                foreach ($centerStatsData as $section => $sectionData) {
-                    foreach ($sectionData as $date => $week) {
-                        foreach ($week as $type => $data) {
-                            foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
-                                if (!isset($globalReportData[$section][$date][$type][$game])) {
-                                    $globalReportData[$section][$date][$type][$game] = 0;
-                                }
-                                if ($data) {
-                                    $globalReportData[$section][$date][$type][$game] += $data->$game;
-                                }
-                            }
+
+                foreach ($centerStatsData as $week) {
+                    $dateString = $week->reportingDate->toDateString();
+                    $type = $week->type;
+
+                    $weekData = isset($cumulativeData[$dateString][$type])
+                        ? $cumulativeData[$dateString][$type]
+                        : new \stdClass();
+
+                    $weekData->type = $type;
+                    $weekData->reportingDate = $week->reportingDate;
+
+                    foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
+                        if (!isset($weekData->$game)) {
+                            $weekData->$game = 0;
                         }
+                        $weekData->$game += $week[$game];
                     }
+                    $cumulativeData[$dateString][$type] = $weekData;
                 }
             }
-            foreach ($globalReportData as $section => $sectionData) {
-                foreach ($sectionData as $date => $week) {
-                    foreach ($week as $type => $data) {
-                        $val = $data['gitw'];
-                        $globalReportData[$section][$date][$type]['gitw'] = round($val/$count);
-                    }
+
+            $globalReportData = [];
+            $count = count($statsReports);
+            foreach ($cumulativeData as $date => $week) {
+                foreach ($week as $type => $data) {
+                    // GITW is calculated as an average, so we need the total first
+                    $total = $data->gitw;
+                    $data->gitw = round($total / $count);
+
+                    $globalReportData[] = $data;
                 }
             }
         }
@@ -148,48 +155,56 @@ class CenterStatsController extends Controller
 
     protected $statsReport = null;
 
-    public function getByStatsReport($id)
+    public function getByStatsReport($id, Carbon $onlyThisDate = null)
     {
-        $cacheKey = "statsReport{$id}:centerstats";
+        $dateString = $onlyThisDate ? $onlyThisDate->toDateString() : null;
+        $cacheKey = $onlyThisDate === null
+            ? "statsReport{$id}:centerstats"
+            : "statsReport{$id}:date{$dateString}:centerstats";
         $centerStatsData = (static::USE_CACHE) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
 
         if (!$centerStatsData) {
             $statsReport = StatsReport::find($id);
-
-            $this->statsReport = $statsReport;
-
             if (!$statsReport) {
                 return null;
             }
 
-            // Center Stats
-            $week = clone $statsReport->quarter->startWeekendDate;
-            $week->addWeek();
-            $centerStatsData = array();
-            while ($week->lte($statsReport->quarter->endWeekendDate)) {
+            $this->statsReport = $statsReport;
 
-                if ($week->lte($statsReport->quarter->classroom1Date)) {
-                    $classroom = 0;
-                } else if ($week->lte($statsReport->quarter->classroom2Date)) {
-                    $classroom = 1;
-                } else if ($week->lte($statsReport->quarter->classroom3Date)) {
-                    $classroom = 2;
-                } else {
-                    $classroom = 3;
-                }
-
-                $centerStatsData[$classroom][$week->toDateString()]['promise'] = $this->getPromiseData($week, $statsReport->center, $statsReport->quarter);
-
-                if ($week->lte($statsReport->reportingDate)) {
-                    $centerStatsData[$classroom][$week->toDateString()]['actual'] = $this->getActualData($week, $statsReport->center, $statsReport->quarter);
-                }
-
+            $centerStatsData = [];
+            if ($onlyThisDate) {
+                $centerStatsData = $this->getWeekData($onlyThisDate, $statsReport->center, $statsReport->quarter);
+            } else {
+                $week = clone $statsReport->quarter->startWeekendDate;
                 $week->addWeek();
+                while ($week->lte($statsReport->quarter->endWeekendDate)) {
+
+                    $weekData = $this->getWeekData(
+                        $week,
+                        $statsReport->center,
+                        $statsReport->quarter,
+                        $week->gt($statsReport->reportingDate)
+                    );
+                    $centerStatsData = array_merge($centerStatsData, $weekData);
+
+                    $week->addWeek();
+                }
             }
         }
         Cache::tags(["statsReport{$id}"])->put($cacheKey, $centerStatsData, static::STATS_REPORT_CACHE_TTL);
 
         return $centerStatsData;
+    }
+
+    public function getWeekData(Carbon $date, Center $center, Quarter $quarter, $excludeActual = false)
+    {
+        $output = [];
+        $output[] = $this->getPromiseData($date, $center, $quarter);
+        if (!$excludeActual) {
+            $output[] = $this->getActualData($date, $center, $quarter);
+        }
+
+        return $output;
     }
 
     // TODO: Refactor this so we're not reusing basically the same code as in importer
