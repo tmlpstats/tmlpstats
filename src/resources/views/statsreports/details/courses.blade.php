@@ -27,13 +27,13 @@
                 @foreach ($reportData[$type] as $courseData)
                     <tr>
                         <td>{{ $courseData['location'] }}</td>
-                        <td style="border-right: 2px solid #DDD;">{{ $courseData['startDate']->format("M j, Y") }}</td>
-                        <td style="text-align: center">{{ $courseData['quarterStartTer'] }}</td>
-                        <td style="text-align: center">{{ $courseData['quarterStartStandardStarts'] }}</td>
-                        <td style="border-right: 2px solid #DDD; text-align: center">{{ $courseData['quarterStartXfer'] }}</td>
-                        <td style="text-align: center">{{ $courseData['currentTer'] }}</td>
-                        <td style="text-align: center">{{ $courseData['currentStandardStarts'] }}</td>
-                        <td style="text-align: center">{{ $courseData['currentXfer'] }}</td>
+                        <td style="vertical-align: middle; border-right: 2px solid #DDD;">{{ $courseData['startDate']->format("M j, Y") }}</td>
+                        <td style="vertical-align: middle; text-align: center">{{ $courseData['quarterStartTer'] }}</td>
+                        <td style="vertical-align: middle; text-align: center">{{ $courseData['quarterStartStandardStarts'] }}</td>
+                        <td style="vertical-align: middle; border-right: 2px solid #DDD; text-align: center">{{ $courseData['quarterStartXfer'] }}</td>
+                        <td style="vertical-align: middle; text-align: center">{{ $courseData['currentTer'] }}</td>
+                        <td style="vertical-align: middle; text-align: center">{{ $courseData['currentStandardStarts'] }}</td>
+                        <td style="vertical-align: middle; text-align: center">{{ $courseData['currentXfer'] }}</td>
                     </tr>
                 @endforeach
                 </tbody>
@@ -80,18 +80,18 @@
                 <tr>
                     <td>{{ $courseData['type'] }}</td>
                     <td>{{ $courseData['location'] }}</td>
-                    <td style="border-right: 2px solid #DDD;">{{ $courseData['startDate']->format("M j, Y") }}</td>
-                    <td style="text-align: center">{{ $courseData['quarterStartTer'] }}</td>
-                    <td style="text-align: center">{{ $courseData['quarterStartStandardStarts'] }}</td>
-                    <td style="border-right: 2px solid #DDD; text-align: center">{{ $courseData['quarterStartXfer'] }}</td>
-                    <td style="text-align: center">{{ $courseData['currentTer'] }}</td>
-                    <td style="text-align: center">{{ $courseData['currentStandardStarts'] }}</td>
-                    <td style="border-right: 2px solid #DDD; text-align: center">{{ $courseData['currentXfer'] }}</td>
-                    <td style="text-align: center">{{ $courseData['completedStandardStarts'] }}</td>
-                    <td style="text-align: center">{{ $courseData['potentials'] }}</td>
-                    <td style="border-right: 2px solid #DDD; text-align: center">{{ $courseData['registrations'] }}</td>
-                    <td style="text-align: center">{{ $courseData['completionStats']['registrationFulfillment'] }}%</td>
-                    <td style="text-align: center">{{ $courseData['completionStats']['registrationEffectiveness'] }}%</td>
+                    <td style="vertical-align: middle; border-right: 2px solid #DDD;">{{ $courseData['startDate']->format("M j, Y") }}</td>
+                    <td style="vertical-align: middle; text-align: center">{{ $courseData['quarterStartTer'] }}</td>
+                    <td style="vertical-align: middle; text-align: center">{{ $courseData['quarterStartStandardStarts'] }}</td>
+                    <td style="vertical-align: middle; border-right: 2px solid #DDD; text-align: center">{{ $courseData['quarterStartXfer'] }}</td>
+                    <td style="vertical-align: middle; text-align: center">{{ $courseData['currentTer'] }}</td>
+                    <td style="vertical-align: middle; text-align: center">{{ $courseData['currentStandardStarts'] }}</td>
+                    <td style="vertical-align: middle; border-right: 2px solid #DDD; text-align: center">{{ $courseData['currentXfer'] }}</td>
+                    <td style="vertical-align: middle; text-align: center">{{ $courseData['completedStandardStarts'] }}</td>
+                    <td style="vertical-align: middle; text-align: center">{{ $courseData['potentials'] }}</td>
+                    <td style="vertical-align: middle; border-right: 2px solid #DDD; text-align: center">{{ $courseData['registrations'] }}</td>
+                    <td style="vertical-align: middle; text-align: center">{{ $courseData['completionStats']['registrationFulfillment'] }}%</td>
+                    <td style="vertical-align: middle; text-align: center">{{ $courseData['completionStats']['registrationEffectiveness'] }}%</td>
                 </tr>
             @endforeach
             </tbody>
