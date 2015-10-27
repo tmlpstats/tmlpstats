@@ -93,7 +93,18 @@
             </div>
             <div class="tab-pane" id="classlist-tab">
                 <h3>Team Members</h3>
+                <div class="btn-group" role="group">
+                    <button id ="classlist-button" type="button" class="btn btn-primary">Summary</button>
+                    <button id ="gitwsummary-button" type="button" class="btn btn-default">GITW</button>
+                    <button id ="tdosummary-button" type="button" class="btn btn-default">TDO</button>
+                </div>
                 <div id="classlist-container">
+                    @include('partials.loading')
+                </div>
+                <div id="gitwsummary-container" style="display: none">
+                    @include('partials.loading')
+                </div>
+                <div id="tdosummary-container" style="display: none">
                     @include('partials.loading')
                 </div>
             </div>
@@ -153,6 +164,44 @@
                 $("#tmlpregistrations-container").hide();
             });
 
+
+
+            $("#classlist-button").click(function() {
+                $(this).addClass('btn-primary');
+                $("#gitwsummary-button").addClass('btn-default');
+                $("#gitwsummary-button").removeClass('btn-primary');
+                $("#tdosummary-button").addClass('btn-default');
+                $("#tdosummary-button").removeClass('btn-primary');
+
+                $("#classlist-container").show();
+                $("#gitwsummary-container").hide();
+                $("#tdosummary-container").hide();
+            });
+
+            $("#gitwsummary-button").click(function() {
+                $(this).addClass('btn-primary');
+                $("#classlist-button").addClass('btn-default');
+                $("#classlist-button").removeClass('btn-primary');
+                $("#tdosummary-button").addClass('btn-default');
+                $("#tdosummary-button").removeClass('btn-primary');
+
+                $("#gitwsummary-container").show();
+                $("#classlist-container").hide();
+                $("#tdosummary-container").hide();
+            });
+
+            $("#tdosummary-button").click(function() {
+                $(this).addClass('btn-primary');
+                $("#classlist-button").addClass('btn-default');
+                $("#classlist-button").removeClass('btn-primary');
+                $("#gitwsummary-button").addClass('btn-default');
+                $("#gitwsummary-button").removeClass('btn-primary');
+
+                $("#tdosummary-container").show();
+                $("#gitwsummary-container").hide();
+                $("#classlist-container").hide();
+            });
+
             // Fetch Summary
             $.ajax({
                 type: "GET",
@@ -186,6 +235,24 @@
                 url: "{{ url('/statsreports/' . $statsReport->id . '/classlist') }}",
                 success: function(response) {
                     $("#classlist-container").html(response);
+                }
+            });
+
+            // Fetch GITW Summary
+            $.ajax({
+                type: "GET",
+                url: "{{ url('/statsreports/' . $statsReport->id . '/gitwsummary') }}",
+                success: function(response) {
+                    $("#gitwsummary-container").html(response);
+                }
+            });
+
+            // Fetch TDO Summary
+            $.ajax({
+                type: "GET",
+                url: "{{ url('/statsreports/' . $statsReport->id . '/tdosummary') }}",
+                success: function(response) {
+                    $("#tdosummary-container").html(response);
                 }
             });
 

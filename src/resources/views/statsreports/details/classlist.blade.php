@@ -1,42 +1,33 @@
 <div class="table-responsive">
-    @foreach ($teamMembers as $groupName => $group)
-        <?php
-            if (!in_array($groupName, ['team1', 'team2'])) {
-                continue;
-            }
-        ?>
+    @foreach (['team1', 'team2', 'withdrawn'] as $group)
+        <br />
+        <h4>{{ ucwords($group) }}</h4>
         <table class="table table-condensed table-striped table-hover">
             <thead>
-                <tr>
-                    <th colspan="14">{{ ucwords($groupName) }}</th>
-                </tr>
-                <tr>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Quarter</th>
-                    <th>GITW</th>
-                    <th>TDO</th>
-                    <th>WD</th>
-                    <th>Accountability</th>
-                    <th>Comment</th>
-                    <th>Travel</th>
-                    <th>Room</th>
-                    <th>Special</th>
-                </tr>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th style="text-align: center">Quarter</th>
+                <th>Accountability</th>
+                @if ($group != 'withdrawn')
+                    <th style="text-align: center">GITW</th>
+                    <th style="text-align: center">TDO</th>
+                    <th style="text-align: center">Travel</th>
+                    <th style="text-align: center">Room</th>
+                @else
+                    <th>Withdraw</th>
+                @endif
+                <th>Comment</th>
+                <th>Special</th>
+            </tr>
             </thead>
             <tbody>
-                @foreach ($group as $memberData)
+            @foreach ($reportData[$group] as $quarterNumber => $quarterClass)
+                @foreach ($quarterClass as $memberData)
                     <tr>
                         <td>{{ $memberData->firstName }}</td>
                         <td>{{ $memberData->lastName }}</td>
-                        <td style="text-align: center">Q{{ $memberData->teamMember->quarterNumber }}</td>
-                        <td style="text-align: center">{{ $memberData->gitw ? 'E' : 'I' }}</td>
-                        <td style="text-align: center">{{ $memberData->tdo ? 'Y' : 'N' }}</td>
-                        @if ($memberData->withdrawCode)
-                            <td title="{{ $memberData->withdrawCode->display }}">{{ $memberData->withdrawCode->code }}</td>
-                        @else
-                            <td></td>
-                        @endif
+                        <td style="text-align: center">{{ $quarterNumber }}</td>
                         <td><?php
                             $accountabilities = $memberData->teamMember->person->accountabilities()->get();
 
@@ -48,9 +39,27 @@
                                 echo implode(', ', $accountabilityNames);
                             }
                             ?></td>
+                        @if ($group != 'withdrawn')
+                            <td style="text-align: center">{{ $memberData->gitw ? 'E' : 'I' }}</td>
+                            <td style="text-align: center">{{ $memberData->tdo ? 'Y' : 'N' }}</td>
+                            <td style="text-align: center">
+                                @if ($memberData->travel)
+                                    <span class="glyphicon glyphicon-ok"></span>
+                                @endif
+                            </td>
+                            <td style="text-align: center">
+                                @if ($memberData->travel)
+                                    <span class="glyphicon glyphicon-ok"></span>
+                                @endif
+                            </td>
+                        @else
+                            @if ($memberData->withdrawCode)
+                                <td title="{{ $memberData->withdrawCode->code }}">{{ $memberData->withdrawCode->display }}</td>
+                            @else
+                                <td></td>
+                            @endif
+                        @endif
                         <td>{{ is_numeric($memberData->comment) ? TmlpStats\Util::getExcelDate($memberData->comment)->format('M j, Y') : $memberData->comment }}</td>
-                        <td style="text-align: center">{{ $memberData->travel ? 'Yes' : '' }}</td>
-                        <td style="text-align: center">{{ $memberData->room ? 'Yes' : '' }}</td>
                         <td><?php
                             $special = array();
                             if (!$memberData->atWeekend) {
@@ -75,6 +84,7 @@
                             ?></td>
                     </tr>
                 @endforeach
+            @endforeach
             </tbody>
         </table>
     @endforeach

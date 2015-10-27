@@ -57,6 +57,8 @@ Route::get('statsreports/{id}/tmlpregistrations', 'StatsReportController@getTmlp
 Route::get('statsreports/{id}/tmlpregistrationsbystatus', 'StatsReportController@getTmlpRegistrationsByStatus');
 Route::get('statsreports/{id}/courses', 'StatsReportController@getCourses');
 Route::get('statsreports/{id}/contactinfo', 'StatsReportController@getContacts');
+Route::get('statsreports/{id}/gitwsummary', 'StatsReportController@getGitwByTeamMember');
+Route::get('statsreports/{id}/tdosummary', 'StatsReportController@getTdoByTeamMember');
 
 
 Route::resource('globalreports', 'GlobalReportController');
