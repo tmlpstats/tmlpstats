@@ -17,10 +17,10 @@
                         <th>Reg Date</th>
                         <th>App Out Date</th>
                         <th>App In Date</th>
-                        <th>Appr Date</th>
+                        <th>Approve Date</th>
                         @if ($group == 'withdrawn')
-                            <th>WD</th>
-                            <th>WD Date</th>
+                            <th>Reason</th>
+                            <th>Withdraw Date</th>
                         @elseif ($quarterName == 'next')
                             <th>Travel</th>
                             <th>Room</th>

@@ -1,7 +1,7 @@
 <div class="table-responsive">
     @foreach (['notSent', 'out', 'waiting', 'approved', 'withdrawn'] as $group)
         @if ($reportData[$group])
-            <br />
+            <br/>
             <h4>
                 @if ($group == 'withdrawn')
                     Withdrawn
@@ -24,16 +24,16 @@
                     <th style="text-align: center">Team Year</th>
                     <th>Reg Date</th>
                     @if ($group == 'withdrawn')
-                        <th>WD</th>
-                        <th>WD Date</th>
+                        <th>Reason</th>
+                        <th>Withdraw Date</th>
                     @elseif ($group == 'out')
                         <th>App Out Date</th>
-                        <th>Application Due</th>
+                        <th>Application Process Deadline</th>
                     @elseif ($group == 'waiting')
                         <th>App In Date</th>
-                        <th>Application Due</th>
+                        <th>Application Process Deadline</th>
                     @elseif ($group == 'approved')
-                        <th>Appr Date</th>
+                        <th>Approve Date</th>
                     @else
                         <th>Application Due</th>
                     @endif
@@ -42,43 +42,47 @@
                 </thead>
                 <tbody>
                 @foreach ($reportData[$group] as $registrationData)
-                    <tr {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'class="danger"' : '' !!}>
-                        <td>{{ $registrationData->firstName }}</td>
-                        <td>{{ $registrationData->lastName }}</td>
-                        <td style="text-align: center">{{ $registrationData->registration->teamYear }}</td>
-                        <td>{{ $registrationData->regDate ? $registrationData->regDate->format('n/j/y') : '' }}</td>
-                        @if ($group == 'withdrawn')
-                            @if ($registrationData->withdrawCode)
-                                <td title="{{ $registrationData->withdrawCode->code }}">
-                                    {{ $registrationData->withdrawCode->display }}
+                    @if ($registrationData->due() && $registrationData->due()->lt($reportingDate))
+                        <tr class="danger" title="{{ ($group == 'notSent') ? 'Due within 2 days of registration' : 'Due within 14 days of registration' }}">
+                    @else
+                        <tr>
+                    @endif
+                            <td>{{ $registrationData->firstName }}</td>
+                            <td>{{ $registrationData->lastName }}</td>
+                            <td style="text-align: center">{{ $registrationData->registration->teamYear }}</td>
+                            <td>{{ $registrationData->regDate ? $registrationData->regDate->format('n/j/y') : '' }}</td>
+                            @if ($group == 'withdrawn')
+                                @if ($registrationData->withdrawCode)
+                                    <td title="{{ $registrationData->withdrawCode->code }}">
+                                        {{ $registrationData->withdrawCode->display }}
+                                    </td>
+                                    <td title="{{ $registrationData->withdrawCode->code }}">
+                                        {{ $registrationData->wdDate ? $registrationData->wdDate->format('n/j/y') : '' }}
+                                    </td>
+                                @else
+                                    <td></td>
+                                    <td></td>
+                                @endif
+                            @elseif ($group == 'out')
+                                <td>{{ $registrationData->appOutDate ? $registrationData->appOutDate->format('n/j/y') : '' }}</td>
+                                <td {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
+                                    {{ $registrationData->due() ? $registrationData->due()->format('n/j/y') : '' }}
                                 </td>
-                                <td title="{{ $registrationData->withdrawCode->code }}">
-                                    {{ $registrationData->wdDate ? $registrationData->wdDate->format('n/j/y') : '' }}
+                            @elseif ($group == 'waiting')
+                                <td>{{ $registrationData->appInDate ? $registrationData->appInDate->format('n/j/y') : '' }}</td>
+                                <td {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
+                                    {{ $registrationData->due() ? $registrationData->due()->format('n/j/y') : '' }}
                                 </td>
+                            @elseif ($group == 'approved')
+                                <td>{{ $registrationData->apprDate ? $registrationData->apprDate->format('n/j/y') : '' }}</td>
                             @else
-                                <td></td>
-                                <td></td>
+                                <td {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
+                                    {{ $registrationData->due() ? $registrationData->due()->format('n/j/y') : '' }}
+                                </td>
                             @endif
-                        @elseif ($group == 'out')
-                            <td>{{ $registrationData->appOutDate ? $registrationData->appOutDate->format('n/j/y') : '' }}</td>
-                            <td {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
-                                {{ $registrationData->due() ? $registrationData->due()->format('n/j/y') : '' }}
-                            </td>
-                        @elseif ($group == 'waiting')
-                            <td>{{ $registrationData->appInDate ? $registrationData->appInDate->format('n/j/y') : '' }}</td>
-                            <td {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
-                                {{ $registrationData->due() ? $registrationData->due()->format('n/j/y') : '' }}
-                            </td>
-                        @elseif ($group == 'approved')
-                            <td>{{ $registrationData->apprDate ? $registrationData->apprDate->format('n/j/y') : '' }}</td>
-                        @else
-                            <td {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
-                                {{ $registrationData->due() ? $registrationData->due()->format('n/j/y') : '' }}
-                            </td>
-                        @endif
-                        <td>{{ is_numeric($registrationData->comment) ? TmlpStats\Util::getExcelDate($registrationData->comment)->format('F') : $registrationData->comment }}</td>
-                    </tr>
-                @endforeach
+                            <td>{{ is_numeric($registrationData->comment) ? TmlpStats\Util::getExcelDate($registrationData->comment)->format('F') : $registrationData->comment }}</td>
+                        </tr>
+                        @endforeach
                 </tbody>
             </table>
         @endif
