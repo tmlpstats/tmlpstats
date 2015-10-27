@@ -1,12 +1,8 @@
 <?php namespace TmlpStats\Http\Controllers;
 
-use App;
-use Request;
-use Response;
 use TmlpStats\Http\Requests;
 use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
-use TmlpStats\Region;
 use TmlpStats\Reports\Arrangements\GamesByMilestone;
 use TmlpStats\Reports\Arrangements\GamesByWeek;
 use TmlpStats\StatsReport;
@@ -15,8 +11,10 @@ use TmlpStats\Reports\Arrangements;
 
 use Carbon\Carbon;
 
-use Input;
+use App;
 use Auth;
+use Response;
+use Input;
 
 class GlobalReportController extends Controller
 {

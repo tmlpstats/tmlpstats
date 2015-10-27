@@ -7,7 +7,6 @@ use TmlpStats\Import\Xlsx\XlsxArchiver;
 
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
-use TmlpStats\Region;
 use TmlpStats\User;
 use TmlpStats\StatsReport;
 use TmlpStats\CenterStatsData;
@@ -16,7 +15,6 @@ use TmlpStats\Quarter;
 use Carbon\Carbon;
 
 use Auth;
-use Request;
 use Input;
 
 class AdminController extends Controller {
