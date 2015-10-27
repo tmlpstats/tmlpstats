@@ -17,6 +17,8 @@ use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\Reports\Arrangements\CoursesWithEffectiveness;
 use TmlpStats\Reports\Arrangements\GamesByMilestone;
 use TmlpStats\Reports\Arrangements\GamesByWeek;
+use TmlpStats\Reports\Arrangements\TmlpRegistrationsByIncomingQuarter;
+use TmlpStats\Reports\Arrangements\TmlpRegistrationsByStatus;
 
 use Carbon\Carbon;
 
@@ -429,8 +431,14 @@ class StatsReportController extends Controller
         $teamWithdraws = $teamMembers['withdraws'];
 
         $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
-        $applications = $registrations['applications'];
-        $applicationWithdraws = $registrations['withdraws'];
+
+        $a = new TmlpRegistrationsByStatus(['registrationsData' => $registrations, 'quarter' => $statsReport->quarter]);
+        $applications = $a->compose();
+        $applications = $applications['reportData'];
+
+        $a = new TmlpRegistrationsByIncomingQuarter(['registrationsData' => $registrations, 'quarter' => $statsReport->quarter]);
+        $applicationWithdraws = $a->compose();
+        $applicationWithdraws = $applicationWithdraws['reportData']['withdrawn'];
 
         $courses = App::make(CoursesController::class)->getByStatsReport($id);
 
@@ -469,7 +477,6 @@ class StatsReportController extends Controller
         }
 
         $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($id);
-
         if (!$centerStatsData) {
             return '<p>Center Stats not available.</p>';
         }
@@ -491,10 +498,10 @@ class StatsReportController extends Controller
         }
 
         $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($id);
-
         if (!$teamMembers) {
             return '<p>Team Members not available.</p>';
         }
+
 
         return view('statsreports.details.classlist', compact(
             'teamMembers'
@@ -508,15 +515,15 @@ class StatsReportController extends Controller
             return '<p>This report did not pass validation. See Report Details for more information.</p>';
         }
 
-        $tmlpRegistrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
-
-        if (!$tmlpRegistrations) {
+        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
+        if (!$registrations) {
             return '<p>TMLP Registrations not available.</p>';
         }
 
-        return view('statsreports.details.tmlpregistrations', compact(
-            'tmlpRegistrations'
-        ));
+        $a = new TmlpRegistrationsByIncomingQuarter(['registrationsData' => $registrations, 'quarter' => $statsReport->quarter]);
+        $data = $a->compose();
+
+        return view('statsreports.details.tmlpregistrations', $data);
     }
 
     public function getCourses($id)
@@ -527,7 +534,6 @@ class StatsReportController extends Controller
         }
 
         $courses = App::make(CoursesController::class)->getByStatsReport($id);
-
         if (!$courses) {
             return '<p>Courses not available.</p>';
         }
@@ -546,7 +552,6 @@ class StatsReportController extends Controller
         }
 
         $contacts = App::make(ContactsController::class)->getByStatsReport($id);
-
         if (!$contacts) {
             return '<p>Contacts not available.</p>';
         }

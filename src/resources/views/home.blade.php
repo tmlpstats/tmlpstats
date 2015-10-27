@@ -53,8 +53,7 @@
                             <td>{{ $center['name'] }}</td>
                             <td style="text-align: center">{{ $center['localRegion'] ?: '' }}</td>
                             <td style="text-align: center">
-                                <span
-                                    class="glyphicon {{ $center['submitted'] ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span>
+                                <span class="glyphicon {{ $center['submitted'] ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span>
                             </td>
                             <td>{{ $center['rating'] }}</td>
                             <td>{{ $center['updatedAt'] }}</td>
