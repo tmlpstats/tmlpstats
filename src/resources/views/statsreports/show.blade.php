@@ -99,7 +99,14 @@
             </div>
             <div class="tab-pane" id="tmlpregistrations-tab">
                 <h3>Team Expansion</h3>
+                <div class="btn-group" role="group">
+                    <button id ="tmlpregistrations-button" type="button" class="btn btn-primary">By Team Year</button>
+                    <button id ="tmlpregistrationsbystatus-button" type="button" class="btn btn-default">By Status</button>
+                </div>
                 <div id="tmlpregistrations-container">
+                    @include('partials.loading')
+                </div>
+                <div id="tmlpregistrationsbystatus-container" style="display: none">
                     @include('partials.loading')
                 </div>
             </div>
@@ -126,6 +133,24 @@
                 var baseUrl = "{{ url('statsreports') }}";
                 var newReport = $('.reportSelector option:selected').val();
                 window.location.replace(baseUrl + '/' + newReport);
+            });
+
+            $("#tmlpregistrations-button").click(function() {
+                $(this).addClass('btn-primary');
+                $("#tmlpregistrationsbystatus-button").addClass('btn-default');
+                $("#tmlpregistrationsbystatus-button").removeClass('btn-primary');
+
+                $("#tmlpregistrations-container").show();
+                $("#tmlpregistrationsbystatus-container").hide();
+            });
+
+            $("#tmlpregistrationsbystatus-button").click(function() {
+                $(this).addClass('btn-primary');
+                $("#tmlpregistrations-button").addClass('btn-default');
+                $("#tmlpregistrations-button").removeClass('btn-primary');
+
+                $("#tmlpregistrationsbystatus-container").show();
+                $("#tmlpregistrations-container").hide();
             });
 
             // Fetch Summary
@@ -170,6 +195,15 @@
                 url: "{{ url('/statsreports/' . $statsReport->id . '/tmlpregistrations') }}",
                 success: function(response) {
                     $("#tmlpregistrations-container").html(response);
+                }
+            });
+
+            // Fetch Team Registrations By Status
+            $.ajax({
+                type: "GET",
+                url: "{{ url('/statsreports/' . $statsReport->id . '/tmlpregistrationsbystatus') }}",
+                success: function(response) {
+                    $("#tmlpregistrationsbystatus-container").html(response);
                 }
             });
 

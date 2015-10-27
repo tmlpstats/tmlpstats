@@ -54,6 +54,7 @@ Route::get('statsreports/{id}/results', 'StatsReportController@getResults');
 Route::get('statsreports/{id}/centerstats', 'StatsReportController@getCenterStats');
 Route::get('statsreports/{id}/classlist', 'StatsReportController@getTeamMembers');
 Route::get('statsreports/{id}/tmlpregistrations', 'StatsReportController@getTmlpRegistrations');
+Route::get('statsreports/{id}/tmlpregistrationsbystatus', 'StatsReportController@getTmlpRegistrationsByStatus');
 Route::get('statsreports/{id}/courses', 'StatsReportController@getCourses');
 Route::get('statsreports/{id}/contactinfo', 'StatsReportController@getContacts');
 

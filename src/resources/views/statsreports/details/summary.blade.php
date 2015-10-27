@@ -59,9 +59,9 @@
                     <dt>Approved:</dt>
                     <dd>{{ count($applications['approved']) }}</dd>
                 @endif
-                @if ($applications['wd'])
+                @if ($applications['withdrawn'])
                     <dt>Withdrawn:</dt>
-                    <dd>{{ count($applications['wd']) }}</dd>
+                    <dd>{{ count($applications['withdrawn']) }}</dd>
                 @endif
                 <dt>Total:</dt>
                 <dd>{{ $applications['total'] }}</dd>

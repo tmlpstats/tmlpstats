@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
@@ -43,6 +44,22 @@ class TmlpRegistrationData extends Model
                 return $this->registration->person->$name;
             default:
                 return parent::__get($name);
+        }
+    }
+
+    public function due()
+    {
+        if ($this->withdrawCodeId || $this->apprDate) {
+            return null;
+        } else if ($this->appInDate) {
+            $regDate = clone $this->regDate;
+            return $regDate->addDays(14);
+        } else if ($this->appOutDate) {
+            $regDate = clone $this->regDate;
+            return $regDate->addDays(14);
+        } else {
+            $regDate = clone $this->regDate;
+            return $regDate->addDays(2);
         }
     }
 
