@@ -508,6 +508,25 @@ class StatsReportController extends Controller
         ));
     }
 
+    public function getTmlpRegistrationsByStatus($id)
+    {
+        $statsReport = StatsReport::find($id);
+        if (!$statsReport->isValidated()) {
+            return '<p>This report did not pass validation. See Report Details for more information.</p>';
+        }
+
+        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
+        if (!$registrations) {
+            return '<p>TMLP Registrations not available.</p>';
+        }
+
+        $a = new TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
+        $data = $a->compose();
+
+        $data = array_merge($data, ['reportingDate' => $statsReport->reportingDate]);
+        return view('statsreports.details.tmlpregistrationsbystatus', $data);
+    }
+
     public function getTmlpRegistrations($id)
     {
         $statsReport = StatsReport::find($id);

@@ -11,11 +11,11 @@ class TmlpRegistrationsByStatus extends BaseArrangement
         $registrationsData = $data['registrationsData'];
 
         $reportData = [
-            'notSent'  => [],
-            'out'      => [],
-            'waiting'  => [],
-            'approved' => [],
-            'wd'       => [],
+            'notSent'   => [],
+            'out'       => [],
+            'waiting'   => [],
+            'approved'  => [],
+            'withdrawn' => [],
             'total'    => 0,
         ];
 
@@ -23,7 +23,7 @@ class TmlpRegistrationsByStatus extends BaseArrangement
             $reportData['total']++;
 
             if ($data->withdrawCodeId) {
-                $reportData['wd'][] = $data;
+                $reportData['withdrawn'][] = $data;
             } else if ($data->apprDate) {
                 $reportData['approved'][] = $data;
             } else if ($data->appInDate) {
