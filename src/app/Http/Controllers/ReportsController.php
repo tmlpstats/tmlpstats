@@ -4,7 +4,6 @@ namespace TmlpStats\Http\Controllers;
 
 use Illuminate\Http\Request;
 use TmlpStats\Http\Requests;
-use TmlpStats\Http\Controllers\Controller;
 
 class ReportsController extends Controller
 {
@@ -15,7 +14,7 @@ class ReportsController extends Controller
      */
     public function index()
     {
-        //
+        $this->middleware('auth');
     }
 
     /**

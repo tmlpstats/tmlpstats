@@ -7,13 +7,11 @@ use TmlpStats\Center;
 use TmlpStats\User;
 use TmlpStats\StatsReport;
 use TmlpStats\Quarter;
-use TmlpStats\Region;
 
 use Carbon\Carbon;
 
 use Auth;
 use Session;
-use Request;
 use Input;
 
 class HomeController extends Controller {

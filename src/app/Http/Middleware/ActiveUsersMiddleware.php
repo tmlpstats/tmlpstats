@@ -6,7 +6,6 @@ use Auth;
 use Cache;
 use Carbon\Carbon;
 use Closure;
-use Route;
 
 class ActiveUsersMiddleware
 {
@@ -31,9 +30,9 @@ class ActiveUsersMiddleware
             $data = Cache::tags('activeUsers')->get("activeUser{$user->id}");
 
             $data['previousRequests'][] = [
-                'start' => $data['start'],
-                'route' => $data['route'],
-                'end'   => $data['end'],
+                'start' => isset($data['start']) ? $data['start'] : null,
+                'route' => isset($data['route']) ? $data['route'] : null,
+                'end'   => isset($data['end']) ? $data['end'] : null,
             ];
 
             $data['start'] = Carbon::now()->format('U');

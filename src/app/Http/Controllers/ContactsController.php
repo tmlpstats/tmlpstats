@@ -6,7 +6,6 @@ use Cache;
 use Illuminate\Http\Request;
 use TmlpStats\Accountability;
 use TmlpStats\Http\Requests;
-use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\StatsReport;
 
 class ContactsController extends Controller
@@ -18,7 +17,7 @@ class ContactsController extends Controller
      */
     public function index()
     {
-        //
+        $this->middleware('auth');
     }
 
     /**
