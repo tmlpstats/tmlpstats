@@ -1,5 +1,6 @@
 <div class="table-responsive">
     @foreach (['team1', 'team2', 'withdrawn'] as $group)
+        <br />
         <h4>{{ ucwords($group) }}</h4>
         @foreach ($reportData[$group] as $quarterName => $quarterRegistrations)
             <table class="table table-condensed table-striped table-hover">
@@ -67,6 +68,5 @@
                 </tbody>
             </table>
         @endforeach
-        <br />
     @endforeach
 </div>

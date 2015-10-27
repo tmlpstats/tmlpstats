@@ -1,6 +1,7 @@
 <div class="table-responsive">
     @foreach (['notSent', 'out', 'waiting', 'approved', 'withdrawn'] as $group)
         @if ($reportData[$group])
+            <br />
             <h4>
                 @if ($group == 'withdrawn')
                     Withdrawn
@@ -80,7 +81,6 @@
                 @endforeach
                 </tbody>
             </table>
-            <br/>
         @endif
     @endforeach
 </div>

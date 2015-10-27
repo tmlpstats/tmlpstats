@@ -17,6 +17,10 @@ use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\Reports\Arrangements\CoursesWithEffectiveness;
 use TmlpStats\Reports\Arrangements\GamesByMilestone;
 use TmlpStats\Reports\Arrangements\GamesByWeek;
+use TmlpStats\Reports\Arrangements\GitwByTeamMember;
+use TmlpStats\Reports\Arrangements\TdoByTeamMember;
+use TmlpStats\Reports\Arrangements\TeamMembersByQuarter;
+use TmlpStats\Reports\Arrangements\TeamMembersCounts;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByIncomingQuarter;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByStatus;
 
@@ -426,9 +430,13 @@ class StatsReportController extends Controller
         $reportData = $centerStatsData['reportData'][$date];
 
         $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($id);
-        $tdo = $teamMembers['tdo'];
-        $gitw = $teamMembers['gitw'];
-        $teamWithdraws = $teamMembers['withdraws'];
+
+        $a = new TeamMembersCounts(['teamMembersData' => $teamMembers]);
+        $teamMembersCounts = $a->compose();
+
+        $tdo = $teamMembersCounts['reportData']['tdo'];
+        $gitw = $teamMembersCounts['reportData']['gitw'];
+        $teamWithdraws = $teamMembersCounts['reportData']['withdraws'];
 
         $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
 
@@ -502,10 +510,10 @@ class StatsReportController extends Controller
             return '<p>Team Members not available.</p>';
         }
 
+        $a = new TeamMembersByQuarter(['teamMembersData' => $teamMembers]);
+        $data = $a->compose();
 
-        return view('statsreports.details.classlist', compact(
-            'teamMembers'
-        ));
+        return view('statsreports.details.classlist', $data);
     }
 
     public function getTmlpRegistrationsByStatus($id)
@@ -578,6 +586,60 @@ class StatsReportController extends Controller
         return view('statsreports.details.contactinfo', compact(
             'contacts'
         ));
+    }
+
+    public function getGitwByTeamMember($id)
+    {
+        $statsReport = StatsReport::find($id);
+        if (!$statsReport->isValidated()) {
+            return '<p>This report did not pass validation. See Report Details for more information.</p>';
+        }
+
+        $weeksData = [];
+
+        $date = clone $statsReport->quarter->startWeekendDate;
+        $date->addWeek();
+        while ($date->lte($statsReport->reportingDate)) {
+            $globalReport = GlobalReport::reportingDate($date)->first();
+            $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
+            $weeksData[$date->toDateString()] = App::make(TeamMembersController::class)->getByStatsReport($report->id);
+            $date->addWeek();
+        }
+        if (!$weeksData) {
+            return '<p>GITW summary not available.</p>';
+        }
+
+        $a = new GitwByTeamMember(['teamMembersData' => $weeksData]);
+        $data = $a->compose();
+
+        return view('statsreports.details.gitwsummary', $data);
+    }
+
+    public function getTdoByTeamMember($id)
+    {
+        $statsReport = StatsReport::find($id);
+        if (!$statsReport->isValidated()) {
+            return '<p>This report did not pass validation. See Report Details for more information.</p>';
+        }
+
+        $weeksData = [];
+
+        $date = clone $statsReport->quarter->startWeekendDate;
+        $date->addWeek();
+        while ($date->lte($statsReport->reportingDate)) {
+            $globalReport = GlobalReport::reportingDate($date)->first();
+            $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
+            $weeksData[$date->toDateString()] = App::make(TeamMembersController::class)->getByStatsReport($report->id);
+            $date->addWeek();
+        }
+        if (!$weeksData) {
+            return '<p>TDO summary not available.</p>';
+        }
+
+        $a = new TdoByTeamMember(['teamMembersData' => $weeksData]);
+        $data = $a->compose();
+
+        return view('statsreports.details.tdosummary', $data);
     }
 
     public function getResults($id)
