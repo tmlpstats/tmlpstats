@@ -29,11 +29,13 @@ class ActiveUsersMiddleware
 
             $data = Cache::tags('activeUsers')->get("activeUser{$user->id}");
 
-            $data['previousRequests'][] = [
-                'start' => isset($data['start']) ? $data['start'] : null,
-                'route' => isset($data['route']) ? $data['route'] : null,
-                'end'   => isset($data['end']) ? $data['end'] : null,
-            ];
+            if ($data) {
+                $data['previousRequests'][] = [
+                    'start' => isset($data['start']) ? $data['start'] : null,
+                    'route' => isset($data['route']) ? $data['route'] : null,
+                    'end'   => isset($data['end']) ? $data['end'] : null,
+                ];
+            }
 
             $data['start'] = Carbon::now()->format('U');
             $data['route'] = $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'];

@@ -6,8 +6,6 @@ use TmlpStats\CenterStatsData;
 use TmlpStats\CourseData;
 use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
-use TmlpStats\Reports\Arrangements\GamesByMilestone;
-use TmlpStats\Reports\Arrangements\GamesByWeek;
 use TmlpStats\StatsReport;
 use TmlpStats\TeamMemberData;
 use TmlpStats\TmlpRegistrationData;
@@ -15,6 +13,10 @@ use TmlpStats\TmlpRegistrationData;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Import\Xlsx\XlsxImporter;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
+
+use TmlpStats\Reports\Arrangements\CoursesWithEffectiveness;
+use TmlpStats\Reports\Arrangements\GamesByMilestone;
+use TmlpStats\Reports\Arrangements\GamesByWeek;
 
 use Carbon\Carbon;
 
@@ -431,7 +433,21 @@ class StatsReportController extends Controller
         $applicationWithdraws = $registrations['withdraws'];
 
         $courses = App::make(CoursesController::class)->getByStatsReport($id);
-        $completedCourses = $courses['completedThisWeek'];
+
+        $a = new CoursesWithEffectiveness(['courses' => $courses, 'statsReport' => $statsReport]);
+        $courses = $a->compose();
+
+        $completedCourses = null;
+
+        if (isset($courses['reportData']['completed'])) {
+            $lastWeek = clone $statsReport->reportingDate;
+            $lastWeek->subWeek();
+            foreach ($courses['reportData']['completed'] as $course) {
+                if ($course['startDate']->gte($lastWeek)) {
+                    $completedCourses[] = $course;
+                }
+            }
+        }
 
         return view('statsreports.details.summary', compact(
             'reportData',
@@ -516,9 +532,10 @@ class StatsReportController extends Controller
             return '<p>Courses not available.</p>';
         }
 
-        return view('statsreports.details.courses', compact(
-            'courses'
-        ));
+        $a = new CoursesWithEffectiveness(['courses' => $courses, 'statsReport' => $statsReport]);
+        $data = $a->compose();
+
+        return view('statsreports.details.courses', $data);
     }
 
     public function getContacts($id)

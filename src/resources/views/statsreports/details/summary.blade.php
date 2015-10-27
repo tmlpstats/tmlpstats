@@ -83,17 +83,17 @@
                 <h4>Course Results:</h4>
                 <dl class="dl-horizontal">
                     @foreach ($completedCourses as $courseData)
-                        <span style="text-decoration: underline">{{ $courseData->course->type }}
-                            - {{ $courseData->course->startDate->format('M j') }}</span>
+                        <span style="text-decoration: underline">{{ $courseData['type'] }}
+                            - {{ $courseData['startDate']->format('M j') }}</span>
                         <dl class="dl-horizontal">
                             <dt>Standard Starts:</dt>
-                            <dd>{{ $courseData->currentStandardStarts }}</dd>
+                            <dd>{{ $courseData['currentStandardStarts'] }}</dd>
                             <dt>Reg Fulfillment:</dt>
-                            <dd>{{ round(($courseData->currentStandardStarts / $courseData->currentTer) * 100) }}%</dd>
+                            <dd>{{ $courseData['completionStats']['registrationFulfillment'] }}%</dd>
                             <dt>Reg Effectiveness:</dt>
-                            <dd>{{ $courseData->potentials ? round(($courseData->registrations / $courseData->potentials) * 100) : 0 }}%</dd>
+                            <dd>{{ $courseData['completionStats']['registrationEffectiveness'] }}%</dd>
                             <dt>Registrations:</dt>
-                            <dd>{{ $courseData->registrations }}</dd>
+                            <dd>{{ $courseData['registrations'] }}</dd>
                         </dl>
                     @endforeach
                 </dl>

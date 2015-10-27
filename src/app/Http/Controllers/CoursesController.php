@@ -94,39 +94,15 @@ class CoursesController extends Controller
 
         if (!$courses) {
             $statsReport = StatsReport::find($id);
-
             if (!$statsReport) {
                 return null;
             }
 
-            $courses = [
-                'CAP'               => [],
-                'CPC'               => [],
-                'completedThisWeek' => [],
-            ];
-
-            $thisWeek = $statsReport->reportingDate;
-            $lastWeek = clone $thisWeek;
-            $lastWeek->subWeek();
-            $completedCourses = [];
-
-            // Courses
+            $courses = [];
             $courseData = CourseData::byStatsReport($statsReport)->with('course')->get();
             foreach ($courseData as $data) {
-                if ($data->course->type == 'CAP') {
-                    $courses['CAP'][] = $data;
-                    if ($data->course->startDate->gt($lastWeek) && $data->course->startDate->lt($thisWeek)) {
-                        $completedCourses[] = $data;
-                    }
-                } else {
-                    $courses['CPC'][] = $data;
-                    if ($data->course->startDate->gt($lastWeek) && $data->course->startDate->lt($thisWeek)) {
-                        $completedCourses[] = $data;
-                    }
-                }
+                $courses[] = $data;
             }
-
-            $courses['completedThisWeek'] = $completedCourses;
         }
         Cache::tags(["statsReport{$id}"])->put($cacheKey, $courses, static::STATS_REPORT_CACHE_TTL);
 
