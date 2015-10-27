@@ -45,39 +45,27 @@
             <dl class="dl-horizontal">
                 @if ($applications['notSent'])
                     <dt>Not Sent:</dt>
-                    <dd>{{ $applications['notSent'] }}</dd>
+                    <dd>{{ count($applications['notSent']) }}</dd>
                 @endif
                 @if ($applications['out'])
                     <dt>Out:</dt>
-                    <dd>{{ $applications['out'] }}</dd>
+                    <dd>{{ count($applications['out']) }}</dd>
                 @endif
                 @if ($applications['waiting'])
                     <dt>Waiting Interview:</dt>
-                    <dd>{{ $applications['waiting'] }}</dd>
+                    <dd>{{ count($applications['waiting']) }}</dd>
                 @endif
                 @if ($applications['approved'])
                     <dt>Approved:</dt>
-                    <dd>{{ $applications['approved'] }}</dd>
+                    <dd>{{ count($applications['approved']) }}</dd>
                 @endif
                 @if ($applications['wd'])
                     <dt>Withdrawn:</dt>
-                    <dd>{{ $applications['wd'] }}</dd>
+                    <dd>{{ count($applications['wd']) }}</dd>
                 @endif
                 <dt>Total:</dt>
                 <dd>{{ $applications['total'] }}</dd>
             </dl>
-
-            @if ($applicationWithdraws['total'])
-                <h4>Applications Withdrawn:</h4>
-                <dl class="dl-horizontal">
-                    <dt>Team 1:</dt>
-                    <dd>{{ $applicationWithdraws['team1'] }}</dd>
-                    <dt>Team 2:</dt>
-                    <dd>{{ $applicationWithdraws['team2'] }}</dd>
-                    <dt>Total:</dt>
-                    <dd>{{ $applicationWithdraws['total'] }}</dd>
-                </dl>
-            @endif
 
             @if ($completedCourses)
                 <h4>Course Results:</h4>
