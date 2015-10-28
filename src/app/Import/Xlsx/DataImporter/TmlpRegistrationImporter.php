@@ -106,6 +106,9 @@ class TmlpRegistrationImporter extends DataImporterAbstract
                 $code = substr($incomingInput['wd'], 2);
                 $withdrawCode = WithdrawCode::code($code)->first();
                 $incomingData->withdrawCodeId = $withdrawCode ? $withdrawCode->id : null;
+            } else {
+                // Reset withdraw code if they were moved from current to future quarters
+                $incomingData->withdrawCodeId = null;
             }
 
             $thisQuarter = $this->statsReport->quarter;
