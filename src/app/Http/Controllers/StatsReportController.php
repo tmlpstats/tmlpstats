@@ -612,7 +612,7 @@ class StatsReportController extends Controller
         $a = new GitwByTeamMember(['teamMembersData' => $weeksData]);
         $data = $a->compose();
 
-        return view('statsreports.details.gitwsummary', $data);
+        return view('statsreports.details.teammembersweekly', $data);
     }
 
     public function getTdoByTeamMember($id)
@@ -639,7 +639,7 @@ class StatsReportController extends Controller
         $a = new TdoByTeamMember(['teamMembersData' => $weeksData]);
         $data = $a->compose();
 
-        return view('statsreports.details.tdosummary', $data);
+        return view('statsreports.details.teammembersweekly', $data);
     }
 
     public function getResults($id)
