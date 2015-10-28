@@ -28,9 +28,9 @@ class GamesByWeek extends BaseArrangement
 
                 if ($complement) {
                     if ($type == 'promise') {
-                        $percent = $this->getPercent($complement[$game], $data->$game);
+                        $percent = StatsReport::calculatePercent($complement[$game], $data->$game);
                     } else {
-                        $percent = $this->getPercent($data->$game, $complement[$game]);
+                        $percent = StatsReport::calculatePercent($data->$game, $complement[$game]);
                     }
 
                     $points = StatsReport::pointsByPercent($percent, $game);
@@ -54,13 +54,5 @@ class GamesByWeek extends BaseArrangement
         return ($type === 'promise')
             ? 'actual'
             : 'promise';
-    }
-
-    protected function getPercent($actual, $promise)
-    {
-        // Whole number >= 0 and <= 100
-        return $promise
-            ? max(min(round(($actual / $promise) * 100), 100), 0)
-            : 0;
     }
 }
