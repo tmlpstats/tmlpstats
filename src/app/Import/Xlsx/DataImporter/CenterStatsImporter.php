@@ -186,7 +186,7 @@ class CenterStatsImporter extends DataImporterAbstract
             if (!$actualData->exists || $this->statsReport->reportingDate->eq($weekDate)) {
 
                 $actualData = $this->setValues($actualData, $week);
-                $actualData->points = $this->calculatePoints($promiseData, $actualData);
+                $actualData->points = $this->calculatePoints($actualData, $promiseData);
                 $actualData->save();
             }
         }
@@ -290,7 +290,7 @@ class CenterStatsImporter extends DataImporterAbstract
             ->first();
     }
 
-    public function calculatePoints($promises, $actuals)
+    public function calculatePoints($actuals, $promises)
     {
         if (!$promises || !$actuals) {
             return null;
@@ -302,26 +302,8 @@ class CenterStatsImporter extends DataImporterAbstract
 
             $promise = $promises->$game;
             $actual = $actuals->$game;
-            $percent = $promise
-                ? round(($actual / $promise) * 100)
-                : 0;
-
-            if ($percent >= 100) {
-                $gamePoints = 4;
-            } else if ($percent >= 90) {
-                $gamePoints = 3;
-            } else if ($percent >= 80) {
-                $gamePoints = 2;
-            } else if ($percent >= 75) {
-                $gamePoints = 1;
-            } else {
-                $gamePoints = 0;
-            }
-
-            if ($game == 'cap') {
-                $gamePoints *= 2;
-            }
-            $points += $gamePoints;
+            $percent = StatsReport::calculatePercent($actual, $promise);
+            $points += StatsReport::pointsByPercent($percent, $game);
         }
         return $points;
     }

@@ -77,6 +77,13 @@ class StatsReport extends Model
         return static::pointsToRating($points);
     }
 
+    public static function calculatePercent($actual, $promise)
+    {
+        return $promise > 0
+            ? max(min(round(($actual / $promise) * 100), 100), 0)
+            : 0;
+    }
+
     public static function pointsByPercent($percent, $game)
     {
         $points = 0;
