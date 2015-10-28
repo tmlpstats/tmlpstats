@@ -22,7 +22,7 @@
                             <td class="active" style="color: #006000; text-align: center">
                                 <span class="glyphicon glyphicon-minus"></span>
                             </td>
-                        @elseif ($data['effective'])
+                        @elseif ($data['value'])
                             <td class="success" style="color: #006000; text-align: center">
                                 <span class="glyphicon glyphicon-ok"></span>
                             </td>
