@@ -35,7 +35,7 @@ class GlobalReportController extends Controller
     {
         if (!$this->hasAccess('R')) {
             $error = 'You do not have access to view these reports.';
-            return  Response::view('errors.403', compact('error'), 403);
+            return Response::view('errors.403', compact('error'), 403);
         }
 
         $globalReports = GlobalReport::orderBy('reporting_date', 'desc')->get();
@@ -51,7 +51,7 @@ class GlobalReportController extends Controller
     {
         if (!$this->hasAccess('C')) {
             $error = 'You do not have access to create new reports.';
-            return  Response::view('errors.403', compact('error'), 403);
+            return Response::view('errors.403', compact('error'), 403);
         }
 
         $reportingDates = array();
@@ -73,7 +73,7 @@ class GlobalReportController extends Controller
     {
         if (!$this->hasAccess('C')) {
             $error = 'You do not have access to save this report.';
-            return  Response::view('errors.403', compact('error'), 403);
+            return Response::view('errors.403', compact('error'), 403);
         }
 
         $redirect = '/globalreports';
@@ -98,13 +98,13 @@ class GlobalReportController extends Controller
     {
         if (!$this->hasAccess('R')) {
             $error = 'You do not have access to view this report.';
-            return  Response::view('errors.403', compact('error'), 403);
+            return Response::view('errors.403', compact('error'), 403);
         }
 
         $globalReport = GlobalReport::find($id);
         if (!$globalReport) {
             $error = 'Report not found.';
-            return  Response::view('errors.404', compact('error'), 404);
+            return Response::view('errors.404', compact('error'), 404);
         }
 
         $region = $this->getRegion(true);
@@ -136,7 +136,7 @@ class GlobalReportController extends Controller
     {
         if (!$this->hasAccess('U')) {
             $error = 'You do not have access to update this report.';
-            return  Response::view('errors.403', compact('error'), 403);
+            return Response::view('errors.403', compact('error'), 403);
         }
 
         if (!Input::has('cancel')) {
@@ -242,13 +242,13 @@ class GlobalReportController extends Controller
     {
         if (!$this->hasAccess('R')) {
             $error = 'You do not have access to view this report.';
-            return  Response::view('errors.403', compact('error'), 403);
+            return Response::view('errors.403', compact('error'), 403);
         }
 
         $globalReport = GlobalReport::find($id);
         if (!$globalReport) {
             $error = 'Report not found.';
-            return  Response::view('errors.404', compact('error'), 404);
+            return Response::view('errors.404', compact('error'), 404);
         }
 
         $region = $this->getRegion(true);
@@ -266,8 +266,18 @@ class GlobalReportController extends Controller
 
     public function getRegionalStats($id)
     {
-        $region = $this->getRegion(true);
+        if (!$this->hasAccess('R')) {
+            $error = 'You do not have access to view this report.';
+            return Response::view('errors.403', compact('error'), 403);
+        }
+
         $globalReport = GlobalReport::find($id);
+        if (!$globalReport) {
+            $error = 'Report not found.';
+            return Response::view('errors.404', compact('error'), 404);
+        }
+
+        $region = $this->getRegion(true);
 
         $quarter = Quarter::byRegion($region)->date($globalReport->reportingDate)->first();
         $quarter->setRegion($region);
@@ -281,4 +291,81 @@ class GlobalReportController extends Controller
         $data = $a->compose();
         return view('reports.centergames.milestones', $data);
     }
+
+    public function getCenterStatsReports($id)
+    {
+        if (!$this->hasAccess('R')) {
+            $error = 'You do not have access to view this report.';
+            return Response::view('errors.403', compact('error'), 403);
+        }
+
+        $globalReport = GlobalReport::find($id);
+        if (!$globalReport) {
+            $error = 'Report not found.';
+            return Response::view('errors.404', compact('error'), 404);
+        }
+
+        $region = $this->getRegion(true);
+
+        $quarter = Quarter::byRegion($region)->date($globalReport->reportingDate)->first();
+        $quarter->setRegion($region);
+
+        $statsReports = $globalReport->statsReports()
+            ->byRegion($region)
+            ->get();
+
+        $statsReportsList = [];
+
+        foreach ($statsReports as $report) {
+
+            $statsReportData = [
+                'id'              => $report->id,
+                'center'          => $report->center->name,
+                'region'          => $region->name,
+                'rating'          => $report->getRating(),
+                'points'          => $report->getPoints(),
+                'isValidated'     => $report->isValidated(),
+                'onTime'          => false,
+                'firstSubmitTime' => '',
+            ];
+
+            if ($report->isOnTime()) {
+                $statsReportData['onTime'] = true;
+                $statsReportData['onTimeOneSubmit'] = true;
+                $statsReportData['firstSubmitTime'] = $report->submittedAt->setTimezone($report->center->timezone)->format('M j, Y @ g:ia T');
+            } else {
+                $otherReports = StatsReport::reportingDate($globalReport->reportingDate)
+                    ->byCenter($report->center)
+                    ->whereNotNull('submitted_at')
+                    ->orderBy('submitted_at', 'asc')
+                    ->get();
+
+                if (!$otherReports->isEmpty()) {
+                    $first = $otherReports->shift();
+                    if ($first->isOnTime()) {
+                        $statsReportData['onTime'] = true;
+                        $statsReportData['firstSubmitTime'] = $first->submittedAt->setTimezone($report->center->timezone)->format('M j, Y @ g:ia T');
+                    } else {
+                        $statsReportData['firstSubmitTime'] = $first->submittedAt->setTimezone($report->center->timezone)->format('M j, Y @ g:ia T');
+                    }
+
+                    if (!$otherReports->isEmpty()) {
+                        $last = $otherReports->pop();
+                        $statsReportData['lastSubmitOnTime'] = $last->isOnTime();
+                        $statsReportData['lastSubmitTime'] = $last->submittedAt->setTimezone($report->center->timezone)->format('M j, Y @ g:ia T');
+                    }
+                }
+            }
+            $statsReportsList[] = $statsReportData;
+        }
+        usort($statsReportsList, array(get_class(), 'sortByCenterName'));
+
+        return view('globalreports.details.statsreports', compact('globalReport', 'region', 'statsReportsList'));
+    }
+
+    protected static function sortByCenterName($a, $b)
+    {
+        return strcmp($a['center'], $b['center']);
+    }
+
 }

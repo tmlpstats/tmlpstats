@@ -50,6 +50,40 @@ class StatsReport extends Model
         $this->attributes['reporting_date'] = $date->toDateString();
     }
 
+    public function isOnTime()
+    {
+        $submittedAt = clone $this->submittedAt;
+        $submittedAt->setTimezone($this->center->timezone);
+
+        return $submittedAt->lte($this->due());
+    }
+
+    public function due()
+    {
+        // TODO: make this configurable
+        if ($this->reportingDate->eq($this->quarter->classroom2Date)) {
+            // Stats are due by 11:59 PM at the second classroom
+            // 11:59.59 PM local time on the reporting date.
+            return Carbon::create(
+                $this->reportingDate->year,
+                $this->reportingDate->month,
+                $this->reportingDate->day,
+                23, 59, 59,
+                $this->center->timezone
+            );
+        } else {
+            // Stats are due by 7:00 PM every other week
+            // 7:00.59 PM local time on the reporting date.
+            return Carbon::create(
+                $this->reportingDate->year,
+                $this->reportingDate->month,
+                $this->reportingDate->day,
+                19, 0, 59,
+                $this->center->timezone
+            );
+        }
+    }
+
     public function isValidated()
     {
         return (bool)$this->validated;
