@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
 
@@ -81,6 +82,12 @@ class Center extends Model
         } else {
             return null;
         }
+    }
+
+    public function getLocalTime(Carbon $time)
+    {
+        $time->setTimezone($this->timezone);
+        return $time;
     }
 
     public function inRegion(Region $region)

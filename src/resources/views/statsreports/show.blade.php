@@ -1,34 +1,5 @@
 @extends('template')
 
-@section('headers')
-    <style type="text/css">
-        table.centerStatsTable {
-            width: 95%;
-        }
-        .centerStatsTable th, .centerStatsTable td {
-            text-align: center;
-        }
-        .centerStatsTable td {
-             width: 4em;
-        }
-
-        .centerStatsSummaryTable th, .centerStatsSummaryTable td {
-            text-align: center;
-            width: 4em;
-        }
-        table.centerStatsSummaryTable {
-            width: 400px;
-        }
-        table {
-            empty-cells: show;
-        }
-
-        .table-hover>tbody>tr:hover>td, .table-hover>tbody>tr:hover>th {
-            background-color: #DDDDDD;
-        }
-    </style>
-@endsection
-
 @section('content')
 
 @if ($statsReport)

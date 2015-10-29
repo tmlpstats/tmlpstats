@@ -21,24 +21,26 @@
                     <tr>
                         <th>Center</th>
                         <th>Region</th>
+                        <th>On Time</th>
+                        <th>Submit Time</th>
                         <th>Rating</th>
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach ($globalReport->statsReports as $statsReport)
-                        @if  ($statsReport->center->inRegion($region))
-                        <tr id="{{ $statsReport->id }}" >
-                            <td><a href="{{ url("/statsreports/{$statsReport->id}") }}">{{ $statsReport->center->name }}</a></td>
-                            <td>{{ $statsReport->center->region->name }}</td>
+                    @foreach ($statsReportsList as $data)
+                        <tr id="{{ $data['id'] }}" class="{{ !$data['onTime'] ? 'danger' : '' }}" >
+                            <td><a href="{{ url("/statsreports/{$data['id']}") }}">{{ $data['center'] }}</a></td>
+                            <td>{{ $data['region'] }}</td>
+                            <td style="text-align: center">{{ $data['onTime'] ? 'Yes' : 'No' }}</td>
+                            <td>{{ isset($data['lastSubmitOnTime']) && $data['lastSubmitOnTime'] ? $data['lastSubmitTime'] : $data['firstSubmitTime'] }}</td>
                             <td>
-                                @if ($statsReport->isValidated())
-                                    {{ $statsReport->getRating() }} ({{ $statsReport->getPoints() }})
+                                @if ($data['isValidated'])
+                                    {{ $data['rating'] }} ({{ $data['points'] }})
                                 @else
                                     -
                                 @endif
                             </td>
                         </tr>
-                        @endif
                     @endforeach
                     </tbody>
                 </table>

@@ -64,6 +64,7 @@ Route::get('statsreports/{id}/tdosummary', 'StatsReportController@getTdoByTeamMe
 Route::resource('globalreports', 'GlobalReportController');
 Route::get('globalreports/{id}/ratingsummary', 'GlobalReportController@getRatingSummary');
 Route::get('globalreports/{id}/regionalstats', 'GlobalReportController@getRegionalStats');
+Route::get('globalreports/{id}/statsreports', 'GlobalReportController@getCenterStatsReports');
 
 // Import
 Route::when('import', 'auth|statistician');

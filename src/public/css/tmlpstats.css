@@ -86,3 +86,56 @@
   animation-name: onOff;
   animation-direction: reverse;
 }
+
+
+
+
+
+table.centerStatsTable {
+    width: 95%;
+}
+
+.centerStatsTable th, .centerStatsTable td {
+    text-align: center;
+}
+
+.centerStatsTable td {
+    width: 4em;
+}
+
+.centerStatsSummaryTable th, .centerStatsSummaryTable td {
+    text-align: center;
+    width: 4em;
+}
+
+table.centerStatsSummaryTable {
+    width: 400px;
+}
+
+table {
+    empty-cells: show;
+}
+
+.table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
+    background-color: #DDDDDD;
+}
+
+.ratingsTable .points td {
+    padding: 0px !important;
+    margin: 0px !important;
+    height: 2em;
+    vertical-align: middle;
+}
+
+.meter > span {
+    display: block;
+    height: 100%;
+    background-color: #0075b0;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.table-hover>tbody>tr:hover>td, .table-hover>tbody>tr:hover>th {
+    background-color: #DDDDDD;
+}
