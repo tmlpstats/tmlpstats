@@ -71,7 +71,7 @@ class CommCourseInfoValidator extends ValidatorAbstract
 
                     $this->addMessage('COMMCOURSE_COMPLETED_SS_GREATER_THAN_CURRENT_SS');
                     $isValid = false;
-                } else if ($data->completedStandardStarts < ($data->currentStandardStarts - 3)) {
+                } else if ($data->completedStandardStarts < ($data->currentStandardStarts - 3) && $startDate->diffInDays($statsReport->reportingDate) < 7) {
 
                     $withdrew = $data->currentStandardStarts - $data->completedStandardStarts;
                     $this->addMessage('COMMCOURSE_COMPLETED_SS_LESS_THAN_CURRENT_SS', $withdrew);

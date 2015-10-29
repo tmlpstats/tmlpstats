@@ -340,7 +340,7 @@ class Message
         ),
         'COMMCOURSE_COMPLETED_SS_LESS_THAN_CURRENT_SS' => array(
             'type' => Message::WARNING,
-            'format' => "Completed Standard Starts is %%difference%% less than the course starting standard starts. Confirm that %%difference%% people did withdraw during the course.",
+            'format' => "Completed Standard Starts is %%difference%% less than the course starting standard starts. Confirm with your regional statistician that %%difference%% people did withdraw during the course.",
             'arguments' => array(
                 '%%difference%%',
             ),
