@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats;
 
+use DB;
 use TmlpStats\Center;
 use Illuminate\Database\Eloquent\Model;
 use Eloquence\Database\Traits\CamelCaseModel;
@@ -77,7 +78,7 @@ class Person extends Model
     public function scopeByAccountability($query, $accountability)
     {
         return $query->whereHas('accountabilities', function ($query) use ($accountability) {
-            $query->whereName($accountability);
+            $query->whereName($accountability->name);
         });
     }
 

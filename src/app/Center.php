@@ -55,8 +55,10 @@ class Center extends Model
         return $this->getAccountable('teamStatisticianApprentice');
     }
 
-    public function getAccountable($accountability)
+    public function getAccountable($accountabilityName)
     {
+        $accountability = Accountability::name($accountabilityName)->first();
+
         if ($accountability === null) {
             return null;
         }
