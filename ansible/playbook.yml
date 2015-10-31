@@ -110,6 +110,10 @@
   - copy: src=/vagrant/ansible/templates/etc/php5/mods-available/xdebug.ini dest=/etc/php5/mods-available/xdebug.ini
     notify: restart apache
 
+  # Puppet - Not Installed
+
+  - name: ensure puppet is not installed
+    apt: name=puppet state=absent
 
   # Finalize
 
