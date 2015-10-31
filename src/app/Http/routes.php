@@ -65,6 +65,10 @@ Route::resource('globalreports', 'GlobalReportController');
 Route::get('globalreports/{id}/ratingsummary', 'GlobalReportController@getRatingSummary');
 Route::get('globalreports/{id}/regionalstats', 'GlobalReportController@getRegionalStats');
 Route::get('globalreports/{id}/statsreports', 'GlobalReportController@getCenterStatsReports');
+Route::get('globalreports/{id}/applicationsbystatus', 'GlobalReportController@getTmlpRegistrationsByStatus');
+Route::get('globalreports/{id}/applicationsoverdue', 'GlobalReportController@getTmlpRegistrationsOverdue');
+Route::get('globalreports/{id}/applicationsbycenter', 'GlobalReportController@getTmlpRegistrationsByCenter');
+
 
 // Import
 Route::when('import', 'auth|statistician');

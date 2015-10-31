@@ -41,7 +41,14 @@ class TmlpRegistrationData extends Model
 
             case 'firstName':
             case 'lastName':
+            case 'center':
                 return $this->registration->person->$name;
+            case 'incomingQuarter':
+                $quarter = Quarter::find($this->incomingQuarterId);
+                if ($quarter) {
+                    $quarter->setRegion($this->registration->person->center->region);
+                }
+                return $quarter;
             default:
                 return parent::__get($name);
         }
@@ -51,14 +58,12 @@ class TmlpRegistrationData extends Model
     {
         if ($this->withdrawCodeId || $this->apprDate) {
             return null;
-        } else if ($this->appInDate) {
-            $regDate = clone $this->regDate;
-            return $regDate->addDays(14);
-        } else if ($this->appOutDate) {
-            $regDate = clone $this->regDate;
+        }
+
+        $regDate = clone $this->regDate;
+        if ($this->appInDate || $this->appOutDate) {
             return $regDate->addDays(14);
         } else {
-            $regDate = clone $this->regDate;
             return $regDate->addDays(2);
         }
     }
