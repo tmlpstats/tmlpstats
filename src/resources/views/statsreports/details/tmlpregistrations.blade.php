@@ -1,6 +1,6 @@
 <div class="table-responsive">
     @foreach (['team1', 'team2', 'withdrawn'] as $group)
-        @if (isset($reportData[$group]))
+        @if (isset($reportData[$group]) && count($reportData[$group]))
             <br/>
             <h4>{{ ucwords($group) }}</h4>
             @foreach ($reportData[$group] as $quarterName => $quarterRegistrations)

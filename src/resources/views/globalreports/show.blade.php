@@ -19,6 +19,7 @@
                 <li class="active"><a href="#ratingsummary-tab" data-toggle="tab">Ratings Summary</a></li>
                 <li><a href="#regionalstats-tab" data-toggle="tab">Regional Games</a></li>
                 <li><a href="#statsreports-tab" data-toggle="tab">Center Reports</a></li>
+                <li><a href="#applications-tab" data-toggle="tab">Applications</a></li>
             </ul>
         </div>
         <div class="col-xs-10">
@@ -44,6 +45,24 @@
                         @include('partials.loading')
                     </div>
                 </div>
+                <div class="tab-pane" id="applications-tab">
+                    <h3>Center Reports</h3>
+
+                    <div class="btn-group" role="group">
+                        <button id ="applicationsbystatus-button" type="button" class="btn btn-primary">By Status</button>
+                        <button id ="applicationsbycenter-button" type="button" class="btn btn-default">By Center</button>
+                        <button id ="applicationsoverdue-button" type="button" class="btn btn-default">Overdue</button>
+                    </div>
+                    <div id="applicationsbystatus-container">
+                        @include('partials.loading')
+                    </div>
+                    <div id="applicationsoverdue-container" style="display: none">
+                        @include('partials.loading')
+                    </div>
+                    <div id="applicationsbycenter-container" style="display: none">
+                        @include('partials.loading')
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -51,6 +70,42 @@
     <script type="text/javascript">
         jQuery(document).ready(function ($) {
             $('#tabs').tab();
+
+            $("#applicationsbystatus-button").click(function() {
+                $(this).addClass('btn-primary');
+                $("#applicationsoverdue-button").addClass('btn-default');
+                $("#applicationsoverdue-button").removeClass('btn-primary');
+                $("#applicationsbycenter-button").addClass('btn-default');
+                $("#applicationsbycenter-button").removeClass('btn-primary');
+
+                $("#applicationsbystatus-container").show();
+                $("#applicationsoverdue-container").hide();
+                $("#applicationsbycenter-container").hide();
+            });
+
+            $("#applicationsoverdue-button").click(function() {
+                $(this).addClass('btn-primary');
+                $("#applicationsbystatus-button").addClass('btn-default');
+                $("#applicationsbystatus-button").removeClass('btn-primary');
+                $("#applicationsbycenter-button").addClass('btn-default');
+                $("#applicationsbycenter-button").removeClass('btn-primary');
+
+                $("#applicationsoverdue-container").show();
+                $("#applicationsbystatus-container").hide();
+                $("#applicationsbycenter-container").hide();
+            });
+
+            $("#applicationsbycenter-button").click(function() {
+                $(this).addClass('btn-primary');
+                $("#applicationsbystatus-button").addClass('btn-default');
+                $("#applicationsbystatus-button").removeClass('btn-primary');
+                $("#applicationsoverdue-button").addClass('btn-default');
+                $("#applicationsoverdue-button").removeClass('btn-primary');
+
+                $("#applicationsbycenter-container").show();
+                $("#applicationsoverdue-container").hide();
+                $("#applicationsbystatus-container").hide();
+            });
 
             // Fetch Rating Summary
             $.ajax({
@@ -68,12 +123,36 @@
                     $("#regionalstats-container").html(response);
                 }
             });
-            // Fetch Regional Stats
+            // Fetch Stats Reports
             $.ajax({
                 type: "GET",
                 url: "{{ url("/globalreports/{$globalReport->id}/statsreports?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#statsreports-container").html(response);
+                }
+            });
+            // Fetch Applications
+            $.ajax({
+                type: "GET",
+                url: "{{ url("/globalreports/{$globalReport->id}/applicationsbystatus?region={$region->abbreviation}") }}",
+                success: function (response) {
+                    $("#applicationsbystatus-container").html(response);
+                }
+            });
+            // Fetch Applications
+            $.ajax({
+                type: "GET",
+                url: "{{ url("/globalreports/{$globalReport->id}/applicationsbycenter?region={$region->abbreviation}") }}",
+                success: function (response) {
+                    $("#applicationsbycenter-container").html(response);
+                }
+            });
+            // Fetch Applications
+            $.ajax({
+                type: "GET",
+                url: "{{ url("/globalreports/{$globalReport->id}/applicationsoverdue?region={$region->abbreviation}") }}",
+                success: function (response) {
+                    $("#applicationsoverdue-container").html(response);
                 }
             });
         });

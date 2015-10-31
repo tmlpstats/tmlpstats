@@ -2,9 +2,13 @@
 
 namespace TmlpStats\Http\Controllers;
 
+use App;
 use Cache;
 use Illuminate\Http\Request;
+use Response;
+use TmlpStats\GlobalReport;
 use TmlpStats\Http\Requests;
+use TmlpStats\Region;
 use TmlpStats\StatsReport;
 use TmlpStats\TmlpRegistrationData;
 
@@ -84,6 +88,27 @@ class TmlpRegistrationsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getByGlobalReport($id, Region $region)
+    {
+        $globalReport = GlobalReport::find($id);
+
+        $statsReports = $globalReport->statsReports()
+            ->byRegion($region)
+            ->reportingDate($globalReport->reportingDate)
+            ->get();
+
+        $registrations = [];
+        foreach ($statsReports as $report) {
+
+            $reportRegistrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($report->id);
+            foreach ($reportRegistrations as $registration) {
+                $registrations[] = $registration;
+            }
+        }
+
+        return $registrations;
     }
 
     public function getByStatsReport($id)

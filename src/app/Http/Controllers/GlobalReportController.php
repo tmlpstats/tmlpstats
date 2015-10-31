@@ -5,6 +5,10 @@ use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
 use TmlpStats\Reports\Arrangements\GamesByMilestone;
 use TmlpStats\Reports\Arrangements\GamesByWeek;
+use TmlpStats\Reports\Arrangements\TmlpRegistrationsByCenter;
+use TmlpStats\Reports\Arrangements\TmlpRegistrationsByIncomingQuarter;
+use TmlpStats\Reports\Arrangements\TmlpRegistrationsByOverdue;
+use TmlpStats\Reports\Arrangements\TmlpRegistrationsByStatus;
 use TmlpStats\StatsReport;
 use TmlpStats\Center;
 use TmlpStats\Reports\Arrangements;
@@ -292,6 +296,86 @@ class GlobalReportController extends Controller
         return view('reports.centergames.milestones', $data);
     }
 
+    public function getTmlpRegistrationsByStatus($id)
+    {
+        $globalReport = GlobalReport::find($id);
+        if (!$globalReport) {
+            $error = 'Report not found.';
+            return Response::view('errors.404', compact('error'), 404);
+        }
+
+        $region = $this->getRegion(true);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($id, $region);
+        if (!$registrations) {
+            return '<p>TMLP Registrations not available.</p>';
+        }
+
+        $a = new TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
+        $data = $a->compose();
+
+        $data = array_merge($data, ['reportingDate' => $globalReport->reportingDate]);
+        return view('globalreports.details.applicationsbystatus', $data);
+    }
+
+    public function getTmlpRegistrationsOverdue($id)
+    {
+        $globalReport = GlobalReport::find($id);
+        if (!$globalReport) {
+            $error = 'Report not found.';
+            return Response::view('errors.404', compact('error'), 404);
+        }
+
+        $region = $this->getRegion(true);
+
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($id, $region);
+        if (!$registrations) {
+            return '<p>TMLP Registrations not available.</p>';
+        }
+
+        $a = new TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
+        $statusData = $a->compose();
+
+        $a = new TmlpRegistrationsByOverdue(['registrationsData' => $statusData['reportData']]);
+        $data = $a->compose();
+
+        $data = array_merge($data, ['reportingDate' => $globalReport->reportingDate]);
+        return view('globalreports.details.applicationsoverdue', $data);
+    }
+
+    public function getTmlpRegistrationsByCenter($id)
+    {
+        $globalReport = GlobalReport::find($id);
+        if (!$globalReport) {
+            $error = 'Report not found.';
+            return Response::view('errors.404', compact('error'), 404);
+        }
+
+        $region = $this->getRegion(true);
+
+        $quarter = Quarter::byRegion($region)->date($globalReport->reportingDate)->first();
+        $quarter->setRegion($region);
+
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($id, $region);
+        if (!$registrations) {
+            return '<p>TMLP Registrations not available.</p>';
+        }
+
+        $a = new TmlpRegistrationsByCenter(['registrationsData' => $registrations]);
+        $centersData = $a->compose();
+
+        $updatedCentersData = [];
+        foreach ($centersData['reportData'] as $centerName => $data) {
+            $a = new TmlpRegistrationsByIncomingQuarter(['registrationsData' => $data, 'quarter' => $quarter]);
+            $data = $a->compose();
+            $updatedCentersData[$centerName] = $data['reportData'];
+        }
+
+        return view('globalreports.details.applicationsbycenter', [
+            'reportData' => $updatedCentersData,
+            'reportingDate' => $globalReport->reportingDate,
+        ]);
+    }
+
     public function getCenterStatsReports($id)
     {
         if (!$this->hasAccess('R')) {
@@ -329,6 +413,11 @@ class GlobalReportController extends Controller
                 'officialSubmitTime' => '',
                 'officialReport'     => $report,
             ];
+
+            // Was most recent report submitted on time?
+            // Was a report submitted on time, then a resubmit happend late
+            // All submits were late
+
 
             if ($report->isOnTime()) {
                 $statsReportData['onTime'] = true;
