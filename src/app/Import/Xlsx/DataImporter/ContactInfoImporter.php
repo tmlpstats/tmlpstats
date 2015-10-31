@@ -14,15 +14,9 @@ class ContactInfoImporter extends DataImporterAbstract
 {
     protected $sheetId = ImportDocument::TAB_LOCAL_TEAM_CONTACT;
 
-    protected $reportingStatistician = NULL;
-    protected $programManager = NULL;
-    protected $classroomLeader = NULL;
-    protected $t2tl = NULL;
-    protected $t1tl = NULL;
-    protected $statistician = NULL;
-    protected $apprentice = NULL;
-    protected $programManagerAttendingWeekend = NULL;
-    protected $classroomLeaderAttendingWeekend = NULL;
+    protected $reportingStatistician = null;
+    protected $programManagerAttendingWeekend = null;
+    protected $classroomLeaderAttendingWeekend = null;
 
     public function getReportingStatistician()
     {
@@ -43,13 +37,13 @@ class ContactInfoImporter extends DataImporterAbstract
     {
         $this->reader = $this->getReader($this->sheet);
 
-        $this->programManager = $this->loadEntry(5);
-        $this->classroomLeader = $this->loadEntry(6);
-        $this->t2tl = $this->loadEntry(7);
-        $this->t1tl = $this->loadEntry(8);
-        $this->statistician = $this->loadEntry(9);
-        $this->apprentice = $this->loadEntry(10);
-//        $this->reportingStatistician = $this->loadReportingStatistician();
+        $this->loadEntry(5); // programManager
+        $this->loadEntry(6); // classroomLeader
+        $this->loadEntry(7); // t2tl
+        $this->loadEntry(8); // t1tl
+        $this->loadEntry(9); // statistician
+        $this->loadEntry(10); // apprentice
+//        $this->loadReportingStatistician(); // reportingStatistician
         $this->loadProgramLeadersAttendingWeekend();
     }
 
@@ -81,13 +75,16 @@ class ContactInfoImporter extends DataImporterAbstract
         $this->classroomLeaderAttendingWeekend = $this->reader->getClassroomLeaderAttendingWeekend();
     }
 
+    /**
+     *
+     */
     public function postProcess()
     {
         foreach ($this->data as $leader) {
 
             $accountability = Accountability::name($this->mapAccountabilities($leader['accountability']))->first();
 
-            if ($leader['name'] === NULL || strtoupper($leader['name']) == 'NA' || strtoupper($leader['name']) == 'N/A') {
+            if ($leader['name'] === null || strtoupper($leader['name']) == 'NA' || strtoupper($leader['name']) == 'N/A') {
 
                 $currentAccountable = $this->statsReport->center->getAccountable($accountability);
                 if ($currentAccountable) {
