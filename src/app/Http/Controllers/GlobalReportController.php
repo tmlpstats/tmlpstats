@@ -319,20 +319,20 @@ class GlobalReportController extends Controller
         foreach ($statsReports as $report) {
 
             $statsReportData = [
-                'id'              => $report->id,
-                'center'          => $report->center->name,
-                'region'          => $region->name,
-                'rating'          => $report->getRating(),
-                'points'          => $report->getPoints(),
-                'isValidated'     => $report->isValidated(),
-                'onTime'          => false,
-                'firstSubmitTime' => '',
+                'id'                 => $report->id,
+                'center'             => $report->center->name,
+                'region'             => $region->abbreviation,
+                'rating'             => $report->getRating(),
+                'points'             => $report->getPoints(),
+                'isValidated'        => $report->isValidated(),
+                'onTime'             => false,
+                'officialSubmitTime' => '',
+                'officialReport'     => $report,
             ];
 
             if ($report->isOnTime()) {
                 $statsReportData['onTime'] = true;
-                $statsReportData['onTimeOneSubmit'] = true;
-                $statsReportData['firstSubmitTime'] = $report->submittedAt->setTimezone($report->center->timezone)->format('M j, Y @ g:ia T');
+                $statsReportData['officialSubmitTime'] = $report->submittedAt->setTimezone($report->center->timezone)->format('M j @ g:ia T');
             } else {
                 $otherReports = StatsReport::reportingDate($globalReport->reportingDate)
                     ->byCenter($report->center)
@@ -341,18 +341,30 @@ class GlobalReportController extends Controller
                     ->get();
 
                 if (!$otherReports->isEmpty()) {
-                    $first = $otherReports->shift();
-                    if ($first->isOnTime()) {
-                        $statsReportData['onTime'] = true;
-                        $statsReportData['firstSubmitTime'] = $first->submittedAt->setTimezone($report->center->timezone)->format('M j, Y @ g:ia T');
-                    } else {
-                        $statsReportData['firstSubmitTime'] = $first->submittedAt->setTimezone($report->center->timezone)->format('M j, Y @ g:ia T');
+
+                    $officialReport = null;
+                    foreach ($otherReports as $submitted) {
+                        $officialReport = $submitted;
+                        if ($officialReport->isOnTime()) {
+                            $statsReportData['onTime'] = true;
+                            break;
+                        }
                     }
 
-                    if (!$otherReports->isEmpty()) {
-                        $last = $otherReports->pop();
-                        $statsReportData['lastSubmitOnTime'] = $last->isOnTime();
-                        $statsReportData['lastSubmitTime'] = $last->submittedAt->setTimezone($report->center->timezone)->format('M j, Y @ g:ia T');
+                    if ($officialReport && $statsReportData['onTime'] === true) {
+                        $statsReportData['officialSubmitTime'] = $officialReport->submittedAt->setTimezone($report->center->timezone)->format('M j @ g:ia T');
+                        $statsReportData['officialReport'] = $officialReport;
+
+                        $statsReportData['revisionSubmitTime'] = $report->submittedAt->setTimezone($report->center->timezone)->format('M j @ g:ia T');
+                        $statsReportData['revisedReport'] = $report;
+                    } else {
+                        $first = $otherReports->first();
+                        $statsReportData['officialSubmitTime'] = $first->submittedAt->setTimezone($report->center->timezone)->format('M j @ g:ia T');
+                        $statsReportData['officialReport'] = $first;
+                        if ($first->id != $report->id) {
+                            $statsReportData['revisionSubmitTime'] = $report->submittedAt->setTimezone($report->center->timezone)->format('M j @ g:ia T');
+                            $statsReportData['revisedReport'] = $report;
+                        }
                     }
                 }
             }
