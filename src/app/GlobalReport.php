@@ -39,10 +39,16 @@ class GlobalReport extends Model
         Cache::tags(["globalReport{$this->id}"])->flush();
     }
 
+    public function getStatsReportByCenter(Center $center)
+    {
+        return $this->statsReports()->byCenter($center)->first();
+    }
+
     public function scopeReportingDate($query, Carbon $date)
     {
         return $query->whereReportingDate($date);
     }
+
 
     public function updatedByUser()
     {

@@ -35,6 +35,7 @@ Route::when('admin/*', 'auth|admin');
 
 Route::match(['get', 'post'], 'admin/dashboard', 'AdminController@index');
 Route::get('admin/status', 'AdminController@status');
+Route::get('admin/peoplereport', 'AdminController@getPeopleReport');
 
 Route::get('admin/import', 'ImportController@import');
 Route::post('admin/import', 'ImportController@uploadImportSpreadsheet');

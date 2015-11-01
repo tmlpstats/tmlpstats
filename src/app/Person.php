@@ -21,7 +21,8 @@ class Person extends Model
 
     public function hasAccountability(Accountability $accountability)
     {
-        foreach ($this->accountabilities as $myAccountability) {
+        $accountabilities = $this->accountabilities()->get();
+        foreach ($accountabilities as $myAccountability) {
             if ($myAccountability->id == $accountability->id) {
                 return true;
             }
@@ -42,7 +43,7 @@ class Person extends Model
             DB::table('accountability_person')
                 ->where('person_id', $this->id)
                 ->where('accountability_id', $accountability->id)
-                ->update(array('active' => false));
+                ->update(['active' => false]);
         }
     }
 
@@ -90,6 +91,7 @@ class Person extends Model
     public function accountabilities()
     {
         return $this->belongsToMany('TmlpStats\Accountability', 'accountability_person', 'person_id', 'accountability_id')
+            ->withPivot('active')
             ->whereActive(true)
             ->withTimestamps();
     }
@@ -97,5 +99,20 @@ class Person extends Model
     public function center()
     {
         return $this->belongsTo('TmlpStats\Center');
+    }
+
+    public function user()
+    {
+        return $this->hasOne('TmlpStats\User');
+    }
+
+    public function teamMember()
+    {
+        return $this->hasOne('TmlpStats\TeamMember');
+    }
+
+    public function registration()
+    {
+        return $this->hasOne('TmlpStats\TmlpRegistration', 'person_id');
     }
 }

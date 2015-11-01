@@ -102,6 +102,14 @@ class ContactInfoImporter extends DataImporterAbstract
                 ->byCenter($this->statsReport->center)
                 ->get();
 
+            // If we didn't find anyone, then try with just the first letter
+            if ($possibleMembers->isEmpty() && strlen($nameParts['lastName']) > 1) {
+                $possibleMembers = Person::firstName($nameParts['firstName'])
+                    ->lastName($nameParts['lastName'][0]) // Just the first letter
+                    ->byCenter($this->statsReport->center)
+                    ->get();
+            }
+
             if ($possibleMembers->count() == 1) {
                 $member = $possibleMembers->first();
             } else if ($possibleMembers->count() > 1) {
@@ -116,6 +124,8 @@ class ContactInfoImporter extends DataImporterAbstract
                     }
                 }
             }
+            // TODO: if accountable should be a team member, tell user they need to double check the names match exactly
+            //       with a team member on the class list
 
             if (!$member) {
                 $member = Person::create([
@@ -127,7 +137,7 @@ class ContactInfoImporter extends DataImporterAbstract
 
             if ($accountability && !$member->hasAccountability($accountability)) {
 
-                $currentAccountable = $this->statsReport->center->getAccountable($accountability);
+                $currentAccountable = $this->statsReport->center->getAccountable($accountability->name);
                 if ($currentAccountable) {
                     $currentAccountable->removeAccountability($accountability);
                 }

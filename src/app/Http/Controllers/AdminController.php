@@ -7,6 +7,7 @@ use TmlpStats\Import\Xlsx\XlsxArchiver;
 
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
+use TmlpStats\Person;
 use TmlpStats\User;
 use TmlpStats\StatsReport;
 use TmlpStats\CenterStatsData;
@@ -212,4 +213,22 @@ class AdminController extends Controller {
         return $sessions;
     }
 
+    /**
+     * Get a report of people and associated relationships
+     */
+    public function getPeopleReport()
+    {
+        $centerPeopleList = [];
+
+        $centers = Center::all();
+
+        foreach ($centers as $center) {
+            $roster = $center->getTeamRoster();
+            foreach ($roster as $teamMember) {
+                $centerPeopleList[$center->name][] = $teamMember->person;
+            }
+        }
+
+        return view('admin.peoplereport')->with(compact('centerPeopleList'));
+    }
 }

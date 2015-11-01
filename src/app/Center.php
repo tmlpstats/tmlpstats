@@ -68,6 +68,30 @@ class Center extends Model
             ->first();
     }
 
+    /**
+     * Get all team members that have reported in an official report for this center
+     *
+     * @return mixed
+     */
+    public function getTeamRoster()
+    {
+        $statsReports = $this->statsReports()
+            ->currentQuarter($this->region)
+            ->orderBy('submitted_at')
+            ->groupBy('reporting_date')
+            ->get();
+
+        $memberIds = [];
+        foreach ($statsReports as $report) {
+            $membersData = TeamMemberData::byStatsReport($report)->get();
+            foreach ($membersData as $data) {
+                $memberIds[] = $data->teamMember->id;
+            }
+        }
+        $members = TeamMember::whereIn('id', array_unique($memberIds))->get();
+        return $members;
+    }
+
     public function getGlobalRegion()
     {
         if ($this->region->isGlobalRegion()) {
@@ -94,7 +118,7 @@ class Center extends Model
 
     public function inRegion(Region $region)
     {
-        return  $this->region->inRegion($region);
+        return $this->region->inRegion($region);
     }
 
     public function scopeName($query, $name)
