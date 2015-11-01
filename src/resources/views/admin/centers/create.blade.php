@@ -7,7 +7,7 @@
 
 {!! Form::open(['url' => 'admin/centers', 'class' => 'form-horizontal']) !!}
 
-    @include('centers.form', ['submitButtonText' => 'Create'])
+    @include('admin.centers.form', ['submitButtonText' => 'Create'])
 
 {!! Form::close() !!}
 
