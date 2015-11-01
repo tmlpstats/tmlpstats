@@ -37,4 +37,9 @@ abstract class Controller extends BaseController {
 
         return $region;
     }
+
+    public function useCache()
+    {
+        return env('REPORTS_USE_CACHE', static::USE_CACHE);
+    }
 }

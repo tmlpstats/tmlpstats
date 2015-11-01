@@ -97,7 +97,7 @@ class CenterStatsController extends Controller
         $cacheKey = $region === null
             ? "globalreport{$id}:centerstats"
             : "globalreport{$id}:region{$region->id}:centerstats";
-        $globalReportData = (static::USE_CACHE) ? Cache::tags(["globalReport{$id}"])->get($cacheKey) : false;
+        $globalReportData = ($this->useCache()) ? Cache::tags(["globalReport{$id}"])->get($cacheKey) : false;
 
         if (!$globalReportData) {
 
@@ -161,7 +161,7 @@ class CenterStatsController extends Controller
         $cacheKey = $onlyThisDate === null
             ? "statsReport{$id}:centerstats"
             : "statsReport{$id}:date{$dateString}:centerstats";
-        $centerStatsData = (static::USE_CACHE) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
+        $centerStatsData = ($this->useCache()) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
 
         if (!$centerStatsData) {
             $statsReport = StatsReport::find($id);

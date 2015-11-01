@@ -661,7 +661,7 @@ class StatsReportController extends Controller
             if ($sheetPath) {
 
                 $cacheKey = "statsReport{$id}:validation";
-                $sheet = (static::USE_CACHE) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
+                $sheet = ($this->useCache()) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
                 if (!$sheet) {
                     try {
                         $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, false);

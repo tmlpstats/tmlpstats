@@ -90,7 +90,7 @@ class TeamMembersController extends Controller
     public function getByStatsReport($id)
     {
         $cacheKey = "statsReport{$id}:teammembers";
-        $teamMembers = (static::USE_CACHE) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
+        $teamMembers = ($this->useCache()) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
 
         if (!$teamMembers) {
             $statsReport = StatsReport::find($id);

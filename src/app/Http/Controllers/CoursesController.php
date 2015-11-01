@@ -90,7 +90,7 @@ class CoursesController extends Controller
     public function getByStatsReport($id)
     {
         $cacheKey = "statsReport{$id}:courses";
-        $courses = (static::USE_CACHE) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
+        $courses = ($this->useCache()) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
 
         if (!$courses) {
             $statsReport = StatsReport::find($id);
