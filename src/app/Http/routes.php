@@ -70,6 +70,8 @@ Route::get('globalreports/{id}/applicationsbystatus', 'GlobalReportController@ge
 Route::get('globalreports/{id}/applicationsoverdue', 'GlobalReportController@getTmlpRegistrationsOverdue');
 Route::get('globalreports/{id}/applicationsbycenter', 'GlobalReportController@getTmlpRegistrationsByCenter');
 
+// Center Info
+Route::resource('center', 'CenterController');
 
 // Import
 Route::when('import', 'auth|statistician');
