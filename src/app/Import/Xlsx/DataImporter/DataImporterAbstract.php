@@ -57,20 +57,36 @@ abstract class DataImporterAbstract
     // This lets us process each block separately
     abstract protected function populateSheetRanges();
 
-    protected function findRange($startRow, $targetStartText, $targetEndText, $targetColumn = 'A')
+    /**
+     * @param $startRow                 Index of the row to start searching in
+     * @param $targetStartText          Cell text that indicates the start of the range
+     * @param $targetEndText            Cell text that indicates the end of the range
+     * @param string $targetStartColumn Column to look in for the targetStartText
+     * @param null $targetEndColumn     Column to look in for the targetEndText
+     * @return array[start, end]        Array with the start and end of the range, inclusive
+     *                                  start is the index immediately after the row with targetStartText
+     *                                  end is the index immediately before the row with targetEndText
+     */
+    protected function findRange($startRow, $targetStartText, $targetEndText, $targetStartColumn = 'A', $targetEndColumn = null)
     {
         $rangeStart = NULL;
         $rangeEnd = NULL;
+
+        if ($targetEndColumn === null) {
+            $targetEndColumn = $targetStartColumn;
+        }
 
         $row = $startRow;
         $searching = true;
         $maxRows = count($this->sheet);
         $maxSearchRows = 500;
+        $targetColumn = $targetStartColumn;
         while ($searching && $row < $maxSearchRows) {
             $value = $this->sheet[$row][$targetColumn];
 
             if ($rangeStart === NULL && $value == $targetStartText) {
                 $rangeStart = $row + 1; // Range starts the row after start text
+                $targetColumn = $targetEndColumn;
             }
 
             if ($rangeEnd === NULL && ($value == $targetEndText || $row >= $maxRows)) {

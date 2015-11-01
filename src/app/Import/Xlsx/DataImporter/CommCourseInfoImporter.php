@@ -17,11 +17,13 @@ class CommCourseInfoImporter extends DataImporterAbstract
 
     protected function populateSheetRanges()
     {
+        $cap = $this->findRange(3, 'Course Start Date', 'Total (Open Courses):', 'B', 'A');
         $this->blockCAP[] = $this->excelRange('A','O');
-        $this->blockCAP[] = $this->excelRange(5,14);
+        $this->blockCAP[] = $this->excelRange($cap['start'] + 1, $cap['end']);
 
+        $cpc = $this->findRange($cap['end'], 'Course Start Date', 'Total (Open Courses):', 'B', 'A');
         $this->blockCPC[] = $this->excelRange('A','O');
-        $this->blockCPC[] = $this->excelRange(18,25);
+        $this->blockCPC[] = $this->excelRange($cpc['start'] + 1, $cpc['end']);
     }
 
     protected function load()

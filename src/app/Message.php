@@ -346,7 +346,7 @@ class Message
             ),
         ),
         'COMMCOURSE_COMPLETED_SS_GREATER_THAN_CURRENT_SS' => array(
-            'type' => Message::WARNING,
+            'type' => Message::ERROR,
             'format' => "More people completed the course than there were that started. Make sure Current Standard Starts matches the number of people that started the course, and Completed Standard Starts matches the number of people that completed the course.",
             'arguments' => array(),
         ),
