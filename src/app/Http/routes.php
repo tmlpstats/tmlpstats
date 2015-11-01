@@ -40,7 +40,7 @@ Route::get('admin/peoplereport', 'AdminController@getPeopleReport');
 Route::get('admin/import', 'ImportController@import');
 Route::post('admin/import', 'ImportController@uploadImportSpreadsheet');
 
-Route::resource('admin/centers', 'CenterController');
+Route::resource('admin/centers', 'AdminCenterController');
 //Route::resource('admin/quarters', 'QuarterController');
 Route::resource('admin/users', 'UserController');
 //Route::resource('admin/roles', 'RoleController');
@@ -61,7 +61,7 @@ Route::get('statsreports/{id}/contactinfo', 'StatsReportController@getContacts')
 Route::get('statsreports/{id}/gitwsummary', 'StatsReportController@getGitwByTeamMember');
 Route::get('statsreports/{id}/tdosummary', 'StatsReportController@getTdoByTeamMember');
 
-
+// Global Reports
 Route::resource('globalreports', 'GlobalReportController');
 Route::get('globalreports/{id}/ratingsummary', 'GlobalReportController@getRatingSummary');
 Route::get('globalreports/{id}/regionalstats', 'GlobalReportController@getRegionalStats');

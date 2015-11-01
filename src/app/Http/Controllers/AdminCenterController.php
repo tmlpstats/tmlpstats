@@ -6,7 +6,7 @@ use TmlpStats\Region;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Requests\CenterRequest;
 
-class CenterController extends Controller {
+class AdminCenterController extends Controller {
 
     /**
      * Create a new controller instance.
@@ -25,7 +25,7 @@ class CenterController extends Controller {
     {
         $centers = Center::orderBy('name', 'asc')->get();
 
-        return view('centers.index', compact('centers'));
+        return view('admin.centers.index', compact('centers'));
     }
 
     /**
@@ -35,7 +35,7 @@ class CenterController extends Controller {
      */
     public function create()
     {
-        return view('centers.create');
+        return view('admin.centers.create');
     }
 
     /**
@@ -75,7 +75,7 @@ class CenterController extends Controller {
     {
         $center = Center::where('abbreviation', '=', $id)->firstOrFail();
 
-        return view('centers.show', compact('center'));
+        return view('admin.centers.show', compact('center'));
     }
 
     /**
@@ -88,7 +88,7 @@ class CenterController extends Controller {
     {
         $center = Center::where('abbreviation', '=', $id)->firstOrFail();
 
-        return view('centers.edit', compact('center'));
+        return view('admin.centers.edit', compact('center'));
     }
 
     /**

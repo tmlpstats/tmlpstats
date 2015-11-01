@@ -7,7 +7,7 @@
 
 {!! Form::model($center, ['url' => 'admin/centers/' . $center->abbreviation, 'method' => 'PUT', 'class' => 'form-horizontal']) !!}
 
-    @include('centers.form', ['submitButtonText' => 'Update'])
+    @include('admin.centers.form', ['submitButtonText' => 'Update'])
 
 {!! Form::close() !!}
 
