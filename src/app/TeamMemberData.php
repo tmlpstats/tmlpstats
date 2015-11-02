@@ -43,6 +43,7 @@ class TeamMemberData extends Model
 
             case 'firstName':
             case 'lastName':
+            case 'center':
                 return $this->teamMember->person->$name;
             default:
                 return parent::__get($name);

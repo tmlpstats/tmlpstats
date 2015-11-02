@@ -49,11 +49,15 @@
                     <h3>Center Reports</h3>
 
                     <div class="btn-group" role="group">
-                        <button id ="applicationsbystatus-button" type="button" class="btn btn-primary">By Status</button>
+                        <button id ="applicationsoverview-button" type="button" class="btn btn-primary">Overview</button>
+                        <button id ="applicationsbystatus-button" type="button" class="btn btn-default">By Status</button>
                         <button id ="applicationsbycenter-button" type="button" class="btn btn-default">By Center</button>
                         <button id ="applicationsoverdue-button" type="button" class="btn btn-default">Overdue</button>
                     </div>
-                    <div id="applicationsbystatus-container">
+                    <div id="applicationsoverview-container">
+                        @include('partials.loading')
+                    </div>
+                    <div id="applicationsbystatus-container" style="display: none">
                         @include('partials.loading')
                     </div>
                     <div id="applicationsoverdue-container" style="display: none">
@@ -71,16 +75,34 @@
         jQuery(document).ready(function ($) {
             $('#tabs').tab();
 
+            $("#applicationsoverview-button").click(function() {
+                $(this).addClass('btn-primary');
+                $("#applicationsoverdue-button").addClass('btn-default');
+                $("#applicationsoverdue-button").removeClass('btn-primary');
+                $("#applicationsbycenter-button").addClass('btn-default');
+                $("#applicationsbycenter-button").removeClass('btn-primary');
+                $("#applicationsbystatus-button").addClass('btn-default');
+                $("#applicationsbystatus-button").removeClass('btn-primary');
+
+                $("#applicationsoverview-container").show();
+                $("#applicationsoverdue-container").hide();
+                $("#applicationsbycenter-container").hide();
+                $("#applicationsbystatus-container").hide();
+            });
+
             $("#applicationsbystatus-button").click(function() {
                 $(this).addClass('btn-primary');
                 $("#applicationsoverdue-button").addClass('btn-default');
                 $("#applicationsoverdue-button").removeClass('btn-primary');
                 $("#applicationsbycenter-button").addClass('btn-default');
                 $("#applicationsbycenter-button").removeClass('btn-primary');
+                $("#applicationsoverview-button").addClass('btn-default');
+                $("#applicationsoverview-button").removeClass('btn-primary');
 
                 $("#applicationsbystatus-container").show();
                 $("#applicationsoverdue-container").hide();
                 $("#applicationsbycenter-container").hide();
+                $("#applicationsoverview-container").hide();
             });
 
             $("#applicationsoverdue-button").click(function() {
@@ -89,10 +111,13 @@
                 $("#applicationsbystatus-button").removeClass('btn-primary');
                 $("#applicationsbycenter-button").addClass('btn-default');
                 $("#applicationsbycenter-button").removeClass('btn-primary');
+                $("#applicationsoverview-button").addClass('btn-default');
+                $("#applicationsoverview-button").removeClass('btn-primary');
 
                 $("#applicationsoverdue-container").show();
                 $("#applicationsbystatus-container").hide();
                 $("#applicationsbycenter-container").hide();
+                $("#applicationsoverview-container").hide();
             });
 
             $("#applicationsbycenter-button").click(function() {
@@ -101,10 +126,13 @@
                 $("#applicationsbystatus-button").removeClass('btn-primary');
                 $("#applicationsoverdue-button").addClass('btn-default');
                 $("#applicationsoverdue-button").removeClass('btn-primary');
+                $("#applicationsoverview-button").addClass('btn-default');
+                $("#applicationsoverview-button").removeClass('btn-primary');
 
                 $("#applicationsbycenter-container").show();
                 $("#applicationsoverdue-container").hide();
                 $("#applicationsbystatus-container").hide();
+                $("#applicationsoverview-container").hide();
             });
 
             // Fetch Rating Summary
@@ -153,6 +181,14 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/applicationsoverdue?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#applicationsoverdue-container").html(response);
+                }
+            });
+            // Fetch Applications
+            $.ajax({
+                type: "GET",
+                url: "{{ url("/globalreports/{$globalReport->id}/applicationsoverview?region={$region->abbreviation}") }}",
+                success: function (response) {
+                    $("#applicationsoverview-container").html(response);
                 }
             });
         });
