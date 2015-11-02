@@ -2,10 +2,13 @@
 
 namespace TmlpStats\Http\Controllers;
 
+use App;
 use Cache;
 use Illuminate\Http\Request;
+use TmlpStats\GlobalReport;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Controllers\Controller;
+use TmlpStats\Region;
 use TmlpStats\StatsReport;
 use TmlpStats\TeamMemberData;
 
@@ -85,6 +88,27 @@ class TeamMembersController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getByGlobalReport($id, Region $region)
+    {
+        $globalReport = GlobalReport::find($id);
+
+        $statsReports = $globalReport->statsReports()
+            ->byRegion($region)
+            ->reportingDate($globalReport->reportingDate)
+            ->get();
+
+        $teamMembers = [];
+        foreach ($statsReports as $report) {
+
+            $reportTeamMembers = $this->getByStatsReport($report->id);
+            foreach ($reportTeamMembers as $member) {
+                $teamMembers[] = $member;
+            }
+        }
+
+        return $teamMembers;
     }
 
     public function getByStatsReport($id)

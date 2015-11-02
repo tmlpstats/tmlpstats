@@ -5,6 +5,9 @@ use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
 use TmlpStats\Reports\Arrangements\GamesByMilestone;
 use TmlpStats\Reports\Arrangements\GamesByWeek;
+use TmlpStats\Reports\Arrangements\TeamMemberIncomingOverview;
+use TmlpStats\Reports\Arrangements\TeamMembersByCenter;
+use TmlpStats\Reports\Arrangements\TeamMembersByQuarter;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByCenter;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByIncomingQuarter;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByOverdue;
@@ -298,6 +301,11 @@ class GlobalReportController extends Controller
 
     public function getTmlpRegistrationsByStatus($id)
     {
+        if (!$this->hasAccess('R')) {
+            $error = 'You do not have access to view this report.';
+            return Response::view('errors.403', compact('error'), 403);
+        }
+
         $globalReport = GlobalReport::find($id);
         if (!$globalReport) {
             $error = 'Report not found.';
@@ -319,6 +327,11 @@ class GlobalReportController extends Controller
 
     public function getTmlpRegistrationsOverdue($id)
     {
+        if (!$this->hasAccess('R')) {
+            $error = 'You do not have access to view this report.';
+            return Response::view('errors.403', compact('error'), 403);
+        }
+
         $globalReport = GlobalReport::find($id);
         if (!$globalReport) {
             $error = 'Report not found.';
@@ -342,8 +355,88 @@ class GlobalReportController extends Controller
         return view('globalreports.details.applicationsoverdue', $data);
     }
 
+    public function getTmlpRegistrationsOverview($id)
+    {
+        if (!$this->hasAccess('R')) {
+            $error = 'You do not have access to view this report.';
+            return Response::view('errors.403', compact('error'), 403);
+        }
+
+        $globalReport = GlobalReport::find($id);
+        if (!$globalReport) {
+            $error = 'Report not found.';
+            return Response::view('errors.404', compact('error'), 404);
+        }
+
+        $region = $this->getRegion(true);
+
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($id, $region);
+        if (!$registrations) {
+            return '<p>TMLP Registrations not available.</p>';
+        }
+
+        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($id, $region);
+        if (!$teamMembers) {
+            return '<p>TeamMembers not available.</p>';
+        }
+
+        $a = new TmlpRegistrationsByCenter(['registrationsData' => $registrations]);
+        $registrationsByCenter = $a->compose();
+        $registrationsByCenter = $registrationsByCenter['reportData'];
+
+        $a = new TeamMembersByCenter(['teamMembersData' => $teamMembers]);
+        $teamMembersByCenter = $a->compose();
+        $teamMembersByCenter = $teamMembersByCenter['reportData'];
+
+
+        $reportData = [];
+        $teamCounts = [
+            'team1' => [
+                'applications' => [],
+                'incoming' => 0,
+                'ongoing'  => 0,
+            ],
+            'team2' => [
+                'applications' => [],
+                'incoming' => 0,
+                'ongoing'  => 0,
+            ],
+        ];
+        foreach ($teamMembersByCenter as $centerName => $unused) {
+            $a = new TeamMemberIncomingOverview([
+                'registrationsData' => isset($registrationsByCenter[$centerName]) ? $registrationsByCenter[$centerName] : [],
+                'teamMembersData'   => isset($teamMembersByCenter[$centerName]) ? $teamMembersByCenter[$centerName] : [],
+                'region'            => $region,
+            ]);
+            $centerRow = $a->compose();
+
+            $reportData[$centerName] = $centerRow['reportData'];
+
+            foreach ($centerRow['reportData'] as $team => $teamData) {
+
+                foreach ($teamData['applications'] as $status => $statusCount) {
+                    if (!isset($teamCounts[$team]['applications'][$status])) {
+                        $teamCounts[$team]['applications'][$status] = 0;
+                    }
+
+                    $teamCounts[$team]['applications'][$status] += $statusCount;
+                }
+                $teamCounts[$team]['incoming'] += isset($teamData['incoming']) ? $teamData['incoming'] : 0;
+                $teamCounts[$team]['ongoing'] += isset($teamData['ongoing']) ? $teamData['ongoing'] : 0;
+            }
+        }
+        ksort($reportData);
+
+        return view('globalreports.details.applicationsoverview', compact('reportData', 'teamCounts'));
+    }
+
     public function getTmlpRegistrationsByCenter($id)
     {
+        if (!$this->hasAccess('R')) {
+            $error = 'You do not have access to view this report.';
+            return Response::view('errors.403', compact('error'), 403);
+        }
+
         $globalReport = GlobalReport::find($id);
         if (!$globalReport) {
             $error = 'Report not found.';
@@ -369,9 +462,10 @@ class GlobalReportController extends Controller
             $data = $a->compose();
             $updatedCentersData[$centerName] = $data['reportData'];
         }
+        ksort($updatedCentersData);
 
         return view('globalreports.details.applicationsbycenter', [
-            'reportData' => $updatedCentersData,
+            'reportData'    => $updatedCentersData,
             'reportingDate' => $globalReport->reportingDate,
         ]);
     }
