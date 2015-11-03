@@ -10,6 +10,7 @@ use TmlpStats\Reports\Arrangements\GamesByWeek;
 use TmlpStats\Reports\Arrangements\TeamMemberIncomingOverview;
 use TmlpStats\Reports\Arrangements\TeamMembersByCenter;
 use TmlpStats\Reports\Arrangements\TeamMembersByQuarter;
+use TmlpStats\Reports\Arrangements\TeamMembersByStatus;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByCenter;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByIncomingQuarter;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByOverdue;
@@ -521,6 +522,31 @@ class GlobalReportController extends Controller
         ksort($reportData);
 
         return view('globalreports.details.traveloverview', compact('reportData'));
+    }
+
+    public function getTeamMemberStatus($id)
+    {
+        if (!$this->hasAccess('R')) {
+            $error = 'You do not have access to view this report.';
+            return Response::view('errors.403', compact('error'), 403);
+        }
+
+        $globalReport = GlobalReport::find($id);
+        if (!$globalReport) {
+            $error = 'Report not found.';
+            return Response::view('errors.404', compact('error'), 404);
+        }
+
+        $region = $this->getRegion(true);
+        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($id, $region);
+        if (!$teamMembers) {
+            return '<p>TeamMembers not available.</p>';
+        }
+
+        $a = new TeamMembersByStatus(['teamMembersData' => $teamMembers]);
+        $data = $a->compose();
+
+        return view('globalreports.details.teammemberstatus', $data);
     }
 
     public function getCenterStatsReports($id)
