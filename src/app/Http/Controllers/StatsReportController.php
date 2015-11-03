@@ -450,7 +450,7 @@ class StatsReportController extends Controller
 
         $courses = App::make(CoursesController::class)->getByStatsReport($id);
 
-        $a = new CoursesWithEffectiveness(['courses' => $courses, 'statsReport' => $statsReport]);
+        $a = new CoursesWithEffectiveness(['courses' => $courses, 'reportingDate' => $statsReport->reportingDate]);
         $courses = $a->compose();
 
         $completedCourses = null;

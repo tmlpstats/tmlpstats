@@ -21,6 +21,7 @@
                 <li><a href="#statsreports-tab" data-toggle="tab">Center Reports</a></li>
                 <li><a href="#applications-tab" data-toggle="tab">Applications</a></li>
                 <li><a href="#traveloverview-tab" data-toggle="tab">Travel Summary</a></li>
+                <li><a href="#completedcourses-tab" data-toggle="tab">Completed Courses</a></li>
             </ul>
         </div>
         <div class="col-xs-10">
@@ -72,6 +73,13 @@
                     <h3>Travel/Rooming Summary</h3>
 
                     <div id="traveloverview-container">
+                        @include('partials.loading')
+                    </div>
+                </div>
+                <div class="tab-pane" id="completedcourses-tab">
+                    <h3>Course Completion Stats</h3>
+
+                    <div id="completedcourses-container">
                         @include('partials.loading')
                     </div>
                 </div>
@@ -205,6 +213,14 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/traveloverview?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#traveloverview-container").html(response);
+                }
+            });
+            // Fetch Courses
+            $.ajax({
+                type: "GET",
+                url: "{{ url("/globalreports/{$globalReport->id}/completedcourses?region={$region->abbreviation}") }}",
+                success: function (response) {
+                    $("#completedcourses-container").html(response);
                 }
             });
         });

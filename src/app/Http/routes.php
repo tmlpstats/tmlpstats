@@ -71,6 +71,7 @@ Route::get('globalreports/{id}/applicationsoverdue', 'GlobalReportController@get
 Route::get('globalreports/{id}/applicationsbycenter', 'GlobalReportController@getTmlpRegistrationsByCenter');
 Route::get('globalreports/{id}/applicationsoverview', 'GlobalReportController@getTmlpRegistrationsOverview');
 Route::get('globalreports/{id}/traveloverview', 'GlobalReportController@getTravelReport');
+Route::get('globalreports/{id}/completedcourses', 'GlobalReportController@getCompletedCoursesReport');
 
 // Center Info
 Route::resource('center', 'CenterController');

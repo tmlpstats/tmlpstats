@@ -5,7 +5,9 @@ namespace TmlpStats\Http\Controllers;
 use Cache;
 use Illuminate\Http\Request;
 use TmlpStats\CourseData;
+use TmlpStats\GlobalReport;
 use TmlpStats\Http\Requests;
+use TmlpStats\Region;
 use TmlpStats\StatsReport;
 
 class CoursesController extends Controller
@@ -84,6 +86,27 @@ class CoursesController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getByGlobalReport($id, Region $region)
+    {
+        $globalReport = GlobalReport::find($id);
+
+        $statsReports = $globalReport->statsReports()
+            ->byRegion($region)
+            ->reportingDate($globalReport->reportingDate)
+            ->get();
+
+        $courses = [];
+        foreach ($statsReports as $report) {
+
+            $reportCourses = $this->getByStatsReport($report->id);
+            foreach ($reportCourses as $course) {
+                $courses[] = $course;
+            }
+        }
+
+        return $courses;
     }
 
 

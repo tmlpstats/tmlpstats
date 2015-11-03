@@ -9,7 +9,7 @@ class CoursesWithEffectiveness extends BaseArrangement
     public function build($data)
     {
         $courses = $data['courses'];
-        $statsReport = $data['statsReport'];
+        $reportingDate = $data['reportingDate'];
 
         $reportData = [];
         foreach ($courses as $courseData) {
@@ -38,7 +38,7 @@ class CoursesWithEffectiveness extends BaseArrangement
                 $course[$field] = $courseData->$field;
             }
 
-            if ($course['startDate']->lt($statsReport->reportingDate)) {
+            if ($course['startDate']->lt($reportingDate)) {
                 $course['completionStats']['registrationFulfillment'] = $courseData->currentTer
                     ? round(($courseData->currentStandardStarts / $courseData->currentTer) * 100)
                     : 0;
