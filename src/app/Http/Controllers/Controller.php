@@ -6,6 +6,7 @@ use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Request;
+use Session;
 use TmlpStats\Region;
 
 abstract class Controller extends BaseController {
@@ -21,6 +22,13 @@ abstract class Controller extends BaseController {
         $region = null;
         if (Request::has('region')) {
             $region = Region::abbreviation(Request::get('region'))->first();
+            Session::set('viewRegionId', $region->id);
+        }
+
+        if (!$region) {
+            if (Session::has('viewRegionId')) {
+                $region = Region::find(Session::get('viewRegionId'));
+            }
         }
 
         if (!$region) {
