@@ -24,6 +24,16 @@ class CourseData extends Model
         'registrations',
     ];
 
+    public function __get($name)
+    {
+        switch ($name) {
+            case 'center':
+                return $this->course->$name;
+            default:
+                return parent::__get($name);
+        }
+    }
+
     public function scopeByStatsReport($query, $statsReport)
     {
         return $query->whereStatsReportId($statsReport->id);

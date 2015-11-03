@@ -3,6 +3,8 @@
 use TmlpStats\Http\Requests;
 use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
+use TmlpStats\Reports\Arrangements\CoursesByCenter;
+use TmlpStats\Reports\Arrangements\CoursesWithEffectiveness;
 use TmlpStats\Reports\Arrangements\GamesByMilestone;
 use TmlpStats\Reports\Arrangements\GamesByWeek;
 use TmlpStats\Reports\Arrangements\TeamMemberIncomingOverview;
@@ -607,6 +609,44 @@ class GlobalReportController extends Controller
         usort($statsReportsList, array(get_class(), 'sortByCenterName'));
 
         return view('globalreports.details.statsreports', compact('globalReport', 'region', 'statsReportsList'));
+    }
+
+    public function getCompletedCoursesReport($id)
+    {
+        if (!$this->hasAccess('R')) {
+            $error = 'You do not have access to view this report.';
+            return Response::view('errors.403', compact('error'), 403);
+        }
+
+        $globalReport = GlobalReport::find($id);
+        if (!$globalReport) {
+            $error = 'Report not found.';
+            return Response::view('errors.404', compact('error'), 404);
+        }
+
+        $region = $this->getRegion(true);
+
+        $coursesData = App::make(CoursesController::class)->getByGlobalReport($id, $region);
+
+        $a = new CoursesByCenter(['coursesData' => $coursesData]);
+        $coursesByCenter = $a->compose();
+        $coursesByCenter = $coursesByCenter['reportData'];
+
+        $reportData = [];
+        foreach ($coursesByCenter as $centerName => $coursesData) {
+
+            $a = new CoursesWithEffectiveness(['courses' => $coursesData, 'reportingDate' => $globalReport->reportingDate]);
+            $centerRow = $a->compose();
+
+            if (!isset($centerRow['reportData']['completed'])) {
+                continue;
+            }
+
+            $reportData[$centerName] = $centerRow['reportData']['completed'];
+        }
+        ksort($reportData);
+
+        return view('globalreports.details.completedcourses', compact('reportData'));
     }
 
     protected static function sortByCenterName($a, $b)
