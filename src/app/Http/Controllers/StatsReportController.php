@@ -565,7 +565,7 @@ class StatsReportController extends Controller
             return '<p>Courses not available.</p>';
         }
 
-        $a = new CoursesWithEffectiveness(['courses' => $courses, 'statsReport' => $statsReport]);
+        $a = new CoursesWithEffectiveness(['courses' => $courses, 'reportingDate' => $statsReport->reportingDate]);
         $data = $a->compose();
 
         return view('statsreports.details.courses', $data);
