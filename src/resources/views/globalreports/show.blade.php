@@ -22,6 +22,7 @@
                 <li><a href="#applications-tab" data-toggle="tab">Applications</a></li>
                 <li><a href="#traveloverview-tab" data-toggle="tab">Travel Summary</a></li>
                 <li><a href="#completedcourses-tab" data-toggle="tab">Completed Courses</a></li>
+                <li><a href="#teammemberstatus-tab" data-toggle="tab">Team Member Alerts</a></li>
             </ul>
         </div>
         <div class="col-xs-10">
@@ -80,6 +81,13 @@
                     <h3>Course Completion Stats</h3>
 
                     <div id="completedcourses-container">
+                        @include('partials.loading')
+                    </div>
+                </div>
+                <div class="tab-pane" id="teammemberstatus-tab">
+                    <h3>Team Members of Interest</h3>
+
+                    <div id="teammemberstatus-container">
                         @include('partials.loading')
                     </div>
                 </div>
@@ -221,6 +229,14 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/completedcourses?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#completedcourses-container").html(response);
+                }
+            });
+            // Fetch Team Members' Status
+            $.ajax({
+                type: "GET",
+                url: "{{ url("/globalreports/{$globalReport->id}/teammemberstatus?region={$region->abbreviation}") }}",
+                success: function (response) {
+                    $("#teammemberstatus-container").html(response);
                 }
             });
         });
