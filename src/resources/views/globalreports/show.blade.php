@@ -20,6 +20,7 @@
                 <li><a href="#regionalstats-tab" data-toggle="tab">Regional Games</a></li>
                 <li><a href="#statsreports-tab" data-toggle="tab">Center Reports</a></li>
                 <li><a href="#applications-tab" data-toggle="tab">Applications</a></li>
+                <li><a href="#traveloverview-tab" data-toggle="tab">Travel Summary</a></li>
             </ul>
         </div>
         <div class="col-xs-10">
@@ -64,6 +65,13 @@
                         @include('partials.loading')
                     </div>
                     <div id="applicationsbycenter-container" style="display: none">
+                        @include('partials.loading')
+                    </div>
+                </div>
+                <div class="tab-pane" id="traveloverview-tab">
+                    <h3>Travel/Rooming Summary</h3>
+
+                    <div id="traveloverview-container">
                         @include('partials.loading')
                     </div>
                 </div>
@@ -189,6 +197,14 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/applicationsoverview?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#applicationsoverview-container").html(response);
+                }
+            });
+            // Fetch Travel
+            $.ajax({
+                type: "GET",
+                url: "{{ url("/globalreports/{$globalReport->id}/traveloverview?region={$region->abbreviation}") }}",
+                success: function (response) {
+                    $("#traveloverview-container").html(response);
                 }
             });
         });
