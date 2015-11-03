@@ -12,6 +12,7 @@ use TmlpStats\Reports\Arrangements\TmlpRegistrationsByCenter;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByIncomingQuarter;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByOverdue;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByStatus;
+use TmlpStats\Reports\Arrangements\TravelRoomingByTeamYear;
 use TmlpStats\StatsReport;
 use TmlpStats\Center;
 use TmlpStats\Reports\Arrangements;
@@ -468,6 +469,56 @@ class GlobalReportController extends Controller
             'reportData'    => $updatedCentersData,
             'reportingDate' => $globalReport->reportingDate,
         ]);
+    }
+
+    public function getTravelReport($id)
+    {
+        if (!$this->hasAccess('R')) {
+            $error = 'You do not have access to view this report.';
+            return Response::view('errors.403', compact('error'), 403);
+        }
+
+        $globalReport = GlobalReport::find($id);
+        if (!$globalReport) {
+            $error = 'Report not found.';
+            return Response::view('errors.404', compact('error'), 404);
+        }
+
+        $region = $this->getRegion(true);
+
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($id, $region);
+        if (!$registrations) {
+            return '<p>TMLP Registrations not available.</p>';
+        }
+
+        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($id, $region);
+        if (!$teamMembers) {
+            return '<p>TeamMembers not available.</p>';
+        }
+
+        $a = new TmlpRegistrationsByCenter(['registrationsData' => $registrations]);
+        $registrationsByCenter = $a->compose();
+        $registrationsByCenter = $registrationsByCenter['reportData'];
+
+        $a = new TeamMembersByCenter(['teamMembersData' => $teamMembers]);
+        $teamMembersByCenter = $a->compose();
+        $teamMembersByCenter = $teamMembersByCenter['reportData'];
+
+        $reportData = [];
+        foreach ($teamMembersByCenter as $centerName => $teamMembersData) {
+
+            $a = new TravelRoomingByTeamYear([
+                'registrationsData' => isset($registrationsByCenter[$centerName]) ? $registrationsByCenter[$centerName] : [],
+                'teamMembersData'   => isset($teamMembersByCenter[$centerName]) ? $teamMembersByCenter[$centerName] : [],
+                'region'            => $region,
+            ]);
+            $centerRow = $a->compose();
+
+            $reportData[$centerName] = $centerRow['reportData'];
+        }
+        ksort($reportData);
+
+        return view('globalreports.details.traveloverview', compact('reportData'));
     }
 
     public function getCenterStatsReports($id)
