@@ -23,6 +23,37 @@
         </thead>
         <tbody>
         @foreach ($reportData as $centerName => $centerData)
+            <?php
+            $t1Total = 0;
+            if (isset($centerData['team1']['incoming'])) {
+                $t1Total += $centerData['team1']['incoming'];
+            }
+            if (isset($centerData['team1']['ongoing'])) {
+                $t1Total += $centerData['team1']['ongoing'];
+            }
+
+            $t2Total = 0;
+            if (isset($centerData['team2']['incoming'])) {
+                $t2Total += $centerData['team2']['incoming'];
+            }
+            if (isset($centerData['team2']['ongoing'])) {
+                $t2Total += $centerData['team2']['ongoing'];
+            }
+
+            $t1TotalClass = '';
+            if ($t1Total < 6) {
+                $t1TotalClass = 'bg-danger';
+            } else if ($t1Total <= 7) {
+                $t1TotalClass = 'bg-warning';
+            }
+
+            $t2TotalClass = '';
+            if ($t2Total < 1) {
+                $t2TotalClass = 'bg-danger';
+            } else if ($t2Total <= 2) {
+                $t2TotalClass = 'bg-warning';
+            }
+            ?>
             <tr>
                 <td style="border-right: 2px solid #DDD;">{{ $centerName }}</td>
                 @foreach ($centerData as $team => $registrationData)
@@ -31,30 +62,8 @@
                     <td style="text-align: center">{{ isset($registrationData['applications']['approved']) ? $registrationData['applications']['approved'] : 0 }}</td>
                     <td style="text-align: center; border-right: 2px solid #DDD;">{{ isset($registrationData['applications']['withdrawn']) ? $registrationData['applications']['withdrawn'] : 0 }}</td>
                 @endforeach
-                <td style="text-align: center">
-                    <?php
-                    $total = 0;
-                    if (isset($centerData['team1']['incoming'])) {
-                        $total += $centerData['team1']['incoming'];
-                    }
-                    if (isset($centerData['team1']['ongoing'])) {
-                        $total += $centerData['team1']['ongoing'];
-                    }
-                    echo $total;
-                    ?>
-                </td>
-                <td style="text-align: center">
-                    <?php
-                    $total = 0;
-                    if (isset($centerData['team2']['incoming'])) {
-                        $total += $centerData['team2']['incoming'];
-                    }
-                    if (isset($centerData['team2']['ongoing'])) {
-                        $total += $centerData['team2']['ongoing'];
-                    }
-                    echo $total;
-                    ?>
-                </td>
+                <td class="{{ $t1TotalClass }}" style="text-align: center">{{ $t1Total }}</td>
+                <td class="{{ $t2TotalClass }}" style="text-align: center">{{ $t2Total }}</td>
             </tr>
         @endforeach
         </tbody>
