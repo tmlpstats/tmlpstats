@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Import;
 
+use Cache;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
 
 use TmlpStats\Center;
@@ -77,7 +78,10 @@ class ImportManager
 
                 try {
                     $importer = new Xlsx\XlsxImporter($file->getRealPath(), $fileName, $this->expectedDate, $this->enforceVersion);
-                    $importer->import($saveReport);
+                    $importer->import();
+                    if ($saveReport) {
+                        $importer->saveReport();
+                    }
                     $sheet = $importer->getResults();
                 } catch (Exception $e) {
                     Log::error("Error processing '$fileName': " . $e->getMessage() . "\n" . $e->getTraceAsString());
@@ -90,6 +94,14 @@ class ImportManager
                 Log::info("{$user} submitted sheet for {$sheet['center']} with {$errorCount} errors and {$warningCount} warnings.");
 
                 if (isset($sheet['statsReportId'])) {
+
+                    // Caching results so we don't have to reprocess them when the user presses submit.
+                    // Throw away results if not submitted within 10 minutes
+                    // If we already saved, don't bother caching.
+                    if (!$saveReport) {
+                        $cacheKey = "statsReport{$sheet['statsReportId']}:importdata";
+                        Cache::put($cacheKey, $importer, 10);
+                    }
 
                     if ($sheet['submittedAt']) {
                         $sheetPath = XlsxArchiver::getInstance()->archive($file, $sheet['statsReport']);

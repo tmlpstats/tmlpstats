@@ -289,8 +289,14 @@ class StatsReportController extends Controller
                 $sheet = [];
 
                 try {
-                    $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
-                    $importer->import(true);
+                    // Check if we have cached the report already. If so, remove it from the cache and use it here
+                    $cacheKey = "statsReport{$id}:importdata";
+                    $importer = Cache::pull($cacheKey);
+                    if (!$importer) {
+                        $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
+                        $importer->import();
+                    }
+                    $importer->saveReport();
                     $sheet = $importer->getResults();
                 } catch (Exception $e) {
                     Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
@@ -429,7 +435,7 @@ class StatsReportController extends Controller
                 : Response::view('errors.403', compact('error'), 403);
         }
 
-        if (!$statsReport->isValidated()) {
+        if (!$statsReport->isValidated() && $report != 'results') {
             return '<p>This report did not pass validation. See Report Details for more information.</p>';
         }
 

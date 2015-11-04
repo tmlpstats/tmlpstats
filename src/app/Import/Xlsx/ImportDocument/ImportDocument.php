@@ -526,15 +526,15 @@ class ImportDocument extends ImportDocumentAbstract
 
     // This method is called after validateReport, and only if it passes.
     // Put work here that add/updates data based on valid values
-    protected function postProcess($isValid)
+    protected function postProcess()
     {
         // Don't save anything if report is locked
         if ($this->statsReport->locked) {
             $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_STATS_REPORT_LOCKED', $this->center->name, $this->reportingDate->format("M d, Y"));
-            return;
+            return false;
         }
 
-        if ($isValid) {
+        if ($this->statsReport->validated) {
             foreach ($this->importers as $name => $importer) {
 
                 $importer->postProcess();
@@ -564,7 +564,6 @@ class ImportDocument extends ImportDocumentAbstract
         }
 
         $this->statsReport->version = $this->version;
-        $this->statsReport->validated = $isValid;
         $this->statsReport->submittedAt = $this->submittedAt ?: Carbon::now();
         $this->statsReport->save();
 
@@ -574,6 +573,8 @@ class ImportDocument extends ImportDocumentAbstract
         $this->globalReport->addCenterReport($this->statsReport);
 
         $this->saved = true;
+
+        return true;
     }
 
     protected function getWeeklyStatsSheet()
