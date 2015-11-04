@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use Illuminate\Http\Request;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
@@ -40,14 +41,14 @@ class HomeController extends Controller {
      *
      * @return Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $timezone = '';
         if (Session::has('timezone')) {
             $timezone =  Session::get('timezone');
         }
 
-        $region = $this->getRegion();
+        $region = $this->getRegion($request);
 
         $allReports = StatsReport::currentQuarter($region)->submitted()->orderBy('reporting_date', 'desc')->get();
         if ($allReports->isEmpty()) {
