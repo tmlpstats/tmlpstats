@@ -3,29 +3,31 @@
 use TmlpStats\Http\Requests;
 use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
+use TmlpStats\Region;
+use TmlpStats\StatsReport;
+use TmlpStats\Center;
 use TmlpStats\Reports\Arrangements\CoursesByCenter;
 use TmlpStats\Reports\Arrangements\CoursesWithEffectiveness;
 use TmlpStats\Reports\Arrangements\GamesByMilestone;
 use TmlpStats\Reports\Arrangements\GamesByWeek;
 use TmlpStats\Reports\Arrangements\TeamMemberIncomingOverview;
 use TmlpStats\Reports\Arrangements\TeamMembersByCenter;
-use TmlpStats\Reports\Arrangements\TeamMembersByQuarter;
 use TmlpStats\Reports\Arrangements\TeamMembersByStatus;
+
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByCenter;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByIncomingQuarter;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByOverdue;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByStatus;
 use TmlpStats\Reports\Arrangements\TravelRoomingByTeamYear;
-use TmlpStats\StatsReport;
-use TmlpStats\Center;
 use TmlpStats\Reports\Arrangements;
 
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 use App;
 use Auth;
-use Response;
 use Input;
+use Response;
 
 class GlobalReportController extends Controller
 {
@@ -105,7 +107,7 @@ class GlobalReportController extends Controller
      * @param  int $id
      * @return Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         if (!$this->hasAccess('R')) {
             $error = 'You do not have access to view this report.';
@@ -118,7 +120,7 @@ class GlobalReportController extends Controller
             return Response::view('errors.404', compact('error'), 404);
         }
 
-        $region = $this->getRegion(true);
+        $region = $this->getRegion($request, true);
 
         return view('globalreports.show', compact(
             'globalReport',
@@ -249,25 +251,80 @@ class GlobalReportController extends Controller
         return $centers;
     }
 
-    public function getRatingSummary($id)
+    public function runDispatcher(Request $request, $id, $report)
     {
         if (!$this->hasAccess('R')) {
             $error = 'You do not have access to view this report.';
-            return Response::view('errors.403', compact('error'), 403);
+            return $request->ajax()
+                ? "<p>{$error}</p>"
+                : Response::view('errors.403', compact('error'), 403);
         }
 
         $globalReport = GlobalReport::find($id);
         if (!$globalReport) {
             $error = 'Report not found.';
-            return Response::view('errors.404', compact('error'), 404);
+            return $request->ajax()
+                ? "<p>{$error}</p>"
+                : Response::view('errors.404', compact('error'), 404);
         }
 
-        $region = $this->getRegion(true);
+        $region = $this->getRegion($request, true);
 
+        $response = null;
+        switch ($report) {
+            case 'ratingsummary':
+                $response = $this->getRatingSummary($globalReport, $region);
+                break;
+            case 'regionalstats':
+                $response = $this->getRegionalStats($globalReport, $region);
+                break;
+            case 'statsreports':
+                $response = $this->getCenterStatsReports($globalReport, $region);
+                break;
+            case 'applicationsbystatus':
+                $response = $this->getTmlpRegistrationsByStatus($globalReport, $region);
+                break;
+            case 'applicationsoverdue':
+                $response = $this->getTmlpRegistrationsOverdue($globalReport, $region);
+                break;
+            case 'applicationsbycenter':
+                $response = $this->getTmlpRegistrationsByCenter($globalReport, $region);
+                break;
+            case 'applicationsoverview':
+                $response = $this->getTmlpRegistrationsOverview($globalReport, $region);
+                break;
+            case 'traveloverview':
+                $response = $this->getTravelReport($globalReport, $region);
+                break;
+            case 'completedcourses':
+                $response = $this->getCompletedCoursesReport($globalReport, $region);
+                break;
+            case 'teammemberstatus':
+                $response = $this->getTeamMemberStatus($globalReport, $region);
+                break;
+        }
+
+        if (!$response) {
+            $error = 'Report not available.';
+            $response = $request->ajax()
+                ? "<p>{$error}</p>"
+                : Response::view('errors.404', $error, 404);
+        }
+
+        return $response;
+    }
+
+
+    public function getRatingSummary(GlobalReport $globalReport, Region $region)
+    {
         $statsReports = $globalReport->statsReports()
             ->validated()
             ->byRegion($region)
             ->get();
+
+        if ($statsReports->isEmpty()) {
+            return null;
+        }
 
         // TODO don't force passing the data in in the future
         $a = new Arrangements\RegionByRating($statsReports);
@@ -275,25 +332,15 @@ class GlobalReportController extends Controller
         return view('globalreports.details.ratingsummary', $data);
     }
 
-    public function getRegionalStats($id)
+    public function getRegionalStats(GlobalReport $globalReport, Region $region)
     {
-        if (!$this->hasAccess('R')) {
-            $error = 'You do not have access to view this report.';
-            return Response::view('errors.403', compact('error'), 403);
-        }
-
-        $globalReport = GlobalReport::find($id);
-        if (!$globalReport) {
-            $error = 'Report not found.';
-            return Response::view('errors.404', compact('error'), 404);
-        }
-
-        $region = $this->getRegion(true);
-
         $quarter = Quarter::byRegion($region)->date($globalReport->reportingDate)->first();
         $quarter->setRegion($region);
 
-        $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($id, $region);
+        $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($globalReport->id, $region);
+        if (!$globalReportData) {
+            return null;
+        }
 
         $a = new GamesByWeek($globalReportData);
         $weeklyData = $a->compose();
@@ -303,23 +350,11 @@ class GlobalReportController extends Controller
         return view('reports.centergames.milestones', $data);
     }
 
-    public function getTmlpRegistrationsByStatus($id)
+    public function getTmlpRegistrationsByStatus(GlobalReport $globalReport, Region $region)
     {
-        if (!$this->hasAccess('R')) {
-            $error = 'You do not have access to view this report.';
-            return Response::view('errors.403', compact('error'), 403);
-        }
-
-        $globalReport = GlobalReport::find($id);
-        if (!$globalReport) {
-            $error = 'Report not found.';
-            return Response::view('errors.404', compact('error'), 404);
-        }
-
-        $region = $this->getRegion(true);
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($id, $region);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$registrations) {
-            return '<p>TMLP Registrations not available.</p>';
+            return null;
         }
 
         $a = new TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
@@ -329,24 +364,11 @@ class GlobalReportController extends Controller
         return view('globalreports.details.applicationsbystatus', $data);
     }
 
-    public function getTmlpRegistrationsOverdue($id)
+    public function getTmlpRegistrationsOverdue(GlobalReport $globalReport, Region $region)
     {
-        if (!$this->hasAccess('R')) {
-            $error = 'You do not have access to view this report.';
-            return Response::view('errors.403', compact('error'), 403);
-        }
-
-        $globalReport = GlobalReport::find($id);
-        if (!$globalReport) {
-            $error = 'Report not found.';
-            return Response::view('errors.404', compact('error'), 404);
-        }
-
-        $region = $this->getRegion(true);
-
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($id, $region);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$registrations) {
-            return '<p>TMLP Registrations not available.</p>';
+            return null;
         }
 
         $a = new TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
@@ -359,29 +381,16 @@ class GlobalReportController extends Controller
         return view('globalreports.details.applicationsoverdue', $data);
     }
 
-    public function getTmlpRegistrationsOverview($id)
+    public function getTmlpRegistrationsOverview(GlobalReport $globalReport, Region $region)
     {
-        if (!$this->hasAccess('R')) {
-            $error = 'You do not have access to view this report.';
-            return Response::view('errors.403', compact('error'), 403);
-        }
-
-        $globalReport = GlobalReport::find($id);
-        if (!$globalReport) {
-            $error = 'Report not found.';
-            return Response::view('errors.404', compact('error'), 404);
-        }
-
-        $region = $this->getRegion(true);
-
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($id, $region);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$registrations) {
-            return '<p>TMLP Registrations not available.</p>';
+            return null;
         }
 
-        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($id, $region);
+        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$teamMembers) {
-            return '<p>TeamMembers not available.</p>';
+            return null;
         }
 
         $a = new TmlpRegistrationsByCenter(['registrationsData' => $registrations]);
@@ -391,7 +400,6 @@ class GlobalReportController extends Controller
         $a = new TeamMembersByCenter(['teamMembersData' => $teamMembers]);
         $teamMembersByCenter = $a->compose();
         $teamMembersByCenter = $teamMembersByCenter['reportData'];
-
 
         $reportData = [];
         $teamCounts = [
@@ -434,69 +442,41 @@ class GlobalReportController extends Controller
         return view('globalreports.details.applicationsoverview', compact('reportData', 'teamCounts'));
     }
 
-    public function getTmlpRegistrationsByCenter($id)
+    public function getTmlpRegistrationsByCenter(GlobalReport $globalReport, Region $region)
     {
-        if (!$this->hasAccess('R')) {
-            $error = 'You do not have access to view this report.';
-            return Response::view('errors.403', compact('error'), 403);
-        }
-
-        $globalReport = GlobalReport::find($id);
-        if (!$globalReport) {
-            $error = 'Report not found.';
-            return Response::view('errors.404', compact('error'), 404);
-        }
-
-        $region = $this->getRegion(true);
-
         $quarter = Quarter::byRegion($region)->date($globalReport->reportingDate)->first();
         $quarter->setRegion($region);
 
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($id, $region);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$registrations) {
-            return '<p>TMLP Registrations not available.</p>';
+            return null;
         }
 
         $a = new TmlpRegistrationsByCenter(['registrationsData' => $registrations]);
         $centersData = $a->compose();
 
-        $updatedCentersData = [];
+        $reportData = [];
         foreach ($centersData['reportData'] as $centerName => $data) {
             $a = new TmlpRegistrationsByIncomingQuarter(['registrationsData' => $data, 'quarter' => $quarter]);
             $data = $a->compose();
-            $updatedCentersData[$centerName] = $data['reportData'];
+            $reportData[$centerName] = $data['reportData'];
         }
-        ksort($updatedCentersData);
+        ksort($reportData);
+        $reportingDate = $globalReport->reportingDate;
 
-        return view('globalreports.details.applicationsbycenter', [
-            'reportData'    => $updatedCentersData,
-            'reportingDate' => $globalReport->reportingDate,
-        ]);
+        return view('globalreports.details.applicationsbycenter', compact('reportData', 'reportingDate'));
     }
 
-    public function getTravelReport($id)
+    public function getTravelReport(GlobalReport $globalReport, Region $region)
     {
-        if (!$this->hasAccess('R')) {
-            $error = 'You do not have access to view this report.';
-            return Response::view('errors.403', compact('error'), 403);
-        }
-
-        $globalReport = GlobalReport::find($id);
-        if (!$globalReport) {
-            $error = 'Report not found.';
-            return Response::view('errors.404', compact('error'), 404);
-        }
-
-        $region = $this->getRegion(true);
-
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($id, $region);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$registrations) {
-            return '<p>TMLP Registrations not available.</p>';
+            return null;
         }
 
-        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($id, $region);
+        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$teamMembers) {
-            return '<p>TeamMembers not available.</p>';
+            return null;
         }
 
         $a = new TmlpRegistrationsByCenter(['registrationsData' => $registrations]);
@@ -524,23 +504,11 @@ class GlobalReportController extends Controller
         return view('globalreports.details.traveloverview', compact('reportData'));
     }
 
-    public function getTeamMemberStatus($id)
+    public function getTeamMemberStatus(GlobalReport $globalReport, Region $region)
     {
-        if (!$this->hasAccess('R')) {
-            $error = 'You do not have access to view this report.';
-            return Response::view('errors.403', compact('error'), 403);
-        }
-
-        $globalReport = GlobalReport::find($id);
-        if (!$globalReport) {
-            $error = 'Report not found.';
-            return Response::view('errors.404', compact('error'), 404);
-        }
-
-        $region = $this->getRegion(true);
-        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($id, $region);
+        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$teamMembers) {
-            return '<p>TeamMembers not available.</p>';
+            return null;
         }
 
         $a = new TeamMembersByStatus(['teamMembersData' => $teamMembers]);
@@ -549,27 +517,19 @@ class GlobalReportController extends Controller
         return view('globalreports.details.teammemberstatus', $data);
     }
 
-    public function getCenterStatsReports($id)
+    public function getCenterStatsReports(GlobalReport $globalReport, Region $region)
+
     {
-        if (!$this->hasAccess('R')) {
-            $error = 'You do not have access to view this report.';
-            return Response::view('errors.403', compact('error'), 403);
-        }
-
-        $globalReport = GlobalReport::find($id);
-        if (!$globalReport) {
-            $error = 'Report not found.';
-            return Response::view('errors.404', compact('error'), 404);
-        }
-
-        $region = $this->getRegion(true);
-
         $quarter = Quarter::byRegion($region)->date($globalReport->reportingDate)->first();
         $quarter->setRegion($region);
 
         $statsReports = $globalReport->statsReports()
             ->byRegion($region)
             ->get();
+
+        if ($statsReports->isEmpty()) {
+            return null;
+        }
 
         $statsReportsList = [];
 
@@ -586,11 +546,6 @@ class GlobalReportController extends Controller
                 'officialSubmitTime' => '',
                 'officialReport'     => $report,
             ];
-
-            // Was most recent report submitted on time?
-            // Was a report submitted on time, then a resubmit happend late
-            // All submits were late
-
 
             if ($report->isOnTime()) {
                 $statsReportData['onTime'] = true;
@@ -634,25 +589,15 @@ class GlobalReportController extends Controller
         }
         usort($statsReportsList, array(get_class(), 'sortByCenterName'));
 
-        return view('globalreports.details.statsreports', compact('globalReport', 'region', 'statsReportsList'));
+        return view('globalreports.details.statsreports', compact('statsReportsList'));
     }
 
-    public function getCompletedCoursesReport($id)
+    public function getCompletedCoursesReport(GlobalReport $globalReport, Region $region)
     {
-        if (!$this->hasAccess('R')) {
-            $error = 'You do not have access to view this report.';
-            return Response::view('errors.403', compact('error'), 403);
+        $coursesData = App::make(CoursesController::class)->getByGlobalReport($globalReport->id, $region);
+        if (!$coursesData) {
+            return null;
         }
-
-        $globalReport = GlobalReport::find($id);
-        if (!$globalReport) {
-            $error = 'Report not found.';
-            return Response::view('errors.404', compact('error'), 404);
-        }
-
-        $region = $this->getRegion(true);
-
-        $coursesData = App::make(CoursesController::class)->getByGlobalReport($id, $region);
 
         $a = new CoursesByCenter(['coursesData' => $coursesData]);
         $coursesByCenter = $a->compose();

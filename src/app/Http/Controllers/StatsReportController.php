@@ -32,6 +32,7 @@ use Cache;
 use Exception;
 use Input;
 use Log;
+use Request;
 use Response;
 
 class StatsReportController extends Controller
@@ -410,27 +411,102 @@ class StatsReportController extends Controller
         }
     }
 
-
-    public function getSummary($id)
+    public function runDispatcher(Request $request, $id, $report)
     {
         $statsReport = StatsReport::find($id);
+
+        if (!$statsReport) {
+            $error = 'Report not found.';
+            return $request->ajax()
+                ? "<p>{$error}</p>"
+                : Response::view('errors.404', compact('error'), 404);
+        }
+
+        if (!$this->hasAccess($statsReport->center->id, 'R')) {
+            $error = 'You do not have access to view this report.';
+            return $request->ajax()
+                ? "<p>{$error}</p>"
+                : Response::view('errors.403', compact('error'), 403);
+        }
+
         if (!$statsReport->isValidated()) {
             return '<p>This report did not pass validation. See Report Details for more information.</p>';
         }
 
-        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($id, $statsReport->reportingDate);
-        if (!$centerStatsData) {
-            return '<p>Center Stats not available.</p>';
+        $response = null;
+        switch ($report) {
+            case 'summary':
+                $response =  $this->getSummary($statsReport);
+                break;
+            case 'results':
+                $response =  $this->getResults($statsReport);
+                break;
+            case 'centerstats':
+                $response =  $this->getCenterStats($statsReport);
+                break;
+            case 'classlist':
+                $response =  $this->getTeamMembers($statsReport);
+                break;
+            case 'tmlpregistrations':
+                $response =  $this->getTmlpRegistrations($statsReport);
+                break;
+            case 'tmlpregistrationsbystatus':
+                $response =  $this->getTmlpRegistrationsByStatus($statsReport);
+                break;
+            case 'courses':
+                $response =  $this->getCourses($statsReport);
+                break;
+            case 'contactinfo':
+                $response =  $this->getContacts($statsReport);
+                break;
+            case 'gitwsummary':
+                $response =  $this->getGitwByTeamMember($statsReport);
+                break;
+            case 'tdosummary':
+                $response =  $this->getTdoByTeamMember($statsReport);
+                break;
         }
 
+        if ($response === null) {
+            $error = 'Report not found.';
+            $response = $request->ajax()
+                ? "<p>{$error}</p>"
+                : Response::view('errors.404', $error, 404);
+        }
+
+        return $response;
+    }
+
+    public function getSummary(StatsReport $statsReport)
+    {
+        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($statsReport->id, $statsReport->reportingDate);
+        if (!$centerStatsData) {
+            return null;
+        }
+
+        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport->id);
+        if (!$teamMembers) {
+            return null;
+        }
+
+        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport->id);
+        if (!$registrations) {
+            return null;
+        }
+
+        $courses = App::make(CoursesController::class)->getByStatsReport($statsReport->id);
+        if (!$courses) {
+            return null;
+        }
+
+        # Center Games
         $a = new GamesByWeek($centerStatsData);
         $centerStatsData = $a->compose();
 
         $date = $statsReport->reportingDate->toDateString();
         $reportData = $centerStatsData['reportData'][$date];
 
-        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($id);
-
+        # Team Member stats
         $a = new TeamMembersCounts(['teamMembersData' => $teamMembers]);
         $teamMembersCounts = $a->compose();
 
@@ -438,18 +514,17 @@ class StatsReportController extends Controller
         $gitw = $teamMembersCounts['reportData']['gitw'];
         $teamWithdraws = $teamMembersCounts['reportData']['withdraws'];
 
-        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
-
+        # Application Status
         $a = new TmlpRegistrationsByStatus(['registrationsData' => $registrations, 'quarter' => $statsReport->quarter]);
         $applications = $a->compose();
         $applications = $applications['reportData'];
 
+        # Application Withdraws
         $a = new TmlpRegistrationsByIncomingQuarter(['registrationsData' => $registrations, 'quarter' => $statsReport->quarter]);
         $applicationWithdraws = $a->compose();
         $applicationWithdraws = $applicationWithdraws['reportData']['withdrawn'];
 
-        $courses = App::make(CoursesController::class)->getByStatsReport($id);
-
+        # Completed Courses
         $a = new CoursesWithEffectiveness(['courses' => $courses, 'reportingDate' => $statsReport->reportingDate]);
         $courses = $a->compose();
 
@@ -477,16 +552,11 @@ class StatsReportController extends Controller
         ));
     }
 
-    public function getCenterStats($id)
+    public function getCenterStats(StatsReport $statsReport)
     {
-        $statsReport = StatsReport::find($id);
-        if (!$statsReport->isValidated()) {
-            return '<p>This report did not pass validation. See Report Details for more information.</p>';
-        }
-
-        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($id);
+        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($statsReport->id);
         if (!$centerStatsData) {
-            return '<p>Center Stats not available.</p>';
+            return null;
         }
 
         $a = new GamesByWeek($centerStatsData);
@@ -498,16 +568,11 @@ class StatsReportController extends Controller
         return view('reports.centergames.milestones', $data);
     }
 
-    public function getTeamMembers($id)
+    public function getTeamMembers(StatsReport $statsReport)
     {
-        $statsReport = StatsReport::find($id);
-        if (!$statsReport->isValidated()) {
-            return '<p>This report did not pass validation. See Report Details for more information.</p>';
-        }
-
-        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($id);
+        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport->id);
         if (!$teamMembers) {
-            return '<p>Team Members not available.</p>';
+            return null;
         }
 
         $a = new TeamMembersByQuarter(['teamMembersData' => $teamMembers]);
@@ -516,16 +581,11 @@ class StatsReportController extends Controller
         return view('statsreports.details.classlist', $data);
     }
 
-    public function getTmlpRegistrationsByStatus($id)
+    public function getTmlpRegistrationsByStatus(StatsReport $statsReport)
     {
-        $statsReport = StatsReport::find($id);
-        if (!$statsReport->isValidated()) {
-            return '<p>This report did not pass validation. See Report Details for more information.</p>';
-        }
-
-        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport->id);
         if (!$registrations) {
-            return '<p>TMLP Registrations not available.</p>';
+            return null;
         }
 
         $a = new TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
@@ -535,16 +595,11 @@ class StatsReportController extends Controller
         return view('statsreports.details.tmlpregistrationsbystatus', $data);
     }
 
-    public function getTmlpRegistrations($id)
+    public function getTmlpRegistrations(StatsReport $statsReport)
     {
-        $statsReport = StatsReport::find($id);
-        if (!$statsReport->isValidated()) {
-            return '<p>This report did not pass validation. See Report Details for more information.</p>';
-        }
-
-        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($id);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport->id);
         if (!$registrations) {
-            return '<p>TMLP Registrations not available.</p>';
+            return null;
         }
 
         $a = new TmlpRegistrationsByIncomingQuarter(['registrationsData' => $registrations, 'quarter' => $statsReport->quarter]);
@@ -553,16 +608,11 @@ class StatsReportController extends Controller
         return view('statsreports.details.tmlpregistrations', $data);
     }
 
-    public function getCourses($id)
+    public function getCourses(StatsReport $statsReport)
     {
-        $statsReport = StatsReport::find($id);
-        if (!$statsReport->isValidated()) {
-            return '<p>This report did not pass validation. See Report Details for more information.</p>';
-        }
-
-        $courses = App::make(CoursesController::class)->getByStatsReport($id);
+        $courses = App::make(CoursesController::class)->getByStatsReport($statsReport->id);
         if (!$courses) {
-            return '<p>Courses not available.</p>';
+            return null;
         }
 
         $a = new CoursesWithEffectiveness(['courses' => $courses, 'reportingDate' => $statsReport->reportingDate]);
@@ -571,16 +621,11 @@ class StatsReportController extends Controller
         return view('statsreports.details.courses', $data);
     }
 
-    public function getContacts($id)
+    public function getContacts(StatsReport $statsReport)
     {
-        $statsReport = StatsReport::find($id);
-        if (!$statsReport->isValidated()) {
-            return '<p>This report did not pass validation. See Report Details for more information.</p>';
-        }
-
-        $contacts = App::make(ContactsController::class)->getByStatsReport($id);
+        $contacts = App::make(ContactsController::class)->getByStatsReport($statsReport->id);
         if (!$contacts) {
-            return '<p>Contacts not available.</p>';
+            return null;
         }
 
         return view('statsreports.details.contactinfo', compact(
@@ -588,13 +633,8 @@ class StatsReportController extends Controller
         ));
     }
 
-    public function getGitwByTeamMember($id)
+    public function getGitwByTeamMember(StatsReport $statsReport)
     {
-        $statsReport = StatsReport::find($id);
-        if (!$statsReport->isValidated()) {
-            return '<p>This report did not pass validation. See Report Details for more information.</p>';
-        }
-
         $weeksData = [];
 
         $date = clone $statsReport->quarter->startWeekendDate;
@@ -606,7 +646,7 @@ class StatsReportController extends Controller
             $date->addWeek();
         }
         if (!$weeksData) {
-            return '<p>GITW summary not available.</p>';
+            return null;
         }
 
         $a = new GitwByTeamMember(['teamMembersData' => $weeksData]);
@@ -615,13 +655,8 @@ class StatsReportController extends Controller
         return view('statsreports.details.teammembersweekly', $data);
     }
 
-    public function getTdoByTeamMember($id)
+    public function getTdoByTeamMember(StatsReport $statsReport)
     {
-        $statsReport = StatsReport::find($id);
-        if (!$statsReport->isValidated()) {
-            return '<p>This report did not pass validation. See Report Details for more information.</p>';
-        }
-
         $weeksData = [];
 
         $date = clone $statsReport->quarter->startWeekendDate;
@@ -633,7 +668,7 @@ class StatsReportController extends Controller
             $date->addWeek();
         }
         if (!$weeksData) {
-            return '<p>TDO summary not available.</p>';
+            return null;
         }
 
         $a = new TdoByTeamMember(['teamMembersData' => $weeksData]);
@@ -642,41 +677,31 @@ class StatsReportController extends Controller
         return view('statsreports.details.teammembersweekly', $data);
     }
 
-    public function getResults($id)
+    public function getResults(StatsReport $statsReport)
     {
-        $statsReport = StatsReport::find($id);
-
-        if ($statsReport && !$this->hasAccess($statsReport->center->id, 'R')) {
-            $error = 'You do not have access to this report.';
-            return  Response::view('errors.403', compact('error'), 403);
-        }
-
         $sheet = array();
         $sheetUrl = '';
 
-        if ($statsReport) {
+        $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
 
-            $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+        if ($sheetPath) {
 
-            if ($sheetPath) {
-
-                $cacheKey = "statsReport{$id}:validation";
-                $sheet = ($this->useCache()) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
-                if (!$sheet) {
-                    try {
-                        $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, false);
-                        $importer->import(false);
-                        $sheet = $importer->getResults();
-                    } catch (Exception $e) {
-                        Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
-                    }
+            $cacheKey = "statsReport{$statsReport->id}:validation";
+            $sheet = ($this->useCache()) ? Cache::tags(["statsReport{$statsReport->id}"])->get($cacheKey) : false;
+            if (!$sheet) {
+                try {
+                    $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, false);
+                    $importer->import(false);
+                    $sheet = $importer->getResults();
+                } catch (Exception $e) {
+                    Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
                 }
-                Cache::tags(["statsReport{$id}"])->put($cacheKey, $sheet, static::STATS_REPORT_CACHE_TTL);
-
-                $sheetUrl = $sheetPath
-                    ? url("/statsreports/{$statsReport->id}/download")
-                    : null;
             }
+            Cache::tags(["statsReport{$statsReport->id}"])->put($cacheKey, $sheet, static::STATS_REPORT_CACHE_TTL);
+
+            $sheetUrl = $sheetPath
+                ? url("/statsreports/{$statsReport->id}/download")
+                : null;
         }
 
         if (!$sheetUrl) {
