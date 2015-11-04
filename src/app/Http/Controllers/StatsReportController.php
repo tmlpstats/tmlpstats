@@ -50,9 +50,9 @@ class StatsReportController extends Controller
      *
      * @return Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $selectedRegion = $this->getRegion();
+        $selectedRegion = $this->getRegion($request);
 
         $allReports = StatsReport::currentQuarter($selectedRegion)
             ->groupBy('reporting_date')

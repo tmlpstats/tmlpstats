@@ -7,7 +7,6 @@ use TmlpStats\Import\Xlsx\XlsxArchiver;
 
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
-use TmlpStats\Person;
 use TmlpStats\User;
 use TmlpStats\StatsReport;
 use TmlpStats\CenterStatsData;
@@ -17,6 +16,7 @@ use Carbon\Carbon;
 
 use Auth;
 use Input;
+use Illuminate\Http\Request;
 
 class AdminController extends Controller {
 
@@ -28,9 +28,9 @@ class AdminController extends Controller {
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $region = $this->getRegion();
+        $region = $this->getRegion($request);
 
         $allReports = StatsReport::currentQuarter($region)->orderBy('reporting_date', 'desc')->get();
         if ($allReports->isEmpty()) {
