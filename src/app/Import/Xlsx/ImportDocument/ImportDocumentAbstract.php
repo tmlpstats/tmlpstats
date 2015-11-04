@@ -48,7 +48,7 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
         $this->enforceVersion = $enforceVersion;
     }
 
-    public function import($saveReport = false)
+    public function import()
     {
         $isValid = false;
 
@@ -61,17 +61,25 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
                 $isValid = true;
             }
 
-            if ($saveReport) {
-                $this->postProcess($isValid);
-            } else if (!$this->statsReport->locked) {
+            if (!$this->statsReport->locked) {
                 $this->statsReport->validated = $isValid;
                 $this->statsReport->save();
             }
         }
+        $this->sheets = null;
 
         $this->normalizeMessages();
 
         return $isValid;
+    }
+
+    public function saveReport()
+    {
+        if ($this->statsReport) {
+            return $this->postProcess();
+        }
+
+        return false;
     }
 
     public function __get($name)
@@ -239,5 +247,5 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
         return ($a['section'] >= $b['section']) ? 1 : -1;
     }
 
-    protected function postProcess($isValid) { }
+    protected function postProcess() { }
 }

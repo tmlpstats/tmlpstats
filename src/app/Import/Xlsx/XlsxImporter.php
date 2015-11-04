@@ -14,6 +14,8 @@ class XlsxImporter
     protected $expectedDate = null;
     protected $enforceVersion = true;
 
+    protected $importDocument = null;
+
     public function __construct($filePath, $fileName, $expectedDate = null, $enforceVersion = true)
     {
         if (!is_file($filePath)) {
@@ -30,10 +32,10 @@ class XlsxImporter
         $this->enforceVersion = $enforceVersion;
     }
 
-    public function import($saveReport = true)
+    public function import()
     {
         $doc = new ImportDocument\ImportDocument($this->file, $this->expectedDate, $this->enforceVersion);
-        $doc->import($saveReport);
+        $doc->import();
 
         $submittedAt = ($doc->saved() && $doc->statsReport)
             ? $doc->statsReport->submittedAt
@@ -59,6 +61,15 @@ class XlsxImporter
         } else {
             $this->results['result'] = 'ok';
         }
+
+        $this->importDocument = $doc;
+    }
+
+    public function saveReport()
+    {
+        return $this->importDocument
+            ? $this->importDocument->saveReport()
+            : false;
     }
 
     public function getResults()
