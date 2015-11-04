@@ -23,9 +23,10 @@ class RouteServiceProvider extends ServiceProvider {
      */
     public function boot(Router $router)
     {
-        parent::boot($router);
+        // Require parameters called id to be numeric
+        $router->pattern('id', '[0-9]+');
 
-        //
+        parent::boot($router);
     }
 
     /**

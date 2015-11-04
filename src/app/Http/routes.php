@@ -17,7 +17,7 @@ Route::filter('admin', function()
         return redirect('auth/login');
     }
     if (!Auth::user()->hasRole('administrator')) {
-        return App::abort(403, 'Unauthorized action.');
+        return App::abort(403, "Sorry. You don't have access to that page.");
     }
 });
 Route::filter('statistician', function()
@@ -26,7 +26,7 @@ Route::filter('statistician', function()
         return redirect('auth/login');
     }
     if (!Auth::user()->hasRole('localStatistician') && !Auth::user()->hasRole('globalStatistician') && !Auth::user()->hasRole('administrator')) {
-        return App::abort(403, 'Unauthorized action.');
+        return App::abort(403, "Sorry. You don't have access to that page.");
     }
 });
 
@@ -41,38 +41,18 @@ Route::get('admin/import', 'ImportController@import');
 Route::post('admin/import', 'ImportController@uploadImportSpreadsheet');
 
 Route::resource('admin/centers', 'AdminCenterController');
-//Route::resource('admin/quarters', 'QuarterController');
 Route::resource('admin/users', 'UserController');
-//Route::resource('admin/roles', 'RoleController');
 
 // Stats Reports
 Route::resource('statsreports', 'StatsReportController');
-Route::get('statsreports/{id}/download', 'StatsReportController@downloadSheet');
 Route::post('statsreports/{id}/submit', 'StatsReportController@submit');
-
-Route::get('statsreports/{id}/summary', 'StatsReportController@getSummary');
-Route::get('statsreports/{id}/results', 'StatsReportController@getResults');
-Route::get('statsreports/{id}/centerstats', 'StatsReportController@getCenterStats');
-Route::get('statsreports/{id}/classlist', 'StatsReportController@getTeamMembers');
-Route::get('statsreports/{id}/tmlpregistrations', 'StatsReportController@getTmlpRegistrations');
-Route::get('statsreports/{id}/tmlpregistrationsbystatus', 'StatsReportController@getTmlpRegistrationsByStatus');
-Route::get('statsreports/{id}/courses', 'StatsReportController@getCourses');
-Route::get('statsreports/{id}/contactinfo', 'StatsReportController@getContacts');
-Route::get('statsreports/{id}/gitwsummary', 'StatsReportController@getGitwByTeamMember');
-Route::get('statsreports/{id}/tdosummary', 'StatsReportController@getTdoByTeamMember');
+Route::get('statsreports/{id}/download', 'StatsReportController@downloadSheet');
+Route::get('statsreports/{id}/{report}', 'StatsReportController@runDispatcher');
 
 // Global Reports
 Route::resource('globalreports', 'GlobalReportController');
-Route::get('globalreports/{id}/ratingsummary', 'GlobalReportController@getRatingSummary');
-Route::get('globalreports/{id}/regionalstats', 'GlobalReportController@getRegionalStats');
-Route::get('globalreports/{id}/statsreports', 'GlobalReportController@getCenterStatsReports');
-Route::get('globalreports/{id}/applicationsbystatus', 'GlobalReportController@getTmlpRegistrationsByStatus');
-Route::get('globalreports/{id}/applicationsoverdue', 'GlobalReportController@getTmlpRegistrationsOverdue');
-Route::get('globalreports/{id}/applicationsbycenter', 'GlobalReportController@getTmlpRegistrationsByCenter');
-Route::get('globalreports/{id}/applicationsoverview', 'GlobalReportController@getTmlpRegistrationsOverview');
-Route::get('globalreports/{id}/traveloverview', 'GlobalReportController@getTravelReport');
-Route::get('globalreports/{id}/completedcourses', 'GlobalReportController@getCompletedCoursesReport');
-Route::get('globalreports/{id}/teammemberstatus', 'GlobalReportController@getTeamMemberStatus');
+Route::get('globalreports/{id}/{report}', 'GlobalReportController@runDispatcher');
+
 
 // Center Info
 Route::resource('center', 'CenterController');

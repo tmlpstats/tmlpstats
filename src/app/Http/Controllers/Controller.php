@@ -1,13 +1,15 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
-use Auth;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
-use Request;
-use Session;
+use Illuminate\Http\Request;
+
 use TmlpStats\Region;
+
+use Auth;
+use Session;
 
 abstract class Controller extends BaseController {
 
@@ -17,11 +19,11 @@ abstract class Controller extends BaseController {
     const STATS_REPORT_CACHE_TTL = 7 * 24 * 60;
     const USE_CACHE = true;
 
-    public function getRegion($includeLocalRegions = false)
+    public function getRegion(Request $request, $includeLocalRegions = false)
     {
         $region = null;
-        if (Request::has('region')) {
-            $region = Region::abbreviation(Request::get('region'))->first();
+        if ($request->has('region')) {
+            $region = Region::abbreviation($request->get('region'))->first();
             Session::set('viewRegionId', $region->id);
         }
 
