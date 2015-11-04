@@ -308,7 +308,7 @@ class GlobalReportController extends Controller
             $error = 'Report not available.';
             $response = $request->ajax()
                 ? "<p>{$error}</p>"
-                : Response::view('errors.404', $error, 404);
+                : Response::view('errors.404', compact('error'), 404);
         }
 
         return $response;
