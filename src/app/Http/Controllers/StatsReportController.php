@@ -1,5 +1,6 @@
 <?php namespace TmlpStats\Http\Controllers;
 
+use Illuminate\Http\Request;
 use TmlpStats\Accountability;
 use TmlpStats\Center;
 use TmlpStats\CenterStatsData;
@@ -32,7 +33,6 @@ use Cache;
 use Exception;
 use Input;
 use Log;
-use Request;
 use Response;
 
 class StatsReportController extends Controller
@@ -471,7 +471,7 @@ class StatsReportController extends Controller
             $error = 'Report not found.';
             $response = $request->ajax()
                 ? "<p>{$error}</p>"
-                : Response::view('errors.404', $error, 404);
+                : Response::view('errors.404', compact('error'), 404);
         }
 
         return $response;
