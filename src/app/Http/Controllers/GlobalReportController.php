@@ -318,35 +318,35 @@ class GlobalReportController extends Controller
     public function getRatingSummary(GlobalReport $globalReport, Region $region)
     {
         $statsReports = $globalReport->statsReports()
-            ->validated()
             ->byRegion($region)
+            ->validated()
             ->get();
 
         if ($statsReports->isEmpty()) {
             return null;
         }
 
-        // TODO don't force passing the data in in the future
         $a = new Arrangements\RegionByRating($statsReports);
         $data = $a->compose();
+
         return view('globalreports.details.ratingsummary', $data);
     }
 
     public function getRegionalStats(GlobalReport $globalReport, Region $region)
     {
-        $quarter = Quarter::byRegion($region)->date($globalReport->reportingDate)->first();
-        $quarter->setRegion($region);
-
         $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$globalReportData) {
             return null;
         }
+
+        $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
 
         $a = new GamesByWeek($globalReportData);
         $weeklyData = $a->compose();
 
         $a = new GamesByMilestone(['weeks' => $weeklyData['reportData'], 'quarter' => $quarter]);
         $data = $a->compose();
+
         return view('reports.centergames.milestones', $data);
     }
 
@@ -444,13 +444,12 @@ class GlobalReportController extends Controller
 
     public function getTmlpRegistrationsByCenter(GlobalReport $globalReport, Region $region)
     {
-        $quarter = Quarter::byRegion($region)->date($globalReport->reportingDate)->first();
-        $quarter->setRegion($region);
-
         $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$registrations) {
             return null;
         }
+
+        $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
 
         $a = new TmlpRegistrationsByCenter(['registrationsData' => $registrations]);
         $centersData = $a->compose();
@@ -518,11 +517,7 @@ class GlobalReportController extends Controller
     }
 
     public function getCenterStatsReports(GlobalReport $globalReport, Region $region)
-
     {
-        $quarter = Quarter::byRegion($region)->date($globalReport->reportingDate)->first();
-        $quarter->setRegion($region);
-
         $statsReports = $globalReport->statsReports()
             ->byRegion($region)
             ->get();

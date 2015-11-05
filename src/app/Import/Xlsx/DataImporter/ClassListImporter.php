@@ -126,9 +126,7 @@ class ClassListImporter extends DataImporterAbstract
 
         foreach ($this->data as $memberInput) {
 
-            $completionQuarter = Quarter::byRegion($this->statsReport->center->region)
-                ->date($memberInput['completionQuarter'])
-                ->first();
+            $completionQuarter = Quarter::getQuarterByDate($memberInput['completionQuarter'], $this->statsReport->center->region);
 
             if (!$completionQuarter) {
                 Log::error("Completion quarter '{$memberInput['completionQuarter']}' in region '{$this->statsReport->center->globalRegion}' doesn't exist");

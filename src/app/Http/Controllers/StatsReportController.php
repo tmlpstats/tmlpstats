@@ -634,9 +634,7 @@ class StatsReportController extends Controller
             return null;
         }
 
-        return view('statsreports.details.contactinfo', compact(
-            'contacts'
-        ));
+        return view('statsreports.details.contactinfo', compact('contacts'));
     }
 
     public function getGitwByTeamMember(StatsReport $statsReport)
