@@ -90,21 +90,29 @@ class CoursesController extends Controller
 
     public function getByGlobalReport($id, Region $region)
     {
-        $globalReport = GlobalReport::find($id);
+        $cacheKey = $region === null
+            ? "globalreport{$id}:courses"
+            : "globalreport{$id}:region{$region->id}:courses";
+        $courses = ($this->useCache()) ? Cache::tags(["globalReport{$id}"])->get($cacheKey) : false;
 
-        $statsReports = $globalReport->statsReports()
-            ->byRegion($region)
-            ->reportingDate($globalReport->reportingDate)
-            ->get();
+        if (!$courses) {
+            $globalReport = GlobalReport::find($id);
 
-        $courses = [];
-        foreach ($statsReports as $report) {
+            $statsReports = $globalReport->statsReports()
+                ->byRegion($region)
+                ->reportingDate($globalReport->reportingDate)
+                ->get();
 
-            $reportCourses = $this->getByStatsReport($report->id);
-            foreach ($reportCourses as $course) {
-                $courses[] = $course;
+            $courses = [];
+            foreach ($statsReports as $report) {
+
+                $reportCourses = $this->getByStatsReport($report->id);
+                foreach ($reportCourses as $course) {
+                    $courses[] = $course;
+                }
             }
         }
+        Cache::tags(["globalReport{$id}"])->put($cacheKey, $courses, static::CACHE_TTL);
 
         return $courses;
     }

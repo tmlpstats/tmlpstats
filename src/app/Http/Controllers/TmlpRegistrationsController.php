@@ -92,21 +92,29 @@ class TmlpRegistrationsController extends Controller
 
     public function getByGlobalReport($id, Region $region)
     {
-        $globalReport = GlobalReport::find($id);
+        $cacheKey = $region === null
+            ? "globalreport{$id}:tmlpregistrations"
+            : "globalreport{$id}:region{$region->id}:tmlpregistrations";
+        $registrations = ($this->useCache()) ? Cache::tags(["globalReport{$id}"])->get($cacheKey) : false;
 
-        $statsReports = $globalReport->statsReports()
-            ->byRegion($region)
-            ->reportingDate($globalReport->reportingDate)
-            ->get();
+        if (!$registrations) {
+            $globalReport = GlobalReport::find($id);
 
-        $registrations = [];
-        foreach ($statsReports as $report) {
+            $statsReports = $globalReport->statsReports()
+                ->byRegion($region)
+                ->reportingDate($globalReport->reportingDate)
+                ->get();
 
-            $reportRegistrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($report->id);
-            foreach ($reportRegistrations as $registration) {
-                $registrations[] = $registration;
+            $registrations = [];
+            foreach ($statsReports as $report) {
+
+                $reportRegistrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($report->id);
+                foreach ($reportRegistrations as $registration) {
+                    $registrations[] = $registration;
+                }
             }
         }
+        Cache::tags(["globalReport{$id}"])->put($cacheKey, $registrations, static::CACHE_TTL);
 
         return $registrations;
     }
