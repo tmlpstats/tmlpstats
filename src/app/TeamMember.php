@@ -30,9 +30,7 @@ class TeamMember extends Model
                 return $this->person->$name;
             case 'quarterNumber':
 
-                $thisQuarter = Quarter::byRegion($this->person->center->region)
-                    ->current()
-                    ->first();
+                $thisQuarter = Quarter::getCurrentQuarter($this->person->center->region);
 
                 if (!$thisQuarter) {
                     return null;

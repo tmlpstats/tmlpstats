@@ -433,14 +433,9 @@ class ImportDocument extends ImportDocumentAbstract
             // No need to throw error, one has already been logged
             return;
         }
-        $this->quarter = Quarter::byRegion($this->center->region)
-            ->date($this->reportingDate)
-            ->first();
+        $this->quarter = Quarter::getQuarterByDate($this->reportingDate, $this->center->region);
         if (!$this->quarter) {
             $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_QUARTER_NOT_FOUND', $this->reportingDate->toDateString());
-        } else {
-            // TODO: figure out how to not have to do this
-            $this->quarter->setRegion($this->center->region);
         }
     }
 

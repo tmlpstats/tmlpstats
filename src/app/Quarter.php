@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats;
 
+use Cache;
 use TmlpStats\Region;
 use TmlpStats\RegionQuarterDetails;
 use Illuminate\Database\Eloquent\Model;
@@ -43,6 +44,28 @@ class Quarter extends Model
             default:
                 return parent::__get($name);
         }
+    }
+
+    public static function getCurrentQuarter(Region $region)
+    {
+        return static::getQuarterByDate(Carbon::now(), $region);
+    }
+
+    public static function getQuarterByDate(Carbon $date, Region $region)
+    {
+        $dateString = $date->toDateString();
+        $cacheKey = "quarters:date{$dateString}:region{$region->id}";
+
+        $quarter = Cache::remember($cacheKey, 24 * 60, function() use ($date, $region) {
+            return Quarter::byRegion($region)
+                ->date($date)
+                ->first();
+        });
+
+        if ($quarter) {
+            $quarter->setRegion($region);
+        }
+        return $quarter;
     }
 
     public function getNextQuarter()
