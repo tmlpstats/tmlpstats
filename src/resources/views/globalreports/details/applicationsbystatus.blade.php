@@ -20,12 +20,11 @@
                 <thead>
                 <tr>
                     <th>Center</th>
-                    <th>First</th>
-                    <th>Last</th>
+                    <th>Name</th>
                     <th style="text-align: center">Year</th>
                     <th>Incoming</th>
                     <th>Reg Date</th>
-                @if ($group == 'withdrawn')
+                    @if ($group == 'withdrawn')
                         <th>Reason</th>
                         <th>Withdraw</th>
                     @elseif ($group == 'out')
@@ -51,8 +50,7 @@
                         <tr>
                             @endif
                             <td>{{ $registrationData->center->name }}</td>
-                            <td>{{ $registrationData->firstName }}</td>
-                            <td>{{ $registrationData->lastName }}</td>
+                            <td>{{ $registrationData->firstName }} {{ $registrationData->lastName }}</td>
                             <td style="text-align: center">{{ $registrationData->registration->teamYear }}</td>
                             <td>{{ $registrationData->incomingQuarter ? $registrationData->incomingQuarter->startWeekendDate->format('M') : '' }}</td>
                             <td>{{ $registrationData->regDate ? $registrationData->regDate->format('n/j/y') : '' }}</td>
