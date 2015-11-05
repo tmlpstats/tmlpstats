@@ -8,8 +8,7 @@
                 <table class="table table-condensed table-striped table-hover applicationTable">
                     <thead>
                     <tr>
-                        <th>First</th>
-                        <th>Last</th>
+                        <th>Name</th>
                         <th>Reg Quarter</th>
                         @if ($group != 'withdrawn')
                             <th>Status</th>
@@ -23,8 +22,7 @@
                     @foreach ($centerData[$group] as $quarterName => $quarterRegistrations)
                         @foreach ($quarterRegistrations as $registrationData)
                             <tr>
-                                <td>{{ $registrationData->firstName }}</td>
-                                <td>{{ $registrationData->lastName }}</td>
+                                <td>{{ $registrationData->firstName }} {{ $registrationData->lastName }}</td>
                                 <td>
                                     @if ($registrationData->regDate)
                                         @if ($registrationData->regDate->gt($registrationData->statsReport->quarter->startWeekendDate))
