@@ -92,21 +92,29 @@ class TeamMembersController extends Controller
 
     public function getByGlobalReport($id, Region $region)
     {
-        $globalReport = GlobalReport::find($id);
+        $cacheKey = $region === null
+            ? "globalreport{$id}:teammembers"
+            : "globalreport{$id}:region{$region->id}:teammembers";
+        $teamMembers = ($this->useCache()) ? Cache::tags(["globalReport{$id}"])->get($cacheKey) : false;
 
-        $statsReports = $globalReport->statsReports()
-            ->byRegion($region)
-            ->reportingDate($globalReport->reportingDate)
-            ->get();
+        if (!$teamMembers) {
+            $globalReport = GlobalReport::find($id);
 
-        $teamMembers = [];
-        foreach ($statsReports as $report) {
+            $statsReports = $globalReport->statsReports()
+                ->byRegion($region)
+                ->reportingDate($globalReport->reportingDate)
+                ->get();
 
-            $reportTeamMembers = $this->getByStatsReport($report->id);
-            foreach ($reportTeamMembers as $member) {
-                $teamMembers[] = $member;
+            $teamMembers = [];
+            foreach ($statsReports as $report) {
+
+                $reportTeamMembers = $this->getByStatsReport($report->id);
+                foreach ($reportTeamMembers as $member) {
+                    $teamMembers[] = $member;
+                }
             }
         }
+        Cache::tags(["globalReport{$id}"])->put($cacheKey, $teamMembers, static::CACHE_TTL);
 
         return $teamMembers;
     }
