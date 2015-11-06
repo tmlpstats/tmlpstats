@@ -21,7 +21,7 @@
                 <h1>Oops!</h1>
                 <h2>403 Not Allowed</h2>
                 <div class="error-details">
-                    {{ $error ?: "Sorry, you don't have access to view this page!" }}
+                    Sorry, you don't have access to view this page!
                 </div>
                 <div class="error-actions">
                     <a href="{{ url('/') }}" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-home"></span> Take Me Home</a>

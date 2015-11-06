@@ -2,7 +2,7 @@
 
 @section('content')
 <h2 class="sub-header">Global Reports</h2>
-<a href="{{ url('/globalreports/create') }}">+ Add one</a>
+{{--<a href="{{ url('/globalreports/create') }}">+ Add one</a>--}}
 
 <div class="table-responsive">
     <table class="table table-hover">

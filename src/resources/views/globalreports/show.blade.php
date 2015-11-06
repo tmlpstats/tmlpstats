@@ -96,6 +96,19 @@
     </div>
 
     <script type="text/javascript">
+
+        function getErrorMessage(code) {
+            var message = '';
+            if (code == 404) {
+                message = 'Unable to find report.';
+            } else if (code == 403) {
+                message = 'You do not have access to this report.';
+            } else {
+                message = 'Unable to get report.';
+            }
+            return message;
+        }
+
         jQuery(document).ready(function ($) {
             $('#tabs').tab();
 
@@ -165,6 +178,10 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/ratingsummary?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#ratingsummary-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#ratingsummary-container").html('<p>' + message + '</p>');
                 }
             });
             // Fetch Regional Stats
@@ -173,6 +190,10 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/regionalstats?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#regionalstats-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#regionalstats-container").html('<p>' + message + '</p>');
                 }
             });
             // Fetch Stats Reports
@@ -181,6 +202,10 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/statsreports?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#statsreports-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#statsreports-container").html('<p>' + message + '</p>');
                 }
             });
             // Fetch Applications
@@ -189,6 +214,10 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/applicationsbystatus?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#applicationsbystatus-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#applicationsbystatus-container").html('<p>' + message + '</p>');
                 }
             });
             // Fetch Applications
@@ -197,6 +226,10 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/applicationsbycenter?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#applicationsbycenter-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#applicationsbycenter-container").html('<p>' + message + '</p>');
                 }
             });
             // Fetch Applications
@@ -205,6 +238,10 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/applicationsoverdue?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#applicationsoverdue-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#applicationsoverdue-container").html('<p>' + message + '</p>');
                 }
             });
             // Fetch Applications
@@ -213,6 +250,10 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/applicationsoverview?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#applicationsoverview-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#applicationsoverview-container").html('<p>' + message + '</p>');
                 }
             });
             // Fetch Travel
@@ -221,6 +262,10 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/traveloverview?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#traveloverview-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#traveloverview-container").html('<p>' + message + '</p>');
                 }
             });
             // Fetch Courses
@@ -229,6 +274,10 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/completedcourses?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#completedcourses-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#completedcourses-container").html('<p>' + message + '</p>');
                 }
             });
             // Fetch Team Members' Status
@@ -237,6 +286,10 @@
                 url: "{{ url("/globalreports/{$globalReport->id}/teammemberstatus?region={$region->abbreviation}") }}",
                 success: function (response) {
                     $("#teammemberstatus-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#teammemberstatus-container").html('<p>' + message + '</p>');
                 }
             });
         });

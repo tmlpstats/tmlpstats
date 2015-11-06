@@ -3,6 +3,10 @@ namespace TmlpStats\Providers;
 
 use Illuminate\Contracts\Auth\Access\Gate as GateContract;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use TmlpStats\GlobalReport;
+use TmlpStats\Policies\GlobalReportPolicy;
+use TmlpStats\Policies\StatsReportPolicy;
+use TmlpStats\StatsReport;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -12,6 +16,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
+        StatsReport::class => StatsReportPolicy::class,
+        GlobalReport::class => GlobalReportPolicy::class,
     ];
 
     /**

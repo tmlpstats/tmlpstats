@@ -11,28 +11,7 @@
 |
 */
 
-Route::filter('admin', function()
-{
-    if (!Auth::check()) {
-        return redirect('auth/login');
-    }
-    if (!Auth::user()->hasRole('administrator')) {
-        return App::abort(403, "Sorry. You don't have access to that page.");
-    }
-});
-Route::filter('statistician', function()
-{
-    if (!Auth::check()) {
-        return redirect('auth/login');
-    }
-    if (!Auth::user()->hasRole('localStatistician') && !Auth::user()->hasRole('globalStatistician') && !Auth::user()->hasRole('administrator')) {
-        return App::abort(403, "Sorry. You don't have access to that page.");
-    }
-});
-
 // Admin Area
-Route::when('admin/*', 'auth|admin');
-
 Route::match(['get', 'post'], 'admin/dashboard', 'AdminController@index');
 Route::get('admin/status', 'AdminController@status');
 Route::get('admin/peoplereport', 'AdminController@getPeopleReport');
@@ -53,13 +32,10 @@ Route::get('statsreports/{id}/{report}', 'StatsReportController@runDispatcher');
 Route::resource('globalreports', 'GlobalReportController');
 Route::get('globalreports/{id}/{report}', 'GlobalReportController@runDispatcher');
 
-
 // Center Info
 Route::resource('center', 'CenterController');
 
 // Import
-Route::when('import', 'auth|statistician');
-
 Route::get('import', 'ImportController@index');
 Route::post('import', 'ImportController@uploadSpreadsheet');
 

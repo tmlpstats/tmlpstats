@@ -25,7 +25,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 use App;
-use Auth;
 use Input;
 use Response;
 
@@ -46,10 +45,7 @@ class GlobalReportController extends Controller
      */
     public function index()
     {
-        if (!$this->hasAccess('R')) {
-            $error = 'You do not have access to view these reports.';
-            return Response::view('errors.403', compact('error'), 403);
-        }
+        $this->authorize('index', GlobalReport::class);
 
         $globalReports = GlobalReport::orderBy('reporting_date', 'desc')->get();
         return view('globalreports.index', compact('globalReports'));
@@ -62,19 +58,7 @@ class GlobalReportController extends Controller
      */
     public function create()
     {
-        if (!$this->hasAccess('C')) {
-            $error = 'You do not have access to create new reports.';
-            return Response::view('errors.403', compact('error'), 403);
-        }
 
-        $reportingDates = array();
-        $week = new Carbon('this friday');
-        while ($week->gt(Carbon::now()->subWeeks(8))) {
-            $reportingDates[$week->toDateString()] = $week->format('F j, Y');
-            $week->subWeek();
-        }
-
-        return view('globalreports.create', compact('reportingDates'));
     }
 
     /**
@@ -84,21 +68,7 @@ class GlobalReportController extends Controller
      */
     public function store()
     {
-        if (!$this->hasAccess('C')) {
-            $error = 'You do not have access to save this report.';
-            return Response::view('errors.403', compact('error'), 403);
-        }
 
-        $redirect = '/globalreports';
-
-        if (Input::has('cancel')) {
-            return redirect($redirect);
-        }
-
-        if (Input::has('reporting_date')) {
-            GlobalReport::create(array('reporting_date' => Input::get('reporting_date')));
-        }
-        return redirect($redirect);
     }
 
     /**
@@ -109,16 +79,9 @@ class GlobalReportController extends Controller
      */
     public function show(Request $request, $id)
     {
-        if (!$this->hasAccess('R')) {
-            $error = 'You do not have access to view this report.';
-            return Response::view('errors.403', compact('error'), 403);
-        }
+        $globalReport = GlobalReport::findOrFail($id);
 
-        $globalReport = GlobalReport::find($id);
-        if (!$globalReport) {
-            $error = 'Report not found.';
-            return Response::view('errors.404', compact('error'), 404);
-        }
+        $this->authorize('read', $globalReport);
 
         $region = $this->getRegion($request, true);
 
@@ -147,58 +110,7 @@ class GlobalReportController extends Controller
      */
     public function update($id)
     {
-        if (!$this->hasAccess('U')) {
-            $error = 'You do not have access to update this report.';
-            return Response::view('errors.403', compact('error'), 403);
-        }
 
-        if (!Input::has('cancel')) {
-
-            $globalReport = GlobalReport::find($id);
-            if ($globalReport) {
-
-                if (Input::has('center')) {
-                    $center = Center::abbreviation(Input::get('center'))->first();
-                    $statsReport = StatsReport::reportingDate($globalReport->reportingDate)
-                        ->byCenter($center)
-                        ->validated(true)
-                        ->orderBy('submitted_at', 'desc')
-                        ->first();
-
-                    if ($statsReport
-                        && !$globalReport->statsReports()->find($statsReport->id)
-                        && !$globalReport->statsReports()->byCenter($statsReport->center)->first()
-                    ) {
-                        $globalReport->statsReports()->attach([$statsReport->id]);
-                    }
-                }
-                if (Input::has('locked')) {
-                    $locked = Input::get('locked');
-                    $globalReport->locked = ($locked == false || $locked === 'false') ? false : true;
-                    $success = $globalReport->save();
-
-                    if (Input::has('dataType') && Input::get('dataType') == 'JSON') {
-                        return array('globalReportId' => $id, 'locked' => $globalReport->locked, 'success' => $success);
-                    }
-                }
-                if (Input::has('remove')) {
-                    if (Input::get('remove') == 'statsreport' && Input::has('id')) {
-                        $id = (int)Input::get('id');
-                        $globalReport->statsReports()->detach($id);
-
-                        if (Input::has('dataType') && Input::get('dataType') == 'JSON') {
-                            return array('globalReportId' => $id, 'statsReport' => $id, 'success' => true, 'message' => 'Removed stats report successfully.');
-                        }
-                    }
-                }
-            }
-        }
-
-        $redirect = "/globalreports/{$id}";
-        if (Input::has('previous_url')) {
-            $redirect = Input::has('previous_url');
-        }
-        return redirect($redirect);
     }
 
     /**
@@ -212,24 +124,7 @@ class GlobalReportController extends Controller
         //
     }
 
-    // This is a really crappy authz. Need to address this properly
-    public function hasAccess($permissions)
-    {
-        switch ($permissions) {
-            case 'R':
-                return (Auth::user()->hasRole('globalStatistician')
-                    || Auth::user()->hasRole('administrator')
-                    || Auth::user()->hasRole('localStatistician'));
-            case 'U':
-            case 'C':
-            case 'D':
-            default:
-                return (Auth::user()->hasRole('globalStatistician')
-                    || Auth::user()->hasRole('administrator'));
-        }
-    }
-
-    public function getStatsReportsNotOnList(GlobalReport $globalReport)
+    protected function getStatsReportsNotOnList(GlobalReport $globalReport)
     {
         $statsReports = StatsReport::reportingDate($globalReport->reportingDate)
             ->submitted()
@@ -253,20 +148,9 @@ class GlobalReportController extends Controller
 
     public function runDispatcher(Request $request, $id, $report)
     {
-        if (!$this->hasAccess('R')) {
-            $error = 'You do not have access to view this report.';
-            return $request->ajax()
-                ? "<p>{$error}</p>"
-                : Response::view('errors.403', compact('error'), 403);
-        }
+        $globalReport = GlobalReport::findOrFail($id);
 
-        $globalReport = GlobalReport::find($id);
-        if (!$globalReport) {
-            $error = 'Report not found.';
-            return $request->ajax()
-                ? "<p>{$error}</p>"
-                : Response::view('errors.404', compact('error'), 404);
-        }
+        $this->authorize('read', $globalReport);
 
         $region = $this->getRegion($request, true);
 
@@ -305,17 +189,14 @@ class GlobalReportController extends Controller
         }
 
         if (!$response) {
-            $error = 'Report not available.';
-            $response = $request->ajax()
-                ? "<p>{$error}</p>"
-                : Response::view('errors.404', compact('error'), 404);
+            abort(404);
         }
 
         return $response;
     }
 
 
-    public function getRatingSummary(GlobalReport $globalReport, Region $region)
+    protected function getRatingSummary(GlobalReport $globalReport, Region $region)
     {
         $statsReports = $globalReport->statsReports()
             ->byRegion($region)
@@ -332,7 +213,7 @@ class GlobalReportController extends Controller
         return view('globalreports.details.ratingsummary', $data);
     }
 
-    public function getRegionalStats(GlobalReport $globalReport, Region $region)
+    protected function getRegionalStats(GlobalReport $globalReport, Region $region)
     {
         $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$globalReportData) {
@@ -350,7 +231,7 @@ class GlobalReportController extends Controller
         return view('reports.centergames.milestones', $data);
     }
 
-    public function getTmlpRegistrationsByStatus(GlobalReport $globalReport, Region $region)
+    protected function getTmlpRegistrationsByStatus(GlobalReport $globalReport, Region $region)
     {
         $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$registrations) {
@@ -364,7 +245,7 @@ class GlobalReportController extends Controller
         return view('globalreports.details.applicationsbystatus', $data);
     }
 
-    public function getTmlpRegistrationsOverdue(GlobalReport $globalReport, Region $region)
+    protected function getTmlpRegistrationsOverdue(GlobalReport $globalReport, Region $region)
     {
         $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$registrations) {
@@ -381,7 +262,7 @@ class GlobalReportController extends Controller
         return view('globalreports.details.applicationsoverdue', $data);
     }
 
-    public function getTmlpRegistrationsOverview(GlobalReport $globalReport, Region $region)
+    protected function getTmlpRegistrationsOverview(GlobalReport $globalReport, Region $region)
     {
         $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$registrations) {
@@ -442,7 +323,7 @@ class GlobalReportController extends Controller
         return view('globalreports.details.applicationsoverview', compact('reportData', 'teamCounts'));
     }
 
-    public function getTmlpRegistrationsByCenter(GlobalReport $globalReport, Region $region)
+    protected function getTmlpRegistrationsByCenter(GlobalReport $globalReport, Region $region)
     {
         $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$registrations) {
@@ -466,7 +347,7 @@ class GlobalReportController extends Controller
         return view('globalreports.details.applicationsbycenter', compact('reportData', 'reportingDate'));
     }
 
-    public function getTravelReport(GlobalReport $globalReport, Region $region)
+    protected function getTravelReport(GlobalReport $globalReport, Region $region)
     {
         $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$registrations) {
@@ -503,7 +384,7 @@ class GlobalReportController extends Controller
         return view('globalreports.details.traveloverview', compact('reportData'));
     }
 
-    public function getTeamMemberStatus(GlobalReport $globalReport, Region $region)
+    protected function getTeamMemberStatus(GlobalReport $globalReport, Region $region)
     {
         $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$teamMembers) {
@@ -516,7 +397,7 @@ class GlobalReportController extends Controller
         return view('globalreports.details.teammemberstatus', $data);
     }
 
-    public function getCenterStatsReports(GlobalReport $globalReport, Region $region)
+    protected function getCenterStatsReports(GlobalReport $globalReport, Region $region)
     {
         $statsReports = $globalReport->statsReports()
             ->byRegion($region)
@@ -587,7 +468,7 @@ class GlobalReportController extends Controller
         return view('globalreports.details.statsreports', compact('statsReportsList'));
     }
 
-    public function getCompletedCoursesReport(GlobalReport $globalReport, Region $region)
+    protected function getCompletedCoursesReport(GlobalReport $globalReport, Region $region)
     {
         $coursesData = App::make(CoursesController::class)->getByGlobalReport($globalReport->id, $region);
         if (!$coursesData) {
