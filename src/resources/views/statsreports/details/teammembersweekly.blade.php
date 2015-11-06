@@ -19,7 +19,7 @@
                     @foreach ($reportData['dates'] as $date)
                         <?php $data = isset($memberRow[$date->toDateString()]) ? $memberRow[$date->toDateString()] : null; ?>
                         @if ($data === null)
-                            <td class="active" style="color: #006000; text-align: center">
+                            <td class="active" style="color: #666666; text-align: center">
                                 <span class="glyphicon glyphicon-minus"></span>
                             </td>
                         @elseif ($data['value'])
