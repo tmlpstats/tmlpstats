@@ -16,6 +16,12 @@ abstract class TeamMemberWeeklyValue extends BaseArrangement
         ];
         foreach ($teamMembersData as $date => $teamData) {
             $dates[] = Carbon::createFromFormat('Y-m-d', $date);
+
+            // Weeks can be empty if we don't have any data from that week.
+            if (!$teamData) {
+                continue;
+            }
+
             foreach ($teamData as $data) {
 
                 $teamYear = ($data->teamMember->teamYear == 1)

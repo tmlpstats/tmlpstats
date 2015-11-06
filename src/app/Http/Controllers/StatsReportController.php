@@ -535,7 +535,7 @@ class StatsReportController extends Controller
         while ($date->lte($statsReport->reportingDate)) {
             $globalReport = GlobalReport::reportingDate($date)->first();
             $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
-            $weeksData[$date->toDateString()] = App::make(TeamMembersController::class)->getByStatsReport($report->id);
+            $weeksData[$date->toDateString()] = $report ? App::make(TeamMembersController::class)->getByStatsReport($report->id) : null;
             $date->addWeek();
         }
         if (!$weeksData) {
@@ -557,7 +557,7 @@ class StatsReportController extends Controller
         while ($date->lte($statsReport->reportingDate)) {
             $globalReport = GlobalReport::reportingDate($date)->first();
             $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
-            $weeksData[$date->toDateString()] = App::make(TeamMembersController::class)->getByStatsReport($report->id);
+            $weeksData[$date->toDateString()] = $report ? App::make(TeamMembersController::class)->getByStatsReport($report->id) : null;
             $date->addWeek();
         }
         if (!$weeksData) {
