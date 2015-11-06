@@ -258,9 +258,19 @@ class CenterStatsController extends Controller
             $statsReport = $globalReport->statsReports()->byCenter($center)->first();
         }
 
+        $actual = null;
+        if ($statsReport) {
+            $actual = CenterStatsData::actual()
+                ->reportingDate($date)
+                ->byStatsReport($statsReport)
+                ->first();
+        }
+
         // If not, search from the beginning until we find it
-        if (!$statsReport) {
+        if (!$actual) {
             $statsReport = $this->findFirstWeek($center, $quarter, 'actual');
+        } else {
+            return $actual;
         }
 
         if (!$statsReport) {

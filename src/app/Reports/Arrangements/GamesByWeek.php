@@ -14,6 +14,9 @@ class GamesByWeek extends BaseArrangement
         $reportData = [];
         foreach ($centerStatsData as $data) {
 
+            if (!$data) {
+                continue;
+            }
             $type = $data->type;
             $dateString = $data->reportingDate->toDateString();
             $reportData[$dateString][$type] = [];
