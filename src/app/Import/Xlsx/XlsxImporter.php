@@ -34,35 +34,8 @@ class XlsxImporter
 
     public function import()
     {
-        $doc = new ImportDocument\ImportDocument($this->file, $this->expectedDate, $this->enforceVersion);
-        $doc->import();
-
-        $submittedAt = ($doc->saved() && $doc->statsReport)
-            ? $doc->statsReport->submittedAt
-            : null;
-
-        $this->results = array(
-            'statsReportId' => ($doc->statsReport) ? $doc->statsReport->id : null,
-            'statsReport'   => ($doc->statsReport) ? $doc->statsReport : null,
-            'centerId'      => ($doc->center) ? $doc->center->id : null,
-            'center'        => ($doc->center) ? $doc->center->name : null,
-            'reportingDate' => ($doc->reportingDate) ? $doc->reportingDate : null,
-            'sheetVersion'  => ($doc->version) ? $doc->version : null,
-            'sheetFilename' => ($doc->statsReport) ? $doc->statsReport->center->sheetFilename : null,
-            'submittedAt'   => $submittedAt,
-            'errors'        => $doc->messages['errors'],
-            'warnings'      => $doc->messages['warnings'],
-        );
-
-        if (count($this->results['errors']) > 0) {
-            $this->results['result'] = 'error';
-        } else if (count($this->results['warnings']) > 0) {
-            $this->results['result'] = 'warning';
-        } else {
-            $this->results['result'] = 'ok';
-        }
-
-        $this->importDocument = $doc;
+        $this->importDocument = new ImportDocument\ImportDocument($this->file, $this->expectedDate, $this->enforceVersion);
+        $this->importDocument->import();
     }
 
     public function saveReport()
@@ -74,6 +47,31 @@ class XlsxImporter
 
     public function getResults()
     {
+        $submittedAt = ($this->importDocument->saved() && $this->importDocument->statsReport)
+            ? $this->importDocument->statsReport->submittedAt
+            : null;
+
+        $this->results = array(
+            'statsReportId' => ($this->importDocument->statsReport) ? $this->importDocument->statsReport->id : null,
+            'statsReport'   => ($this->importDocument->statsReport) ? $this->importDocument->statsReport : null,
+            'centerId'      => ($this->importDocument->center) ? $this->importDocument->center->id : null,
+            'center'        => ($this->importDocument->center) ? $this->importDocument->center->name : null,
+            'reportingDate' => ($this->importDocument->reportingDate) ? $this->importDocument->reportingDate : null,
+            'sheetVersion'  => ($this->importDocument->version) ? $this->importDocument->version : null,
+            'sheetFilename' => ($this->importDocument->statsReport) ? $this->importDocument->statsReport->center->sheetFilename : null,
+            'submittedAt'   => $submittedAt,
+            'errors'        => $this->importDocument->messages['errors'],
+            'warnings'      => $this->importDocument->messages['warnings'],
+        );
+
+        if (count($this->results['errors']) > 0) {
+            $this->results['result'] = 'error';
+        } else if (count($this->results['warnings']) > 0) {
+            $this->results['result'] = 'warning';
+        } else {
+            $this->results['result'] = 'ok';
+        }
+
         return $this->results;
     }
 
