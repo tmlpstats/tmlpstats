@@ -11,7 +11,7 @@ use TmlpStats\Quarter;
 
 use Carbon\Carbon;
 
-use Auth;
+use Gate;
 use Session;
 use Input;
 
@@ -141,9 +141,7 @@ class HomeController extends Controller {
             $sheetUrl = null;
             $reportUrl = null;
 
-            if (Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator')
-                || (Auth::user()->hasRole('localStatistician') && Auth::user()->center->id === $center->id)
-            ) {
+            if (Gate::allows('downloadSheet', $statsReport)) {
                 $sheetUrl = $statsReport && XlsxArchiver::getInstance()->getSheetPath($statsReport)
                     ? url("/statsreports/{$statsReport->id}/download")
                     : null;

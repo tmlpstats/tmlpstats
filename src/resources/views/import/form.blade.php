@@ -117,10 +117,11 @@
                 <h4 class="modal-title" id="submitCompleteModelLabel">Your stats are submitted!</h4>
             </div>
             <div class="modal-body">
+                <div id="successMessage">
                 You have successfully submitted your stats! We received them at <span id="submitTime"></span>.
 
                 Check to make sure you received an email from TMLP Stats in your center's stats email.<br/><br/>
-
+                </div>
                 <div id="submitResult" class="alert" role="alert" style="display:none">
                     <span class="message"></span>
                 </div>
@@ -188,6 +189,27 @@
                     }
                     $("#submitTime").text(response.submittedAt);
                     $("#submitResult").show();
+                    $('#submitModel').modal('hide');
+                    $('#submitCompleteModel').modal('show');
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var code = jqXHR.status;
+
+                    var message = '';
+                    if (code == 404) {
+                        message = 'We were unable to find that report. Please try validating and submitting your report again.';
+                    } else if (code == 403) {
+                        message = 'You are not allowed to submit this report.';
+                    } else {
+                        message = 'There was a problem submitting your report. Please try again.';
+                    }
+
+                    $("#submitResult span.message").html('<p>' + message + '</p>');
+                    $("#submitResult").removeClass("alert-success");
+                    $("#submitResult").addClass("alert-danger");
+
+                    $("#submitResult").show();
+                    $('#successMessage').hide();
                     $('#submitModel').modal('hide');
                     $('#submitCompleteModel').modal('show');
                 }

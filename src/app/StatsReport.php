@@ -226,7 +226,7 @@ class StatsReport extends Model
 
     public function user()
     {
-        return $this->hasOne('TmlpStats\User');
+        return $this->belongsTo('TmlpStats\User');
     }
 
     public function globalReports()

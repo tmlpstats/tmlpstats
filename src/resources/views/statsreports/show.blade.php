@@ -108,6 +108,19 @@
     </div>
 
     <script type="text/javascript">
+
+        function getErrorMessage(code) {
+            var message = '';
+            if (code == 404) {
+                message = 'Unable to find report.';
+            } else if (code == 403) {
+                message = 'You do not have access to this report.';
+            } else {
+                message = 'Unable to get report.';
+            }
+            return message;
+        }
+
         jQuery(document).ready(function ($) {
             $('#tabs').tab();
 
@@ -173,12 +186,18 @@
                 $("#classlist-container").hide();
             });
 
+
+
             // Fetch Summary
             $.ajax({
                 type: "GET",
                 url: "{{ url('/statsreports/' . $statsReport->id . '/summary') }}",
                 success: function(response) {
                     $("#summary-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#summary-container").html('<p>' + message + '</p>');
                 }
             });
 
@@ -188,6 +207,10 @@
                 url: "{{ url('/statsreports/' . $statsReport->id . '/results') }}",
                 success: function(response) {
                     $("#results-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#results-container").html('<p>' + message + '</p>');
                 }
             });
 
@@ -197,6 +220,10 @@
                 url: "{{ url('/statsreports/' . $statsReport->id . '/centerstats') }}",
                 success: function(response) {
                     $("#centerstats-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#centerstats-container").html('<p>' + message + '</p>');
                 }
             });
 
@@ -206,6 +233,10 @@
                 url: "{{ url('/statsreports/' . $statsReport->id . '/classlist') }}",
                 success: function(response) {
                     $("#classlist-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#classlist-container").html('<p>' + message + '</p>');
                 }
             });
 
@@ -215,6 +246,10 @@
                 url: "{{ url('/statsreports/' . $statsReport->id . '/gitwsummary') }}",
                 success: function(response) {
                     $("#gitwsummary-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#gitwsummary-container").html('<p>' + message + '</p>');
                 }
             });
 
@@ -224,6 +259,10 @@
                 url: "{{ url('/statsreports/' . $statsReport->id . '/tdosummary') }}",
                 success: function(response) {
                     $("#tdosummary-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#tdosummary-container").html('<p>' + message + '</p>');
                 }
             });
 
@@ -233,6 +272,10 @@
                 url: "{{ url('/statsreports/' . $statsReport->id . '/tmlpregistrations') }}",
                 success: function(response) {
                     $("#tmlpregistrations-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#tmlpregistrations-container").html('<p>' + message + '</p>');
                 }
             });
 
@@ -242,6 +285,10 @@
                 url: "{{ url('/statsreports/' . $statsReport->id . '/tmlpregistrationsbystatus') }}",
                 success: function(response) {
                     $("#tmlpregistrationsbystatus-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#tmlpregistrationsbystatus-container").html('<p>' + message + '</p>');
                 }
             });
 
@@ -251,6 +298,10 @@
                 url: "{{ url('/statsreports/' . $statsReport->id . '/courses') }}",
                 success: function(response) {
                     $("#courses-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#courses-container").html('<p>' + message + '</p>');
                 }
             });
 
@@ -260,6 +311,10 @@
                 url: "{{ url('/statsreports/' . $statsReport->id . '/contactinfo') }}",
                 success: function(response) {
                     $("#contactinfo-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#contactinfo-container").html('<p>' + message + '</p>');
                 }
             });
         });

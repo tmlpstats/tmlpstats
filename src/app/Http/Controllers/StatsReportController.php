@@ -52,6 +52,8 @@ class StatsReportController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('index', StatsReport::class);
+
         $selectedRegion = $this->getRegion($request);
 
         $allReports = StatsReport::currentQuarter($selectedRegion)
@@ -146,45 +148,39 @@ class StatsReportController extends Controller
      */
     public function show($id)
     {
-        $statsReport = StatsReport::find($id);
+        $statsReport = StatsReport::findOrFail($id);
 
-        if ($statsReport && !$this->hasAccess($statsReport->center->id, 'R')) {
-            $error = 'You do not have access to this report.';
-            return  Response::view('errors.403', compact('error'), 403);
-        }
+        $this->authorize('read', $statsReport);
 
         $sheetUrl = '';
         $globalReport = null;
 
-        if ($statsReport) {
+        $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
 
-            $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
-
-            if ($sheetPath) {
-                $sheetUrl = $sheetPath
-                    ? url("/statsreports/{$statsReport->id}/download")
-                    : null;
-            }
-
-            // Other Stats Reports
-            $otherStatsReports = array();
-            $searchWeek = clone $statsReport->quarter->startWeekendDate;
-
-            $searchWeek->addWeek();
-
-            while ($searchWeek->lte($statsReport->quarter->endWeekendDate)) {
-                $globalReport = GlobalReport::reportingDate($searchWeek)->first();
-                if ($globalReport) {
-                    $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
-                    if ($report) {
-                        $otherStatsReports[$report->id] = $report->reportingDate->format('M d, Y');
-                    }
-                }
-                $searchWeek->addWeek();
-            }
-
-            $globalReport = GlobalReport::reportingDate($statsReport->reportingDate)->first();
+        if ($sheetPath) {
+            $sheetUrl = $sheetPath
+                ? url("/statsreports/{$statsReport->id}/download")
+                : null;
         }
+
+        // Other Stats Reports
+        $otherStatsReports = array();
+        $searchWeek = clone $statsReport->quarter->startWeekendDate;
+
+        $searchWeek->addWeek();
+
+        while ($searchWeek->lte($statsReport->quarter->endWeekendDate)) {
+            $globalReport = GlobalReport::reportingDate($searchWeek)->first();
+            if ($globalReport) {
+                $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
+                if ($report) {
+                    $otherStatsReports[$report->id] = $report->reportingDate->format('M d, Y');
+                }
+            }
+            $searchWeek->addWeek();
+        }
+
+        $globalReport = GlobalReport::reportingDate($statsReport->reportingDate)->first();
 
         return view('statsreports.show', compact(
             'statsReport',
@@ -215,45 +211,7 @@ class StatsReportController extends Controller
      */
     public function update($id)
     {
-        $userEmail = Auth::user()->email;
-        $response = array(
-            'statsReport' => $id,
-            'success'     => false,
-            'message'     => '',
-        );
 
-        $statsReport = StatsReport::find($id);
-
-        if ($statsReport && !$this->hasAccess($statsReport->center->id, 'U')) {
-            $response['message'] = 'You do not have access to update this report.';
-            return $response;
-        }
-
-        if ($statsReport) {
-            $locked = Input::get('locked', null);
-            if ($locked !== null) {
-
-                $statsReport->locked = ($locked == false || $locked === 'false') ? false : true;
-
-                if ($statsReport->save()) {
-                    $response['success'] = true;
-                    $response['locked'] = $statsReport->locked;
-                    Log::info("User {$userEmail} " . ($statsReport->locked ? 'locked' : 'unlocked') . " statsReport {$id}");
-                } else {
-                    $response['message'] = 'Unable to lock stats report.';
-                    $response['locked'] = !$statsReport->locked;
-                    Log::error("User {$userEmail} attempted to lock statsReport {$id}. Failed to lock.");
-                }
-            } else {
-                $response['message'] = 'Invalid value for locked.';
-                Log::error("User {$userEmail} attempted to lock statsReport {$id}. No value provided for locked. ");
-            }
-        } else {
-            $response['message'] = 'Unable to update stats report.';
-            Log::error("User {$userEmail} attempted to lock statsReport {$id}. Not found.");
-        }
-
-        return $response;
     }
 
     /**
@@ -266,6 +224,10 @@ class StatsReportController extends Controller
      */
     public function submit($id)
     {
+        $statsReport = StatsReport::findOrFail($id);
+
+        $this->authorize($statsReport);
+
         $userEmail = Auth::user()->email;
         $response = array(
             'statsReport' => $id,
@@ -273,71 +235,58 @@ class StatsReportController extends Controller
             'message'     => '',
         );
 
-        $statsReport = StatsReport::find($id);
+        $action = Input::get('function', null);
+        if ($action === 'submit') {
 
-        if ($statsReport) {
+            $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+            $sheet = [];
 
-            if (!$this->hasAccess($statsReport->center->id, 'U')) {
-                $response['message'] = 'You do not have access to submit this report.';
-                return $response;
+            try {
+                // Check if we have cached the report already. If so, remove it from the cache and use it here
+                $cacheKey = "statsReport{$id}:importdata";
+                $importer = Cache::pull($cacheKey);
+                if (!$importer) {
+                    $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
+                    $importer->import();
+                }
+                $importer->saveReport();
+                $sheet = $importer->getResults();
+            } catch (Exception $e) {
+                Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             }
 
-            $action = Input::get('function', null);
-            if ($action === 'submit') {
+            $statsReport->submittedAt = Carbon::now();
+            $statsReport->submitComment = Input::get('comment', null);
 
-                $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
-                $sheet = [];
+            if ($statsReport->save()) {
+                // Cache the validation results so we don't have to regenerate
+                $cacheKey = "statsReport{$id}:validation";
+                Cache::tags(["statsReport{$id}"])->put($cacheKey, $sheet, static::STATS_REPORT_CACHE_TTL);
 
-                try {
-                    // Check if we have cached the report already. If so, remove it from the cache and use it here
-                    $cacheKey = "statsReport{$id}:importdata";
-                    $importer = Cache::pull($cacheKey);
-                    if (!$importer) {
-                        $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
-                        $importer->import();
-                    }
-                    $importer->saveReport();
-                    $sheet = $importer->getResults();
-                } catch (Exception $e) {
-                    Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
-                }
+                XlsxArchiver::getInstance()->promoteWorkingSheet($statsReport);
 
-                $statsReport->submittedAt = Carbon::now();
-                $statsReport->submitComment = Input::get('comment', null);
+                $submittedAt = clone $statsReport->submittedAt;
+                $submittedAt->setTimezone($statsReport->center->timezone);
 
-                if ($statsReport->save()) {
-                    // Cache the validation results so we don't have to regenerate
-                    $cacheKey = "statsReport{$id}:validation";
-                    Cache::tags(["statsReport{$id}"])->put($cacheKey, $sheet, static::STATS_REPORT_CACHE_TTL);
+                $response['submittedAt'] = $submittedAt->format('g:i A');
+                $result = ImportManager::sendStatsSubmittedEmail($statsReport, $sheet);
 
-                    XlsxArchiver::getInstance()->promoteWorkingSheet($statsReport);
-
-                    $submittedAt = clone $statsReport->submittedAt;
-                    $submittedAt->setTimezone($statsReport->center->timezone);
-
-                    $response['submittedAt'] = $submittedAt->format('g:i A');
-                    $result = ImportManager::sendStatsSubmittedEmail($statsReport, $sheet);
-
-                    if (isset($result['success'])) {
-                        $response['success'] = true;
-                        $response['message'] = $result['success'][0];
-                    } else {
-                        $response['success'] = false;
-                        $response['message'] = $result['error'][0];
-                    }
-
-                    Log::info("User {$userEmail} submitted statsReport {$id}");
+                if (isset($result['success'])) {
+                    $response['success'] = true;
+                    $response['message'] = $result['success'][0];
                 } else {
-                    $response['message'] = 'Unable to submit stats report.';
-                    Log::error("User {$userEmail} attempted to submit statsReport {$id}. Failed to submit.");
+                    $response['success'] = false;
+                    $response['message'] = $result['error'][0];
                 }
+
+                Log::info("User {$userEmail} submitted statsReport {$id}");
             } else {
-                $response['message'] = 'Invalid request.';
-                Log::error("User {$userEmail} attempted to submit statsReport {$id}. No value provided for submitReport. ");
+                $response['message'] = 'Unable to submit stats report.';
+                Log::error("User {$userEmail} attempted to submit statsReport {$id}. Failed to submit.");
             }
         } else {
-            $response['message'] = 'Unable to update stats report.';
-            Log::error("User {$userEmail} attempted to submit statsReport {$id}. Not found.");
+            $response['message'] = 'Invalid request.';
+            Log::error("User {$userEmail} attempted to submit statsReport {$id}. No value provided for submitReport. ");
         }
 
         return $response;
@@ -351,44 +300,16 @@ class StatsReportController extends Controller
      */
     public function destroy($id)
     {
-        $userEmail = Auth::user()->email;
-        $response = array(
-            'statsReport' => $id,
-            'success'     => false,
-            'message'     => '',
-        );
 
-        $statsReport = StatsReport::find($id);
-
-        if ($statsReport && !$this->hasAccess($statsReport->center->id, 'D')) {
-            $response['message'] = 'You do not have access to delete this report.';
-            return $response;
-        }
-
-        if ($statsReport) {
-            if ($statsReport->clear() && $statsReport->delete()) {
-                $response['success'] = true;
-                $response['message'] = 'Stats report deleted successfully.';
-                Log::info("User {$userEmail} deleted statsReport {$id}");
-            } else {
-                $response['message'] = 'Unable to delete stats report.';
-                Log::error("User {$userEmail} attempted to delete statsReport {$id}. Failed to clear or delete.");
-            }
-        } else {
-            $response['message'] = 'Unable to delete stats report.';
-            Log::error("User {$userEmail} attempted to delete statsReport {$id}. Not found.");
-        }
-
-        return $response;
     }
 
     public function downloadSheet($id)
     {
-        $statsReport = StatsReport::find($id);
+        $statsReport = StatsReport::findOrFail($id);
 
-        $path = $statsReport
-            ? XlsxArchiver::getInstance()->getSheetPath($statsReport)
-            : null;
+        $this->authorize($statsReport);
+
+        $path = XlsxArchiver::getInstance()->getSheetPath($statsReport);
 
         if ($path) {
             $filename = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
@@ -400,40 +321,11 @@ class StatsReportController extends Controller
         }
     }
 
-    // This is a really crappy authz. Need to address this properly
-    public function hasAccess($centerId, $permissions)
-    {
-        switch ($permissions) {
-            case 'R':
-            case 'U':
-                return (Auth::user()->hasRole('globalStatistician')
-                    || Auth::user()->hasRole('administrator')
-                    || (Auth::user()->hasRole('localStatistician') && Auth::user()->center->id === $centerId));
-            case 'C':
-            case 'D':
-            default:
-                return (Auth::user()->hasRole('globalStatistician')
-                    || Auth::user()->hasRole('administrator'));
-        }
-    }
-
     public function runDispatcher(Request $request, $id, $report)
     {
-        $statsReport = StatsReport::find($id);
+        $statsReport = StatsReport::findOrFail($id);
 
-        if (!$statsReport) {
-            $error = 'Report not found.';
-            return $request->ajax()
-                ? "<p>{$error}</p>"
-                : Response::view('errors.404', compact('error'), 404);
-        }
-
-        if (!$this->hasAccess($statsReport->center->id, 'R')) {
-            $error = 'You do not have access to view this report.';
-            return $request->ajax()
-                ? "<p>{$error}</p>"
-                : Response::view('errors.403', compact('error'), 403);
-        }
+        $this->authorize('read', $statsReport);
 
         if (!$statsReport->isValidated() && $report != 'results') {
             return '<p>This report did not pass validation. See Report Details for more information.</p>';
@@ -474,16 +366,13 @@ class StatsReportController extends Controller
         }
 
         if ($response === null) {
-            $error = 'Report not found.';
-            $response = $request->ajax()
-                ? "<p>{$error}</p>"
-                : Response::view('errors.404', compact('error'), 404);
+            abort(404);
         }
 
         return $response;
     }
 
-    public function getSummary(StatsReport $statsReport)
+    protected function getSummary(StatsReport $statsReport)
     {
         $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($statsReport->id, $statsReport->reportingDate);
         if (!$centerStatsData) {
@@ -558,7 +447,7 @@ class StatsReportController extends Controller
         ));
     }
 
-    public function getCenterStats(StatsReport $statsReport)
+    protected function getCenterStats(StatsReport $statsReport)
     {
         $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($statsReport->id);
         if (!$centerStatsData) {
@@ -574,7 +463,7 @@ class StatsReportController extends Controller
         return view('reports.centergames.milestones', $data);
     }
 
-    public function getTeamMembers(StatsReport $statsReport)
+    protected function getTeamMembers(StatsReport $statsReport)
     {
         $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport->id);
         if (!$teamMembers) {
@@ -587,7 +476,7 @@ class StatsReportController extends Controller
         return view('statsreports.details.classlist', $data);
     }
 
-    public function getTmlpRegistrationsByStatus(StatsReport $statsReport)
+    protected function getTmlpRegistrationsByStatus(StatsReport $statsReport)
     {
         $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport->id);
         if (!$registrations) {
@@ -601,7 +490,7 @@ class StatsReportController extends Controller
         return view('statsreports.details.tmlpregistrationsbystatus', $data);
     }
 
-    public function getTmlpRegistrations(StatsReport $statsReport)
+    protected function getTmlpRegistrations(StatsReport $statsReport)
     {
         $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport->id);
         if (!$registrations) {
@@ -614,7 +503,7 @@ class StatsReportController extends Controller
         return view('statsreports.details.tmlpregistrations', $data);
     }
 
-    public function getCourses(StatsReport $statsReport)
+    protected function getCourses(StatsReport $statsReport)
     {
         $courses = App::make(CoursesController::class)->getByStatsReport($statsReport->id);
         if (!$courses) {
@@ -627,7 +516,7 @@ class StatsReportController extends Controller
         return view('statsreports.details.courses', $data);
     }
 
-    public function getContacts(StatsReport $statsReport)
+    protected function getContacts(StatsReport $statsReport)
     {
         $contacts = App::make(ContactsController::class)->getByStatsReport($statsReport->id);
         if (!$contacts) {
@@ -637,7 +526,7 @@ class StatsReportController extends Controller
         return view('statsreports.details.contactinfo', compact('contacts'));
     }
 
-    public function getGitwByTeamMember(StatsReport $statsReport)
+    protected function getGitwByTeamMember(StatsReport $statsReport)
     {
         $weeksData = [];
 
@@ -659,7 +548,7 @@ class StatsReportController extends Controller
         return view('statsreports.details.teammembersweekly', $data);
     }
 
-    public function getTdoByTeamMember(StatsReport $statsReport)
+    protected function getTdoByTeamMember(StatsReport $statsReport)
     {
         $weeksData = [];
 
@@ -681,7 +570,7 @@ class StatsReportController extends Controller
         return view('statsreports.details.teammembersweekly', $data);
     }
 
-    public function getResults(StatsReport $statsReport)
+    protected function getResults(StatsReport $statsReport)
     {
         $sheet = array();
         $sheetUrl = '';

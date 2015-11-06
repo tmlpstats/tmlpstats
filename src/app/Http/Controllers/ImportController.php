@@ -12,6 +12,7 @@ class ImportController extends Controller {
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware('role:statistician');
     }
 
     public function index()
@@ -27,7 +28,6 @@ class ImportController extends Controller {
     // Handle XLSX file uploads
     public function uploadSpreadsheet(Request $request)
     {
-        $user = Auth::user();
         $enforceVersion = (Request::get('ignoreVersion') != 1);
 
         $submitReport = false;

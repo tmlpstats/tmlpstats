@@ -14,9 +14,9 @@
             <ul class="nav navbar-nav">
                 @if (Auth::check())
                     <li {{ Request::is('/') ? 'class="active"' : '' }}><a href="{{ url('/') }}">Home</a></li>
-                    @if (Auth::user()->hasRole('localStatistician') || Auth::user()->hasRole('globalStatistician') || Auth::user()->hasRole('administrator'))
+                    @can ('validate', TmlpStats\StatsReport::class)
                         <li {!! Request::is('import') ? 'class="active"' : '' !!}><a href="{{ url('/import') }}">Validate Stats</a></li>
-                    @endif
+                    @endcan
                     @if (Auth::user()->hasRole('administrator'))
                         <li class="dropdown {{ Request::is('admin') || Request::is('admin/*') ? 'active' : '' }}">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Admin <span

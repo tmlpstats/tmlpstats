@@ -1,7 +1,7 @@
 @extends('template')
 
 @section('content')
-    @if (!Auth::user()->hasRole('localStatistician') && !Auth::user()->hasRole('globalStatistician') && !Auth::user()->hasRole('administrator'))
+    @cannot ('index', TmlpStats\StatsReport::class)
         Welcome to your dashboard. If you think you should have access to this site, please contact your
         regional statistician.
     @else
@@ -78,5 +78,5 @@
                 </table>
             </div>
         @endforeach
-    @endif
+    @endcan
 @endsection
