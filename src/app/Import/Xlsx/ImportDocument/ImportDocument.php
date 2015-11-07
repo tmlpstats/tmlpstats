@@ -276,9 +276,9 @@ class ImportDocument extends ImportDocumentAbstract
         $t1QStartApproved = 0;
         $t2QStartApproved  = 0;
         foreach ($tmlpGames as $game) {
-            if (preg_match('/T1/', $game['type'])) {
+            if (strpos($game['type'], 'T1') !== false) {
                 $t1QStartApproved += $game['quarterStartApproved'];
-            } else if (preg_match('/T2/', $game['type'])) {
+            } else {
                 $t2QStartApproved += $game['quarterStartApproved'];
             }
         }
