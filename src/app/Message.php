@@ -503,93 +503,93 @@ class Message
         // ImportDocument Errors
         'IMPORTDOC_QSTART_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND' => array(
             'type' => Message::ERROR,
-            'format' => "%%type%% Quarter Starting Total Registered (%%quarterStartRegistered%%) does not match the number of incoming registered before the quarter's start date (%%registered%%).",
+            'format' => "The %%type%% Quarter Starting Total Registered value you reported (%%reported%%) does not match the number of incoming with registered dates before the quarter's start date (%%calculated%%).",
             'arguments' => array(
                 '%%type%%',
-                '%%quarterStartRegistered%%',
-                '%%registered%%',
+                '%%reported%%',
+                '%%calculated%%',
             ),
         ),
         'IMPORTDOC_QSTART_APPROVED_DOESNT_MATCH_APPR_BEFORE_WEEKEND' => array(
             'type' => Message::ERROR,
-            'format' => "%%type%% Quarter Starting Total Approved (%%quarterStartApproved%%) does not match the number of incoming approved before the quarter's start date (%%approved%%).",
+            'format' => "The %%type%% Quarter Starting Total Approved value you reported (%%quarterStartApproved%%) does not match the number of incoming with approved dates before the quarter's start date (%%calculated%%).",
             'arguments' => array(
                 '%%type%%',
                 '%%quarterStartApproved%%',
-                '%%approved%%',
+                '%%calculated%%',
             ),
         ),
         'IMPORTDOC_QSTART_T1_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND' => array(
             'type' => Message::WARNING,
-            'format' => "T1 Quarter Starting Total Registered totals (%%qStartRegisteredTotal%%) do not match the number of incoming registered before the quarter's start date (%%totals%%). Double check what the difference is. It could be a mistake, or a transfer from another center.",
+            'format' => "The T1 Quarter Starting Total Registered totals reported (%%reported%%) do not match the number of incoming with registered dates before the quarter's start date (%%calculated%%). Did someone transfer from another center?",
             'arguments' => array(
-                '%%qStartRegisteredTotal%%',
-                '%%totals%%',
+                '%%reported%%',
+                '%%calculated%%',
             ),
         ),
         'IMPORTDOC_QSTART_T1_APPROVED_DOESNT_MATCH_APPR_BEFORE_WEEKEND' => array(
             'type' => Message::WARNING,
-            'format' => "T1 Quarter Starting Total Approved totals (%%qStartApprovedTotal%%) do not match the number of incoming approved before the quarter's start date (%%totals%%). Double check what the difference is. It could be a mistake, or a transfer from another center.",
+            'format' => "The T1 Quarter Starting Total Approved totals reported (%%reported%%) do not match the number of incoming with approved dates before the quarter's start date (%%calculated%%). Did someone transfer from another center?",
             'arguments' => array(
-                '%%qStartApprovedTotal%%',
-                '%%totals%%',
+                '%%reported%%',
+                '%%calculated%%',
             ),
         ),
         'IMPORTDOC_QSTART_T2_TER_DOESNT_MATCH_REG_BEFORE_WEEKEND' => array(
             'type' => Message::WARNING,
-            'format' => "T2 Quarter Starting Total Registered totals (%%qStartRegisteredTotal%%) do not match the number of incoming registered before the quarter's start date (%%totals%%). Double check what the difference is. It could be a mistake, or a transfer from another center.",
+            'format' => "The T2 Quarter Starting Total Registered totals reported (%%reported%%) do not match the number of incoming with registered dates before the quarter's start date (%%calculated%%). Did someone transfer from another center?",
             'arguments' => array(
-                '%%qStartRegisteredTotal%%',
-                '%%totals%%',
+                '%%reported%%',
+                '%%calculated%%',
             ),
         ),
         'IMPORTDOC_QSTART_T2_APPROVED_DOESNT_MATCH_APPR_BEFORE_WEEKEND' => array(
             'type' => Message::WARNING,
-            'format' => "T2 Quarter Starting Total Approved totals (%%qStartApprovedTotal%%) do not match the number of incoming approved before the quarter's start date (%%totals%%). Double check what the difference is. It could be a mistake, or a transfer from another center.",
+            'format' => "The T2 Quarter Starting Total Approved totals reported (%%reported%%) do not match the number of incoming with approved dates before the quarter's start date (%%calculated%%). Did someone transfer from another center?",
             'arguments' => array(
-                '%%qStartApprovedTotal%%',
-                '%%totals%%',
+                '%%reported%%',
+                '%%calculated%%',
             ),
         ),
 
         'IMPORTDOC_CAP_ACTUAL_INCORRECT' => array(
             'type' => Message::ERROR,
-            'format' => "CAP actual for this week (%%calculated%%) does not match reported value (%%reported%%).",
+            'format' => "The CAP actual that you reported this week (%%reported%%) does not match the net number of CAP registrations this quarter (%%calculated%%).",
             'arguments' => array(
-                '%%calculated%%',
                 '%%reported%%',
+                '%%calculated%%',
             ),
         ),
         'IMPORTDOC_CPC_ACTUAL_INCORRECT' => array(
             'type' => Message::ERROR,
-            'format' => "CPC actual for this week (%%calculated%%) does not match reported value (%%reported%%).",
+            'format' => "The CPC actual that you reported this week (%%reported%%) does not match the net number of CPC registrations this quarter (%%calculated%%).",
             'arguments' => array(
-                '%%calculated%%',
                 '%%reported%%',
+                '%%calculated%%',
             ),
         ),
         'IMPORTDOC_T1X_ACTUAL_INCORRECT' => array(
             'type' => Message::WARNING,
-            'format' => "T1X actual approved for this week (%%calculated%%) does not match the net number of T1 incoming approved this quarter (%%reported%%). If the sheet does not detect this, the quarter starting totals are likely inaccurate. Verify manually.",
+            'format' => "The T1X actual that you reported this week (%%reported%%) does not match the net number of T1 incoming approved this quarter (%%calculated%%). If the sheet does flag this in purple, the quarter starting totals are likely inaccurate.",
             'arguments' => array(
-                '%%calculated%%',
                 '%%reported%%',
+                '%%calculated%%',
             ),
         ),
         'IMPORTDOC_T2X_ACTUAL_INCORRECT' => array(
             'type' => Message::WARNING,
-            'format' => "T2X actual approved for this week (%%calculated%%) does not match the net number of T2 incoming approved this quarter (%%reported%%). If the sheet does not detect this, the quarter starting totals are likely inaccurate. Verify manually.",
+            'format' => "The T2X actual that you reported this week (%%reported%%) does not match the net number of T2 incoming approved this quarter (%%calculated%%). If the sheet does flag this in purple, the quarter starting totals are likely inaccurate.",
             'arguments' => array(
-                '%%calculated%%',
                 '%%reported%%',
+                '%%calculated%%',
             ),
         ),
         'IMPORTDOC_GITW_ACTUAL_INCORRECT' => array(
             'type' => Message::ERROR,
-            'format' => "GITW actual for this week (%%calculated%%%) does not match the total number of team members reported as effective (%%reported%%%).",
+            'format' => "The GITW actual that you reported this week (%%reported%%%) does not match the percentage of team members reported as effective (%%calculated%%%).",
             'arguments' => array(
-                '%%calculated%%',
                 '%%reported%%',
+                '%%calculated%%',
             ),
         ),
         'IMPORTDOC_SPREADSHEET_VERSION_MISMATCH' => array(
