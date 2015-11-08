@@ -1,10 +1,9 @@
 <?php namespace TmlpStats\Handlers\Events;
 
-use Log;
-
-use Session;
 use TmlpStats\User;
-use Carbon\Carbon;
+
+use Log;
+use Session;
 
 class AuthLogoutEventHandler
 {
