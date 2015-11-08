@@ -1,12 +1,13 @@
 <?php
 namespace TmlpStats\Http\Middleware;
 
-use Auth;
-use Closure;
 use Illuminate\Contracts\Auth\Guard;
-use Session;
 use TmlpStats\ReportToken;
 use TmlpStats\User;
+
+use Auth;
+use Closure;
+use Session;
 
 class TokenAuthenticate
 {
@@ -40,17 +41,17 @@ class TokenAuthenticate
         if (Session::has('reportTokenId')) {
 
             if (!$this->auth->check()) {
-                // New user without a previously authenticated session
-                $reportToken = $this->getReportToken();
-                $user = User::find(0);
-                $user->setReportToken($reportToken);
 
-                $this->auth->login($user);
-                Session::set('homePath', $reportToken->getReportPath());
-            } else if ($this->auth->user()->hasRole('readonly')) {
-                // A readonly user that has already been authenticated
-                $reportToken = $this->getReportToken();
-                $this->auth->user()->setReportToken($reportToken);
+                $reportToken = ReportToken::find(Session::get('reportTokenId'));
+                if (!$reportToken->isValid()) {
+                    abort(403);
+                }
+
+                $this->auth->onceUsingId(0);
+                $user = $this->auth->user();
+                $user->setReportToken($reportToken);
+                Auth::setUser($user);
+
                 Session::set('homePath', $reportToken->getReportPath());
             }
         }
@@ -58,12 +59,5 @@ class TokenAuthenticate
         return $next($request);
     }
 
-    public function getReportToken()
-    {
-        $reportToken = ReportToken::find(Session::get('reportTokenId'));
-        if (!$reportToken->isValid()) {
-            abort(403);
-        }
-        return $reportToken;
-    }
+
 }
