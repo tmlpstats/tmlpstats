@@ -13,7 +13,6 @@ class GlobalReportPolicy
     /**
      * Create a new policy instance.
      *
-     * @return void
      */
     public function __construct()
     {
@@ -34,7 +33,11 @@ class GlobalReportPolicy
 
     public function read(User $user, GlobalReport $globalReport)
     {
-        return $user->hasRole('globalStatistician') || $user->hasRole('localStatistician');
+        if ($user->hasRole('readonly')) {
+            return ($user->reportToken && $user->reportToken->reportId === $globalReport->id);
+        } else {
+            return ($user->hasRole('globalStatistician') || $user->hasRole('localStatistician'));
+        }
     }
 
     public function update(User $user, GlobalReport $globalReport)

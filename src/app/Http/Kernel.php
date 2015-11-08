@@ -17,7 +17,7 @@ class Kernel extends HttpKernel
         \Illuminate\Session\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         Middleware\VerifyCsrfToken::class,
-        Middleware\ActiveUsersMiddleware::class,
+//        Middleware\ActiveUsersMiddleware::class,
     ];
 
     /**
@@ -28,6 +28,7 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         'auth' => Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'auth.token' => Middleware\TokenAuthenticate::class,
         'guest' => Middleware\RedirectIfAuthenticated::class,
         'role' => Middleware\RoleMiddleware::class,
     ];

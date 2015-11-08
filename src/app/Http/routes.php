@@ -12,6 +12,10 @@
 */
 
 // Admin Area
+use TmlpStats\GlobalReport;
+use TmlpStats\ReportToken;
+use TmlpStats\User;
+
 Route::match(['get', 'post'], 'admin/dashboard', 'AdminController@index');
 Route::get('admin/status', 'AdminController@status');
 Route::get('admin/peoplereport', 'AdminController@getPeopleReport');
@@ -32,6 +36,25 @@ Route::get('statsreports/{id}/{report}', 'StatsReportController@runDispatcher');
 Route::resource('globalreports', 'GlobalReportController');
 Route::get('globalreports/{id}/{report}', 'GlobalReportController@runDispatcher');
 
+
+Route::get('report/{token}', function ($token) {
+
+    $reportToken = ReportToken::token($token)->first();
+    if (!$reportToken) {
+        abort(404);
+    }
+
+    Session::set('reportTokenId', $reportToken->id);
+
+    $reportUrl = $reportToken->getReportPath();
+
+    if ($reportUrl) {
+        return redirect($reportUrl);
+    } else {
+        abort(404);
+    }
+});
+
 // Center Info
 Route::resource('center', 'CenterController');
 
@@ -51,6 +74,13 @@ Route::post('home/clientsettings', function () {
     if (Request::has('locale')) {
         Session::put('locale', Request::get('locale'));
     }
+});
+
+Route::get('auth/reauth', function() {
+    // Logout and show login page (used to upgrade a report user)
+    Auth::logout();
+
+    return redirect('auth/login');
 });
 
 Route::controllers([

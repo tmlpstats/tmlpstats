@@ -50,27 +50,58 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
      */
     protected $hidden = ['password', 'remember_token'];
 
+    protected $reportToken = null;
+
     public function __get($name)
     {
+        if ($this->reportToken) {
+            return $this->getForReportUser($name);
+        } else if ($name == 'reportToken') {
+            return null;
+        }
+
         switch ($name) {
             case 'firstName':
             case 'lastName':
             case 'phone':
-            case 'email':
             case 'center':
-                // TODO: remove me. needed for migration
-                if (!$this->person) {
-                    return parent::__get($name);
-                }
-                return $this->person->$name;
+                return $this->person
+                    ? $this->person->$name
+                    : null;
             default:
                 return parent::__get($name);
         }
     }
 
+    protected function getForReportUser($name)
+    {
+        switch ($name) {
+            case 'firstName':
+                return 'Guest';
+            case 'reportToken':
+                return $this->reportToken;
+            case 'center':
+                return $this->reportToken
+                    ? $this->reportToken->center
+                    : null;
+            case 'lastName':
+            case 'phone':
+                return null;
+            default:
+                return parent::__get($name);
+        }
+    }
+
+    public function setReportToken(ReportToken $reportToken)
+    {
+        $this->reportToken = $reportToken;
+    }
+
     public function hasAccountability($name)
     {
-        return $this->person->hasAccountability($name);
+        return $this->person
+            ? $this->person->hasAccountability($name)
+            : false;
     }
 
     public function hasRole($name)
@@ -80,11 +111,23 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
     public function homeRegion()
     {
-        return $this->person->center ? $this->person->center->region : null;
+        if ($this->reportToken) {
+            return $this->reportToken->center
+                ? $this->reportToken->center->region
+                : null;
+        }
+
+        return $this->person && $this->person->center
+            ? $this->person->center->region
+            : null;
     }
 
     public function setCenter($center)
     {
+        if (!$this->person) {
+            return;
+        }
+
         $person = $this->person;
         $person->centerId = $center->id;
         $person->save();
@@ -92,6 +135,10 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
     public function setPhone($phone)
     {
+        if (!$this->person) {
+            return;
+        }
+
         $person = $this->person;
         $person->phone = $phone;
         $person->save();
@@ -99,6 +146,10 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
     public function setEmail($email)
     {
+        if (!$this->person) {
+            return;
+        }
+
         $person = $this->person;
         $person->email = $email;
         $person->save();
@@ -106,6 +157,10 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
     public function formatPhone()
     {
+        if (!$this->person) {
+            return;
+        }
+
         // TODO: This handles the standard 10 digit North American phone number. Update to handle international formats
         if (isset($this->person->phone) && preg_match('/^(\d\d\d)[\s\.\-]?(\d\d\d)[\s\.\-]?(\d\d\d\d)$/', $this->person->phone, $matches)) {
             return "({$matches[1]}) {$matches[2]}-{$matches[3]}";

@@ -21,16 +21,36 @@
         @foreach ($statsReportsList as $data)
             <tr id="{{ $data['id'] }}"
                 class="{{ !$data['onTime'] ? ' bg-danger' : (isset($data['revisionSubmitTime']) ? 'bg-warning' : '') }}">
-                <td><a href="{{ url("/statsreports/{$data['id']}") }}">{{ $data['center'] }}</a></td>
+                <td>
+                    @can ('read', $data['officialReport'])
+                    <a href="{{ url("/statsreports/{$data['id']}") }}">
+                        {{ $data['center'] }}
+                    </a>
+                    @else
+                        {{ $data['center'] }}
+                    @endcan
+                </td>
                 <td>{{ $data['region'] }}</td>
                 <td style="text-align: center">{{ $data['onTime'] ? 'Yes' : 'No' }}</td>
                 <td>
-                    <a href="{{ url("/statsreports/{$data['officialReport']->id}") }}">{{ $data['officialSubmitTime'] }}</a>
+                    @can ('read', $data['officialReport'])
+                    <a href="{{ url("/statsreports/{$data['officialReport']->id}") }}">
+                        {{ $data['officialSubmitTime'] }}
+                    </a>
+                    @else
+                        {{ $data['officialSubmitTime'] }}
+                    @endcan
                 </td>
                 @if (isset($data['revisedReport']))
                     <td style="text-align: center">Yes</td>
                     <td>
-                        <a href="{{ url("/statsreports/{$data['revisedReport']->id}") }}">{{ $data['revisionSubmitTime'] }}</a>
+                        @can ('read', $data['revisedReport'])
+                        <a href="{{ url("/statsreports/{$data['revisedReport']->id}") }}">
+                            {{ $data['revisionSubmitTime'] }}
+                        </a>
+                        @else
+                            {{ $data['revisionSubmitTime'] }}
+                        @endcan
                     </td>
                 @else
                     <td style="text-align: center">No</td>

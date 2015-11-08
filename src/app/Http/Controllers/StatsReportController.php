@@ -42,6 +42,7 @@ class StatsReportController extends Controller
      */
     public function __construct()
     {
+        $this->middleware('auth.token');
         $this->middleware('auth');
     }
 

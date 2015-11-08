@@ -12,6 +12,10 @@ We received them on {{ $time }} your local time. Please find the submitted sheet
     You are not complete yet. Your regional statistician will review your sheet and declare you complete by {{ $respondByTime }} your local time Saturday morning.<br/>
 @endif
 <br/>
+@if ($reportUrl)
+<a href="{{ $reportUrl }}">View your report online: {{ $centerName }} - {{ $reportingDate->format('M j, Y') }}</a><br/>
+<br/>
+@endif
 @if ($comment)
     You provided the following comment:<br/>
     -----<br/>

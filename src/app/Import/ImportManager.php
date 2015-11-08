@@ -1,18 +1,21 @@
 <?php
 namespace TmlpStats\Import;
 
-use Cache;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
-
 use TmlpStats\Center;
+use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
+use TmlpStats\ReportToken;
+use TmlpStats\Setting;
+use TmlpStats\Util;
+
 use Carbon\Carbon;
 
 use Auth;
+use Cache;
+use Exception;
 use Log;
 use Mail;
-use Exception;
-use TmlpStats\Setting;
 
 // Required for importing multiple sheets
 ini_set('max_execution_time', 240);
@@ -267,12 +270,27 @@ class ImportManager
             $sheet = [];
         }
 
+        $globalReport = GlobalReport::reportingDate($statsReport->reportingDate)->first();
+
+        $reportToken = ReportToken::firstOrCreate([
+            'center_id' => $center->id,
+            'report_id' => $globalReport->id,
+            'report_type' => 'global_reports',
+            'expires_at' => null,
+        ]);
+        if (!$reportToken->token) {
+            $reportToken->token = Util::getRandomString();
+            $reportToken->save();
+        }
+        $reportUrl = url("/report/{$reportToken->token}");
+
         $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
         $sheetName = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
         $centerName = $center->name;
         $comment = $statsReport->submitComment;
+        $reportingDate = $statsReport->reportingDate;
         try {
-            Mail::send('emails.statssubmitted', compact('user', 'centerName', 'time', 'sheet', 'isLate', 'due', 'comment', 'respondByTime'),
+            Mail::send('emails.statssubmitted', compact('user', 'centerName', 'time', 'sheet', 'isLate', 'due', 'comment', 'respondByTime', 'reportUrl', 'reportingDate'),
                 function($message) use ($emails, $emailMap, $centerName, $sheetPath, $sheetName) {
                 // Only send email to centers in production
                 if (env('APP_ENV') === 'prod') {

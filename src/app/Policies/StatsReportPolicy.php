@@ -34,9 +34,16 @@ class StatsReportPolicy
 
     public function read(User $user, StatsReport $statsReport)
     {
-        return ($user->hasRole('globalStatistician')
-            || ($user->hasRole('localStatistician') && $user->center->id === $statsReport->center->id))
-            || ($user->hasRole('localStatistician') && $user->id === $statsReport->user->id);
+        if ($user->hasRole('globalStatistician')) {
+            return true;
+        } else if ($user->hasRole('localStatistician')) {
+            return $user->center->id === $statsReport->center->id || $user->id === $statsReport->user->id;
+        } else if ($user->hasRole('readonly')) {
+            $result = $user->center && $user->center->id === $statsReport->center->id;
+            return $result;
+        }
+
+        return false;
     }
 
     public function update(User $user, StatsReport $statsReport)
@@ -58,7 +65,8 @@ class StatsReportPolicy
 
     public function downloadSheet(User $user, StatsReport $statsReport)
     {
-        return $this->read($user, $statsReport);
+        // No downloading for readonly users
+        return $this->read($user, $statsReport) && !$user->hasRole('readonly');
     }
 
     public function index(User $user)

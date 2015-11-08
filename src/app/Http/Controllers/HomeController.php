@@ -43,6 +43,8 @@ class HomeController extends Controller {
      */
     public function index(Request $request)
     {
+        $this->authorize('index', StatsReport::class);
+
         $timezone = '';
         if (Session::has('timezone')) {
             $timezone =  Session::get('timezone');

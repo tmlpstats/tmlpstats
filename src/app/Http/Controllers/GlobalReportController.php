@@ -6,6 +6,7 @@ use TmlpStats\Quarter;
 use TmlpStats\Region;
 use TmlpStats\StatsReport;
 use TmlpStats\Center;
+
 use TmlpStats\Reports\Arrangements\CoursesByCenter;
 use TmlpStats\Reports\Arrangements\CoursesWithEffectiveness;
 use TmlpStats\Reports\Arrangements\GamesByMilestone;
@@ -13,7 +14,6 @@ use TmlpStats\Reports\Arrangements\GamesByWeek;
 use TmlpStats\Reports\Arrangements\TeamMemberIncomingOverview;
 use TmlpStats\Reports\Arrangements\TeamMembersByCenter;
 use TmlpStats\Reports\Arrangements\TeamMembersByStatus;
-
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByCenter;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByIncomingQuarter;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByOverdue;
@@ -21,11 +21,9 @@ use TmlpStats\Reports\Arrangements\TmlpRegistrationsByStatus;
 use TmlpStats\Reports\Arrangements\TravelRoomingByTeamYear;
 use TmlpStats\Reports\Arrangements;
 
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 use App;
-use Input;
 use Response;
 
 class GlobalReportController extends Controller
@@ -35,6 +33,7 @@ class GlobalReportController extends Controller
      */
     public function __construct()
     {
+        $this->middleware('auth.token');
         $this->middleware('auth');
     }
 
