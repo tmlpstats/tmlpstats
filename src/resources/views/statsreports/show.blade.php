@@ -4,8 +4,9 @@
 
 @if ($statsReport)
     <h2>{{ $statsReport->center->name }} - {{ $statsReport->reportingDate->format('F j, Y') }}</h2>
+    @can ('index', TmlpStats\StatsReport::class)
     <a href="{{ url('/home') }}"><< See All</a><br/><br/>
-
+    @endcan
     <div class="table-responsive" style="overflow: hidden">
         {!! Form::open(['url' => "statsreports", 'method' => 'GET', 'class' => 'form-horizontal', 'id' => 'reportSelectorForm']) !!}
         <div class="row">

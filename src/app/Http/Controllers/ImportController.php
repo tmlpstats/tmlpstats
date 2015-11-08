@@ -4,7 +4,6 @@ namespace TmlpStats\Http\Controllers;
 use TmlpStats\Http\Requests;
 use TmlpStats\Import\ImportManager;
 
-use Auth;
 use Request;
 
 class ImportController extends Controller {

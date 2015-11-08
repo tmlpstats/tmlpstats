@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats;
 
+use Cache;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use Carbon\Carbon;
@@ -112,5 +113,49 @@ class Util
             }
         }
         return $parts;
+    }
+
+    /**
+     * Get a random string (sha512 that's been base64 encoded to shorten it)
+     *
+     * @return string
+     */
+    public static function getRandomString()
+    {
+        $b64Hash = base64_encode(hash('sha512', openssl_random_pseudo_bytes(32), true));
+
+        return strtr($b64Hash, '+/', '-_');
+    }
+
+    /**
+     * Get the current active sessions from memcache. Careful using this in production.
+     *
+     * @return array
+     */
+    public static function getMemcacheSessions()
+    {
+        $sessions = [];
+
+        try {
+            $memcache = new \Memcache;
+            $memcache->connect('127.0.0.1', 11211) or die ("Could not connect to memcache server");
+            $allSlabs = $memcache->getExtendedStats('slabs');
+            foreach ($allSlabs as $server => $slabs) {
+                foreach ($slabs AS $slabId => $slabMeta) {
+                    $cdump = $memcache->getExtendedStats('cachedump', (int)$slabId);
+                    foreach ($cdump AS $keys => $arrVal) {
+                        if (!is_array($arrVal)) continue;
+                        foreach ($arrVal AS $k => $v) {
+                            if (preg_match('/^laravel:([^:]+)$/', $k, $matches)) {
+                                $sessions[$matches[1]] = unserialize(Cache::get($matches[1]));
+                            }
+                        }
+                    }
+                    usleep(20000);// 20ms between lookups
+                }
+            }
+        } catch (\Exception $e) { }
+
+        return $sessions;
     }
 }

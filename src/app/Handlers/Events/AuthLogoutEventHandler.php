@@ -2,6 +2,7 @@
 
 use Log;
 
+use Session;
 use TmlpStats\User;
 use Carbon\Carbon;
 
@@ -27,5 +28,7 @@ class AuthLogoutEventHandler
         if ($user) {
             Log::info("User {$user->id} logged out");
         }
+
+        Session::flush();
     }
 }
