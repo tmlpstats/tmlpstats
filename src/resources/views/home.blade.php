@@ -25,7 +25,11 @@
                 <div class="col-md-3" style="align-content: center">
                     {!! Form::select('reportingDate', $reportingDates, $reportingDate->toDateString(), ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}
                 </div>
-                <div class="col-md-6"></div>
+                <div class="col-md-6">
+                    @if ($globalReport)
+                        <a class="btn btn-primary" href="{{ url("globalreports/{$globalReport->id}?region={$selectedRegion}") }}">View Regional Report</a>
+                    @endif
+                </div>
             </div>
             {!! Form::close() !!}
         </div>
