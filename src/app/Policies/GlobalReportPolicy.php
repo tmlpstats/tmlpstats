@@ -2,14 +2,11 @@
 
 namespace TmlpStats\Policies;
 
-use Illuminate\Auth\Access\HandlesAuthorization;
 use TmlpStats\GlobalReport;
 use TmlpStats\User;
 
-class GlobalReportPolicy
+class GlobalReportPolicy extends Policy
 {
-    use HandlesAuthorization;
-
     /**
      * Create a new policy instance.
      *
@@ -17,13 +14,6 @@ class GlobalReportPolicy
     public function __construct()
     {
         //
-    }
-
-    public function before($user, $ability)
-    {
-        if ($user->hasRole('administrator')) {
-            return true;
-        }
     }
 
     public function create(User $user)

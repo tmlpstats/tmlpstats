@@ -7,24 +7,34 @@
     @can ('index', TmlpStats\StatsReport::class)
     <a href="{{ url('/home') }}"><< See All</a><br/><br/>
     @endcan
+
     <div class="table-responsive" style="overflow: hidden">
         {!! Form::open(['url' => "statsreports", 'method' => 'GET', 'class' => 'form-horizontal', 'id' => 'reportSelectorForm']) !!}
         <div class="row">
             <div class="col-md-3" style="align-content: center">
                 {!! Form::label('report_id', 'Other Weekly Reports:', ['class' => 'control-label']) !!}
             </div>
-            <div class="col-md-9"></div>
+            <div class="col-md-2"></div>
+            <div class="col-md-7">
+                @if ($reportToken)
+                {!! Form::label('reportTokenUrl', 'Report Link:', ['class' => 'control-label']) !!}
+                @endif
+            </div>
         </div>
         <div class="row">
             <div class="col-md-3" style="align-content: center">
                 {!! Form::select('report_id', $otherStatsReports, $statsReport->id, ['class' => 'form-control reportSelector']) !!}
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 @if ($globalReport)
                     <a class="btn btn-primary" href="{{ url("globalreports/{$globalReport->id}?region={$statsReport->center->region->abbreviation}") }}">View Regional Report</a>
                 @endif
             </div>
-            <div class="col-md-6"></div>
+            <div class="col-md-7">
+                @if ($reportToken)
+                    {!! Form::text('reportTokenUrl', url($reportToken->getUrl()), ['size' => 80]) !!}
+                @endif
+            </div>
         </div>
         {!! Form::close() !!}
     </div>

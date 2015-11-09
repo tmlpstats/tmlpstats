@@ -124,7 +124,7 @@ class Util
     {
         $b64Hash = base64_encode(hash('sha512', openssl_random_pseudo_bytes(32), true));
 
-        return strtr($b64Hash, '+/', '-_');
+        return str_replace(['+','/','='], ['-','_',''], $b64Hash);
     }
 
     /**

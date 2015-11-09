@@ -272,16 +272,7 @@ class ImportManager
 
         $globalReport = GlobalReport::reportingDate($statsReport->reportingDate)->first();
 
-        $reportToken = ReportToken::firstOrCreate([
-            'center_id' => $center->id,
-            'report_id' => $globalReport->id,
-            'report_type' => 'global_reports',
-            'expires_at' => null,
-        ]);
-        if (!$reportToken->token) {
-            $reportToken->token = Util::getRandomString();
-            $reportToken->save();
-        }
+        $reportToken = ReportToken::get($globalReport, $center);
         $reportUrl = url("/report/{$reportToken->token}");
 
         $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);

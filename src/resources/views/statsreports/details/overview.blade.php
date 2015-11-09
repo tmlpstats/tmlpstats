@@ -50,6 +50,7 @@
                 @endif
             </td>
         </tr>
+        @can('downloadSheet', $statsReport)
         <tr>
             <th>File:</th>
             <td>
@@ -60,6 +61,7 @@
                 @endif
             </td>
         </tr>
+        @endcan
         <tr>
             <th>Submission Comment:</th>
             <td>{{ $statsReport->submitComment }}</td>

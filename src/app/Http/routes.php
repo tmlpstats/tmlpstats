@@ -36,6 +36,8 @@ Route::get('statsreports/{id}/{report}', 'StatsReportController@runDispatcher');
 Route::resource('globalreports', 'GlobalReportController');
 Route::get('globalreports/{id}/{report}', 'GlobalReportController@runDispatcher');
 
+// Report Tokens
+Route::resource('reporttokens', 'ReportTokenController');
 
 Route::get('report/{token}', function ($token) {
 
