@@ -4,6 +4,7 @@ use TmlpStats\Http\Requests;
 use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
 use TmlpStats\Region;
+use TmlpStats\ReportToken;
 use TmlpStats\StatsReport;
 use TmlpStats\Center;
 
@@ -24,6 +25,7 @@ use TmlpStats\Reports\Arrangements;
 use Illuminate\Http\Request;
 
 use App;
+use Gate;
 use Response;
 
 class GlobalReportController extends Controller
@@ -84,9 +86,14 @@ class GlobalReportController extends Controller
 
         $region = $this->getRegion($request, true);
 
+        $reportToken = Gate::allows('readLink', ReportToken::class)
+            ? ReportToken::get($globalReport)
+            : null;
+
         return view('globalreports.show', compact(
             'globalReport',
-            'region'
+            'region',
+            'reportToken'
         ));
     }
 

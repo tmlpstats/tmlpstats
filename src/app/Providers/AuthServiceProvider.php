@@ -5,7 +5,9 @@ use Illuminate\Contracts\Auth\Access\Gate as GateContract;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use TmlpStats\GlobalReport;
 use TmlpStats\Policies\GlobalReportPolicy;
+use TmlpStats\Policies\ReportTokenPolicy;
 use TmlpStats\Policies\StatsReportPolicy;
+use TmlpStats\ReportToken;
 use TmlpStats\StatsReport;
 
 class AuthServiceProvider extends ServiceProvider
@@ -18,6 +20,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         StatsReport::class => StatsReportPolicy::class,
         GlobalReport::class => GlobalReportPolicy::class,
+        ReportToken::class => ReportTokenPolicy::class,
     ];
 
     /**

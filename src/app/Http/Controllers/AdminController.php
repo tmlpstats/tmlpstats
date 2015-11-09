@@ -31,6 +31,13 @@ class AdminController extends Controller {
 
     public function index(Request $request)
     {
+
+        return view('admin.index', compact());
+    }
+
+
+    public function old_index(Request $request)
+    {
         $region = $this->getRegion($request);
 
         $allReports = StatsReport::currentQuarter($region)->orderBy('reporting_date', 'desc')->get();

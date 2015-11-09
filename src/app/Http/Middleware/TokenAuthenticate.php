@@ -40,7 +40,7 @@ class TokenAuthenticate
     {
         if (Session::has('reportTokenId')) {
 
-            if (!$this->auth->check()) {
+            if (!$this->auth->check() && !$this->auth->user()) {
 
                 $reportToken = ReportToken::find(Session::get('reportTokenId'));
                 if (!$reportToken->isValid()) {

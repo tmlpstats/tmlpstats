@@ -15,6 +15,10 @@
     <!-- Help with Timezones -->
     <script type="text/javascript" src="{{ asset('/js/jstz.min.js') }}"></script>
 
+    <!-- DataTables -->
+    <script type="text/javascript" src="{{ asset('/js/query.dataTables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('/js/dataTables.bootstrap.js') }}"></script>
+
     <!-- Bootstrap -->
     <link href="{{ asset('/css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('/css/bootstrap.min.css') }}" rel="stylesheet">

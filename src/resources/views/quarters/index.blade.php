@@ -37,8 +37,7 @@
         </tbody>
     </table>
 </div>
-<script src="{{ asset('/js/query.dataTables.min.js') }}"></script>
-<script src="{{ asset('/js/dataTables.bootstrap.js') }}"></script>
+
 <script type="text/javascript">
     $(document).ready(function() {
         $('#quartersTable').dataTable({

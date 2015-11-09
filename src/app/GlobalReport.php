@@ -59,4 +59,9 @@ class GlobalReport extends Model
     {
         return $this->belongsToMany('TmlpStats\StatsReport', 'global_report_stats_report')->withTimestamps();
     }
+
+    public function reportToken()
+    {
+        return $this->morphOne('TmlpStats\ReportToken', 'report');
+    }
 }

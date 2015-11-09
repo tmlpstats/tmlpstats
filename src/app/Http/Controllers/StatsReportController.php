@@ -7,6 +7,7 @@ use TmlpStats\CenterStatsData;
 use TmlpStats\CourseData;
 use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
+use TmlpStats\ReportToken;
 use TmlpStats\StatsReport;
 use TmlpStats\TeamMemberData;
 use TmlpStats\TmlpRegistrationData;
@@ -31,6 +32,7 @@ use App;
 use Auth;
 use Cache;
 use Exception;
+use Gate;
 use Input;
 use Log;
 use Response;
@@ -183,11 +185,16 @@ class StatsReportController extends Controller
 
         $globalReport = GlobalReport::reportingDate($statsReport->reportingDate)->first();
 
+        $reportToken = Gate::allows('readLink', ReportToken::class)
+            ? ReportToken::get($globalReport, $statsReport->center)
+            : null;
+
         return view('statsreports.show', compact(
             'statsReport',
             'globalReport',
             'otherStatsReports',
-            'sheetUrl'
+            'sheetUrl',
+            'reportToken'
         ));
     }
 

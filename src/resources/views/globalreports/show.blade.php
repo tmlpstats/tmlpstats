@@ -5,14 +5,31 @@
         <h2>{{ $region ? $region->name : 'Global' }} Report - {{ $globalReport->reportingDate->format('F j, Y') }}</h2>
         <a href="{{ \URL::previous() }}"><< Go Back</a><br/><br/>
 
-        {!! Form::open(['url' => "globalreports/{$globalReport->id}", 'method' => 'GET', 'class' => 'form-horizontal', 'id' => 'reportSelectorForm']) !!}
-        <div class="form-group">
-            {!! Form::label('region', 'Region:', ['class' => 'col-sm-1 control-label']) !!}
-            <div class="col-sm-3">
-                @include('partials.forms.regions', ['selectedRegion' => $region->abbreviation, 'includeLocalRegions' => true])
+        <div class="table-responsive" style="overflow: hidden">
+            {!! Form::open(['url' => "globalreports/{$globalReport->id}", 'method' => 'GET', 'class' => 'form-horizontal', 'id' => 'reportSelectorForm']) !!}
+            <div class="row">
+                <div class="col-md-3">
+                    {!! Form::label('region', 'Region:', ['class' => 'control-label']) !!}
+                </div>
+                <div class="col-md-9">
+                    @if ($reportToken)
+                        {!! Form::label('reportTokenUrl', 'Report Link:', ['class' => 'control-label']) !!}
+                    @endif
+                </div>
             </div>
+            <div class="row">
+                <div class="col-md-3">
+                    @include('partials.forms.regions', ['selectedRegion' => $region->abbreviation, 'includeLocalRegions' => true])
+                </div>
+                <div class="col-md-9">
+                    @if ($reportToken)
+                        {!! Form::text('reportTokenUrl', url($reportToken->getUrl()), ['size' => 80]) !!}
+                    @endif
+                </div>
+            </div>
+            {!! Form::close() !!}
         </div>
-        {!! Form::close() !!}
+        <br /><br />
 
         <div class="col-xs-2">
             <ul id="tabs " class="nav nav-tabs tabs-left" data-tabs="tabs">
