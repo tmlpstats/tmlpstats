@@ -78,13 +78,6 @@ Route::post('home/clientsettings', function () {
     }
 });
 
-Route::get('auth/reauth', function() {
-    // Logout and show login page (used to upgrade a report user)
-    Auth::logout();
-
-    return redirect('auth/login');
-});
-
 Route::controllers([
     'auth' => 'Auth\AuthController',
     'password' => 'Auth\PasswordController',
