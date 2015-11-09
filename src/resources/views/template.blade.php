@@ -79,7 +79,9 @@
                         },
                         data: $.param(data),
                         success: function () {
+                            @if (Request::is('/home'))
                             location.reload();
+                            @endif
                         }
                     });
                 }
