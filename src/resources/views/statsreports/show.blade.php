@@ -49,7 +49,9 @@
             <li><a href="#classlist-tab" data-toggle="tab">Team Members</a></li>
             <li><a href="#tmlpregistrations-tab" data-toggle="tab">Team Expansion</a></li>
             <li><a href="#courses-tab" data-toggle="tab">Courses</a></li>
+            @can ('readContactInfo', $statsReport)
             <li><a href="#contactinfo-tab" data-toggle="tab">Contact Info</a></li>
+            @endcan
         </ul>
 
         <div class="tab-content">
@@ -109,12 +111,14 @@
                     @include('partials.loading')
                 </div>
             </div>
+            @can ('readContactInfo', $statsReport)
             <div class="tab-pane" id="contactinfo-tab">
                 <h3>Contact Info</h3>
                 <div id="contactinfo-container">
                     @include('partials.loading')
                 </div>
             </div>
+            @endcan
         </div>
     </div>
 
@@ -316,6 +320,7 @@
                 }
             });
 
+            @can ('readContactInfo', $statsReport)
             // Fetch Contact Info
             $.ajax({
                 type: "GET",
@@ -328,6 +333,7 @@
                     $("#contactinfo-container").html('<p>' + message + '</p>');
                 }
             });
+            @endcan
         });
     </script>
 

@@ -363,6 +363,7 @@ class StatsReportController extends Controller
                 $response =  $this->getCourses($statsReport);
                 break;
             case 'contactinfo':
+                $this->authorize('readContactInfo', $statsReport);
                 $response =  $this->getContacts($statsReport);
                 break;
             case 'gitwsummary':

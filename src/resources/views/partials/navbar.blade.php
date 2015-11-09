@@ -41,7 +41,7 @@
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
-                @if (Auth::guest() || (Auth::user()->hasRole('readonly') && Request::is('home')))
+                @if (Auth::guest() || Auth::user()->hasRole('readonly')))
                     <li {!! Request::is('/') ? 'class="active"' : '' !!}>
                         <a href="{{ url('/auth/login') }}">Login/Register</a>
                     </li>
@@ -49,11 +49,7 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ Auth::user()->firstName }} <span class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">
-                            @if (Auth::user()->hasRole('readonly'))
-                                <li><a href="{{ url('/auth/reauth') }}">Login</a></li>
-                            @else
-                                <li><a href="{{ url('/auth/logout') }}">Logout</a></li>
-                            @endif
+                            <li><a href="{{ url('/auth/logout') }}">Logout</a></li>
                         </ul>
                     </li>
                 @endif
