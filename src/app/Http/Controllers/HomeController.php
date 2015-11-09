@@ -2,6 +2,7 @@
 namespace TmlpStats\Http\Controllers;
 
 use Illuminate\Http\Request;
+use TmlpStats\GlobalReport;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
@@ -182,11 +183,17 @@ class HomeController extends Controller {
             usort($sortRegion['centersData'], array(get_class(), 'sortBySubmitted'));
         }
 
-        return view('home')->with(['reportingDate'  => $reportingDate,
-                                   'reportingDates' => $reportingDates,
-                                   'timezone'       => $timezone,
-                                   'selectedRegion' => $region->abbreviation,
-                                   'regionsData'    => $regionsData]);
+        $selectedRegion = $region->abbreviation;
+        $globalReport = GlobalReport::reportingDate($reportingDate)->first();
+
+        return view('home', compact(
+            'reportingDate',
+            'reportingDates',
+            'timezone',
+            'selectedRegion',
+            'regionsData',
+            'globalReport'
+        ));
     }
 
     protected static function sortBySubmitted($a, $b)
