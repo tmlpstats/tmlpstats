@@ -206,8 +206,20 @@ class GlobalReportController extends Controller
             return null;
         }
 
+        $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($globalReport->id, $region, $globalReport->reportingDate);
+        if (!$globalReportData) {
+            return null;
+        }
+
+        $a = new GamesByWeek($globalReportData);
+        $weeklyData = $a->compose();
+
         $a = new Arrangements\RegionByRating($statsReports);
         $data = $a->compose();
+
+        $dateString = $globalReport->reportingDate->toDateString();
+        $data['summary']['points'] = $weeklyData['reportData'][$dateString]['points']['total'];
+        $data['summary']['rating'] = $weeklyData['reportData'][$dateString]['rating'];
 
         return view('globalreports.details.ratingsummary', $data);
     }

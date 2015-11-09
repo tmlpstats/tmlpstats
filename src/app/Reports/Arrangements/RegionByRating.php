@@ -14,21 +14,13 @@ class RegionByRating extends BaseArrangement
      */
     public function build($statsReports)
     {
-        $totalPoints = 0;
-
         // Phase 1: loop all stats reports in this region making a subarray by points.
         $centerPoints = array();
         foreach ($statsReports as $statsReport) {
-
             $reportPoints = $statsReport->getPoints();
             $centerPoints[$reportPoints][] = $statsReport;
-            $totalPoints += $reportPoints;
         }
         ksort($centerPoints); // sort by rating points
-
-        $points = $centerPoints
-            ? round($totalPoints / count($centerPoints))
-            : 0;
 
         // Phase 2: loop the sorted-by-points array and now group by rating.
         $centerReports = array();
@@ -40,10 +32,6 @@ class RegionByRating extends BaseArrangement
 
         return [
             'rows'    => $centerReports,
-            'summary' => [
-                'rating' => StatsReport::pointsToRating($points), // text rating; e.g. "Ineffective"
-                'points' => $points,
-            ],
         ];
     }
 }

@@ -92,11 +92,15 @@ class CenterStatsController extends Controller
         //
     }
 
-    public function getByGlobalReport($id, Region $region = null)
+    public function getByGlobalReport($id, Region $region = null, Carbon $onlyThisDate = null)
     {
-        $cacheKey = $region === null
-            ? "globalreport{$id}:centerstats"
-            : "globalreport{$id}:region{$region->id}:centerstats";
+        $dateString = $onlyThisDate ? $onlyThisDate->toDateString() : null;
+
+        $cacheKey = "globalreport{$id}";
+        $cacheKey .= $region !== null ? ":region{$region->id}" : '';
+        $cacheKey .= $onlyThisDate !== null ? ":date{$dateString}" : '';
+        $cacheKey .= ":centerstats";
+
         $globalReportData = ($this->useCache()) ? Cache::tags(["globalReport{$id}"])->get($cacheKey) : false;
 
         if (!$globalReportData) {
@@ -113,7 +117,7 @@ class CenterStatsController extends Controller
 
             $cumulativeData = [];
             foreach ($statsReports as $statsReport) {
-                $centerStatsData = $this->getByStatsReport($statsReport->id);
+                $centerStatsData = $this->getByStatsReport($statsReport->id, $onlyThisDate);
 
                 foreach ($centerStatsData as $week) {
                     $dateString = $week->reportingDate->toDateString();
