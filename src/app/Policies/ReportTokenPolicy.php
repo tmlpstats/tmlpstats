@@ -17,6 +17,17 @@ class ReportTokenPolicy extends Policy
     }
 
     /**
+     * Can $user view the full list of reportTokens?
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function index(User $user)
+    {
+        return false; // admin only
+    }
+
+    /**
      * Can user view the ReportToken's URL?
      *
      * @param User $user

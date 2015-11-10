@@ -11,12 +11,22 @@ use TmlpStats\ReportToken;
 class ReportTokenController extends Controller
 {
     /**
+     * Create a new controller instance.
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
+        $this->authorize('index', ReportToken::class);
+
         $reportTokens = ReportToken::all();
 
         return view('reportTokens.index', compact('reportTokens'));
