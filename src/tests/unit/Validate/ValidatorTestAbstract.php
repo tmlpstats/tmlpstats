@@ -5,6 +5,8 @@ use stdClass;
 
 class ValidatorTestAbstract extends \TmlpStats\Tests\TestAbstract
 {
+    protected $dataFields = [];
+
     //
     // populateValidators()
     //
