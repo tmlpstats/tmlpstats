@@ -4,16 +4,8 @@ namespace TmlpStats\Http\Controllers;
 use TmlpStats\Role;
 use TmlpStats\Http\Requests;
 
-class RoleController extends Controller {
-
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
+class RoleController extends Controller
+{
     /**
      * Display a listing of the resource.
      *
@@ -47,7 +39,7 @@ class RoleController extends Controller {
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function show($id)
@@ -58,7 +50,7 @@ class RoleController extends Controller {
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function edit($id)
@@ -69,7 +61,7 @@ class RoleController extends Controller {
     /**
      * Update the specified resource in storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function update($id)
@@ -80,7 +72,7 @@ class RoleController extends Controller {
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function destroy($id)

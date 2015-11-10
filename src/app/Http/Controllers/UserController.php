@@ -10,16 +10,8 @@ use TmlpStats\Region;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Requests\UserRequest;
 
-class UserController extends Controller {
-
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
+class UserController extends Controller
+{
     /**
      * Display a listing of the resource.
      *
@@ -119,7 +111,7 @@ class UserController extends Controller {
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function show($id)
@@ -132,7 +124,7 @@ class UserController extends Controller {
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function edit($id)
@@ -170,13 +162,13 @@ class UserController extends Controller {
     /**
      * Update the specified resource in storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function update(UserRequest $request, $id)
     {
         $redirect = 'admin/users/' . $id;
-           if ($request->has('previous_url')) {
+        if ($request->has('previous_url')) {
             $redirect = $request->get('previous_url');
         }
 
@@ -219,7 +211,7 @@ class UserController extends Controller {
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function destroy($id)

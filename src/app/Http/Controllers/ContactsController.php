@@ -17,7 +17,7 @@ class ContactsController extends Controller
      */
     public function index()
     {
-        $this->middleware('auth');
+        //
     }
 
     /**
