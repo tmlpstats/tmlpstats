@@ -16,7 +16,7 @@ use DB;
 class UserController extends Controller
 {
     /**
-     * Create a new controller instance.
+     * Authenticated admins only
      */
     public function __construct()
     {
