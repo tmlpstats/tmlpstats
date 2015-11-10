@@ -22,25 +22,6 @@
     </div>
 
     <div class="form-group">
-        {!! Form::label('global_region', 'Global Region:', ['class' => 'col-sm-2 control-label']) !!}
-        <div class="col-sm-5">
-            {!! Form::select('global_region', [
-                'ANZ' => 'Australia/New Zealand',
-                'EME' => 'Europe/Middle East',
-                'IND' => 'India',
-                'NA'  => 'North America'
-            ], 'NA', ['class' => 'form-control']) !!}
-        </div>
-    </div>
-
-    <div class="form-group">
-        {!! Form::label('local_region', 'Local Region:', ['class' => 'col-sm-2 control-label']) !!}
-        <div class="col-sm-5">
-            {!! Form::select('local_region', ['East'=>'East', 'West'=>'West'], 'East', ['class' => 'form-control']) !!}
-        </div>
-    </div>
-
-    <div class="form-group">
         {!! Form::label('stats_email', 'Stats Email:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-5">
             {!! Form::text('stats_email', null, ['class' => 'form-control']) !!}
@@ -48,9 +29,16 @@
     </div>
 
     <div class="form-group">
-        {!! Form::label('stats_email', 'Time Zone:', ['class' => 'col-sm-2 control-label']) !!}
+        {!! Form::label('region', 'Region:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-5">
-            {!! Form::text('timezone', null, ['class' => 'form-control']) !!}
+            @include('partials.forms.regions', ['includeLocalRegions' => true, 'selectedRegion' => isset($center) ? $center->region->abbreviation : null])
+        </div>
+    </div>
+
+    <div class="form-group">
+        {!! Form::label('timezone', 'Timezone:', ['class' => 'col-sm-2 control-label']) !!}
+        <div class="col-sm-5">
+            @include('partials.forms.timezones', compact('timezones', 'selectedTimezone'))
         </div>
     </div>
 

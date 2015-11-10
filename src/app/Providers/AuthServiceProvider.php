@@ -8,9 +8,11 @@ use TmlpStats\Center;
 use TmlpStats\GlobalReport;
 use TmlpStats\Policies\CenterPolicy;
 use TmlpStats\Policies\GlobalReportPolicy;
+use TmlpStats\Policies\RegionPolicy;
 use TmlpStats\Policies\ReportTokenPolicy;
 use TmlpStats\Policies\StatsReportPolicy;
 use TmlpStats\Policies\UserPolicy;
+use TmlpStats\Region;
 use TmlpStats\ReportToken;
 use TmlpStats\StatsReport;
 use TmlpStats\User;
@@ -25,6 +27,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Center::class       => CenterPolicy::class,
         GlobalReport::class => GlobalReportPolicy::class,
+        Region::class       => RegionPolicy::class,
         ReportToken::class  => ReportTokenPolicy::class,
         StatsReport::class  => StatsReportPolicy::class,
         User::class         => UserPolicy::class,

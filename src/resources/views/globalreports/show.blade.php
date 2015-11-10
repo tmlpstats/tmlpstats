@@ -19,11 +19,11 @@
             </div>
             <div class="row">
                 <div class="col-md-3">
-                    @include('partials.forms.regions', ['selectedRegion' => $region->abbreviation, 'includeLocalRegions' => true])
+                    @include('partials.forms.regions', ['selectedRegion' => $region->abbreviation, 'includeLocalRegions' => true, 'autoSubmit' => true])
                 </div>
                 <div class="col-md-9">
                     @if ($reportToken)
-                        {!! Form::text('reportTokenUrl', url($reportToken->getUrl()), ['size' => 80]) !!}
+                        <input size="80" type="text" value="{{ url($reportToken->getUrl()) }}" id="reportTokenUrl" />
                     @endif
                 </div>
             </div>

@@ -12,7 +12,7 @@
 <div class="form-group">
     {!! Form::label('region', 'Region:', ['class' => 'col-sm-1 control-label']) !!}
     <div class="col-sm-3">
-        @include('partials.forms.regions', ['selectedRegion' => $selectedRegion->abbreviation])
+        @include('partials.forms.regions', ['selectedRegion' => $selectedRegion->abbreviation, 'autoSubmit' => true])
     </div>
 </div>
 {!! Form::close() !!}

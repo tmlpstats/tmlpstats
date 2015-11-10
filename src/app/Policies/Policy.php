@@ -9,6 +9,8 @@ class Policy
 {
     use HandlesAuthorization;
 
+    protected $defaultAllow = false;
+
     /**
      * Create a new policy instance.
      */
@@ -41,6 +43,6 @@ class Policy
      */
     public function __call($name, $arguments)
     {
-        return false;
+        return $this->defaultAllow;
     }
 }

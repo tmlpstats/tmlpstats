@@ -40,7 +40,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     ];
 
     protected $dates = [
-        'last_login_at' => 'date',
+        'last_login_at',
     ];
 
     /**
@@ -130,6 +130,28 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
         $person = $this->person;
         $person->centerId = $center->id;
+        $person->save();
+    }
+
+    public function setFirstName($firstName)
+    {
+        if (!$this->person) {
+            return;
+        }
+
+        $person = $this->person;
+        $person->firstName = $firstName;
+        $person->save();
+    }
+
+    public function setLastName($lastName)
+    {
+        if (!$this->person) {
+            return;
+        }
+
+        $person = $this->person;
+        $person->lastName = $lastName;
         $person->save();
     }
 

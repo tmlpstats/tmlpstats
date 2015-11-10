@@ -4,7 +4,7 @@
 
 <h2>{{ $user->first_name }} {{ $user->last_name[0] }}</h2>
 <a href="{{ url('/admin/users') }}"><< See All</a><br/><br/>
-<a href="{{ url('/admin/users/' . $user->id . '/edit') }}">Edit</a>
+<a href="{{ url("/admin/users/{$user->id}/edit") }}">Edit</a>
 
 <div class="table-responsive">
     <table class="table table-condensed table-striped">

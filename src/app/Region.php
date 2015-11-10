@@ -14,6 +14,39 @@ class Region extends Model
         'email',
     );
 
+    public function __get($name)
+    {
+        switch ($name) {
+            case 'centers':
+                $centers = [];
+                $children = $this->getChildRegions();
+                if ($children && !$children->isEmpty()) {
+                    foreach ($children as $child) {
+                        $centerList = $child->centers()->get();
+                        foreach ($centerList as $center) {
+                            if (!$center->active) {
+                                continue;
+                            }
+                            $centers[$center->name] = $center;
+                        }
+                    }
+                } else {
+                    $centerList = $this->centers()->get();
+                    foreach ($centerList as $center) {
+                        if (!$center->active) {
+                            continue;
+                        }
+                        $centers[$center->name] = $center;
+                    }
+                }
+                ksort($centers);
+
+                return array_values($centers);
+            default:
+                return parent::__get($name);
+        }
+    }
+
     public function isGlobalRegion()
     {
         return $this->parentId === null;
@@ -60,5 +93,10 @@ class Region extends Model
     public function parent()
     {
         return $this->hasOne('TmlpStats\Region', 'id', 'parent_id');
+    }
+
+    public function centers()
+    {
+        return $this->hasMany('TmlpStats\Center');
     }
 }

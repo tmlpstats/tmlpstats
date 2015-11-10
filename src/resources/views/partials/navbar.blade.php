@@ -32,6 +32,7 @@
                             <ul class="dropdown-menu" role="menu">
                                 <li><a href="{{ url('/admin/users') }}">Users</a></li>
                                 <li><a href="{{ url('/admin/centers') }}">Centers</a></li>
+                                <li><a href="{{ url('/regions') }}">Regions</a></li>
                                 <li><a href="{{ url('/globalreports') }}">Global Reports</a></li>
                                 <li><a href="{{ url('/import') }}">Import Sheets</a></li>
                             </ul>

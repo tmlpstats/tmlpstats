@@ -32,7 +32,7 @@
             </div>
             <div class="col-md-7">
                 @if ($reportToken)
-                    {!! Form::text('reportTokenUrl', url($reportToken->getUrl()), ['size' => 80]) !!}
+                    <input size="80" type="text" value="{{ url($reportToken->getUrl()) }}" id="reportTokenUrl" />
                 @endif
             </div>
         </div>
