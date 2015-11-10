@@ -4,13 +4,12 @@ use Carbon\Carbon;
 
 class GamesByMilestone extends BaseArrangement
 {
-
-    /* Builds an array of weekly promise/actual pairs
+    /*
+     * Builds an array of weekly promise/actual pairs
      * broken down by milestone
      *
      * Requires input weeks to be formatted like the output from
      * GamesByWeek arrangement
-     *
      */
     public function build($data)
     {

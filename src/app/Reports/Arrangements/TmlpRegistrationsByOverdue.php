@@ -2,7 +2,6 @@
 
 class TmlpRegistrationsByOverdue extends BaseArrangement
 {
-
     /*
      * Builds an array of Tmlp Registrations overdye by status
      */
@@ -16,7 +15,7 @@ class TmlpRegistrationsByOverdue extends BaseArrangement
             'waiting'   => [],
             'approved'  => [],
             'withdrawn' => [],
-            'total'    => 0,
+            'total'     => 0,
         ];
 
         foreach ($registrationsData as $status => $statusData) {

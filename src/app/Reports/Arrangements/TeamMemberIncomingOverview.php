@@ -4,7 +4,6 @@ use TmlpStats\Quarter;
 
 class TeamMemberIncomingOverview extends BaseArrangement
 {
-
     /*
      * Builds an array of Tmlp Registrations by center with status counts
      */
@@ -17,13 +16,13 @@ class TeamMemberIncomingOverview extends BaseArrangement
         $reportData = [
             'team1' => [
                 'applications' => [],
-                'incoming' => 0,
-                'ongoing'  => 0,
+                'incoming'     => 0,
+                'ongoing'      => 0,
             ],
             'team2' => [
                 'applications' => [],
-                'incoming' => 0,
-                'ongoing'  => 0,
+                'incoming'     => 0,
+                'ongoing'      => 0,
             ],
         ];
 

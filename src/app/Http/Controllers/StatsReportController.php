@@ -25,6 +25,7 @@ use TmlpStats\Reports\Arrangements\TeamMembersByQuarter;
 use TmlpStats\Reports\Arrangements\TeamMembersCounts;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByIncomingQuarter;
 use TmlpStats\Reports\Arrangements\TmlpRegistrationsByStatus;
+use TmlpStats\Reports\Arrangements\TravelRoomingByTeamYear;
 
 use Carbon\Carbon;
 
@@ -428,6 +429,17 @@ class StatsReportController extends Controller
         $applicationWithdraws = $a->compose();
         $applicationWithdraws = $applicationWithdraws['reportData']['withdrawn'];
 
+        # Travel/Room
+        $a = new TravelRoomingByTeamYear([
+            'registrationsData' => $registrations,
+            'teamMembersData'   => $teamMembers,
+            'region'            => $statsReport->center->region,
+        ]);
+        $travelDetails = $a->compose();
+        $travelDetails = $travelDetails['reportData'];
+        $teamTravelDetails = $travelDetails['teamMembers'];
+        $incomingTravelDetails = $travelDetails['incoming'];
+
         # Completed Courses
         $a = new CoursesWithEffectiveness(['courses' => $courses, 'reportingDate' => $statsReport->reportingDate]);
         $courses = $a->compose();
@@ -452,7 +464,9 @@ class StatsReportController extends Controller
             'applications',
             'teamWithdraws',
             'applicationWithdraws',
-            'completedCourses'
+            'completedCourses',
+            'teamTravelDetails',
+            'incomingTravelDetails'
         ));
     }
 

@@ -2,9 +2,8 @@
 
 class CoursesWithEffectiveness extends BaseArrangement
 {
-
-    /* Builds an array of courses with effectiveness calculations
-     *
+    /*
+     * Builds an array of courses with effectiveness calculations
      */
     public function build($data)
     {

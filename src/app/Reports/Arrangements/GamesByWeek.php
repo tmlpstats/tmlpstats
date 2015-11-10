@@ -4,10 +4,9 @@ use TmlpStats\StatsReport;
 
 class GamesByWeek extends BaseArrangement
 {
-
-    /* Builds an array of weekly promise/actual pairs
+    /*
+     * Builds an array of weekly promise/actual pairs
      * broken down by week
-     *
      */
     public function build($centerStatsData)
     {
@@ -26,7 +25,7 @@ class GamesByWeek extends BaseArrangement
                 : null;
 
             $totalPoints = null;
-            foreach (['cap','cpc','t1x','t2x','gitw','lf'] as $game) {
+            foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
                 $reportData[$dateString][$type][$game] = $data->$game;
 
                 if ($complement) {

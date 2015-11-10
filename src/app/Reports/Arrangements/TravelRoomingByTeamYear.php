@@ -4,7 +4,6 @@ use TmlpStats\Quarter;
 
 class TravelRoomingByTeamYear extends BaseArrangement
 {
-
     /*
      * Builds an array of Tmlp Registrations by center with status counts
      */
@@ -15,28 +14,28 @@ class TravelRoomingByTeamYear extends BaseArrangement
         $region = $data['region'];
 
         $reportData = [
-            'incoming' => [
+            'incoming'    => [
                 'team1' => [
                     'travel' => 0,
-                    'room' => 0,
-                    'total' => 0,
+                    'room'   => 0,
+                    'total'  => 0,
                 ],
                 'team2' => [
                     'travel' => 0,
-                    'room' => 0,
-                    'total' => 0,
+                    'room'   => 0,
+                    'total'  => 0,
                 ],
             ],
             'teamMembers' => [
                 'team1' => [
                     'travel' => 0,
-                    'room' => 0,
-                    'total' => 0,
+                    'room'   => 0,
+                    'total'  => 0,
                 ],
                 'team2' => [
                     'travel' => 0,
-                    'room' => 0,
-                    'total' => 0,
+                    'room'   => 0,
+                    'total'  => 0,
                 ],
             ],
         ];
