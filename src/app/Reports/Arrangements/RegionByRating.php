@@ -4,7 +4,6 @@ use TmlpStats\StatsReport;
 
 class RegionByRating extends BaseArrangement
 {
-
     /* Builds a breakdown of all the centers in a region by rating
      * @param $statsReports: an array of stats reports.
      * @return
@@ -31,7 +30,7 @@ class RegionByRating extends BaseArrangement
         }
 
         return [
-            'rows'    => $centerReports,
+            'rows' => $centerReports,
         ];
     }
 }

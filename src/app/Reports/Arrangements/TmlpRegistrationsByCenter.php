@@ -2,7 +2,6 @@
 
 class TmlpRegistrationsByCenter extends BaseArrangement
 {
-
     /*
      * Builds an array of Tmlp Registrations by center
      */

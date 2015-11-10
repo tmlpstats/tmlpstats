@@ -24,21 +24,17 @@
                 <dd>{{ $gitw['total'] }}%</dd>
             </dl>
 
-            @if ($teamWithdraws['total'])
-                <h4>Team Members Withdrawn:</h4>
-                <dl class="dl-horizontal">
-                    <dt>Team 1:</dt>
-                    <dd>{{ $teamWithdraws['team1'] }}</dd>
-                    <dt>Team 2:</dt>
-                    <dd>{{ $teamWithdraws['team2'] }}</dd>
-                    <dt>Total:</dt>
-                    <dd>{{ $teamWithdraws['total'] }}</dd>
-                    @if ($teamWithdraws['ctw'])
-                        <dt>In Conversation:</dt>
-                        <dd>{{ $teamWithdraws['ctw'] }}</dd>
-                    @endif
-                </dl>
-            @endif
+            <h4>Travel & Rooming</h4>
+            <dl class="dl-horizontal">
+                <dt>Team Travel:</dt>
+                <dd>{{ $teamTravelDetails['team1']['travel'] + $teamTravelDetails['team2']['travel'] }} / {{ $teamTravelDetails['team1']['total'] + $teamTravelDetails['team2']['total'] }}</dd>
+                <dt>Team Room:</dt>
+                <dd>{{ $teamTravelDetails['team1']['room'] + $teamTravelDetails['team2']['room'] }} / {{ $teamTravelDetails['team1']['total'] + $teamTravelDetails['team2']['total'] }}</dd>
+                <dt>Incoming Travel:</dt>
+                <dd>{{ $incomingTravelDetails['team1']['travel'] + $incomingTravelDetails['team2']['travel'] }} / {{ $incomingTravelDetails['team1']['total'] + $incomingTravelDetails['team2']['total'] }}</dd>
+                <dt>Incoming Room:</dt>
+                <dd>{{ $incomingTravelDetails['team1']['room'] + $incomingTravelDetails['team2']['room'] }} / {{ $incomingTravelDetails['team1']['total'] + $incomingTravelDetails['team2']['total'] }}</dd>
+            </dl>
         </div>
         <div class="col-md-4">
             <h4>Application Status:</h4>
@@ -66,6 +62,22 @@
                 <dt>Total:</dt>
                 <dd>{{ $applications['total'] }}</dd>
             </dl>
+
+            @if ($teamWithdraws['total'])
+                <h4>Team Members Withdrawn:</h4>
+                <dl class="dl-horizontal">
+                    <dt>Team 1:</dt>
+                    <dd>{{ $teamWithdraws['team1'] }}</dd>
+                    <dt>Team 2:</dt>
+                    <dd>{{ $teamWithdraws['team2'] }}</dd>
+                    <dt>Total:</dt>
+                    <dd>{{ $teamWithdraws['total'] }}</dd>
+                    @if ($teamWithdraws['ctw'])
+                        <dt>In Conversation:</dt>
+                        <dd>{{ $teamWithdraws['ctw'] }}</dd>
+                    @endif
+                </dl>
+            @endif
 
             @if ($completedCourses)
                 <h4>Course Results:</h4>

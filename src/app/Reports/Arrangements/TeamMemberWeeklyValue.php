@@ -24,12 +24,10 @@ abstract class TeamMemberWeeklyValue extends BaseArrangement
 
             foreach ($teamData as $data) {
 
-                $teamYear = ($data->teamMember->teamYear == 1)
-                    ? 'team1'
-                    : 'team2';
+                $team = "team{$data->teamMember->teamYear}";
 
-                $member = isset($members[$teamYear][$data->teamMember->id])
-                    ? $members[$teamYear][$data->teamMember->id]
+                $member = isset($members[$team][$data->teamMember->id])
+                    ? $members[$team][$data->teamMember->id]
                     : [];
 
                 if (!$member) {
@@ -43,7 +41,7 @@ abstract class TeamMemberWeeklyValue extends BaseArrangement
                     'value' => $this->getValue($data),
                 ];
 
-                $members[$teamYear][$data->teamMember->id] = $member;
+                $members[$team][$data->teamMember->id] = $member;
             }
         }
         $reportData['dates'] = $dates;

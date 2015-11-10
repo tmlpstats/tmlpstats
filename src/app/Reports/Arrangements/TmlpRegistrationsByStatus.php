@@ -2,9 +2,8 @@
 
 class TmlpRegistrationsByStatus extends BaseArrangement
 {
-
-    /* Builds an array of Tmlp Registrations by status
-     *
+    /*
+     * Builds an array of Tmlp Registrations by status
      */
     public function build($data)
     {
@@ -16,7 +15,7 @@ class TmlpRegistrationsByStatus extends BaseArrangement
             'waiting'   => [],
             'approved'  => [],
             'withdrawn' => [],
-            'total'    => 0,
+            'total'     => 0,
         ];
 
         foreach ($registrationsData as $data) {

@@ -2,9 +2,8 @@
 
 class TmlpRegistrationsByIncomingQuarter extends BaseArrangement
 {
-
-    /* Builds an array of Tmlp Registration by incoming quarter
-     *
+    /*
+     * Builds an array of Tmlp Registration by incoming quarter
      */
     public function build($data)
     {
@@ -12,8 +11,8 @@ class TmlpRegistrationsByIncomingQuarter extends BaseArrangement
         $quarter = $data['quarter'];
 
         $reportData = [
-            'team1'    => [],
-            'team2'    => [],
+            'team1'     => [],
+            'team2'     => [],
             'withdrawn' => [],
         ];
 
@@ -21,20 +20,14 @@ class TmlpRegistrationsByIncomingQuarter extends BaseArrangement
 
         foreach ($registrationsData as $data) {
 
-            if ($data->withdrawCodeId !== null) {
-                $reportData['withdrawn']['next'][] = $data;
-            } else if ($data->registration->teamYear == 1) {
-                if ($data->incomingQuarterId == $nextQuarter->id) {
-                    $reportData['team1']['next'][] = $data;
-                } else {
-                    $reportData['team1']['future'][] = $data;
-                }
+            $index = $data->withdrawCodeId !== null
+                ? 'withdrawn'
+                : "team{$data->registration->teamYear}";
+
+            if ($data->incomingQuarterId == $nextQuarter->id) {
+                $reportData[$index]['next'][] = $data;
             } else {
-                if ($data->incomingQuarterId == $nextQuarter->id) {
-                    $reportData['team2']['next'][] = $data;
-                } else {
-                    $reportData['team2']['future'][] = $data;
-                }
+                $reportData[$index]['future'][] = $data;
             }
         }
 
