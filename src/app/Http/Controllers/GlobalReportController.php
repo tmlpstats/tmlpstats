@@ -304,13 +304,13 @@ class GlobalReportController extends Controller
         $teamCounts = [
             'team1' => [
                 'applications' => [],
-                'incoming' => 0,
-                'ongoing'  => 0,
+                'incoming'     => 0,
+                'ongoing'      => 0,
             ],
             'team2' => [
                 'applications' => [],
-                'incoming' => 0,
-                'ongoing'  => 0,
+                'incoming'     => 0,
+                'ongoing'      => 0,
             ],
         ];
         foreach ($teamMembersByCenter as $centerName => $unused) {

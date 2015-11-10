@@ -6,8 +6,8 @@ use TmlpStats\Import\ImportManager;
 
 use Request;
 
-class ImportController extends Controller {
-
+class ImportController extends Controller
+{
     public function __construct()
     {
         $this->middleware('auth');
@@ -35,8 +35,8 @@ class ImportController extends Controller {
         }
 
         $manager = new ImportManager(Request::file('statsFiles'),
-                                     Request::get('expectedReportDate'),
-                                     $enforceVersion);
+            Request::get('expectedReportDate'),
+            $enforceVersion);
         $manager->import($submitReport);
 
         $results = $manager->getResults();

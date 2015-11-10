@@ -5,17 +5,8 @@ use TmlpStats\Quarter;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Requests\QuarterRequest;
 
-class QuarterController extends Controller {
-
-
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
+class QuarterController extends Controller
+{
     /**
      * Display a listing of the resource.
      *
@@ -24,9 +15,9 @@ class QuarterController extends Controller {
     public function index()
     {
         $quarters = Quarter::orderBy('global_region')
-                           ->orderBy('start_weekend_date', 'ASC')
-                           ->presentAndFuture()
-                           ->get();
+            ->orderBy('start_weekend_date', 'ASC')
+            ->presentAndFuture()
+            ->get();
         return view('quarters.index', compact('quarters'));
     }
 
@@ -56,7 +47,7 @@ class QuarterController extends Controller {
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function show($id)
@@ -69,7 +60,7 @@ class QuarterController extends Controller {
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function edit($id)
@@ -82,7 +73,7 @@ class QuarterController extends Controller {
     /**
      * Update the specified resource in storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function update(QuarterRequest $request, $id)
@@ -93,7 +84,7 @@ class QuarterController extends Controller {
         }
 
         $redirect = 'admin/quarters/' . $id;
-           if ($request->has('previous_url')) {
+        if ($request->has('previous_url')) {
             $redirect = $request->get('previous_url');
         }
         return redirect($redirect);
@@ -102,7 +93,7 @@ class QuarterController extends Controller {
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function destroy($id)

@@ -6,16 +6,8 @@ use TmlpStats\Region;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Requests\CenterRequest;
 
-class AdminCenterController extends Controller {
-
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
+class AdminCenterController extends Controller
+{
     /**
      * Display a listing of the resource.
      *
@@ -49,7 +41,7 @@ class AdminCenterController extends Controller {
 
             $input = $request->all();
 
-            if($request->has('global_region') || $request->has('local_region')) {
+            if ($request->has('global_region') || $request->has('local_region')) {
 
                 $region = (!$request->has('local_region') || $request->get('global_region') !== 'NA')
                     ? Region::abbreviation($request->get('global_region'))->first()
@@ -68,7 +60,7 @@ class AdminCenterController extends Controller {
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function show($id)
@@ -81,7 +73,7 @@ class AdminCenterController extends Controller {
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function edit($id)
@@ -94,7 +86,7 @@ class AdminCenterController extends Controller {
     /**
      * Update the specified resource in storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function update(CenterRequest $request, $id)
@@ -108,7 +100,7 @@ class AdminCenterController extends Controller {
                 $input['active'] = false;
             }
 
-            if($request->has('global_region') || $request->has('local_region')) {
+            if ($request->has('global_region') || $request->has('local_region')) {
 
                 $region = (!$request->has('local_region') || $request->get('global_region') !== 'NA')
                     ? Region::abbreviation($request->get('global_region'))->first()
@@ -131,7 +123,7 @@ class AdminCenterController extends Controller {
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function destroy($id)

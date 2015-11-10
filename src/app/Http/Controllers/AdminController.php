@@ -18,8 +18,8 @@ use Auth;
 use Input;
 use Illuminate\Http\Request;
 
-class AdminController extends Controller {
-
+class AdminController extends Controller
+{
     /**
      * Create a new controller instance.
      */
@@ -74,13 +74,13 @@ class AdminController extends Controller {
         $reportingDate = $reportingDate->startOfDay();
 
         $centers = Center::active()
-                         ->byRegion($region)
-                         ->orderBy('name', 'asc')
-                         ->get();
+            ->byRegion($region)
+            ->orderBy('name', 'asc')
+            ->get();
 
         $regionsData = array();
 
-        switch($region->abbreviation) {
+        switch ($region->abbreviation) {
             case 'ANZ':
                 $regionsData[0]['displayName'] = 'Australia/New Zealand Region';
                 $regionsData[0]['validatedCount'] = 0;
@@ -119,9 +119,9 @@ class AdminController extends Controller {
             $localRegion = $localRegion ? $localRegion->abbreviation : 0;
 
             $statsReport = $center->statsReports()
-                                  ->reportingDate($reportingDate)
-                                  ->orderBy('submitted_at', 'desc')
-                                  ->first();
+                ->reportingDate($reportingDate)
+                ->orderBy('submitted_at', 'desc')
+                ->first();
 
             $user = $statsReport
                 ? User::find($statsReport->user_id)
@@ -163,10 +163,10 @@ class AdminController extends Controller {
             usort($sortRegion['centersData'], array(get_class(), 'sortByComplete'));
         }
 
-        return view('admin.dashboard')->with(['reportingDate' => $reportingDate,
+        return view('admin.dashboard')->with(['reportingDate'  => $reportingDate,
                                               'reportingDates' => $reportingDates,
                                               'selectedRegion' => $region->abbreviation,
-                                              'regionsData' => $regionsData]);
+                                              'regionsData'    => $regionsData]);
     }
 
     protected static function sortByComplete($a, $b)

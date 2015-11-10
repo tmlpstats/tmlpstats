@@ -12,14 +12,29 @@ use TmlpStats\Region;
 use Auth;
 use Session;
 
-abstract class Controller extends BaseController {
-
+abstract class Controller extends BaseController
+{
     use DispatchesCommands, ValidatesRequests, AuthorizesRequests;
 
     const CACHE_TTL = 60;
     const STATS_REPORT_CACHE_TTL = 7 * 24 * 60;
     const USE_CACHE = true;
 
+    /**
+     * Create a new controller instance.
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Get the select region to display content for based on input or save settings
+     *
+     * @param Request $request
+     * @param bool|false $includeLocalRegions
+     * @return null
+     */
     public function getRegion(Request $request, $includeLocalRegions = false)
     {
         $region = null;
@@ -39,7 +54,7 @@ abstract class Controller extends BaseController {
         }
 
         if (!$region) {
-           $region = Region::abbreviation('NA')->first();
+            $region = Region::abbreviation('NA')->first();
         }
 
         if (!$includeLocalRegions && !$region->isGlobalRegion()) {
@@ -49,8 +64,13 @@ abstract class Controller extends BaseController {
         return $region;
     }
 
+    /**
+     * Get setting for whether or not to use cached data
+     *
+     * @return bool
+     */
     public function useCache()
     {
-        return env('REPORTS_USE_CACHE', static::USE_CACHE);
+        return (bool)env('REPORTS_USE_CACHE', static::USE_CACHE);
     }
 }

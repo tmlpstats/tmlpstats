@@ -342,35 +342,35 @@ class StatsReportController extends Controller
         $response = null;
         switch ($report) {
             case 'summary':
-                $response =  $this->getSummary($statsReport);
+                $response = $this->getSummary($statsReport);
                 break;
             case 'results':
-                $response =  $this->getResults($statsReport);
+                $response = $this->getResults($statsReport);
                 break;
             case 'centerstats':
-                $response =  $this->getCenterStats($statsReport);
+                $response = $this->getCenterStats($statsReport);
                 break;
             case 'classlist':
-                $response =  $this->getTeamMembers($statsReport);
+                $response = $this->getTeamMembers($statsReport);
                 break;
             case 'tmlpregistrations':
-                $response =  $this->getTmlpRegistrations($statsReport);
+                $response = $this->getTmlpRegistrations($statsReport);
                 break;
             case 'tmlpregistrationsbystatus':
-                $response =  $this->getTmlpRegistrationsByStatus($statsReport);
+                $response = $this->getTmlpRegistrationsByStatus($statsReport);
                 break;
             case 'courses':
-                $response =  $this->getCourses($statsReport);
+                $response = $this->getCourses($statsReport);
                 break;
             case 'contactinfo':
                 $this->authorize('readContactInfo', $statsReport);
-                $response =  $this->getContacts($statsReport);
+                $response = $this->getContacts($statsReport);
                 break;
             case 'gitwsummary':
-                $response =  $this->getGitwByTeamMember($statsReport);
+                $response = $this->getGitwByTeamMember($statsReport);
                 break;
             case 'tdosummary':
-                $response =  $this->getTdoByTeamMember($statsReport);
+                $response = $this->getTdoByTeamMember($statsReport);
                 break;
         }
 

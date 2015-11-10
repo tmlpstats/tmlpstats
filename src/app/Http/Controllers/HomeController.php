@@ -16,27 +16,8 @@ use Gate;
 use Session;
 use Input;
 
-class HomeController extends Controller {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Home Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller renders your application's "dashboard" for users that
-    | are authenticated. Of course, you are free to change or remove the
-    | controller as you wish. It is just here to get your app started!
-    |
-    */
-
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
+class HomeController extends Controller
+{
     /**
      * Show the application dashboard to the user.
      *
@@ -48,7 +29,7 @@ class HomeController extends Controller {
 
         $timezone = '';
         if (Session::has('timezone')) {
-            $timezone =  Session::get('timezone');
+            $timezone = Session::get('timezone');
         }
 
         $region = $this->getRegion($request);
@@ -87,42 +68,42 @@ class HomeController extends Controller {
         $reportingDate = $reportingDate->startOfDay();
 
         $centers = Center::active()
-                         ->byRegion($region)
-                         ->orderBy('name', 'asc')
-                         ->get();
+            ->byRegion($region)
+            ->orderBy('name', 'asc')
+            ->get();
 
         $regionsData = array();
 
-        switch($region->abbreviation) {
+        switch ($region->abbreviation) {
             case 'ANZ':
-                $regionsData[0]['displayName']    = 'Australia/New Zealand Region';
+                $regionsData[0]['displayName'] = 'Australia/New Zealand Region';
                 $regionsData[0]['validatedCount'] = 0;
-                $regionsData[0]['completeCount']  = 0;
-                $regionsData[0]['centersData']    = array();
+                $regionsData[0]['completeCount'] = 0;
+                $regionsData[0]['centersData'] = array();
                 break;
             case 'EME':
-                $regionsData[0]['displayName']    = 'Europe/Middle East Region';
+                $regionsData[0]['displayName'] = 'Europe/Middle East Region';
                 $regionsData[0]['validatedCount'] = 0;
-                $regionsData[0]['completeCount']  = 0;
-                $regionsData[0]['centersData']    = array();
+                $regionsData[0]['completeCount'] = 0;
+                $regionsData[0]['centersData'] = array();
                 break;
             case 'IND':
-                $regionsData[0]['displayName']    = 'India Region';
+                $regionsData[0]['displayName'] = 'India Region';
                 $regionsData[0]['validatedCount'] = 0;
-                $regionsData[0]['completeCount']  = 0;
-                $regionsData[0]['centersData']    = array();
+                $regionsData[0]['completeCount'] = 0;
+                $regionsData[0]['centersData'] = array();
                 break;
             case 'NA':
             default:
-                $regionsData['East']['displayName']    = 'North America - Eastern Region';
+                $regionsData['East']['displayName'] = 'North America - Eastern Region';
                 $regionsData['East']['validatedCount'] = 0;
-                $regionsData['East']['completeCount']  = 0;
-                $regionsData['East']['centersData']    = array();
+                $regionsData['East']['completeCount'] = 0;
+                $regionsData['East']['centersData'] = array();
 
-                $regionsData['West']['displayName']    = 'North America - Western Region';
+                $regionsData['West']['displayName'] = 'North America - Western Region';
                 $regionsData['West']['validatedCount'] = 0;
-                $regionsData['West']['completeCount']  = 0;
-                $regionsData['West']['centersData']    = array();
+                $regionsData['West']['completeCount'] = 0;
+                $regionsData['West']['centersData'] = array();
                 break;
         }
 
@@ -132,10 +113,10 @@ class HomeController extends Controller {
             $localRegion = $localRegion ? $localRegion->abbreviation : 0;
 
             $statsReport = $center->statsReports()
-                                  ->reportingDate($reportingDate)
-                                  ->submitted()
-                                  ->orderBy('submitted_at', 'desc')
-                                  ->first();
+                ->reportingDate($reportingDate)
+                ->submitted()
+                ->orderBy('submitted_at', 'desc')
+                ->first();
 
             $user = $statsReport
                 ? User::find($statsReport->user_id)
