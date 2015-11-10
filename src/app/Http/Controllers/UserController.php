@@ -1,7 +1,6 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
-use DB;
 use Illuminate\Http\Request;
 use TmlpStats\User;
 use TmlpStats\Role;
@@ -10,6 +9,9 @@ use TmlpStats\Person;
 use TmlpStats\Region;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Requests\UserRequest;
+
+use Auth;
+use DB;
 
 class UserController extends Controller
 {
@@ -52,9 +54,14 @@ class UserController extends Controller
 
         $rolesObjects = Role::all();
 
+        $selectedRole = null;
         $roles = array();
         foreach ($rolesObjects as $role) {
             $roles[$role->id] = $role->display;
+
+            if ($role->name == 'readonly') {
+                $selectedRole = $role->id;
+            }
         }
 
         $centerList = DB::table('centers')
@@ -76,7 +83,7 @@ class UserController extends Controller
         }
         asort($centers);
 
-        return view('users.create', compact('centers', 'roles'));
+        return view('users.create', compact('centers', 'roles', 'selectedRole'));
     }
 
     /**
@@ -86,13 +93,7 @@ class UserController extends Controller
      */
     public function store(UserRequest $request)
     {
-        $redirect = 'admin/users';
-
-        if ($request->has('cancel')) {
-            return redirect($redirect);
-        }
-
-        $this->authorize(User::class);
+        $this->authorize('create', User::class);
 
         $input = $request->all();
 
@@ -121,7 +122,7 @@ class UserController extends Controller
         }
         $user->save();
 
-        return redirect($redirect);
+        return redirect('admin/users');
     }
 
     /**
@@ -188,15 +189,6 @@ class UserController extends Controller
      */
     public function update(UserRequest $request, $id)
     {
-        $redirect = 'admin/users/' . $id;
-        if ($request->has('previous_url')) {
-            $redirect = $request->get('previous_url');
-        }
-
-        if ($request->has('cancel')) {
-            return redirect($redirect);
-        }
-
         $user = User::findOrFail($id);
         $this->authorize($user);
 
@@ -214,6 +206,12 @@ class UserController extends Controller
                 $user->roleId = $role->id;
             }
         }
+        if ($request->has('first_name')) {
+            $user->setFirstName($request->get('first_name'));
+        }
+        if ($request->has('last_name')) {
+            $user->setLastName($request->get('last_name'));
+        }
         if ($request->has('phone')) {
             $user->setPhone($request->get('phone'));
         }
@@ -227,6 +225,11 @@ class UserController extends Controller
             $user->requirePasswordReset = $request->get('require_password_reset') == true;
         }
         $user->save();
+
+        $redirect = "admin/users/{$id}";
+        if ($request->has('previous_url')) {
+            $redirect = $request->get('previous_url');
+        }
 
         return redirect($redirect);
     }
@@ -249,19 +252,12 @@ class UserController extends Controller
         $this->authorize($user);
 
         $roles = $user->roles;
-        $showPasswordUpdate = true;
 
         return view('users.edit', compact('user', 'roles'));
     }
 
     public function updateProfile(Request $request, $id)
     {
-        $redirect = 'user/profile';
-
-        if ($request->has('cancel')) {
-            return redirect($redirect);
-        }
-
         $user = User::findOrFail($id);
 
         $this->authorize($user);
@@ -269,6 +265,6 @@ class UserController extends Controller
         $user->update($request->all());
         $user->save();
 
-        return redirect($redirect);
+        return redirect('user/profile');
     }
 }

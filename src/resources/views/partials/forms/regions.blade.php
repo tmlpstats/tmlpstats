@@ -13,5 +13,5 @@
             'EME' => 'Europe/Middle East',
             'IND' => 'India',
             'NA'  => 'North America',
-        ], $selectedRegion,
-    ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}
+        ], isset($selectedRegion) ? $selectedRegion : null,
+    ['class' => 'form-control',  'onchange' => (isset($autoSubmit) && $autoSubmit) ? 'this.form.submit()' : '']) !!}

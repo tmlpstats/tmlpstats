@@ -20,7 +20,7 @@
             </div>
             <div class="row">
                 <div class="col-md-3" style="align-content: center">
-                    @include('partials.forms.regions')
+                    @include('partials.forms.regions', ['selectedRegion' => $selectedRegion, 'autoSubmit' => true])
                 </div>
                 <div class="col-md-3" style="align-content: center">
                     {!! Form::select('reportingDate', $reportingDates, $reportingDate->toDateString(), ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}

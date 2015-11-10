@@ -21,6 +21,9 @@ Route::get('admin/status', 'AdminController@status');
 Route::get('admin/peoplereport', 'AdminController@getPeopleReport');
 
 Route::resource('admin/centers', 'AdminCenterController');
+Route::post('admin/centers', 'AdminCenterController@batchUpdate');
+
+
 Route::resource('admin/users', 'UserController');
 
 // Stats Reports
@@ -55,7 +58,10 @@ Route::get('report/{token}', function ($token) {
 });
 
 // Center Info
-Route::resource('center', 'CenterController');
+Route::resource('centers', 'CenterController');
+
+// Regions
+Route::resource('regions', 'RegionController');
 
 // Validate
 Route::get('validate', 'ImportController@indexValidateSheet');

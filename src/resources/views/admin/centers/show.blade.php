@@ -4,7 +4,7 @@
 
 <h2>{{ $center->name }} Center</h2>
 <a href="{{ url('/admin/centers') }}"><< See All</a><br/><br/>
-<a href="{{ url('/admin/centers/' . $center->abbreviation . '/edit') }}">Edit</a>
+<a href="{{ url("/admin/centers/{$center->abbreviation}/edit") }}">Edit</a>
 
 <div class="table-responsive">
     <table class="table table-condensed table-striped">
@@ -23,20 +23,22 @@
         <tr>
             <th>Global Region:</th>
             <td><?php
-                $region = $center->getGlobalRegion();
-                if ($region) {
-                    echo $region->name;
+                $globalRegion = $center->getGlobalRegion();
+                if ($globalRegion) {
+                    echo $globalRegion->name;
                 }
             ?></td>
         </tr>
         <tr>
             <th>Local Region:</th>
             <td><?php
-                $region = $center->getLocalRegion();
-                if ($region) {
-                    echo $region->name;
+                $localRegion = $center->getLocalRegion();
+                if ($localRegion) {
+                    echo $globalRegion
+                        ? str_replace("{$globalRegion->name} - ", '', $localRegion->name)
+                        : $localRegion->name;
                 }
-            ?></td>
+                ?></td>
         </tr>
         <tr>
             <th>Stats Email:</th>

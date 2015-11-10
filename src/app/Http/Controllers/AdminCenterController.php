@@ -1,10 +1,14 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use Illuminate\Http\Request;
 use TmlpStats\Center;
 use TmlpStats\Region;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Requests\CenterRequest;
+
+use DateTimeZone;
+use Log;
 
 class AdminCenterController extends Controller
 {
@@ -36,11 +40,15 @@ class AdminCenterController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
         $this->authorize('create', Center::class);
 
-        return view('admin.centers.create');
+        $selectedRegion = $this->getRegion($request);
+
+        $timezones = DateTimeZone::listIdentifiers();
+
+        return view('admin.centers.create', compact('selectedRegion', 'timezones'));
     }
 
     /**
@@ -50,24 +58,25 @@ class AdminCenterController extends Controller
      */
     public function store(CenterRequest $request)
     {
-        if (!$request->has('cancel')) {
+        $this->authorize('store', Center::class);
 
-            $this->authorize('store', Center::class);
+        $input = $request->all();
 
-            $input = $request->all();
-
-            if ($request->has('global_region') || $request->has('local_region')) {
-
-                $region = (!$request->has('local_region') || $request->get('global_region') !== 'NA')
-                    ? Region::abbreviation($request->get('global_region'))->first()
-                    : Region::abbreviation($request->get('local_region'))->first();
-                if ($region) {
-                    $input['region_id'] = $region->id;
-                }
+        if ($request->has('region')) {
+            $region = Region::abbreviation($request->get('region'))->first();
+            if ($region) {
+                $input['region_id'] = $region->id;
             }
-
-            Center::create($input);
         }
+
+        if ($request->has('timezone')) {
+            $timezoneList = DateTimeZone::listIdentifiers();
+            if (isset($timezoneList[$request->get('timezone')])) {
+                $input['timezone'] = $timezoneList[$request->get('timezone')];
+            }
+        }
+
+        Center::create($input);
 
         return redirect('admin/centers');
     }
@@ -99,7 +108,14 @@ class AdminCenterController extends Controller
 
         $this->authorize($center);
 
-        return view('admin.centers.edit', compact('center'));
+        $timezones = DateTimeZone::listIdentifiers();
+        $selectedTimezone = array_search($center->timezone, $timezones);
+
+        if ($selectedTimezone === false) {
+            $selectedTimezone = null;
+        }
+
+        return view('admin.centers.edit', compact('center', 'timezones', 'selectedTimezone'));
     }
 
     /**
@@ -110,35 +126,60 @@ class AdminCenterController extends Controller
      */
     public function update(CenterRequest $request, $id)
     {
-        if (!$request->has('cancel')) {
-            $center = Center::where('abbreviation', '=', $id)->firstOrFail();
+        $center = Center::where('abbreviation', '=', $id)->firstOrFail();
 
-            $this->authorize($center);
+        $this->authorize($center);
 
-            $input = $request->all();
+        $input = $request->all();
 
-            if (!$request->has('active')) {
-                $input['active'] = false;
-            }
-
-            if ($request->has('global_region') || $request->has('local_region')) {
-
-                $region = (!$request->has('local_region') || $request->get('global_region') !== 'NA')
-                    ? Region::abbreviation($request->get('global_region'))->first()
-                    : Region::abbreviation($request->get('local_region'))->first();
-                if ($region) {
-                    $input['region_id'] = $region->id;
-                }
-            }
-
-            $center->update($input);
+        if (!$request->has('active')) {
+            $input['active'] = false;
         }
 
-        $redirect = 'admin/centers/' . $id;
+        if ($request->has('region')) {
+            $region = Region::abbreviation($request->get('region'))->first();
+            if ($region) {
+                $input['region_id'] = $region->id;
+            }
+        }
+
+        if ($request->has('timezone')) {
+            $timezoneList = DateTimeZone::listIdentifiers();
+            if (isset($timezoneList[$request->get('timezone')])) {
+                $input['timezone'] = $timezoneList[$request->get('timezone')];
+            }
+        }
+
+        $center->update($input);
+
+        $redirect = "admin/centers";
         if ($request->has('previous_url')) {
             $redirect = $request->get('previous_url');
         }
         return redirect($redirect);
+    }
+
+    public function batchUpdate(Request $request)
+    {
+        if ($request->has('sheetVersion') && $request->has('centerIds')) {
+            $centerIds = $request->get('centerIds');
+            if ($centerIds) {
+                $sheetVersion = $request->get('sheetVersion');
+                if (!preg_match("/\d+\.\d+\.\d+/", $sheetVersion)) {
+                    Log::warn("Invalid sheet version {$sheetVersion}.");
+                    return;
+                }
+                foreach ($centerIds as $id) {
+                    $center = Center::find($id);
+                    if (!$center) {
+                        Log::warn("Unable to update center {$id}. Center not found.");
+                        continue;
+                    }
+                    $center->sheetVersion = $sheetVersion;
+                    $center->save();
+                }
+            }
+        }
     }
 
     /**
