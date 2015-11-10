@@ -63,7 +63,7 @@
 
     <div class="table-responsive">
         {!! Form::open(['url' => "regions/{$region->id}"]) !!}
-        <table class="table table-condensed table-hover">
+        <table id="mainTable" class="table table-condensed table-hover">
             <thead>
                 <th><input type="checkbox" id="checkAll" /></th>
                 <th>Name</th>
@@ -74,7 +74,7 @@
             @foreach ($region->centers as $center)
             <tr>
                 <td>{!! Form::checkbox("centers[]", $center->id, null, ['class' => 'checkedItem']) !!}</td>
-                <td><a href="{{ url("admin/centers/{$center->abbreviation}") }}">{{ $center->name }}</a></td>
+                <td><a href="{{ url("admin/centers/{$center->abbreviation}/edit") }}">{{ $center->name }}</a></td>
                 <td>{{ $center->sheetVersion }}</td>
                 <td>{{ $center->statsEmail }}</td>
             </tr>
@@ -91,14 +91,17 @@
 
     <script>
         $(document).ready(function() {
+            $('#mainTable').dataTable({
+                "paging":    false,
+                "searching": false
+            });
+
             $('#checkAll').on('click', function () {
                 $('input:checkbox').prop('checked', this.checked);
             });
 
             $('#centersUpdateForm').submit(function( event ) {
-
                 var centerIds = [];
-
                 $.each($("input:checkbox[class=checkedItem]:checked"), function(){
                     centerIds.push($(this).val());
                 });
@@ -109,7 +112,6 @@
                     data.sheetVersion = $('input[name=sheet_version]').val();
                 }
 
-                console.log(data);
                 if (!$.isEmptyObject(data)) {
                     $.ajax({
                         type: "POST",

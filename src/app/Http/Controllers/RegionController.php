@@ -11,13 +11,24 @@ use TmlpStats\Region;
 class RegionController extends Controller
 {
     /**
+     * Authenticated admins only
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('role:administrator');
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        $regions = Region::all();
+        $this->authorize('index', Region::class);
+
+        $regions = Region::orderBy('name')->get();
 
         return view('regions.index', compact('regions'));
     }
