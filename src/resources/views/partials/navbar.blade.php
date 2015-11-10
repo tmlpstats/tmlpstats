@@ -20,8 +20,8 @@
                         <a href="{{ url($homeUrl) }}">Home</a>
                     </li>
                     @can ('validate', TmlpStats\StatsReport::class)
-                        <li {!! Request::is('import') ? 'class="active"' : '' !!}>
-                            <a href="{{ url('/import') }}">Validate Stats</a>
+                        <li {!! Request::is('validate') ? 'class="active"' : '' !!}>
+                            <a href="{{ url('validate') }}">Validate Stats</a>
                         </li>
                     @endcan
                     @if (Auth::user()->hasRole('administrator'))
@@ -33,7 +33,7 @@
                                 <li><a href="{{ url('/admin/users') }}">Users</a></li>
                                 <li><a href="{{ url('/admin/centers') }}">Centers</a></li>
                                 <li><a href="{{ url('/globalreports') }}">Global Reports</a></li>
-                                <li><a href="{{ url('/admin/import') }}">Import Sheets</a></li>
+                                <li><a href="{{ url('/import') }}">Import Sheets</a></li>
                             </ul>
                         </li>
                     @endif

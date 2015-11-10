@@ -20,9 +20,6 @@ Route::match(['get', 'post'], 'admin/dashboard', 'AdminController@index');
 Route::get('admin/status', 'AdminController@status');
 Route::get('admin/peoplereport', 'AdminController@getPeopleReport');
 
-Route::get('admin/import', 'ImportController@import');
-Route::post('admin/import', 'ImportController@uploadImportSpreadsheet');
-
 Route::resource('admin/centers', 'AdminCenterController');
 Route::resource('admin/users', 'UserController');
 
@@ -60,9 +57,13 @@ Route::get('report/{token}', function ($token) {
 // Center Info
 Route::resource('center', 'CenterController');
 
+// Validate
+Route::get('validate', 'ImportController@indexValidateSheet');
+Route::post('validate', 'ImportController@validateSheet');
+
 // Import
-Route::get('import', 'ImportController@index');
-Route::post('import', 'ImportController@uploadSpreadsheet');
+Route::get('import', 'ImportController@indexImportSheet');
+Route::post('import', 'ImportController@importSheet');
 
 Route::match(['get', 'post'], 'home', 'HomeController@index');
 Route::get('/', 'WelcomeController@index');

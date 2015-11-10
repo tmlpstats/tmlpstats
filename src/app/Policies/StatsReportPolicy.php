@@ -9,8 +9,6 @@ class StatsReportPolicy extends Policy
 {
     /**
      * Create a new policy instance.
-     *
-     * @return void
      */
     public function __construct()
     {
@@ -111,6 +109,24 @@ class StatsReportPolicy extends Policy
         return $user->hasRole('globalStatistician') || $user->hasRole('localStatistician');
     }
 
+    /**
+     * Can $user import spreadsheets (distinct from submitting)
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function import(User $user)
+    {
+        return $user->hasRole('globalStatistician');
+    }
+
+    /**
+     * Can $user view the contact info for $statsReport
+     *
+     * @param User $user
+     * @param StatsReport $statsReport
+     * @return bool
+     */
     public function readContactInfo(User $user, StatsReport $statsReport)
     {
         return $this->read($user, $statsReport) && !$user->hasRole('readonly');
