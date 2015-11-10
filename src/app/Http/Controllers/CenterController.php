@@ -50,10 +50,9 @@ class CenterController extends Controller
      */
     public function show($id)
     {
-        $center = Center::find($id);
-        if (!$center) {
-            return '<p>Center not found.</p>';
-        }
+        $center = Center::findOrFail($id);
+
+        $this->authorize($center);
 
         $roster = $center->getTeamRoster();
 

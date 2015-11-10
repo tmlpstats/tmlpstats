@@ -1,21 +1,33 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
-use TmlpStats\Http\Requests;
+use Illuminate\Http\Request;
 use TmlpStats\Import\ImportManager;
 
-use Request;
+use TmlpStats\StatsReport;
 
 class ImportController extends Controller
 {
+    /**
+     * ImportController constructor.
+     *
+     * Requires that the user is logged in and is a statistician
+     */
     public function __construct()
     {
         $this->middleware('auth');
         $this->middleware('role:statistician');
     }
 
-    public function index()
+    /**
+     * Show spreadsheet validation pag
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexValidateSheet()
     {
+        $this->authorize('validate', StatsReport::class);
+
         return view('import.index')->with([
             'submitReport'            => false, // Controls whether or not to show Submit button
             'showUploadForm'          => true,
@@ -24,24 +36,31 @@ class ImportController extends Controller
         ]);
     }
 
-    // Handle XLSX file uploads
-    public function uploadSpreadsheet(Request $request)
+    /**
+     * Validate uploaded spreadsheet and return results
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function validateSheet(Request $request)
     {
-        $enforceVersion = (Request::get('ignoreVersion') != 1);
+        $this->authorize('validate', StatsReport::class);
+
+        $enforceVersion = ($request->get('ignoreVersion') != 1);
 
         $submitReport = false;
-        if (Request::has('submitReport')) {
-            $submitReport = (Request::get('submitReport') == 1);
+        if ($request->has('submitReport')) {
+            $submitReport = ($request->get('submitReport') == 1);
         }
 
-        $manager = new ImportManager(Request::file('statsFiles'),
-            Request::get('expectedReportDate'),
+        $manager = new ImportManager($request->file('statsFiles'),
+            $request->get('expectedReportDate'),
             $enforceVersion);
         $manager->import($submitReport);
 
         $results = $manager->getResults();
 
-        Request::flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
+        $request->flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
         return view('import.index')->with([
             'submitReport'            => true,
@@ -52,9 +71,15 @@ class ImportController extends Controller
         ]);
     }
 
-    // Import sheets from previous quarters. No validation is done
-    public function import()
+    /**
+     * Show spreadsheet import page
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexImportSheet()
     {
+        $this->authorize('import', StatsReport::class);
+
         return view('admin.import')->with([
             'submitReport'            => false, // Controls whether or not to show Submit button
             'showUploadForm'          => true,
@@ -62,19 +87,25 @@ class ImportController extends Controller
         ]);
     }
 
-    // Handle XLSX file uploads
-    public function uploadImportSpreadsheet()
+    /**
+     * Import uploaded spreadsheet. This does a validate and submit without sending an email.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function importSheet(Request $request)
     {
-        $manager = new ImportManager(Request::file('statsFiles'), null, false);
+        $this->authorize('import', StatsReport::class);
+
+        $manager = new ImportManager($request->file('statsFiles'), null, false);
         $manager->setSkipEmail(true);
         $manager->import(true);
         $results = $manager->getResults();
 
-        if (Request::has('json')) {
+        if ($request->has('json')) {
             return json_encode($results);
         }
 
-        Request::flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
+        $request->flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
         return view('admin.import')->with([
             'submitReport'            => false, // Controls whether or not to show Submit button

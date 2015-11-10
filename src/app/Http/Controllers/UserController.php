@@ -2,6 +2,7 @@
 namespace TmlpStats\Http\Controllers;
 
 use DB;
+use Illuminate\Http\Request;
 use TmlpStats\User;
 use TmlpStats\Role;
 use TmlpStats\Center;
@@ -13,12 +14,23 @@ use TmlpStats\Http\Requests\UserRequest;
 class UserController extends Controller
 {
     /**
+     * Create a new controller instance.
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('role:administrator');
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return Response
      */
     public function index()
     {
+        $this->authorize('index', User::class);
+
         $users = User::active()
             ->select('users.*', 'people.first_name', 'people.last_name', 'people.phone', 'people.email')
             ->join('people', 'people.id', '=', 'users.person_id')
@@ -36,6 +48,8 @@ class UserController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', User::class);
+
         $rolesObjects = Role::all();
 
         $roles = array();
@@ -78,6 +92,8 @@ class UserController extends Controller
             return redirect($redirect);
         }
 
+        $this->authorize(User::class);
+
         $input = $request->all();
 
         $person = Person::create($input);
@@ -118,6 +134,8 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
+        $this->authorize($user);
+
         return view('users.show', compact('user'));
     }
 
@@ -130,6 +148,9 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = User::findOrFail($id);
+
+        $this->authorize($user);
+
         $rolesObjects = Role::all();
 
         $roles = array();
@@ -177,6 +198,8 @@ class UserController extends Controller
         }
 
         $user = User::findOrFail($id);
+        $this->authorize($user);
+
         $user->update($request->all());
 
         if ($request->has('center')) {
@@ -222,13 +245,16 @@ class UserController extends Controller
     public function showProfile()
     {
         $user = Auth::user();
+
+        $this->authorize($user);
+
         $roles = $user->roles;
         $showPasswordUpdate = true;
 
         return view('users.edit', compact('user', 'roles'));
     }
 
-    public function updateProfile()
+    public function updateProfile(Request $request, $id)
     {
         $redirect = 'user/profile';
 
@@ -237,8 +263,10 @@ class UserController extends Controller
         }
 
         $user = User::findOrFail($id);
-        $user->update($request->all());
 
+        $this->authorize($user);
+
+        $user->update($request->all());
         $user->save();
 
         return redirect($redirect);
