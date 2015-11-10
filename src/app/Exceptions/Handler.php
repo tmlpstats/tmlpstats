@@ -38,9 +38,7 @@ class Handler extends ExceptionHandler {
      */
     public function report(Exception $e)
     {
-        // Ignore token expiration messages
-
-        if ($this->shouldReport($e) && !App::runningInConsole()) {
+        if ($this->shouldReport($e) && !App::runningInConsole() && env('APP_ENV') == 'prod') {
 
             $user = Auth::user() ? Auth::user()->email : 'unknown';
             $center = Auth::user() && Auth::user()->center
