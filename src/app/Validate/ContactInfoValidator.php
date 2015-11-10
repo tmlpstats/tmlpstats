@@ -25,11 +25,8 @@ class ContactInfoValidator extends ValidatorAbstract
         $emailValidator = v::email();
         if ($data->accountability == 'Reporting Statistician') {
             $emailValidator = v::alwaysValid();
-        }
-
-        // Skip rows with names == NA or N/A
-        if (preg_match('/^N\/?A$/i', $data->name)) {
-            return;
+        } else if (preg_match('/^N\/?A$/i', $data->name)) {
+            return; // Skip rows with names == NA or N/A
         }
 
         $this->dataValidators['name']           = v::string()->regex('/^(.+)\s([^\s]+)$/i');

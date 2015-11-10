@@ -69,8 +69,14 @@ class CommCourseInfoValidator extends ValidatorAbstract
             if (!is_null($data->completedStandardStarts) && !is_null($data->currentStandardStarts)) {
                 if ($data->completedStandardStarts > $data->currentStandardStarts) {
 
-                    $this->addMessage('COMMCOURSE_COMPLETED_SS_GREATER_THAN_CURRENT_SS');
-                    $isValid = false;
+                    $location = strtolower($data->location);
+
+                    if ($statsReport->center->name == 'London' && ($location == 'germany' || $location == 'intl')) {
+                        // Special case handling for courses in London where the standard starts count is different
+                    } else {
+                        $this->addMessage('COMMCOURSE_COMPLETED_SS_GREATER_THAN_CURRENT_SS');
+                        $isValid = false;
+                    }
                 } else if ($data->completedStandardStarts < ($data->currentStandardStarts - 3) && $startDate->diffInDays($statsReport->reportingDate) < 7) {
 
                     $withdrew = $data->currentStandardStarts - $data->completedStandardStarts;

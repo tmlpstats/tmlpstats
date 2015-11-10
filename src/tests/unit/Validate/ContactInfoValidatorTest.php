@@ -20,8 +20,24 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
     {
         $data = new stdClass;
         $data->accountability = 'Program Manager';
+        $data->name = 'Jeff Bridges';
 
         parent::testPopulateValidatorsSetsValidatorsForEachInput($data);
+    }
+
+    public function testPopulateValidatorsSkipsNameWhenNotApplicable($data = null)
+    {
+        $data = new stdClass;
+        $data->accountability = 'Program Manager';
+        $data->name = 'N/A';
+
+        // When name is N/A, we skip all validation
+        $tmpDataFields = $this->dataFields;
+        $this->dataFields = [];
+
+        parent::testPopulateValidatorsSetsValidatorsForEachInput($data);
+
+        $this->dataFields = $tmpDataFields;
     }
 
     public function testPopulateValidatorsSetsValidatorsForEachInputReportingStatistician($data = null)

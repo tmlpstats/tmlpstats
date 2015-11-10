@@ -12,6 +12,7 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
 
     protected $dataFields = array(
         'startDate',
+        'location',
         'type',
         'quarterStartTer',
         'quarterStartStandardStarts',
@@ -61,6 +62,7 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'startDate'                  => null,
+                    'location'                   => null,
                     'type'                       => null,
                     'quarterStartTer'            => null,
                     'quarterStartStandardStarts' => null,
@@ -88,6 +90,7 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'startDate'                  => '2015-05-16',
+                    'location'                   => '',
                     'type'                       => 'CAP',
                     'quarterStartTer'            => 15,
                     'quarterStartStandardStarts' => 14,
@@ -106,6 +109,7 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'startDate'                  => '2016-05-16',
+                    'location'                   => 'Germany',
                     'type'                       => 'CPC',
                     'quarterStartTer'            => 0,
                     'quarterStartStandardStarts' => 0,
@@ -125,6 +129,7 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'startDate'                  => 'asdf',
+                    'location'                   => null,
                     'type'                       => 'CPC',
                     'quarterStartTer'            => 0,
                     'quarterStartStandardStarts' => 0,
@@ -284,14 +289,28 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
 
     public function providerValidateCourseCompletionStats()
     {
+        $london = new stdClass();
+        $london->name = 'London';
+
+        $atlanta = new stdClass();
+        $atlanta->name = 'Atlanta';
+
         $statsReport = new stdClass;
         $statsReport->reportingDate = Carbon::createFromDate(2015, 5, 8);
+        $statsReport->center = $atlanta;
+
+        $statsReportLondon = clone $statsReport;
+        $statsReportLondon->center = $london;
+
+        $statsReportTwoWeeksAfterCourse = clone $statsReport;
+        $statsReportTwoWeeksAfterCourse->reportingDate = Carbon::createFromDate(2015, 5, 15);
 
         return array(
             // Gracefully handle null start date (don't blow up - required validator will catch this error)
             array(
                 $this->arrayToObject(array(
                     'startDate'               => null,
+                    'location'                => 'Atlanta',
                     'completedStandardStarts' => null,
                     'potentials'              => null,
                     'registrations'           => null,
@@ -305,6 +324,7 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'startDate'               => '2015-06-06',
+                    'location'                => 'Atlanta',
                     'completedStandardStarts' => null,
                     'potentials'              => null,
                     'registrations'           => null,
@@ -317,7 +337,8 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Course in past with completion stats
             array(
                 $this->arrayToObject(array(
-                    'startDate'               => '2015-05-01',
+                    'startDate'               => '2015-05-02',
+                    'location'                => 'Atlanta',
                     'completedStandardStarts' => 35,
                     'potentials'              => 30,
                     'registrations'           => 25,
@@ -331,7 +352,8 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Course in past missing completedStandardStarts
             array(
                 $this->arrayToObject(array(
-                    'startDate'               => '2015-05-01',
+                    'startDate'               => '2015-05-02',
+                    'location'                => 'Atlanta',
                     'completedStandardStarts' => null,
                     'potentials'              => 30,
                     'registrations'           => 25,
@@ -346,7 +368,8 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Course in past missing potentials
             array(
                 $this->arrayToObject(array(
-                    'startDate'               => '2015-05-01',
+                    'startDate'               => '2015-05-02',
+                    'location'                => 'Atlanta',
                     'completedStandardStarts' => 35,
                     'potentials'              => null,
                     'registrations'           => 25,
@@ -361,7 +384,8 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Course in past missing registrations
             array(
                 $this->arrayToObject(array(
-                    'startDate'               => '2015-05-01',
+                    'startDate'               => '2015-05-02',
+                    'location'                => 'Atlanta',
                     'completedStandardStarts' => 35,
                     'potentials'              => 30,
                     'registrations'           => null,
@@ -377,7 +401,8 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             // Course in past with more completed SS that current SS
             array(
                 $this->arrayToObject(array(
-                    'startDate'               => '2015-05-01',
+                    'startDate'               => '2015-05-02',
+                    'location'                => 'Atlanta',
                     'completedStandardStarts' => 40,
                     'potentials'              => 30,
                     'registrations'           => 25,
@@ -389,10 +414,56 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
                 ),
                 false,
             ),
+            // Course in past with more completed SS that current SS, at London center for London
+            array(
+                $this->arrayToObject(array(
+                    'startDate'               => '2015-05-02',
+                    'location'                => 'London',
+                    'completedStandardStarts' => 40,
+                    'potentials'              => 30,
+                    'registrations'           => 25,
+                    'currentStandardStarts'   => 35,
+                )),
+                $statsReportLondon,
+                array(
+                    array('COMMCOURSE_COMPLETED_SS_GREATER_THAN_CURRENT_SS'),
+                ),
+                false,
+            ),
+            // Course in past with more completed SS that current SS, at London center for Germany
+            array(
+                $this->arrayToObject(array(
+                    'startDate'               => '2015-05-02',
+                    'location'                => 'Germany',
+                    'completedStandardStarts' => 40,
+                    'potentials'              => 30,
+                    'registrations'           => 25,
+                    'currentStandardStarts'   => 35,
+                )),
+                $statsReportLondon,
+                array(),
+                true,
+            ),
+            // Course in past with more completed SS that current SS, at London center for Into
+            array(
+                $this->arrayToObject(array(
+                    'startDate'               => '2015-05-02',
+                    'location'                => 'INTL',
+                    'completedStandardStarts' => 40,
+                    'potentials'              => 30,
+                    'registrations'           => 25,
+                    'currentStandardStarts'   => 35,
+                )),
+                $statsReportLondon,
+                array(),
+                true,
+            ),
+
             // Course in past with more than 3 withdraw during course
             array(
                 $this->arrayToObject(array(
-                    'startDate'               => '2015-05-01',
+                    'startDate'               => '2015-05-02',
+                    'location'                => 'Atlanta',
                     'completedStandardStarts' => 31,
                     'potentials'              => 30,
                     'registrations'           => 25,
@@ -404,10 +475,25 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
                 ),
                 true,
             ),
+            // Course in past with more than 3 withdraw during course, but checked over a week after the course
+            array(
+                $this->arrayToObject(array(
+                    'startDate'               => '2015-05-02',
+                    'location'                => 'Atlanta',
+                    'completedStandardStarts' => 31,
+                    'potentials'              => 30,
+                    'registrations'           => 25,
+                    'currentStandardStarts'   => 35,
+                )),
+                $statsReportTwoWeeksAfterCourse,
+                array(),
+                true,
+            ),
             // Course in past with <= 3 withdraw during course
             array(
                 $this->arrayToObject(array(
-                    'startDate'               => '2015-05-01',
+                    'startDate'               => '2015-05-02',
+                    'location'                => 'Atlanta',
                     'completedStandardStarts' => 32,
                     'potentials'              => 30,
                     'registrations'           => 25,
@@ -422,6 +508,7 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'startDate'               => '2015-05-16',
+                    'location'                => 'Atlanta',
                     'completedStandardStarts' => 35,
                     'potentials'              => 30,
                     'registrations'           => null,
@@ -437,6 +524,7 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'startDate'               => '2015-05-16',
+                    'location'                => 'Atlanta',
                     'completedStandardStarts' => 35,
                     'potentials'              => null,
                     'registrations'           => 30,
@@ -452,6 +540,7 @@ class CommCourseInfoValidatorTest extends ValidatorTestAbstract
             array(
                 $this->arrayToObject(array(
                     'startDate'               => '2015-05-16',
+                    'location'                => 'Atlanta',
                     'completedStandardStarts' => 35,
                     'potentials'              => null,
                     'registrations'           => null,

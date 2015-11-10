@@ -20,11 +20,13 @@ class TmlpGameInfoImporter extends DataImporterAbstract
 
     protected function populateSheetRanges()
     {
+        $t1x = $this->findRange(30, 'Game', 'Total', 'B', 'A');
         $this->blockT1X[] = $this->excelRange('A', 'K');
-        $this->blockT1X[] = $this->excelRange(30, 31);
+        $this->blockT1X[] = $this->excelRange($t1x['start'] + 1, $t1x['end']);
 
+        $t2x = $this->findRange($t1x['end'] + 1, 'Game', 'Total', 'B', 'A');
         $this->blockT2X[] = $this->excelRange('A', 'K');
-        $this->blockT2X[] = $this->excelRange(38, 39);
+        $this->blockT2X[] = $this->excelRange($t2x['start'] + 1, $t2x['end']);
     }
 
     protected function load()
