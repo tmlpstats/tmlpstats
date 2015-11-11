@@ -14,7 +14,8 @@
         "phpoffice/phpexcel": "~1.8",
         "doctrine/dbal": "^2.5",
         "barryvdh/laravel-ide-helper": "^2.1",
-        "guzzlehttp/guzzle": "^6.1"
+        "guzzlehttp/guzzle": "^6.1",
+        "intouch/laravel-newrelic": "^2.0"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.0",
