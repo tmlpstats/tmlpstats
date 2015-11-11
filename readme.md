@@ -34,7 +34,7 @@ Your VM should now be ready to go.
 
 You can add an entry to your hosts file for ease of testing:
 ```
-echo '192.168.56.102  vagrant.tmlpstats.com' | sudo tee -a /etc/hosts"
+$ echo '192.168.56.102  vagrant.tmlpstats.com' | sudo tee -a /etc/hosts"
 ```
 
 View the application in your browser. Visit: `http://vagrant.tmlpstats.com/`
@@ -49,7 +49,7 @@ You can also snap the database after provisioning using the mysql import:
 ```
 $ vagrant ssh
 <inside vagrant VM>
-mysql -u root vagrant_dev_tmlpstats < /vagrant/export/tmlpstats_vagrant_export.sql
+$ mysql -u root vagrant_dev_tmlpstats < /vagrant/export/tmlpstats_vagrant_export.sql
 ```
 
 Provisioning should setup a default admin account so you can login if you don't already have an account setup. You can
