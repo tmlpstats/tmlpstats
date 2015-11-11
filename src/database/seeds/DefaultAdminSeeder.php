@@ -1,28 +1,35 @@
 <?php
 
+use TmlpStats\Center;
 use TmlpStats\Role;
-use TmlpStats\User;
+use TmlpStats\Http\Controllers\Auth\AuthController;
 use Illuminate\Database\Seeder;
 
-class DefaultAdminSeeder extends Seeder {
-
+class DefaultAdminSeeder extends Seeder
+{
     public function run()
     {
-        $user = User::create([
-            'email' => 'admin@tmlpstats.com',
-            'password' => Hash::make('password'),
-            'first_name' => 'Joe',
-            'last_name' => 'Admin',
-            'phone' => '555-555-5555',
-        ]);
-
-        if (!Role::find(1)) {
-            echo "Admin role not found. Did you provide an export of the database?";
+        if (!Schema::hasTable('users')
+            || !Schema::hasTable('people')
+            || !Schema::hasTable('roles')
+            || !Schema::hasTable('centers')
+            || !Role::find(1)
+            || !Center::find(1)
+        ) {
+            echo "Unable to find basic database objects. Make sure you import the database first.\n\n";
+            return false;
         }
 
-        $user->roles()->attach(1); // Admin
-        $user->roles()->attach(2); // Global Statistician
-        $user->centers()->attach(1); // Vancouver
+        $user = App::make(AuthController::class)->create([
+            'email'      => 'admin@tmlpstats.com',
+            'password'   => 'password',
+            'first_name' => 'Joe',
+            'last_name'  => 'Admin',
+            'phone'      => '555-555-5555',
+        ]);
+
+        $user->roleId = 1; // Admin
+        $user->setCenter(Center::find(1)); // Vancouver
 
         $user->save();
     }
