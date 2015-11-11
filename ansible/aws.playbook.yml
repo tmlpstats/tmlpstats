@@ -142,22 +142,10 @@
   - file: path=/etc/mysql/conf.d state=directory
 
   # Custom MySQL Config settings (low memory footprint for AWS)
-  - lineinfile: dest=/etc/mysql/my.cnf regexp='^key_buffer\s*=' line='key_buffer = 8M' state=present
-    notify: restart mysql
+  - file: path=/etc/mysql/conf.d/ state=directory owner=root
 
-  - lineinfile: dest=/etc/mysql/my.cnf regexp='^max_connections\s*=' line='max_connections = 30' state=present
-    notify: restart mysql
-
-  - lineinfile: dest=/etc/mysql/my.cnf regexp='^query_cache_size\s*=' line='query_cache_size = 8M' state=present
-    notify: restart mysql
-
-  - lineinfile: dest=/etc/mysql/my.cnf regexp='^query_cache_limit\s*=' line='query_cache_limit = 512K' state=present
-    notify: restart mysql
-
-  - lineinfile: dest=/etc/mysql/my.cnf regexp='^thread_stack\s*=' line='thread_stack = 128K' state=present
-    notify: restart mysql
-
-  - lineinfile: dest=/etc/mysql/my.cnf regexp='^performance_schema\s*=' line='performance_schema = 0' state=present
+  - name: add mysql config
+    copy: src=/vagrant/ansible/templates/etc/mysql/conf.d/memory_tuned.cnf dest=/etc/mysql/conf.d/memory_tuned.cnf
     notify: restart mysql
 
   # PHP 5.6
