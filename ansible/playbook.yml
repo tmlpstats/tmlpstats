@@ -82,6 +82,12 @@
     with_items:
       - "{{ db_main }}"
 
+  - file: path=/etc/mysql/conf.d/ state=directory owner=root
+
+  - name: add mysql config
+    copy: src=/vagrant/ansible/templates/etc/mysql/conf.d/memory_tuned.cnf dest=/etc/mysql/conf.d/memory_tuned.cnf
+    notify: restart mysql
+
   # PHP: Setup PHP 5.6
 
   - name: add php5.6 ppa
@@ -108,10 +114,13 @@
   - copy: src=/vagrant/ansible/templates/etc/php5/mods-available/xdebug.ini dest=/etc/php5/mods-available/xdebug.ini
     notify: restart apache
 
-  # Puppet - Not Installed
+  # Puppet & Chef - Not Installed
 
   - name: ensure puppet is not installed
     apt: name=puppet state=absent
+
+  - name: ensure chef is not installed
+    apt: name=chef state=absent
 
   # Finalize
 
