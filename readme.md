@@ -39,7 +39,7 @@ echo '192.168.56.102  vagrant.tmlpstats.com' | sudo tee -a /etc/hosts"
 
 View the application in your browser. Visit: `http://vagrant.tmlpstats.com/`
 
-If you see a webpage with a message able setting your hosts file, double check that there is an entry for the vagrant.tmlpstats.com domain.
+If you see a web page with a message about setting your hosts file, double check that there is an entry for the vagrant.tmlpstats.com domain.
 
 ### Setup for Database Seeding
 If you have an export of the database, the provisioning will import the database for you. Grab the latest dev export and copy the file
