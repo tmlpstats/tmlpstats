@@ -82,10 +82,8 @@
     with_items:
       - "{{ db_main }}"
 
-  # - name: import database
-  #   mysql_db: state=import name={{ db_main }} target=/vagrant/export/tmlpstats_stage_2015-10-15.sql
-
   # PHP: Setup PHP 5.6
+
   - name: add php5.6 ppa
     apt_repository: repo='ppa:ondrej/php5-5.6'
 
@@ -121,6 +119,20 @@
     action: service name=apache2 state=started enabled=true
 
   - file: src=/vagrant/src dest=/var/www/tmlpstats.com state=link
+
+  # Import database and setup default if export exists
+
+  - name: check for db export
+    stat: path=/vagrant/export/tmlpstats_vagrant_export.sql
+    register: export_path
+
+  - name: import database
+    mysql_db: state=import name={{ db_main }} target=/vagrant/export/tmlpstats_vagrant_export.sql
+    when: export_path.stat.exists
+
+  - name: Run artisan seeds
+    shell: php /var/www/tmlpstats.com/artisan db:seed --class=DefaultAdminSeeder
+    when: export_path.stat.exists
 
   handlers:
     - name: restart apache

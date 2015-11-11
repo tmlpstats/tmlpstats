@@ -76,19 +76,6 @@ then
     sed -i '/AllowOverride None/c AllowOverride All' /etc/apache2/sites-available/default
 fi
 
-
-# echo "--- Update apache vhosts ---"
-# sudo echo '
-# <VirtualHost *:80>
-#     ServerName tmlp.vagrant-dev.com
-#     DocumentRoot /var/www/tmlpstats/
-#     <Directory /var/www/tmlpstats>
-#         Options Indexes FollowSymLinks
-#         AllowOverride All
-#     </Directory>
-# </VirtualHost>
-# ' >> /etc/apache2/sites-available/default
-
 echo "--- Restart apache ---"
 sudo service apache2 restart > /dev/null 2>&1
 
@@ -150,6 +137,6 @@ cd /vagrant/tmlpstats && php artisan migrate:refresh --seed
 echo "--- Setup complete ---"
 echo ""
 echo "Add VM's hostname to your hosts file:"
-echo "  echo '192.168.56.102  vagrant-dev.com' | sudo tee -a /etc/hosts"
+echo "  echo '192.168.56.102  vagrant.tmlpstats.com' | sudo tee -a /etc/hosts"
 echo "Access the website in your browser:"
-echo "  http://vagrant-dev.com/tmlpstats/"
+echo "  http://vagrant.tmlpstats.com/"
