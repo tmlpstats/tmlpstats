@@ -286,29 +286,29 @@ class ImportDocument extends ImportDocumentAbstract
         return $this->loadSheet(3);
     }
 
-    protected function getCenterStatsImporter($sheet)
+    protected function getCenterStatsImporter(&$sheet)
     {
-        return DataImporterFactory::build('CenterStats', $this->version, $sheet, $this->statsReport);
+        return DataImporterFactory::build('CenterStats', $sheet, $this->statsReport);
     }
-    protected function getTmlpRegistrationImporter($sheet)
+    protected function getTmlpRegistrationImporter(&$sheet)
     {
-        return DataImporterFactory::build('TmlpRegistration', $this->version, $sheet, $this->statsReport);
+        return DataImporterFactory::build('TmlpRegistration', $sheet, $this->statsReport);
     }
-    protected function getClassListImporter($sheet)
+    protected function getClassListImporter(&$sheet)
     {
-        return DataImporterFactory::build('ClassList', $this->version, $sheet, $this->statsReport);
+        return DataImporterFactory::build('ClassList', $sheet, $this->statsReport);
     }
-    protected function getContactInfoImporter($sheet)
+    protected function getContactInfoImporter(&$sheet)
     {
-        return DataImporterFactory::build('ContactInfo', $this->version, $sheet, $this->statsReport);
+        return DataImporterFactory::build('ContactInfo', $sheet, $this->statsReport);
     }
-    protected function getCommCourseInfoImporter($sheet)
+    protected function getCommCourseInfoImporter(&$sheet)
     {
-        return DataImporterFactory::build('CommCourseInfo', $this->version, $sheet, $this->statsReport);
+        return DataImporterFactory::build('CommCourseInfo', $sheet, $this->statsReport);
     }
-    protected function getTmlpGameInfoImporter($sheet)
+    protected function getTmlpGameInfoImporter(&$sheet)
     {
-        return DataImporterFactory::build('TmlpGameInfo', $this->version, $sheet, $this->statsReport);
+        return DataImporterFactory::build('TmlpGameInfo', $sheet, $this->statsReport);
     }
 
     // @codeCoverageIgnoreStart
