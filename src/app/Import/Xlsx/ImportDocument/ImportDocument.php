@@ -30,8 +30,15 @@ class ImportDocument extends ImportDocumentAbstract
         $data['expectedVersion'] = $this->enforceVersion ? $this->version : null;
         $data['expectedDate'] = $this->expectedDate;
 
-        $validationManager = new ValidationManager($this->statsReport, $data);
-        $isValid = $validationManager->run();
+        $validationManager = new ValidationManager($this->statsReport);
+        $isValid = $validationManager->run($data);
+
+        unset($data['expectedVersion']);
+        unset($data['expectedDate']);
+
+        foreach ($data as $type => $importData) {
+            $this->importers[$type]->setData($importData);
+        }
 
         $this->mergeMessages($validationManager->getMessages());
 
@@ -253,6 +260,7 @@ class ImportDocument extends ImportDocumentAbstract
                         break;
                 }
             }
+            $this->importers = null;
         }
 
         $this->statsReport->version = $this->version;

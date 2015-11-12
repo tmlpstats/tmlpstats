@@ -10,6 +10,7 @@ abstract class DataImporterAbstract
     protected $sheet = NULL;
     protected $reader = NULL;
     protected $statsReport = NULL;
+    protected $blocks = [];
 
     protected $data = array();
 
@@ -45,6 +46,11 @@ abstract class DataImporterAbstract
         if ($this->statsReport)
         {
             $this->load();
+
+            // Cleanup to save on memory since this object lives for the whole request
+            $this->sheet = null;
+            $this->reader = null;
+            $this->blocks = null;
         }
         else
         {
@@ -115,7 +121,7 @@ abstract class DataImporterAbstract
 
     protected function loadBlock($blockParams, $arg=NULL)
     {
-        foreach ($blockParams[1] as $offset)
+        foreach ($blockParams['rows'] as $offset)
         {
             try {
                 $this->loadEntry($offset, $arg);
@@ -128,6 +134,11 @@ abstract class DataImporterAbstract
     public function getData()
     {
         return $this->data;
+    }
+
+    public function setData($data)
+    {
+        $this->data = $data;
     }
 
     public function setValues($object, $data)

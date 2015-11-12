@@ -14,23 +14,19 @@ class TmlpRegistrationImporter extends DataImporterAbstract
 {
     protected $sheetId = ImportDocument::TAB_WEEKLY_STATS;
 
-    protected $blockT1Reg = array();
-    protected $blockT2Reg = array();
-    protected $blockFutureReg = array();
-
     protected function populateSheetRanges()
     {
         $t1Reg = $this->findRange(32, 'Team 1 Registrations', 'Team 2 Registrations');
-        $this->blockT1Reg[] = $this->excelRange('A','AG');
-        $this->blockT1Reg[] = $this->excelRange($t1Reg['start'] + 1, $t1Reg['end']);
+        $this->blocks['t1Reg']['cols'] = $this->excelRange('A','AG');
+        $this->blocks['t1Reg']['rows'] = $this->excelRange($t1Reg['start'] + 1, $t1Reg['end']);
 
         $t2Reg = $this->findRange($t1Reg['end'], 'Team 2 Registrations', 'Future Weekend Reg');
-        $this->blockT2Reg[] = $this->excelRange('A','AG');
-        $this->blockT2Reg[] = $this->excelRange($t2Reg['start'] + 1, $t2Reg['end']);
+        $this->blocks['t2Reg']['cols'] = $this->excelRange('A','AG');
+        $this->blocks['t2Reg']['rows'] = $this->excelRange($t2Reg['start'] + 1, $t2Reg['end']);
 
         $futureReg = $this->findRange($t2Reg['end'], 'Future Weekend Reg', 'REMEMBER TO ENTER THE COURSE INFORMATION ON THE "CAP & CPC Course Info" Tab');
-        $this->blockFutureReg[] = $this->excelRange('A','AE');
-        $this->blockFutureReg[] = $this->excelRange($futureReg['start'] + 1, $futureReg['end']);
+        $this->blocks['futureReg']['cols'] = $this->excelRange('A','AE');
+        $this->blocks['futureReg']['rows'] = $this->excelRange($futureReg['start'] + 1, $futureReg['end']);
     }
 
     public function load()
@@ -38,9 +34,9 @@ class TmlpRegistrationImporter extends DataImporterAbstract
         $this->reader = $this->getReader($this->sheet);
         $this->reader->setReportingDate($this->statsReport->reportingDate);
 
-        $this->loadBlock($this->blockT1Reg, 1);
-        $this->loadBlock($this->blockT2Reg, 2);
-        $this->loadBlock($this->blockFutureReg, 'future');
+        $this->loadBlock($this->blocks['t1Reg'], 1);
+        $this->loadBlock($this->blocks['t2Reg'], 2);
+        $this->loadBlock($this->blocks['futureReg'], 'future');
     }
 
     protected function loadEntry($row, $type)
@@ -77,11 +73,13 @@ class TmlpRegistrationImporter extends DataImporterAbstract
     {
         foreach ($this->data as $incomingInput) {
 
-            if ($incomingInput['incomingTeamYear'] == 'R') {
-                $incomingInput['teamYear'] = 2;
-            } else {
-                $incomingInput['teamYear'] = $incomingInput['incomingTeamYear'];
+            if (isset($this->data['errors'])) {
+                continue;
             }
+
+            $incomingInput['teamYear'] = ($incomingInput['incomingTeamYear'] == 'R')
+                ? 2
+                : $incomingInput['incomingTeamYear'];
 
             $incoming = TmlpRegistration::firstOrNew(array(
                 'first_name' => $incomingInput['firstName'],

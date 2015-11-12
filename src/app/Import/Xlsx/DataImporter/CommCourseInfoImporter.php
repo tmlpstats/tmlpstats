@@ -12,26 +12,23 @@ class CommCourseInfoImporter extends DataImporterAbstract
 {
     protected $sheetId = ImportDocument::TAB_COURSES;
 
-    protected $blockCAP = array();
-    protected $blockCPC = array();
-
     protected function populateSheetRanges()
     {
         $cap = $this->findRange(3, 'Course Start Date', 'Total (Open Courses):', 'B', 'A');
-        $this->blockCAP[] = $this->excelRange('A','O');
-        $this->blockCAP[] = $this->excelRange($cap['start'] + 1, $cap['end']);
+        $this->blocks['cap']['cols'] = $this->excelRange('A','O');
+        $this->blocks['cap']['rows'] = $this->excelRange($cap['start'] + 1, $cap['end']);
 
         $cpc = $this->findRange($cap['end'], 'Course Start Date', 'Total (Open Courses):', 'B', 'A');
-        $this->blockCPC[] = $this->excelRange('A','O');
-        $this->blockCPC[] = $this->excelRange($cpc['start'] + 1, $cpc['end']);
+        $this->blocks['cpc']['cols'] = $this->excelRange('A','O');
+        $this->blocks['cpc']['rows'] = $this->excelRange($cpc['start'] + 1, $cpc['end']);
     }
 
     protected function load()
     {
         $this->reader = $this->getReader($this->sheet);
 
-        $this->loadBlock($this->blockCAP, 'CAP');
-        $this->loadBlock($this->blockCPC, 'CPC');
+        $this->loadBlock($this->blocks['cap'], 'CAP');
+        $this->loadBlock($this->blocks['cpc'], 'CPC');
     }
 
     protected function loadEntry($row, $type)
@@ -58,6 +55,10 @@ class CommCourseInfoImporter extends DataImporterAbstract
     public function postProcess()
     {
         foreach ($this->data as $courseInput) {
+
+            if (isset($this->data['errors'])) {
+                continue;
+            }
 
             $course = Course::firstOrCreate(array(
                 'center_id'  => $this->statsReport->center->id,
