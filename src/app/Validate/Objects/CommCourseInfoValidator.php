@@ -1,11 +1,10 @@
 <?php
-namespace TmlpStats\Validate;
+namespace TmlpStats\Validate\Objects;
 
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
-use Carbon\Carbon;
 use Respect\Validation\Validator as v;
 
-class CommCourseInfoValidator extends ValidatorAbstract
+class CommCourseInfoValidator extends ObjectsValidatorAbstract
 {
     protected $sheetId = ImportDocument::TAB_COURSES;
 
@@ -50,9 +49,8 @@ class CommCourseInfoValidator extends ValidatorAbstract
     {
         $isValid = true;
 
-        $statsReport = $this->getStatsReport();
         $startDate = $this->getDateObject($data->startDate);
-        if ($startDate && $startDate->lt($statsReport->reportingDate)) {
+        if ($startDate && $startDate->lt($this->statsReport->reportingDate)) {
             if (is_null($data->completedStandardStarts)) {
                 $this->addMessage('COMMCOURSE_COMPLETED_SS_MISSING');
                 $isValid = false;
@@ -71,13 +69,13 @@ class CommCourseInfoValidator extends ValidatorAbstract
 
                     $location = strtolower($data->location);
 
-                    if ($statsReport->center->name == 'London' && ($location == 'germany' || $location == 'intl')) {
+                    if ($this->statsReport->center->name == 'London' && ($location == 'germany' || $location == 'intl')) {
                         // Special case handling for courses in London where the standard starts count is different
                     } else {
                         $this->addMessage('COMMCOURSE_COMPLETED_SS_GREATER_THAN_CURRENT_SS');
                         $isValid = false;
                     }
-                } else if ($data->completedStandardStarts < ($data->currentStandardStarts - 3) && $startDate->diffInDays($statsReport->reportingDate) < 7) {
+                } else if ($data->completedStandardStarts < ($data->currentStandardStarts - 3) && $startDate->diffInDays($this->statsReport->reportingDate) < 7) {
 
                     $withdrew = $data->currentStandardStarts - $data->completedStandardStarts;
                     $this->addMessage('COMMCOURSE_COMPLETED_SS_LESS_THAN_CURRENT_SS', $withdrew);
@@ -97,9 +95,8 @@ class CommCourseInfoValidator extends ValidatorAbstract
     {
         $isValid = true;
 
-        $statsReport = $this->getStatsReport();
         $startDate = $this->getDateObject($data->startDate);
-        if ($startDate && $startDate->lt($statsReport->quarter->startWeekendDate)) {
+        if ($startDate && $startDate->lt($this->statsReport->quarter->startWeekendDate)) {
             $this->addMessage('COMMCOURSE_COURSE_DATE_BEFORE_QUARTER');
             $isValid = false;
         }

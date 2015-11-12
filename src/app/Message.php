@@ -738,7 +738,7 @@ class Message
             'message' => $this->getMessageFromFormat($messageId, $message['format'], $message['arguments'], $arguments),
         );
 
-        if ($offset !== false) {
+        if ($offset !== null) {
             $result['offset'] = $offset;
             $result['offsetType'] = $this->getOffsetType($offset);
         }

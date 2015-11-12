@@ -48,7 +48,7 @@ abstract class DataImporterAbstract
         }
         else
         {
-            $this->addMessage('IMPORT_TAB_FAILED', false);
+            $this->addMessage('IMPORT_TAB_FAILED', null);
         }
     }
     abstract protected function load();

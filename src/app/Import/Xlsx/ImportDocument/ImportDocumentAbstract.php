@@ -185,7 +185,6 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
             ? $this->naSheetNames
             : $this->intSheetNames;
 
-        $loadedCount = 0;
         for($i = 0; $i < count($sheetNames); $i++) {
 
             $sheet = $this->loadSheet($i, $doc);
