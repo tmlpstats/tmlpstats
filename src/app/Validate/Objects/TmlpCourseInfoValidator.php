@@ -1,11 +1,10 @@
 <?php
-namespace TmlpStats\Validate;
+namespace TmlpStats\Validate\Objects;
 
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
-use TmlpStats\Import\Xlsx\Reader as Reader;
 use Respect\Validation\Validator as v;
 
-class TmlpCourseInfoValidator extends ValidatorAbstract
+class TmlpCourseInfoValidator extends ObjectsValidatorAbstract
 {
     protected $sheetId = ImportDocument::TAB_COURSES;
 

@@ -3,7 +3,7 @@ namespace TmlpStats\Validate;
 
 class ValidatorFactory
 {
-    public static function build($statsReport, $type = null)
+    public static function build(&$statsReport, $type = null)
     {
         if ($type === null)
         {
@@ -18,6 +18,13 @@ class ValidatorFactory
             case 'contactInfo':
             case 'commCourseInfo':
             case 'tmlpCourseInfo':
+            case 'statsReport':
+                $class = '\\TmlpStats\\Validate\\Objects\\' . ucfirst($type) . 'Validator';
+                break;
+            case 'teamExpansion':
+            case 'centerGames':
+                $class = '\\TmlpStats\\Validate\\Relationships\\' . ucfirst($type) . 'Validator';
+                break;
             case 'null':
                 $class = '\\TmlpStats\\Validate\\' . ucfirst($type) . 'Validator';
                 break;

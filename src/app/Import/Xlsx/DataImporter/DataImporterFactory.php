@@ -3,23 +3,21 @@ namespace TmlpStats\Import\Xlsx\DataImporter;
 
 class DataImporterFactory
 {
-    public static function build($type, $version, $data, $statsReport)
+    public static function build($type, &$data, &$statsReport)
     {
-        $namespace = 'TmlpStats\\Import\\Xlsx\\DataImporter\\';
-
         switch ($type) {
-
             case 'CenterStats':
             case 'ClassList':
             case 'CommCourseInfo':
             case 'ContactInfo':
             case 'TmlpGameInfo':
             case 'TmlpRegistration':
-                $class = $namespace . $type . 'Importer';
-                return new $class($data, $statsReport);
-
+                $class = 'TmlpStats\\Import\\Xlsx\\DataImporter\\' . $type . 'Importer';
+                break;
             default:
-                return NULL;
+                throw new \Exception("Invalid type passed to DataImporterFactory");
         }
+
+        return new $class($data, $statsReport);
     }
 }
