@@ -3,15 +3,12 @@
 namespace TmlpStats;
 
 use Carbon\Carbon;
-use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Model;
 
 use Exception;
 
-class ReportToken extends Model
+class ReportToken extends ModelCachedRelationships
 {
-    use CamelCaseModel;
-
     protected $fillable = array(
         'token',
         'report_id',

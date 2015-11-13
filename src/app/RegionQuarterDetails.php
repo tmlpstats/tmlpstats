@@ -3,17 +3,10 @@ namespace TmlpStats;
 
 use TmlpStats\Quarter;
 
-use Illuminate\Database\Eloquent\Model;
-use Eloquence\Database\Traits\CamelCaseModel;
 use Carbon\Carbon;
 
-use DB;
-use Exception;
-
-class RegionQuarterDetails extends Model
+class RegionQuarterDetails extends ModelCachedRelationships
 {
-    use CamelCaseModel;
-
     protected $fillable = array(
         'quarter_id',
         'region_id',

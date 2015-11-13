@@ -2,19 +2,12 @@
 namespace TmlpStats;
 
 use Cache;
-use TmlpStats\Region;
-use TmlpStats\RegionQuarterDetails;
-use Illuminate\Database\Eloquent\Model;
-use Eloquence\Database\Traits\CamelCaseModel;
 use Carbon\Carbon;
 
-use DB;
 use Exception;
 
-class Quarter extends Model
+class Quarter extends ModelCachedRelationships
 {
-    use CamelCaseModel;
-
     protected $fillable = array(
         't1_distinction',
         't2_distinction',

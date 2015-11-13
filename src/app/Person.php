@@ -3,13 +3,9 @@ namespace TmlpStats;
 
 use DB;
 use TmlpStats\Center;
-use Illuminate\Database\Eloquent\Model;
-use Eloquence\Database\Traits\CamelCaseModel;
 
-class Person extends Model
+class Person extends ModelCachedRelationships
 {
-    use CamelCaseModel;
-
     protected $fillable = [
         'first_name',
         'last_name',
