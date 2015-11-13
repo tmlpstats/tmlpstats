@@ -50,14 +50,17 @@ class Quarter extends ModelCachedRelationships
         $cacheKey = "quarters:date{$dateString}:region{$region->id}";
 
         $quarter = Cache::remember($cacheKey, 24 * 60, function() use ($date, $region) {
-            return Quarter::byRegion($region)
+            $found = Quarter::byRegion($region)
                 ->date($date)
                 ->first();
+
+            if ($found) {
+                $found->setRegion($region);
+            }
+
+            return $found;
         });
 
-        if ($quarter) {
-            $quarter->setRegion($region);
-        }
         return $quarter;
     }
 
