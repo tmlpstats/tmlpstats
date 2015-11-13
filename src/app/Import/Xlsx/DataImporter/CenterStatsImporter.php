@@ -18,39 +18,34 @@ class CenterStatsImporter extends DataImporterAbstract
 
     protected $weeks = array();
 
-    protected $blockClassroom1 = array();
-    protected $blockClassroom2 = array();
-    protected $blockClassroom3 = array();
-    protected $blockClassroom4 = array();
-
     protected function populateSheetRanges()
     {
-        $this->blockClassroom1[] = $this->excelRange('C', 'L');
-        $this->blockClassroom1[] = $this->excelRange(4, 11);
+        $this->blocks['classroom1']['cols'] = $this->excelRange('C', 'L');
+        $this->blocks['classroom1']['rows'] = $this->excelRange(4, 11);
 
-        $this->blockClassroom2[] = $this->excelRange('Q', 'Z');
-        $this->blockClassroom2[] = $this->excelRange(4, 11);
+        $this->blocks['classroom2']['cols'] = $this->excelRange('Q', 'Z');
+        $this->blocks['classroom2']['rows'] = $this->excelRange(4, 11);
 
-        $this->blockClassroom3[] = $this->excelRange('C', 'L');
-        $this->blockClassroom3[] = $this->excelRange(14, 21);
+        $this->blocks['classroom3']['cols'] = $this->excelRange('C', 'L');
+        $this->blocks['classroom3']['rows'] = $this->excelRange(14, 21);
 
-        $this->blockClassroom4[] = $this->excelRange('Q', 'Z');
-        $this->blockClassroom4[] = $this->excelRange(14, 21);
+        $this->blocks['classroom4']['cols'] = $this->excelRange('Q', 'Z');
+        $this->blocks['classroom4']['rows'] = $this->excelRange(14, 21);
     }
 
     protected function load()
     {
         $this->reader = $this->getReader($this->sheet);
 
-        $this->loadBlock($this->blockClassroom1);
-        $this->loadBlock($this->blockClassroom2);
-        $this->loadBlock($this->blockClassroom3);
-        $this->loadBlock($this->blockClassroom4);
+        $this->loadBlock($this->blocks['classroom1']);
+        $this->loadBlock($this->blocks['classroom2']);
+        $this->loadBlock($this->blocks['classroom3']);
+        $this->loadBlock($this->blocks['classroom4']);
     }
 
     protected function loadBlock($blockParams, $args = null)
     {
-        for ($week = 0; $week < count($blockParams[0]); $week += 2) {
+        for ($week = 0; $week < count($blockParams['cols']); $week += 2) {
             try {
                 $this->loadEntry($week, $blockParams);
             } catch (\Exception $e) {
@@ -61,10 +56,10 @@ class CenterStatsImporter extends DataImporterAbstract
 
     protected function loadEntry($week, $blockParams)
     {
-        $promiseCol = $blockParams[0][$week];
-        $actualCol = $blockParams[0][$week + 1];
-        $weekCol = $blockParams[0][$week];
-        $blockStartRow = $blockParams[1][0];
+        $promiseCol = $blockParams['cols'][$week];
+        $actualCol = $blockParams['cols'][$week + 1];
+        $weekCol = $blockParams['cols'][$week];
+        $blockStartRow = $blockParams['rows'][0];
 
         $weekDate = $this->reader->getWeekDate($blockStartRow, $weekCol);
 
@@ -93,7 +88,7 @@ class CenterStatsImporter extends DataImporterAbstract
         for ($i = 0; $i < count($rowHeaders); $i++) {
             $field = $rowHeaders[$i];
 
-            $row = $blockParams[1][$i + 2]; // skip 2 title rows
+            $row = $blockParams['rows'][$i + 2]; // skip 2 title rows
 
             $promiseValue = $this->reader->getGameValue($row, $promiseCol);
             if ($field == 'gitw') {
@@ -132,6 +127,10 @@ class CenterStatsImporter extends DataImporterAbstract
 
         foreach ($this->data as $week) {
 
+            if (isset($this->data['errors'])) {
+                continue;
+            }
+
             if ($week['type'] != 'promise') {
                 continue;
             }
@@ -158,6 +157,10 @@ class CenterStatsImporter extends DataImporterAbstract
         }
 
         foreach ($this->data as $week) {
+
+            if (isset($this->data['errors'])) {
+                continue;
+            }
 
             if ($week['type'] != 'actual') {
                 continue;

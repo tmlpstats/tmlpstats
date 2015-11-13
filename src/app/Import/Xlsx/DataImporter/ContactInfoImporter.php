@@ -82,6 +82,10 @@ class ContactInfoImporter extends DataImporterAbstract
     {
         foreach ($this->data as $leader) {
 
+            if (isset($this->data['errors'])) {
+                continue;
+            }
+
             $accountability = Accountability::name($this->mapAccountabilities($leader['accountability']))->first();
 
             if ($leader['name'] === null || strtoupper($leader['name']) == 'NA' || strtoupper($leader['name']) == 'N/A') {
@@ -181,5 +185,6 @@ class ContactInfoImporter extends DataImporterAbstract
 
     protected function populateSheetRanges()
     {
-    } // no blocks to load in this sheet
+        // no blocks to load in this sheet
+    }
 }

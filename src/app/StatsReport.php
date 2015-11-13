@@ -134,6 +134,7 @@ class StatsReport extends Model
 
         return ($game == 'cap') ? $points * 2 : $points;
     }
+
     public static function pointsToRating($points)
     {
         if ($points == 28) {

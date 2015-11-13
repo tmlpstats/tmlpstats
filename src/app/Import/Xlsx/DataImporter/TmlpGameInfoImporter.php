@@ -15,26 +15,23 @@ class TmlpGameInfoImporter extends DataImporterAbstract
 {
     protected $sheetId = ImportDocument::TAB_COURSES;
 
-    protected $blockT1X = array();
-    protected $blockT2X = array();
-
     protected function populateSheetRanges()
     {
         $t1x = $this->findRange(28, 'Game', 'Total', 'B', 'A');
-        $this->blockT1X[] = $this->excelRange('A', 'K');
-        $this->blockT1X[] = $this->excelRange($t1x['start'] + 1, $t1x['end']);
+        $this->blocks['t1x']['cols'] = $this->excelRange('A', 'K');
+        $this->blocks['t1x']['rows'] = $this->excelRange($t1x['start'] + 1, $t1x['end']);
 
         $t2x = $this->findRange($t1x['end'] + 1, 'Game', 'Total', 'B', 'A');
-        $this->blockT2X[] = $this->excelRange('A', 'K');
-        $this->blockT2X[] = $this->excelRange($t2x['start'] + 1, $t2x['end']);
+        $this->blocks['t2x']['cols'] = $this->excelRange('A', 'K');
+        $this->blocks['t2x']['rows'] = $this->excelRange($t2x['start'] + 1, $t2x['end']);
     }
 
     protected function load()
     {
         $this->reader = $this->getReader($this->sheet);
 
-        $this->loadBlock($this->blockT1X, 'T1X');
-        $this->loadBlock($this->blockT2X, 'T2X');
+        $this->loadBlock($this->blocks['t1x'], 'T1X');
+        $this->loadBlock($this->blocks['t2x'], 'T2X');
     }
 
     protected function loadEntry($row, $type)
@@ -52,6 +49,10 @@ class TmlpGameInfoImporter extends DataImporterAbstract
     public function postProcess()
     {
         foreach ($this->data as $gameInput) {
+
+            if (isset($this->data['errors'])) {
+                continue;
+            }
 
             $gameData = $this->getGameData($gameInput['type'], $this->statsReport->center, $this->statsReport->quarter);
 
