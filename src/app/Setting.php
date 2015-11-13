@@ -2,13 +2,8 @@
 
 namespace TmlpStats;
 
-use Illuminate\Database\Eloquent\Model;
-use Eloquence\Database\Traits\CamelCaseModel;
-
-class Setting extends Model
+class Setting extends ModelCachedRelationships
 {
-    use CamelCaseModel;
-
     protected $fillable = [
         'center_id',
         'name',

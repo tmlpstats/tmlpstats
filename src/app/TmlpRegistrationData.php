@@ -1,14 +1,8 @@
 <?php
 namespace TmlpStats;
 
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use Eloquence\Database\Traits\CamelCaseModel;
-
-class TmlpRegistrationData extends Model
+class TmlpRegistrationData extends ModelCachedRelationships
 {
-    use CamelCaseModel;
-
     protected $table = 'tmlp_registrations_data';
 
     protected $fillable = [

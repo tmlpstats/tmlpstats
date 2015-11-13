@@ -2,13 +2,9 @@
 namespace TmlpStats;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use Eloquence\Database\Traits\CamelCaseModel;
 
-class Center extends Model
+class Center extends ModelCachedRelationships
 {
-    use CamelCaseModel;
-
     protected $fillable = array(
         'name',
         'abbreviation',

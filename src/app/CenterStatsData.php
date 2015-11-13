@@ -3,13 +3,9 @@ namespace TmlpStats;
 
 use TmlpStats\Center;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use Eloquence\Database\Traits\CamelCaseModel;
 
-class CenterStatsData extends Model
+class CenterStatsData extends ModelCachedRelationships
 {
-    use CamelCaseModel;
-
     protected $table = 'center_stats_data';
 
     protected $center = null;

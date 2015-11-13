@@ -3,15 +3,11 @@ namespace TmlpStats;
 
 use TmlpStats\Quarter;
 use TmlpStats\CenterStatsData;
-use Illuminate\Database\Eloquent\Model;
-use Eloquence\Database\Traits\CamelCaseModel;
 
 use Carbon\Carbon;
 
-class StatsReport extends Model
+class StatsReport extends ModelCachedRelationships
 {
-    use CamelCaseModel;
-
     protected $fillable = [
         'reporting_date',
         'center_id',

@@ -1,13 +1,8 @@
 <?php
 namespace TmlpStats;
 
-use Illuminate\Database\Eloquent\Model;
-use Eloquence\Database\Traits\CamelCaseModel;
-
-class TeamMemberData extends Model
+class TeamMemberData extends ModelCachedRelationships
 {
-    use CamelCaseModel;
-
     protected $table = 'team_members_data';
 
     protected $fillable = [

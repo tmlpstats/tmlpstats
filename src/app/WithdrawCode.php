@@ -1,13 +1,8 @@
 <?php
 namespace TmlpStats;
 
-use Illuminate\Database\Eloquent\Model;
-use Eloquence\Database\Traits\CamelCaseModel;
-
-class WithdrawCode extends Model
+class WithdrawCode extends ModelCachedRelationships
 {
-    use CamelCaseModel;
-
     protected $fillable = array(
         'code',
         'display',
