@@ -158,4 +158,17 @@ class Util
 
         return $sessions;
     }
+
+    /**
+     * Get the base classname of an object.
+     *   e.g.
+     *      \TmlpStats\StatsReport => StatsReport
+     *
+     * @param $object
+     * @return string
+     */
+    public static function getClassBasename($object)
+    {
+        return substr(strrchr(get_class($object), '\\'), 1);
+    }
 }

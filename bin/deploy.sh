@@ -57,6 +57,11 @@ cd $DEST/
 php artisan migrate
 
 echo ""
+echo "Flushing Reports Cache"
+cd $DEST/
+php artisan cache:clear-reports
+
+echo ""
 echo "Fixing file permisssions"
 sudo chmod -R o+w $DEST/storage
 

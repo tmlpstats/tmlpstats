@@ -6,7 +6,6 @@ use TmlpStats\Quarter;
 use TmlpStats\Region;
 use TmlpStats\ReportToken;
 use TmlpStats\StatsReport;
-use TmlpStats\Center;
 
 use TmlpStats\Reports\Arrangements\CoursesByCenter;
 use TmlpStats\Reports\Arrangements\CoursesWithEffectiveness;
@@ -28,7 +27,7 @@ use App;
 use Gate;
 use Response;
 
-class GlobalReportController extends Controller
+class GlobalReportController extends ReportDispatchAbstractController
 {
     /**
      * Create a new controller instance.
@@ -152,12 +151,31 @@ class GlobalReportController extends Controller
         return $centers;
     }
 
-    public function runDispatcher(Request $request, $id, $report)
+    public function getById($id)
     {
-        $globalReport = GlobalReport::findOrFail($id);
+        return GlobalReport::findOrFail($id);
+    }
 
-        $this->authorize('read', $globalReport);
+    public function getCacheKey($model, $report)
+    {
+        $keyBase = parent::getCacheKey($model, $report);
 
+        $region = $this->getRegion(\Request::instance(), true);
+
+        return $region === null
+            ? $keyBase
+            : "{$keyBase}:region{$region->id}";
+    }
+
+    public function getCacheTags($model, $report)
+    {
+        $tags = parent::getCacheTags($model, $report);
+
+        return array_merge($tags, ["globalReport{$model->id}"]);
+    }
+
+    public function runDispatcher(Request $request, $globalReport, $report)
+    {
         $region = $this->getRegion($request, true);
 
         $response = null;
@@ -194,10 +212,6 @@ class GlobalReportController extends Controller
                 break;
         }
 
-        if (!$response) {
-            abort(404);
-        }
-
         return $response;
     }
 
@@ -213,7 +227,7 @@ class GlobalReportController extends Controller
             return null;
         }
 
-        $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($globalReport->id, $region, $globalReport->reportingDate);
+        $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($globalReport, $region, $globalReport->reportingDate);
         if (!$globalReportData) {
             return null;
         }
@@ -233,7 +247,7 @@ class GlobalReportController extends Controller
 
     protected function getRegionalStats(GlobalReport $globalReport, Region $region)
     {
-        $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($globalReport->id, $region);
+        $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($globalReport, $region);
         if (!$globalReportData) {
             return null;
         }
@@ -251,7 +265,7 @@ class GlobalReportController extends Controller
 
     protected function getTmlpRegistrationsByStatus(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
         if (!$registrations) {
             return null;
         }
@@ -265,7 +279,7 @@ class GlobalReportController extends Controller
 
     protected function getTmlpRegistrationsOverdue(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
         if (!$registrations) {
             return null;
         }
@@ -282,12 +296,12 @@ class GlobalReportController extends Controller
 
     protected function getTmlpRegistrationsOverview(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
         if (!$registrations) {
             return null;
         }
 
-        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport->id, $region);
+        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport, $region);
         if (!$teamMembers) {
             return null;
         }
@@ -343,7 +357,7 @@ class GlobalReportController extends Controller
 
     protected function getTmlpRegistrationsByCenter(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
         if (!$registrations) {
             return null;
         }
@@ -367,12 +381,12 @@ class GlobalReportController extends Controller
 
     protected function getTravelReport(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport->id, $region);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
         if (!$registrations) {
             return null;
         }
 
-        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport->id, $region);
+        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport, $region);
         if (!$teamMembers) {
             return null;
         }
@@ -404,7 +418,7 @@ class GlobalReportController extends Controller
 
     protected function getTeamMemberStatus(GlobalReport $globalReport, Region $region)
     {
-        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport->id, $region);
+        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport, $region);
         if (!$teamMembers) {
             return null;
         }
@@ -488,7 +502,7 @@ class GlobalReportController extends Controller
 
     protected function getCompletedCoursesReport(GlobalReport $globalReport, Region $region)
     {
-        $coursesData = App::make(CoursesController::class)->getByGlobalReport($globalReport->id, $region);
+        $coursesData = App::make(CoursesController::class)->getByGlobalReport($globalReport, $region);
         if (!$coursesData) {
             return null;
         }

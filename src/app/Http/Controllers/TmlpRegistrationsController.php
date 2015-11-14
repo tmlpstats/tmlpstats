@@ -2,10 +2,7 @@
 
 namespace TmlpStats\Http\Controllers;
 
-use App;
-use Cache;
 use Illuminate\Http\Request;
-use Response;
 use TmlpStats\GlobalReport;
 use TmlpStats\Http\Requests;
 use TmlpStats\Region;
@@ -90,51 +87,27 @@ class TmlpRegistrationsController extends Controller
         //
     }
 
-    public function getByGlobalReport($id, Region $region)
+    public function getByGlobalReport(GlobalReport $globalReport, Region $region)
     {
-        $cacheKey = $region === null
-            ? "globalreport{$id}:tmlpregistrations"
-            : "globalreport{$id}:region{$region->id}:tmlpregistrations";
-        $registrations = ($this->useCache()) ? Cache::tags(["globalReport{$id}"])->get($cacheKey) : false;
+        $statsReports = $globalReport->statsReports()
+            ->byRegion($region)
+            ->reportingDate($globalReport->reportingDate)
+            ->get();
 
-        if (!$registrations) {
-            $globalReport = GlobalReport::find($id);
+        $registrations = [];
+        foreach ($statsReports as $report) {
 
-            $statsReports = $globalReport->statsReports()
-                ->byRegion($region)
-                ->reportingDate($globalReport->reportingDate)
-                ->get();
-
-            $registrations = [];
-            foreach ($statsReports as $report) {
-
-                $reportRegistrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($report->id);
-                foreach ($reportRegistrations as $registration) {
-                    $registrations[] = $registration;
-                }
+            $reportRegistrations = $this->getByStatsReport($report);
+            foreach ($reportRegistrations as $registration) {
+                $registrations[] = $registration;
             }
         }
-        Cache::tags(["globalReport{$id}"])->put($cacheKey, $registrations, static::CACHE_TTL);
 
         return $registrations;
     }
 
-    public function getByStatsReport($id)
+    public function getByStatsReport(StatsReport $statsReport)
     {
-        $cacheKey = "statsReport{$id}:tmlpregistrations";
-        $tmlpRegistrations = ($this->useCache()) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
-
-        if (!$tmlpRegistrations) {
-            $statsReport = StatsReport::find($id);
-
-            if (!$statsReport) {
-                return null;
-            }
-
-            $tmlpRegistrations = TmlpRegistrationData::byStatsReport($statsReport)->with('registration.person', 'committedTeamMember.person')->get();
-        }
-        Cache::tags(["statsReport{$id}"])->put($cacheKey, $tmlpRegistrations, static::STATS_REPORT_CACHE_TTL);
-
-        return $tmlpRegistrations;
+        return TmlpRegistrationData::byStatsReport($statsReport)->with('registration.person', 'committedTeamMember.person')->get();
     }
 }

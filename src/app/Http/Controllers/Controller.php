@@ -2,11 +2,9 @@
 namespace TmlpStats\Http\Controllers;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
-
 use TmlpStats\Region;
 
 use Auth;
@@ -14,11 +12,9 @@ use Session;
 
 abstract class Controller extends BaseController
 {
-    use DispatchesCommands, ValidatesRequests, AuthorizesRequests;
+    use ValidatesRequests, AuthorizesRequests;
 
-    const CACHE_TTL = 60;
-    const STATS_REPORT_CACHE_TTL = 7 * 24 * 60;
-    const USE_CACHE = true;
+    protected $region = null;
 
     /**
      * Create a new controller instance.
@@ -37,6 +33,10 @@ abstract class Controller extends BaseController
      */
     public function getRegion(Request $request, $includeLocalRegions = false)
     {
+        if ($this->region) {
+            return $this->region;
+        }
+
         $region = null;
         if ($request->has('region')) {
             $region = Region::abbreviation($request->get('region'))->first();
@@ -61,16 +61,6 @@ abstract class Controller extends BaseController
             $region = $region->getParentGlobalRegion();
         }
 
-        return $region;
-    }
-
-    /**
-     * Get setting for whether or not to use cached data
-     *
-     * @return bool
-     */
-    public function useCache()
-    {
-        return (bool)env('REPORTS_USE_CACHE', static::USE_CACHE);
+        return $this->region = $region;
     }
 }

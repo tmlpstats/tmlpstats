@@ -2,7 +2,6 @@
 
 namespace TmlpStats\Http\Controllers;
 
-use Cache;
 use Illuminate\Http\Request;
 use TmlpStats\CourseData;
 use TmlpStats\GlobalReport;
@@ -88,54 +87,33 @@ class CoursesController extends Controller
         //
     }
 
-    public function getByGlobalReport($id, Region $region)
+    public function getByGlobalReport(GlobalReport $globalReport, Region $region)
     {
-        $cacheKey = $region === null
-            ? "globalreport{$id}:courses"
-            : "globalreport{$id}:region{$region->id}:courses";
-        $courses = ($this->useCache()) ? Cache::tags(["globalReport{$id}"])->get($cacheKey) : false;
+        $statsReports = $globalReport->statsReports()
+            ->byRegion($region)
+            ->reportingDate($globalReport->reportingDate)
+            ->get();
 
-        if (!$courses) {
-            $globalReport = GlobalReport::find($id);
+        $courses = [];
+        foreach ($statsReports as $report) {
 
-            $statsReports = $globalReport->statsReports()
-                ->byRegion($region)
-                ->reportingDate($globalReport->reportingDate)
-                ->get();
-
-            $courses = [];
-            foreach ($statsReports as $report) {
-
-                $reportCourses = $this->getByStatsReport($report->id);
-                foreach ($reportCourses as $course) {
-                    $courses[] = $course;
-                }
+            $reportCourses = $this->getByStatsReport($report);
+            foreach ($reportCourses as $course) {
+                $courses[] = $course;
             }
         }
-        Cache::tags(["globalReport{$id}"])->put($cacheKey, $courses, static::CACHE_TTL);
 
         return $courses;
     }
 
 
-    public function getByStatsReport($id)
+    public function getByStatsReport(StatsReport $statsReport)
     {
-        $cacheKey = "statsReport{$id}:courses";
-        $courses = ($this->useCache()) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
-
-        if (!$courses) {
-            $statsReport = StatsReport::find($id);
-            if (!$statsReport) {
-                return null;
-            }
-
-            $courses = [];
-            $courseData = CourseData::byStatsReport($statsReport)->with('course')->get();
-            foreach ($courseData as $data) {
-                $courses[] = $data;
-            }
+        $courses = [];
+        $courseData = CourseData::byStatsReport($statsReport)->with('course')->get();
+        foreach ($courseData as $data) {
+            $courses[] = $data;
         }
-        Cache::tags(["statsReport{$id}"])->put($cacheKey, $courses, static::STATS_REPORT_CACHE_TTL);
 
         return $courses;
     }
