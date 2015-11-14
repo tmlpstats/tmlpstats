@@ -26,8 +26,8 @@ class TeamMember extends ModelCachedRelationships
             case 'quarterNumber':
 
                 $key = "quarterNumber";
-                $quarterNumber = ModelCache::create()->get($key, $this->incomingQuarterId);
-                if ($quarterNumber === null) {
+
+                return static::getFromCache($key, $this->incomingQuarterId, function() {
 
                     $thisQuarter = Quarter::getCurrentQuarter($this->person->center->region);
 
@@ -40,12 +40,8 @@ class TeamMember extends ModelCachedRelationships
                         $quarterNumber += 4;
                     }
 
-                    $quarterNumber -= $this->incomingQuarter->quarterNumber;
-
-                    ModelCache::create()->set($key, $this->incomingQuarterId, $quarterNumber);
-                }
-
-                return $quarterNumber;
+                    return $quarterNumber - $this->incomingQuarter->quarterNumber;
+                });
             default:
                 return parent::__get($name);
         }
