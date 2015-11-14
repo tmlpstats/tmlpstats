@@ -1,12 +1,9 @@
 <?php namespace TmlpStats\Http\Controllers;
 
 use Illuminate\Http\Request;
-use TmlpStats\Accountability;
 use TmlpStats\Center;
-use TmlpStats\CenterStatsData;
-use TmlpStats\CourseData;
 use TmlpStats\GlobalReport;
-use TmlpStats\Quarter;
+use TmlpStats\Reports\Diffs\TmlpRegistrationDiff;
 use TmlpStats\ReportToken;
 use TmlpStats\StatsReport;
 
@@ -36,8 +33,10 @@ use Input;
 use Log;
 use Response;
 
-class StatsReportController extends Controller
+class StatsReportController extends ReportDispatchAbstractController
 {
+    const CACHE_TTL = 7 * 24 * 60;
+
     /**
      * Create a new controller instance.
      */
@@ -268,8 +267,8 @@ class StatsReportController extends Controller
 
             if ($statsReport->save()) {
                 // Cache the validation results so we don't have to regenerate
-                $cacheKey = "statsReport{$id}:validation";
-                Cache::tags(["statsReport{$id}"])->put($cacheKey, $sheet, static::STATS_REPORT_CACHE_TTL);
+                $cacheKey = "statsReport{$id}:results";
+                Cache::tags(["statsReport{$id}"])->put($cacheKey, $sheet, static::CACHE_TTL);
 
                 XlsxArchiver::getInstance()->promoteWorkingSheet($statsReport);
 
@@ -329,12 +328,30 @@ class StatsReportController extends Controller
         }
     }
 
-    public function runDispatcher(Request $request, $id, $report)
+    public function getById($id)
     {
-        $statsReport = StatsReport::findOrFail($id);
+        return StatsReport::findOrFail($id);
+    }
 
-        $this->authorize('read', $statsReport);
+    public function getCacheTags($model, $report)
+    {
+        $tags = parent::getCacheTags($model, $report);
 
+        return array_merge($tags, ["statsReport{$model->id}"]);
+    }
+
+    public function authorizeReport($statsReport, $report)
+    {
+        switch ($report) {
+            case 'contactinfo':
+                $this->authorize('readContactInfo', $statsReport);
+            default:
+                parent::authorizeReport($statsReport, $report);
+        }
+    }
+
+    public function runDispatcher(Request $request, $statsReport, $report)
+    {
         if (!$statsReport->isValidated() && $report != 'results') {
             return '<p>This report did not pass validation. See Report Details for more information.</p>';
         }
@@ -363,7 +380,6 @@ class StatsReportController extends Controller
                 $response = $this->getCourses($statsReport);
                 break;
             case 'contactinfo':
-                $this->authorize('readContactInfo', $statsReport);
                 $response = $this->getContacts($statsReport);
                 break;
             case 'gitwsummary':
@@ -383,22 +399,22 @@ class StatsReportController extends Controller
 
     protected function getSummary(StatsReport $statsReport)
     {
-        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($statsReport->id, $statsReport->reportingDate);
+        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($statsReport, $statsReport->reportingDate);
         if (!$centerStatsData) {
             return null;
         }
 
-        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport->id);
+        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
         if (!$teamMembers) {
             return null;
         }
 
-        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport->id);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
         if (!$registrations) {
             return null;
         }
 
-        $courses = App::make(CoursesController::class)->getByStatsReport($statsReport->id);
+        $courses = App::make(CoursesController::class)->getByStatsReport($statsReport);
         if (!$courses) {
             return null;
         }
@@ -471,7 +487,7 @@ class StatsReportController extends Controller
 
     protected function getCenterStats(StatsReport $statsReport)
     {
-        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($statsReport->id);
+        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($statsReport);
         if (!$centerStatsData) {
             return null;
         }
@@ -487,7 +503,7 @@ class StatsReportController extends Controller
 
     protected function getTeamMembers(StatsReport $statsReport)
     {
-        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport->id);
+        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
         if (!$teamMembers) {
             return null;
         }
@@ -500,7 +516,7 @@ class StatsReportController extends Controller
 
     protected function getTmlpRegistrationsByStatus(StatsReport $statsReport)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport->id);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
         if (!$registrations) {
             return null;
         }
@@ -514,7 +530,7 @@ class StatsReportController extends Controller
 
     protected function getTmlpRegistrations(StatsReport $statsReport)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport->id);
+        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
         if (!$registrations) {
             return null;
         }
@@ -527,7 +543,7 @@ class StatsReportController extends Controller
 
     protected function getCourses(StatsReport $statsReport)
     {
-        $courses = App::make(CoursesController::class)->getByStatsReport($statsReport->id);
+        $courses = App::make(CoursesController::class)->getByStatsReport($statsReport);
         if (!$courses) {
             return null;
         }
@@ -540,7 +556,7 @@ class StatsReportController extends Controller
 
     protected function getContacts(StatsReport $statsReport)
     {
-        $contacts = App::make(ContactsController::class)->getByStatsReport($statsReport->id);
+        $contacts = App::make(ContactsController::class)->getByStatsReport($statsReport);
         if (!$contacts) {
             return null;
         }
@@ -557,7 +573,7 @@ class StatsReportController extends Controller
         while ($date->lte($statsReport->reportingDate)) {
             $globalReport = GlobalReport::reportingDate($date)->first();
             $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
-            $weeksData[$date->toDateString()] = $report ? App::make(TeamMembersController::class)->getByStatsReport($report->id) : null;
+            $weeksData[$date->toDateString()] = $report ? App::make(TeamMembersController::class)->getByStatsReport($report) : null;
             $date->addWeek();
         }
         if (!$weeksData) {
@@ -579,7 +595,7 @@ class StatsReportController extends Controller
         while ($date->lte($statsReport->reportingDate)) {
             $globalReport = GlobalReport::reportingDate($date)->first();
             $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
-            $weeksData[$date->toDateString()] = $report ? App::make(TeamMembersController::class)->getByStatsReport($report->id) : null;
+            $weeksData[$date->toDateString()] = $report ? App::make(TeamMembersController::class)->getByStatsReport($report) : null;
             $date->addWeek();
         }
         if (!$weeksData) {
@@ -600,19 +616,13 @@ class StatsReportController extends Controller
         $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
 
         if ($sheetPath) {
-
-            $cacheKey = "statsReport{$statsReport->id}:validation";
-            $sheet = ($this->useCache()) ? Cache::tags(["statsReport{$statsReport->id}"])->get($cacheKey) : false;
-            if (!$sheet) {
-                try {
-                    $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, false);
-                    $importer->import(false);
-                    $sheet = $importer->getResults();
-                } catch (Exception $e) {
-                    Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
-                }
+            try {
+                $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, false);
+                $importer->import(false);
+                $sheet = $importer->getResults();
+            } catch (Exception $e) {
+                Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             }
-            Cache::tags(["statsReport{$statsReport->id}"])->put($cacheKey, $sheet, static::STATS_REPORT_CACHE_TTL);
 
             $sheetUrl = $sheetPath
                 ? url("/statsreports/{$statsReport->id}/download")

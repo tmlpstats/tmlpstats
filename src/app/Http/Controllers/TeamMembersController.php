@@ -1,12 +1,9 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
-use App;
-use Cache;
 use Illuminate\Http\Request;
 use TmlpStats\GlobalReport;
 use TmlpStats\Http\Requests;
-use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\Region;
 use TmlpStats\StatsReport;
 use TmlpStats\TeamMemberData;
@@ -89,51 +86,27 @@ class TeamMembersController extends Controller
         //
     }
 
-    public function getByGlobalReport($id, Region $region)
+    public function getByGlobalReport(GlobalReport $globalReport, Region $region)
     {
-        $cacheKey = $region === null
-            ? "globalreport{$id}:teammembers"
-            : "globalreport{$id}:region{$region->id}:teammembers";
-        $teamMembers = ($this->useCache()) ? Cache::tags(["globalReport{$id}"])->get($cacheKey) : false;
+        $statsReports = $globalReport->statsReports()
+            ->byRegion($region)
+            ->reportingDate($globalReport->reportingDate)
+            ->get();
 
-        if (!$teamMembers) {
-            $globalReport = GlobalReport::find($id);
+        $teamMembers = [];
+        foreach ($statsReports as $report) {
 
-            $statsReports = $globalReport->statsReports()
-                ->byRegion($region)
-                ->reportingDate($globalReport->reportingDate)
-                ->get();
-
-            $teamMembers = [];
-            foreach ($statsReports as $report) {
-
-                $reportTeamMembers = $this->getByStatsReport($report->id);
-                foreach ($reportTeamMembers as $member) {
-                    $teamMembers[] = $member;
-                }
+            $reportTeamMembers = $this->getByStatsReport($report);
+            foreach ($reportTeamMembers as $member) {
+                $teamMembers[] = $member;
             }
         }
-        Cache::tags(["globalReport{$id}"])->put($cacheKey, $teamMembers, static::CACHE_TTL);
 
         return $teamMembers;
     }
 
-    public function getByStatsReport($id)
+    public function getByStatsReport(StatsReport $statsReport)
     {
-        $cacheKey = "statsReport{$id}:teammembers";
-        $teamMembers = ($this->useCache()) ? Cache::tags(["statsReport{$id}"])->get($cacheKey) : false;
-
-        if (!$teamMembers) {
-            $statsReport = StatsReport::find($id);
-
-            if (!$statsReport) {
-                return null;
-            }
-
-            $teamMembers = TeamMemberData::byStatsReport($statsReport)->with('teamMember.person')->get();
-        }
-        Cache::tags(["statsReport{$id}"])->put($cacheKey, $teamMembers, static::STATS_REPORT_CACHE_TTL);
-
-        return $teamMembers;
+        return TeamMemberData::byStatsReport($statsReport)->with('teamMember.person')->get();
     }
 }

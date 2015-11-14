@@ -30,11 +30,11 @@ Route::resource('admin/users', 'UserController');
 Route::resource('statsreports', 'StatsReportController');
 Route::post('statsreports/{id}/submit', 'StatsReportController@submit');
 Route::get('statsreports/{id}/download', 'StatsReportController@downloadSheet');
-Route::get('statsreports/{id}/{report}', 'StatsReportController@runDispatcher');
+Route::get('statsreports/{id}/{report}', 'StatsReportController@dispatchReport');
 
 // Global Reports
 Route::resource('globalreports', 'GlobalReportController');
-Route::get('globalreports/{id}/{report}', 'GlobalReportController@runDispatcher');
+Route::get('globalreports/{id}/{report}', 'GlobalReportController@dispatchReport');
 
 // Report Tokens
 Route::resource('reporttokens', 'ReportTokenController');
