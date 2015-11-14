@@ -213,6 +213,24 @@ class CenterStatsController extends Controller
         return $output;
     }
 
+    protected $globalReportCache = [];
+
+    /**
+     * Get global report by date, and cache it for later
+     *
+     * @param Carbon $reportingDate
+     * @return mixed
+     */
+    protected function getGlobalReport(Carbon $reportingDate)
+    {
+        $date = $reportingDate->toDateString();
+        if (!isset($this->globalReportCache[$date])) {
+            $this->globalReportCache[$date] = GlobalReport::reportingDate($reportingDate)->with('statsReports')->first();
+        }
+        return $this->globalReportCache[$date];
+    }
+
+
     // TODO: Refactor this so we're not reusing basically the same code as in importer
     public function getPromiseData(Carbon $date, Center $center, Quarter $quarter)
     {
@@ -224,14 +242,14 @@ class CenterStatsController extends Controller
 
         // Usually, promises will be saved in the global report for the expected week
         if ($this->statsReport->reportingDate->gte($quarter->classroom2Date) && $date->gt($quarter->classroom2Date)) {
-            $globalReport = GlobalReport::reportingDate($quarter->classroom2Date)->first();
+            $globalReport = $this->getGlobalReport($quarter->classroom2Date);
         } else {
-            $globalReport = GlobalReport::reportingDate($firstWeek)->first();
+            $globalReport = $this->getGlobalReport($firstWeek);
         }
 
         // If there was a global report from those weeks, look there
         if ($globalReport) {
-            $statsReport = $globalReport->statsReports()->byCenter($center)->first();
+            $statsReport = $globalReport->getStatsReportByCenter($center);
         }
 
         // It it wasn't found in the expected week, search all weeks from the beginning until
@@ -257,9 +275,9 @@ class CenterStatsController extends Controller
         $statsReport = null;
 
         // First, check if it's in the official report from the actual date
-        $globalReport = GlobalReport::reportingDate($date)->first();
+        $globalReport = $this->getGlobalReport($date);
         if ($globalReport) {
-            $statsReport = $globalReport->statsReports()->byCenter($center)->first();
+            $statsReport = $globalReport->getStatsReportByCenter($center);
         }
 
         $actual = null;
@@ -287,15 +305,14 @@ class CenterStatsController extends Controller
             ->first();
     }
 
-    // TODO: Refactor this so we're not reusing basically the same code as in importer
-    protected $promiseStatsReport = null;
 
+    protected $firstStatsReportCache = [];
     public function findFirstWeek(Center $center, Quarter $quarter, $type)
     {
         // Promises should all be saved during the same week. Let's remember where we found the
         // last one.
-        if ($this->promiseStatsReport) {
-            return $this->promiseStatsReport;
+        if (isset($this->firstStatsReportCache[$center->id])) {
+            return $this->firstStatsReportCache[$center->id];
         }
 
         $statsReportResult = DB::table('stats_reports')
@@ -310,9 +327,9 @@ class CenterStatsController extends Controller
             ->first();
 
         if ($statsReportResult) {
-            $this->promiseStatsReport = StatsReport::find($statsReportResult->id);
+            $this->firstStatsReportCache[$center->id] = StatsReport::find($statsReportResult->id);
         }
 
-        return $this->promiseStatsReport;
+        return $this->firstStatsReportCache[$center->id];
     }
 }
