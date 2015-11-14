@@ -3,7 +3,6 @@
 use Illuminate\Http\Request;
 use TmlpStats\Center;
 use TmlpStats\GlobalReport;
-use TmlpStats\Reports\Diffs\TmlpRegistrationDiff;
 use TmlpStats\ReportToken;
 use TmlpStats\StatsReport;
 
