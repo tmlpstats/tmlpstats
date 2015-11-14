@@ -1,11 +1,15 @@
 <?php
 namespace TmlpStats;
 
-use TmlpStats\Center;
 use Carbon\Carbon;
+use Eloquence\Database\Traits\CamelCaseModel;
+use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Traits\CachedRelationships;
 
-class CenterStatsData extends ModelCachedRelationships
+class CenterStatsData extends Model
 {
+    use CamelCaseModel, CachedRelationships;
+
     protected $table = 'center_stats_data';
 
     protected $center = null;

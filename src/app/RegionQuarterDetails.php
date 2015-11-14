@@ -1,12 +1,15 @@
 <?php
 namespace TmlpStats;
 
-use TmlpStats\Quarter;
-
 use Carbon\Carbon;
+use Eloquence\Database\Traits\CamelCaseModel;
+use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Traits\CachedRelationships;
 
-class RegionQuarterDetails extends ModelCachedRelationships
+class RegionQuarterDetails extends Model
 {
+    use CamelCaseModel, CachedRelationships;
+
     protected $fillable = array(
         'quarter_id',
         'region_id',
