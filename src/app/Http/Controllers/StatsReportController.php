@@ -9,8 +9,6 @@ use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
 use TmlpStats\ReportToken;
 use TmlpStats\StatsReport;
-use TmlpStats\TeamMemberData;
-use TmlpStats\TmlpRegistrationData;
 
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Import\Xlsx\XlsxImporter;

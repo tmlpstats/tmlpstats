@@ -38,19 +38,14 @@ class TmlpRegistrationData extends ModelCachedRelationships
             case 'center':
                 return $this->registration->person->$name;
             case 'incomingQuarter':
-
                 $key = "incomingQuarter:region{$this->center->regionId}";
-                $quarter = ModelCache::create()->get($key, $this->incomingQuarterId);
-                if ($quarter === null) {
+                return static::getFromCache($key, $this->incomingQuarterId, function() {
                     $quarter = Quarter::find($this->incomingQuarterId);
                     if ($quarter) {
                         $quarter->setRegion($this->center->region);
                     }
-
-                    ModelCache::create()->set($key, $this->incomingQuarterId, $quarter);
-                }
-
-                return $quarter;
+                    return $quarter;
+                });
             default:
                 return parent::__get($name);
         }
