@@ -1,8 +1,14 @@
 <?php
 namespace TmlpStats;
 
-class TmlpRegistrationData extends ModelCachedRelationships
+use Eloquence\Database\Traits\CamelCaseModel;
+use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Traits\CachedRelationships;
+
+class TmlpRegistrationData extends Model
 {
+    use CamelCaseModel, CachedRelationships;
+
     protected $table = 'tmlp_registrations_data';
 
     protected $fillable = [

@@ -1,13 +1,15 @@
 <?php
 namespace TmlpStats;
 
-use TmlpStats\Quarter;
-use TmlpStats\CenterStatsData;
-
 use Carbon\Carbon;
+use Eloquence\Database\Traits\CamelCaseModel;
+use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Traits\CachedRelationships;
 
-class StatsReport extends ModelCachedRelationships
+class StatsReport extends Model
 {
+    use CamelCaseModel, CachedRelationships;
+
     protected $fillable = [
         'reporting_date',
         'center_id',

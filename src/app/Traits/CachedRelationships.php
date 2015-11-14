@@ -1,21 +1,12 @@
 <?php
-namespace TmlpStats;
+namespace TmlpStats\Traits;
 
-use Illuminate\Database\Eloquent\Model;
-use Eloquence\Database\Traits\CamelCaseModel;
+use TmlpStats\ModelCache;
 
-class ModelCachedRelationships extends Model
+trait CachedRelationships
 {
-    use CamelCaseModel;
-
     public function getRelationshipFromMethod($method)
     {
-        // I think this is a bug in Laravel's Eloquent Model where if they model is copied,
-        // we don't bother checking if the relation was eager loaded so we get 2 lookups
-        if (isset($this->relations[$method])) {
-            return $this->relations[$method];
-        }
-
         $relations = $this->$method();
         $relationKey = $relations->getForeignKey();
 

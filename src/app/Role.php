@@ -1,8 +1,14 @@
 <?php
 namespace TmlpStats;
 
-class Role extends ModelCachedRelationships
+use Eloquence\Database\Traits\CamelCaseModel;
+use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Traits\CachedRelationships;
+
+class Role extends Model
 {
+    use CamelCaseModel, CachedRelationships;
+
     protected $fillable = array(
         'name',
         'display',

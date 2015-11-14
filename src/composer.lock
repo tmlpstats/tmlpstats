@@ -1196,16 +1196,16 @@
         },
         {
             "name": "kirkbushell/eloquence",
-            "version": "1.4.5",
+            "version": "1.4.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kirkbushell/eloquence.git",
-                "reference": "ab18208c4e1271f2af8e1dccf7294d64b49765d2"
+                "reference": "ad48c3085f267d4b2a3b615b30e0b149d52c514b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kirkbushell/eloquence/zipball/ab18208c4e1271f2af8e1dccf7294d64b49765d2",
-                "reference": "ab18208c4e1271f2af8e1dccf7294d64b49765d2",
+                "url": "https://api.github.com/repos/kirkbushell/eloquence/zipball/ad48c3085f267d4b2a3b615b30e0b149d52c514b",
+                "reference": "ad48c3085f267d4b2a3b615b30e0b149d52c514b",
                 "shasum": ""
             },
             "require": {
@@ -1244,7 +1244,7 @@
                 "snake",
                 "snake_case"
             ],
-            "time": "2015-05-21 10:56:45"
+            "time": "2015-11-11 19:12:39"
         },
         {
             "name": "kris/laravel-form-builder",

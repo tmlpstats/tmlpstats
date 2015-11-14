@@ -1,8 +1,6 @@
 <?php
 namespace TmlpStats;
 
-use Respect\Validation\Validator as v;
-
 class Message
 {
     const EMERGENCY = 1;

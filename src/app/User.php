@@ -1,14 +1,17 @@
 <?php
 namespace TmlpStats;
 
+use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Traits\CachedRelationships;
 
-class User extends ModelCachedRelationships implements AuthenticatableContract, CanResetPasswordContract
+class User extends Model implements AuthenticatableContract, CanResetPasswordContract
 {
-    use Authenticatable, CanResetPassword;
+    use Authenticatable, CanResetPassword, CamelCaseModel, CachedRelationships;
 
     /**
      * The database table used by the model.

@@ -1,8 +1,14 @@
 <?php
 namespace TmlpStats;
 
-class Course extends ModelCachedRelationships
+use Eloquence\Database\Traits\CamelCaseModel;
+use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Traits\CachedRelationships;
+
+class Course extends Model
 {
+    use CamelCaseModel, CachedRelationships;
+
     protected $fillable = [
         'center_id',
         'start_date',

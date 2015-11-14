@@ -1,13 +1,16 @@
 <?php
 namespace TmlpStats;
 
-use Cache;
 use Carbon\Carbon;
-
+use Eloquence\Database\Traits\CamelCaseModel;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Traits\CachedRelationships;
 
-class Quarter extends ModelCachedRelationships
+class Quarter extends Model
 {
+    use CamelCaseModel, CachedRelationships;
+
     protected $fillable = array(
         't1_distinction',
         't2_distinction',
