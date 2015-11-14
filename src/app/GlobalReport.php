@@ -32,6 +32,7 @@ class GlobalReport extends Model
         $existingReport = $this->statsReports()->byCenter($report->center)->first();
         if ($existingReport) {
             $this->statsReports()->detach($existingReport->id);
+            Cache::tags(["statsReport{$existingReport->id}"])->flush();
         }
         $this->statsReports()->attach($report->id);
 
@@ -40,7 +41,12 @@ class GlobalReport extends Model
 
     public function getStatsReportByCenter(Center $center)
     {
-        return $this->statsReports()->byCenter($center)->first();
+        foreach ($this->statsReports as $report) {
+            if ($report->centerId == $center->id) {
+                return $report;
+            }
+        }
+        return null;
     }
 
     public function scopeReportingDate($query, Carbon $date)
