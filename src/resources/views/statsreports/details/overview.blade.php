@@ -50,18 +50,21 @@
                 @endif
             </td>
         </tr>
-        @can('downloadSheet', $statsReport)
+
         <tr>
-            <th>File:</th>
+            <th>Spreadsheet:</th>
             <td>
-                @if ($sheetUrl)
-                    <a href="{{ $sheetUrl }}">Download</a>
+                @can('downloadSheet', $statsReport)
+                    @if ($sheetUrl)
+                        <a href="{{ $sheetUrl }}">Download</a>
+                    @else
+                        <span style="font-style: italic">Sheet not available</span>
+                    @endif
                 @else
-                    <span style="font-style: italic">Sheet not available</span>
-                @endif
+                    <span style="font-style: italic">You must be logged in to download the report.</span>
+                @endcan
             </td>
         </tr>
-        @endcan
         <tr>
             <th>Submission Comment:</th>
             <td>{{ $statsReport->submitComment }}</td>
