@@ -130,7 +130,7 @@ class TeamMembersController extends Controller
                 return null;
             }
 
-            $teamMembers = TeamMemberData::byStatsReport($statsReport)->with('teamMember')->get();
+            $teamMembers = TeamMemberData::byStatsReport($statsReport)->with('teamMember.person')->get();
         }
         Cache::tags(["statsReport{$id}"])->put($cacheKey, $teamMembers, static::STATS_REPORT_CACHE_TTL);
 

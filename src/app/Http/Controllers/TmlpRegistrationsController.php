@@ -131,7 +131,7 @@ class TmlpRegistrationsController extends Controller
                 return null;
             }
 
-            $tmlpRegistrations = TmlpRegistrationData::byStatsReport($statsReport)->get();
+            $tmlpRegistrations = TmlpRegistrationData::byStatsReport($statsReport)->with('registration.person', 'committedTeamMember.person')->get();
         }
         Cache::tags(["statsReport{$id}"])->put($cacheKey, $tmlpRegistrations, static::STATS_REPORT_CACHE_TTL);
 
