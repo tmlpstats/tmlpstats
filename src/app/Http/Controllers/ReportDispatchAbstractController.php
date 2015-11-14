@@ -48,7 +48,7 @@ abstract class ReportDispatchAbstractController extends Controller
      */
     public function getCacheKey($model, $report)
     {
-        $keyBase = Util::getClassBasename($model);
+        $keyBase = lcfirst(Util::getClassBasename($model));
 
         return "{$keyBase}{$model->id}:{$report}";
     }
