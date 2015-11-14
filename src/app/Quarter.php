@@ -44,22 +44,38 @@ class Quarter extends ModelCachedRelationships
         return static::getQuarterByDate(Carbon::now(), $region);
     }
 
+    public static function findForCenter($id, Center $center)
+    {
+        $key = "quarter:region{$center->regionId}";
+        $quarter = ModelCache::create()->get($key, $id);
+        if ($quarter === null) {
+            $quarter = Quarter::find($id);
+            if ($quarter) {
+                $quarter->setRegion($center->region);
+            }
+
+            ModelCache::create()->set($key, $id, $quarter);
+        }
+
+        return $quarter;
+    }
+
     public static function getQuarterByDate(Carbon $date, Region $region)
     {
         $dateString = $date->toDateString();
-        $cacheKey = "quarters:date{$dateString}:region{$region->id}";
-
-        $quarter = Cache::remember($cacheKey, 24 * 60, function() use ($date, $region) {
-            $found = Quarter::byRegion($region)
+        $key = "quarters:region{$region->id}:dates";
+        $quarter = ModelCache::create()->get($key, $dateString);
+        if ($quarter === null) {
+            $quarter = Quarter::byRegion($region)
                 ->date($date)
                 ->first();
 
-            if ($found) {
-                $found->setRegion($region);
+            if ($quarter) {
+                $quarter->setRegion($region);
             }
 
-            return $found;
-        });
+            ModelCache::create()->set($key, $dateString, $quarter);
+        }
 
         return $quarter;
     }

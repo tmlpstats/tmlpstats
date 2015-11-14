@@ -33,9 +33,7 @@ class StatsReport extends ModelCachedRelationships
     public function __get($name)
     {
         if ($name === 'quarter') {
-            $quarter = parent::__get('quarter');
-            $quarter->setRegion($this->center->region);
-            return $quarter;
+            return Quarter::findForCenter($this->quarterId, $this->center);
         }
         return parent::__get($name);
     }

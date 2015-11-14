@@ -21,4 +21,18 @@ class ModelCache
     {
         static::$modelCache[$key][$id] = $value;
     }
+
+    public function forget($key, $id = null)
+    {
+        if ($id !== null) {
+            unset(static::$modelCache[$key][$id]);
+        } else {
+            unset(static::$modelCache[$key]);
+        }
+    }
+
+    public function flush()
+    {
+        static::$modelCache = null;
+    }
 }

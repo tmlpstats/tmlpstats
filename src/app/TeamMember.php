@@ -25,18 +25,27 @@ class TeamMember extends ModelCachedRelationships
                 return $this->person->$name;
             case 'quarterNumber':
 
-                $thisQuarter = Quarter::getCurrentQuarter($this->person->center->region);
+                $key = "quarterNumber";
+                $quarterNumber = ModelCache::create()->get($key, $this->incomingQuarterId);
+                if ($quarterNumber === null) {
 
-                if (!$thisQuarter) {
-                    return null;
+                    $thisQuarter = Quarter::getCurrentQuarter($this->person->center->region);
+
+                    if (!$thisQuarter) {
+                        return null;
+                    }
+
+                    $quarterNumber = $thisQuarter->quarterNumber;
+                    if ($thisQuarter->quarterNumber <= $this->incomingQuarter->quarterNumber) {
+                        $quarterNumber += 4;
+                    }
+
+                    $quarterNumber -= $this->incomingQuarter->quarterNumber;
+
+                    ModelCache::create()->set($key, $this->incomingQuarterId, $quarterNumber);
                 }
 
-                $quarterNumber = $thisQuarter->quarterNumber;
-                if ($thisQuarter->quarterNumber <= $this->incomingQuarter->quarterNumber) {
-                    $quarterNumber += 4;
-                }
-
-                return $quarterNumber - $this->incomingQuarter->quarterNumber;
+                return $quarterNumber;
             default:
                 return parent::__get($name);
         }
@@ -45,8 +54,8 @@ class TeamMember extends ModelCachedRelationships
     public static function firstOrNew(array $attributes)
     {
         $center = Center::find($attributes['center_id']);
-        $incomingQuarter = Quarter::find($attributes['incoming_quarter_id']);
-        $incomingQuarter->setRegion($center->region);
+
+        $incomingQuarter = Quarter::findForCenter($attributes['incoming_quarter_id'], $center);
 
         $quarterStartDateString = $incomingQuarter->startWeekendDate->toDateString();
 
@@ -66,7 +75,7 @@ class TeamMember extends ModelCachedRelationships
 
     public function getIncomingQuarter()
     {
-        return Quarter::find($this->incomingQuarterId);
+        return Quarter::findForCenter($this->incomingQuarterId, $this->person->center);
     }
 
     public function scopeTeamYear($query, $teamYear)
