@@ -266,6 +266,7 @@ class StatsReportController extends Controller
 
             $statsReport->submittedAt = Carbon::now();
             $statsReport->submitComment = Input::get('comment', null);
+            $statsReport->locked = true;
 
             if ($statsReport->save()) {
                 // Cache the validation results so we don't have to regenerate
