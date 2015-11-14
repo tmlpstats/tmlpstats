@@ -7,7 +7,6 @@ use TmlpStats\CenterStatsData;
 use TmlpStats\CourseData;
 use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
-use TmlpStats\Reports\Diffs\TmlpRegistrationDiff;
 use TmlpStats\ReportToken;
 use TmlpStats\StatsReport;
 
