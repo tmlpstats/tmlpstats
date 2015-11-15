@@ -83,6 +83,8 @@ abstract class ReportDispatchAbstractController extends Controller
 
         $this->authorizeReport($model, $report);
 
+        Util::setReportDate($model->reportingDate);
+
         $response = null;
 
         if ($this->useCache($report)) {

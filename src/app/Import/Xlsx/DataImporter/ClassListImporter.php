@@ -120,16 +120,23 @@ class ClassListImporter extends DataImporterAbstract
                 continue;
             }
 
-            $completionQuarter = Quarter::getQuarterByDate($memberInput['completionQuarter'], $this->statsReport->center->region);
+            $incomingQuarter = null;
 
-            if (!$completionQuarter) {
-                Log::error("Completion quarter '{$memberInput['completionQuarter']}' in region '{$this->statsReport->center->globalRegion}' doesn't exist");
+            if (preg_match('/^Q(\d)-(\d\d\d\d)$/', $memberInput['completionQuarter'], $matches)) {
+                $quarterNumber = $matches[1];
+                $year = $matches[2];
+
+                $incomingQuarter = Quarter::year($year - 1)
+                    ->quarterNumber($quarterNumber)
+                    ->first();
+            }
+
+            if (!$incomingQuarter) {
+                Log::error("Completion quarter '{$memberInput['completionQuarter']}' in region '{$this->statsReport->center->region->name}' doesn't exist");
                 continue;
             }
 
-            $incomingQuarter = Quarter::year($completionQuarter->year - 1)
-                ->quarterNumber($completionQuarter->quarterNumber)
-                ->first();
+            $memberQuarterNumber = TeamMember::getQuarterNumber($incomingQuarter, $this->statsReport->center->region);
 
             $member = TeamMember::firstOrNew(array(
                 'center_id'           => $memberInput['centerId'],
@@ -137,6 +144,7 @@ class ClassListImporter extends DataImporterAbstract
                 'last_name'           => trim(str_replace('.', '', $memberInput['lastName'])),
                 'team_year'           => $memberInput['teamYear'],
                 'incoming_quarter_id' => $incomingQuarter->id,
+                'team_quarter'        => $memberQuarterNumber,
             ));
 
             // For now, we'll drop this and only keep the ones we get from the Contact Info tab

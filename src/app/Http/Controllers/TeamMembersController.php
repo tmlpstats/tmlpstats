@@ -6,6 +6,7 @@ use TmlpStats\GlobalReport;
 use TmlpStats\Http\Requests;
 use TmlpStats\Region;
 use TmlpStats\StatsReport;
+use TmlpStats\TeamMember;
 use TmlpStats\TeamMemberData;
 
 class TeamMembersController extends Controller
