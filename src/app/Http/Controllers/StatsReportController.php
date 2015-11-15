@@ -31,6 +31,8 @@ use Gate;
 use Input;
 use Log;
 use Response;
+use TmlpStats\TeamMember;
+use TmlpStats\TmlpRegistration;
 
 class StatsReportController extends ReportDispatchAbstractController
 {
@@ -387,10 +389,6 @@ class StatsReportController extends ReportDispatchAbstractController
             case 'tdosummary':
                 $response = $this->getTdoByTeamMember($statsReport);
                 break;
-        }
-
-        if ($response === null) {
-            abort(404);
         }
 
         return $response;

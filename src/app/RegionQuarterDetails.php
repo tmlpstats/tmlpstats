@@ -50,18 +50,17 @@ class RegionQuarterDetails extends Model
 
     public function scopeCurrent($query)
     {
-        return $query->where('start_weekend_date', '<', Carbon::now()->startOfDay())
-            ->where('end_weekend_date', '>=', Carbon::now()->startOfDay());
+        return $this->scopeDate($query, Util::getReportDate());
     }
 
     public function scopePresentAndFuture($query)
     {
-        return $query->where('end_weekend_date', '>=', Carbon::now()->startOfDay());
+        return $query->where('end_weekend_date', '>=', Util::getReportDate()->startOfDay());
     }
 
     public function scopePast($query)
     {
-        return $query->where('end_weekend_date', '<', Carbon::now()->startOfDay());
+        return $query->where('end_weekend_date', '<', Util::getReportDate()->startOfDay());
     }
 
     public function quarter()

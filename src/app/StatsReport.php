@@ -190,7 +190,7 @@ class StatsReport extends Model
 
     public function scopeCurrentQuarter($query, Region $region = null)
     {
-        $quarter = Quarter::getQuarterByDate(Carbon::now(), $region);
+        $quarter = Quarter::getQuarterByDate(Util::getReportDate(), $region);
         if (!$quarter) {
             return $query;
         }
@@ -199,7 +199,7 @@ class StatsReport extends Model
 
     public function scopeLastQuarter($query, Region $region = null)
     {
-        $currentQuarter = Quarter::getQuarterByDate(Carbon::now(), $region);
+        $currentQuarter = Quarter::getQuarterByDate(Util::getReportDate(), $region);
         if (!$currentQuarter) {
             return $query;
         }

@@ -94,6 +94,17 @@ class Util
         return $dateObj ? $dateObj->startOfDay() : null;
     }
 
+    protected static $reportDate = null;
+    public static function setReportDate(Carbon $date)
+    {
+        static::$reportDate = $date;
+    }
+
+    public static function getReportDate()
+    {
+        return static::$reportDate ?: Carbon::now()->startOfDay();
+    }
+
     public static function getNameParts($name)
     {
         $parts = array(

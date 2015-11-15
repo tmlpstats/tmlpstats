@@ -1,12 +1,14 @@
 <?php
 namespace TmlpStats\Import\Xlsx\Reader;
 
+use Carbon\Carbon;
+
 class ClassListReader extends ReaderAbstract
 {
     protected $dataMap = array(
         'firstName'         => array('col' => 'A'),
         'lastInitial'       => array('col' => 'B'),
-        'completionQuarter' => array('col' => 'B', 'format' => 'date'),
+        'completionQuarter' => array('col' => 'B', 'format' => 'date', 'callback' => 'formatCompletionQuarter'),
         'accountability'    => array('col' => 'D'),
         'wknd'              => array('col' => 'F'),
         'xferIn'            => array('col' => 'H'),
@@ -25,32 +27,30 @@ class ClassListReader extends ReaderAbstract
 
     // This is a total hack. We can get rid of it once we transition to a
     // web-based stats submission system.
-    protected function formatCompletionQuarter($dateStr)
+    protected function formatCompletionQuarter($name, Carbon $date)
     {
-        // Passed in as YYYY-MM-DD timestamp, but day is inaccurate
-        $timestamp = strtotime($dateStr);
-        $month = date('M', $timestamp);
-        $year = date('Y', $timestamp);
+        $month = $date->format('M');
+        $year = $date->format('Y');
 
-        $newDateStr = '';
+        $quarterString = '';
 
         // Set to values that we know are within the quarter
         switch($month)
         {
             case 'Nov':
-                $newDateStr = 'December 1';
+                $quarterString = "Q4-{$year}";
                 break;
             case 'Feb':
-                $newDateStr = 'March 1';
+                $quarterString = "Q1-{$year}";
                 break;
             case 'May':
-                $newDateStr = 'July 1';
+                $quarterString = "Q2-{$year}";
                 break;
             case 'Aug':
-                $newDateStr = 'September 1';
+                $quarterString = "Q3-{$year}";
                 break;
             default:
         }
-        return Carbon::createFromFormat('F j, Y', "$newDateStr, $year")->startOfDay();
+        return $quarterString;
     }
 }

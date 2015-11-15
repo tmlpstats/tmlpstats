@@ -29,12 +29,55 @@ class TmlpRegistration extends Model
     {
         $regDateString = $attributes['reg_date']->toDateString();
 
-        $person = Person::firstOrCreate([
-            'center_id'  => $attributes['center_id'],
-            'first_name' => $attributes['first_name'],
-            'last_name'  => $attributes['last_name'],
-            'identifier' => "r:{$regDateString}:{$attributes['team_year']}",
-        ]);
+        $identifier = "r:{$regDateString}:{$attributes['team_year']}";
+
+        $people = Person::where('center_id', $attributes['center_id'])
+            ->where('first_name', $attributes['first_name'])
+            ->where('last_name', $attributes['last_name'])
+            ->get();
+
+        $person = null;
+        if ($people->count() == 1) {
+            $person = $people->first();
+
+            // Fix for when people withdraw to change quarters
+            if ($person->identifier != $identifier) {
+                $person->identifier = $identifier;
+                $person->save();
+            }
+        } else if ($people->count() > 1) {
+            $person = $people->where('identifier', $identifier)->first();
+
+            if (!$person) {
+                // Maybe they withdrew and changed reg dates
+                $searchIdentifier = "r:%:{$attributes['team_year']}";
+                $person = $people->where('identifier', 'like', $searchIdentifier)->first();
+                if ($person) {
+                    $person->identifier = $identifier;
+                    $person->save();
+                }
+            }
+        }
+
+        if (!$person) {
+            $person = Person::create([
+                'center_id'  => $attributes['center_id'],
+                'first_name' => $attributes['first_name'],
+                'last_name'  => $attributes['last_name'],
+                'identifier' => $identifier,
+            ]);
+        } else if ($person->identifier != $identifier) {
+
+            // Only update it on the first week of the quarter. Otherwise, they should be done intentionally.
+            $center = static::getFromCache('center', $attributes['center_id'], function () use ($attributes) {
+                return Center::find($attributes['center_id']);
+            });
+
+            if (Quarter::isFirstWeek($center->region)) {
+                $person->identifier = $identifier;
+                $person->save();
+            }
+        }
 
         return parent::firstOrNew([
             'reg_date'  => $attributes['reg_date'],

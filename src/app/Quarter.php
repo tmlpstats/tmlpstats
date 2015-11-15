@@ -42,10 +42,25 @@ class Quarter extends Model
         }
     }
 
+    public static function isFirstWeek(Region $region)
+    {
+        $reportingDate = Util::getReportDate();
+        $quarter = Quarter::getQuarterByDate($reportingDate, $region);
+
+        if ($quarter) {
+            $firstWeek = clone $quarter->startWeekendDate;
+            $firstWeek->addWeek();
+            return $firstWeek->eq($reportingDate);
+        }
+        return false;
+    }
+
     public static function getCurrentQuarter(Region $region)
     {
-        return static::getQuarterByDate(Carbon::now(), $region);
+        $date = Util::getReportDate();
+        return static::getQuarterByDate($date, $region);
     }
+
 
     public static function findForCenter($id, Center $center)
     {
@@ -84,7 +99,12 @@ class Quarter extends Model
             ? $this->year + 1
             : $this->year;
 
-        return Quarter::year($year)->quarterNumber($quarterNumber)->first();
+        $quarter = Quarter::year($year)->quarterNumber($quarterNumber)->first();
+
+        if ($this->region) {
+            $quarter->setRegion($this->region);
+        }
+        return $quarter;
     }
 
     public function setRegion($region)
@@ -142,7 +162,7 @@ class Quarter extends Model
 
     public function scopeCurrent($query)
     {
-        $date = Carbon::now();
+        $date = Util::getReportDate();
         return $query->whereIn('id', function ($query) use ($date) {
             $query->select('quarter_id')
                 ->from('region_quarter_details')
@@ -160,7 +180,7 @@ class Quarter extends Model
 
     public function scopePresentAndFuture($query)
     {
-        $date = Carbon::now();
+        $date = Util::getReportDate();
         return $query->whereIn('id', function ($query) use ($date) {
             $query->select('quarter_id')
                 ->from('region_quarter_details')

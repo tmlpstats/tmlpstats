@@ -103,6 +103,8 @@ class ImportDocument extends ImportDocumentAbstract
 
         $this->reportingDate = Util::getExcelDate($reportingDate);
 
+        Util::setReportDate($this->reportingDate);
+
         if (!$this->reportingDate) {
             // Parse international dates properly
             $this->reportingDate = Util::parseUnknownDateFormat($reportingDate);
@@ -232,6 +234,8 @@ class ImportDocument extends ImportDocumentAbstract
             $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_STATS_REPORT_LOCKED', $this->center->name, $this->reportingDate->format("M d, Y"));
             return false;
         }
+
+        Util::setReportDate($this->reportingDate);
 
         if ($this->statsReport->validated) {
             foreach ($this->importers as $name => $importer) {
