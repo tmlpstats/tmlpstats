@@ -92,7 +92,9 @@ class StatsReport extends Model
 
     public function getPoints()
     {
-        $data = CenterStatsData::actual()->byStatsReport($this)->first();
+        $data = CenterStatsData::actual()->byStatsReport($this)
+            ->reportingDate($this->reportingDate)
+            ->first();
         return $data ? $data->points : null;
     }
 
