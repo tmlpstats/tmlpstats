@@ -29,12 +29,7 @@ class TeamMember extends Model
             case 'center':
                 return $this->person->$name;
             case 'quarterNumber':
-
-                $key = "quarterNumber";
-
-                return static::getFromCache($key, $this->incomingQuarterId, function() {
-                    return static::getQuarterNumber($this->incomingQuarter, $this->person->center->region);
-                });
+                return static::getQuarterNumber($this->incomingQuarter, $this->person->center->region);
             case 'incomingQuarter':
                 $key = "incomingQuarter:region{$this->center->regionId}";
                 return static::getFromCache($key, $this->incomingQuarterId, function() {
@@ -51,17 +46,20 @@ class TeamMember extends Model
 
     public static function getQuarterNumber(Quarter $incomingQuarter, Region $region)
     {
-        $thisQuarter = Quarter::getCurrentQuarter($region);
-        if (!$thisQuarter) {
-            return null;
-        }
+        return static::getFromCache("quarterNumber:region{$region->id}", $incomingQuarter->id, function() use ($incomingQuarter, $region) {
 
-        $quarterNumber = $thisQuarter->quarterNumber;
-        if ($thisQuarter->quarterNumber < $incomingQuarter->quarterNumber) {
-            $quarterNumber += 4;
-        }
+            $thisQuarter = Quarter::getCurrentQuarter($region);
+            if (!$thisQuarter) {
+                return null;
+            }
 
-        return $quarterNumber - $incomingQuarter->quarterNumber + 1;
+            $quarterNumber = $thisQuarter->quarterNumber;
+            if ($thisQuarter->quarterNumber < $incomingQuarter->quarterNumber) {
+                $quarterNumber += 4;
+            }
+
+            return $quarterNumber - $incomingQuarter->quarterNumber + 1;
+        });
     }
 
     public static function firstOrNew(array $attributes)

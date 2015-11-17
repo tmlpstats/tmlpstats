@@ -46,6 +46,9 @@ class TeamMemberData extends Model
             case 'lastName':
             case 'center':
                 return $this->teamMember->person->$name;
+            case 'teamYear':
+            case 'quarterNumber':
+                return $this->teamMember->$name;
             default:
                 return parent::__get($name);
         }

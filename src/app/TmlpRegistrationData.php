@@ -43,6 +43,8 @@ class TmlpRegistrationData extends Model
             case 'lastName':
             case 'center':
                 return $this->registration->person->$name;
+            case 'teamYear':
+                return $this->registration->$name;
             case 'incomingQuarter':
                 $key = "incomingQuarter:region{$this->center->regionId}";
                 return static::getFromCache($key, $this->incomingQuarterId, function() {
