@@ -222,7 +222,7 @@
                             : 'in a future';
                         $newExpectedQuarter = $new->incomingQuarterId == $thisQuarter->getNextQuarter()->id
                             ? 'next'
-                            : 'a future';
+                            : 'in a future';
                         echo "Was expected {$expectedQuarter} quarter, now is expected {$newExpectedQuarter} quarter.";
                     }
                 ?></td>
