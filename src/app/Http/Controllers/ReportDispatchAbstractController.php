@@ -95,6 +95,13 @@ abstract class ReportDispatchAbstractController extends Controller
         }
 
         if (!$response) {
+            // Calling session_write_close here to free up the session lock. This makes the concurrent ajax requests
+            // that are used to fetch the reports load faster since they don't have to wait for previous calls to
+            // complete first.
+            //
+            // Note: Make sure you don't write to the session during runDispatcher.
+            session_write_close();
+
             $response = $this->runDispatcher($request, $model, $report);
         }
 

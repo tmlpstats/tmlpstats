@@ -52,6 +52,9 @@
             @can ('readContactInfo', $statsReport)
             <li><a href="#contactinfo-tab" data-toggle="tab">Contact Info</a></li>
             @endcan
+            @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
+            <li><a href="#transitionsummary-tab" data-toggle="tab">Transfer Check</a></li>
+            @endif
         </ul>
 
         <div class="tab-content">
@@ -119,6 +122,14 @@
                 </div>
             </div>
             @endcan
+            @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
+            <div class="tab-pane" id="transitionsummary-tab">
+                <h3>Transfer Check</h3>
+                <div id="transitionsummary-container">
+                    @include('partials.loading')
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 
@@ -200,8 +211,6 @@
                 $("#gitwsummary-container").hide();
                 $("#classlist-container").hide();
             });
-
-
 
             // Fetch Summary
             $.ajax({
@@ -334,8 +343,24 @@
                 }
             });
             @endcan
+
+            @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
+            // Fetch Transfer Ananlysis
+            $.ajax({
+                type: "GET",
+                url: "{{ url('/statsreports/' . $statsReport->id . '/transitionsummary') }}",
+                success: function(response) {
+                    $("#transitionsummary-container").html(response);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $("#transitionsummary-container").html('<p>' + message + '</p>');
+                }
+            });
+            @endif
         });
     </script>
+
 
 @else
     <p>Unable to find report.</p>

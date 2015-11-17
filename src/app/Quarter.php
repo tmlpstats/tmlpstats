@@ -37,6 +37,9 @@ class Quarter extends Model
                 }
                 return $this->regionQuarterDetails->$name;
 
+            case 'firstWeekDate':
+                $startDate = clone $this->startWeekendDate;
+                return $startDate->addWeek();
             default:
                 return parent::__get($name);
         }

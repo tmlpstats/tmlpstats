@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use TmlpStats\Center;
 use TmlpStats\GlobalReport;
+use TmlpStats\Quarter;
 use TmlpStats\ReportToken;
 use TmlpStats\StatsReport;
 
@@ -31,8 +32,8 @@ use Gate;
 use Input;
 use Log;
 use Response;
-use TmlpStats\TeamMember;
-use TmlpStats\TmlpRegistration;
+use TmlpStats\TeamMemberData;
+use TmlpStats\TmlpRegistrationData;
 
 class StatsReportController extends ReportDispatchAbstractController
 {
@@ -389,6 +390,9 @@ class StatsReportController extends ReportDispatchAbstractController
             case 'tdosummary':
                 $response = $this->getTdoByTeamMember($statsReport);
                 break;
+            case 'transitionsummary':
+                $response = $this->getNewQuarterTeamTransferAnalysis($statsReport);
+                break;
         }
 
         return $response;
@@ -638,4 +642,226 @@ class StatsReportController extends ReportDispatchAbstractController
             'includeUl'
         ));
     }
+
+    protected function getNewQuarterTeamTransferAnalysis(StatsReport $statsReport)
+    {
+        $thisWeek = clone $statsReport->reportingDate;
+
+        $globalReport = GlobalReport::reportingDate($thisWeek->subWeek())->first();
+        if (!$globalReport) {
+            return null;
+        }
+
+        $lastStatsReport = $globalReport->getStatsReportByCenter($statsReport->center);
+        if (!$lastStatsReport) {
+            return null;
+        }
+
+        // Get this week and last weeks data organized by team year and quarter
+        $teamMemberDataThisWeek = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
+        $teamMemberDataLastWeek = App::make(TeamMembersController::class)->getByStatsReport($lastStatsReport);
+
+        $a = new TeamMembersByQuarter(['teamMembersData' => $teamMemberDataThisWeek]);
+        $teamThisWeekByQuarter = $a->compose();
+        $teamThisWeekByQuarter = $teamThisWeekByQuarter['reportData'];
+
+        $a = new TeamMembersByQuarter(['teamMembersData' => $teamMemberDataLastWeek]);
+        $teamLastWeekByQuarter = $a->compose();
+        $teamLastWeekByQuarter = $teamLastWeekByQuarter['reportData'];
+
+        $incomingDataThisWeek = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
+        $incomingDataLastWeek = App::make(TmlpRegistrationsController::class)->getByStatsReport($lastStatsReport);
+
+        $a = new TmlpRegistrationsByIncomingQuarter(['registrationsData' => $incomingDataThisWeek, 'quarter' => $statsReport->quarter]);
+        $incomingThisWeekByQuarter = $a->compose();
+        $incomingThisWeekByQuarter = $incomingThisWeekByQuarter['reportData'];
+
+        $a = new TmlpRegistrationsByIncomingQuarter(['registrationsData' => $incomingDataLastWeek, 'quarter' => $statsReport->quarter]);
+        $incomingLastWeekByQuarter = $a->compose();
+        $incomingLastWeekByQuarter = $incomingLastWeekByQuarter['reportData'];
+
+
+        // Cleanup incoming withdraws
+        // Remove people that were withdrawn and moved to the future weekend section
+        foreach ($incomingLastWeekByQuarter['withdrawn'] as $quarterNumber => $quarterData) {
+            foreach ($quarterData as $idx => $withdrawData) {
+                $team = "team{$withdrawData->registration->teamYear}";
+
+                list($field, $idx, $object) = $this->hasPerson(['next', 'future'], $withdrawData, $incomingLastWeekByQuarter[$team]);
+                if ($field !== null) {
+                    unset($incomingLastWeekByQuarter['withdrawn'][$field][$idx]);
+                }
+            }
+        }
+
+        // Keep track of persons of interest
+        $incomingSummary = [
+            'missing'  => [], // Was on last week's sheet but not this week
+            'changed'  => [], // On both sheets
+            'new'      => [], // New on this week (could be a WD that's now reregistered)
+        ];
+
+        // Find all missing or modified applications
+        foreach (['team1', 'team2'] as $team) {
+            foreach ($incomingLastWeekByQuarter[$team] as $quarterNumber => $quarterData) {
+                foreach ($quarterData as $lastWeekData) {
+                    list($field, $idx, $thisWeekData) = $this->hasPerson(['next', 'future'], $lastWeekData, $incomingThisWeekByQuarter[$team]);
+                    if ($field !== null) {
+                        // We only need to display existing rows that weren't copied properly
+                        if (!$this->incomingCopiedCorrectly($lastWeekData, $thisWeekData)) {
+                            $incomingSummary['changed'][] = [$thisWeekData, $lastWeekData];
+                        }
+                        unset($incomingThisWeekByQuarter[$team][$field][$idx]);
+                    } else {
+                        $incomingSummary['missing'][] = [null, $lastWeekData];
+                    }
+                }
+            }
+        }
+
+        // Everything that's left is new.
+        // Attach info from any application that was withdrawn last quarter
+        foreach (['team1', 'team2'] as $team) {
+            foreach ($incomingThisWeekByQuarter[$team] as $quarterNumber => $quarterData) {
+                foreach ($quarterData as $thisWeekData) {
+                    list($field, $idx, $withdrawData) = $this->hasPerson(['next', 'future'], $thisWeekData, $incomingLastWeekByQuarter['withdrawn']);
+                    $incomingSummary['new'][] = [$thisWeekData, $withdrawData];
+                }
+            }
+        }
+
+        $teamMemberSummary = [
+            'new' => [],
+            'missing' => [],
+        ];
+
+        // Find any missing team members (except quarter 4 who are outgoing)
+        foreach (['team1', 'team2'] as $team) {
+            foreach ($teamLastWeekByQuarter[$team] as $quarterNumber => $quarterData) {
+                // Skip Q1 because quarter number calculations wrap, so last quarter's Q4 now looks like a Q1
+                if ($quarterNumber == 'Q1') {
+                    continue;
+                }
+
+                foreach ($quarterData as $lasWeekData) {
+                    list($field, $idx, $data) = $this->hasPerson(['Q2', 'Q3', 'Q4'], $lasWeekData, $teamThisWeekByQuarter[$team]);
+                    if ($field !== null) {
+                        // We found it! remove it from the search list
+                        unset($teamThisWeekByQuarter[$team][$field][$idx]);
+                    } else {
+                        $teamMemberSummary['missing'][] = [null, $lasWeekData];
+                    }
+                }
+            }
+        }
+
+        // Process new team members
+        // By now, we've removed all of the members that matched, so it should all be new team members.
+        // Check the incoming and add match any withdrawn members that have reappeared
+        foreach (['team1', 'team2'] as $team) {
+            foreach ($teamThisWeekByQuarter[$team] as $quarterNumber => $quarterData) {
+                foreach ($quarterData as $thisWeekData) {
+                    $matched = false;
+                    $lastWeekData = null;
+                    if ($quarterNumber == 'Q1') {
+                        // Match up incoming with new Q1 team
+                        foreach ($incomingSummary['missing'] as $idx => $incomingData) {
+                            if ($this->objectsAreEqual($incomingData[1], $thisWeekData)) {
+                                unset($incomingSummary['missing'][$idx]);
+                                $matched = true;
+                                break;
+                            }
+                        }
+                    } else if (isset($teamLastWeekByQuarter['withdrawn'][$quarterNumber])) {
+
+                        // Check if the new team member was withdrawn previously
+                        list($field, $idx, $withdrawData) = $this->hasPerson(['Q1', 'Q2', 'Q3', 'Q4'], $thisWeekData, $teamLastWeekByQuarter['withdrawn']);
+                        if ($withdrawData !== null) {
+                            $lastWeekData = $withdrawData;
+                        }
+                    }
+                    if (!$matched) {
+                        $teamMemberSummary['new'][] = [$thisWeekData, $lastWeekData];
+                    }
+                }
+            }
+        }
+
+        $thisQuarter = Quarter::getCurrentQuarter($this->getRegion(\Request::instance()));
+
+        return view('statsreports.details.transitionsummary', compact('teamMemberSummary', 'incomingSummary', 'thisQuarter'));
+    }
+
+    public function incomingCopiedCorrectly($old, $new)
+    {
+        $checkFields = [
+            'regDate',
+            'appOutDate',
+            'appInDate',
+            'apprDate',
+            'teamYear',
+            'incomingQuarterId',
+        ];
+
+        $ok = true;
+        foreach ($checkFields as $field) {
+
+            if ($old->$field && $new->$field) {
+                if (($old->$field instanceof Carbon) && $old->$field->ne($new->$field)) {
+                    $ok = false;
+                    break;
+                } else if ($old->$field != $new->$field) {
+                    $ok = false;
+                    break;
+                }
+            } else if ($old->$field && !$new->$field) {
+                $ok = false;
+                break;
+            }
+        }
+
+        return $ok;
+    }
+
+    public function getTargetValue($object)
+    {
+        if ($object instanceof TmlpRegistrationData) {
+            return $object->tmlpRegistrationId;
+        } else if ($object instanceof TeamMemberData) {
+            return $object->teamMemberId;
+        }
+
+        return null;
+    }
+
+    public function objectsAreEqual($a, $b)
+    {
+        if (($a instanceof TeamMemberData) && ($b instanceof TmlpRegistrationData)) {
+            return $a->teamMember->personId == $b->tmlpRegistration->personId;
+        } else if (($a instanceof TmlpRegistrationData) && ($b instanceof TeamMemberData)) {
+            return $a->registration->personId == $b->teamMember->personId;
+        } else {
+            return $this->getTargetValue($a) == $this->getTargetValue($b);
+        }
+    }
+
+    public function hasPerson($fields, $needle, $haystacks, $haystackObjectOffset = null)
+    {
+        foreach ($fields as $field) {
+            if (isset($haystacks[$field])) {
+                foreach ($haystacks[$field] as $idx => $object) {
+                    $target = $haystackObjectOffset === null
+                        ? $object
+                        : $object[$haystackObjectOffset];
+
+                    if ($this->objectsAreEqual($target, $needle)) {
+                        return [$field, $idx, $target];
+                    }
+                }
+            }
+        }
+
+        return [null, null, null];
+    }
 }
+
