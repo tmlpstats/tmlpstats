@@ -2,9 +2,7 @@
     <div class="alert alert-info" role="alert"><span style="font-weight: bold">Pro Tip:</span> Use the check boxes to keep track of people you've already matched.</div>
 
     <h4>Continuing Team Members</h4>
-    @if (!$teamMemberSummary['new'] && !$teamMemberSummary['missing'])
-        <p>All team members transferred correctly</p>
-    @else
+    <div class="tableContainer">
     <table id="teamMembersTable" class="table table-condensed table-striped table-hover">
         <thead>
         <tr>
@@ -46,14 +44,12 @@
             @endforeach
         </tbody>
     </table>
-    @endif
+    </div>
     <br/><br/>
 
     <h4>Q1 Incoming</h4>
-    @if (!$teamMemberSummary['new'] && !$incomingSummary['missing'])
-        <p>All Q1 incoming transferred</p>
-    @else
-        <table id="incomingTable" class="table table-condensed table-striped table-hover">
+    <div class="tableContainer">
+        <table id="q1Table" class="table table-condensed table-striped table-hover">
             <thead>
             <tr>
                 <th>&nbsp;</th>
@@ -110,13 +106,11 @@
             @endforeach
             </tbody>
         </table>
-    @endif
+    </div>
     <br/><br/>
 
     <h4>New/Missing Incoming</h4>
-    @if (!$incomingSummary['new'] && !$incomingSummary['missing'])
-        <p>No new or missing applications.</p>
-    @else
+    <div class="tableContainer">
         <table id="incomingTable" class="table table-condensed table-striped table-hover">
             <thead>
             <tr>
@@ -167,13 +161,11 @@
             @endforeach
             </tbody>
         </table>
-    @endif
+    </div>
     <br/><br/>
 
     <h4>Modified Incoming</h4>
-    @if (!$incomingSummary['changed'])
-        <p>All exiting incoming transferred correctly</p>
-    @else
+    <div class="tableContainer">
     <table id="ongoingTable" class="table table-condensed table-striped table-hover">
         <thead>
         <tr>
@@ -257,28 +249,43 @@
         @endforeach
         </tbody>
     </table>
-    @endif
+    </div>
 </div>
 
 <script type="text/javascript">
     $(document).ready(function() {
-        $('#teamMembersTable').dataTable({
-            "paging":    false,
-            "searching": false,
-            "order": [[ 1, "asc" ]],
-            "columnDefs": [ { "targets": 0, "orderable": false } ]
-        });
-        $('#incomingTable').dataTable({
-            "paging":    false,
-            "searching": false,
-            "order": [[ 1, "asc" ]],
-            "columnDefs": [ { "targets": 0, "orderable": false } ]
-        });
-        $('#ongoingTable').dataTable({
-            "paging":    false,
-            "searching": false,
-            "order": [[ 1, "asc" ]],
-            "columnDefs": [ { "targets": 0, "orderable": false } ]
+
+        var tables = [
+            {
+                id: "teamMembersTable",
+                emptyMessage: "All team members transferred correctly"
+            },
+            {
+                id: "q1Table",
+                emptyMessage: "All Q1 incoming transferred"
+            },
+            {
+                id: "incomingTable",
+                emptyMessage: "No new or missing applications"
+            },
+            {
+                id: "ongoingTable",
+                emptyMessage: "All existing incoming transferred correctly"
+            }
+        ];
+
+        $.each(tables, function(index, table) {
+            $('#' + table.id).dataTable({
+                "paging":    false,
+                "searching": false,
+                "order": [[ 1, "asc" ]],
+                "columnDefs": [ { "targets": 0, "orderable": false } ],
+                fnDrawCallback: function (settings) {
+                    if (settings.fnRecordsDisplay() == 0) {
+                        $(this).closest("div.tableContainer").html("<p>" + table.emptyMessage + "</p>");
+                    }
+                }
+            });
         });
     });
 </script>
