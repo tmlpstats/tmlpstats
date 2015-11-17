@@ -191,28 +191,55 @@
         </thead>
         <tbody>
         @foreach ($incomingSummary['changed'] as $existingPair)
-            <?php $new = $existingPair[0]; ?>
-            <?php $old = $existingPair[1]; ?>
+            <?php
+                $new = $existingPair[0];
+                $old = $existingPair[1];
+
+                $attributes = [
+                    'teamYear' => '',
+                    'regDate' => '',
+                    'appOutDate' => '',
+                    'appInDate' => '',
+                    'apprDate' => '',
+                    'incomingQuarterId' => '',
+                ];
+                foreach (array_keys($attributes) as $field) {
+                    if (strpos($field, 'Date') !== false) {
+                        if (($new->$field && $old->$field && $new->$field->ne($old->$field))
+                            || ($old->$field && !$new->$field)
+                        ) {
+                            $attributes[$field] = 'class="bg-warning" title="Was ' . $old->$field->format('M j, Y') . '"';
+                        }
+                    } else {
+                        if ($new->$field != $old->$field) {
+                            $attributes[$field] = 'class="bg-warning"';
+                            if (!preg_match('/Id$/', $field)) {
+                                $attributes[$field] .= ' title="Was ' . $old->$field . '"';
+                            }
+                        }
+                    }
+                }
+            ?>
             <tr>
                 <td><input type="checkbox" /></td>
                 <td>{{ $new->firstName }}</td>
                 <td>{{ $new->lastName }}</td>
-                <td {!! $new->teamYear != $old->teamYear ? 'class="bg-warning" title="Was '.$old->teamYear.'"' : '' !!} style="text-align: center">
+                <td {!! $attributes['teamYear'] !!} style="text-align: center">
                     {{ $new->teamYear }}
                 </td>
-                <td {!! $new->regDate && $new->regDate->ne($old->regDate) ? 'class="bg-warning" title="Was '.$old->regDate->format('M j, Y').'"' : '' !!} style="text-align: center">
+                <td {!! $attributes['regDate'] !!} style="text-align: center">
                     {{ $new->regDate ? $new->regDate->format('M j, Y') : '' }}
                 </td>
-                <td {!! $new->appOutDate && $new->appOutDate->ne($old->appOutDate) ? 'class="bg-warning" title="Was '.$old->appOutDate->format('M j, Y').'"' : '' !!} style="text-align: center">
+                <td {!! $attributes['appOutDate'] !!} style="text-align: center">
                     {{ $new->appOutDate ? $new->appOutDate->format('M j, Y') : '' }}
                 </td>
-                <td {!! $new->appInDate && $new->appInDate->ne($old->appInDate) ? 'class="bg-warning" title="Was '.$old->appInDate->format('M j, Y').'"' : '' !!} style="text-align: center">
+                <td {!! $attributes['appInDate'] !!} style="text-align: center">
                     {{ $new->appInDate ? $new->appInDate->format('M j, Y') : '' }}
                 </td>
-                <td {!! $new->apprDate && $new->apprDate->ne($old->apprDate) ? 'class="bg-warning" title="Was '.$old->apprDate->format('M j, Y').'"' : '' !!} style="text-align: center">
+                <td {!! $attributes['apprDate'] !!} style="text-align: center">
                     {{ $new->apprDate ? $new->apprDate->format('M j, Y') : '' }}
                 </td>
-                <td {!! $new->incomingQuarterId != $old->incomingQuarterId ? 'class="bg-warning"' : '' !!} style="text-align: center">
+                <td {!! $attributes['incomingQuarterId'] !!} style="text-align: center">
                     {{ $new->incomingQuarterId == $thisQuarter->getNextQuarter()->id ? 'Next' : 'Future' }}
                 </td>
                 <td><?php
