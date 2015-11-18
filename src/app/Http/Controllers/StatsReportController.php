@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use TmlpStats\Center;
+use TmlpStats\CourseData;
 use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
 use TmlpStats\ReportToken;
@@ -370,7 +371,7 @@ class StatsReportController extends ReportDispatchAbstractController
                 $response = $this->getCenterStats($statsReport);
                 break;
             case 'classlist':
-                $response = $this->getTeamMembers($statsReport);
+                $response = $this->getClassList($statsReport);
                 break;
             case 'tmlpregistrations':
                 $response = $this->getTmlpRegistrations($statsReport);
@@ -382,16 +383,19 @@ class StatsReportController extends ReportDispatchAbstractController
                 $response = $this->getCourses($statsReport);
                 break;
             case 'contactinfo':
-                $response = $this->getContacts($statsReport);
+                $response = $this->getContactInfo($statsReport);
                 break;
             case 'gitwsummary':
-                $response = $this->getGitwByTeamMember($statsReport);
+                $response = $this->getGitwSummary($statsReport);
                 break;
             case 'tdosummary':
-                $response = $this->getTdoByTeamMember($statsReport);
+                $response = $this->getTdoSummary($statsReport);
                 break;
-            case 'transitionsummary':
-                $response = $this->getNewQuarterTeamTransferAnalysis($statsReport);
+            case 'peopletransfersummary':
+                $response = $this->getPeopleTransferSummary($statsReport);
+                break;
+            case 'coursestransfersummary':
+                $response = $this->getCoursesTransferSummary($statsReport);
                 break;
         }
 
@@ -502,7 +506,7 @@ class StatsReportController extends ReportDispatchAbstractController
         return view('reports.centergames.milestones', $data);
     }
 
-    protected function getTeamMembers(StatsReport $statsReport)
+    protected function getClassList(StatsReport $statsReport)
     {
         $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
         if (!$teamMembers) {
@@ -555,7 +559,7 @@ class StatsReportController extends ReportDispatchAbstractController
         return view('statsreports.details.courses', $data);
     }
 
-    protected function getContacts(StatsReport $statsReport)
+    protected function getContactInfo(StatsReport $statsReport)
     {
         $contacts = App::make(ContactsController::class)->getByStatsReport($statsReport);
         if (!$contacts) {
@@ -565,7 +569,7 @@ class StatsReportController extends ReportDispatchAbstractController
         return view('statsreports.details.contactinfo', compact('contacts'));
     }
 
-    protected function getGitwByTeamMember(StatsReport $statsReport)
+    protected function getGitwSummary(StatsReport $statsReport)
     {
         $weeksData = [];
 
@@ -587,7 +591,7 @@ class StatsReportController extends ReportDispatchAbstractController
         return view('statsreports.details.teammembersweekly', $data);
     }
 
-    protected function getTdoByTeamMember(StatsReport $statsReport)
+    protected function getTdoSummary(StatsReport $statsReport)
     {
         $weeksData = [];
 
@@ -643,7 +647,7 @@ class StatsReportController extends ReportDispatchAbstractController
         ));
     }
 
-    protected function getNewQuarterTeamTransferAnalysis(StatsReport $statsReport)
+    protected function getPeopleTransferSummary(StatsReport $statsReport)
     {
         $thisWeek = clone $statsReport->reportingDate;
 
@@ -708,7 +712,7 @@ class StatsReportController extends ReportDispatchAbstractController
                     list($field, $idx, $thisWeekData) = $this->hasPerson(['next', 'future'], $lastWeekData, $incomingThisWeekByQuarter[$team]);
                     if ($field !== null) {
                         // We only need to display existing rows that weren't copied properly
-                        if (!$this->incomingCopiedCorrectly($lastWeekData, $thisWeekData)) {
+                        if (!$this->incomingCopiedCorrectly($thisWeekData, $lastWeekData)) {
                             $incomingSummary['changed'][] = [$thisWeekData, $lastWeekData];
                         }
                         unset($incomingThisWeekByQuarter[$team][$field][$idx]);
@@ -789,10 +793,82 @@ class StatsReportController extends ReportDispatchAbstractController
 
         $thisQuarter = Quarter::getCurrentQuarter($this->getRegion(\Request::instance()));
 
-        return view('statsreports.details.transitionsummary', compact('teamMemberSummary', 'incomingSummary', 'thisQuarter'));
+        return view('statsreports.details.peopletransfersummary', compact('teamMemberSummary', 'incomingSummary', 'thisQuarter'));
     }
 
-    public function incomingCopiedCorrectly($old, $new)
+    public function getCoursesTransferSummary(StatsReport $statsReport)
+    {
+        $thisWeek = clone $statsReport->reportingDate;
+
+        $globalReport = GlobalReport::reportingDate($thisWeek->subWeek())->first();
+        if (!$globalReport) {
+            return null;
+        }
+
+        $lastStatsReport = $globalReport->getStatsReportByCenter($statsReport->center);
+        if (!$lastStatsReport) {
+            return null;
+        }
+
+        $thisWeekCourses = App::make(CoursesController::class)->getByStatsReport($statsReport);
+        $lastWeekCourses = App::make(CoursesController::class)->getByStatsReport($lastStatsReport);
+
+        $a = new CoursesWithEffectiveness(['courses' => $thisWeekCourses, 'reportingDate' => $statsReport->reportingDate]);
+        $thisWeekCoursesList = $a->compose();
+        $thisWeekCoursesList = $thisWeekCoursesList['reportData'];
+
+        $a = new CoursesWithEffectiveness(['courses' => $lastWeekCourses, 'reportingDate' => $lastStatsReport->reportingDate]);
+        $lastWeekCoursesList = $a->compose();
+        $lastWeekCoursesList = $lastWeekCoursesList['reportData'];
+
+        /*
+         * No completed courses copied over (Done by validator)
+         * Starting numbers match the completing numbers from last week
+         */
+        $flagged = [];
+        foreach ($thisWeekCoursesList as $type => $thisWeekCourses) {
+            foreach ($thisWeekCourses as $thisWeekCourseData) {
+                foreach ($lastWeekCoursesList[$type] as $lastWeekCourseData) {
+                    if ($thisWeekCourseData['courseId'] == $lastWeekCourseData['courseId']
+                        && !$this->courseCopiedCorrectly($thisWeekCourseData, $lastWeekCourseData)
+                    ) {
+                        $flagged[$type][] = [$thisWeekCourseData, $lastWeekCourseData];
+                    }
+                }
+            }
+        }
+
+        return view('statsreports.details.coursestransfersummary', compact('flagged'));
+    }
+
+    public function courseCopiedCorrectly($new, $old)
+    {
+        // Make sure quarter starting numbers match last quarters ending numbers
+        if ($new['quarterStartTer'] != $old['currentTer']) {
+            return false;
+        }
+        if ($new['quarterStartStandardStarts'] != $old['currentStandardStarts']) {
+            return false;
+        }
+        if ($new['quarterStartXfer'] != $old['currentXfer']) {
+            return false;
+        }
+
+        // There wasn't a course during the TMLP weekend, so this must be empty
+        if ($new['completedStandardStarts'] !== null) {
+            return false;
+        }
+        if ($new['potentials'] !== null) {
+            return false;
+        }
+        if ($new['registrations'] !== null) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function incomingCopiedCorrectly($new, $old)
     {
         $checkFields = [
             'regDate',
@@ -829,6 +905,8 @@ class StatsReportController extends ReportDispatchAbstractController
             return $object->tmlpRegistrationId;
         } else if ($object instanceof TeamMemberData) {
             return $object->teamMemberId;
+        } else if ($object instanceof CourseData) {
+            return $object->courseId;
         }
 
         return null;

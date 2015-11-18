@@ -22,6 +22,7 @@ class CoursesWithEffectiveness extends BaseArrangement
             ];
 
             $copyFields = [
+                'courseId',
                 'quarterStartTer',
                 'quarterStartStandardStarts',
                 'quarterStartXfer',

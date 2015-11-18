@@ -125,7 +125,14 @@
             @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
             <div class="tab-pane" id="transitionsummary-tab">
                 <h3>Transfer Check</h3>
-                <div id="transitionsummary-container">
+                <div class="btn-group" role="group">
+                    <button id ="peopletransfersummary-button" type="button" class="btn btn-primary">People</button>
+                    <button id ="coursestransfersummary-button" type="button" class="btn btn-default">Courses</button>
+                </div>
+                <div id="peopletransfersummary-container">
+                    @include('partials.loading')
+                </div>
+                <div id="coursestransfersummary-container">
                     @include('partials.loading')
                 </div>
             </div>
@@ -161,7 +168,8 @@
             'contactinfo',
             @endcan
             @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
-            'transitionsummary',
+            'peopletransfersummary',
+            'coursestransfersummary',
             @endif
         ];
 
@@ -174,6 +182,10 @@
             [
                 'tmlpregistrations',
                 'tmlpregistrationsbystatus',
+            ],
+            [
+                'peopletransfersummary',
+                'coursestransfersummary',
             ]
         ];
 
