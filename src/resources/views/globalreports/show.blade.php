@@ -126,188 +126,65 @@
             return message;
         }
 
-        jQuery(document).ready(function ($) {
+        var pages = [
+            'ratingsummary',
+            'regionalstats',
+            'statsreports',
+            'applicationsbystatus',
+            'applicationsbycenter',
+            'applicationsoverdue',
+            'applicationsoverview',
+            'traveloverview',
+            'completedcourses',
+            'teammemberstatus',
+        ];
+
+        var buttonGroups = [
+            [
+                'applicationsoverview',
+                'applicationsoverdue',
+                'applicationsbycenter',
+                'applicationsbystatus',
+            ],
+        ];
+
+        $(document).ready(function ($) {
             $('#tabs').tab();
 
-            $("#applicationsoverview-button").click(function() {
-                $(this).addClass('btn-primary');
-                $("#applicationsoverdue-button").addClass('btn-default');
-                $("#applicationsoverdue-button").removeClass('btn-primary');
-                $("#applicationsbycenter-button").addClass('btn-default');
-                $("#applicationsbycenter-button").removeClass('btn-primary');
-                $("#applicationsbystatus-button").addClass('btn-default');
-                $("#applicationsbystatus-button").removeClass('btn-primary');
-
-                $("#applicationsoverview-container").show();
-                $("#applicationsoverdue-container").hide();
-                $("#applicationsbycenter-container").hide();
-                $("#applicationsbystatus-container").hide();
+            // Load all of the pages
+            $.each(pages, function (index, page) {
+                var url = "{{ url("/globalreports/{$globalReport->id}") }}/" + page + "?region={{$region->abbreviation}}";
+                var container = "#" + page + "-container";
+                $.get(url, function (response) {
+                    $(container).html(response);
+                }).fail(function (jqXHR) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $(container).html('<p>' + message + '</p>');
+                });
             });
 
-            $("#applicationsbystatus-button").click(function() {
-                $(this).addClass('btn-primary');
-                $("#applicationsoverdue-button").addClass('btn-default');
-                $("#applicationsoverdue-button").removeClass('btn-primary');
-                $("#applicationsbycenter-button").addClass('btn-default');
-                $("#applicationsbycenter-button").removeClass('btn-primary');
-                $("#applicationsoverview-button").addClass('btn-default');
-                $("#applicationsoverview-button").removeClass('btn-primary');
+            // Setup the button click events
+            $.each(buttonGroups, function (i, buttons) {
+                $.each(buttons, function (j, primaryName) {
+                    var primaryButton = "#" + primaryName + "-button";
+                    var primaryContainer = "#" + primaryName + "-container";
 
-                $("#applicationsbystatus-container").show();
-                $("#applicationsoverdue-container").hide();
-                $("#applicationsbycenter-container").hide();
-                $("#applicationsoverview-container").hide();
-            });
-
-            $("#applicationsoverdue-button").click(function() {
-                $(this).addClass('btn-primary');
-                $("#applicationsbystatus-button").addClass('btn-default');
-                $("#applicationsbystatus-button").removeClass('btn-primary');
-                $("#applicationsbycenter-button").addClass('btn-default');
-                $("#applicationsbycenter-button").removeClass('btn-primary');
-                $("#applicationsoverview-button").addClass('btn-default');
-                $("#applicationsoverview-button").removeClass('btn-primary');
-
-                $("#applicationsoverdue-container").show();
-                $("#applicationsbystatus-container").hide();
-                $("#applicationsbycenter-container").hide();
-                $("#applicationsoverview-container").hide();
-            });
-
-            $("#applicationsbycenter-button").click(function() {
-                $(this).addClass('btn-primary');
-                $("#applicationsbystatus-button").addClass('btn-default');
-                $("#applicationsbystatus-button").removeClass('btn-primary');
-                $("#applicationsoverdue-button").addClass('btn-default');
-                $("#applicationsoverdue-button").removeClass('btn-primary');
-                $("#applicationsoverview-button").addClass('btn-default');
-                $("#applicationsoverview-button").removeClass('btn-primary');
-
-                $("#applicationsbycenter-container").show();
-                $("#applicationsoverdue-container").hide();
-                $("#applicationsbystatus-container").hide();
-                $("#applicationsoverview-container").hide();
-            });
-
-            // Fetch Rating Summary
-            $.ajax({
-                type: "GET",
-                url: "{{ url("/globalreports/{$globalReport->id}/ratingsummary?region={$region->abbreviation}") }}",
-                success: function (response) {
-                    $("#ratingsummary-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#ratingsummary-container").html('<p>' + message + '</p>');
-                }
-            });
-            // Fetch Regional Stats
-            $.ajax({
-                type: "GET",
-                url: "{{ url("/globalreports/{$globalReport->id}/regionalstats?region={$region->abbreviation}") }}",
-                success: function (response) {
-                    $("#regionalstats-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#regionalstats-container").html('<p>' + message + '</p>');
-                }
-            });
-            // Fetch Stats Reports
-            $.ajax({
-                type: "GET",
-                url: "{{ url("/globalreports/{$globalReport->id}/statsreports?region={$region->abbreviation}") }}",
-                success: function (response) {
-                    $("#statsreports-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#statsreports-container").html('<p>' + message + '</p>');
-                }
-            });
-            // Fetch Applications
-            $.ajax({
-                type: "GET",
-                url: "{{ url("/globalreports/{$globalReport->id}/applicationsbystatus?region={$region->abbreviation}") }}",
-                success: function (response) {
-                    $("#applicationsbystatus-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#applicationsbystatus-container").html('<p>' + message + '</p>');
-                }
-            });
-            // Fetch Applications
-            $.ajax({
-                type: "GET",
-                url: "{{ url("/globalreports/{$globalReport->id}/applicationsbycenter?region={$region->abbreviation}") }}",
-                success: function (response) {
-                    $("#applicationsbycenter-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#applicationsbycenter-container").html('<p>' + message + '</p>');
-                }
-            });
-            // Fetch Applications
-            $.ajax({
-                type: "GET",
-                url: "{{ url("/globalreports/{$globalReport->id}/applicationsoverdue?region={$region->abbreviation}") }}",
-                success: function (response) {
-                    $("#applicationsoverdue-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#applicationsoverdue-container").html('<p>' + message + '</p>');
-                }
-            });
-            // Fetch Applications
-            $.ajax({
-                type: "GET",
-                url: "{{ url("/globalreports/{$globalReport->id}/applicationsoverview?region={$region->abbreviation}") }}",
-                success: function (response) {
-                    $("#applicationsoverview-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#applicationsoverview-container").html('<p>' + message + '</p>');
-                }
-            });
-            // Fetch Travel
-            $.ajax({
-                type: "GET",
-                url: "{{ url("/globalreports/{$globalReport->id}/traveloverview?region={$region->abbreviation}") }}",
-                success: function (response) {
-                    $("#traveloverview-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#traveloverview-container").html('<p>' + message + '</p>');
-                }
-            });
-            // Fetch Courses
-            $.ajax({
-                type: "GET",
-                url: "{{ url("/globalreports/{$globalReport->id}/completedcourses?region={$region->abbreviation}") }}",
-                success: function (response) {
-                    $("#completedcourses-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#completedcourses-container").html('<p>' + message + '</p>');
-                }
-            });
-            // Fetch Team Members' Status
-            $.ajax({
-                type: "GET",
-                url: "{{ url("/globalreports/{$globalReport->id}/teammemberstatus?region={$region->abbreviation}") }}",
-                success: function (response) {
-                    $("#teammemberstatus-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#teammemberstatus-container").html('<p>' + message + '</p>');
-                }
+                    $(primaryButton).click(function () {
+                        $.each(buttons, function (k, secondaryName) {
+                            if (primaryName == secondaryName) {
+                                $(primaryButton).addClass('btn-primary');
+                                $(primaryButton).removeClass('btn-default');
+                                $(primaryContainer).show();
+                            } else {
+                                var secondaryButton = "#" + secondaryName + "-button";
+                                var secondaryContainer = "#" + secondaryName + "-container";
+                                $(secondaryButton).addClass('btn-default');
+                                $(secondaryButton).removeClass('btn-primary');
+                                $(secondaryContainer).hide();
+                            }
+                        });
+                    });
+                });
             });
         });
     </script>

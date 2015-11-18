@@ -147,7 +147,37 @@
             return message;
         }
 
-        jQuery(document).ready(function ($) {
+        var pages = [
+            'summary',
+            'results',
+            'centerstats',
+            'classlist',
+            'gitwsummary',
+            'tdosummary',
+            'tmlpregistrations',
+            'tmlpregistrationsbystatus',
+            'courses',
+            @can ('readContactInfo', $statsReport)
+            'contactinfo',
+            @endcan
+            @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
+            'transitionsummary',
+            @endif
+        ];
+
+        var buttonGroups = [
+            [
+                'classlist',
+                'gitwsummary',
+                'tdosummary',
+            ],
+            [
+                'tmlpregistrations',
+                'tmlpregistrationsbystatus',
+            ]
+        ];
+
+        $(document).ready(function ($) {
             $('#tabs').tab();
 
             $('select.reportSelector').change(function() {
@@ -156,208 +186,41 @@
                 window.location.replace(baseUrl + '/' + newReport);
             });
 
-            $("#tmlpregistrations-button").click(function() {
-                $(this).addClass('btn-primary');
-                $("#tmlpregistrationsbystatus-button").addClass('btn-default');
-                $("#tmlpregistrationsbystatus-button").removeClass('btn-primary');
-
-                $("#tmlpregistrations-container").show();
-                $("#tmlpregistrationsbystatus-container").hide();
-            });
-
-            $("#tmlpregistrationsbystatus-button").click(function() {
-                $(this).addClass('btn-primary');
-                $("#tmlpregistrations-button").addClass('btn-default');
-                $("#tmlpregistrations-button").removeClass('btn-primary');
-
-                $("#tmlpregistrationsbystatus-container").show();
-                $("#tmlpregistrations-container").hide();
-            });
-
-
-
-            $("#classlist-button").click(function() {
-                $(this).addClass('btn-primary');
-                $("#gitwsummary-button").addClass('btn-default');
-                $("#gitwsummary-button").removeClass('btn-primary');
-                $("#tdosummary-button").addClass('btn-default');
-                $("#tdosummary-button").removeClass('btn-primary');
-
-                $("#classlist-container").show();
-                $("#gitwsummary-container").hide();
-                $("#tdosummary-container").hide();
-            });
-
-            $("#gitwsummary-button").click(function() {
-                $(this).addClass('btn-primary');
-                $("#classlist-button").addClass('btn-default');
-                $("#classlist-button").removeClass('btn-primary');
-                $("#tdosummary-button").addClass('btn-default');
-                $("#tdosummary-button").removeClass('btn-primary');
-
-                $("#gitwsummary-container").show();
-                $("#classlist-container").hide();
-                $("#tdosummary-container").hide();
-            });
-
-            $("#tdosummary-button").click(function() {
-                $(this).addClass('btn-primary');
-                $("#classlist-button").addClass('btn-default');
-                $("#classlist-button").removeClass('btn-primary');
-                $("#gitwsummary-button").addClass('btn-default');
-                $("#gitwsummary-button").removeClass('btn-primary');
-
-                $("#tdosummary-container").show();
-                $("#gitwsummary-container").hide();
-                $("#classlist-container").hide();
-            });
-
-            // Fetch Summary
-            $.ajax({
-                type: "GET",
-                url: "{{ url('/statsreports/' . $statsReport->id . '/summary') }}",
-                success: function(response) {
-                    $("#summary-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
+            // Load all of the pages
+            $.each(pages, function (index, page) {
+                var url = "{{ url("/statsreports/{$statsReport->id}") }}/" + page;
+                var container = "#" + page + "-container";
+                $.get(url, function (response) {
+                    $(container).html(response);
+                }).fail(function (jqXHR) {
                     var message = getErrorMessage(jqXHR.status);
-                    $("#summary-container").html('<p>' + message + '</p>');
-                }
+                    $(container).html('<p>' + message + '</p>');
+                });
             });
 
-            // Fetch Validation Results
-            $.ajax({
-                type: "GET",
-                url: "{{ url('/statsreports/' . $statsReport->id . '/results') }}",
-                success: function(response) {
-                    $("#results-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#results-container").html('<p>' + message + '</p>');
-                }
-            });
+            // Setup the button click events
+            $.each(buttonGroups, function (i, buttons) {
+                $.each(buttons, function (j, primaryName) {
+                    var primaryButton = "#" + primaryName + "-button";
+                    var primaryContainer = "#" + primaryName + "-container";
 
-            // Fetch Center Stats data
-            $.ajax({
-                type: "GET",
-                url: "{{ url('/statsreports/' . $statsReport->id . '/centerstats') }}",
-                success: function(response) {
-                    $("#centerstats-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#centerstats-container").html('<p>' + message + '</p>');
-                }
+                    $(primaryButton).click(function () {
+                        $.each(buttons, function (k, secondaryName) {
+                            if (primaryName == secondaryName) {
+                                $(primaryButton).addClass('btn-primary');
+                                $(primaryButton).removeClass('btn-default');
+                                $(primaryContainer).show();
+                            } else {
+                                var secondaryButton = "#" + secondaryName + "-button";
+                                var secondaryContainer = "#" + secondaryName + "-container";
+                                $(secondaryButton).addClass('btn-default');
+                                $(secondaryButton).removeClass('btn-primary');
+                                $(secondaryContainer).hide();
+                            }
+                        });
+                    });
+                });
             });
-
-            // Fetch Classlist
-            $.ajax({
-                type: "GET",
-                url: "{{ url('/statsreports/' . $statsReport->id . '/classlist') }}",
-                success: function(response) {
-                    $("#classlist-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#classlist-container").html('<p>' + message + '</p>');
-                }
-            });
-
-            // Fetch GITW Summary
-            $.ajax({
-                type: "GET",
-                url: "{{ url('/statsreports/' . $statsReport->id . '/gitwsummary') }}",
-                success: function(response) {
-                    $("#gitwsummary-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#gitwsummary-container").html('<p>' + message + '</p>');
-                }
-            });
-
-            // Fetch TDO Summary
-            $.ajax({
-                type: "GET",
-                url: "{{ url('/statsreports/' . $statsReport->id . '/tdosummary') }}",
-                success: function(response) {
-                    $("#tdosummary-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#tdosummary-container").html('<p>' + message + '</p>');
-                }
-            });
-
-            // Fetch Team Registrations
-            $.ajax({
-                type: "GET",
-                url: "{{ url('/statsreports/' . $statsReport->id . '/tmlpregistrations') }}",
-                success: function(response) {
-                    $("#tmlpregistrations-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#tmlpregistrations-container").html('<p>' + message + '</p>');
-                }
-            });
-
-            // Fetch Team Registrations By Status
-            $.ajax({
-                type: "GET",
-                url: "{{ url('/statsreports/' . $statsReport->id . '/tmlpregistrationsbystatus') }}",
-                success: function(response) {
-                    $("#tmlpregistrationsbystatus-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#tmlpregistrationsbystatus-container").html('<p>' + message + '</p>');
-                }
-            });
-
-            // Fetch Courses
-            $.ajax({
-                type: "GET",
-                url: "{{ url('/statsreports/' . $statsReport->id . '/courses') }}",
-                success: function(response) {
-                    $("#courses-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#courses-container").html('<p>' + message + '</p>');
-                }
-            });
-
-            @can ('readContactInfo', $statsReport)
-            // Fetch Contact Info
-            $.ajax({
-                type: "GET",
-                url: "{{ url('/statsreports/' . $statsReport->id . '/contactinfo') }}",
-                success: function(response) {
-                    $("#contactinfo-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#contactinfo-container").html('<p>' + message + '</p>');
-                }
-            });
-            @endcan
-
-            @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
-            // Fetch Transfer Ananlysis
-            $.ajax({
-                type: "GET",
-                url: "{{ url('/statsreports/' . $statsReport->id . '/transitionsummary') }}",
-                success: function(response) {
-                    $("#transitionsummary-container").html(response);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    var message = getErrorMessage(jqXHR.status);
-                    $("#transitionsummary-container").html('<p>' + message + '</p>');
-                }
-            });
-            @endif
         });
     </script>
 
