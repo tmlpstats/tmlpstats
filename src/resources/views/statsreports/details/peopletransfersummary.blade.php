@@ -1,4 +1,5 @@
 <div class="table-responsive">
+    <br/>
     <div class="alert alert-info" role="alert"><span style="font-weight: bold">Pro Tip:</span> Use the check boxes to keep track of people you've already matched.</div>
 
     <h4>Continuing Team Members</h4>
