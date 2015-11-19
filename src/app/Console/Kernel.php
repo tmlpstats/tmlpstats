@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel {
         Commands\ClearTablesCommand::class,
         Commands\ReportsWiki::class,
         Commands\FlushReportsCacheCommand::class,
+        Commands\SanitizeDb::class,
     ];
 
     /**

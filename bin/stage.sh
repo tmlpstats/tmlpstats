@@ -4,13 +4,21 @@
 # Stage website
 #
 
+die() {
+    echo $1
+    exit 1
+}
+
 SOURCE="$HOME/tmlpstats.git/src"
 DEST="/var/www/stage.tmlpstats.com"
 PROD="/var/www/tmlpstats.com"
 ROLLBACK="$HOME/tmlpstats.rollback"
 
+$SOURCE/../bin/stage-lock.sh || exit 1
+
 if [ "$1" == "rollback" ]; then
     rsync -av --delete --filter='protect storage/framework/down' $ROLLBACK/ $DEST
+    $SOURCE/../bin/stage-lock.sh release
     exit 0;
 fi
 
@@ -72,3 +80,5 @@ php artisan migrate
 echo ""
 echo "Fixing file permisssions"
 sudo chmod -R o+w $DEST/storage
+
+$SOURCE/../bin/stage-lock.sh release
