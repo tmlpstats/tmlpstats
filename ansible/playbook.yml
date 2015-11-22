@@ -94,6 +94,7 @@
               state=present
     with_items:
       - "{{ db_main }}"
+      - "tracker"
 
   - file: path=/etc/mysql/conf.d/ state=directory owner=root
 
