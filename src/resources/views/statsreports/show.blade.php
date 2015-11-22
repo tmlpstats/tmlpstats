@@ -132,7 +132,7 @@
                 <div id="peopletransfersummary-container">
                     @include('partials.loading')
                 </div>
-                <div id="coursestransfersummary-container">
+                <div id="coursestransfersummary-container" style="display: none">
                     @include('partials.loading')
                 </div>
             </div>
