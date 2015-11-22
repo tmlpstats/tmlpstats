@@ -83,7 +83,7 @@ class TmlpRegistrationImporter extends DataImporterAbstract
 
             $incoming = TmlpRegistration::firstOrNew(array(
                 'first_name' => $incomingInput['firstName'],
-                'last_name'  => $incomingInput['lastName'],
+                'last_name'  => trim(str_replace('.', '', $incomingInput['lastName'])),
                 'center_id'  => $this->statsReport->center->id,
                 'reg_date'   => $incomingInput['regDate'],
                 'team_year'  => $incomingInput['teamYear'],

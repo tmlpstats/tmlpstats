@@ -135,7 +135,7 @@ class ContactInfoImporter extends DataImporterAbstract
                 $member = Person::create([
                     'center_id'     => $this->statsReport->center->id,
                     'first_name'    => $nameParts['firstName'],
-                    'last_name'     => $nameParts['lastName'],
+                    'last_name'     => trim(str_replace('.', '', $nameParts['lastName'])),
                 ]);
             }
 
