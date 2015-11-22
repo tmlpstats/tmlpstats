@@ -28,6 +28,11 @@ cd $SOURCE/
 echo "Pulling latest sources"
 git pull --rebase
 
+if [ "$1" == "refresh" ]; then
+    echo "Stage script refreshed. Run stage again without refresh option to stage latest changes"
+    exit 0;
+fi
+
 echo ""
 echo "Running composer"
 composer install --no-dev --optimize-autoloader
@@ -38,7 +43,7 @@ npm install --production
 
 echo ""
 echo "Running bower"
-bower install --production
+node_modules/.bin/bower install --production
 
 echo ""
 echo "Snapping the database"
