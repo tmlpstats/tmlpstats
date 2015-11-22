@@ -34,7 +34,7 @@ composer install --no-dev --optimize-autoloader
 
 echo ""
 echo "Running npm"
-npm install
+npm install --production
 
 echo ""
 echo "Running bower"
@@ -64,9 +64,9 @@ rsync -av --delete --filter='protect .env' \
                    --filter='protect storage/framework/down' \
                    --filter='protect storage/logs/*' \
                    --filter='protect storage/app/*' \
-                   --filter='protect storage/debugbar/*' \
                    --filter='protect public/error_log' \
-                   --exclude='bin' \
+                   --exclude='node_modules' \
+                   --exclude='storage/debugbar' \
                    --exclude='tests' \
                    --exclude='.editorconfig' \
                    --exclude='.env.example' \
