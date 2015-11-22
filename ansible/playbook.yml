@@ -6,8 +6,12 @@
     db_user: vagrant_dev_tmlp
     db_pass: SuperSecretCode!
     db_main: vagrant_dev_tmlpstats
+    hostname: vagrant.tmlpstats.com
   sudo: true
   tasks:
+
+  - name: set hostname
+    hostname: name={{ hostname }}
 
   - name: create /var/www
     file: path=/var/www state=directory
@@ -22,7 +26,16 @@
       - wget
       - htop
       - sendmail
+      - nodejs
+      - npm
 
+  # Puppet & Chef - Not Installed
+
+  - name: ensure puppet is not installed
+    apt: name=puppet state=absent
+
+  - name: ensure chef is not installed
+    apt: name=chef state=absent
 
   # Memcached
 
@@ -114,20 +127,12 @@
   - copy: src=/vagrant/ansible/templates/etc/php5/mods-available/xdebug.ini dest=/etc/php5/mods-available/xdebug.ini
     notify: restart apache
 
-  # Puppet & Chef - Not Installed
+  - file: src=/vagrant/src dest=/var/www/tmlpstats.com state=link
 
-  - name: ensure puppet is not installed
-    apt: name=puppet state=absent
-
-  - name: ensure chef is not installed
-    apt: name=chef state=absent
-
-  # Finalize
+  # Bring up Apache
 
   - name: make sure apache is running
     action: service name=apache2 state=started enabled=true
-
-  - file: src=/vagrant/src dest=/var/www/tmlpstats.com state=link
 
   # Import database and setup default if export exists
 
@@ -138,6 +143,38 @@
   - name: import database
     mysql_db: state=import name={{ db_main }} target=/vagrant/export/tmlpstats_vagrant_export.sql
     when: export_path.stat.exists
+
+  # Install dependencies
+
+  # This makes sure bower can access the nodejs executable
+  - file: src=/usr/bin/nodejs dest=/usr/bin/node state=link
+
+  # This helps maintain the cache and authtokens between box destroys
+  - file: path=/vagrant/.composer state=directory
+  - file: src=/vagrant/.composer dest=/home/vagrant/.composer state=link
+
+  - name: Download Composer
+    get_url:
+      url: https://getcomposer.org/installer
+      dest: /tmp/composer-installer.php
+      mode: 0755
+
+  - name: Install Composer
+    command: php composer-installer.php chdir=/tmp creates=/usr/local/bin/composer
+
+  - name: Move Composer into globally-accessible location.
+    shell: mv /tmp/composer.phar /usr/local/bin/composer creates=/usr/local/bin/composer
+
+  - name: Run composer install
+    shell: cd /var/www/tmlpstats.com && composer install
+
+  - name: Install bower package manager
+    shell: cd /var/www/tmlpstats.com && npm install bower -g
+
+  - name: Run bower install
+    shell: cd /var/www/tmlpstats.com && bower install --allow-root
+
+  # Run Laravel Default Admin seeder
 
   - name: Run artisan seeds
     shell: php /var/www/tmlpstats.com/artisan db:seed --class=DefaultAdminSeeder

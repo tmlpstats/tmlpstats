@@ -62,3 +62,26 @@ $ php artisan db:seed --class=DefaultAdminSeeder
 ```
 
 See the DefaultAdminSeeder source code for the credentials.
+
+### Installing Dependencies
+The web application uses a bunch of third-party libraries. The vagrant box provisioner will install them all for you, but
+if you ever need to install them manually, you can use the following
+```
+$ vagrant ssh
+<inside vagrant VM>
+$ cd /vagrant/src
+$ composer install
+$ npm install
+$ bower install
+```
+
+- Composer is a php package manager and will install all of the php dependancies.
+- NPM is the node.js package manager. It just installs bower.
+- Bower is the package manager for our third-party javscript and css.
+
+You can run these in the vagrant box, or on your local machine in the src directory. Just make sure you have the right versions
+of php, composer and nodejs installed if you do it locally.
+
+Sometimes ```composer install``` will fail or not complete, asking for an oauth token. Github has rate-limiting for
+unauthenticated cloning. You can get around this by going to your github account settings and generating a new "Personal
+access token" for your laptop. Re run ```composer install``` and paste the token when asked. 

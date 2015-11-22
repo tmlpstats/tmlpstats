@@ -1,12 +1,8 @@
-/src/vendor
-/node_modules
-.env
-.vagrant/
+.composer
 .DS_STORE
 .idea
-_ide_helper.php
-_ide_helper_models.php
-export/
-email-output.log
+.vagrant
 ansible/templates/etc/ssl
 ansible/templates/home/ubuntu/bin/sync
+email-output.log
+export

@@ -23,12 +23,6 @@ echo "Backing up for rollback"
 rm -rf $ROLLBACK
 rsync -aq --exclude='storage/framework/down' $DEST/ $ROLLBACK
 
-# Do actual deploy
-echo ""
-echo "Running composer"
-cd $SOURCE/
-composer install --no-dev --optimize-autoloader
-
 echo ""
 echo "Syncing files"
 rsync -av --delete --filter='protect .env' \
@@ -36,6 +30,7 @@ rsync -av --delete --filter='protect .env' \
                    --filter='protect storage/framework/down' \
                    --filter='protect storage/logs/*' \
                    --filter='protect storage/app/*' \
+                   --filter='protect storage/debugbar/*' \
                    --filter='protect public/error_log' \
                    --exclude='bin' \
                    --exclude='tests' \
@@ -47,8 +42,9 @@ rsync -av --delete --filter='protect .env' \
                    --exclude='package.json' \
                    --exclude='phpspec.yml' \
                    --exclude='phpunit.xml' \
-                   --exclude='readme.md' \
-                   --exclude='Vagrantfile' \
+                   --exclude='*.md' \
+                   --exclude='bower.json' \
+                   --exclude='.bowerrc' \
                    $SOURCE/ $DEST
 
 echo ""
@@ -62,7 +58,7 @@ cd $DEST/
 php artisan cache:clear-reports
 
 echo ""
-echo "Fixing file permisssions"
+echo "Fixing file permissions"
 sudo chmod -R o+w $DEST/storage
 
 php artisan up

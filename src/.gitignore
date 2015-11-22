@@ -1,0 +1,6 @@
+.DS_STORE
+.env
+_ide_helper*
+node_modules
+public/components
+vendor
