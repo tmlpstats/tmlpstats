@@ -57,14 +57,14 @@ return [
 	 *    - Error log
 	 *    - URL queries (including values)
 	 */
-	'log_enabled' => true,
+	'log_enabled' => env('TRACKER_LOG_ENABLED', true),
 
 	/**
 	 * Log SQL queries?
 	 *
 	 * Log must be enabled for this option to work.
 	 */
-	'log_sql_queries' => true,
+	'log_sql_queries' => env('TRACKER_LOG_SQL_QUERIES', true),
 
 	/**
 	 * If you prefer to store Tracker data on a different database or connection,
@@ -96,12 +96,12 @@ return [
 	 *
 	 * Log must be enabled for this option to work.
 	 */
-	'log_sql_queries_bindings' => true,
+	'log_sql_queries_bindings' => env('TRACKER_LOG_SQL_QUERIES_BINDINGS', true),
 
 	/**
 	 * Log events?
 	 */
-	'log_events' => false,
+	'log_events' => env('TRACKER_LOG_EVENTS', false),
 
 	/**
 	 * Which events do you want to log exactly?
@@ -146,47 +146,47 @@ return [
 	 *     sudo apt-get purge php5-geoip
 	 *
 	 */
-	'log_geoip' => true,
+	'log_geoip' => env('TRACKER_LOG_GEOIP', true),
 
 	/**
 	 * Do you wish to log the user agent?
 	 */
-	'log_user_agents' => true,
+	'log_user_agents' => env('TRACKER_LOG_USER_AGENTS', true),
 
 	/**
 	 * Do you wish to log your users?
 	 */
-	'log_users' => true,
+	'log_users' => env('TRACKER_LOG_USERS', true),
 
 	/**
 	 * Do you wish to log devices?
 	 */
-	'log_devices' => true,
+	'log_devices' => env('TRACKER_LOG_DEVICES', true),
 
 	/**
 	 * Do you wish to log HTTP referers?
 	 */
-	'log_referers' => true,
+	'log_referers' => env('TRACKER_LOG_REFERERS', true),
 
 	/**
 	 * Do you wish to log url paths?
 	 */
-	'log_paths' => true,
+	'log_paths' => env('TRACKER_LOG_PATHS', true),
 
 	/**
 	 * Do you wish to log url queries and query arguments?
 	 */
-	'log_queries' => true,
+	'log_queries' => env('TRACKER_LOG_QUERIES', true),
 
 	/**
 	 * Do you wish to log routes and route parameters?
 	 */
-	'log_routes' => true,
+	'log_routes' => env('TRACKER_LOG_ROUTES', true),
 
 	/**
 	 * Log errors and exceptions?
 	 */
-	'log_exceptions' => true,
+	'log_exceptions' => env('TRACKER_LOG_EXCEPTIONS', true),
 
 	/**
 	 * A cookie may be created on your visitor device, so you can have information
