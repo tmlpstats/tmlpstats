@@ -153,6 +153,7 @@ return [
         Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
         Intouch\LaravelNewrelic\NewrelicServiceProvider::class,
         Barryvdh\Debugbar\ServiceProvider::class,
+        PragmaRX\Tracker\Vendor\Laravel\ServiceProvider::class,
     ],
 
     /*
@@ -205,6 +206,7 @@ return [
         'Html'      => Collective\Html\HtmlFacade::class,
         'Newrelic'  => Intouch\LaravelNewrelic\Facades\Newrelic::class,
         'Debugbar'  => Barryvdh\Debugbar\Facade::class,
+        'Tracker'   => PragmaRX\Tracker\Vendor\Laravel\Facade::class,
     ],
 
 ];
