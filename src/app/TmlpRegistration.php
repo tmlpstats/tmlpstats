@@ -37,15 +37,7 @@ class TmlpRegistration extends Model
             ->get();
 
         $person = null;
-        if ($people->count() == 1) {
-            $person = $people->first();
-
-            // Fix for when people withdraw to change quarters
-            if ($person->identifier != $identifier) {
-                $person->identifier = $identifier;
-                $person->save();
-            }
-        } else if ($people->count() > 1) {
+        if ($people->count() > 1) {
             $person = $people->where('identifier', $identifier)->first();
 
             if (!$person) {
@@ -59,6 +51,18 @@ class TmlpRegistration extends Model
             }
         }
 
+        // If there was only one, or if we couldn't find them by now, just grab the first one
+        if (!$person && !$people->isEmpty()) {
+            $person = $people->first();
+
+            // Fix for when people withdraw to change quarters
+            if ($people->count() == 1 && $person->identifier != $identifier) {
+                $person->identifier = $identifier;
+                $person->save();
+            }
+        }
+
+        // If we couldnt find anyone with that name, create a new person
         if (!$person) {
             $person = Person::create([
                 'center_id'  => $attributes['center_id'],

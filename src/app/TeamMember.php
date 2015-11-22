@@ -81,14 +81,27 @@ class TeamMember extends Model
             ->get();
 
         $person = null;
-        if ($people->count() == 1) {
-            // If there's only one, great!
-            $person = $people->first();
-        } else if ($people->count() > 1) {
+        if ($people->count() > 1) {
             // If there's more than one, let's try to narrow it down
             $person = $people->where('identifier', $identifier)->first();
+
+            // That didn't work? Maybe they are a new team member
+            if (!$person) {
+                $searchIdentifier = "r:%:{$attributes['team_year']}";
+                $person = $people->where('identifier', 'like', $searchIdentifier)->first();
+                if ($person) {
+                    $person->identifier = $identifier;
+                    $person->save();
+                }
+            }
         }
 
+        // If there was only one, or if we couldn't find them by now, just grab the first one
+        if (!$person && !$people->isEmpty()) {
+            $person = $people->first();
+        }
+
+        // If we couldnt find anyone with that name, create a new person
         if (!$person) {
             // Still haven't found them? Fine, create a new one then
             $person = Person::create([
