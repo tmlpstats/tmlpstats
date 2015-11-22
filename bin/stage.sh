@@ -29,7 +29,9 @@ echo "Pulling latest sources"
 git pull --rebase
 
 if [ "$1" == "refresh" ]; then
+    echo ""
     echo "Stage script refreshed. Run stage again without refresh option to stage latest changes"
+    $SOURCE/../bin/stage-lock.sh release
     exit 0;
 fi
 
