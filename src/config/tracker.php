@@ -296,12 +296,7 @@ return [
 	 * Stats Panel routes middleware
 	 *
 	 */
-	'stats_routes_middleware' => '',
-
-	/**
-     * Stats Panel template path
-     */
-    'stats_template_path' => '/templates/sb-admin-2',
+	'stats_routes_middleware' => ['auth', 'role:administrator'],
 
     /**
      * Stats Panel base uri.
