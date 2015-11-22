@@ -30,8 +30,15 @@ git pull --rebase
 
 echo ""
 echo "Running composer"
-# Do actual deploy
 composer install --no-dev --optimize-autoloader
+
+echo ""
+echo "Running npm"
+npm install
+
+echo ""
+echo "Running bower"
+bower install --production
 
 echo ""
 echo "Snapping the database"
@@ -57,6 +64,7 @@ rsync -av --delete --filter='protect .env' \
                    --filter='protect storage/framework/down' \
                    --filter='protect storage/logs/*' \
                    --filter='protect storage/app/*' \
+                   --filter='protect storage/debugbar/*' \
                    --filter='protect public/error_log' \
                    --exclude='bin' \
                    --exclude='tests' \
@@ -68,8 +76,9 @@ rsync -av --delete --filter='protect .env' \
                    --exclude='package.json' \
                    --exclude='phpspec.yml' \
                    --exclude='phpunit.xml' \
-                   --exclude='readme.md' \
-                   --exclude='Vagrantfile' \
+                   --exclude='*.md' \
+                   --exclude='bower.json' \
+                   --exclude='.bowerrc' \
                    $SOURCE/ $DEST
 
 echo ""
@@ -78,7 +87,7 @@ cd $DEST/
 php artisan migrate
 
 echo ""
-echo "Fixing file permisssions"
+echo "Fixing file permissions"
 sudo chmod -R o+w $DEST/storage
 
 $SOURCE/../bin/stage-lock.sh release

@@ -1,0 +1,48 @@
+{
+  "name": "tmlpstats",
+  "version": "1.0.0",
+  "keywords": [
+    "bootstrap",
+    "theme"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "components",
+    "test",
+    "tests",
+    "pages",
+    "index.html",
+    "/js"
+  ],
+  "main": [
+    "public/css/tmlpstats.css",
+    "public/js/tmlpstats.js"
+  ],
+  "dependencies": {
+    "jquery-loading": "~1.1.0",
+    "jstz": "*",
+    "html5shiv": "~3.7.3",
+    "datatables-plugins": "~1.10.10",
+    "datatables": "~1.10.10",
+    "bootstrap": "~3.3.5",
+    "jquery": "~2.1.4",
+    "respond": "~1.4.2",
+    "font-awesome": "~4.4.0",
+    "sb-admin-2": "*",
+    "bootstrap-vertical-tabs": "~1.2.1",
+    "datatables.net": "~1.10.10",
+    "datatables.net-bs": "~1.10.10",
+    "world-flags-sprite": "*",
+    "moment": "~2.10.6"
+  },
+  "homepage": "https://github.com/pdarg/tmlpstats",
+  "authors": [
+    "Peter <peter.argue@gmail.com>"
+  ],
+  "description": "",
+  "moduleType": [],
+  "license": "MIT",
+  "private": true
+}
