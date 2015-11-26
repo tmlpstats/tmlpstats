@@ -103,8 +103,6 @@ class ImportDocument extends ImportDocumentAbstract
 
         $this->reportingDate = Util::getExcelDate($reportingDate);
 
-        Util::setReportDate($this->reportingDate);
-
         if (!$this->reportingDate) {
             // Parse international dates properly
             $this->reportingDate = Util::parseUnknownDateFormat($reportingDate);
@@ -113,6 +111,10 @@ class ImportDocument extends ImportDocumentAbstract
 
         if (!$this->reportingDate || $this->reportingDate->lt(Carbon::create(1980,1,1,0,0,0))) {
             $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_DATE_NOT_FOUND', $reportingDate);
+        }
+
+        if ($this->reportingDate) {
+            Util::setReportDate($this->reportingDate);
         }
     }
 
