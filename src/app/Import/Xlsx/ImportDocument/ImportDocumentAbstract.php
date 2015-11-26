@@ -146,6 +146,7 @@ abstract class ImportDocumentAbstract extends \TmlpStats\Import\ImportDocument
     {
         $expectedSheets = $this->naSheetNames;
         array_push($expectedSheets, 'Accountability Roster');
+        array_push($expectedSheets, 'FutureTracker');
         array_push($expectedSheets, 'Instructions - Revision History');
 
         return $this->hasExpectedSheets($inputWorksheetNames, $expectedSheets);
