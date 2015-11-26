@@ -82,7 +82,7 @@ class ImportDocument extends ImportDocumentAbstract
 
         $this->center = Center::name($centerName)->first();
         if (!$this->center) {
-            $centerListObjects = Center::globalRegion(Auth::user()->homeRegion())->orderBy('name')->get();
+            $centerListObjects = Center::byRegion(Auth::user()->homeRegion())->orderBy('name')->get();
             $centerList = array();
 
             foreach ($centerListObjects as $center) {
