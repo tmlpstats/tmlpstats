@@ -1,10 +1,12 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
+use TmlpStats\Import\ImportManager;
 use TmlpStats\Region;
 
 use Auth;
@@ -43,10 +45,8 @@ abstract class Controller extends BaseController
             Session::set('viewRegionId', $region->id);
         }
 
-        if (!$region) {
-            if (Session::has('viewRegionId')) {
-                $region = Region::find(Session::get('viewRegionId'));
-            }
+        if (!$region && Session::has('viewRegionId')) {
+            $region = Region::find(Session::get('viewRegionId'));
         }
 
         if (!$region) {
@@ -62,5 +62,29 @@ abstract class Controller extends BaseController
         }
 
         return $this->region = $region;
+    }
+
+    public function getReportingDate(Request $request, $reportingDates = [])
+    {
+        $reportingDate = null;
+        $reportingDateString = '';
+        if ($request->has('reportingDate')) {
+            $reportingDateString = $request->get('reportingDate');
+            Session::set('viewReportingDate', $reportingDateString);
+        }
+
+        if (!$reportingDateString && Session::has('viewReportingDate')) {
+            $reportingDateString = Session::get('viewReportingDate');
+        }
+
+        if ($reportingDateString && in_array($reportingDateString, $reportingDates)) {
+            $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
+        } else if (!$reportingDateString && $reportingDates) {
+            $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDates[0]);
+        } else {
+            $reportingDate = ImportManager::getExpectedReportDate();
+        }
+
+        return $reportingDate->startOfDay();
     }
 }

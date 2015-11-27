@@ -169,11 +169,9 @@ class StatsReportController extends ReportDispatchAbstractController
 
         // Other Stats Reports
         $otherStatsReports = array();
-        $searchWeek = clone $statsReport->quarter->startWeekendDate;
+        $searchWeek = clone $statsReport->quarter->endWeekendDate;
 
-        $searchWeek->addWeek();
-
-        while ($searchWeek->lte($statsReport->quarter->endWeekendDate)) {
+        while ($searchWeek->gte($statsReport->quarter->startWeekendDate)) {
             $globalReport = GlobalReport::reportingDate($searchWeek)->first();
             if ($globalReport) {
                 $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
@@ -181,7 +179,26 @@ class StatsReportController extends ReportDispatchAbstractController
                     $otherStatsReports[$report->id] = $report->reportingDate->format('M d, Y');
                 }
             }
-            $searchWeek->addWeek();
+            $searchWeek->subWeek();
+        }
+
+        // Only show last quarter's completion report on the first week
+        if ($statsReport->reportingDate->diffInWeeks($statsReport->quarter->startWeekendDate) > 1) {
+            array_pop($otherStatsReports);
+        }
+
+        // When showing last quarter's data, make sure we also show this week's report
+        if ($statsReport->quarter->endWeekendDate->lt(Carbon::now())) {
+            $firstWeek = clone $statsReport->quarter->endWeekendDate;
+            $firstWeek->addWeek();
+
+            $globalReport = GlobalReport::reportingDate($firstWeek)->first();
+            if ($globalReport) {
+                $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
+                if ($report) {
+                    $otherStatsReports = [$report->id => $report->reportingDate->format('M d, Y')] + $otherStatsReports;
+                }
+            }
         }
 
         $globalReport = GlobalReport::reportingDate($statsReport->reportingDate)->first();
