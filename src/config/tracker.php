@@ -16,7 +16,7 @@ return [
 	 * Which environments are not trackable?
 	 */
 	'do_not_track_environments' => [
-		//'local',
+		'local',
         'stage',
 	],
 
