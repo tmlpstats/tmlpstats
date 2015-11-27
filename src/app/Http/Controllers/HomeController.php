@@ -25,6 +25,11 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
+        if (Gate::denies('index', StatsReport::class)) {
+            // If they aren't allowed to see the full home page, just return a blank home page
+            return view('home');
+        }
+
         $this->authorize('index', StatsReport::class);
 
         $timezone = '';
