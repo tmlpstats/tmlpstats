@@ -89,8 +89,11 @@ class MergeDuplicatePeople extends Command
             $this->line("----");
             $this->line("Inspecting person {$person->id}: {$person->firstName} {$person->lastName}");
 
-            if ($person->centerId != $primary->centerId) {
+            if ($person->centerId && $primary->centerId && $person->centerId != $primary->centerId) {
                 $this->line("Primary {$primary->id} is from {$primary->center->name}, but person {$person->id} is from {$person->center->name}. Skipping");
+                continue;
+            } else if ($person->centerId && !$primary->centerId) {
+                $this->line("Primary {$primary->id} does not have a center, but person {$person->id} is from {$person->center->name}. Person will loose their center settings. Please correct. Skipping");
                 continue;
             }
 
