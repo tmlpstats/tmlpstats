@@ -37,17 +37,25 @@ class ClassListReader extends ReaderAbstract
         // Set to values that we know are within the quarter
         switch($month)
         {
-            case 'Nov':
-                $quarterString = "Q4-{$year}";
-                break;
+            case 'Jan':
             case 'Feb':
+            case 'Mar':
                 $quarterString = "Q1-{$year}";
                 break;
+            case 'Apr':
             case 'May':
+            case 'Jun':
                 $quarterString = "Q2-{$year}";
                 break;
+            case 'Jul':
             case 'Aug':
+            case 'Sep':
                 $quarterString = "Q3-{$year}";
+                break;
+            case 'Oct':
+            case 'Nov':
+            case 'Dec':
+                $quarterString = "Q4-{$year}";
                 break;
             default:
         }
