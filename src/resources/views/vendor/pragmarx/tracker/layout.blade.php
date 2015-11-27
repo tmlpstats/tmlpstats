@@ -7,21 +7,21 @@
 
     <title>Laravel Stats Tracker</title>
 
-    <script type="text/javascript" src="{{ asset('/components/jquery/dist/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset("{$stats_template_path}/jquery/dist/jquery.min.js") }}"></script>
 
     @yield('required-scripts-top')
 
-    <link href="{{ asset('/components/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet" />
-    <link href="{{ asset('/components/sb-admin-2/css/plugins/dataTables.bootstrap.css') }}" rel="stylesheet" />
-    <link href="{{ asset('/components/sb-admin-2/css/plugins/metisMenu/metisMenu.min.css') }}" rel="stylesheet" />
-    <link href="{{ asset('/components/sb-admin-2/css/plugins/morris.css') }}" rel="stylesheet" />
-    <link href="{{ asset('/components/sb-admin-2/css/plugins/timeline.css') }}" rel="stylesheet" />
-    <link href="{{ asset('/components/sb-admin-2/css/bootstrap.min.css') }}" rel="stylesheet" />
-    <link href="{{ asset('/components/sb-admin-2/css/sb-admin-2.css') }}" rel="stylesheet" />
-    <link href="{{ asset('/components/sb-admin-2/css/sb-admin-2.css') }}" rel="stylesheet" />
-    <link href="{{ asset('/components/world-flags-sprite/stylesheets/flags16.css') }}" rel="stylesheet" />
+    <link href="{{ asset("{$stats_template_path}/sb-admin-2/font-awesome-4.1.0/css/font-awesome.min.css") }}" rel="stylesheet" />
+    <link href="{{ asset("{$stats_template_path}/sb-admin-2/css/plugins/dataTables.bootstrap.css") }}" rel="stylesheet" />
+    <link href="{{ asset("{$stats_template_path}/sb-admin-2/css/plugins/metisMenu/metisMenu.min.css") }}" rel="stylesheet" />
+    <link href="{{ asset("{$stats_template_path}/sb-admin-2/css/plugins/morris.css") }}" rel="stylesheet" />
+    <link href="{{ asset("{$stats_template_path}/sb-admin-2/css/plugins/timeline.css") }}" rel="stylesheet" />
+    <link href="{{ asset("{$stats_template_path}/sb-admin-2/css/bootstrap.min.css") }}" rel="stylesheet" />
+    <link href="{{ asset("{$stats_template_path}/sb-admin-2/css/sb-admin-2.css") }}" rel="stylesheet" />
+    <link href="{{ asset("{$stats_template_path}/sb-admin-2/css/sb-admin-2.css") }}" rel="stylesheet" />
+    <link href="{{ asset("{$stats_template_path}/world-flags-sprite/stylesheets/flags16.css") }}" rel="stylesheet" />
 
-    <link href="{{ asset('/components/datatables/media/css/jquery.dataTables.min.css') }}" rel="stylesheet" />
+    <link href="{{ asset("{$stats_template_path}/datatables/media/css/jquery.dataTables.min.css") }}" rel="stylesheet" />
 </head>
 
 <body>
@@ -112,15 +112,15 @@
 <!-- /#wrapper -->
 
 <!-- Core Scripts - Include with every page -->
-<script src="{{ asset('/components/sb-admin-2/js/bootstrap.min.js') }}" type="text/javascript"></script>
-<script src="{{ asset('/components/sb-admin-2/js/plugins/metisMenu/metisMenu.min.js') }}" type="text/javascript"></script>
-<script src="{{ asset('/components/sb-admin-2/js/plugins/morris/raphael.min.js') }}" type="text/javascript"></script>
-<script src="{{ asset('/components/sb-admin-2/js/plugins/morris/morris.min.js') }}" type="text/javascript"></script>
+<script src="{{ asset("{$stats_template_path}/sb-admin-2/js/bootstrap.min.js") }}" type="text/javascript"></script>
+<script src="{{ asset("{$stats_template_path}/sb-admin-2/js/plugins/metisMenu/metisMenu.min.js") }}" type="text/javascript"></script>
+<script src="{{ asset("{$stats_template_path}/sb-admin-2/js/plugins/morris/raphael.min.js") }}" type="text/javascript"></script>
+<script src="{{ asset("{$stats_template_path}/sb-admin-2/js/plugins/morris/morris.min.js") }}" type="text/javascript"></script>
 
 <!-- SB Admin Scripts - Include with every page -->
-<script src="{{ asset('/components/sb-admin-2/js/sb-admin-2.js') }}" type="text/javascript"></script>
-<script src="{{ asset('/components/moment/min/moment.min.js') }}" type="text/javascript"></script>
-<script src="{{ asset('/components/datatables.net/js/jquery.dataTables.min.js') }}" type="text/javascript"></script>
+<script src="{{ asset("{$stats_template_path}/sb-admin-2/js/sb-admin-2.js") }}" type="text/javascript"></script>
+<script src="{{ asset("{$stats_template_path}/moment/min/moment.min.js") }}" type="text/javascript"></script>
+<script src="{{ asset("{$stats_template_path}/datatables.net/js/jquery.dataTables.min.js") }}" type="text/javascript"></script>
 
 @yield('required-scripts-bottom')
 

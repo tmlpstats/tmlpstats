@@ -299,6 +299,11 @@ return [
 	'stats_routes_middleware' => ['auth', 'role:administrator'],
 
     /**
+     * Stats Panel template path
+     */
+    'stats_template_path' => '/components',
+
+    /**
      * Stats Panel base uri.
      *
      * If your site url is http://wwww.mysite.com, then your stats page will be:
