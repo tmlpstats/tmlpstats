@@ -26,6 +26,7 @@ class ContactInfoValidator extends ObjectsValidatorAbstract
         if ($data->accountability == 'Reporting Statistician') {
             $emailValidator = v::alwaysValid();
         } else if (preg_match('/^N\/?A$/i', $data->name)) {
+            $this->skipped = true;
             return; // Skip rows with names == NA or N/A
         }
 
@@ -37,6 +38,27 @@ class ContactInfoValidator extends ObjectsValidatorAbstract
 
     protected function validate($data)
     {
+        if (!$this->validateName($data)) {
+            $this->isValid = false;
+        }
+
         return $this->isValid;
+    }
+
+    protected function validateName($data)
+    {
+        $isValid = true;
+
+        if (strpos($data->name, '/') !== false) {
+            $this->addMessage('CONTACTINFO_SLASHES_FOUND');
+            $isValid = false;
+        }
+
+        if (strtolower($data->name) == 'not applicable' || !$data->name) {
+            $this->addMessage('CONTACTINFO_NO_NAME', $data->accountability);
+            $isValid = false;
+        }
+
+        return $isValid;
     }
 }

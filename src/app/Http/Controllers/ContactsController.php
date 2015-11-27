@@ -85,7 +85,6 @@ class ContactsController extends Controller
         //
     }
 
-
     public function getByStatsReport(StatsReport $statsReport)
     {
         // Contacts
@@ -93,10 +92,10 @@ class ContactsController extends Controller
         $accountabilities = array(
             'programManager',
             'classroomLeader',
-            'team1TeamLeader',
-            'team2TeamLeader',
-            'teamStatistician',
-            'teamStatisticianApprentice',
+            't1tl',
+            't2tl',
+            'statistician',
+            'statisticianApprentice',
         );
         foreach ($accountabilities as $accountability) {
             $accountabilityObj = Accountability::name($accountability)->first();

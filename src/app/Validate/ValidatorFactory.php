@@ -21,6 +21,10 @@ class ValidatorFactory
             case 'statsReport':
                 $class = '\\TmlpStats\\Validate\\Objects\\' . ucfirst($type) . 'Validator';
                 break;
+            case 'committedTeamMember':
+            case 'contactInfoTeamMember':
+            case 'duplicateTeamMember':
+            case 'duplicateTmlpRegistration':
             case 'teamExpansion':
             case 'centerGames':
                 $class = '\\TmlpStats\\Validate\\Relationships\\' . ucfirst($type) . 'Validator';

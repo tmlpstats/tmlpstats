@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel {
         Commands\ReportsWiki::class,
         Commands\FlushReportsCacheCommand::class,
         Commands\SanitizeDb::class,
+        Commands\MergeDuplicatePeople::class,
     ];
 
     /**

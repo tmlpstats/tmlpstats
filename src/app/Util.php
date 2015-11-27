@@ -105,6 +105,17 @@ class Util
         return static::$reportDate ?: Carbon::now()->startOfDay();
     }
 
+    public static function now($includeTime = false)
+    {
+        $date = static::getReportDate();
+
+        if ($includeTime && $date->eq(Carbon::now()->startOfDay())) {
+            $date = Carbon::now();
+        }
+
+        return $date;
+    }
+
     public static function getNameParts($name)
     {
         $parts = array(
@@ -117,10 +128,19 @@ class Util
         }
 
         $names = explode(' ', trim($name));
-        if ($names && count($names) > 0) {
-            $parts['firstName'] = $names[0];
-            if (count($names) > 1) {
-                $parts['lastName'] = trim(str_replace('.', '', $names[1]));
+
+        $partsCount = count($names);
+        if ($names && $partsCount > 0) {
+            // For names Like 'Mary Louise C'
+            if ($partsCount > 2) {
+                $parts['firstName'] = implode(' ', array_slice($names, 0, -1));
+                $parts['firstName'] = trim($parts['firstName']);
+                $parts['lastName'] = trim(str_replace('.', '', $names[$partsCount - 1]));
+            } else {
+                $parts['firstName'] = trim($names[0]);
+                if ($partsCount > 1) {
+                    $parts['lastName'] = trim(str_replace('.', '', $names[1]));
+                }
             }
         }
         return $parts;

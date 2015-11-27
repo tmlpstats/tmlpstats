@@ -30,7 +30,7 @@
                             <td>{{ $memberData->lastName }}</td>
                             <td style="text-align: center">{{ $quarterNumber }}</td>
                             <td><?php
-                                $accountabilities = $memberData->teamMember->person->accountabilities()->get();
+                                $accountabilities = $memberData->teamMember->accountabilities;
 
                                 if ($accountabilities) {
                                     $accountabilityNames = array();

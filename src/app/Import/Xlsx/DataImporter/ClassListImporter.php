@@ -1,17 +1,15 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use TmlpStats\Accountability;
+use TmlpStats\CenterStatsData;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\Quarter;
 use TmlpStats\TeamMember;
 use TmlpStats\TeamMemberData;
-use TmlpStats\CenterStats;
-use TmlpStats\CenterStatsData;
-
-use Carbon\Carbon;
+use TmlpStats\WithdrawCode;
 
 use Log;
-use TmlpStats\WithdrawCode;
 
 class ClassListImporter extends DataImporterAbstract
 {
@@ -147,8 +145,12 @@ class ClassListImporter extends DataImporterAbstract
                 'team_quarter'        => $memberQuarterNumber,
             ));
 
-            // For now, we'll drop this and only keep the ones we get from the Contact Info tab
-            // $member->accountability = $memberInput['accountability'];
+            $accountability = $memberInput['accountability']
+                ? $this->getAccountability($memberInput['accountability'])
+                : null;
+            if ($accountability) {
+                $member->person->addAccountability($accountability);
+            }
 
             if ($member->isDirty()) {
                 $member->save();
@@ -222,5 +224,34 @@ class ClassListImporter extends DataImporterAbstract
             $data->tdo = $tdoActual;
             $data->save();
         }
+    }
+
+    public function getAccountability($name)
+    {
+        $name = strtolower($name);
+
+        $accountabilityName = '';
+        switch ($name) {
+            case 'cap':
+            case 'cpc':
+            case 't1x':
+            case 't2x':
+            case 'gitw':
+            case 'lf':
+                $accountabilityName = $name;
+                break;
+            case 'log':
+            case 'logistics':
+                $accountabilityName = 'logistics';
+                break;
+        }
+        // Intentionally skipping accountabilities imported on the contact page
+
+        $accountability = null;
+        if ($accountabilityName) {
+            $accountability = Accountability::name($name)->first();
+        }
+
+        return $accountability;
     }
 }

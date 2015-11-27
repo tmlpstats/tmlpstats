@@ -97,47 +97,7 @@ class ContactInfoImporter extends DataImporterAbstract
                 continue;
             }
 
-            $nameParts = Util::getNameParts($leader['name']);
-
-            $member = null;
-
-            $possibleMembers = Person::firstName($nameParts['firstName'])
-                ->lastName($nameParts['lastName'])
-                ->byCenter($this->statsReport->center)
-                ->get();
-
-            // If we didn't find anyone, then try with just the first letter
-            if ($possibleMembers->isEmpty() && strlen($nameParts['lastName']) > 1) {
-                $possibleMembers = Person::firstName($nameParts['firstName'])
-                    ->lastName($nameParts['lastName'][0]) // Just the first letter
-                    ->byCenter($this->statsReport->center)
-                    ->get();
-            }
-
-            if ($possibleMembers->count() == 1) {
-                $member = $possibleMembers->first();
-            } else if ($possibleMembers->count() > 1) {
-                $sameEmailMembers = $possibleMembers->where('email', '=', $leader['email']);
-
-                if ($sameEmailMembers->count() == 1) {
-                    $member = $sameEmailMembers->first();
-                } else {
-                    $teamMembers = $possibleMembers->where('identifier', 'LIKE', 'q:%');
-                    if ($teamMembers->count() == 1) {
-                        $member = $teamMembers->first();
-                    }
-                }
-            }
-            // TODO: if accountable should be a team member, tell user they need to double check the names match exactly
-            //       with a team member on the class list
-
-            if (!$member) {
-                $member = Person::create([
-                    'center_id'     => $this->statsReport->center->id,
-                    'first_name'    => $nameParts['firstName'],
-                    'last_name'     => trim(str_replace('.', '', $nameParts['lastName'])),
-                ]);
-            }
+            $member = $this->getPerson($leader);
 
             if ($accountability && !$member->hasAccountability($accountability)) {
 
@@ -162,22 +122,66 @@ class ContactInfoImporter extends DataImporterAbstract
         }
     }
 
+    protected function getPerson($leader)
+    {
+        $nameParts = Util::getNameParts($leader['name']);
+
+        $member = null;
+
+        $possibleMembers = Person::firstName($nameParts['firstName'])
+            ->lastName($nameParts['lastName'])
+            ->byCenter($this->statsReport->center)
+            ->get();
+
+        if ($possibleMembers->count() == 1) {
+            $member = $possibleMembers->first();
+        } else if ($possibleMembers->count() > 1) {
+
+            // There are multiple people with that name at this center. Try searching by email
+            $sameEmailMembers = $possibleMembers->where('email', '=', $leader['email'])->get();
+
+            if ($sameEmailMembers->count() > 0) {
+                // If we found any, it's for sure the same person
+                $member = $sameEmailMembers->first();
+            } else {
+                // If not, try searching for just team members
+                $teamMembers = $possibleMembers->where('identifier', 'LIKE', 'q:%')->get();
+                if ($teamMembers->count() > 0) {
+                    // If we found any, good enough
+                    $member = $teamMembers->first();
+                } else {
+                    // fine, just give me the first one
+                    $member = $possibleMembers->first();
+                }
+            }
+        }
+
+        if (!$member) {
+            $member = Person::create([
+                'center_id'     => $this->statsReport->center->id,
+                'first_name'    => $nameParts['firstName'],
+                'last_name'     => $nameParts['lastName'],
+            ]);
+        }
+
+        return $member;
+    }
+
     protected function mapAccountabilities($displayString)
     {
-
         switch ($displayString) {
             case 'Program Manager':
                 return 'programManager';
             case 'Classroom Leader':
                 return 'classroomLeader';
             case 'Team 1 Team Leader':
-                return 'team1TeamLeader';
+                return 't1tl';
             case 'Team 2 Team Leader':
-                return 'team2TeamLeader';
+                return 't2tl';
             case 'Statistician':
-                return 'teamStatistician';
+                return 'statistician';
             case 'Statistician Apprentice':
-                return 'teamStatisticianApprentice';
+                return 'statisticianApprentice';
             default:
                 return null;
         }
