@@ -16,7 +16,7 @@ return [
 	 * Which environments are not trackable?
 	 */
 	'do_not_track_environments' => [
-		'local',
+		//'local',
         'stage',
 	],
 
@@ -297,6 +297,11 @@ return [
 	 *
 	 */
 	'stats_routes_middleware' => ['auth', 'role:administrator'],
+
+    /**
+     * Stats Panel template path
+     */
+    'stats_template_path' => '/components',
 
     /**
      * Stats Panel base uri.

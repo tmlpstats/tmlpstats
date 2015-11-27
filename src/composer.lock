@@ -2254,7 +2254,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/antonioribeiro/support/zipball/b3be90e32c0b44a5a30a4f4aa103d9c096ff6af0",
+                "url": "https://api.github.com/repos/antonioribeiro/support/zipball/ba98bd6fdc250172d6ef0ac1d900cd3aeaa22d75",
                 "reference": "b3be90e32c0b44a5a30a4f4aa103d9c096ff6af0",
                 "shasum": ""
             },
@@ -2300,16 +2300,16 @@
         },
         {
             "name": "pragmarx/tracker",
-            "version": "v1.0.7",
+            "version": "v1.0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/antonioribeiro/tracker.git",
-                "reference": "e53dfe36775825873e78d5b8306c40684465cccb"
+                "reference": "2186c68ad3b7e4921dd8e6ef422a93c7fa9023e8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/antonioribeiro/tracker/zipball/e53dfe36775825873e78d5b8306c40684465cccb",
-                "reference": "e53dfe36775825873e78d5b8306c40684465cccb",
+                "url": "https://api.github.com/repos/antonioribeiro/tracker/zipball/2186c68ad3b7e4921dd8e6ef422a93c7fa9023e8",
+                "reference": "2186c68ad3b7e4921dd8e6ef422a93c7fa9023e8",
                 "shasum": ""
             },
             "require": {
@@ -2363,7 +2363,7 @@
                 "user agent",
                 "visitor"
             ],
-            "time": "2015-11-22 14:47:02"
+            "time": "2015-11-24 00:41:12"
         },
         {
             "name": "psr/http-message",

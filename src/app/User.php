@@ -98,6 +98,11 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         $this->reportToken = $reportToken;
     }
 
+    public function isAdmin()
+    {
+        return $this->hasRole('administrator');
+    }
+
     public function hasAccountability($name)
     {
         return $this->person
