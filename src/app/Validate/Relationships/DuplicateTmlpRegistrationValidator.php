@@ -12,7 +12,7 @@ class DuplicateTmlpRegistrationValidator extends ValidatorAbstract
 
     protected function validate($data)
     {
-        $first = trim(str_replace('.', '', strtolower($data->firstName)));
+        $first = strtolower($data->firstName);
         $last = trim(str_replace('.', '', strtolower($data->lastName)));
 
         if (isset(static::$names[$first][$last]) ) {
