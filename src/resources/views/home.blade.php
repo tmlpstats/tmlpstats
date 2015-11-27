@@ -2,8 +2,8 @@
 
 @section('content')
     @cannot ('index', TmlpStats\StatsReport::class)
-        Welcome to your dashboard. If you think you should have access to this site, please contact your
-        regional statistician.
+    <h1>Welcome {{ Auth::user()->firstName }}</h1>
+    <p>It looks like your account isn't completely setup. Please contact <strong>future.tmlpstat@gmail.com</strong> and they will make sure you get access to everything you need.</p>
     @else
         <h1>Results for Week Ending {{ $reportingDate->format('F j, Y') }}</h1>
 
