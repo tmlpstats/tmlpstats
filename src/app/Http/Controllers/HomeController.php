@@ -35,7 +35,7 @@ class HomeController extends Controller
         $region = $this->getRegion($request);
 
         $allReports = StatsReport::currentQuarter($region)->submitted()->orderBy('reporting_date', 'desc')->get();
-        if ($allReports->isEmpty()) {
+        if ($allReports->isEmpty() || $allReports->count() == 1) {
             $allReports = StatsReport::lastQuarter($region)->submitted()->orderBy('reporting_date', 'desc')->get();
         }
 
@@ -50,22 +50,7 @@ class HomeController extends Controller
             $reportingDates[$dateString] = $report->reportingDate->format('F j, Y');
         }
 
-        $reportingDate = null;
-        $reportingDateString = Input::has('reportingDate')
-            ? Input::get('reportingDate')
-            : '';
-
-        if ($reportingDateString && isset($reportingDates[$reportingDateString])) {
-            $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
-        } else if ($today->dayOfWeek == Carbon::FRIDAY) {
-            $reportingDate = $today;
-        } else if (!$reportingDate && $reportingDates) {
-            $reportingDate = $allReports[0]->reportingDate;
-        } else {
-            $reportingDate = ImportManager::getExpectedReportDate();
-        }
-
-        $reportingDate = $reportingDate->startOfDay();
+        $reportingDate = $this->getReportingDate($request, array_keys($reportingDates));
 
         $centers = Center::active()
             ->byRegion($region)
