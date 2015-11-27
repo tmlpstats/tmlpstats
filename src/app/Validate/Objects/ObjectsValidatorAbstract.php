@@ -11,11 +11,17 @@ abstract class ObjectsValidatorAbstract extends ValidatorAbstract
 {
     protected $dataValidators = array();
     protected $reader = null;
+    protected $skipped = false;
 
-    public function run($data)
+    public function run($data, $supplementalData = null)
     {
         $this->data = $data;
+        $this->supplementalData = $supplementalData;
         $this->populateValidators($data);
+
+        if ($this->skipped) {
+            return $this->isValid;
+        }
 
         foreach ($this->dataValidators as $field => $validator)
         {

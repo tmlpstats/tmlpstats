@@ -6,6 +6,8 @@ use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Model;
 use TmlpStats\Traits\CachedRelationships;
 
+use Carbon\Carbon;
+
 class Person extends Model
 {
     use CamelCaseModel, CachedRelationships;
@@ -19,9 +21,95 @@ class Person extends Model
         'identifier',
     ];
 
+    public function __get($name)
+    {
+        if ($name == 'accountabilities') {
+            return $this->getAccountabilities();
+        } else {
+            return parent::__get($name);
+        }
+    }
+
+    /**
+     * Find a person by their first and last name, and center.
+     *
+     * This will do a best effort search for the person. It will try various combinations of
+     * name tweaks until it has found someone.
+     *
+     * @param            $first
+     * @param            $last
+     * @param            $center
+     * @param bool|false $recursed
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    protected static function findByName($first, $last, $center, $replaced = false)
+    {
+        $possibleMembers = Person::firstName($first)
+            ->lastName($last)
+            ->byCenter($center)
+            ->get();
+
+        // If we didn't find anyone. Maybe they gave their first name here.
+        // Try with just the first letter
+        if ($possibleMembers->isEmpty() && strlen($last) > 1) {
+            $possibleMembers = Person::firstName($first)
+                ->lastName($last[0]) // Just the first letter
+                ->byCenter($center)
+                ->get();
+        }
+
+        // If we still haven't found one, try some common character replacements
+        // Careful not to get yourself into a loop
+        if ($possibleMembers->isEmpty()) {
+            $newFirst = '';
+            if ($replaced !== '-' && strpos($first, '-') !== false) {
+                $newFirst = str_replace('-', ' ', $first);
+                $replaced = '-';
+            } else if ($replaced !== '-' && strpos($first, ' ') !== false) {
+                $newFirst = str_replace(' ', '-', $first);
+                $replaced = '-';
+            } else if ($replaced !== '.' && strpos($first, '.') !== false) {
+                $newFirst = str_replace('.', '', $first);
+                $replaced = '.';
+            } else if ($replaced !== 'accent') {
+                // Maybe there's an accent in the new one, but not in the existing one.
+                $newFirst = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $first);
+                $replaced = 'accent';
+            }
+            if ($newFirst) {
+                $possibleMembers = static::findByName($newFirst, $last, $center, $replaced);
+            }
+        }
+
+        return $possibleMembers;
+    }
+
+    public function getAccountabilities()
+    {
+        $allAccountabilities = $this->accountabilities()->get();
+
+        $accountabilities = [];
+        foreach ($allAccountabilities as $myAccountability) {
+            $startsAt = $myAccountability->pivot->starts_at
+                ? Carbon::createFromFormat('Y-m-d H:i:s', $myAccountability->pivot->starts_at)
+                : null;
+
+            $endsAt = $myAccountability->pivot->ends_at
+                ? Carbon::createFromFormat('Y-m-d H:i:s', $myAccountability->pivot->ends_at)
+                : null;
+
+            if ($startsAt && $startsAt->lte(Util::now()) && ($endsAt === null || $endsAt->gt(Util::now()))) {
+                $accountabilities[] = $myAccountability;
+            }
+        }
+
+        return $accountabilities;
+    }
+
     public function hasAccountability(Accountability $accountability)
     {
-        $accountabilities = $this->accountabilities()->get();
+        $accountabilities = $this->getAccountabilities();
         foreach ($accountabilities as $myAccountability) {
             if ($myAccountability->id == $accountability->id) {
                 return true;
@@ -30,10 +118,11 @@ class Person extends Model
         return false;
     }
 
-    public function addAccountability(Accountability $accountability)
+    public function addAccountability(Accountability $accountability, Carbon $starts = null, Carbon $ends = null)
     {
         if (!$this->hasAccountability($accountability)) {
-            $this->accountabilities()->attach($accountability->id);
+            $starts = $starts ?: Util::now();
+            $this->accountabilities()->attach($accountability->id, ['starts_at' => $starts, 'ends_at' => $ends]);
         }
     }
 
@@ -43,7 +132,7 @@ class Person extends Model
             DB::table('accountability_person')
                 ->where('person_id', $this->id)
                 ->where('accountability_id', $accountability->id)
-                ->update(['active' => false]);
+                ->update(['ends_at' => Util::now()]);
         }
     }
 
@@ -79,7 +168,12 @@ class Person extends Model
     public function scopeByAccountability($query, $accountability)
     {
         return $query->whereHas('accountabilities', function ($query) use ($accountability) {
-            $query->whereName($accountability->name);
+            $query->whereName($accountability->name)
+                ->where('starts_at', '<=', Util::now())
+                ->where(function ($query) {
+                    $query->where('ends_at', '>', Util::now())
+                        ->orWhereNull('ends_at');
+                });
         });
     }
 
@@ -91,8 +185,7 @@ class Person extends Model
     public function accountabilities()
     {
         return $this->belongsToMany('TmlpStats\Accountability', 'accountability_person', 'person_id', 'accountability_id')
-            ->withPivot('active')
-            ->whereActive(true)
+            ->withPivot(['starts_at', 'ends_at'])
             ->withTimestamps();
     }
 

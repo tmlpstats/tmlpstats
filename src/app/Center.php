@@ -38,22 +38,22 @@ class Center extends Model
 
     public function getT1TeamLeader()
     {
-        return $this->getAccountable('team1TeamLeader');
+        return $this->getAccountable('t1tl');
     }
 
     public function getT2TeamLeader()
     {
-        return $this->getAccountable('team2TeamLeader');
+        return $this->getAccountable('t2tl');
     }
 
     public function getStatistician()
     {
-        return $this->getAccountable('teamStatistician');
+        return $this->getAccountable('statistician');
     }
 
     public function getStatisticianApprentice()
     {
-        return $this->getAccountable('teamStatisticianApprentice');
+        return $this->getAccountable('statisticianApprentice');
     }
 
     public function getAccountable($accountabilityName)

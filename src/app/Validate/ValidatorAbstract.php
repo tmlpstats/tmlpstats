@@ -10,6 +10,7 @@ abstract class ValidatorAbstract
 
     protected $isValid = true;
     protected $data = null;
+    protected $supplementalData = null;
     protected $statsReport = null;
 
     protected $messages = array();
@@ -31,9 +32,10 @@ abstract class ValidatorAbstract
         }
     }
 
-    public function run($data)
+    public function run($data, $supplementalData = null)
     {
         $this->data = $data;
+        $this->supplementalData = $supplementalData;
 
         $this->validate($data);
 
@@ -43,6 +45,27 @@ abstract class ValidatorAbstract
     public function getMessages()
     {
         return $this->messages;
+    }
+
+    /**
+     * Returns any working data that may be useful to other validators. This is helpful when checking
+     * relationships between data types and you've already done some preprocessing.
+     *
+     * @return array
+     */
+    public function getWorkingData()
+    {
+        return [];
+    }
+
+    /**
+     * Since sometime the working data is managed as static variables, we will call this method after the
+     * validation manager completes to cleanup any working data.
+     *
+     */
+    public function resetWorkingData()
+    {
+        // noop
     }
 
     abstract protected function validate($data);

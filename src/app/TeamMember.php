@@ -27,6 +27,7 @@ class TeamMember extends Model
             case 'firstName':
             case 'lastName':
             case 'center':
+            case 'accountabilities':
                 return $this->person->$name;
             case 'quarterNumber':
                 return static::getQuarterNumber($this->incomingQuarter, $this->person->center->region);
