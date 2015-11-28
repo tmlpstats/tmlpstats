@@ -15,11 +15,11 @@ class CommCourseInfoImporter extends DataImporterAbstract
     protected function populateSheetRanges()
     {
         $cap = $this->findRange(3, 'Course Start Date', 'Total (Open Courses):', 'B', 'A');
-        $this->blocks['cap']['cols'] = $this->excelRange('A','O');
+        $this->blocks['cap']['cols'] = $this->excelRange('A', 'O');
         $this->blocks['cap']['rows'] = $this->excelRange($cap['start'] + 1, $cap['end']);
 
         $cpc = $this->findRange($cap['end'], 'Course Start Date', 'Total (Open Courses):', 'B', 'A');
-        $this->blocks['cpc']['cols'] = $this->excelRange('A','O');
+        $this->blocks['cpc']['cols'] = $this->excelRange('A', 'O');
         $this->blocks['cpc']['rows'] = $this->excelRange($cpc['start'] + 1, $cpc['end']);
     }
 
@@ -33,9 +33,11 @@ class CommCourseInfoImporter extends DataImporterAbstract
 
     protected function loadEntry($row, $type)
     {
-        if ($this->reader->isEmptyCell($row,'B')) return;
+        if ($this->reader->isEmptyCell($row, 'B')) {
+            return;
+        }
 
-        $this->data[] = array(
+        $this->data[] = [
             'type'                       => $type,
             'offset'                     => $row,
             'location'                   => $this->reader->getLocation($row),
@@ -49,32 +51,35 @@ class CommCourseInfoImporter extends DataImporterAbstract
             'completedStandardStarts'    => $this->reader->getCompletedStandardStarts($row),
             'potentials'                 => $this->reader->getPotentials($row),
             'registrations'              => $this->reader->getRegistrations($row),
-        );
+            'guestsPromised'             => $this->reader->getGuestsPromised($row),
+            'guestsInvited'              => $this->reader->getGuestsInvited($row),
+            'guestsConfirmed'            => $this->reader->getGuestsConfirmed($row),
+            'guestsAttended'             => $this->reader->getGuestsAttended($row),
+        ];
     }
 
     public function postProcess()
     {
         foreach ($this->data as $courseInput) {
-
             if (isset($this->data['errors'])) {
                 continue;
             }
 
-            $course = Course::firstOrCreate(array(
+            $course = Course::firstOrCreate([
                 'center_id'  => $this->statsReport->center->id,
                 'start_date' => $courseInput['startDate'],
                 'type'       => $courseInput['type'],
-            ));
+            ]);
 
             if ($course->location != $courseInput['location']) {
                 $course->location = $courseInput['location'];
                 $course->save();
             }
 
-            $courseData = CourseData::firstOrNew(array(
+            $courseData = CourseData::firstOrNew([
                 'course_id'       => $course->id,
                 'stats_report_id' => $this->statsReport->id,
-            ));
+            ]);
 
             unset($courseInput['startDate']);
             unset($courseInput['type']);

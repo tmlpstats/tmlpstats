@@ -23,6 +23,10 @@ class CourseData extends Model
         'completed_standard_starts',
         'potentials',
         'registrations',
+        'guests_promised',
+        'guests_invited',
+        'guests_confirmed',
+        'guests_attended',
     ];
 
     public function __get($name)

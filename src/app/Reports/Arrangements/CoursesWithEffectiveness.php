@@ -32,6 +32,10 @@ class CoursesWithEffectiveness extends BaseArrangement
                 'completedStandardStarts',
                 'potentials',
                 'registrations',
+                'guestsPromised',
+                'guestsInvited',
+                'guestsConfirmed',
+                'guestsAttended',
             ];
 
             foreach ($copyFields as $field) {
@@ -45,6 +49,9 @@ class CoursesWithEffectiveness extends BaseArrangement
                 $course['completionStats']['registrationEffectiveness'] = $courseData->potentials
                     ? round(($courseData->registrations / $courseData->potentials) * 100)
                     : 0;
+                if ($courseData->guestsPromised) {
+                    $course['completionStats']['guestsGameEffectiveness'] = round(($courseData->guestsAttended / $courseData->guestsPromised) * 100);
+                }
 
                 $type = 'completed';
             }

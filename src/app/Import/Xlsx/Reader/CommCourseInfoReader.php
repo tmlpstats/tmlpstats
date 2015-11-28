@@ -3,17 +3,21 @@ namespace TmlpStats\Import\Xlsx\Reader;
 
 class CommCourseInfoReader extends ReaderAbstract
 {
-    protected $dataMap = array(
-        'location'                   => array('col' => 'A'),
-        'startDate'                  => array('col' => 'B', 'format' => 'date'),
-        'quarterStartTer'            => array('col' => 'C'),
-        'quarterStartStandardStarts' => array('col' => 'D'),
-        'quarterStartXfer'           => array('col' => 'E'),
-        'currentTer'                 => array('col' => 'F'),
-        'currentStandardStarts'      => array('col' => 'G'),
-        'currentXfer'                => array('col' => 'J'),
-        'completedStandardStarts'    => array('col' => 'L'),
-        'potentials'                 => array('col' => 'M'),
-        'registrations'              => array('col' => 'N'),
-    );
+    protected $dataMap = [
+        'location'                   => ['col' => 'A'],
+        'startDate'                  => ['col' => 'B', 'format' => 'date'],
+        'quarterStartTer'            => ['col' => 'C'],
+        'quarterStartStandardStarts' => ['col' => 'D'],
+        'quarterStartXfer'           => ['col' => 'E'],
+        'currentTer'                 => ['col' => 'F'],
+        'currentStandardStarts'      => ['col' => 'G'],
+        'currentXfer'                => ['col' => 'J'],
+        'completedStandardStarts'    => ['col' => 'L'],
+        'potentials'                 => ['col' => 'M'],
+        'registrations'              => ['col' => 'N'],
+        'guestsPromised'             => ['col' => 'P'],
+        'guestsInvited'              => ['col' => 'Q'],
+        'guestsConfirmed'            => ['col' => 'R'],
+        'guestsAttended'             => ['col' => 'S'],
+    ];
 }

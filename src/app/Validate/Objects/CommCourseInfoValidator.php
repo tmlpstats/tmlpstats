@@ -14,7 +14,7 @@ class CommCourseInfoValidator extends ObjectsValidatorAbstract
         $positiveIntNotNullValidator = v::when(v::nullValue(), v::alwaysInvalid(), $positiveIntValidator);
         $positiveIntOrNullValidator  = v::when(v::nullValue(), v::alwaysValid(), $positiveIntValidator);
 
-        $types = array('CAP', 'CPC');
+        $types = ['CAP', 'CPC'];
 
         $this->dataValidators['startDate']                  = v::date('Y-m-d');
         $this->dataValidators['location']                   = v::when(v::nullValue(), v::alwaysValid(), v::string());
@@ -28,6 +28,10 @@ class CommCourseInfoValidator extends ObjectsValidatorAbstract
         $this->dataValidators['completedStandardStarts']    = $positiveIntOrNullValidator;
         $this->dataValidators['potentials']                 = $positiveIntOrNullValidator;
         $this->dataValidators['registrations']              = $positiveIntOrNullValidator;
+        $this->dataValidators['guestsPromised']             = $positiveIntOrNullValidator;
+        $this->dataValidators['guestsInvited']              = $positiveIntOrNullValidator;
+        $this->dataValidators['guestsConfirmed']            = $positiveIntOrNullValidator;
+        $this->dataValidators['guestsAttended']             = $positiveIntOrNullValidator;
     }
 
     protected function validate($data)
@@ -39,6 +43,9 @@ class CommCourseInfoValidator extends ObjectsValidatorAbstract
             $this->isValid = false;
         }
         if (!$this->validateCourseStartDate($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateGuestGame($data)) {
             $this->isValid = false;
         }
 
@@ -145,6 +152,38 @@ class CommCourseInfoValidator extends ObjectsValidatorAbstract
             if ($data->currentXfer < (int)$data->quarterStartXfer) {
 
                 $this->addMessage('COMMCOURSE_CURRENT_XFER_LESS_THAN_QSTART_XFER', $data->currentXfer, $data->quarterStartXfer);
+            }
+        }
+
+        return $isValid;
+    }
+
+    public function validateGuestGame($data)
+    {
+        $isValid = true;
+
+        if (is_null($data->guestsPromised)) {
+            return $isValid;
+        }
+
+        $startDate = $this->getDateObject($data->startDate);
+        if ($startDate && $startDate->lt($this->statsReport->reportingDate)) {
+            if (is_null($data->guestsInvited)) {
+                $this->addMessage('COMMCOURSE_GUESTS_INVITED_MISSING');
+                $isValid = false;
+            }
+            if (is_null($data->guestsConfirmed)) {
+                $this->addMessage('COMMCOURSE_GUESTS_CONFIRMED_MISSING');
+                $isValid = false;
+            }
+            if (is_null($data->guestsAttended)) {
+                $this->addMessage('COMMCOURSE_GUESTS_ATTENDED_MISSING');
+                $isValid = false;
+            }
+        } else {
+            if (!is_null($data->guestsAttended)) {
+                $this->addMessage('COMMCOURSE_GUESTS_ATTENDED_PROVIDED_BEFORE_COURSE');
+                $isValid = false;
             }
         }
 
