@@ -248,7 +248,7 @@ class ImportManager
         $emails = array();
         foreach ($emailMap as $accountability => $email) {
 
-            if (!$email) {
+            if (!$email || $accountability == 'center') {
                 continue;
             }
 
@@ -309,7 +309,7 @@ class ImportManager
                     ));
                 }
             });
-            $successMessage = "<span style='font-weight:bold'>Thank you.</span> We received your statistics and have sent a copy to <ul><li>" . implode('</li><li>', $emails) . "</li></ul> Please reply-all to that email if there is anything you need to communicate.";
+            $successMessage = "<span style='font-weight:bold'>Thank you.</span> We received your statistics and have sent a copy to <ul><li>" . implode('</li><li>', array_values($emailMap)) . "</li></ul> Please reply-all to that email if there is anything you need to communicate.";
             if (env('APP_ENV') === 'prod') {
                 Log::info("Sent emails to the following people with team {$centerName}'s report: " . implode(', ', $emails));
             } else {
