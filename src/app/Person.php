@@ -132,7 +132,7 @@ class Person extends Model
             DB::table('accountability_person')
                 ->where('person_id', $this->id)
                 ->where('accountability_id', $accountability->id)
-                ->update(['ends_at' => Util::now()]);
+                ->update(['ends_at' => Util::now()->copy()->subSecond()]);
         }
     }
 
