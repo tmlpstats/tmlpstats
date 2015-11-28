@@ -7,9 +7,9 @@ use TmlpStats\Message;
 abstract class DataImporterAbstract
 {
     protected $sheetId = "";
-    protected $sheet = NULL;
-    protected $reader = NULL;
-    protected $statsReport = NULL;
+    protected $sheet = null;
+    protected $reader = null;
+    protected $statsReport = null;
     protected $blocks = [];
 
     protected $data = array();
@@ -18,11 +18,11 @@ abstract class DataImporterAbstract
 
     public function __construct(&$sheet, &$statsReport)
     {
-        if ($sheet == NULL)
+        if ($sheet == null)
         {
             throw new \Exception('An error occurred while processing request. Stats sheet not provided to data importer.');
         }
-        if ($statsReport == NULL)
+        if ($statsReport == null)
         {
             throw new \Exception('An error occurred while processing request. StatsReport not provided to data importer.');
         }
@@ -75,34 +75,47 @@ abstract class DataImporterAbstract
      */
     protected function findRange($startRow, $targetStartText, $targetEndText, $targetStartColumn = 'A', $targetEndColumn = null)
     {
-        $rangeStart = NULL;
-        $rangeEnd = NULL;
+        $maxSearchRows = 500;
+        $maxConsecutiveBlankRows = 3;
+
+        $rangeStart = null;
+        $rangeEnd = null;
 
         if ($targetEndColumn === null) {
             $targetEndColumn = $targetStartColumn;
         }
 
         $row = $startRow;
-        $searching = true;
         $maxRows = count($this->sheet);
-        $maxSearchRows = 500;
         $targetColumn = $targetStartColumn;
+
+        $searching = true;
+        $blankCount = 0;
         while ($searching && $row < $maxSearchRows) {
             $value = $this->sheet[$row][$targetColumn];
 
-            if ($rangeStart === NULL && $value == $targetStartText) {
+            if ($rangeStart === null && $value == $targetStartText) {
                 $rangeStart = $row + 1; // Range starts the row after start text
                 $targetColumn = $targetEndColumn;
             }
 
-            if ($rangeEnd === NULL && ($value == $targetEndText || $row >= $maxRows)) {
-                $rangeEnd = $row - 1; // Range ends the row before end text
-                $searching = false;
+            if ($rangeStart !== null) {
+                $searchValue = $this->sheet[$row][$targetStartColumn];
+                if ($searchValue === '' || $searchValue === null) {
+                    $blankCount++;
+                } else {
+                    $blankCount = 0;
+                }
+
+                if ($value == $targetEndText || $blankCount >= $maxConsecutiveBlankRows || $row >= $maxRows) {
+                    $rangeEnd = $row - 1; // Range ends the row before end text
+                    $searching = false;
+                }
             }
 
             $row++;
         }
-        if ($rangeEnd === NULL) {
+        if ($rangeEnd === null) {
             $rangeEnd = $row;
         }
 
@@ -119,7 +132,7 @@ abstract class DataImporterAbstract
         return ReaderFactory::build($readerType, $data);
     }
 
-    protected function loadBlock($blockParams, $arg=NULL)
+    protected function loadBlock($blockParams, $arg=null)
     {
         foreach ($blockParams['rows'] as $offset)
         {
