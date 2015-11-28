@@ -4,13 +4,13 @@ namespace TmlpStats;
 class Message
 {
     const EMERGENCY = 1;
-    const ALERT = 2;
-    const CRITICAL = 3;
-    const ERROR = 4;
-    const WARNING = 5;
-    const NOTICE = 6;
-    const INFO = 7;
-    const DEBUG = 8;
+    const ALERT     = 2;
+    const CRITICAL  = 3;
+    const ERROR     = 4;
+    const WARNING   = 5;
+    const NOTICE    = 6;
+    const INFO      = 7;
+    const DEBUG     = 8;
 
     // Message Definitions
     static $messageList = [
@@ -416,6 +416,26 @@ class Message
                 '%%quarterStartXfer%%',
             ],
         ],
+        'COMMCOURSE_GUESTS_INVITED_MISSING'                             => [
+            'type'      => Message::ERROR,
+            'format'    => "Course has completed but the guest game's number of people invited is missing.",
+            'arguments' => [],
+        ],
+        'COMMCOURSE_GUESTS_CONFIRMED_MISSING'                           => [
+            'type'      => Message::ERROR,
+            'format'    => "Course has completed but the guest game's number of people confirmed is missing.",
+            'arguments' => [],
+        ],
+        'COMMCOURSE_GUESTS_ATTENDED_MISSING'                            => [
+            'type'      => Message::ERROR,
+            'format'    => "Course has completed but the guest game's number of people who attended is missing.",
+            'arguments' => [],
+        ],
+        'COMMCOURSE_GUESTS_ATTENDED_PROVIDED_BEFORE_COURSE'             => [
+            'type'      => Message::ERROR,
+            'format'    => "Course has not completed yet, but the guest game shows that people have already attended.",
+            'arguments' => [],
+        ],
 
         // Class List Errors
         'CLASSLIST_GITW_LEAVE_BLANK'                                    => [
@@ -750,7 +770,7 @@ class Message
 
     public static function create($section)
     {
-        $me = new static();
+        $me          = new static();
         $me->section = $section;
 
         return $me;
@@ -758,7 +778,7 @@ class Message
 
     public function addMessage($messageId, $offset)
     {
-        $message = static::$messageList[$messageId];
+        $message   = static::$messageList[$messageId];
         $arguments = array_slice(func_get_args(), 2);
 
         $result = [
@@ -769,7 +789,7 @@ class Message
         ];
 
         if ($offset !== null) {
-            $result['offset'] = $offset;
+            $result['offset']     = $offset;
             $result['offsetType'] = $this->getOffsetType($offset);
         }
 
@@ -787,7 +807,7 @@ class Message
         $message = $format;
 
         for ($i = 0; $i < count($argumentNames); $i++) {
-            $name = $argumentNames[$i];
+            $name  = $argumentNames[$i];
             $value = $arguments[$i];
 
             $message = str_replace($name, $value, $message);
