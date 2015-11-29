@@ -1,6 +1,8 @@
 <?php
 namespace TmlpStats\Providers;
 
+use Blade;
+use Session;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider {
@@ -30,6 +32,17 @@ class AppServiceProvider extends ServiceProvider {
             \Illuminate\Contracts\Auth\Registrar::class,
             \TmlpStats\Services\Registrar::class
         );
+
+        Blade::directive('date', function($expression) {
+            $format = 'M j, Y';
+            if (Session::has('locale')) {
+                $format = Session::get('locale') == 'en-US'
+                    ? 'n/j/y'
+                    : 'j/n/y';
+            }
+
+            return "<?php echo with{$expression}->format('{$format}'); ?>";
+        });
     }
 
 }

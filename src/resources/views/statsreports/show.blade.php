@@ -60,84 +60,64 @@
         <div class="tab-content">
             <div class="tab-pane active" id="summary-tab">
                 <h3>Week Summary</h3>
-                <div id="summary-container">
-                    @include('partials.loading')
-                </div>
+                <div id="summary-container"></div>
             </div>
             <div class="tab-pane" id="overview-tab">
                 <h3>Report Details</h3>
                 @include('statsreports.details.overview', ['statsReport' => $statsReport, 'sheetUrl' => $sheetUrl])
                 <h3>Results</h3>
-                <div id="results-container">
-                    @include('partials.loading')
-                </div>
+                <div id="results-container"></div>
             </div>
             <div class="tab-pane" id="centerstats-tab">
                 <h3>Center Games</h3>
-                <div id="centerstats-container">
-                    @include('partials.loading')
-                </div>
+                <div id="centerstats-container"></div>
             </div>
             <div class="tab-pane" id="classlist-tab">
                 <h3>Team Members</h3>
                 <div class="btn-group" role="group">
-                    <button id ="classlist-button" type="button" class="btn btn-primary">Summary</button>
-                    <button id ="gitwsummary-button" type="button" class="btn btn-default">GITW</button>
-                    <button id ="tdosummary-button" type="button" class="btn btn-default">TDO</button>
+                    <button id ="classlist-button" type="button" class="btn">Summary</button>
+                    <button id ="gitwsummary-button" type="button" class="btn">GITW</button>
+                    <button id ="tdosummary-button" type="button" class="btn">TDO</button>
                 </div>
-                <div id="classlist-container">
-                    @include('partials.loading')
-                </div>
-                <div id="gitwsummary-container" style="display: none">
-                    @include('partials.loading')
-                </div>
-                <div id="tdosummary-container" style="display: none">
-                    @include('partials.loading')
-                </div>
+                <div id="classlist-container"></div>
+                <div id="gitwsummary-container"></div>
+                <div id="tdosummary-container"></div>
             </div>
             <div class="tab-pane" id="tmlpregistrations-tab">
                 <h3>Team Expansion</h3>
                 <div class="btn-group" role="group">
-                    <button id ="tmlpregistrations-button" type="button" class="btn btn-primary">By Team Year</button>
-                    <button id ="tmlpregistrationsbystatus-button" type="button" class="btn btn-default">By Status</button>
+                    <button id ="tmlpregistrations-button" type="button" class="btn">By Team Year</button>
+                    <button id ="tmlpregistrationsbystatus-button" type="button" class="btn">By Status</button>
                 </div>
-                <div id="tmlpregistrations-container">
-                    @include('partials.loading')
-                </div>
-                <div id="tmlpregistrationsbystatus-container" style="display: none">
-                    @include('partials.loading')
-                </div>
+                <div id="tmlpregistrations-container"></div>
+                <div id="tmlpregistrationsbystatus-container"></div>
             </div>
             <div class="tab-pane" id="courses-tab">
                 <h3>Courses</h3>
-                <div id="courses-container">
-                    @include('partials.loading')
-                </div>
+                <div id="courses-container"></div>
             </div>
             @can ('readContactInfo', $statsReport)
             <div class="tab-pane" id="contactinfo-tab">
                 <h3>Contact Info</h3>
-                <div id="contactinfo-container">
-                    @include('partials.loading')
-                </div>
+                <div id="contactinfo-container"></div>
             </div>
             @endcan
             @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
             <div class="tab-pane" id="transitionsummary-tab">
                 <h3>Transfer Check</h3>
                 <div class="btn-group" role="group">
-                    <button id ="peopletransfersummary-button" type="button" class="btn btn-primary">People</button>
-                    <button id ="coursestransfersummary-button" type="button" class="btn btn-default">Courses</button>
+                    <button id ="peopletransfersummary-button" type="button" class="btn">People</button>
+                    <button id ="coursestransfersummary-button" type="button" class="btn">Courses</button>
                 </div>
-                <div id="peopletransfersummary-container">
-                    @include('partials.loading')
-                </div>
-                <div id="coursestransfersummary-container" style="display: none">
-                    @include('partials.loading')
-                </div>
+                <div id="peopletransfersummary-container"></div>
+                <div id="coursestransfersummary-container"></div>
             </div>
             @endif
         </div>
+    </div>
+
+    <div id="loader" style="display: none">
+        @include('partials.loading')
     </div>
 
     <script type="text/javascript">
@@ -202,6 +182,10 @@
             $.each(pages, function (index, page) {
                 var url = "{{ url("/statsreports/{$statsReport->id}") }}/" + page;
                 var container = "#" + page + "-container";
+
+                // Display loader by default
+                $(container).html($("#loader").html());
+
                 $.get(url, function (response) {
                     $(container).html(response);
                 }).fail(function (jqXHR) {
@@ -231,6 +215,15 @@
                             }
                         });
                     });
+
+                    // Setup default display
+                    if (j == 0) {
+                        $(primaryButton).addClass('btn-primary');
+                        $(primaryContainer).show();
+                    } else {
+                        $(primaryButton).addClass('btn-default');
+                        $(primaryContainer).hide();
+                    }
                 });
             });
         });

@@ -38,7 +38,7 @@
                 <li><a href="#statsreports-tab" data-toggle="tab">Center Reports</a></li>
                 <li><a href="#applications-tab" data-toggle="tab">Applications</a></li>
                 <li><a href="#traveloverview-tab" data-toggle="tab">Travel Summary</a></li>
-                <li><a href="#completedcourses-tab" data-toggle="tab">Completed Courses</a></li>
+                <li><a href="#courses-tab" data-toggle="tab">Courses</a></li>
                 <li><a href="#teammemberstatus-tab" data-toggle="tab">Team Member Alerts</a></li>
             </ul>
         </div>
@@ -47,69 +47,64 @@
                 <div class="tab-pane active" id="ratingsummary-tab">
                     <h3>Ratings Summary</h3>
 
-                    <div id="ratingsummary-container">
-                        @include('partials.loading')
-                    </div>
+                    <div id="ratingsummary-container"></div>
                 </div>
                 <div class="tab-pane" id="regionalstats-tab">
                     <h3>Regional Games</h3>
 
-                    <div id="regionalstats-container">
-                        @include('partials.loading')
-                    </div>
+                    <div id="regionalstats-container"></div>
                 </div>
                 <div class="tab-pane" id="statsreports-tab">
                     <h3>Center Reports</h3>
 
-                    <div id="statsreports-container">
-                        @include('partials.loading')
-                    </div>
+                    <div id="statsreports-container"></div>
                 </div>
                 <div class="tab-pane" id="applications-tab">
                     <h3>Center Reports</h3>
 
                     <div class="btn-group" role="group">
-                        <button id ="applicationsoverview-button" type="button" class="btn btn-primary">Overview</button>
-                        <button id ="applicationsbystatus-button" type="button" class="btn btn-default">By Status</button>
-                        <button id ="applicationsbycenter-button" type="button" class="btn btn-default">By Center</button>
-                        <button id ="applicationsoverdue-button" type="button" class="btn btn-default">Overdue</button>
+                        <button id ="applicationsoverview-button" type="button" class="btn">Overview</button>
+                        <button id ="applicationsbystatus-button" type="button" class="btn">By Status</button>
+                        <button id ="applicationsbycenter-button" type="button" class="btn">By Center</button>
+                        <button id ="applicationsoverdue-button" type="button" class="btn">Overdue</button>
                     </div>
-                    <div id="applicationsoverview-container">
-                        @include('partials.loading')
-                    </div>
-                    <div id="applicationsbystatus-container" style="display: none">
-                        @include('partials.loading')
-                    </div>
-                    <div id="applicationsoverdue-container" style="display: none">
-                        @include('partials.loading')
-                    </div>
-                    <div id="applicationsbycenter-container" style="display: none">
-                        @include('partials.loading')
-                    </div>
+                    <div id="applicationsoverview-container"></div>
+                    <div id="applicationsbystatus-container"></div>
+                    <div id="applicationsoverdue-container"></div>
+                    <div id="applicationsbycenter-container"></div>
                 </div>
                 <div class="tab-pane" id="traveloverview-tab">
                     <h3>Travel/Rooming Summary</h3>
 
-                    <div id="traveloverview-container">
-                        @include('partials.loading')
-                    </div>
+                    <div id="traveloverview-container"></div>
                 </div>
-                <div class="tab-pane" id="completedcourses-tab">
-                    <h3>Course Completion Stats</h3>
+                <div class="tab-pane" id="courses-tab">
+                    <h3>Courses</h3>
 
-                    <div id="completedcourses-container">
-                        @include('partials.loading')
+                    <div class="btn-group" role="group">
+                        <button id ="coursesthisweek-button" type="button" class="btn">Completed This Week</button>
+                        <button id ="coursesnextmonth-button" type="button" class="btn">Next 4 Weeks</button>
+                        <button id ="coursesupcoming-button" type="button" class="btn">Upcoming</button>
+                        <button id ="coursescompleted-button" type="button" class="btn">Completed</button>
+                        <button id ="coursesguestgames-button" type="button" class="btn">Guest Games</button>
                     </div>
+                    <div id="coursesthisweek-container"></div>
+                    <div id="coursesnextmonth-container"></div>
+                    <div id="coursesupcoming-container"></div>
+                    <div id="coursescompleted-container"></div>
+                    <div id="coursesguestgames-container"></div>
                 </div>
                 <div class="tab-pane" id="teammemberstatus-tab">
                     <h3>Team Members of Interest</h3>
 
-                    <div id="teammemberstatus-container">
-                        @include('partials.loading')
-                    </div>
+                    <div id="teammemberstatus-container"></div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="loader" style="display: none">
+        @include('partials.loading')
     </div>
 
     <script type="text/javascript">
@@ -135,7 +130,11 @@
             'applicationsoverdue',
             'applicationsoverview',
             'traveloverview',
-            'completedcourses',
+            'coursesthisweek',
+            'coursesnextmonth',
+            'coursesupcoming',
+            'coursescompleted',
+            'coursesguestgames',
             'teammemberstatus',
         ];
 
@@ -146,6 +145,13 @@
                 'applicationsbycenter',
                 'applicationsbystatus',
             ],
+            [
+                'coursesthisweek',
+                'coursesnextmonth',
+                'coursesupcoming',
+                'coursescompleted',
+                'coursesguestgames',
+            ],
         ];
 
         $(document).ready(function ($) {
@@ -155,6 +161,10 @@
             $.each(pages, function (index, page) {
                 var url = "{{ url("/globalreports/{$globalReport->id}") }}/" + page + "?region={{$region->abbreviation}}";
                 var container = "#" + page + "-container";
+
+                // Display loader by default
+                $(container).html($("#loader").html());
+
                 $.get(url, function (response) {
                     $(container).html(response);
                 }).fail(function (jqXHR) {
@@ -184,6 +194,15 @@
                             }
                         });
                     });
+
+                    // Setup default display
+                    if (j == 0) {
+                        $(primaryButton).addClass('btn-primary');
+                        $(primaryContainer).show();
+                    } else {
+                        $(primaryButton).addClass('btn-default');
+                        $(primaryContainer).hide();
+                    }
                 });
             });
         });

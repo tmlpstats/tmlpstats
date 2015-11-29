@@ -46,6 +46,12 @@ $ratingColors = [
         @foreach ($rows as $rating => $statsReports)
             <?php $count = 0; ?>
             @foreach ($statsReports as $report)
+                <?php
+                    $meterClass = ($report->getPoints() > 0) ? 'meter' : 'meter-zero';
+
+                    // Width must always be > 0 to display even when 0 points
+                    $meterWidth = max(round(($report->getPoints()/28)*100), 4);
+                ?>
                 <tr class="points">
                     @if ($count === 0)
                         <?php $count++; ?>
@@ -54,13 +60,13 @@ $ratingColors = [
                     <td style="background-color: {{ $ratingColors[$report->getPoints()] }}; vertical-align: middle; text-align: center; font-weight: bold;">
                         @can ('read', $report)
                         <a href="{{ url("/statsreports/{$report->id}") }}">
-                            <div class="meter">
-                                <span style="width: {{ round(($report->getPoints()/28)*100) }}%">{{ $report->getPoints() }}</span>
+                            <div class="{{ $meterClass }}">
+                                <span style="width: {{ $meterWidth }}%">{{ $report->getPoints() }}</span>
                             </div>
                         </a>
                         @else
-                            <div class="meter">
-                                <span style="width: {{ round(($report->getPoints()/28)*100) }}%">{{ $report->getPoints() }}</span>
+                            <div class="{{ $meterClass }}">
+                                <span style="width: {{ $meterWidth }}%">{{ $report->getPoints() }}</span>
                             </div>
                         @endcan
                     </td>

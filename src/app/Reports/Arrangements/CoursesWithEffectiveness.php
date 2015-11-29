@@ -7,7 +7,7 @@ class CoursesWithEffectiveness extends BaseArrangement
      */
     public function build($data)
     {
-        $courses = $data['courses'];
+        $courses       = $data['courses'];
         $reportingDate = $data['reportingDate'];
 
         $reportData = [];
@@ -16,9 +16,10 @@ class CoursesWithEffectiveness extends BaseArrangement
             $type = $courseData->course->type;
 
             $course = [
-                'location'  => $courseData->course->location ?: $courseData->course->center->name,
-                'startDate' => $courseData->course->startDate,
-                'type'      => $type,
+                'centerName' => $courseData->course->center->name,
+                'location'   => $courseData->course->location ?: $courseData->course->center->name,
+                'startDate'  => $courseData->course->startDate,
+                'type'       => $type,
             ];
 
             $copyFields = [
@@ -43,7 +44,7 @@ class CoursesWithEffectiveness extends BaseArrangement
             }
 
             if ($course['startDate']->lt($reportingDate)) {
-                $course['completionStats']['registrationFulfillment'] = $courseData->currentTer
+                $course['completionStats']['registrationFulfillment']   = $courseData->currentTer
                     ? round(($courseData->currentStandardStarts / $courseData->currentTer) * 100)
                     : 0;
                 $course['completionStats']['registrationEffectiveness'] = $courseData->potentials
