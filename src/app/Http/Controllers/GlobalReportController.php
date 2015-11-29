@@ -204,8 +204,23 @@ class GlobalReportController extends ReportDispatchAbstractController
             case 'traveloverview':
                 $response = $this->getTravelReport($globalReport, $region);
                 break;
-            case 'completedcourses':
-                $response = $this->getCompletedCoursesReport($globalReport, $region);
+            case 'courses':
+                $response = $this->getCoursesReport($globalReport, $region);
+                break;
+            case 'coursesthisweek':
+                $response = $this->getCoursesThisWeek($globalReport, $region);
+                break;
+            case 'coursesnextmonth':
+                $response = $this->getCoursesNextMonth($globalReport, $region);
+                break;
+            case 'coursesupcoming':
+                $response = $this->getCoursesUpcoming($globalReport, $region);
+                break;
+            case 'coursescompleted':
+                $response = $this->getCoursesCompleted($globalReport, $region);
+                break;
+            case 'coursesguestgames':
+                $response = $this->getCoursesGuestGames($globalReport, $region);
                 break;
             case 'teammemberstatus':
                 $response = $this->getTeamMemberStatus($globalReport, $region);
@@ -500,32 +515,148 @@ class GlobalReportController extends ReportDispatchAbstractController
         return view('globalreports.details.statsreports', compact('statsReportsList'));
     }
 
-    protected function getCompletedCoursesReport(GlobalReport $globalReport, Region $region)
+    protected function getCoursesThisWeek(GlobalReport $globalReport, Region $region)
     {
         $coursesData = App::make(CoursesController::class)->getByGlobalReport($globalReport, $region);
         if (!$coursesData) {
             return null;
         }
 
+        $targetCourses = [];
+        foreach ($coursesData as $courseData) {
+            if ($courseData->course->startDate->lt($globalReport->reportingDate)
+                && $courseData->course->startDate->gt($globalReport->reportingDate->copy()->subWeek())
+            ) {
+                $targetCourses[] = $courseData;
+            }
+        }
+
+        return $this->displayCoursesReport($targetCourses, $globalReport, 'completed', true, true);
+    }
+
+    protected function getCoursesNextMonth(GlobalReport $globalReport, Region $region)
+    {
+        $coursesData = App::make(CoursesController::class)->getByGlobalReport($globalReport, $region);
+        if (!$coursesData) {
+            return null;
+        }
+
+        $targetCourses = [];
+        foreach ($coursesData as $courseData) {
+            if ($courseData->course->startDate->gt($globalReport->reportingDate)
+                && $courseData->course->startDate->lt($globalReport->reportingDate->copy()->addMonth())
+            ) {
+                $targetCourses[] = $courseData;
+            }
+        }
+
+        return $this->displayCoursesReport($targetCourses, $globalReport, 'upcoming', true);
+    }
+
+    protected function getCoursesUpcoming(GlobalReport $globalReport, Region $region)
+    {
+        $coursesData = App::make(CoursesController::class)->getByGlobalReport($globalReport, $region);
+        if (!$coursesData) {
+            return null;
+        }
+
+        $targetCourses = [];
+        foreach ($coursesData as $courseData) {
+            if ($courseData->course->startDate->gt($globalReport->reportingDate)) {
+                $targetCourses[] = $courseData;
+            }
+        }
+
+        return $this->displayCoursesReport($targetCourses, $globalReport, 'upcoming', true);
+    }
+
+    protected function getCoursesCompleted(GlobalReport $globalReport, Region $region)
+    {
+        $coursesData = App::make(CoursesController::class)->getByGlobalReport($globalReport, $region);
+        if (!$coursesData) {
+            return null;
+        }
+
+        $targetCourses = [];
+        foreach ($coursesData as $courseData) {
+            if ($courseData->course->startDate->lt($globalReport->reportingDate)) {
+                $targetCourses[] = $courseData;
+            }
+        }
+
+        return $this->displayCoursesReport($targetCourses, $globalReport, 'completed', true, true);
+    }
+
+    protected function getCoursesGuestGames(GlobalReport $globalReport, Region $region)
+    {
+        $coursesData = App::make(CoursesController::class)->getByGlobalReport($globalReport, $region);
+        if (!$coursesData) {
+            return null;
+        }
+
+        $targetCourses = [];
+        foreach ($coursesData as $courseData) {
+            if ($courseData->guestsPromised !== null) {
+                $targetCourses[] = $courseData;
+            }
+        }
+
+        return $this->displayCoursesReport($targetCourses, $globalReport, 'guests', true, true);
+    }
+
+    protected function displayCoursesReport($coursesData, GlobalReport $globalReport, $type, $byType = false, $flatten = false)
+    {
         $a = new CoursesByCenter(['coursesData' => $coursesData]);
         $coursesByCenter = $a->compose();
         $coursesByCenter = $coursesByCenter['reportData'];
 
-        $reportData = [];
+        $centerReportData = [];
         foreach ($coursesByCenter as $centerName => $coursesData) {
-
             $a = new CoursesWithEffectiveness(['courses' => $coursesData, 'reportingDate' => $globalReport->reportingDate]);
             $centerRow = $a->compose();
 
-            if (!isset($centerRow['reportData']['completed'])) {
-                continue;
+            $centerReportData[$centerName] = $centerRow['reportData'];
+        }
+        ksort($centerReportData);
+
+        if ($byType) {
+            $typeReportData = [
+                'CAP' => [],
+                'CPC' => [],
+                'completed' => []
+            ];
+
+            foreach ($centerReportData as $centerName => $coursesData) {
+                foreach ($coursesData as $courseType => $courseTypeData) {
+                    foreach ($courseTypeData as $courseData) {
+                        $typeReportData[$courseType][] = $courseData;
+                    }
+                }
             }
 
-            $reportData[$centerName] = $centerRow['reportData']['completed'];
+            if ($flatten) {
+                $reportData = [];
+                foreach (['CAP', 'CPC', 'completed'] as $courseType) {
+                    if (isset($typeReportData[$courseType])) {
+                        foreach ($typeReportData[$courseType] as $data) {
+                            $reportData[] = $data;
+                        }
+                    }
+                }
+            } else {
+                // Make sure they come out in the right order
+                foreach ($typeReportData as $courseType => $data) {
+                    if (!$data) {
+                        unset($typeReportData[$courseType]);
+                    }
+                }
+                $reportData = $typeReportData;
+            }
+        } else {
+            $reportData = $centerReportData;
         }
-        ksort($reportData);
 
-        return view('globalreports.details.completedcourses', compact('reportData'));
+        return view('globalreports.details.courses', compact('reportData', 'type'));
     }
 
     protected static function sortByCenterName($a, $b)

@@ -43,8 +43,20 @@ table {
     empty-cells: show;
 }
 
+td.data-point, th.data-point {
+    vertical-align: middle;
+    text-align: center;
+}
+
+td.border-left, th.border-left {
+    border-left: 2px solid #DDD
+}
+td.border-right, th.border-right {
+    border-right: 2px solid #DDD
+}
+
 .table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
-    background-color: #DDDDDD;
+    background-color: #EEEEEE;
 }
 
 .ratingsTable .points td {
@@ -52,9 +64,10 @@ table {
     margin: 0px !important;
     height: 2em;
     vertical-align: middle;
+    color: white;
 }
 
-.meter > span {
+.ratingsTable .meter > span {
     display: block;
     height: 100%;
     background-color: #0075b0;
@@ -63,6 +76,11 @@ table {
     overflow: hidden;
 }
 
-.table-hover>tbody>tr:hover>td, .table-hover>tbody>tr:hover>th {
-    background-color: #DDDDDD;
+.ratingsTable .meter-zero > span {
+    display: block;
+    height: 100%;
+    color: white;
+    position: relative;
+    overflow: hidden;
 }
+
