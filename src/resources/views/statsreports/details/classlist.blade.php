@@ -8,13 +8,13 @@
                 <tr>
                     <th>First Name</th>
                     <th>Last Name</th>
-                    <th style="text-align: center">Quarter</th>
+                    <th class="data-point">Quarter</th>
                     <th>Accountability</th>
                     @if ($group != 'withdrawn')
-                        <th style="text-align: center">GITW</th>
-                        <th style="text-align: center">TDO</th>
-                        <th style="text-align: center">Travel</th>
-                        <th style="text-align: center">Room</th>
+                        <th class="data-point">GITW</th>
+                        <th class="data-point">TDO</th>
+                        <th class="data-point">Travel</th>
+                        <th class="data-point">Room</th>
                     @else
                         <th>Withdraw</th>
                     @endif
@@ -28,7 +28,7 @@
                         <tr>
                             <td>{{ $memberData->firstName }}</td>
                             <td>{{ $memberData->lastName }}</td>
-                            <td style="text-align: center">{{ $quarterNumber }}</td>
+                            <td class="data-point">{{ $quarterNumber }}</td>
                             <td><?php
                                 $accountabilities = $memberData->teamMember->accountabilities;
 
@@ -41,14 +41,14 @@
                                 }
                                 ?></td>
                             @if ($group != 'withdrawn')
-                                <td style="text-align: center">{{ $memberData->gitw ? 'E' : 'I' }}</td>
-                                <td style="text-align: center">{{ $memberData->tdo ? 'Y' : 'N' }}</td>
-                                <td style="text-align: center">
+                                <td class="data-point">{{ $memberData->gitw ? 'E' : 'I' }}</td>
+                                <td class="data-point">{{ $memberData->tdo ? 'Y' : 'N' }}</td>
+                                <td class="data-point">
                                     @if ($memberData->travel)
                                         <span class="glyphicon glyphicon-ok"></span>
                                     @endif
                                 </td>
-                                <td style="text-align: center">
+                                <td class="data-point">
                                     @if ($memberData->travel)
                                         <span class="glyphicon glyphicon-ok"></span>
                                     @endif
@@ -60,7 +60,7 @@
                                     <td></td>
                                 @endif
                             @endif
-                            <td>{{ is_numeric($memberData->comment) ? TmlpStats\Util::getExcelDate($memberData->comment)->format('M j, Y') : $memberData->comment }}</td>
+                            <td>{{ is_numeric($memberData->comment) ? TmlpStats\Util::getExcelDate($memberData->comment)->format(TmlpStats\Util::getLocaleDateFormat()) : $memberData->comment }}</td>
                             <td><?php
                                 $special = array();
                                 if (!$memberData->atWeekend) {

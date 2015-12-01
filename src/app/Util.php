@@ -5,6 +5,7 @@ use Cache;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use Carbon\Carbon;
+use Session;
 
 class Util
 {
@@ -201,5 +202,17 @@ class Util
     public static function getClassBasename($object)
     {
         return substr(strrchr(get_class($object), '\\'), 1);
+    }
+
+    public static function getLocaleDateFormat()
+    {
+        $format = 'M j, Y';
+        if (Session::has('locale')) {
+            $format = Session::get('locale') == 'en-US'
+                ? 'n/j/y'
+                : 'j/n/y';
+        }
+
+        return $format;
     }
 }

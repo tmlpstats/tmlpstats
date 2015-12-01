@@ -10,8 +10,8 @@
             <th>&nbsp;</th>
             <th>First Name</th>
             <th>Last Name</th>
-            <th style="text-align: center">Team Year</th>
-            <th style="text-align: center">Quarter</th>
+            <th class="data-point">Team Year</th>
+            <th class="data-point">Quarter</th>
             <th>Status</th>
             <th>Attention</th>
         </tr>
@@ -28,8 +28,8 @@
                             <td><input type="checkbox" /></td>
                             <td>{{ $member->firstName }}</td>
                             <td>{{ $member->lastName }}</td>
-                            <td style="text-align: center">{{ $member->teamYear }}</td>
-                            <td style="text-align: center">Q{{ $member->quarterNumber }}</td>
+                            <td class="data-point">{{ $member->teamYear }}</td>
+                            <td class="data-point">Q{{ $member->quarterNumber }}</td>
                             <td>{{ $type }}</td>
                             <td><?php
                                 if ($type == 'new') {
@@ -56,8 +56,8 @@
                 <th>&nbsp;</th>
                 <th>First Name</th>
                 <th>Last Name</th>
-                <th style="text-align: center">Team Year</th>
-                <th style="text-align: center">Quarter</th>
+                <th class="data-point">Team Year</th>
+                <th class="data-point">Quarter</th>
                 <th>Status</th>
                 <th>Attention</th>
             </tr>
@@ -73,8 +73,8 @@
                     <td><input type="checkbox" /></td>
                     <td>{{ $incoming->firstName }}</td>
                     <td>{{ $incoming->lastName }}</td>
-                    <td style="text-align: center">{{ $incoming->teamYear }}</td>
-                    <td style="text-align: center"></td>
+                    <td class="data-point">{{ $incoming->teamYear }}</td>
+                    <td class="data-point"></td>
                     <td>missing</td>
                     <td><?php
                         if ($incoming->incomingQuarterId == $thisQuarter->id) {
@@ -96,8 +96,8 @@
                     <td><input type="checkbox" /></td>
                     <td>{{ $member->firstName }}</td>
                     <td>{{ $member->lastName }}</td>
-                    <td style="text-align: center">{{ $member->teamYear }}</td>
-                    <td style="text-align: center">Q{{ $member->quarterNumber }}</td>
+                    <td class="data-point">{{ $member->teamYear }}</td>
+                    <td class="data-point">Q{{ $member->quarterNumber }}</td>
                     <td>new</td>
                     <td><?php
 
@@ -118,7 +118,7 @@
                 <th>&nbsp;</th>
                 <th>First Name</th>
                 <th>Last Name</th>
-                <th style="text-align: center">Team Year</th>
+                <th class="data-point">Team Year</th>
                 <th>Status</th>
                 <th>Attention</th>
             </tr>
@@ -136,7 +136,7 @@
                             <td><input type="checkbox" /></td>
                             <td>{{ $incoming->firstName }}</td>
                             <td>{{ $incoming->lastName }}</td>
-                            <td style="text-align: center">{{ $incoming->teamYear }}</td>
+                            <td class="data-point">{{ $incoming->teamYear }}</td>
                             <td>{{ $type }}</td>
                             <td><?php
                                 if ($type == 'missing') {
@@ -173,12 +173,12 @@
             <th>&nbsp;</th>
             <th>First Name</th>
             <th>Last Name</th>
-            <th style="text-align: center">Team Year</th>
-            <th style="text-align: center">Reg Date</th>
-            <th style="text-align: center">App Out Date</th>
-            <th style="text-align: center">App In Date</th>
-            <th style="text-align: center">Approve Date</th>
-            <th style="text-align: center">Incoming Quarter</th>
+            <th class="data-point">Team Year</th>
+            <th class="data-point">Reg Date</th>
+            <th class="data-point">App Out Date</th>
+            <th class="data-point">App In Date</th>
+            <th class="data-point">Approve Date</th>
+            <th class="data-point">Incoming Quarter</th>
             <th>Attention</th>
         </tr>
         </thead>
@@ -201,7 +201,7 @@
                         if (($new->$field && $old->$field && $new->$field->ne($old->$field))
                             || ($old->$field && !$new->$field)
                         ) {
-                            $attributes[$field] = 'class="bg-warning" title="Was ' . $old->$field->format('M j, Y') . '"';
+                            $attributes[$field] = 'class="bg-warning" title="Was ' . $old->$field->format(TmlpStats\Util::getLocaleDateFormat()) . '"';
                         }
                     } else {
                         if ($new->$field != $old->$field) {
@@ -217,22 +217,30 @@
                 <td><input type="checkbox" /></td>
                 <td>{{ $new->firstName }}</td>
                 <td>{{ $new->lastName }}</td>
-                <td {!! $attributes['teamYear'] !!} style="text-align: center">
+                <td {!! $attributes['teamYear'] !!} class="data-point">
                     {{ $new->teamYear }}
                 </td>
-                <td {!! $attributes['regDate'] !!} style="text-align: center">
-                    {{ $new->regDate ? $new->regDate->format('M j, Y') : '' }}
+                <td {!! $attributes['regDate'] !!} class="data-point">
+                    @if ($new->regDate)
+                        @date($new->regDate)
+                    @endif
                 </td>
-                <td {!! $attributes['appOutDate'] !!} style="text-align: center">
-                    {{ $new->appOutDate ? $new->appOutDate->format('M j, Y') : '' }}
+                <td {!! $attributes['appOutDate'] !!} class="data-point">
+                    @if ($new->appOutDate)
+                        @date($new->appOutDate)
+                    @endif
                 </td>
-                <td {!! $attributes['appInDate'] !!} style="text-align: center">
-                    {{ $new->appInDate ? $new->appInDate->format('M j, Y') : '' }}
+                <td {!! $attributes['appInDate'] !!} class="data-point">
+                    @if ($new->appInDate)
+                        @date($new->appInDate)
+                    @endif
                 </td>
-                <td {!! $attributes['apprDate'] !!} style="text-align: center">
-                    {{ $new->apprDate ? $new->apprDate->format('M j, Y') : '' }}
+                <td {!! $attributes['apprDate'] !!} class="data-point">
+                    @if ($new->apprDate)
+                        @date($new->apprDate)
+                    @endif
                 </td>
-                <td {!! $attributes['incomingQuarterId'] !!} style="text-align: center">
+                <td {!! $attributes['incomingQuarterId'] !!} class="data-point">
                     {{ $new->incomingQuarterId == $thisQuarter->getNextQuarter()->id ? 'Next' : 'Future' }}
                 </td>
                 <td><?php
