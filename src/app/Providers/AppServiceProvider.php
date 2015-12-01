@@ -4,6 +4,7 @@ namespace TmlpStats\Providers;
 use Blade;
 use Session;
 use Illuminate\Support\ServiceProvider;
+use TmlpStats\Util;
 
 class AppServiceProvider extends ServiceProvider {
 
@@ -34,12 +35,7 @@ class AppServiceProvider extends ServiceProvider {
         );
 
         Blade::directive('date', function($expression) {
-            $format = 'M j, Y';
-            if (Session::has('locale')) {
-                $format = Session::get('locale') == 'en-US'
-                    ? 'n/j/y'
-                    : 'j/n/y';
-            }
+            $format = Util::getLocaleDateFormat();
 
             return "<?php echo with{$expression}->format('{$format}'); ?>";
         });

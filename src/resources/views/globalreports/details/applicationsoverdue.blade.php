@@ -17,16 +17,16 @@
                 <tr>
                     <th>Center</th>
                     <th>Name</th>
-                    <th style="text-align: center">Year</th>
-                    <th>Reg Date</th>
+                    <th class="data-point">Year</th>
+                    <th class="data-point">Reg Date</th>
                     @if ($group == 'out')
-                        <th>App Out</th>
-                        <th>Due</th>
+                        <th class="data-point">App Out</th>
+                        <th class="data-point">Due</th>
                     @elseif ($group == 'waiting')
-                        <th>App In</th>
-                        <th>Due</th>
+                        <th class="data-point">App In</th>
+                        <th class="data-point">Due</th>
                     @else
-                        <th>Due</th>
+                        <th class="data-point">Due</th>
                     @endif
                     <th>Comments</th>
                 </tr>
@@ -37,21 +37,39 @@
 
                         <td>{{ $registrationData->center->name }}</td>
                         <td>{{ $registrationData->firstName }} {{ $registrationData->lastName }}</td>
-                        <td style="text-align: center">{{ $registrationData->registration->teamYear }}</td>
-                        <td>{{ $registrationData->regDate ? $registrationData->regDate->format('n/j/y') : '' }}</td>
+                        <td class="data-point">{{ $registrationData->registration->teamYear }}</td>
+                        <td class="data-point">
+                            @if ($registrationData->regDate)
+                                @date($registrationData->regDate)
+                            @endif
+                        </td>
                         @if ($group == 'out')
-                            <td>{{ $registrationData->appOutDate ? $registrationData->appOutDate->format('n/j/y') : '' }}</td>
-                            <td {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
-                                {{ $registrationData->due() ? $registrationData->due()->format('n/j/y') : '' }}
+                            <td class="data-point">
+                                @if ($registrationData->appOutDate)
+                                    @date($registrationData->appOutDate)
+                                @endif
+                            </td>
+                            <td class="data-point" {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
+                                @if($registrationData->due())
+                                    @date($registrationData->due())
+                                @endif
                             </td>
                         @elseif ($group == 'waiting')
-                            <td>{{ $registrationData->appInDate ? $registrationData->appInDate->format('n/j/y') : '' }}</td>
-                            <td {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
-                                {{ $registrationData->due() ? $registrationData->due()->format('n/j/y') : '' }}
+                            <td class="data-point">
+                                @if ($registrationData->appInDate)
+                                    @date($registrationData->appInDate)
+                                @endif
+                            </td>
+                            <td class="data-point" {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
+                                @if($registrationData->due())
+                                    @date($registrationData->due())
+                                @endif
                             </td>
                         @else
-                            <td {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
-                                {{ $registrationData->due() ? $registrationData->due()->format('n/j/y') : '' }}
+                            <td class="data-point" {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
+                                @if($registrationData->due())
+                                    @date($registrationData->due())
+                                @endif
                             </td>
                         @endif
                         <td>{{ is_numeric($registrationData->comment) ? TmlpStats\Util::getExcelDate($registrationData->comment)->format('F') : $registrationData->comment }}</td>

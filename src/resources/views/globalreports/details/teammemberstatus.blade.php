@@ -19,7 +19,7 @@
                     <th>Center</th>
                     <th>First</th>
                     <th>Last</th>
-                    <th style="text-align: center">Quarter</th>
+                    <th class="data-point">Quarter</th>
                     @if ($group == 'withdrawn')
                         <th>Reason</th>
                         <th>Withdraw</th>
@@ -33,7 +33,7 @@
                         <td>{{ $memberData->center->name }}</td>
                         <td>{{ $memberData->firstName }}</td>
                         <td>{{ $memberData->lastName }}</td>
-                        <td style="text-align: center">T{{ $memberData->teamMember->teamYear }}
+                        <td class="data-point">T{{ $memberData->teamMember->teamYear }}
                             Q{{ $memberData->teamMember->quarterNumber }}</td>
                         @if ($group == 'withdrawn')
                             @if ($memberData->withdrawCode)

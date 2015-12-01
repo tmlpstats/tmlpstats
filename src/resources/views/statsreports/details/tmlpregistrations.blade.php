@@ -14,16 +14,16 @@
                     <tr>
                         <th>First Name</th>
                         <th>Last Name</th>
-                        <th>Reg Date</th>
-                        <th>App Out Date</th>
-                        <th>App In Date</th>
-                        <th>Approve Date</th>
+                        <th class="data-point">Reg Date</th>
+                        <th class="data-point">App Out Date</th>
+                        <th class="data-point">App In Date</th>
+                        <th class="data-point">Approve Date</th>
                         @if ($group == 'withdrawn')
-                            <th>Reason</th>
-                            <th>Withdraw Date</th>
+                            <th class="data-point">Reason</th>
+                            <th class="data-point">Withdraw Date</th>
                         @elseif ($quarterName == 'next')
-                            <th>Travel</th>
-                            <th>Room</th>
+                            <th class="data-point">Travel</th>
+                            <th class="data-point">Room</th>
                         @endif
                         <th>Comments</th>
                         <th>Committed Team Member</th>
@@ -34,29 +34,47 @@
                         <tr>
                             <td>{{ $registrationData->firstName }}</td>
                             <td>{{ $registrationData->lastName }}</td>
-                            <td>{{ $registrationData->regDate ? $registrationData->regDate->format('n/j/y') : '' }}</td>
-                            <td>{{ $registrationData->appOutDate ? $registrationData->appOutDate->format('n/j/y') : '' }}</td>
-                            <td>{{ $registrationData->appInDate ? $registrationData->appInDate->format('n/j/y') : '' }}</td>
-                            <td>{{ $registrationData->apprDate ? $registrationData->apprDate->format('n/j/y') : '' }}</td>
+                            <td class="data-point">
+                                @if ($registrationData->regDate)
+                                    @date($registrationData->regDate)
+                                @endif
+                            </td>
+                            <td class="data-point">
+                                @if ($registrationData->appOutDate)
+                                    @date($registrationData->appOutDate)
+                                @endif
+                            </td>
+                            <td class="data-point">
+                                @if ($registrationData->appInDate)
+                                    @date($registrationData->appInDate)
+                                @endif
+                            </td>
+                            <td class="data-point">
+                                @if ($registrationData->apprDate)
+                                    @date($registrationData->apprDate)
+                                @endif
+                            </td>
                             @if ($group == 'withdrawn')
                                 @if ($registrationData->withdrawCode)
-                                    <td title="{{ $registrationData->withdrawCode->display }}">
+                                    <td class="data-point" title="{{ $registrationData->withdrawCode->display }}">
                                         {{ $registrationData->withdrawCode->code }}
                                     </td>
-                                    <td title="{{ $registrationData->withdrawCode->display }}">
-                                        {{ $registrationData->wdDate ? $registrationData->wdDate->format('n/j/y') : '' }}
+                                    <td class="data-point" title="{{ $registrationData->withdrawCode->display }}">
+                                        @if ($registrationData->wdDate)
+                                            @date($registrationData->wdDate)
+                                        @endif
                                     </td>
                                 @else
                                     <td></td>
                                     <td></td>
                                 @endif
                             @elseif ($quarterName == 'next')
-                                <td>
+                                <td class="data-point">
                                     @if ($registrationData->travel)
                                         <span class="glyphicon glyphicon-ok"></span>
                                     @endif
                                 </td>
-                                <td>
+                                <td class="data-point">
                                     @if ($registrationData->room)
                                         <span class="glyphicon glyphicon-ok"></span>
                                     @endif

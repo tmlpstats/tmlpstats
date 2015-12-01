@@ -1,28 +1,28 @@
 <div class="table-responsive">
-    <table class="table table-condensed applicationTable">
+    <table class="table table-condensed table-bordered applicationTable">
         <thead>
         <tr>
-            <th rowspan="2" style="border-right: 2px solid #DDD;">Center</th>
-            <th colspan="4" style="text-align: center; border-right: 2px solid #DDD;">Incoming T1</th>
-            <th colspan="4" style="text-align: center; border-right: 2px solid #DDD;">Incoming T2</th>
-            <th colspan="4" style="text-align: center; border-right: 2px solid #DDD;">Current T1</th>
-            <th colspan="4" style="text-align: center; border-right: 2px solid #DDD;">Current T2</th>
+            <th rowspan="2" class="border-right">Center</th>
+            <th colspan="4" class="data-point border-right">Incoming T1</th>
+            <th colspan="4" class="data-point border-right">Incoming T2</th>
+            <th colspan="4" class="data-point border-right">Current T1</th>
+            <th colspan="4" class="data-point border-right">Current T2</th>
         </tr>
         <tr>
-            <th colspan="2" style="text-align: center; border-right: 1px solid #DDD;">Travel</th>
-            <th colspan="2" style="text-align: center; border-right: 2px solid #DDD;">Room</th>
-            <th colspan="2" style="text-align: center; border-right: 1px solid #DDD;">Travel</th>
-            <th colspan="2" style="text-align: center; border-right: 2px solid #DDD;">Room</th>
-            <th colspan="2" style="text-align: center; border-right: 1px solid #DDD;">Travel</th>
-            <th colspan="2" style="text-align: center; border-right: 2px solid #DDD;">Room</th>
-            <th colspan="2" style="text-align: center; border-right: 1px solid #DDD;">Travel</th>
-            <th colspan="2" style="text-align: center; border-right: 2px solid #DDD;">Room</th>
+            <th colspan="2" class="data-point">Travel</th>
+            <th colspan="2" class="data-point border-right">Room</th>
+            <th colspan="2" class="data-point">Travel</th>
+            <th colspan="2" class="data-point border-right">Room</th>
+            <th colspan="2" class="data-point">Travel</th>
+            <th colspan="2" class="data-point border-right">Room</th>
+            <th colspan="2" class="data-point">Travel</th>
+            <th colspan="2" class="data-point border-right">Room</th>
         </tr>
         </thead>
         <tbody>
         @foreach ($reportData as $centerName => $centerData)
             <tr>
-                <td style="border-right: 2px solid #DDD;">{{ $centerName }}</td>
+                <td class="border-right">{{ $centerName }}</td>
                 @foreach ($centerData as $group => $groupData)
                     @foreach ($groupData as $team => $teamData)
                         @if ($teamData['total'])
@@ -48,13 +48,13 @@
                                 $roomClass = 'bg-warning';
                             }
                             ?>
-                            <td style="text-align: center; border-right: 1px solid #DDD;">{{ $teamData['travel'] }}/{{ $teamData['total'] }}</td>
-                            <td style="text-align: center; border-right: 1px solid #DDD;" class="{{ $travelClass }}">{{ $travelPercent }}%</td>
-                            <td style="text-align: center; border-right: 1px solid #DDD;">{{ $teamData['room'] }}/{{ $teamData['total'] }}</td>
-                            <td style="text-align: center; border-right: 2px solid #DDD;" class="{{ $roomClass }}">{{ $roomPercent }}%</td>
+                            <td class="data-point">{{ $teamData['travel'] }}/{{ $teamData['total'] }}</td>
+                            <td class="data-point" class="{{ $travelClass }}">{{ $travelPercent }}%</td>
+                            <td class="data-point">{{ $teamData['room'] }}/{{ $teamData['total'] }}</td>
+                            <td class="data-point border-right" class="{{ $roomClass }}">{{ $roomPercent }}%</td>
                         @else
-                            <td colspan="2" style="text-align: center; border-right: 1px solid #DDD;">N/A</td>
-                            <td colspan="2" style="text-align: center; border-right: 2px solid #DDD;">N/A</td>
+                            <td colspan="2" class="data-point">N/A</td>
+                            <td colspan="2" class="data-point border-right">N/A</td>
                         @endif
                     @endforeach
                 @endforeach

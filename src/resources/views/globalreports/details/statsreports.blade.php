@@ -10,9 +10,9 @@
         <tr>
             <th>Center</th>
             <th>Region</th>
-            <th>On Time</th>
+            <th class="data-point">On Time</th>
             <th>Submit Time</th>
-            <th>Had Revision</th>
+            <th class="data-point">Had Revision</th>
             <th>Revision Time</th>
             <th>Rating</th>
         </tr>
@@ -31,7 +31,7 @@
                     @endcan
                 </td>
                 <td>{{ $data['region'] }}</td>
-                <td style="text-align: center">{{ $data['onTime'] ? 'Yes' : 'No' }}</td>
+                <td class="data-point">{{ $data['onTime'] ? 'Yes' : 'No' }}</td>
                 <td>
                     @can ('read', $data['officialReport'])
                     <a href="{{ url("/statsreports/{$data['officialReport']->id}") }}">
@@ -42,7 +42,7 @@
                     @endcan
                 </td>
                 @if (isset($data['revisedReport']))
-                    <td style="text-align: center">Yes</td>
+                    <td class="data-point">Yes</td>
                     <td>
                         @can ('read', $data['revisedReport'])
                         <a href="{{ url("/statsreports/{$data['revisedReport']->id}") }}">
@@ -53,7 +53,7 @@
                         @endcan
                     </td>
                 @else
-                    <td style="text-align: center">No</td>
+                    <td class="data-point">No</td>
                     <td></td>
                 @endif
                 <td>

@@ -13,19 +13,19 @@
                     </tr>
                     <tr>
                         <th>&nbsp;</th>
-                        <th style="border-right: 2px solid #DDD;">&nbsp;</th>
-                        <th colspan="3" style="border-right: 2px solid #DDD; text-align: center">Quarter Starting</th>
-                        <th colspan="3" style="text-align: center">Current</th>
+                        <th>&nbsp;</th>
+                        <th colspan="3" class="data-point border-left">Quarter Starting</th>
+                        <th colspan="3" class="data-point border-left">Current</th>
                     </tr>
                     <tr>
                         <th>Location</th>
-                        <th style="border-right: 2px solid #DDD;">Date</th>
-                        <th style="text-align: center">Total Ever Registered</th>
-                        <th style="text-align: center">Standard Starts</th>
-                        <th style="border-right: 2px solid #DDD; text-align: center">Transferred in from Previous</th>
-                        <th style="text-align: center">Total Ever Registered</th>
-                        <th style="text-align: center">Standard Starts</th>
-                        <th style="text-align: center">Transferred in from Previous</th>
+                        <th>Date</th>
+                        <th class="data-point border-left">Total Ever Registered</th>
+                        <th class="data-point">Standard Starts</th>
+                        <th class="data-point">Transferred in from Previous</th>
+                        <th class="data-point border-left">Total Ever Registered</th>
+                        <th class="data-point">Standard Starts</th>
+                        <th class="data-point">Transferred in from Previous</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -52,16 +52,16 @@
                         ?>
                         <tr>
                             <td>{{ $new['location'] }}</td>
-                            <td style="vertical-align: middle; border-right: 2px solid #DDD;">{{ $new['startDate']->format("M j, Y") }}</td>
-                            <td {!! $attributes['quarterStartTer'] !!} style="vertical-align: middle; text-align: center">{{ $new['quarterStartTer'] }}
+                            <td class="data-point">@date($new['startDate'])</td>
+                            <td {!! $attributes['quarterStartTer'] !!} class="data-point border-left">{{ $new['quarterStartTer'] }}
                                 {{ $attributes['quarterStartTer'] ? 'was ' . $old['currentTer'] : '' }}</td>
-                            <td {!! $attributes['quarterStartStandardStarts'] !!} style="vertical-align: middle; text-align: center">{{ $new['quarterStartStandardStarts'] }}
+                            <td {!! $attributes['quarterStartStandardStarts'] !!} class="data-point">{{ $new['quarterStartStandardStarts'] }}
                                 {{ $attributes['quarterStartStandardStarts'] ? 'was ' . $old['currentStandardStarts'] : '' }}</td>
-                            <td {!! $attributes['quarterStartXfer'] !!} style="vertical-align: middle; border-right: 2px solid #DDD; text-align: center">{{ $new['quarterStartXfer'] }}
+                            <td {!! $attributes['quarterStartXfer'] !!} class="data-point">{{ $new['quarterStartXfer'] }}
                                 {{ $attributes['quarterStartXfer'] ? 'was ' . $old['currentXfer'] : '' }}</td>
-                            <td style="vertical-align: middle; text-align: center">{{ $new['currentTer'] }}</td>
-                            <td style="vertical-align: middle; text-align: center">{{ $new['currentStandardStarts'] }}</td>
-                            <td style="vertical-align: middle; text-align: center">{{ $new['currentXfer'] }}</td>
+                            <td class="data-point border-left">{{ $new['currentTer'] }}</td>
+                            <td class="data-point">{{ $new['currentStandardStarts'] }}</td>
+                            <td class="data-point">{{ $new['currentXfer'] }}</td>
                         </tr>
                     @endforeach
                     </tbody>

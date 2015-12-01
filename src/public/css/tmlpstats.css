@@ -49,10 +49,10 @@ td.data-point, th.data-point {
 }
 
 td.border-left, th.border-left {
-    border-left: 2px solid #DDD
+    border-left: 2px solid #DDD !important;
 }
 td.border-right, th.border-right {
-    border-right: 2px solid #DDD
+    border-right: 2px solid #DDD !important;
 }
 
 .table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
@@ -64,7 +64,6 @@ td.border-right, th.border-right {
     margin: 0px !important;
     height: 2em;
     vertical-align: middle;
-    color: white;
 }
 
 .ratingsTable .meter > span {
@@ -84,3 +83,13 @@ td.border-right, th.border-right {
     overflow: hidden;
 }
 
+
+td.active > span.glyphicon {
+    color: #666666;
+}
+td.success > span.glyphicon {
+    color: #006000;
+}
+td.danger > span.glyphicon {
+    color: #a00000;
+}

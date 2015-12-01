@@ -55,9 +55,9 @@ $ratingColors = [
                 <tr class="points">
                     @if ($count === 0)
                         <?php $count++; ?>
-                        <td style="vertical-align: middle; text-align: center;" rowspan="{{ count($rows[$rating]) }}">{{ $rating }}</td>
+                        <td class="data-point" rowspan="{{ count($rows[$rating]) }}">{{ $rating }}</td>
                     @endif
-                    <td style="background-color: {{ $ratingColors[$report->getPoints()] }}; vertical-align: middle; text-align: center; font-weight: bold;">
+                    <td class="data-point" style="background-color: {{ $ratingColors[$report->getPoints()] }}; font-weight: bold;">
                         @can ('read', $report)
                         <a href="{{ url("/statsreports/{$report->id}") }}">
                             <div class="{{ $meterClass }}">
