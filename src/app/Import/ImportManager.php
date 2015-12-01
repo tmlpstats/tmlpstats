@@ -170,13 +170,22 @@ class ImportManager
     public static function getExpectedReportDate()
     {
         $expectedDate = null;
-        if (Carbon::now()->dayOfWeek == Carbon::FRIDAY) {
-            $expectedDate = Carbon::now();
-        } else if (Carbon::now()->isWeekend()) {
-            $expectedDate = new Carbon('last friday');
-        } else {
-            $expectedDate = new Carbon('next friday');
+        switch (Carbon::now()->dayOfWeek) {
+            case Carbon::SATURDAY:
+            case Carbon::SUNDAY:
+            case Carbon::MONDAY:
+            case Carbon::TUESDAY:
+                $expectedDate = new Carbon('last friday');
+                break;
+            case Carbon::WEDNESDAY:
+            case Carbon::THURSDAY:
+                $expectedDate = new Carbon('next friday');
+                break;
+            case Carbon::FRIDAY:
+                $expectedDate = Carbon::now();
+                break;
         }
+
         return $expectedDate->startOfDay();
     }
 
