@@ -107,12 +107,13 @@ class CenterStatsController extends Controller
                 $dateString = $week->reportingDate->toDateString();
                 $type = $week->type;
 
-                $weekData = isset($cumulativeData[$dateString][$type])
-                    ? $cumulativeData[$dateString][$type]
-                    : new \stdClass();
-
-                $weekData->type = $type;
-                $weekData->reportingDate = $week->reportingDate;
+                if (isset($cumulativeData[$dateString][$type])) {
+                    $weekData = $cumulativeData[$dateString][$type];
+                } else {
+                    $weekData = new \stdClass();
+                    $weekData->type = $type;
+                    $weekData->reportingDate = $week->reportingDate;
+                }
 
                 foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
                     if (!isset($weekData->$game)) {
@@ -198,20 +199,19 @@ class CenterStatsController extends Controller
         return $this->globalReportCache[$date];
     }
 
-
     // TODO: Refactor this so we're not reusing basically the same code as in importer
     public function getPromiseData(Carbon $date, Center $center, Quarter $quarter)
     {
         $globalReport = null;
         $statsReport = null;
 
-        $firstWeek = clone $quarter->startWeekendDate;
-        $firstWeek->addWeek();
-
         // Usually, promises will be saved in the global report for the expected week
         if ($this->statsReport->reportingDate->gte($quarter->classroom2Date) && $date->gt($quarter->classroom2Date)) {
             $globalReport = $this->getGlobalReport($quarter->classroom2Date);
         } else {
+            $firstWeek = clone $quarter->startWeekendDate;
+            $firstWeek->addWeek();
+
             $globalReport = $this->getGlobalReport($firstWeek);
         }
 
@@ -224,7 +224,7 @@ class CenterStatsController extends Controller
         // This can happen when an unvalidated report is submitted
         $promise = null;
         if ($statsReport) {
-            $promise = CenterStatsData::actual()
+            $promise = CenterStatsData::promise()
                 ->reportingDate($date)
                 ->byStatsReport($statsReport)
                 ->first();
@@ -285,7 +285,6 @@ class CenterStatsController extends Controller
             ->byStatsReport($statsReport)
             ->first();
     }
-
 
     protected $firstStatsReportCache = [];
     public function findFirstWeek(Center $center, Quarter $quarter, $type)
