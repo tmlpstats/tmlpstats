@@ -104,13 +104,14 @@ class StatsReportController extends ReportDispatchAbstractController
 
         $statsReportList = array();
         foreach ($centers as $center) {
+            $report = StatsReport::reportingDate($reportingDate)
+                ->byCenter($center)
+                ->orderBy('submitted_at', 'desc')
+                ->first();
             $statsReportList[$center->name] = array(
                 'center'   => $center,
-                'report'   => StatsReport::reportingDate($reportingDate)
-                    ->byCenter($center)
-                    ->orderBy('submitted_at', 'desc')
-                    ->first(),
-                'viewable' => $this->hasAccess($center->id, 'R'),
+                'report'   => $report,
+                'viewable' => $this->authorize('read', $report),
             );
         }
 
