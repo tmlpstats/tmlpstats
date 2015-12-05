@@ -220,10 +220,21 @@ class CenterStatsController extends Controller
             $statsReport = $globalReport->getStatsReportByCenter($center);
         }
 
-        // It it wasn't found in the expected week, search all weeks from the beginning until
-        // we find it
-        if (!$statsReport) {
+        // Check to make sure we can find one using the stats report we found first
+        // This can happen when an unvalidated report is submitted
+        $promise = null;
+        if ($statsReport) {
+            $promise = CenterStatsData::actual()
+                ->reportingDate($date)
+                ->byStatsReport($statsReport)
+                ->first();
+        }
+
+        // If not, search from the beginning until we find it
+        if (!$promise) {
             $statsReport = $this->findFirstWeek($center, $quarter, 'promise');
+        } else {
+            return $promise;
         }
 
         // If we can't find one, or if the only one we could find is from this week
@@ -248,6 +259,8 @@ class CenterStatsController extends Controller
             $statsReport = $globalReport->getStatsReportByCenter($center);
         }
 
+        // Check to make sure we can find one using the stats report we found first
+        // This can happen when an unvalidated report is submitted
         $actual = null;
         if ($statsReport) {
             $actual = CenterStatsData::actual()
