@@ -15,5 +15,5 @@ return [
 
     'failed' => 'These credentials do not match our records.',
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
-
+    'inactive' => 'Your account is currently inactive. If you think this is incorrect, please contact your regional statistician.',
 ];
