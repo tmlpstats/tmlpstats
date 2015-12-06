@@ -39,7 +39,7 @@
                 <li><a href="#applications-tab" data-toggle="tab">Applications</a></li>
                 <li><a href="#traveloverview-tab" data-toggle="tab">Travel Summary</a></li>
                 <li><a href="#courses-tab" data-toggle="tab">Courses</a></li>
-                <li><a href="#teammemberstatus-tab" data-toggle="tab">Team Member Alerts</a></li>
+                <li><a href="#teammemberstatus-tab" data-toggle="tab">Team Members</a></li>
             </ul>
         </div>
         <div class="col-xs-10">
@@ -97,7 +97,16 @@
                 <div class="tab-pane" id="teammemberstatus-tab">
                     <h3>Team Members of Interest</h3>
 
-                    <div id="teammemberstatus-container"></div>
+                    <div class="btn-group" role="group">
+                        <button id ="teammemberstatuswithdrawn-button" type="button" class="btn">Withdrawn</button>
+                        <button id ="teammemberstatusctw-button" type="button" class="btn">CTW</button>
+                        <button id ="teammemberstatustransfer-button" type="button" class="btn">Transfers</button>
+                        <button id ="teammemberstatuspotentials-button" type="button" class="btn">T2 Potentials</button>
+                    </div>
+                    <div id="teammemberstatuswithdrawn-container"></div>
+                    <div id="teammemberstatusctw-container"></div>
+                    <div id="teammemberstatustransfer-container"></div>
+                    <div id="teammemberstatuspotentials-container"></div>
                 </div>
             </div>
         </div>
@@ -135,7 +144,10 @@
             'coursesupcoming',
             'coursescompleted',
             'coursesguestgames',
-            'teammemberstatus',
+            'teammemberstatuswithdrawn',
+            'teammemberstatusctw',
+            'teammemberstatustransfer',
+            'teammemberstatuspotentials',
         ];
 
         var buttonGroups = [
@@ -151,6 +163,12 @@
                 'coursesupcoming',
                 'coursescompleted',
                 'coursesguestgames',
+            ],
+            [
+                'teammemberstatuswithdrawn',
+                'teammemberstatusctw',
+                'teammemberstatustransfer',
+                'teammemberstatuspotentials',
             ],
         ];
 

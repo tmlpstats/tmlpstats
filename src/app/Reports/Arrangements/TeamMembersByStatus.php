@@ -7,10 +7,11 @@ class TeamMembersByStatus extends BaseArrangement
         $teamMembersData = $data['teamMembersData'];
 
         $reportData = [
-            'xferIn'    => [],
-            'xferOut'   => [],
-            'ctw'       => [],
-            'withdrawn' => [],
+            'xferIn'      => [],
+            'xferOut'     => [],
+            'ctw'         => [],
+            'withdrawn'   => [],
+            't2Potential' => [],
         ];
         foreach ($teamMembersData as $data) {
             if ($data->withdrawCodeId !== null) {
@@ -21,6 +22,12 @@ class TeamMembersByStatus extends BaseArrangement
                 $reportData['xferIn'][] = $data;
             } else if ($data->xferOut) {
                 $reportData['xferOut'][] = $data;
+            }
+
+            if ($data->teamYear == 1 && $data->quarterNumber == 4
+                && $data->withdrawCodeId === null && !$data->ctw && !$data->xferOut
+            ) {
+                $reportData['t2Potential'][] = $data;
             }
         }
 
