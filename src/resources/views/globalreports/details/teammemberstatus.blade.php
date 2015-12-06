@@ -26,7 +26,6 @@
                     <th class="data-point">Quarter</th>
                     @if ($group == 'withdrawn')
                         <th>Reason</th>
-                        <th>Withdraw</th>
                     @elseif ($group == 't2Potential')
                         <th class="data-point">Registered</th>
                         <th class="data-point">Approved</th>
@@ -48,9 +47,6 @@
                             @if ($memberData->withdrawCode)
                                 <td title="{{ $memberData->withdrawCode->code }}">
                                     {{ $memberData->withdrawCode->display }}
-                                </td>
-                                <td title="{{ $memberData->withdrawCode->code }}">
-                                    {{ $memberData->wdDate ? $memberData->wdDate->format('n/j/y') : '' }}
                                 </td>
                             @endif
                         @elseif ($group == 't2Potential')
