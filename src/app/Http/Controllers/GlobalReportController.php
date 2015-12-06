@@ -222,8 +222,17 @@ class GlobalReportController extends ReportDispatchAbstractController
             case 'coursesguestgames':
                 $response = $this->getCoursesGuestGames($globalReport, $region);
                 break;
-            case 'teammemberstatus':
-                $response = $this->getTeamMemberStatus($globalReport, $region);
+            case 'teammemberstatuswithdrawn':
+                $response = $this->getTeamMemberStatusWithdrawn($globalReport, $region);
+                break;
+            case 'teammemberstatusctw':
+                $response = $this->getTeamMemberStatusCtw($globalReport, $region);
+                break;
+            case 'teammemberstatustransfer':
+                $response = $this->getTeamMemberStatusTransfer($globalReport, $region);
+                break;
+            case 'teammemberstatuspotentials':
+                $response = $this->getTeamMemberStatusPotentials($globalReport, $region);
                 break;
         }
 
@@ -431,8 +440,32 @@ class GlobalReportController extends ReportDispatchAbstractController
         return view('globalreports.details.traveloverview', compact('reportData'));
     }
 
-    protected function getTeamMemberStatus(GlobalReport $globalReport, Region $region)
+    protected function getTeamMemberStatusWithdrawn(GlobalReport $globalReport, Region $region)
     {
+        return $this->getTeamMemberStatus($globalReport, $region, ['withdrawn']);
+    }
+
+    protected function getTeamMemberStatusCtw(GlobalReport $globalReport, Region $region)
+    {
+        return $this->getTeamMemberStatus($globalReport, $region, ['ctw']);
+    }
+
+    protected function getTeamMemberStatusTransfer(GlobalReport $globalReport, Region $region)
+    {
+        return $this->getTeamMemberStatus($globalReport, $region, ['xferIn', 'xferOut']);
+    }
+
+    protected function getTeamMemberStatusPotentials(GlobalReport $globalReport, Region $region)
+    {
+        return $this->getTeamMemberStatus($globalReport, $region, ['t2Potential']);
+    }
+
+    protected function getTeamMemberStatus(GlobalReport $globalReport, Region $region, $types = null)
+    {
+        if (!$types) {
+            $types = ['xferIn', 'xferOut', 'ctw', 'withdrawn', 't2Potential'];
+        }
+
         $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport, $region);
         if (!$teamMembers) {
             return null;
@@ -441,6 +474,28 @@ class GlobalReportController extends ReportDispatchAbstractController
         $a = new TeamMembersByStatus(['teamMembersData' => $teamMembers]);
         $data = $a->compose();
 
+        if (in_array('t2Potential', $types)) {
+            $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
+            if (!$registrations) {
+                return null;
+            }
+
+            $potentials = $data['reportData']['t2Potential'];
+            $potentialsThatRegistered = [];
+
+            foreach ($registrations as $registration) {
+                if ($registration->teamYear == 2) {
+                    foreach ($potentials as $member) {
+                        if ($member->teamMember->personId == $registration->registration->persionId) {
+                            $potentialsThatRegistered[$member->teamMember->personId] = $registration;
+                        }
+                    }
+                }
+            }
+            $data = array_merge($data, ['registations' => $potentialsThatRegistered]);
+        }
+
+        $data = array_merge($data, ['types' => $types]);
         return view('globalreports.details.teammemberstatus', $data);
     }
 

@@ -1,19 +1,23 @@
 <div class="table-responsive">
-    @foreach (['xferIn', 'xferOut', 'ctw', 'withdrawn'] as $group)
-        @if ($reportData[$group])
-            <br/>
-            <h4>
-                @if ($group == 'xferIn')
-                    Transfers In
-                @elseif ($group == 'xferOut')
-                    Transfers Out
-                @elseif ($group == 'ctw')
-                    Conversations to Withdraw
-                @else
-                    Withdrawn
-                @endif
-            </h4>
-            <table class="table table-condensed table-striped table-hover teamMemberStatusTable">
+    @foreach ($types as $group)
+        <br/>
+        <h4>
+            @if ($group == 'xferIn')
+                Transfers In
+            @elseif ($group == 'xferOut')
+                Transfers Out
+            @elseif ($group == 'ctw')
+                Conversations to Withdraw
+            @elseif ($group == 'withdrawn')
+                Withdrawn
+            @else
+                Team 2 Potentials
+            @endif
+        </h4>
+        @if (!$reportData[$group])
+            <p>None found</p>
+        @else
+            <table class="table table-condensed table-striped table-hover {{ $group }}TeamMemberStatusTable">
                 <thead>
                 <tr>
                     <th>Center</th>
@@ -23,6 +27,9 @@
                     @if ($group == 'withdrawn')
                         <th>Reason</th>
                         <th>Withdraw</th>
+                    @elseif ($group == 't2Potential')
+                        <th class="data-point">Registered</th>
+                        <th class="data-point">Approved</th>
                     @endif
                     <th>Comments</th>
                 </tr>
@@ -33,8 +40,10 @@
                         <td>{{ $memberData->center->name }}</td>
                         <td>{{ $memberData->firstName }}</td>
                         <td>{{ $memberData->lastName }}</td>
-                        <td class="data-point">T{{ $memberData->teamMember->teamYear }}
-                            Q{{ $memberData->teamMember->quarterNumber }}</td>
+                        <td class="data-point">
+                            T{{ $memberData->teamMember->teamYear }}
+                            Q{{ $memberData->teamMember->quarterNumber }}
+                        </td>
                         @if ($group == 'withdrawn')
                             @if ($memberData->withdrawCode)
                                 <td title="{{ $memberData->withdrawCode->code }}">
@@ -44,6 +53,17 @@
                                     {{ $memberData->wdDate ? $memberData->wdDate->format('n/j/y') : '' }}
                                 </td>
                             @endif
+                        @elseif ($group == 't2Potential')
+                            <td class="data-point">
+                                @if (isset($registrations[$memberData->teamMember->personId]))
+                                    <span class="glyphicon glyphicon-ok"></span>
+                                @endif
+                            </td>
+                            <td class="data-point">
+                                @if (isset($registrations[$memberData->teamMember->personId]) && $registrations[$memberData->teamMember->personId]->apprDate)
+                                    <span class="glyphicon glyphicon-ok"></span>
+                                @endif
+                            </td>
                         @endif
                         <td>{{ is_numeric($memberData->comment) ? TmlpStats\Util::getExcelDate($memberData->comment)->format('F') : $memberData->comment }}</td>
                     </tr>
@@ -55,10 +75,19 @@
 </div>
 
 <script type="text/javascript">
+
+    var tables = [
+        @foreach ($types as $type)
+            "{{ $type }}TeamMemberStatusTable",
+        @endforeach
+    ];
+
     $(document).ready(function () {
-        $('table.teamMemberStatusTable').dataTable({
-            "paging": false,
-            "searching": false
+        $.each(tables, function (i, table) {
+            $('table.' + table).dataTable({
+                "paging": false,
+                "searching": false
+            });
         });
     });
 </script>
