@@ -139,15 +139,25 @@
             'applicationsoverdue',
             'applicationsoverview',
             'traveloverview',
-            'coursesthisweek',
-            'coursesnextmonth',
-            'coursesupcoming',
-            'coursescompleted',
-            'coursesguestgames',
-            'teammemberstatuswithdrawn',
-            'teammemberstatusctw',
-            'teammemberstatustransfer',
-            'teammemberstatuspotentials',
+
+        ];
+
+        var batchedPages = [
+            [
+                'coursesall',
+                'coursesthisweek',
+                'coursesnextmonth',
+                'coursesupcoming',
+                'coursescompleted',
+                'coursesguestgames',
+            ],
+            [
+                'teammemberstatusall',
+                'teammemberstatuswithdrawn',
+                'teammemberstatusctw',
+                'teammemberstatustransfer',
+                'teammemberstatuspotentials',
+            ],
         ];
 
         var buttonGroups = [
@@ -187,7 +197,27 @@
                     $(container).html(response);
                 }).fail(function (jqXHR) {
                     var message = getErrorMessage(jqXHR.status);
-                    $(container).html('<p>' + message + '</p>');
+                    $(container).html('<br/><p>' + message + '</p>');
+                });
+            });
+
+            $.each(batchedPages, function (index, batch) {
+                var query = batch.shift();
+                var url = "{{ url("/globalreports/{$globalReport->id}") }}/" + query + "?region={{$region->abbreviation}}";
+
+                $.each(batch, function (i, name) {
+                    $("#" + name + "-container").html($("#loader").html());
+                });
+
+                $.get(url, function (response) {
+                    $.each(response, function (name, data) {
+                        $("#" + name + "-container").html(data);
+                    });
+                }).fail(function (jqXHR) {
+                    var message = getErrorMessage(jqXHR.status);
+                    $.each(batch, function (i, name) {
+                        $("#" + name + "-container").html('<br/><p>' + message + '</p>');
+                    });
                 });
             });
 
