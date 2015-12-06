@@ -1,13 +1,15 @@
 <?php
 namespace TmlpStats\Http\Controllers\Auth;
 
+use Auth;
+use Lang;
 use TmlpStats\Person;
-use TmlpStats\Role;
 use TmlpStats\User;
 use Validator;
 use TmlpStats\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -78,5 +80,21 @@ class AuthController extends Controller
             'email'     => $data['email'],
             'password'  => bcrypt($data['password']),
         ]);
+    }
+
+    protected function authenticated(Request $request, User $user)
+    {
+        if ($user->active) {
+            return redirect()->intended($this->redirectPath());
+        }
+
+        // Don't allow inactive users to login
+        Auth::logout();
+
+        return redirect($this->loginPath())
+            ->withInput($request->only($this->loginUsername(), 'remember'))
+            ->withErrors([
+                $this->loginUsername() => Lang::get('auth.inactive'),
+            ]);
     }
 }
