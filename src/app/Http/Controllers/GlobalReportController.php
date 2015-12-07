@@ -223,7 +223,8 @@ class GlobalReportController extends ReportDispatchAbstractController
             case 'teammemberstatuswithdrawn':
             case 'teammemberstatusctw':
             case 'teammemberstatustransfer':
-            case 'teammemberstatuspotentials':
+            case 'potentialsdetails':
+            case 'potentialsoverview':
                 $response = $this->getTeamMemberStatus($globalReport, $region, $report);
                 break;
             case 'teammemberstatusall':
@@ -470,6 +471,60 @@ class GlobalReportController extends ReportDispatchAbstractController
     {
         if (!$data) {
             return null;
+        } else if (!isset($data['registrations'])) {
+            $potenialsData = $this->getTeamMemberStatusPotentialsData($data, $globalReport, $region);
+        } else {
+            $potenialsData = [];
+        }
+
+        return array_merge($data, $potenialsData, ['types' => ['t2Potential']]);
+    }
+
+    protected function getTeamMemberStatusPotentialsOverview($data, GlobalReport $globalReport, Region $region)
+    {
+        if (!$data) {
+            return null;
+        } else if (!isset($data['registrations'])) {
+            $details = $this->getTeamMemberStatusPotentialsData($data, $globalReport, $region);
+        } else {
+            $details = $data;
+        }
+
+        $reportData = [];
+        $totals = [
+            'total'      => 0,
+            'registered' => 0,
+            'approved'   => 0,
+        ];
+
+        foreach ($details['reportData']['t2Potential'] as $member) {
+            if (!isset($reportData[$member->center->name])) {
+                $reportData[$member->center->name] = [
+                    'total'      => 0,
+                    'registered' => 0,
+                    'approved'   => 0,
+                ];
+            }
+            $reportData[$member->center->name]['total']++;
+            $totals['total']++;
+
+            if (isset($details['registrations'][$member->teamMember->personId])) {
+                $reportData[$member->center->name]['registered']++;
+                $totals['registered']++;
+                if ($details['registrations'][$member->teamMember->personId]->apprDate) {
+                    $reportData[$member->center->name]['approved']++;
+                    $totals['approved']++;
+                }
+            }
+        }
+
+        return view('globalreports.details.potentialsoverview', compact('reportData', 'totals'));
+    }
+
+    protected function getTeamMemberStatusPotentialsData($data, GlobalReport $globalReport, Region $region)
+    {
+        if (!$data) {
+            return null;
         }
 
         $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
@@ -489,7 +544,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             }
         }
 
-        return array_merge($data, ['types' => ['t2Potential'], 'registations' => $potentialsThatRegistered]);
+        return array_merge($data, ['registations' => $potentialsThatRegistered]);
     }
 
     protected function getTeamMemberStatusAll(GlobalReport $globalReport, Region $region)
@@ -498,7 +553,6 @@ class GlobalReportController extends ReportDispatchAbstractController
             'teammemberstatuswithdrawn',
             'teammemberstatusctw',
             'teammemberstatustransfer',
-            'teammemberstatuspotentials',
         ];
 
         $data = $this->getTeamMemberStatusData($globalReport, $region);
@@ -509,6 +563,21 @@ class GlobalReportController extends ReportDispatchAbstractController
         $responseData = [];
         foreach ($statusTypes as $type) {
             $response = $this->getTeamMemberStatus($globalReport, $region, $type, $data);
+            $responseData[$type] = $response
+                ? $response->render()
+                : '';
+        }
+
+        $potentialsData = $this->getTeamMemberStatusPotentialsData($data, $globalReport, $region);
+
+        // The potentials reports use the same specialty data, so reuse it instead of processing twice
+        $potentialTypes = [
+            'potentialsdetails',
+            'potentialsoverview',
+        ];
+
+        foreach ($potentialTypes as $type) {
+            $response = $this->getTeamMemberStatus($globalReport, $region, $type, $potentialsData);
             $responseData[$type] = $response
                 ? $response->render()
                 : '';
@@ -537,9 +606,12 @@ class GlobalReportController extends ReportDispatchAbstractController
             case 'teammemberstatustransfer':
                 $viewData = $this->getTeamMemberStatusTransfer($data, $globalReport, $region);
                 break;
-            case 'teammemberstatuspotentials':
+            case 'potentialsdetails':
                 $viewData = $this->getTeamMemberStatusPotentials($data, $globalReport, $region);
                 break;
+            case 'potentialsoverview':
+                // Potentials Overview uses it's own view
+                return $this->getTeamMemberStatusPotentialsOverview($data, $globalReport, $region);
         }
 
         return $viewData
