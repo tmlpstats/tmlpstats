@@ -447,24 +447,31 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getTeamMemberStatusWithdrawn($data, GlobalReport $globalReport, Region $region)
     {
-        $data = array_merge($data, ['types' => ['withdrawn']]);
-        return $data;
+        return $data
+            ? array_merge($data, ['types' => ['withdrawn']])
+            : null;
     }
 
     protected function getTeamMemberStatusCtw($data, GlobalReport $globalReport, Region $region)
     {
-        $data = array_merge($data, ['types' => ['ctw']]);
-        return $data;
+        return $data
+            ? array_merge($data, ['types' => ['ctw']])
+            : null;
     }
 
     protected function getTeamMemberStatusTransfer($data, GlobalReport $globalReport, Region $region)
     {
-        $data = array_merge($data, ['types' => ['xferIn', 'xferOut']]);
-        return $data;
+        return $data
+            ? array_merge($data, ['types' => ['xferIn', 'xferOut']])
+            : null;
     }
 
     protected function getTeamMemberStatusPotentials($data, GlobalReport $globalReport, Region $region)
     {
+        if (!$data) {
+            return null;
+        }
+
         $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
 
         $potentialsThatRegistered = [];
@@ -481,9 +488,8 @@ class GlobalReportController extends ReportDispatchAbstractController
                 }
             }
         }
-        $data = array_merge($data, ['types' => ['t2Potential'], 'registations' => $potentialsThatRegistered]);
 
-        return $data;
+        return array_merge($data, ['types' => ['t2Potential'], 'registations' => $potentialsThatRegistered]);
     }
 
     protected function getTeamMemberStatusAll(GlobalReport $globalReport, Region $region)
@@ -496,11 +502,16 @@ class GlobalReportController extends ReportDispatchAbstractController
         ];
 
         $data = $this->getTeamMemberStatusData($globalReport, $region);
+        if (!$data) {
+            return null;
+        }
 
         $responseData = [];
         foreach ($statusTypes as $type) {
             $response = $this->getTeamMemberStatus($globalReport, $region, $type, $data);
-            $responseData[$type] = $response->render();
+            $responseData[$type] = $response
+                ? $response->render()
+                : '';
         }
 
         return $responseData;
@@ -510,6 +521,9 @@ class GlobalReportController extends ReportDispatchAbstractController
     {
         if (!$data) {
             $data = $this->getTeamMemberStatusData($globalReport, $region);
+            if (!$data) {
+                return null;
+            }
         }
 
         $viewData = null;
@@ -528,7 +542,9 @@ class GlobalReportController extends ReportDispatchAbstractController
                 break;
         }
 
-        return view('globalreports.details.teammemberstatus', $viewData);
+        return $viewData
+            ? view('globalreports.details.teammemberstatus', $viewData)
+            : null;
     }
 
     protected function getTeamMemberStatusData(GlobalReport $globalReport, Region $region)
@@ -538,10 +554,8 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $a    = new TeamMembersByStatus(['teamMembersData' => $teamMembers]);
-        $data = $a->compose();
-
-        return $data;
+        $a = new TeamMembersByStatus(['teamMembersData' => $teamMembers]);
+        return $a->compose();
     }
 
     protected function getCenterStatsReports(GlobalReport $globalReport, Region $region)
@@ -702,7 +716,9 @@ class GlobalReportController extends ReportDispatchAbstractController
         $responseData = [];
         foreach ($statusTypes as $type) {
             $response = $this->getCoursesStatus($globalReport, $region, $type, $coursesData);
-            $responseData[$type] = $response->render();
+            $responseData[$type] = $response
+                ? $response->render()
+                : '';
         }
 
         return $responseData;
@@ -811,5 +827,4 @@ class GlobalReportController extends ReportDispatchAbstractController
     {
         return strcmp($a['center'], $b['center']);
     }
-
 }

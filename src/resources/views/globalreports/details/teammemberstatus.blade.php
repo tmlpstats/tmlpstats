@@ -14,7 +14,7 @@
                 Team 2 Potentials
             @endif
         </h4>
-        @if (!$reportData[$group])
+        @if (!isset($reportData[$group]) || !$reportData[$group])
             <p>None found</p>
         @else
             <table class="table table-condensed table-striped table-hover {{ $group }}TeamMemberStatusTable">
