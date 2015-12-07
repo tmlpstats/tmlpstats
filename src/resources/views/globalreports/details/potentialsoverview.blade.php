@@ -1,7 +1,7 @@
 <div class="table-responsive">
     <br/>
-    <h4>Applications Overview</h4>
-    <table class="table table-condensed table-striped table-hover applicationTable">
+    <h4>Overview</h4>
+    <table id="potentialsOverviewTable" class="table table-condensed table-striped table-hover">
         <thead>
         <tr>
             <th class="border-right">Center</th>
@@ -20,7 +20,7 @@
             </tr>
         @endforeach
         </tbody>
-        {{-- This is pretty janky, but putting this row outside of the tbody causes datatables from including it in the sort --}}
+        {{-- This is pretty janky, but putting this row outside of the tbody prevents datatables from including it in the sort --}}
         <tr style="font-weight:bold">
             <td class="border-right">Totals</td>
             <td class="data-point">{{ $totals['total'] }}</td>
@@ -29,3 +29,12 @@
         </tr>
     </table>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#potentialsOverviewTable').dataTable({
+            "paging":    false,
+            "searching": false
+        });
+    });
+</script>

@@ -12,7 +12,7 @@
                 @endif
                 <span style="font-weight: normal; font-size: smaller;">(Total: {{ count($reportData[$group]) }})</span>
             </h4>
-            <table class="table table-condensed table-striped table-hover applicationTable">
+            <table class="table table-condensed table-striped table-hover applicationsOverdueTable">
                 <thead>
                 <tr>
                     <th>Center</th>
@@ -80,3 +80,12 @@
         @endif
     @endforeach
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('table.applicationsOverdueTable').dataTable({
+            "paging":    false,
+            "searching": false
+        });
+    });
+</script>

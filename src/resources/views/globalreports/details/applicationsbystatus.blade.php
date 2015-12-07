@@ -52,7 +52,7 @@
                             <td>{{ $registrationData->center->name }}</td>
                             <td>{{ $registrationData->firstName }} {{ $registrationData->lastName }}</td>
                             <td class="data-point">{{ $registrationData->registration->teamYear }}</td>
-                            <td>{{ $registrationData->incomingQuarter ? $registrationData->incomingQuarter->startWeekendDate->format('M') : '' }}</td>
+                            <td>{{ $registrationData->incomingQuarter ? $registrationData->incomingQuarter->startWeekendDate->format('M Y') : '' }}</td>
                             <td class="data-point">
                                 @if ($registrationData->regDate)
                                     @date($registrationData->regDate)

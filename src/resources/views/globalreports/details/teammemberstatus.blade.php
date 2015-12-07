@@ -71,7 +71,6 @@
 </div>
 
 <script type="text/javascript">
-
     var tables = [
         @foreach ($types as $type)
             "{{ $type }}TeamMemberStatusTable",
