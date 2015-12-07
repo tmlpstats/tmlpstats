@@ -9,7 +9,12 @@ class TeamMembersByQuarter extends BaseArrangement
     {
         $teamMembersData = $data['teamMembersData'];
 
-        $reportData = [];
+        $reportData = [
+            'team1'     => [],
+            'team2'     => [],
+            'withdrawn' => [],
+        ];
+
         foreach ($teamMembersData as $data) {
 
             $index = $data->withdrawCodeId !== null
