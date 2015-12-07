@@ -5,7 +5,7 @@
         <span class="message"></span>
     </div>
 
-    <table id="activeCenterTable" class="table">
+    <table id="centerReportsTable" class="table">
         <thead>
         <tr>
             <th>Center</th>
@@ -68,3 +68,12 @@
         </tbody>
     </table>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#centerReportsTable').dataTable({
+            "paging": false,
+            "searching": false
+        });
+    });
+</script>

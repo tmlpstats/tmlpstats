@@ -43,22 +43,30 @@
             $t1TotalClass = '';
             if ($t1Total < 6) {
                 $t1TotalClass = 'bg-danger';
-            } else if ($t1Total <= 7) {
+            } else if ($t1Total == 6) {
                 $t1TotalClass = 'bg-warning';
             }
 
             $t2TotalClass = '';
             if ($t2Total < 1) {
                 $t2TotalClass = 'bg-danger';
-            } else if ($t2Total <= 2) {
+            } else if ($t2Total == 1) {
                 $t2TotalClass = 'bg-warning';
             }
             ?>
             <tr>
                 <td class="border-right">{{ $centerName }}</td>
                 @foreach ($centerData as $team => $registrationData)
-                    <td class="data-point">{{ isset($registrationData['applications']['out']) ? $registrationData['applications']['out'] : 0 }}</td>
-                    <td class="data-point">{{ isset($registrationData['applications']['waiting']) ? $registrationData['applications']['waiting'] : 0 }}</td>
+                    @if (isset($registrationData['applications']['out']))
+                        <td class="data-point success"><strong>{{ $registrationData['applications']['out'] }}</strong></td>
+                    @else
+                        <td class="data-point">0</td>
+                    @endif
+                    @if (isset($registrationData['applications']['waiting']))
+                        <td class="data-point success"><strong>{{ $registrationData['applications']['waiting'] }}</strong></td>
+                    @else
+                        <td class="data-point">0</td>
+                    @endif
                     <td class="data-point">{{ isset($registrationData['applications']['approved']) ? $registrationData['applications']['approved'] : 0 }}</td>
                     <td class="data-point border-right">{{ isset($registrationData['applications']['withdrawn']) ? $registrationData['applications']['withdrawn'] : 0 }}</td>
                 @endforeach
