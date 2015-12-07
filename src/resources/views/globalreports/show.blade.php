@@ -40,6 +40,7 @@
                 <li><a href="#traveloverview-tab" data-toggle="tab">Travel Summary</a></li>
                 <li><a href="#courses-tab" data-toggle="tab">Courses</a></li>
                 <li><a href="#teammemberstatus-tab" data-toggle="tab">Team Members</a></li>
+                <li><a href="#potentials-tab" data-toggle="tab">Potentials</a></li>
             </ul>
         </div>
         <div class="col-xs-10">
@@ -101,12 +102,20 @@
                         <button id ="teammemberstatuswithdrawn-button" type="button" class="btn">Withdrawn</button>
                         <button id ="teammemberstatusctw-button" type="button" class="btn">CTW</button>
                         <button id ="teammemberstatustransfer-button" type="button" class="btn">Transfers</button>
-                        <button id ="teammemberstatuspotentials-button" type="button" class="btn">T2 Potentials</button>
                     </div>
                     <div id="teammemberstatuswithdrawn-container"></div>
                     <div id="teammemberstatusctw-container"></div>
                     <div id="teammemberstatustransfer-container"></div>
-                    <div id="teammemberstatuspotentials-container"></div>
+                </div>
+                <div class="tab-pane" id="potentials-tab">
+                    <h3>Team 2 Potentials</h3>
+
+                    <div class="btn-group" role="group">
+                        <button id ="potentialsoverview-button" type="button" class="btn">Overview</button>
+                        <button id ="potentialsdetails-button" type="button" class="btn">Details</button>
+                    </div>
+                    <div id="potentialsoverview-container"></div>
+                    <div id="potentialsdetails-container"></div>
                 </div>
             </div>
         </div>
@@ -156,7 +165,8 @@
                 'teammemberstatuswithdrawn',
                 'teammemberstatusctw',
                 'teammemberstatustransfer',
-                'teammemberstatuspotentials',
+                'potentialsoverview',
+                'potentialsdetails',
             ],
         ];
 
@@ -179,6 +189,10 @@
                 'teammemberstatusctw',
                 'teammemberstatustransfer',
                 'teammemberstatuspotentials',
+            ],
+            [
+                'potentialsoverview',
+                'potentialsdetails',
             ],
         ];
 
