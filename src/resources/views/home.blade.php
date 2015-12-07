@@ -54,7 +54,15 @@
                     <tbody>
                     @foreach ($data['centersData'] as $name => $center)
                         <tr class="{{ $center['validated'] ? 'success' : 'danger' }}">
-                            <td>{{ $center['name'] }}</td>
+                            <td>
+                                @if ($center['reportUrl'])
+                                    <a href="{{ $center['reportUrl'] }}">
+                                        {{ $center['name'] }}
+                                    </a>
+                                @else
+                                    {{ $center['name'] }}
+                                @endif
+                            </td>
                             <td style="text-align: center">{{ $center['localRegion'] ?: '' }}</td>
                             <td style="text-align: center">
                                 <span class="glyphicon {{ $center['submitted'] ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span>
