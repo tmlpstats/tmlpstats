@@ -110,15 +110,12 @@ class TmlpRegistrationImporter extends DataImporterAbstract
             }
 
             $thisQuarter = $this->statsReport->quarter;
-            if ($incomingInput['incomingWeekend'] === 'current') {
-                $quarterNumber = ($thisQuarter->quarterNumber + 1) % 5;
-            } else {
-                $quarterNumber = ($thisQuarter->quarterNumber + 2) % 5;
+            $quarterNumber = ($thisQuarter->quarterNumber % 4) + 1;
+            if ($incomingInput['incomingWeekend'] !== 'current') {
+                $quarterNumber = ($quarterNumber % 4) + 1;
             }
 
-            $quarterNumber = $quarterNumber ?: 1; // no quarter 0
-
-            $year = ($quarterNumber === 1)
+            $year = ($quarterNumber < $thisQuarter->quarterNumber)
                 ? $thisQuarter->year + 1
                 : $thisQuarter->year;
 
