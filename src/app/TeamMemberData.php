@@ -24,7 +24,6 @@ class TeamMemberData extends Model
         'travel',
         'room',
         'comment',
-        'accountability_id',
         'gitw',
         'tdo',
     ];
@@ -72,11 +71,6 @@ class TeamMemberData extends Model
     public function withdrawCode()
     {
         return $this->belongsTo('TmlpStats\WithdrawCode');
-    }
-
-    public function accountability()
-    {
-        return $this->belongsTo('TmlpStats\Accountability');
     }
 
     public function teamMember()
