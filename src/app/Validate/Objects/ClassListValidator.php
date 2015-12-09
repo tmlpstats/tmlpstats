@@ -3,9 +3,12 @@ namespace TmlpStats\Validate\Objects;
 
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use Respect\Validation\Validator as v;
+use TmlpStats\Traits\ValidatesTravelWithConfig;
 
 class ClassListValidator extends ObjectsValidatorAbstract
 {
+    use ValidatesTravelWithConfig;
+
     protected $sheetId = ImportDocument::TAB_CLASS_LIST;
 
     protected function populateValidators($data)
@@ -210,8 +213,8 @@ class ClassListValidator extends ObjectsValidatorAbstract
             return $isValid; // Not required if withdrawn
         }
 
-        // Travel and Rooming must be reported starting after the 2nd Classroom
-        if ($this->statsReport->reportingDate->gt($this->statsReport->quarter->classroom1Date)) {
+        // Travel and Rooming must be reported starting after the configured date
+        if ($this->isTimeToCheckTravel()) {
             if (is_null($data->travel)) {
                 // Error if no comment provided, warning to look at it otherwise
                 if (is_null($data->comment)) {
@@ -229,19 +232,6 @@ class ClassListValidator extends ObjectsValidatorAbstract
                 } else {
                     $this->addMessage('CLASSLIST_ROOM_COMMENT_REVIEW');                }
             }
-
-            // Disabling check 08/15. Ending this practice
-            //
-            // Any team member without travel AND rooming booked by 2 weeks before the end of the quarter
-            // is considered in a Conversation To Withdraw
-            // $endDate = clone $this->statsReport->quarter->endWeekendDate;
-            // $twoWeeksBeforeWeekend = $endDate->subWeeks(2);
-            // if ($this->statsReport->reportingDate->gte($twoWeeksBeforeWeekend)) {
-            //     if ((is_null($data->travel) || is_null($data->room)) && is_null($data->ctw)) {
-            //         $this->addMessage('CLASSLIST_TRAVEL_ROOM_CTW_MISSING');
-            //         $isValid = false;
-            //     }
-            // }
         }
 
         return $isValid;
