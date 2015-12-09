@@ -309,11 +309,6 @@ class Message
             'format'    => "Rooming is not booked. Make sure the comment provides a specific promise for when rooming will be complete.",
             'arguments' => [],
         ],
-        'TMLPREG_TRAVEL_ROOM_CTW_COMMENT_REVIEW'                        => [
-            'type'      => Message::WARNING,
-            'format'    => "Travel/rooming are not complete by 2 weeks before the end of the quarter. Make sure the comment states that they are in a Conversation To Withdraw (CTW).",
-            'arguments' => [],
-        ],
         'TMLPREG_DUPLICATE_NAME'                                        => [
             'type'      => Message::ERROR,
             'format'    => "There are multiple registrations with the name '%%firstName%% %%lastName%%'. You may have accidentally added them twice. If you have 2 people with the same first name and last initial, please provide an additional letter of their last name so we can tell them apart. Make sure to use the same spelling if you reference them on other tabs.",
@@ -525,11 +520,6 @@ class Message
         'CLASSLIST_ROOM_COMMENT_REVIEW'                                 => [
             'type'      => Message::WARNING,
             'format'    => "Rooming is not booked. Make sure the comment provides a specific promise for when rooming will be complete.",
-            'arguments' => [],
-        ],
-        'CLASSLIST_TRAVEL_ROOM_CTW_MISSING'                             => [
-            'type'      => Message::ERROR,
-            'format'    => "If travel and rooming are not complete by 2 weeks before the end of the quarter, mark the team member as a Conversation To Withdraw (CTW).",
             'arguments' => [],
         ],
         'CLASSLIST_DUPLICATE_TEAM_MEMBER'                               => [
