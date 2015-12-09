@@ -843,20 +843,45 @@ class StatsReportController extends ReportDispatchAbstractController
          * No completed courses copied over (Done by validator)
          * Starting numbers match the completing numbers from last week
          */
-        $flagged = [];
+        $flaggedCount = 0;
+        $flagged = [
+            'missing'  => [],
+            'changed'  => [],
+            'new'      => [],
+        ];
         foreach ($thisWeekCoursesList as $type => $thisWeekCourses) {
             foreach ($thisWeekCourses as $thisWeekCourseData) {
-                foreach ($lastWeekCoursesList[$type] as $lastWeekCourseData) {
-                    if ($thisWeekCourseData['courseId'] == $lastWeekCourseData['courseId']
-                        && !$this->courseCopiedCorrectly($thisWeekCourseData, $lastWeekCourseData)
-                    ) {
-                        $flagged[$type][] = [$thisWeekCourseData, $lastWeekCourseData];
+                $found = false;
+                if (isset($lastWeekCoursesList[$type])) {
+                    foreach ($lastWeekCoursesList[$type] as $idx => $lastWeekCourseData) {
+                        if ($thisWeekCourseData['courseId'] == $lastWeekCourseData['courseId']) {
+                            if (!$this->courseCopiedCorrectly($thisWeekCourseData, $lastWeekCourseData)) {
+                                $flagged['changed'][$type][] = [$thisWeekCourseData, $lastWeekCourseData];
+                                $flaggedCount++;
+                            }
+                            $found = true;
+                            unset($lastWeekCoursesList[$type][$idx]);
+                            continue;
+                        }
                     }
+                }
+                if (!$found) {
+                    $flagged['new'][$type][] = [$thisWeekCourseData, null];
+                    $flaggedCount++;
                 }
             }
         }
 
-        return view('statsreports.details.coursestransfersummary', compact('flagged'));
+        unset ($lastWeekCoursesList['completed']);
+
+        foreach ($lastWeekCoursesList as $type => $lastWeekCourses) {
+            foreach ($lastWeekCourses as $lastWeekCourseData) {
+                $flagged['missing'][$type][] = [null, $lastWeekCourseData];
+                $flaggedCount++;
+            }
+        }
+
+        return view('statsreports.details.coursestransfersummary', compact('flagged', 'flaggedCount'));
     }
 
     public function courseCopiedCorrectly($new, $old)
@@ -920,9 +945,9 @@ class StatsReportController extends ReportDispatchAbstractController
     public function getTargetValue($object)
     {
         if ($object instanceof TmlpRegistrationData) {
-            return $object->tmlpRegistrationId;
+            return $object->registration->personId;
         } else if ($object instanceof TeamMemberData) {
-            return $object->teamMemberId;
+            return $object->teamMember->personId;
         } else if ($object instanceof CourseData) {
             return $object->courseId;
         }
@@ -932,13 +957,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
     public function objectsAreEqual($a, $b)
     {
-        if (($a instanceof TeamMemberData) && ($b instanceof TmlpRegistrationData)) {
-            return $a->teamMember->personId == $b->tmlpRegistration->personId;
-        } else if (($a instanceof TmlpRegistrationData) && ($b instanceof TeamMemberData)) {
-            return $a->registration->personId == $b->teamMember->personId;
-        } else {
-            return $this->getTargetValue($a) == $this->getTargetValue($b);
-        }
+        return $this->getTargetValue($a) == $this->getTargetValue($b);
     }
 
     public function hasPerson($fields, $needle, $haystacks, $haystackObjectOffset = null)
