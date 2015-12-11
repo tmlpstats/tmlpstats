@@ -725,7 +725,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         $targetCourses = [];
         foreach ($coursesData as $courseData) {
             if ($courseData->course->startDate->gt($globalReport->reportingDate)
-                && $courseData->course->startDate->lt($globalReport->reportingDate->copy()->addMonth())
+                && $courseData->course->startDate->lt($globalReport->reportingDate->copy()->addWeeks(5))
             ) {
                 $targetCourses[] = $courseData;
             }

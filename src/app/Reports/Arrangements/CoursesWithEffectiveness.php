@@ -43,10 +43,11 @@ class CoursesWithEffectiveness extends BaseArrangement
                 $course[$field] = $courseData->$field;
             }
 
+            $course['completionStats']['registrationFulfillment']   = $courseData->currentTer
+                ? round(($courseData->currentStandardStarts / $courseData->currentTer) * 100)
+                : 0;
+
             if ($course['startDate']->lt($reportingDate)) {
-                $course['completionStats']['registrationFulfillment']   = $courseData->currentTer
-                    ? round(($courseData->currentStandardStarts / $courseData->currentTer) * 100)
-                    : 0;
                 $course['completionStats']['registrationEffectiveness'] = $courseData->potentials
                     ? round(($courseData->registrations / $courseData->potentials) * 100)
                     : 0;
