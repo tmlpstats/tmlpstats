@@ -6,19 +6,6 @@ use TmlpStats\Quarter;
 use TmlpStats\Region;
 use TmlpStats\ReportToken;
 use TmlpStats\StatsReport;
-
-use TmlpStats\Reports\Arrangements\CoursesByCenter;
-use TmlpStats\Reports\Arrangements\CoursesWithEffectiveness;
-use TmlpStats\Reports\Arrangements\GamesByMilestone;
-use TmlpStats\Reports\Arrangements\GamesByWeek;
-use TmlpStats\Reports\Arrangements\TeamMemberIncomingOverview;
-use TmlpStats\Reports\Arrangements\TeamMembersByCenter;
-use TmlpStats\Reports\Arrangements\TeamMembersByStatus;
-use TmlpStats\Reports\Arrangements\TmlpRegistrationsByCenter;
-use TmlpStats\Reports\Arrangements\TmlpRegistrationsByIncomingQuarter;
-use TmlpStats\Reports\Arrangements\TmlpRegistrationsByOverdue;
-use TmlpStats\Reports\Arrangements\TmlpRegistrationsByStatus;
-use TmlpStats\Reports\Arrangements\TravelRoomingByTeamYear;
 use TmlpStats\Reports\Arrangements;
 
 use Illuminate\Http\Request;
@@ -253,7 +240,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $a          = new GamesByWeek($globalReportData);
+        $a          = new Arrangements\GamesByWeek($globalReportData);
         $weeklyData = $a->compose();
 
         $a    = new Arrangements\RegionByRating($statsReports);
@@ -275,10 +262,10 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
 
-        $a          = new GamesByWeek($globalReportData);
+        $a          = new Arrangements\GamesByWeek($globalReportData);
         $weeklyData = $a->compose();
 
-        $a    = new GamesByMilestone(['weeks' => $weeklyData['reportData'], 'quarter' => $quarter]);
+        $a    = new Arrangements\GamesByMilestone(['weeks' => $weeklyData['reportData'], 'quarter' => $quarter]);
         $data = $a->compose();
 
         return view('reports.centergames.milestones', $data);
@@ -291,7 +278,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $a    = new TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
+        $a    = new Arrangements\TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
         $data = $a->compose();
 
         $data = array_merge($data, ['reportingDate' => $globalReport->reportingDate]);
@@ -306,10 +293,10 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $a          = new TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
+        $a          = new Arrangements\TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
         $statusData = $a->compose();
 
-        $a    = new TmlpRegistrationsByOverdue(['registrationsData' => $statusData['reportData']]);
+        $a    = new Arrangements\TmlpRegistrationsByOverdue(['registrationsData' => $statusData['reportData']]);
         $data = $a->compose();
 
         $data = array_merge($data, ['reportingDate' => $globalReport->reportingDate]);
@@ -329,11 +316,11 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $a                     = new TmlpRegistrationsByCenter(['registrationsData' => $registrations]);
+        $a                     = new Arrangements\TmlpRegistrationsByCenter(['registrationsData' => $registrations]);
         $registrationsByCenter = $a->compose();
         $registrationsByCenter = $registrationsByCenter['reportData'];
 
-        $a                   = new TeamMembersByCenter(['teamMembersData' => $teamMembers]);
+        $a                   = new Arrangements\TeamMembersByCenter(['teamMembersData' => $teamMembers]);
         $teamMembersByCenter = $a->compose();
         $teamMembersByCenter = $teamMembersByCenter['reportData'];
 
@@ -351,7 +338,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             ],
         ];
         foreach ($teamMembersByCenter as $centerName => $unused) {
-            $a         = new TeamMemberIncomingOverview([
+            $a         = new Arrangements\TeamMemberIncomingOverview([
                 'registrationsData' => isset($registrationsByCenter[$centerName]) ? $registrationsByCenter[$centerName]
                     : [],
                 'teamMembersData'   => isset($teamMembersByCenter[$centerName]) ? $teamMembersByCenter[$centerName]
@@ -389,12 +376,12 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
 
-        $a           = new TmlpRegistrationsByCenter(['registrationsData' => $registrations]);
+        $a           = new Arrangements\TmlpRegistrationsByCenter(['registrationsData' => $registrations]);
         $centersData = $a->compose();
 
         $reportData = [];
         foreach ($centersData['reportData'] as $centerName => $data) {
-            $a                       = new TmlpRegistrationsByIncomingQuarter([
+            $a                       = new Arrangements\TmlpRegistrationsByIncomingQuarter([
                 'registrationsData' => $data,
                 'quarter'           => $quarter,
             ]);
@@ -419,18 +406,18 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $a                     = new TmlpRegistrationsByCenter(['registrationsData' => $registrations]);
+        $a                     = new Arrangements\TmlpRegistrationsByCenter(['registrationsData' => $registrations]);
         $registrationsByCenter = $a->compose();
         $registrationsByCenter = $registrationsByCenter['reportData'];
 
-        $a                   = new TeamMembersByCenter(['teamMembersData' => $teamMembers]);
+        $a                   = new Arrangements\TeamMembersByCenter(['teamMembersData' => $teamMembers]);
         $teamMembersByCenter = $a->compose();
         $teamMembersByCenter = $teamMembersByCenter['reportData'];
 
         $reportData = [];
         foreach ($teamMembersByCenter as $centerName => $teamMembersData) {
 
-            $a         = new TravelRoomingByTeamYear([
+            $a         = new Arrangements\TravelRoomingByTeamYear([
                 'registrationsData' => isset($registrationsByCenter[$centerName]) ? $registrationsByCenter[$centerName]
                     : [],
                 'teamMembersData'   => isset($teamMembersByCenter[$centerName]) ? $teamMembersByCenter[$centerName]
@@ -626,7 +613,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $a = new TeamMembersByStatus(['teamMembersData' => $teamMembers]);
+        $a = new Arrangements\TeamMembersByStatus(['teamMembersData' => $teamMembers]);
         return $a->compose();
     }
 
@@ -839,13 +826,13 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function displayCoursesReport($coursesData, GlobalReport $globalReport, $type, $byType = false, $flatten = false)
     {
-        $a               = new CoursesByCenter(['coursesData' => $coursesData]);
+        $a               = new Arrangements\CoursesByCenter(['coursesData' => $coursesData]);
         $coursesByCenter = $a->compose();
         $coursesByCenter = $coursesByCenter['reportData'];
 
         $centerReportData = [];
         foreach ($coursesByCenter as $centerName => $coursesData) {
-            $a         = new CoursesWithEffectiveness([
+            $a         = new Arrangements\CoursesWithEffectiveness([
                 'courses'       => $coursesData,
                 'reportingDate' => $globalReport->reportingDate,
             ]);
