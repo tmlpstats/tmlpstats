@@ -1,5 +1,11 @@
 # TMLP Statistics Web Application
 
+**Table Of Contents**
+
+* [Installing/Setup](#installing)
+* [Code Walkthrough](https://github.com/pdarg/tmlpstats/wiki/Walkthrough)
+
+
 ## Installing:
 This repo includes a Vagrant configuration to make development easier. These instructions are written for OSX/Linux. You can find
 instructions for setting up and installing on windows on google.
@@ -85,3 +91,7 @@ of php, composer and nodejs installed if you do it locally.
 Sometimes ```composer install``` will fail or not complete, asking for an oauth token. Github has rate-limiting for
 unauthenticated cloning. You can get around this by going to your github account settings and generating a new "Personal
 access token" for your laptop. Re run ```composer install``` and paste the token when asked. 
+
+### Next Steps
+
+ * [Code Walkthrough](https://github.com/pdarg/tmlpstats/wiki/Walkthrough)
