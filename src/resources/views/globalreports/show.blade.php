@@ -84,7 +84,7 @@
 
                     <div class="btn-group" role="group">
                         <button id ="coursesthisweek-button" type="button" class="btn">Completed This Week</button>
-                        <button id ="coursesnextmonth-button" type="button" class="btn">Next 4 Weeks</button>
+                        <button id ="coursesnextmonth-button" type="button" class="btn">Next 5 Weeks</button>
                         <button id ="coursesupcoming-button" type="button" class="btn">Upcoming</button>
                         <button id ="coursescompleted-button" type="button" class="btn">Completed</button>
                         <button id ="coursesguestgames-button" type="button" class="btn">Guest Games</button>
