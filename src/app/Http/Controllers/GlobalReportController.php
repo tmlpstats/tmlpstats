@@ -1,5 +1,6 @@
 <?php namespace TmlpStats\Http\Controllers;
 
+use TmlpStats\Center;
 use TmlpStats\Http\Requests;
 use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
@@ -325,6 +326,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         $teamMembersByCenter = $teamMembersByCenter['reportData'];
 
         $reportData = [];
+        $statsReports = [];
         $teamCounts = [
             'team1' => [
                 'applications' => [],
@@ -348,6 +350,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             $centerRow = $a->compose();
 
             $reportData[$centerName] = $centerRow['reportData'];
+            $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Center::name($centerName)->first());
 
             foreach ($centerRow['reportData'] as $team => $teamData) {
 
@@ -364,7 +367,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         }
         ksort($reportData);
 
-        return view('globalreports.details.applicationsoverview', compact('reportData', 'teamCounts'));
+        return view('globalreports.details.applicationsoverview', compact('reportData', 'teamCounts', 'statsReports'));
     }
 
     protected function getTmlpRegistrationsByCenter(GlobalReport $globalReport, Region $region)
@@ -415,6 +418,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         $teamMembersByCenter = $teamMembersByCenter['reportData'];
 
         $reportData = [];
+        $statsReports = [];
         foreach ($teamMembersByCenter as $centerName => $teamMembersData) {
 
             $a         = new Arrangements\TravelRoomingByTeamYear([
@@ -427,10 +431,11 @@ class GlobalReportController extends ReportDispatchAbstractController
             $centerRow = $a->compose();
 
             $reportData[$centerName] = $centerRow['reportData'];
+            $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Center::name($centerName)->first());
         }
         ksort($reportData);
 
-        return view('globalreports.details.traveloverview', compact('reportData'));
+        return view('globalreports.details.traveloverview', compact('reportData', 'statsReports'));
     }
 
     protected function getTeamMemberStatusWithdrawn($data, GlobalReport $globalReport, Region $region)
@@ -485,27 +490,33 @@ class GlobalReportController extends ReportDispatchAbstractController
         ];
 
         foreach ($details['reportData']['t2Potential'] as $member) {
-            if (!isset($reportData[$member->center->name])) {
-                $reportData[$member->center->name] = [
+            $centerName = $member->center->name;
+
+            if (!isset($reportData[$centerName])) {
+                $reportData[$centerName] = [
                     'total'      => 0,
                     'registered' => 0,
                     'approved'   => 0,
                 ];
             }
-            $reportData[$member->center->name]['total']++;
+            $reportData[$centerName]['total']++;
             $totals['total']++;
 
             if (isset($details['registrations'][$member->teamMember->personId])) {
-                $reportData[$member->center->name]['registered']++;
+                $reportData[$centerName]['registered']++;
                 $totals['registered']++;
                 if ($details['registrations'][$member->teamMember->personId]->apprDate) {
-                    $reportData[$member->center->name]['approved']++;
+                    $reportData[$centerName]['approved']++;
                     $totals['approved']++;
                 }
             }
+
+            if (!isset($statsReports[$centerName])) {
+                $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Center::name($centerName)->first());
+            }
         }
 
-        return view('globalreports.details.potentialsoverview', compact('reportData', 'totals'));
+        return view('globalreports.details.potentialsoverview', compact('reportData', 'totals', 'statsReports'));
     }
 
     protected function getTeamMemberStatusPotentialsData($data, GlobalReport $globalReport, Region $region)
@@ -830,6 +841,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         $coursesByCenter = $a->compose();
         $coursesByCenter = $coursesByCenter['reportData'];
 
+        $statsReports = [];
         $centerReportData = [];
         foreach ($coursesByCenter as $centerName => $coursesData) {
             $a         = new Arrangements\CoursesWithEffectiveness([
@@ -839,8 +851,10 @@ class GlobalReportController extends ReportDispatchAbstractController
             $centerRow = $a->compose();
 
             $centerReportData[$centerName] = $centerRow['reportData'];
+            $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Center::name($centerName)->first());
         }
         ksort($centerReportData);
+
 
         if ($byType) {
             $typeReportData = [
@@ -879,11 +893,13 @@ class GlobalReportController extends ReportDispatchAbstractController
             $reportData = $centerReportData;
         }
 
-        return view('globalreports.details.courses', compact('reportData', 'type'));
+        return view('globalreports.details.courses', compact('reportData', 'type', 'statsReports'));
     }
 
     protected static function sortByCenterName($a, $b)
     {
         return strcmp($a['center'], $b['center']);
     }
+
+
 }

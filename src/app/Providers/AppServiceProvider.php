@@ -6,8 +6,8 @@ use Session;
 use Illuminate\Support\ServiceProvider;
 use TmlpStats\Util;
 
-class AppServiceProvider extends ServiceProvider {
-
+class AppServiceProvider extends ServiceProvider
+{
     /**
      * Bootstrap any application services.
      *
@@ -38,6 +38,35 @@ class AppServiceProvider extends ServiceProvider {
             $format = Util::getLocaleDateFormat();
 
             return "<?php echo with{$expression}->format('{$format}'); ?>";
+        });
+
+        Blade::directive('statsReportLink', function($expression) {
+
+            // Remove wrapping parens
+            $data = substr($expression, 1, -1);
+            $query = '';
+            if (strpos($data, ',') !== false) {
+                $parts = explode(',', $data);
+                $data = $parts[0];
+                $query = trim(str_replace("'", '', $parts[1]));
+                $query = trim(str_replace('"', '', $query));
+            }
+
+            $href = "url('/statsreports/' . {$data}->id . '{$query}')";
+
+            // Build php scripts. Have to break it down since {{ }} notation creates additional php tags
+            $returnPhp = "<?php \$condition = Gate::allows('read', {$data}); ?>";
+            $returnPhp .= "<?php if (\$condition): ?>";
+            $returnPhp .= "<a href='{{ {$href} }}'>";
+            $returnPhp .= "<?php endif; ?>";
+
+            return $returnPhp;
+        });
+
+        Blade::directive('endStatsReportLink', function() {
+
+            $tag = "'</a>'";
+            return "<?php if (\$condition) { echo {$tag}; } ?>";
         });
     }
 

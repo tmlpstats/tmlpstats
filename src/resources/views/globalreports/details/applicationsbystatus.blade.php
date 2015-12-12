@@ -49,7 +49,11 @@
                     @else
                         <tr>
                             @endif
-                            <td>{{ $registrationData->center->name }}</td>
+                            <td>
+                                @statsReportLink($registrationData->statsReport)
+                                    {{ $registrationData->center->name }}
+                                @endStatsReportLink
+                            </td>
                             <td>{{ $registrationData->firstName }} {{ $registrationData->lastName }}</td>
                             <td class="data-point">{{ $registrationData->registration->teamYear }}</td>
                             <td>{{ $registrationData->incomingQuarter ? $registrationData->incomingQuarter->startWeekendDate->format('M Y') : '' }}</td>

@@ -36,7 +36,11 @@
                 <tbody>
                 @foreach ($reportData[$group] as $memberData)
                     <tr>
-                        <td>{{ $memberData->center->name }}</td>
+                        <td>
+                            @statsReportLink($memberData->statsReport)
+                                {{ $memberData->center->name }}
+                            @endStatsReportLink
+                        </td>
                         <td>{{ $memberData->firstName }}</td>
                         <td>{{ $memberData->lastName }}</td>
                         <td class="data-point">

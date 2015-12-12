@@ -55,7 +55,11 @@
             }
             ?>
             <tr>
-                <td class="border-right">{{ $centerName }}</td>
+                <td class="border-right">
+                    @statsReportLink($statsReports[$centerName])
+                        {{ $centerName }}
+                    @endStatsReportLink
+                </td>
                 @foreach ($centerData as $team => $registrationData)
                     @if (isset($registrationData['applications']['out']))
                         <td class="data-point success"><strong>{{ $registrationData['applications']['out'] }}</strong></td>

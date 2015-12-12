@@ -22,35 +22,23 @@
             <tr id="{{ $data['id'] }}"
                 class="{{ !$data['onTime'] ? ' bg-danger' : (isset($data['revisionSubmitTime']) ? 'bg-warning' : '') }}">
                 <td>
-                    @can ('read', $data['officialReport'])
-                    <a href="{{ url("/statsreports/{$data['id']}") }}">
+                    @statsReportLink($data['officialReport'])
                         {{ $data['center'] }}
-                    </a>
-                    @else
-                        {{ $data['center'] }}
-                    @endcan
+                    @endStatsReportLink
                 </td>
                 <td>{{ $data['region'] }}</td>
                 <td class="data-point">{{ $data['onTime'] ? 'Yes' : 'No' }}</td>
                 <td>
-                    @can ('read', $data['officialReport'])
-                    <a href="{{ url("/statsreports/{$data['officialReport']->id}") }}">
+                    @statsReportLink($data['officialReport'])
                         {{ $data['officialSubmitTime'] }}
-                    </a>
-                    @else
-                        {{ $data['officialSubmitTime'] }}
-                    @endcan
+                    @endStatsReportLink
                 </td>
                 @if (isset($data['revisedReport']))
                     <td class="data-point">Yes</td>
                     <td>
-                        @can ('read', $data['revisedReport'])
-                        <a href="{{ url("/statsreports/{$data['revisedReport']->id}") }}">
+                        @statsReportLink($data['revisedReport'])
                             {{ $data['revisionSubmitTime'] }}
-                        </a>
-                        @else
-                            {{ $data['revisionSubmitTime'] }}
-                        @endcan
+                        @endStatsReportLink
                     </td>
                 @else
                     <td class="data-point">No</td>
