@@ -17,9 +17,13 @@
         <tr>
             <td>{{ $courseData['type'] }}</td>
             <td>
-                @statsReportLink($statsReports[$courseData['centerName']])
+                @if (isset($statsReports))
+                    @statsReportLink($statsReports[$courseData['centerName']])
+                        {{ $courseData['location'] != $courseData['centerName'] ? "{$courseData['centerName']} ({$courseData['location']})" : $courseData['centerName'] }}
+                    @endStatsReportLink
+                @else
                     {{ $courseData['location'] != $courseData['centerName'] ? "{$courseData['centerName']} ({$courseData['location']})" : $courseData['centerName'] }}
-                @endStatsReportLink
+                @endif
             </td>
             <td class="data-point">@date($courseData['startDate'])</td>
             <td class="data-point border-left">{{ $courseData['currentStandardStarts'] }}</td>
