@@ -58,26 +58,16 @@ $ratingColors = [
                         <td class="data-point" rowspan="{{ count($rows[$rating]) }}">{{ $rating }}</td>
                     @endif
                     <td class="data-point" style="background-color: {{ $ratingColors[$report->getPoints()] }}; font-weight: bold;">
-                        @can ('read', $report)
-                        <a href="{{ url("/statsreports/{$report->id}") }}">
+                        @statsReportLink($report)
                             <div class="{{ $meterClass }}">
                                 <span style="width: {{ $meterWidth }}%">{{ $report->getPoints() }}</span>
                             </div>
-                        </a>
-                        @else
-                            <div class="{{ $meterClass }}">
-                                <span style="width: {{ $meterWidth }}%">{{ $report->getPoints() }}</span>
-                            </div>
-                        @endcan
+                        @endStatsReportLink
                     </td>
                     <td>
-                        @can ('read', $report)
-                        <a href="{{ url("/statsreports/{$report->id}") }}">
+                        @statsReportLink($report)
                             <div style="margin-left: 5px">{{ $report->center->name }}</div>
-                        </a>
-                        @else
-                            <div style="margin-left: 5px">{{ $report->center->name }}</div>
-                        @endcan
+                        @endStatsReportLink
                     </td>
                 </tr>
             @endforeach

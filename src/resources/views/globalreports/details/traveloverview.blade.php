@@ -22,7 +22,11 @@
         <tbody>
         @foreach ($reportData as $centerName => $centerData)
             <tr>
-                <td class="border-right">{{ $centerName }}</td>
+                <td class="border-right">
+                    @statsReportLink($statsReports[$centerName])
+                        {{ $centerName }}
+                    @endStatsReportLink
+                </td>
                 @foreach ($centerData as $group => $groupData)
                     @foreach ($groupData as $team => $teamData)
                         @if ($teamData['total'])

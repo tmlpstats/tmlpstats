@@ -35,7 +35,11 @@
                 @foreach ($reportData[$group] as $registrationData)
                     <tr title="{{ ($group == 'notSent') ? 'Due within 2 days of registration' : 'Due within 14 days of registration' }}">
 
-                        <td>{{ $registrationData->center->name }}</td>
+                        <td>
+                            @statsReportLink($registrationData->statsReport)
+                                {{ $registrationData->center->name }}
+                            @endStatsReportLink
+                        </td>
                         <td>{{ $registrationData->firstName }} {{ $registrationData->lastName }}</td>
                         <td class="data-point">{{ $registrationData->registration->teamYear }}</td>
                         <td class="data-point">

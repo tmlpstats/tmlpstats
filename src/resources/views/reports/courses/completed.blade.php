@@ -47,7 +47,11 @@
     @foreach ($coursesData as $courseData)
         <tr>
             <td>{{ $courseData['type'] }}</td>
-            <td>{{ $courseData['location'] != $courseData['centerName'] ? "{$courseData['centerName']} ({$courseData['location']})" : $courseData['centerName'] }}</td>
+            <td>
+                @statsReportLink($statsReports[$courseData['centerName']])
+                    {{ $courseData['location'] != $courseData['centerName'] ? "{$courseData['centerName']} ({$courseData['location']})" : $courseData['centerName'] }}
+                @endStatsReportLink
+            </td>
             <td class="data-point">@date($courseData['startDate'])</td>
             <td class="data-point border-left">{{ $courseData['quarterStartTer'] }}</td>
             <td class="data-point">{{ $courseData['quarterStartStandardStarts'] }}</td>

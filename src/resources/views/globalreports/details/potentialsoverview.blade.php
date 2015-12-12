@@ -13,7 +13,11 @@
         <tbody>
         @foreach ($reportData as $centerName => $centerData)
             <tr>
-                <td class="border-right">{{ $centerName }}</td>
+                <td class="border-right">
+                    @statsReportLink($statsReports[$centerName])
+                        {{ $centerName }}
+                    @endStatsReportLink
+                </td>
                 <td class="data-point">{{ $centerData['total'] }}</td>
                 <td class="data-point">{{ $centerData['registered'] }}</td>
                 <td class="data-point">{{ $centerData['approved'] }}</td>
