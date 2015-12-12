@@ -3,6 +3,7 @@ namespace TmlpStats\Validate\Objects;
 
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use Respect\Validation\Validator as v;
+use TmlpStats\Setting;
 
 class ContactInfoValidator extends ObjectsValidatorAbstract
 {
@@ -41,6 +42,9 @@ class ContactInfoValidator extends ObjectsValidatorAbstract
         if (!$this->validateName($data)) {
             $this->isValid = false;
         }
+        if (!$this->validateEmail($data)) {
+            $this->isValid = false;
+        }
 
         return $this->isValid;
     }
@@ -59,6 +63,21 @@ class ContactInfoValidator extends ObjectsValidatorAbstract
             $isValid = false;
         }
 
+        return $isValid;
+    }
+
+    protected function validateEmail($data)
+    {
+        $isValid = true;
+
+        $bouncedEmails = Setting::get('bouncedEmails');
+        if ($bouncedEmails->value) {
+            $emails = explode(',', $bouncedEmails->value);
+            if (in_array($data->email, $emails)) {
+                $this->addMessage('CONTACTINFO_BOUNCED_EMAIL', $data->accountability, $data->email);
+                $isValid = false;
+            }
+        }
         return $isValid;
     }
 }

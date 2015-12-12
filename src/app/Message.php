@@ -746,6 +746,14 @@ class Message
                 '%%accountability%%',
             ],
         ],
+        'CONTACTINFO_BOUNCED_EMAIL'               => [
+            'type'      => Message::ERROR,
+            'format'    => "The email provided for %%accountability%% (%%email%%) is not reachable. Please correct it.",
+            'arguments' => [
+                '%%accountability%%',
+                '%%email%%',
+            ],
+        ],
 
 
         // '' => array(
