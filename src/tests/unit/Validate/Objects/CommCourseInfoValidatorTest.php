@@ -2,7 +2,7 @@
 namespace TmlpStats\Tests\Validate\Objects;
 
 use TmlpStats\Util;
-use TmlpStats\Validate\objects\CommCourseInfoValidator;
+use TmlpStats\Validate\Objects\CommCourseInfoValidator;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use stdClass;
