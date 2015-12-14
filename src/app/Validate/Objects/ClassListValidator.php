@@ -13,9 +13,9 @@ class ClassListValidator extends ObjectsValidatorAbstract
 
     protected function populateValidators($data)
     {
-        $nameValidator      = v::string()->notEmpty();
-        $yesValidator       = v::string()->regex('/^[Y]$/i');
-        $yesOrNullValidator = v::when(v::nullValue(), v::alwaysValid(), $yesValidator);
+        $nameValidator      = v::stringType()->notEmpty();
+        $yesValidator       = v::stringType()->regex('/^[Y]$/i');
+        $yesOrNullValidator = v::optional($yesValidator);
 
         $teamYearValidator = v::numeric()->between(1, 2, true);
 
@@ -27,7 +27,7 @@ class ClassListValidator extends ObjectsValidatorAbstract
                 $indicator = 'R';
             }
         }
-        $equalsTeamYearValidator = v::when(v::nullValue(), v::alwaysValid(), v::equals($indicator));
+        $equalsTeamYearValidator = v::optional(v::equals($indicator));
 
         $wdTypes = [
             '1 AP',
@@ -58,14 +58,14 @@ class ClassListValidator extends ObjectsValidatorAbstract
         $this->dataValidators['xferOut']   = $equalsTeamYearValidator;
         $this->dataValidators['xferIn']    = $equalsTeamYearValidator;
         $this->dataValidators['ctw']       = $equalsTeamYearValidator;
-        $this->dataValidators['wd']        = v::when(v::nullValue(), v::alwaysValid(), v::in($wdTypes));
+        $this->dataValidators['wd']        = v::optional(v::in($wdTypes));
         $this->dataValidators['wbo']       = $equalsTeamYearValidator;
         $this->dataValidators['rereg']     = $equalsTeamYearValidator;
         $this->dataValidators['excep']     = $equalsTeamYearValidator;
         $this->dataValidators['travel']    = $yesOrNullValidator;
         $this->dataValidators['room']      = $yesOrNullValidator;
-        $this->dataValidators['gitw']      = v::when(v::nullValue(), v::alwaysValid(), v::string()->regex('/^[EI]$/i'));
-        $this->dataValidators['tdo']       = v::when(v::nullValue(), v::alwaysValid(), v::string()->regex('/^[YN]$/i'));
+        $this->dataValidators['gitw']      = v::optional(v::stringType()->regex('/^[EI]$/i'));
+        $this->dataValidators['tdo']       = v::optional(v::stringType()->regex('/^[YN]$/i'));
     }
 
     protected function validate($data)

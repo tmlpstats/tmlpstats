@@ -10,21 +10,21 @@ class CenterStatsValidator extends ObjectsValidatorAbstract
 
     protected function populateValidators($data)
     {
-        $intNotNullValidator    = v::when(v::nullValue(), v::alwaysInvalid(), v::int());
+        $intValidator           = v::intVal();
         $percentValidator       = v::numeric()->between(0, 100, true);
-        $percentOrNullValidator = v::when(v::nullValue(), v::alwaysValid(), $percentValidator);
+        $percentOrNullValidator = v::optional($percentValidator);
 
         $types = ['promise', 'actual'];
 
         $this->dataValidators['reportingDate'] = v::date('Y-m-d');
         $this->dataValidators['type']          = v::in($types);
         $this->dataValidators['tdo']           = $percentOrNullValidator;
-        $this->dataValidators['cap']           = $intNotNullValidator;
-        $this->dataValidators['cpc']           = $intNotNullValidator;
-        $this->dataValidators['t1x']           = $intNotNullValidator;
-        $this->dataValidators['t2x']           = $intNotNullValidator;
+        $this->dataValidators['cap']           = $intValidator;
+        $this->dataValidators['cpc']           = $intValidator;
+        $this->dataValidators['t1x']           = $intValidator;
+        $this->dataValidators['t2x']           = $intValidator;
         $this->dataValidators['gitw']          = $percentValidator;
-        $this->dataValidators['lf']            = $intNotNullValidator;
+        $this->dataValidators['lf']            = $intValidator;
     }
 
     protected function validate($data)
