@@ -38,6 +38,14 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
         'room',
     ];
 
+    protected $validateMethods = [
+        'validateWeekendReg',
+        'validateApprovalProcess',
+        'validateDates',
+        'validateComment',
+        'validateTravel',
+    ];
+
     //
     // populateValidators()
     //
@@ -650,78 +658,6 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                 ]),
                 [
                     ['INVALID_VALUE', 'Room', 'H'],
-                ],
-                false,
-            ],
-        ];
-    }
-
-    public function providerValidate()
-    {
-        return [
-            // Validate Succeeds
-            [
-                [
-                    'validateWeekendReg'      => true,
-                    'validateApprovalProcess' => true,
-                    'validateDates'           => true,
-                    'validateComment'         => true,
-                    'validateTravel'          => true,
-                ],
-                true,
-            ],
-            // validateWeekendReg fails
-            [
-                [
-                    'validateWeekendReg'      => false,
-                    'validateApprovalProcess' => true,
-                    'validateDates'           => true,
-                    'validateComment'         => true,
-                    'validateTravel'          => true,
-                ],
-                false,
-            ],
-            // validateApprovalProcess fails
-            [
-                [
-                    'validateWeekendReg'      => true,
-                    'validateApprovalProcess' => false,
-                    'validateDates'           => true,
-                    'validateComment'         => true,
-                    'validateTravel'          => true,
-                ],
-                false,
-            ],
-            // validateDates fails
-            [
-                [
-                    'validateWeekendReg'      => true,
-                    'validateApprovalProcess' => true,
-                    'validateDates'           => false,
-                    'validateComment'         => true,
-                    'validateTravel'          => true,
-                ],
-                false,
-            ],
-            // validateComment fails
-            [
-                [
-                    'validateWeekendReg'      => true,
-                    'validateApprovalProcess' => true,
-                    'validateDates'           => true,
-                    'validateComment'         => false,
-                    'validateTravel'          => true,
-                ],
-                false,
-            ],
-            // validateTravel fails
-            [
-                [
-                    'validateWeekendReg'      => true,
-                    'validateApprovalProcess' => true,
-                    'validateDates'           => true,
-                    'validateComment'         => true,
-                    'validateTravel'          => false,
                 ],
                 false,
             ],

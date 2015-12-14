@@ -7,6 +7,7 @@ use TmlpStats\Tests\Validate\ValidatorTestAbstract;
 class ObjectsValidatorTestAbstract extends ValidatorTestAbstract
 {
     protected $dataFields = [];
+    protected $validateMethods = [];
 
     //
     // populateValidators()
@@ -59,15 +60,37 @@ class ObjectsValidatorTestAbstract extends ValidatorTestAbstract
 
     public function providerValidate()
     {
-        return [
-            [
-                [],
+        $default = array_fill_keys($this->validateMethods, true);
+
+        $testData = [];
+
+        if ($this->validateMethods) {
+            // Success case
+            $testData[] = [
+                $default,
                 true,
-            ],
-            [
-                [],
-                false,
-            ],
-        ];
+            ];
+
+            // Each failure case permutation
+            foreach ($this->validateMethods as $method) {
+                $mapping = $default;
+                $mapping[$method] = false;
+                $testData[] = [
+                    $mapping,
+                    false,
+                ];
+            }
+        } else {
+            // Success case
+            $testData[] = [
+                [], true,
+            ];
+            // Failure case
+            $testData[] = [
+                [], false,
+            ];
+        }
+
+        return $testData;
     }
 }

@@ -1,7 +1,6 @@
 <?php
 namespace TmlpStats\Validate\Objects;
 
-use TmlpStats\StatsReport;
 use TmlpStats\Util;
 
 use Carbon\Carbon;

@@ -16,6 +16,11 @@ class ContactInfoValidatorTest extends ObjectsValidatorTestAbstract
         'email',
     ];
 
+    protected $validateMethods = [
+        'validateName',
+        'validateEmail',
+    ];
+
 
     public function testPopulateValidatorsSetsValidatorsForEachInput($data = null)
     {
@@ -270,36 +275,6 @@ class ContactInfoValidatorTest extends ObjectsValidatorTestAbstract
                 ]),
                 [
                     ['INVALID_VALUE', 'Email', 'keith.stone'],
-                ],
-                false,
-            ],
-        ];
-    }
-
-    public function providerValidate()
-    {
-        return [
-            // Validate Succeeds
-            [
-                [
-                    'validateName'  => true,
-                    'validateEmail' => true,
-                ],
-                true,
-            ],
-            // validateName fails
-            [
-                [
-                    'validateName'  => false,
-                    'validateEmail' => true,
-                ],
-                false,
-            ],
-            // validateEmail fails
-            [
-                [
-                    'validateName'  => true,
-                    'validateEmail' => false,
                 ],
                 false,
             ],

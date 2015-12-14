@@ -31,6 +31,15 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
         'tdo',
     ];
 
+    protected $validateMethods = [
+        'validateGitw',
+        'validateTdo',
+        'validateTeamYear',
+        'validateTransfer',
+        'validateWithdraw',
+        'validateTravel',
+    ];
+
     public function testPopulateValidatorsSetsValidatorsForEachInput($data = null)
     {
         $data           = new stdClass;

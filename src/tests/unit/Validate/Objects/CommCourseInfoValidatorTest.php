@@ -30,6 +30,13 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
         'guestsAttended',
     ];
 
+    protected $validateMethods = [
+        'validateCourseBalance',
+        'validateCourseCompletionStats',
+        'validateCourseStartDate',
+        'validateGuestGame',
+    ];
+
     /**
      * @dataProvider providerRun
      */
@@ -164,62 +171,6 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
                 ]),
                 [
                     ['INVALID_VALUE', 'Start Date', 'asdf'],
-                ],
-                false,
-            ],
-        ];
-    }
-
-    public function providerValidate()
-    {
-        return [
-            // Validate Succeeds
-            [
-                [
-                    'validateCourseBalance'         => true,
-                    'validateCourseCompletionStats' => true,
-                    'validateCourseStartDate'       => true,
-                    'validateGuestGame'             => true,
-                ],
-                true,
-            ],
-            // validateCourseBalance fails
-            [
-                [
-                    'validateCourseBalance'         => false,
-                    'validateCourseCompletionStats' => true,
-                    'validateCourseStartDate'       => true,
-                    'validateGuestGame'             => true,
-                ],
-                false,
-            ],
-            // validateCourseCompletionStats fails
-            [
-                [
-                    'validateCourseBalance'         => true,
-                    'validateCourseCompletionStats' => false,
-                    'validateCourseStartDate'       => true,
-                    'validateGuestGame'             => true,
-                ],
-                false,
-            ],
-            // validateCourseStartDate fails
-            [
-                [
-                    'validateCourseBalance'         => true,
-                    'validateCourseCompletionStats' => true,
-                    'validateCourseStartDate'       => false,
-                    'validateGuestGame'             => true,
-                ],
-                false,
-            ],
-            // validateGuestGame fails
-            [
-                [
-                    'validateCourseBalance'         => true,
-                    'validateCourseCompletionStats' => true,
-                    'validateCourseStartDate'       => true,
-                    'validateGuestGame'             => false,
                 ],
                 false,
             ],

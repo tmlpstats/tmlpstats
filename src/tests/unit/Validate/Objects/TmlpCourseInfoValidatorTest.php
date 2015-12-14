@@ -14,6 +14,10 @@ class TmlpCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
         'quarterStartApproved',
     ];
 
+    protected $validateMethods = [
+        'validateQuarterStartValues',
+    ];
+
     /**
      * @dataProvider providerRun
      */
@@ -56,26 +60,6 @@ class TmlpCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
                     ['INVALID_VALUE', 'Type', '[empty]'],
                     ['INVALID_VALUE', 'Quarter Start Registered', '[empty]'],
                     ['INVALID_VALUE', 'Quarter Start Approved', '[empty]'],
-                ],
-                false,
-            ],
-        ];
-    }
-
-    public function providerValidate()
-    {
-        return [
-            // Validate Succeeds
-            [
-                [
-                    'validateQuarterStartValues' => true,
-                ],
-                true,
-            ],
-            // validateQuarterStartValues fails
-            [
-                [
-                    'validateQuarterStartValues' => false,
                 ],
                 false,
             ],
