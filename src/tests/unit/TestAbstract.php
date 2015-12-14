@@ -5,12 +5,13 @@ class TestAbstract extends \PHPUnit_Framework_TestCase
 {
     protected $testClass = '';
 
-    protected function getObjectMock($methods = array(), $constructorArgs = array())
+    protected function getObjectMock($methods = [], $constructorArgs = [])
     {
         if (!$this->testClass) {
             $class = get_class($this);
             throw new \Exception("Test class $class did not specify the class under test, testClass.");
         }
+
         return $this->getMockBuilder($this->testClass)
                     ->setMethods($methods)
                     ->setConstructorArgs($constructorArgs)
@@ -29,7 +30,7 @@ class TestAbstract extends \PHPUnit_Framework_TestCase
         $property = $reflector->getProperty($name);
         $property->setAccessible(true);
 
-        return $property->setValue($object, $value);
+        $property->setValue($object, $value);
     }
 
     protected function getProperty($object, $name)

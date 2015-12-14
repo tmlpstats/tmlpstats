@@ -2592,16 +2592,16 @@
         },
         {
             "name": "respect/validation",
-            "version": "0.9.3",
+            "version": "0.9.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Respect/Validation.git",
-                "reference": "403b80e92c9ea3a411bba20fb674c8c67a85647b"
+                "reference": "d63cae970b1db097c45ba3d8d00cf1592ee51e36"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Respect/Validation/zipball/403b80e92c9ea3a411bba20fb674c8c67a85647b",
-                "reference": "403b80e92c9ea3a411bba20fb674c8c67a85647b",
+                "url": "https://api.github.com/repos/Respect/Validation/zipball/d63cae970b1db097c45ba3d8d00cf1592ee51e36",
+                "reference": "d63cae970b1db097c45ba3d8d00cf1592ee51e36",
                 "shasum": ""
             },
             "require": {
@@ -2650,7 +2650,7 @@
                 "validation",
                 "validator"
             ],
-            "time": "2015-06-06 13:06:25"
+            "time": "2015-11-25 19:54:31"
         },
         {
             "name": "snowplow/referer-parser",

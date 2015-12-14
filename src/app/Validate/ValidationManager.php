@@ -3,7 +3,6 @@ namespace TmlpStats\Validate;
 
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\Util;
-use TmlpStats\Validate\Sequences\ApplicationSequenceValidator;
 
 class ValidationManager
 {
@@ -79,7 +78,7 @@ class ValidationManager
 
         $isValid = true;
         foreach ($list as &$dataArray) {
-            $dataObj = Util::arrayToObject($dataArray);
+            $dataObj   = Util::arrayToObject($dataArray);
             $validator = ValidatorFactory::build($this->statsReport, $type);
             if (!$validator->run($dataObj, $supplementalData)) {
                 $isValid = false;

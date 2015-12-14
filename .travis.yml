@@ -5,3 +5,9 @@ php:
 
 install:
   - cd src/ && composer install
+
+before_install:
+  - pip install --user codecov
+
+after_success:
+  - codecov

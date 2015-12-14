@@ -29,7 +29,10 @@ class Setting extends Model
      */
     public static function get($name, Center $center = null)
     {
-        $setting = null;
+        $setting = static::getFromCache($name, $center ? $center->id : 0);
+        if ($setting) {
+            return $setting;
+        }
 
         if ($center) {
             $setting = Setting::byCenter($center)

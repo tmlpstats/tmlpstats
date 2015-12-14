@@ -5,13 +5,11 @@ class ValidatorFactory
 {
     public static function build(&$statsReport, $type = null)
     {
-        if ($type === null)
-        {
+        if ($type === null) {
             $type = 'null';
         }
 
-        switch ($type)
-        {
+        switch ($type) {
             case 'centerStats':
             case 'tmlpRegistration':
             case 'classList':
@@ -36,6 +34,6 @@ class ValidatorFactory
                 throw new \Exception("Invalid type passed to ValidatorFactory");
         }
 
-       return new $class($statsReport);
+        return new $class($statsReport);
     }
 }

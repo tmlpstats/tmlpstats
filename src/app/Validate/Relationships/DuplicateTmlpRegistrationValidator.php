@@ -13,9 +13,9 @@ class DuplicateTmlpRegistrationValidator extends ValidatorAbstract
     protected function validate($data)
     {
         $first = strtolower($data->firstName);
-        $last = trim(str_replace('.', '', strtolower($data->lastName)));
+        $last  = trim(str_replace('.', '', strtolower($data->lastName)));
 
-        if (isset(static::$names[$first][$last]) ) {
+        if (isset(static::$names[$first][$last])) {
             if (static::$names[$first][$last]) {
                 $this->addMessage('TMLPREG_DUPLICATE_NAME', $data->firstName, $data->lastName);
                 $this->isValid = false;

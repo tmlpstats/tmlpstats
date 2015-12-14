@@ -13,17 +13,17 @@ class TeamExpansionValidator extends ValidatorAbstract
     {
         $calculatedCounts = $this->calculateQuarterStartingCounts($data['tmlpRegistration']);
 
-        $quarterStart = clone $this->quarter->startWeekendDate;
+        $quarterStart  = clone $this->quarter->startWeekendDate;
         $firstWeekDate = $quarterStart->addDays(7);
 
         $reportedCounts = [
             'team1' => [
                 'registered' => 0,
-                'approved' => 0,
+                'approved'   => 0,
             ],
             'team2' => [
                 'registered' => 0,
-                'approved' => 0,
+                'approved'   => 0,
             ],
         ];
 
@@ -91,21 +91,21 @@ class TeamExpansionValidator extends ValidatorAbstract
             'team1' => [
                 'current' => [
                     'registered' => 0,
-                    'approved' => 0,
+                    'approved'   => 0,
                 ],
-                'future' => [
+                'future'  => [
                     'registered' => 0,
-                    'approved' => 0,
+                    'approved'   => 0,
                 ],
             ],
             'team2' => [
                 'current' => [
                     'registered' => 0,
-                    'approved' => 0,
+                    'approved'   => 0,
                 ],
-                'future' => [
+                'future'  => [
                     'registered' => 0,
-                    'approved' => 0,
+                    'approved'   => 0,
                 ],
             ],
         ];

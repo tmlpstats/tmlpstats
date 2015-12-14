@@ -38,6 +38,7 @@ class Util
             $objectKey = static::camelCase($key);
             $object->$objectKey = $value;
         }
+
         return $object;
     }
 

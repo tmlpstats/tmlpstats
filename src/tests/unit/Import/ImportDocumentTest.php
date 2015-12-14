@@ -36,6 +36,9 @@ class ImportDocumentTest extends \TmlpStats\Tests\TestAbstract
                                        $validateCenterGamesResult,
                                        $expectedResult)
     {
+        // TODO: Move this to Validate\Relationships
+        $this->markTestSkipped();
+
         $data = array(
             array(
                 'one' => 1,
@@ -307,6 +310,9 @@ class ImportDocumentTest extends \TmlpStats\Tests\TestAbstract
     */
     public function testValidateTeamExpansion($reportingDate, $quarter, $importers, $messages, $expectedResult)
     {
+        // TODO: Move this to Validate\Relationships
+        $this->markTestSkipped();
+
         $importDoc = $this->getObjectMock(array('addMessage'));
         if ($messages) {
             for ($i = 0; $i < count($messages); $i++) {
@@ -1501,6 +1507,9 @@ class ImportDocumentTest extends \TmlpStats\Tests\TestAbstract
     */
     public function testValidateCenterGames($reportingDate, $importers, $messages, $expectedResult)
     {
+        // TODO: Move this to Validate\Relationships
+        $this->markTestSkipped();
+
         $importDoc = $this->getObjectMock(array('addMessage'));
         if ($messages) {
             for ($i = 0; $i < count($messages); $i++) {

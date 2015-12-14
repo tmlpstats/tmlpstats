@@ -13,9 +13,9 @@ class ClassListValidator extends ObjectsValidatorAbstract
 
     protected function populateValidators($data)
     {
-        $nameValidator           = v::string()->notEmpty();
-        $yesValidator            = v::string()->regex('/^[Y]$/i');
-        $yesOrNullValidator      = v::when(v::nullValue(), v::alwaysValid(), $yesValidator);
+        $nameValidator      = v::string()->notEmpty();
+        $yesValidator       = v::string()->regex('/^[Y]$/i');
+        $yesOrNullValidator = v::when(v::nullValue(), v::alwaysValid(), $yesValidator);
 
         $teamYearValidator = v::numeric()->between(1, 2, true);
 
@@ -29,7 +29,7 @@ class ClassListValidator extends ObjectsValidatorAbstract
         }
         $equalsTeamYearValidator = v::when(v::nullValue(), v::alwaysValid(), v::equals($indicator));
 
-        $wdTypes = array(
+        $wdTypes = [
             '1 AP',
             '1 AP',
             '1 FIN',
@@ -49,23 +49,23 @@ class ClassListValidator extends ObjectsValidatorAbstract
             'R NW',
             'R OOC',
             'R T',
-        );
+        ];
 
-        $this->dataValidators['firstName']           = $nameValidator;
-        $this->dataValidators['lastName']            = $nameValidator;
-        $this->dataValidators['teamYear']            = $teamYearValidator;
-        $this->dataValidators['wknd']                = $equalsTeamYearValidator;
-        $this->dataValidators['xferOut']             = $equalsTeamYearValidator;
-        $this->dataValidators['xferIn']              = $equalsTeamYearValidator;
-        $this->dataValidators['ctw']                 = $equalsTeamYearValidator;
-        $this->dataValidators['wd']                  = v::when(v::nullValue(), v::alwaysValid(), v::in($wdTypes));
-        $this->dataValidators['wbo']                 = $equalsTeamYearValidator;
-        $this->dataValidators['rereg']               = $equalsTeamYearValidator;
-        $this->dataValidators['excep']               = $equalsTeamYearValidator;
-        $this->dataValidators['travel']              = $yesOrNullValidator;
-        $this->dataValidators['room']                = $yesOrNullValidator;
-        $this->dataValidators['gitw']                = v::when(v::nullValue(), v::alwaysValid(), v::string()->regex('/^[EI]$/i'));
-        $this->dataValidators['tdo']                 = v::when(v::nullValue(), v::alwaysValid(), v::string()->regex('/^[YN]$/i'));
+        $this->dataValidators['firstName'] = $nameValidator;
+        $this->dataValidators['lastName']  = $nameValidator;
+        $this->dataValidators['teamYear']  = $teamYearValidator;
+        $this->dataValidators['wknd']      = $equalsTeamYearValidator;
+        $this->dataValidators['xferOut']   = $equalsTeamYearValidator;
+        $this->dataValidators['xferIn']    = $equalsTeamYearValidator;
+        $this->dataValidators['ctw']       = $equalsTeamYearValidator;
+        $this->dataValidators['wd']        = v::when(v::nullValue(), v::alwaysValid(), v::in($wdTypes));
+        $this->dataValidators['wbo']       = $equalsTeamYearValidator;
+        $this->dataValidators['rereg']     = $equalsTeamYearValidator;
+        $this->dataValidators['excep']     = $equalsTeamYearValidator;
+        $this->dataValidators['travel']    = $yesOrNullValidator;
+        $this->dataValidators['room']      = $yesOrNullValidator;
+        $this->dataValidators['gitw']      = v::when(v::nullValue(), v::alwaysValid(), v::string()->regex('/^[EI]$/i'));
+        $this->dataValidators['tdo']       = v::when(v::nullValue(), v::alwaysValid(), v::string()->regex('/^[YN]$/i'));
     }
 
     protected function validate($data)
@@ -208,8 +208,7 @@ class ClassListValidator extends ObjectsValidatorAbstract
     {
         $isValid = true;
 
-        if (!is_null($data->wd) || !is_null($data->wbo) || !is_null($data->xferOut))
-        {
+        if (!is_null($data->wd) || !is_null($data->wbo) || !is_null($data->xferOut)) {
             return $isValid; // Not required if withdrawn
         }
 
@@ -230,7 +229,8 @@ class ClassListValidator extends ObjectsValidatorAbstract
                     $this->addMessage('CLASSLIST_ROOM_COMMENT_MISSING');
                     $isValid = false;
                 } else {
-                    $this->addMessage('CLASSLIST_ROOM_COMMENT_REVIEW');                }
+                    $this->addMessage('CLASSLIST_ROOM_COMMENT_REVIEW');
+                }
             }
         }
 

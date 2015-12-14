@@ -13,12 +13,12 @@ class TmlpCourseInfoValidator extends ObjectsValidatorAbstract
         $positiveIntValidator        = v::int()->min(0, true);
         $positiveIntNotNullValidator = v::when(v::nullValue(), v::alwaysInvalid(), $positiveIntValidator);
 
-        $types = array(
+        $types = [
             'Incoming T1',
             'Future T1',
             'Incoming T2',
             'Future T2',
-        );
+        ];
 
         $this->dataValidators['type']                   = v::in($types);
         $this->dataValidators['quarterStartRegistered'] = $positiveIntNotNullValidator;

@@ -23,7 +23,7 @@ class ContactInfoTeamMemberValidator extends ValidatorAbstract
         $nameParts = Util::getNameParts($data->name);
 
         $first = strtolower($nameParts['firstName']);
-        $last = strtolower($nameParts['lastName']);
+        $last  = strtolower($nameParts['lastName']);
 
         if (!isset($this->supplementalData['names'][$first][$last])) {
             $this->addMessage('CONTACTINFO_NO_MATCHING_TEAM_MEMBER', $data->name, $data->accountability);
