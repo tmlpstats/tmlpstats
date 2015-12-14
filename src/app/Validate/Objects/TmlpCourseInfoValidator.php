@@ -10,8 +10,7 @@ class TmlpCourseInfoValidator extends ObjectsValidatorAbstract
 
     protected function populateValidators($data)
     {
-        $positiveIntValidator        = v::int()->min(0, true);
-        $positiveIntNotNullValidator = v::when(v::nullValue(), v::alwaysInvalid(), $positiveIntValidator);
+        $positiveIntValidator = v::intVal()->min(0, true);
 
         $types = [
             'Incoming T1',
@@ -21,8 +20,8 @@ class TmlpCourseInfoValidator extends ObjectsValidatorAbstract
         ];
 
         $this->dataValidators['type']                   = v::in($types);
-        $this->dataValidators['quarterStartRegistered'] = $positiveIntNotNullValidator;
-        $this->dataValidators['quarterStartApproved']   = $positiveIntNotNullValidator;
+        $this->dataValidators['quarterStartRegistered'] = $positiveIntValidator;
+        $this->dataValidators['quarterStartApproved']   = $positiveIntValidator;
     }
 
     protected function validate($data)

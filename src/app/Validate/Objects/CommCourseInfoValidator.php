@@ -10,21 +10,20 @@ class CommCourseInfoValidator extends ObjectsValidatorAbstract
 
     protected function populateValidators($data)
     {
-        $positiveIntValidator        = v::int()->min(0, true);
-        $positiveIntNotNullValidator = v::when(v::nullValue(), v::alwaysInvalid(), $positiveIntValidator);
-        $positiveIntOrNullValidator  = v::when(v::nullValue(), v::alwaysValid(), $positiveIntValidator);
+        $positiveIntValidator       = v::intVal()->min(0, true);
+        $positiveIntOrNullValidator = v::optional($positiveIntValidator);
 
         $types = ['CAP', 'CPC'];
 
         $this->dataValidators['startDate']                  = v::date('Y-m-d');
-        $this->dataValidators['location']                   = v::when(v::nullValue(), v::alwaysValid(), v::string());
+        $this->dataValidators['location']                   = v::optional(v::stringType());
         $this->dataValidators['type']                       = v::in($types);
-        $this->dataValidators['quarterStartTer']            = $positiveIntNotNullValidator;
-        $this->dataValidators['quarterStartStandardStarts'] = $positiveIntNotNullValidator;
-        $this->dataValidators['quarterStartXfer']           = $positiveIntNotNullValidator;
-        $this->dataValidators['currentTer']                 = $positiveIntNotNullValidator;
-        $this->dataValidators['currentStandardStarts']      = $positiveIntNotNullValidator;
-        $this->dataValidators['currentXfer']                = $positiveIntNotNullValidator;
+        $this->dataValidators['quarterStartTer']            = $positiveIntValidator;
+        $this->dataValidators['quarterStartStandardStarts'] = $positiveIntValidator;
+        $this->dataValidators['quarterStartXfer']           = $positiveIntValidator;
+        $this->dataValidators['currentTer']                 = $positiveIntValidator;
+        $this->dataValidators['currentStandardStarts']      = $positiveIntValidator;
+        $this->dataValidators['currentXfer']                = $positiveIntValidator;
         $this->dataValidators['completedStandardStarts']    = $positiveIntOrNullValidator;
         $this->dataValidators['potentials']                 = $positiveIntOrNullValidator;
         $this->dataValidators['registrations']              = $positiveIntOrNullValidator;

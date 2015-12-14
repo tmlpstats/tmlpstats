@@ -16,11 +16,11 @@ class TmlpRegistrationValidator extends ObjectsValidatorAbstract
 
     protected function populateValidators($data)
     {
-        $nameValidator       = v::string()->notEmpty();
+        $nameValidator       = v::stringType()->notEmpty();
         $dateValidator       = v::date('Y-m-d');
-        $dateOrNullValidator = v::when(v::nullValue(), v::alwaysValid(), $dateValidator);
-        $yesValidator        = v::string()->regex('/^[Y]$/i');
-        $yesOrNullValidator  = v::when(v::nullValue(), v::alwaysValid(), $yesValidator);
+        $dateOrNullValidator = v::optional($dateValidator);
+        $yesValidator        = v::stringType()->regex('/^[Y]$/i');
+        $yesOrNullValidator  = v::optional($yesValidator);
 
         $weekendRegTypes = [
             'before',
@@ -76,7 +76,7 @@ class TmlpRegistrationValidator extends ObjectsValidatorAbstract
                 $indicator = 'R';
             }
         }
-        $equalsIncomingYearValidator = v::when(v::nullValue(), v::alwaysValid(), v::equals($indicator));
+        $equalsIncomingYearValidator = v::optional(v::equals($indicator));
 
         $this->dataValidators['firstName']               = $nameValidator;
         $this->dataValidators['lastName']                = $nameValidator;
@@ -89,13 +89,13 @@ class TmlpRegistrationValidator extends ObjectsValidatorAbstract
         $this->dataValidators['appOut']                  = $equalsIncomingYearValidator;
         $this->dataValidators['appIn']                   = $equalsIncomingYearValidator;
         $this->dataValidators['appr']                    = $equalsIncomingYearValidator;
-        $this->dataValidators['wd']                      = v::when(v::nullValue(), v::alwaysValid(), v::in($wdTypes));
+        $this->dataValidators['wd']                      = v::optional(v::in($wdTypes));
         $this->dataValidators['regDate']                 = $dateValidator;
         $this->dataValidators['appOutDate']              = $dateOrNullValidator;
         $this->dataValidators['appInDate']               = $dateOrNullValidator;
         $this->dataValidators['apprDate']                = $dateOrNullValidator;
         $this->dataValidators['wdDate']                  = $dateOrNullValidator;
-        $this->dataValidators['committedTeamMemberName'] = v::when(v::nullValue(), v::alwaysValid(), $nameValidator);
+        $this->dataValidators['committedTeamMemberName'] = v::optional($nameValidator);
         $this->dataValidators['travel']                  = $yesOrNullValidator;
         $this->dataValidators['room']                    = $yesOrNullValidator;
     }

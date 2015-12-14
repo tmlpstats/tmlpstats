@@ -31,7 +31,7 @@ class ContactInfoValidator extends ObjectsValidatorAbstract
             return; // Skip rows with names == NA or N/A
         }
 
-        $this->dataValidators['name']           = v::string()->regex('/^(.+)\s([^\s]+)$/i');
+        $this->dataValidators['name']           = v::stringType()->regex('/^(.+)\s([^\s]+)$/i');
         $this->dataValidators['accountability'] = v::in($accountabilities);
         $this->dataValidators['phone']          = v::phone();
         $this->dataValidators['email']          = $emailValidator;
