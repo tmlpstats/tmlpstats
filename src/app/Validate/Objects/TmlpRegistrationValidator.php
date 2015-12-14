@@ -10,30 +10,30 @@ class TmlpRegistrationValidator extends ObjectsValidatorAbstract
     use ValidatesTravelWithConfig;
 
     const MAX_DAYS_TO_SEND_APPLICATION_OUT = 2;
-    const MAX_DAYS_TO_APPROVE_APPLICATION = 14;
+    const MAX_DAYS_TO_APPROVE_APPLICATION  = 14;
 
     protected $sheetId = ImportDocument::TAB_WEEKLY_STATS;
 
     protected function populateValidators($data)
     {
-        $nameValidator               = v::string()->notEmpty();
-        $dateValidator               = v::date('Y-m-d');
-        $dateOrNullValidator         = v::when(v::nullValue(), v::alwaysValid(), $dateValidator);
-        $yesValidator                = v::string()->regex('/^[Y]$/i');
-        $yesOrNullValidator          = v::when(v::nullValue(), v::alwaysValid(), $yesValidator);
+        $nameValidator       = v::string()->notEmpty();
+        $dateValidator       = v::date('Y-m-d');
+        $dateOrNullValidator = v::when(v::nullValue(), v::alwaysValid(), $dateValidator);
+        $yesValidator        = v::string()->regex('/^[Y]$/i');
+        $yesOrNullValidator  = v::when(v::nullValue(), v::alwaysValid(), $yesValidator);
 
-        $weekendRegTypes = array(
+        $weekendRegTypes = [
             'before',
             'during',
             'after',
-        );
+        ];
 
-        $incomingWeekendTypes = array(
+        $incomingWeekendTypes = [
             'current',
             'future',
-        );
+        ];
 
-        $wdTypes = array(
+        $wdTypes = [
             '1 AP',
             '1 NW',
             '1 FIN',
@@ -64,7 +64,7 @@ class TmlpRegistrationValidator extends ObjectsValidatorAbstract
             'R T',
             'R RE',
             'R WB',
-        );
+        ];
 
         $incomingTeamYearValidator = v::numeric()->between(1, 2, true);
 
@@ -151,7 +151,7 @@ class TmlpRegistrationValidator extends ObjectsValidatorAbstract
                 $isValid = false;
             }
 
-            $value = $data->wd;
+            $value          = $data->wd;
             $weekendRegType = $this->getWeekendReg($data);
             if ($value[0] != $weekendRegType) {
                 $this->addMessage('TMLPREG_WD_DOESNT_MATCH_INCOMING_YEAR');
@@ -234,50 +234,51 @@ class TmlpRegistrationValidator extends ObjectsValidatorAbstract
         $apprDate   = is_null($data->apprDate) ? null : $this->getDateObject($data->apprDate);
         $wdDate     = is_null($data->wdDate) ? null : $this->getDateObject($data->wdDate);
 
+
         // Make sure dates for each step make sense
-        if (!is_null($data->wdDate) && $wdDate) {
+        if ($wdDate) {
             if ($regDate && $wdDate->lt($regDate)) {
                 $this->addMessage('TMLPREG_WD_DATE_BEFORE_REG_DATE');
                 $isValid = false;
             }
-            if (!is_null($data->apprDate) && $apprDate && $wdDate->lt($apprDate)) {
+            if ($apprDate && $wdDate->lt($apprDate)) {
                 $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPR_DATE');
                 $isValid = false;
             }
-            if (!is_null($data->appInDate) && $appInDate && $wdDate->lt($appInDate)) {
+            if ($appInDate && $wdDate->lt($appInDate)) {
                 $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPIN_DATE');
                 $isValid = false;
             }
-            if (!is_null($data->appOutDate) && $wdDate->lt($appOutDate)) {
+            if ($appOutDate && $wdDate->lt($appOutDate)) {
                 $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPOUT_DATE');
                 $isValid = false;
             }
         }
-        if (!is_null($data->apprDate) && $apprDate) {
+        if ($apprDate) {
             if ($regDate && $apprDate->lt($regDate)) {
                 $this->addMessage('TMLPREG_APPR_DATE_BEFORE_REG_DATE');
                 $isValid = false;
             }
-            if (!is_null($data->appInDate) && $appInDate && $apprDate->lt($appInDate)) {
+            if ($appInDate && $apprDate->lt($appInDate)) {
                 $this->addMessage('TMLPREG_APPR_DATE_BEFORE_APPIN_DATE');
                 $isValid = false;
             }
-            if (!is_null($data->appOutDate) && $appOutDate && $apprDate->lt($appOutDate)) {
+            if ($appOutDate && $apprDate->lt($appOutDate)) {
                 $this->addMessage('TMLPREG_APPR_DATE_BEFORE_APPOUT_DATE');
                 $isValid = false;
             }
         }
-        if (!is_null($data->appInDate) && $appInDate) {
+        if ($appInDate) {
             if ($regDate && $appInDate->lt($regDate)) {
                 $this->addMessage('TMLPREG_APPIN_DATE_BEFORE_REG_DATE');
                 $isValid = false;
             }
-            if (!is_null($data->appOutDate) && $appOutDate && $appInDate->lt($appOutDate)) {
+            if ($appOutDate && $appInDate->lt($appOutDate)) {
                 $this->addMessage('TMLPREG_APPIN_DATE_BEFORE_APPOUT_DATE');
                 $isValid = false;
             }
         }
-        if (!is_null($data->appOutDate) && $appOutDate) {
+        if ($appOutDate) {
             if ($regDate && $appOutDate->lt($regDate)) {
                 $this->addMessage('TMLPREG_APPOUT_DATE_BEFORE_REG_DATE');
                 $isValid = false;
@@ -301,7 +302,7 @@ class TmlpRegistrationValidator extends ObjectsValidatorAbstract
             }
         }
 
-        $maxAppOutDays = static::MAX_DAYS_TO_SEND_APPLICATION_OUT;
+        $maxAppOutDays      = static::MAX_DAYS_TO_SEND_APPLICATION_OUT;
         $maxApplicationDays = static::MAX_DAYS_TO_APPROVE_APPLICATION;
 
         if (is_null($data->wdDate)) {

@@ -26,9 +26,9 @@ class CenterGamesValidator extends ValidatorAbstract
         }
 
         // GITW and TDO
-        $classList = $data['classList'];
+        $classList         = $data['classList'];
         $activeMemberCount = 0;
-        $effectiveCount = 0;
+        $effectiveCount    = 0;
 
         foreach ($classList as $member) {
 
@@ -45,11 +45,11 @@ class CenterGamesValidator extends ValidatorAbstract
         $gitwGame = $activeMemberCount ? round(($effectiveCount / $activeMemberCount) * 100) : 0;
 
         // CAP & CPC Game
-        $courses = $data['commCourseInfo'];
+        $courses                  = $data['commCourseInfo'];
         $capCurrentStandardStarts = 0;
-        $capQStartStandardStarts = 0;
+        $capQStartStandardStarts  = 0;
         $cpcCurrentStandardStarts = 0;
-        $cpcQStartStandardStarts = 0;
+        $cpcQStartStandardStarts  = 0;
 
         foreach ($courses as $course) {
             if ($course['type'] == 'CAP') {
@@ -65,7 +65,7 @@ class CenterGamesValidator extends ValidatorAbstract
         $cpcGame = $cpcCurrentStandardStarts - $cpcQStartStandardStarts;
 
         // T1x and T2x Games
-        $registrations = $data['tmlpRegistration'];
+        $registrations     = $data['tmlpRegistration'];
         $t1CurrentApproved = 0;
         $t2CurrentApproved = 0;
         foreach ($registrations as $registration) {
@@ -76,7 +76,7 @@ class CenterGamesValidator extends ValidatorAbstract
             }
         }
 
-        $tmlpGames = $data['tmlpCourseInfo'];
+        $tmlpGames        = $data['tmlpCourseInfo'];
         $t1QStartApproved = 0;
         $t2QStartApproved = 0;
         foreach ($tmlpGames as $game) {

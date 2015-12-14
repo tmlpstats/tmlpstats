@@ -1,38 +1,39 @@
 <?php
-namespace TmlpStats\Tests\Validate;
+namespace TmlpStats\Tests\Validate\Objects;
 
-use TmlpStats\Validate\ContactInfoValidator;
+use TmlpStats\Util;
+use TmlpStats\Validate\Objects\ContactInfoValidator;
 use stdClass;
 
-class ContactInfoValidatorTest extends ValidatorTestAbstract
+class ContactInfoValidatorTest extends ObjectsValidatorTestAbstract
 {
-    protected $testClass = 'TmlpStats\Validate\ContactInfoValidator';
+    protected $testClass = ContactInfoValidator::class;
 
-    protected $dataFields = array(
+    protected $dataFields = [
         'name',
         'accountability',
         'phone',
         'email',
-    );
+    ];
 
 
     public function testPopulateValidatorsSetsValidatorsForEachInput($data = null)
     {
-        $data = new stdClass;
+        $data                 = new stdClass;
         $data->accountability = 'Program Manager';
-        $data->name = 'Jeff Bridges';
+        $data->name           = 'Jeff Bridges';
 
         parent::testPopulateValidatorsSetsValidatorsForEachInput($data);
     }
 
     public function testPopulateValidatorsSkipsNameWhenNotApplicable($data = null)
     {
-        $data = new stdClass;
+        $data                 = new stdClass;
         $data->accountability = 'Program Manager';
-        $data->name = 'N/A';
+        $data->name           = 'N/A';
 
         // When name is N/A, we skip all validation
-        $tmpDataFields = $this->dataFields;
+        $tmpDataFields    = $this->dataFields;
         $this->dataFields = [];
 
         parent::testPopulateValidatorsSetsValidatorsForEachInput($data);
@@ -42,18 +43,18 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
 
     public function testPopulateValidatorsSetsValidatorsForEachInputReportingStatistician($data = null)
     {
-        $data = new stdClass;
+        $data                 = new stdClass;
         $data->accountability = 'Reporting Statistician';
 
         parent::testPopulateValidatorsSetsValidatorsForEachInput($data);
     }
 
     /**
-    * @dataProvider providerRun
-    */
+     * @dataProvider providerRun
+     */
     public function testRun($data, $messages, $expectedResult)
     {
-        $validator = $this->getObjectMock(array('addMessage', 'validate'));
+        $validator = $this->getObjectMock(['addMessage', 'validate']);
 
         $i = 0;
         if ($messages) {
@@ -78,222 +79,230 @@ class ContactInfoValidatorTest extends ValidatorTestAbstract
 
     public function providerRun()
     {
-        return array(
+        return [
             // Test Required
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => null,
                     'accountability' => null,
                     'phone'          => null,
                     'email'          => null,
-                )),
-                array(
-                    array('INVALID_VALUE', 'Name', '[empty]'),
-                    array('INVALID_VALUE', 'Accountability', '[empty]'),
-                    array('INVALID_VALUE', 'Phone', '[empty]'),
-                    array('INVALID_VALUE', 'Email', '[empty]'),
-                ),
+                ]),
+                [
+                    ['INVALID_VALUE', 'Name', '[empty]'],
+                    ['INVALID_VALUE', 'Accountability', '[empty]'],
+                    ['INVALID_VALUE', 'Phone', '[empty]'],
+                    ['INVALID_VALUE', 'Email', '[empty]'],
+                ],
                 false,
-            ),
+            ],
             // Test Valid
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith Stone',
                     'accountability' => 'Program Manager',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                )),
-                array(),
+                ]),
+                [],
                 true,
-            ),
+            ],
             // Test Valid
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith Stone',
                     'accountability' => 'Classroom Leader',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                )),
-                array(),
+                ]),
+                [],
                 true,
-            ),
+            ],
             // Test Valid
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith Stone',
                     'accountability' => 'T-1 Leader',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                )),
-                array(),
+                ]),
+                [],
                 true,
-            ),
+            ],
             // Test Valid
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith Stone',
                     'accountability' => 'T-2 Leader',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                )),
-                array(),
+                ]),
+                [],
                 true,
-            ),
+            ],
             // Test Valid
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith Stone',
                     'accountability' => 'Team 2 Team Leader',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                )),
-                array(),
+                ]),
+                [],
                 true,
-            ),
+            ],
             // Test Valid
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith Stone',
                     'accountability' => 'Team 1 Team Leader',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                )),
-                array(),
+                ]),
+                [],
                 true,
-            ),
+            ],
             // Test Valid
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith Stone',
                     'accountability' => 'Statistician',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                )),
-                array(),
+                ]),
+                [],
                 true,
-            ),
+            ],
             // Test Valid
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith Stone',
                     'accountability' => 'Statistician Apprentice',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                )),
-                array(),
+                ]),
+                [],
                 true,
-            ),
+            ],
             // Test Valid
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith Stone',
                     'accountability' => 'Reporting Statistician',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                )),
-                array(),
+                ]),
+                [],
                 true,
-            ),
+            ],
             // Test Valid
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith Stone',
                     'accountability' => 'Reporting Statistician',
                     'phone'          => '555-555-5555',
                     'email'          => '',
-                )),
-                array(),
+                ]),
+                [],
                 true,
-            ),
+            ],
 
 
             // Test Invalid First Name
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => ' Stone',
                     'accountability' => 'Program Manager',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                )),
-                array(
-                    array('INVALID_VALUE', 'Name', ' Stone'),
-                ),
+                ]),
+                [
+                    ['INVALID_VALUE', 'Name', ' Stone'],
+                ],
                 false,
-            ),
+            ],
             // Test Invalid Last Name
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith ',
                     'accountability' => 'Program Manager',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                )),
-                array(
-                    array('INVALID_VALUE', 'Name', 'Keith '),
-                ),
+                ]),
+                [
+                    ['INVALID_VALUE', 'Name', 'Keith '],
+                ],
                 false,
-            ),
+            ],
             // Test Invalid accountability
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith Stone',
                     'accountability' => 'asdf',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone@example.com',
-                )),
-                array(
-                    array('INVALID_VALUE', 'Accountability', 'asdf'),
-                ),
+                ]),
+                [
+                    ['INVALID_VALUE', 'Accountability', 'asdf'],
+                ],
                 false,
-            ),
+            ],
             // Test Invalid phone
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith Stone',
                     'accountability' => 'Program Manager',
                     'phone'          => 'asdf',
                     'email'          => 'keith.stone@example.com',
-                )),
-                array(
-                    array('INVALID_VALUE', 'Phone', 'asdf'),
-                ),
+                ]),
+                [
+                    ['INVALID_VALUE', 'Phone', 'asdf'],
+                ],
                 false,
-            ),
+            ],
             // Test Invalid email
-            array(
-                $this->arrayToObject(array(
+            [
+                Util::arrayToObject([
                     'name'           => 'Keith Stone',
                     'accountability' => 'Program Manager',
                     'phone'          => '555-555-5555',
                     'email'          => 'keith.stone',
-                )),
-                array(
-                    array('INVALID_VALUE', 'Email', 'keith.stone'),
-                ),
+                ]),
+                [
+                    ['INVALID_VALUE', 'Email', 'keith.stone'],
+                ],
                 false,
-            ),
-        );
-    }
-
-    /**
-    * @dataProvider providerValidate
-    */
-    public function testValidate($expectedResult)
-    {
-        $validator = $this->getObjectMock();
-
-        $this->setProperty($validator, 'isValid', $expectedResult);
-
-        $result = $this->runMethod($validator, 'validate', array());
-
-        $this->assertEquals($expectedResult, $result);
+            ],
+        ];
     }
 
     public function providerValidate()
     {
-        return array(
-            array(true),
-            array(false),
-        );
+        return [
+            // Validate Succeeds
+            [
+                [
+                    'validateName'  => true,
+                    'validateEmail' => true,
+                ],
+                true,
+            ],
+            // validateName fails
+            [
+                [
+                    'validateName'  => false,
+                    'validateEmail' => true,
+                ],
+                false,
+            ],
+            // validateEmail fails
+            [
+                [
+                    'validateName'  => true,
+                    'validateEmail' => false,
+                ],
+                false,
+            ],
+        ];
     }
 }

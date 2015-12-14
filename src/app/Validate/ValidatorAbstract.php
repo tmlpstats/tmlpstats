@@ -2,7 +2,6 @@
 namespace TmlpStats\Validate;
 
 use TmlpStats\Message;
-use TmlpStats\StatsReport;
 
 abstract class ValidatorAbstract
 {
@@ -13,9 +12,9 @@ abstract class ValidatorAbstract
     protected $supplementalData = null;
     protected $statsReport = null;
 
-    protected $messages = array();
+    protected $messages = [];
 
-    public function __construct(&$statsReport)
+    public function __construct($statsReport)
     {
         $this->statsReport = $statsReport;
     }
@@ -34,10 +33,12 @@ abstract class ValidatorAbstract
 
     public function run($data, $supplementalData = null)
     {
-        $this->data = $data;
+        $this->data             = $data;
         $this->supplementalData = $supplementalData;
 
-        $this->validate($data);
+        if (!$this->validate($data)) {
+            $this->isValid = false;
+        }
 
         return $this->isValid;
     }
@@ -88,7 +89,7 @@ abstract class ValidatorAbstract
     // @codeCoverageIgnoreStart
     protected function callMessageAdd($message, $arguments)
     {
-        return call_user_func_array(array($message, 'addMessage'), $arguments);
+        return call_user_func_array([$message, 'addMessage'], $arguments);
     }
     // @codeCoverageIgnoreEnd
 }

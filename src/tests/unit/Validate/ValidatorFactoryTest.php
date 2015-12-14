@@ -2,16 +2,17 @@
 namespace TmlpStats\Tests\Validate;
 
 use stdClass;
-
+use TmlpStats\Validate\NullValidator;
 use TmlpStats\Validate\ValidatorFactory;
+use TmlpStats\Validate\Objects;
 
 class ValidatorFactoryTest extends \TmlpStats\Tests\TestAbstract
 {
-    protected $testClass = 'TmlpStats\Validate\ValidatorFactory';
+    protected $testClass = ValidatorFactory::class;
 
     public function testBuildReturnsCenterStatsValidator()
     {
-        $class = 'TmlpStats\Validate\CenterStatsValidator';
+        $class       = Objects\CenterStatsValidator::class;
         $statsReport = new stdClass;
 
         $validator = ValidatorFactory::build($statsReport, 'centerStats');
@@ -21,7 +22,7 @@ class ValidatorFactoryTest extends \TmlpStats\Tests\TestAbstract
 
     public function testBuildReturnsTmlpRegistrationValidator()
     {
-        $class = 'TmlpStats\Validate\TmlpRegistrationValidator';
+        $class       = Objects\TmlpRegistrationValidator::class;
         $statsReport = new stdClass;
 
         $validator = ValidatorFactory::build($statsReport, 'tmlpRegistration');
@@ -31,7 +32,7 @@ class ValidatorFactoryTest extends \TmlpStats\Tests\TestAbstract
 
     public function testBuildReturnsClassListValidator()
     {
-        $class = 'TmlpStats\Validate\ClassListValidator';
+        $class       = Objects\ClassListValidator::class;
         $statsReport = new stdClass;
 
         $validator = ValidatorFactory::build($statsReport, 'classList');
@@ -41,7 +42,7 @@ class ValidatorFactoryTest extends \TmlpStats\Tests\TestAbstract
 
     public function testBuildReturnsContactInfoValidator()
     {
-        $class = 'TmlpStats\Validate\ContactInfoValidator';
+        $class       = Objects\ContactInfoValidator::class;
         $statsReport = new stdClass;
 
         $validator = ValidatorFactory::build($statsReport, 'contactInfo');
@@ -51,7 +52,7 @@ class ValidatorFactoryTest extends \TmlpStats\Tests\TestAbstract
 
     public function testBuildReturnsCommCourseInfoValidator()
     {
-        $class = 'TmlpStats\Validate\CommCourseInfoValidator';
+        $class       = Objects\CommCourseInfoValidator::class;
         $statsReport = new stdClass;
 
         $validator = ValidatorFactory::build($statsReport, 'commCourseInfo');
@@ -61,7 +62,7 @@ class ValidatorFactoryTest extends \TmlpStats\Tests\TestAbstract
 
     public function testBuildReturnsTmlpCourseInfoValidator()
     {
-        $class = 'TmlpStats\Validate\TmlpCourseInfoValidator';
+        $class       = Objects\TmlpCourseInfoValidator::class;
         $statsReport = new stdClass;
 
         $validator = ValidatorFactory::build($statsReport, 'tmlpCourseInfo');
@@ -71,7 +72,7 @@ class ValidatorFactoryTest extends \TmlpStats\Tests\TestAbstract
 
     public function testBuildReturnsNullValidator()
     {
-        $class = 'TmlpStats\Validate\NullValidator';
+        $class       = NullValidator::class;
         $statsReport = new stdClass;
 
         $validator = ValidatorFactory::build($statsReport, 'null');
@@ -81,7 +82,7 @@ class ValidatorFactoryTest extends \TmlpStats\Tests\TestAbstract
 
     public function testBuildReturnsNullValidatorWhenNoTypeProvided()
     {
-        $class = 'TmlpStats\Validate\NullValidator';
+        $class       = NullValidator::class;
         $statsReport = new stdClass;
 
         $validator = ValidatorFactory::build($statsReport);

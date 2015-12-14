@@ -2,27 +2,13 @@
 namespace TmlpStats\Tests\Validate;
 
 use TmlpStats\Validate\NullValidator;
-use Carbon\Carbon;
 use stdClass;
 
 class NullValidatorTest extends ValidatorTestAbstract
 {
-    protected $testClass = 'TmlpStats\Validate\NullValidator';
+    protected $testClass = NullValidator::class;
 
-    protected $dataFields = array();
-
-    public function testPopulateValidators()
-    {
-        $data = new stdClass;
-
-        $validator = $this->getObjectMock();
-
-        $this->runMethod($validator, 'populateValidators', $data);
-
-        $dataValidators = $this->getProperty($validator, 'dataValidators');
-
-        $this->assertEmpty($dataValidators);
-    }
+    protected $dataFields = [];
 
     public function testValidate()
     {
