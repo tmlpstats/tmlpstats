@@ -24,7 +24,8 @@
         "phpunit/phpunit": "~5.0",
         "phpspec/phpspec": "~2.1",
         "mockery/mockery": "~0.9",
-        "symfony/yaml": "^2.7"
+        "symfony/yaml": "^2.7",
+        "satooshi/php-coveralls": "dev-master"
     },
     "autoload": {
         "classmap": [
