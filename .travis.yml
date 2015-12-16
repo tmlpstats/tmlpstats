@@ -10,19 +10,13 @@ matrix:
 before_script:
  - phpenv config-rm xdebug.ini
  - cd src/
- - ls -l
  - travis_retry composer self-update
  - travis_retry composer install --no-interaction
 
 script:
- - ls -l
  - mkdir -p build/logs
  - php vendor/bin/phpunit --coverage-clover build/logs/coverage-clover.xml
- - ls -l
 
 after_script:
- - ls -l
- - ls -l build/
  - ls -l build/logs/
- - cat build/logs/coverage-clover.xml
  - travis_retry php vendor/bin/coveralls -v
