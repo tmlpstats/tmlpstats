@@ -1,19 +1,20 @@
 language: php
 php:
-  - '5.6'
-  - '7.0'
+  - 5.6
+  - 7.0
+
+matrix:
+  allow_failures:
+    - php: 7.0
 
 before_script:
  - cd src/
- - pwd
- - wget http://getcomposer.org/composer.phar
+ - curl -s http://getcomposer.org/installer | php
  - php composer.phar install --dev --no-interaction
 
 script:
- - pwd
  - mkdir -p build/logs
- - phpunit --coverage-clover build/logs/clover.xml
+ - php vendor/bin/phpunit --coverage-clover build/logs/clover.xml
 
 after_script:
- - pwd
- - php vendor/bin/coveralls -v
+ - travis_retry php vendor/bin/coveralls -v
