@@ -4,6 +4,7 @@ php:
   - '7.0'
 
 before_script:
+ - cd src/
  - wget http://getcomposer.org/composer.phar
  - php composer.phar install --dev --no-interaction
 
