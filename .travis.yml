@@ -10,11 +10,14 @@ matrix:
 before_script:
  - cd src/
  - curl -s http://getcomposer.org/installer | php
- - php composer.phar install --dev --no-interaction
+ - php composer.phar install --no-interaction
+ - phpenv config-rm xdebug.ini
 
 script:
  - mkdir -p build/logs
  - php vendor/bin/phpunit --coverage-clover build/logs/coverage-clover.xml
 
 after_script:
+ - ls -l build/logs/
+ - cat build/logs/coverage-clover.xml
  - travis_retry php vendor/bin/coveralls -v
