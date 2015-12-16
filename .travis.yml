@@ -8,7 +8,6 @@ matrix:
     - php: 7.0
 
 before_script:
- - phpenv config-rm xdebug.ini
  - cd src/
  - travis_retry composer self-update
  - travis_retry composer install --no-interaction
