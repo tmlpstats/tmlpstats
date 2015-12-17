@@ -13,7 +13,7 @@ class Message
     const DEBUG     = 8;
 
     // Message Definitions
-    static $messageList = [
+    protected $messageList = [
         // General Errors
         'INVALID_VALUE'                                                 => [
             'type'      => Message::ERROR,
@@ -776,7 +776,7 @@ class Message
 
     public function addMessage($messageId, $offset)
     {
-        $message   = static::$messageList[$messageId];
+        $message   = $this->messageList[$messageId];
         $arguments = array_slice(func_get_args(), 2);
 
         $result = [
