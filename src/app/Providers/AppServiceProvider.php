@@ -35,9 +35,9 @@ class AppServiceProvider extends ServiceProvider
         );
 
         Blade::directive('date', function($expression) {
-            $format = Util::getLocaleDateFormat();
+            $php = "<?php echo with{$expression}->toDateString(); ?>";
 
-            return "<?php echo with{$expression}->format('{$format}'); ?>";
+            return "<span class='date' data-date='{$php}'></span>";
         });
 
         Blade::directive('statsReportLink', function($expression) {

@@ -139,6 +139,14 @@
             return message;
         }
 
+        function updateDates() {
+            $('span.date').each(function (index, dateElem) {
+                var formatted = moment($(dateElem).data('date')).format('l');
+                formatted = formatted.replace(/\d\d(\d\d)/, "$1");
+                $(dateElem).text(formatted);
+            });
+        }
+
         var pages = [
             'ratingsummary',
             'regionalstats',
@@ -209,6 +217,7 @@
 
                 $.get(url, function (response) {
                     $(container).html(response);
+                    updateDates();
                 }).fail(function (jqXHR) {
                     var message = getErrorMessage(jqXHR.status);
                     $(container).html('<br/><p>' + message + '</p>');
@@ -226,6 +235,7 @@
                 $.get(url, function (response) {
                     $.each(response, function (name, data) {
                         $("#" + name + "-container").html(data);
+                        updateDates();
                     });
                 }).fail(function (jqXHR) {
                     var message = getErrorMessage(jqXHR.status);
