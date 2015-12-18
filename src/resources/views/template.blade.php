@@ -36,8 +36,10 @@
     <script src="{{ asset('/components/datatables.net/js/jquery.dataTables.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('/components/datatables.net-bs/js/dataTables.bootstrap.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('/components/jquery-loading/dist/jquery.loading.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('/components/jquery-stickytabs/jquery.stickytabs.js') }}" type="text/javascript"></script>
     <script src="{{ asset('/components/moment/min/moment-with-locales.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('/components/jstz/jstz.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('/js/tmlpstats.js') }}" type="text/javascript"></script>
 
     @if (!Session::has('timezone') || !Session::has('locale'))
         <script type="text/javascript">
