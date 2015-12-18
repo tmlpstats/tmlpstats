@@ -175,6 +175,7 @@
 
                 $.get(url, function (response) {
                     $(container).html(response);
+                    updateDates();
                 }).fail(function (jqXHR) {
                     var message = getErrorMessage(jqXHR.status);
                     $(container).html('<p>' + message + '</p>');
