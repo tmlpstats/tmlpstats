@@ -43,36 +43,36 @@
 
     <div id="content">
         <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
-            <li class="active"><a href="#summary-tab" data-toggle="tab">Weekly Summary</a></li>
-            <li><a href="#overview-tab" data-toggle="tab">Report Details</a></li>
-            <li><a href="#centerstats-tab" data-toggle="tab">Center Games</a></li>
-            <li><a href="#classlist-tab" data-toggle="tab">Team Members</a></li>
-            <li><a href="#tmlpregistrations-tab" data-toggle="tab">Team Expansion</a></li>
-            <li><a href="#courses-tab" data-toggle="tab">Courses</a></li>
+            <li class="active"><a href="#summary" data-toggle="tab">Weekly Summary</a></li>
+            <li><a href="#overview" data-toggle="tab">Report Details</a></li>
+            <li><a href="#centerstats" data-toggle="tab">Center Games</a></li>
+            <li><a href="#classlist" data-toggle="tab">Team Members</a></li>
+            <li><a href="#tmlpregistrations" data-toggle="tab">Team Expansion</a></li>
+            <li><a href="#courses" data-toggle="tab">Courses</a></li>
             @can ('readContactInfo', $statsReport)
-            <li><a href="#contactinfo-tab" data-toggle="tab">Contact Info</a></li>
+            <li><a href="#contactinfo" data-toggle="tab">Contact Info</a></li>
             @endcan
             @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
-            <li><a href="#transitionsummary-tab" data-toggle="tab">Transfer Check</a></li>
+            <li><a href="#transitionsummary" data-toggle="tab">Transfer Check</a></li>
             @endif
         </ul>
 
         <div class="tab-content">
-            <div class="tab-pane active" id="summary-tab">
+            <div class="tab-pane active" id="summary">
                 <h3>Week Summary</h3>
                 <div id="summary-container"></div>
             </div>
-            <div class="tab-pane" id="overview-tab">
+            <div class="tab-pane" id="overview">
                 <h3>Report Details</h3>
                 @include('statsreports.details.overview', ['statsReport' => $statsReport, 'sheetUrl' => $sheetUrl])
                 <h3>Results</h3>
                 <div id="results-container"></div>
             </div>
-            <div class="tab-pane" id="centerstats-tab">
+            <div class="tab-pane" id="centerstats">
                 <h3>Center Games</h3>
                 <div id="centerstats-container"></div>
             </div>
-            <div class="tab-pane" id="classlist-tab">
+            <div class="tab-pane" id="classlist">
                 <h3>Team Members</h3>
                 <div class="btn-group" role="group">
                     <button id ="classlist-button" type="button" class="btn">Summary</button>
@@ -83,7 +83,7 @@
                 <div id="gitwsummary-container"></div>
                 <div id="tdosummary-container"></div>
             </div>
-            <div class="tab-pane" id="tmlpregistrations-tab">
+            <div class="tab-pane" id="tmlpregistrations">
                 <h3>Team Expansion</h3>
                 <div class="btn-group" role="group">
                     <button id ="tmlpregistrations-button" type="button" class="btn">By Team Year</button>
@@ -92,18 +92,18 @@
                 <div id="tmlpregistrations-container"></div>
                 <div id="tmlpregistrationsbystatus-container"></div>
             </div>
-            <div class="tab-pane" id="courses-tab">
+            <div class="tab-pane" id="courses">
                 <h3>Courses</h3>
                 <div id="courses-container"></div>
             </div>
             @can ('readContactInfo', $statsReport)
-            <div class="tab-pane" id="contactinfo-tab">
+            <div class="tab-pane" id="contactinfo">
                 <h3>Contact Info</h3>
                 <div id="contactinfo-container"></div>
             </div>
             @endcan
             @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
-            <div class="tab-pane" id="transitionsummary-tab">
+            <div class="tab-pane" id="transitionsummary">
                 <h3>Transfer Check</h3>
                 <div class="btn-group" role="group">
                     <button id ="peopletransfersummary-button" type="button" class="btn">People</button>
@@ -121,19 +121,6 @@
     </div>
 
     <script type="text/javascript">
-
-        function getErrorMessage(code) {
-            var message = '';
-            if (code == 404) {
-                message = 'Unable to find report.';
-            } else if (code == 403) {
-                message = 'You do not have access to this report.';
-            } else {
-                message = 'Unable to get report.';
-            }
-            return message;
-        }
-
         var pages = [
             'summary',
             'results',
@@ -170,7 +157,7 @@
         ];
 
         $(document).ready(function ($) {
-            $('#tabs').tab();
+            $('.nav-tabs').stickyTabs();
 
             $('select.reportSelector').change(function() {
                 var baseUrl = "{{ url('statsreports') }}";

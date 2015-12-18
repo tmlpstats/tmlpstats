@@ -32,35 +32,35 @@
         <br /><br />
 
         <div class="col-xs-2">
-            <ul id="tabs " class="nav nav-tabs tabs-left" data-tabs="tabs">
-                <li class="active"><a href="#ratingsummary-tab" data-toggle="tab">Ratings Summary</a></li>
-                <li><a href="#regionalstats-tab" data-toggle="tab">Regional Games</a></li>
-                <li><a href="#statsreports-tab" data-toggle="tab">Center Reports</a></li>
-                <li><a href="#applications-tab" data-toggle="tab">Applications</a></li>
-                <li><a href="#traveloverview-tab" data-toggle="tab">Travel Summary</a></li>
-                <li><a href="#courses-tab" data-toggle="tab">Courses</a></li>
-                <li><a href="#teammemberstatus-tab" data-toggle="tab">Team Members</a></li>
-                <li><a href="#potentials-tab" data-toggle="tab">Potentials</a></li>
+            <ul id="tabs" class="nav nav-tabs tabs-left" data-tabs="tabs">
+                <li class="active"><a href="#ratingsummary" data-toggle="tab">Ratings Summary</a></li>
+                <li><a href="#regionalstats" data-toggle="tab">Regional Games</a></li>
+                <li><a href="#statsreports" data-toggle="tab">Center Reports</a></li>
+                <li><a href="#applications" data-toggle="tab">Applications</a></li>
+                <li><a href="#traveloverview" data-toggle="tab">Travel Summary</a></li>
+                <li><a href="#courses" data-toggle="tab">Courses</a></li>
+                <li><a href="#teammemberstatus" data-toggle="tab">Team Members</a></li>
+                <li><a href="#potentials" data-toggle="tab">Potentials</a></li>
             </ul>
         </div>
         <div class="col-xs-10">
             <div class="tab-content">
-                <div class="tab-pane active" id="ratingsummary-tab">
+                <div class="tab-pane active" id="ratingsummary">
                     <h3>Ratings Summary</h3>
 
                     <div id="ratingsummary-container"></div>
                 </div>
-                <div class="tab-pane" id="regionalstats-tab">
+                <div class="tab-pane" id="regionalstats">
                     <h3>Regional Games</h3>
 
                     <div id="regionalstats-container"></div>
                 </div>
-                <div class="tab-pane" id="statsreports-tab">
+                <div class="tab-pane" id="statsreports">
                     <h3>Center Reports</h3>
 
                     <div id="statsreports-container"></div>
                 </div>
-                <div class="tab-pane" id="applications-tab">
+                <div class="tab-pane" id="applications">
                     <h3>Center Reports</h3>
 
                     <div class="btn-group" role="group">
@@ -74,12 +74,12 @@
                     <div id="applicationsoverdue-container"></div>
                     <div id="applicationsbycenter-container"></div>
                 </div>
-                <div class="tab-pane" id="traveloverview-tab">
+                <div class="tab-pane" id="traveloverview">
                     <h3>Travel/Rooming Summary</h3>
 
                     <div id="traveloverview-container"></div>
                 </div>
-                <div class="tab-pane" id="courses-tab">
+                <div class="tab-pane" id="courses">
                     <h3>Courses</h3>
 
                     <div class="btn-group" role="group">
@@ -95,7 +95,7 @@
                     <div id="coursescompleted-container"></div>
                     <div id="coursesguestgames-container"></div>
                 </div>
-                <div class="tab-pane" id="teammemberstatus-tab">
+                <div class="tab-pane" id="teammemberstatus">
                     <h3>Team Members of Interest</h3>
 
                     <div class="btn-group" role="group">
@@ -107,7 +107,7 @@
                     <div id="teammemberstatusctw-container"></div>
                     <div id="teammemberstatustransfer-container"></div>
                 </div>
-                <div class="tab-pane" id="potentials-tab">
+                <div class="tab-pane" id="potentials">
                     <h3>Team 2 Potentials</h3>
 
                     <div class="btn-group" role="group">
@@ -126,27 +126,6 @@
     </div>
 
     <script type="text/javascript">
-
-        function getErrorMessage(code) {
-            var message = '';
-            if (code == 404) {
-                message = 'Unable to find report.';
-            } else if (code == 403) {
-                message = 'You do not have access to this report.';
-            } else {
-                message = 'Unable to get report.';
-            }
-            return message;
-        }
-
-        function updateDates() {
-            $('span.date').each(function (index, dateElem) {
-                var formatted = moment($(dateElem).data('date')).format('l');
-                formatted = formatted.replace(/\d\d(\d\d)/, "$1");
-                $(dateElem).text(formatted);
-            });
-        }
-
         var pages = [
             'ratingsummary',
             'regionalstats',
@@ -205,7 +184,7 @@
         ];
 
         $(document).ready(function ($) {
-            $('#tabs').tab();
+            $('.nav-tabs').stickyTabs();
 
             // Load all of the pages
             $.each(pages, function (index, page) {
