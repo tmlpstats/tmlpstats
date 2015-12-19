@@ -19,7 +19,6 @@ class CenterGamesValidator extends ValidatorAbstract
             if ($week['type'] == 'actual'
                 && $week['reportingDate'] == $this->reportingDate->toDateString()
             ) {
-
                 $thisWeekActual = $week;
                 break;
             }

@@ -20,4 +20,15 @@ trait MocksSettings
         $setting->value = $value;
         ModelCache::create()->set($name, $centerId, $setting);
     }
+
+    /**
+     * Forget a cached setting
+     *
+     * @param     $name
+     * @param int $centerId
+     */
+    public function unsetSetting($name, $centerId = 0)
+    {
+        ModelCache::create()->forget($name, $centerId);
+    }
 }

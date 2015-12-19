@@ -1,11 +1,14 @@
 <?php
 namespace TmlpStats\Tests\Validate\Objects;
 
+use TmlpStats\Tests\Traits\MocksMessages;
 use TmlpStats\Util;
 use TmlpStats\Validate\Objects\CenterStatsValidator;
 
 class CenterStatsValidatorTest extends ObjectsValidatorTestAbstract
 {
+    use MocksMessages;
+
     protected $testClass = CenterStatsValidator::class;
 
     protected $dataFields = [
@@ -28,16 +31,7 @@ class CenterStatsValidatorTest extends ObjectsValidatorTestAbstract
         $validator = $this->getObjectMock(['addMessage', 'validate']);
 
         $i = 0;
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i][0], $messages[$i][1], $messages[$i][2]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages, $i);
 
         $validator->expects($this->at($i))
                   ->method('validate')
