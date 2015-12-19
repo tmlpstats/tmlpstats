@@ -2,6 +2,7 @@
 namespace TmlpStats\Tests\Validate\Objects;
 
 use TmlpStats\ModelCache;
+use TmlpStats\Tests\Traits\MocksMessages;
 use TmlpStats\Tests\Traits\MocksSettings;
 use TmlpStats\Util;
 use TmlpStats\Validate\Objects\TmlpRegistrationValidator;
@@ -11,7 +12,7 @@ use stdClass;
 
 class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 {
-    use MocksSettings;
+    use MocksSettings, MocksMessages;
 
     protected $testClass = TmlpRegistrationValidator::class;
 
@@ -68,16 +69,7 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
         $validator = $this->getObjectMock(['addMessage', 'validate']);
 
         $i = 0;
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i][0], $messages[$i][1], $messages[$i][2]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages, $i);
 
         $validator->expects($this->at($i))
                   ->method('validate')
@@ -667,44 +659,67 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
     //
     // validateWeekendReg()
     //
-    public function testValidateWeekendRegPassesForExactlyOne()
-    {
-        $data                   = new stdClass;
-        $data->incomingTeamYear = 2;
-        $data->bef              = 2;
-        $data->dur              = null;
-        $data->aft              = null;
-
-        $validator = $this->getObjectMock();
-        $validator->expects($this->never())
-                  ->method('addMessage');
-
-        $result = $validator->validateWeekendReg($data);
-
-        $this->assertTrue($result);
-    }
-
     /**
-     * @dataProvider providerValidateWeekendRegFails
+     * @dataProvider providerValidateWeekendReg
      */
-    public function testValidateWeekendRegFailsWhenBothBefAndDurSet($data)
+    public function testValidateWeekendReg($data, $messages, $expectedResponse)
     {
         $validator = $this->getObjectMock();
-        $validator->expects($this->once())
-                  ->method('addMessage')
-                  ->with(
-                      $this->equalTo('TMLPREG_MULTIPLE_WEEKENDREG'),
-                      $this->equalTo($data->incomingTeamYear)
-                  );
+
+        $this->setupMessageMocks($validator, $messages);
 
         $result = $validator->validateWeekendReg($data);
 
-        $this->assertFalse($result);
+        $this->assertEquals($expectedResponse, $result);
     }
 
-    public function providerValidateWeekendRegFails()
+    public function providerValidateWeekendReg()
     {
         return [
+            // validateWeekendReg Passes bef
+            [
+                Util::arrayToObject([
+                    'incomingTeamYear' => 2,
+                    'bef'              => 2,
+                    'dur'              => null,
+                    'aft'              => null,
+                ]),
+                [],
+                true
+            ],
+            // validateWeekendReg Passes bef with team 1
+            [
+                Util::arrayToObject([
+                    'incomingTeamYear' => 1,
+                    'bef'              => 1,
+                    'dur'              => null,
+                    'aft'              => null,
+                ]),
+                [],
+                true
+            ],
+            // validateWeekendReg Passes dur
+            [
+                Util::arrayToObject([
+                    'incomingTeamYear' => 2,
+                    'bef'              => null,
+                    'dur'              => 2,
+                    'aft'              => null,
+                ]),
+                [],
+                true
+            ],
+            // validateWeekendReg Passes aft
+            [
+                Util::arrayToObject([
+                    'incomingTeamYear' => 2,
+                    'bef'              => null,
+                    'dur'              => null,
+                    'aft'              => 2,
+                ]),
+                [],
+                true
+            ],
             // validateWeekendReg Fails When Both Bef And Dur Set
             [
                 Util::arrayToObject([
@@ -713,6 +728,10 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'dur'              => 2,
                     'aft'              => null,
                 ]),
+                [
+                    ['TMLPREG_MULTIPLE_WEEKENDREG', 2],
+                ],
+                false,
             ],
             // validateWeekendReg Fails When Both Bef And Aft Set
             [
@@ -722,6 +741,10 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'dur'              => null,
                     'aft'              => 2,
                 ]),
+                [
+                    ['TMLPREG_MULTIPLE_WEEKENDREG', 2],
+                ],
+                false,
             ],
             // validateWeekendReg Fails When Both Dur And Aft Set
             [
@@ -731,6 +754,10 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'dur'              => 2,
                     'aft'              => 2,
                 ]),
+                [
+                    ['TMLPREG_MULTIPLE_WEEKENDREG', 2],
+                ],
+                false,
             ],
         ];
     }
@@ -746,24 +773,8 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
     {
         $validator = $this->getObjectMock();
 
-        if (!$messages) {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        } else {
-            for ($i = 0; $i < count($messages); $i++) {
-                if (is_array($messages[$i])) {
-                    // Some messages have multiple arguments
-                    $validator->expects($this->at($i))
-                              ->method('addMessage')
-                              ->with($messages[$i][0], $messages[$i][1], $messages[$i][2]);
-                } else {
-                    // Other messages have only 1
-                    $validator->expects($this->at($i))
-                              ->method('addMessage')
-                              ->with($messages[$i]);
-                }
-            }
-        }
+        $this->setupMessageMocks($validator, $messages);
+
         $result = $validator->validateApprovalProcess($data);
 
         $this->assertEquals($expectedResult, $result);
@@ -873,7 +884,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'dur'                     => null,
                     'aft'                     => null,
                 ]),
-                ['TMLPREG_WD_DOESNT_MATCH_INCOMING_YEAR'],
+                [
+                    ['TMLPREG_WD_DOESNT_MATCH_INCOMING_YEAR'],
+                ],
                 false,
             ],
             // Withdraw and appOut set
@@ -1012,7 +1025,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'committedTeamMemberName' => 'Keith Stone',
                     'incomingTeamYear'        => 1,
                 ]),
-                ['TMLPREG_APPR_MISSING_APPIN_DATE'],
+                [
+                    ['TMLPREG_APPR_MISSING_APPIN_DATE'],
+                ],
                 false,
             ],
             // Approved and missing appOutDate
@@ -1029,7 +1044,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'committedTeamMemberName' => 'Keith Stone',
                     'incomingTeamYear'        => 1,
                 ]),
-                ['TMLPREG_APPR_MISSING_APPOUT_DATE'],
+                [
+                    ['TMLPREG_APPR_MISSING_APPOUT_DATE'],
+                ],
                 false,
             ],
             // Approved and appOut set
@@ -1140,7 +1157,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'committedTeamMemberName' => 'Keith Stone',
                     'incomingTeamYear'        => 1,
                 ]),
-                ['TMLPREG_APPIN_MISSING_APPOUT_DATE'],
+                [
+                    ['TMLPREG_APPIN_MISSING_APPOUT_DATE'],
+                ],
                 false,
             ],
             // App In and appOut set
@@ -1250,7 +1269,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'committedTeamMemberName' => null,
                     'incomingTeamYear'        => null,
                 ]),
-                ['TMLPREG_NO_COMMITTED_TEAM_MEMBER'],
+                [
+                    ['TMLPREG_NO_COMMITTED_TEAM_MEMBER'],
+                ],
                 false,
             ],
         ];
@@ -1270,31 +1291,8 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             'addMessage',
         ], [$statsReport]);
 
-        if (!$messages) {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        } else {
-            $sequence = 0;
-            for ($i = 0; $i < count($messages); $i++) {
+        $this->setupMessageMocks($validator, $messages);
 
-                if (!is_array($messages[$i])) {
-                    // Other messages have only 1
-                    $validator->expects($this->at($i + $sequence))
-                              ->method('addMessage')
-                              ->with($messages[$i]);
-                } else if (count($messages[$i]) == 2) {
-                    // Some messages have multiple arguments
-                    $validator->expects($this->at($i + $sequence))
-                              ->method('addMessage')
-                              ->with($messages[$i][0], $messages[$i][1]);
-                } else {
-                    // Some messages have multiple arguments
-                    $validator->expects($this->at($i + $sequence))
-                              ->method('addMessage')
-                              ->with($messages[$i][0], $messages[$i][1], $messages[$i][2]);
-                }
-            }
-        }
         $result = $validator->validateDates($data);
 
         $this->assertEquals($expectedResult, $result);
@@ -1357,7 +1355,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_WD_DATE_BEFORE_REG_DATE'],
+                [
+                    ['TMLPREG_WD_DATE_BEFORE_REG_DATE'],
+                ],
                 false,
             ],
             // Withdraw and approve dates OK
@@ -1391,7 +1391,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_WD_DATE_BEFORE_APPR_DATE'],
+                [
+                    ['TMLPREG_WD_DATE_BEFORE_APPR_DATE'],
+                ],
                 false,
             ],
             // Withdraw and appIn dates OK
@@ -1425,7 +1427,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_WD_DATE_BEFORE_APPIN_DATE'],
+                [
+                    ['TMLPREG_WD_DATE_BEFORE_APPIN_DATE'],
+                ],
                 false,
             ],
             // Withdraw and appOut dates OK
@@ -1459,7 +1463,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_WD_DATE_BEFORE_APPOUT_DATE'],
+                [
+                    ['TMLPREG_WD_DATE_BEFORE_APPOUT_DATE'],
+                ],
                 false,
             ],
 
@@ -1512,9 +1518,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                 ]),
                 $statsReport,
                 [
-                    'TMLPREG_APPR_DATE_BEFORE_REG_DATE',
-                    'TMLPREG_APPR_DATE_BEFORE_APPIN_DATE',
-                    'TMLPREG_APPR_DATE_BEFORE_APPOUT_DATE',
+                    ['TMLPREG_APPR_DATE_BEFORE_REG_DATE'],
+                    ['TMLPREG_APPR_DATE_BEFORE_APPIN_DATE'],
+                    ['TMLPREG_APPR_DATE_BEFORE_APPOUT_DATE'],
                 ],
                 false,
             ],
@@ -1549,7 +1555,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_APPR_DATE_BEFORE_APPIN_DATE'],
+                [
+                    ['TMLPREG_APPR_DATE_BEFORE_APPIN_DATE'],
+                ],
                 false,
             ],
             // Approved and appOut dates OK
@@ -1583,7 +1591,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_APPR_DATE_BEFORE_APPOUT_DATE'],
+                [
+                    ['TMLPREG_APPR_DATE_BEFORE_APPOUT_DATE'],
+                ],
                 false,
             ],
 
@@ -1635,7 +1645,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_APPIN_DATE_BEFORE_REG_DATE'],
+                [
+                    ['TMLPREG_APPIN_DATE_BEFORE_REG_DATE'],
+                ],
                 false,
             ],
             // AppIn and appOut dates OK
@@ -1669,7 +1681,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_APPIN_DATE_BEFORE_APPOUT_DATE'],
+                [
+                    ['TMLPREG_APPIN_DATE_BEFORE_APPOUT_DATE'],
+                ],
                 false,
             ],
 
@@ -1721,7 +1735,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_APPOUT_DATE_BEFORE_REG_DATE'],
+                [
+                    ['TMLPREG_APPOUT_DATE_BEFORE_REG_DATE'],
+                ],
                 false,
             ],
 
@@ -1974,7 +1990,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_REG_DATE_IN_FUTURE'],
+                [
+                    ['TMLPREG_REG_DATE_IN_FUTURE'],
+                ],
                 false,
             ],
             // WdDate in future
@@ -1991,7 +2009,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_WD_DATE_IN_FUTURE'],
+                [
+                    ['TMLPREG_WD_DATE_IN_FUTURE'],
+                ],
                 false,
             ],
             // ApprDate in future
@@ -2008,7 +2028,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_APPR_DATE_IN_FUTURE'],
+                [
+                    ['TMLPREG_APPR_DATE_IN_FUTURE'],
+                ],
                 false,
             ],
             // AppInDate in future
@@ -2025,7 +2047,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_APPIN_DATE_IN_FUTURE'],
+                [
+                    ['TMLPREG_APPIN_DATE_IN_FUTURE'],
+                ],
                 false,
             ],
             // AppOutDate in future
@@ -2042,7 +2066,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'             => 1,
                 ]),
                 $statsReport,
-                ['TMLPREG_APPOUT_DATE_IN_FUTURE'],
+                [
+                    ['TMLPREG_APPOUT_DATE_IN_FUTURE'],
+                ],
                 false,
             ],
 
@@ -2131,7 +2157,7 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
         ];
     }
 
-    public function testvalidateCommentFailsWhenNoCommentProvidedForFutureIncomingWeekend()
+    public function testValidateCommentFailsWhenNoCommentProvidedForFutureIncomingWeekend()
     {
         $data                  = new stdClass;
         $data->comment         = null;
@@ -2157,6 +2183,8 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
      */
     public function testValidateTravelPasses($data, $statsReport)
     {
+        $this->setSetting('travelDueByDate', 'classroom2Date');
+
         $statsReport->reportingDate = Carbon::createFromDate(2015, 4, 10);
 
         $validator = $this->getObjectMock([], [$statsReport]);
@@ -2170,8 +2198,6 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateTravelPasses()
     {
-        $this->setSetting('travelDueByDate', 'classroom2Date');
-
         $statsReport          = new stdClass;
         $statsReport->quarter = new stdClass;
         $statsReport->center  = null;
@@ -2259,15 +2285,13 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
      */
     public function testValidateTravelFails($data, $statsReport, $messages, $expectedResult)
     {
+        $this->setSetting('travelDueByDate', 'classroom2Date');
+
         $validator = $this->getObjectMock([
             'addMessage',
         ], [$statsReport]);
 
-        for ($i = 0; $i < count($messages); $i++) {
-            $validator->expects($this->at($i))
-                      ->method('addMessage')
-                      ->with($messages[$i]);
-        }
+        $this->setupMessageMocks($validator, $messages);
 
         $result = $validator->validateTravel($data);
 
@@ -2276,8 +2300,6 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateTravelFails()
     {
-        $this->setSetting('travelDueByDate', 'classroom2Date');
-
         $statsReport          = new stdClass;
         $statsReport->quarter = new stdClass;
         $statsReport->center  = null;
@@ -2301,7 +2323,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'appr'            => null,
                 ]),
                 $statsReport,
-                ['TMLPREG_TRAVEL_COMMENT_MISSING'],
+                [
+                    ['TMLPREG_TRAVEL_COMMENT_MISSING'],
+                ],
                 false,
             ],
             // ValidateTravel Fails When Missing Room
@@ -2315,7 +2339,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'appr'            => null,
                 ]),
                 $statsReport,
-                ['TMLPREG_ROOM_COMMENT_MISSING'],
+                [
+                    ['TMLPREG_ROOM_COMMENT_MISSING'],
+                ],
                 false,
             ],
             // ValidateTravel Throws Warning When Missing Room In Last 2 Weeks
@@ -2329,7 +2355,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'appr'            => 1,
                 ]),
                 $statsReportLastTwoWeeks,
-                ['TMLPREG_TRAVEL_COMMENT_REVIEW'],
+                [
+                    ['TMLPREG_TRAVEL_COMMENT_REVIEW'],
+                ],
                 true,
             ],
             // ValidateTravel Throws Warning When Missing Room In Last 2 Weeks
@@ -2343,7 +2371,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'appr'            => 1,
                 ]),
                 $statsReportLastTwoWeeks,
-                ['TMLPREG_ROOM_COMMENT_REVIEW'],
+                [
+                    ['TMLPREG_ROOM_COMMENT_REVIEW'],
+                ],
                 true,
             ],
         ];

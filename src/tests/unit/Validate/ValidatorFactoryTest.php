@@ -5,98 +5,47 @@ use stdClass;
 use TmlpStats\Validate\NullValidator;
 use TmlpStats\Validate\ValidatorFactory;
 use TmlpStats\Validate\Objects;
+use TmlpStats\Validate\Relationships;
 
 class ValidatorFactoryTest extends \TmlpStats\Tests\TestAbstract
 {
     protected $testClass = ValidatorFactory::class;
 
-    public function testBuildReturnsCenterStatsValidator()
+    /**
+     * @dataProvider providerBuild
+     */
+    public function testBuild($statsReport, $type, $expectedClass)
     {
-        $class       = Objects\CenterStatsValidator::class;
-        $statsReport = new stdClass;
+        if ($expectedClass == 'Exception') {
+            $this->setExpectedException(
+                'Exception', 'Invalid type passed to ValidatorFactory'
+            );
+        }
+        $validator = ValidatorFactory::build($statsReport, $type);
 
-        $validator = ValidatorFactory::build($statsReport, 'centerStats');
-
-        $this->assertInstanceOf($class, $validator);
+        $this->assertInstanceOf($expectedClass, $validator);
     }
 
-    public function testBuildReturnsTmlpRegistrationValidator()
+    public function providerBuild()
     {
-        $class       = Objects\TmlpRegistrationValidator::class;
         $statsReport = new stdClass;
 
-        $validator = ValidatorFactory::build($statsReport, 'tmlpRegistration');
-
-        $this->assertInstanceOf($class, $validator);
-    }
-
-    public function testBuildReturnsClassListValidator()
-    {
-        $class       = Objects\ClassListValidator::class;
-        $statsReport = new stdClass;
-
-        $validator = ValidatorFactory::build($statsReport, 'classList');
-
-        $this->assertInstanceOf($class, $validator);
-    }
-
-    public function testBuildReturnsContactInfoValidator()
-    {
-        $class       = Objects\ContactInfoValidator::class;
-        $statsReport = new stdClass;
-
-        $validator = ValidatorFactory::build($statsReport, 'contactInfo');
-
-        $this->assertInstanceOf($class, $validator);
-    }
-
-    public function testBuildReturnsCommCourseInfoValidator()
-    {
-        $class       = Objects\CommCourseInfoValidator::class;
-        $statsReport = new stdClass;
-
-        $validator = ValidatorFactory::build($statsReport, 'commCourseInfo');
-
-        $this->assertInstanceOf($class, $validator);
-    }
-
-    public function testBuildReturnsTmlpCourseInfoValidator()
-    {
-        $class       = Objects\TmlpCourseInfoValidator::class;
-        $statsReport = new stdClass;
-
-        $validator = ValidatorFactory::build($statsReport, 'tmlpCourseInfo');
-
-        $this->assertInstanceOf($class, $validator);
-    }
-
-    public function testBuildReturnsNullValidator()
-    {
-        $class       = NullValidator::class;
-        $statsReport = new stdClass;
-
-        $validator = ValidatorFactory::build($statsReport, 'null');
-
-        $this->assertInstanceOf($class, $validator);
-    }
-
-    public function testBuildReturnsNullValidatorWhenNoTypeProvided()
-    {
-        $class       = NullValidator::class;
-        $statsReport = new stdClass;
-
-        $validator = ValidatorFactory::build($statsReport);
-
-        $this->assertInstanceOf($class, $validator);
-    }
-
-    public function testBuildThrowsExceptionForInvalidType()
-    {
-        $this->setExpectedException(
-            'Exception', 'Invalid type passed to ValidatorFactory'
-        );
-        $statsReport = new stdClass;
-
-        $validator = ValidatorFactory::build($statsReport, 'invalidType');
+        return [
+            [$statsReport, 'centerStats', Objects\CenterStatsValidator::class],
+            [$statsReport, 'tmlpRegistration', Objects\TmlpRegistrationValidator::class],
+            [$statsReport, 'classList', Objects\ClassListValidator::class],
+            [$statsReport, 'contactInfo', Objects\ContactInfoValidator::class],
+            [$statsReport, 'commCourseInfo', Objects\CommCourseInfoValidator::class],
+            [$statsReport, 'tmlpCourseInfo', Objects\TmlpCourseInfoValidator::class],
+            [$statsReport, 'statsReport', Objects\StatsReportValidator::class],
+            [$statsReport, 'committedTeamMember', Relationships\CommittedTeamMemberValidator::class],
+            [$statsReport, 'contactInfoTeamMember', Relationships\ContactInfoTeamMemberValidator::class],
+            [$statsReport, 'duplicateTeamMember', Relationships\DuplicateTeamMemberValidator::class],
+            [$statsReport, 'duplicateTmlpRegistration', Relationships\DuplicateTmlpRegistrationValidator::class],
+            [$statsReport, 'teamExpansion', Relationships\TeamExpansionValidator::class],
+            [$statsReport, 'centerGames', Relationships\CenterGamesValidator::class],
+            [$statsReport, null, NullValidator::class],
+            [$statsReport, 'asdf', 'Exception'],
+        ];
     }
 }

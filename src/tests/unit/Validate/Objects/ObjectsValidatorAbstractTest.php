@@ -97,6 +97,27 @@ class ObjectsValidatorAbstractTest extends ObjectsValidatorTestAbstract
         $this->assertTrue($result);
     }
 
+    public function testRunSkipped()
+    {
+        $data = new stdClass;
+
+        $validator = $this->getObjectMock([
+            'populateValidators',
+            'validate',
+        ]);
+        $validator->expects($this->once())
+                  ->method('populateValidators');
+        $validator->expects($this->never())
+                  ->method('validate');
+
+
+        $this->setProperty($validator, 'skipped', true);
+
+        $result = $validator->run($data);
+
+        $this->assertTrue($result);
+    }
+
     public function testRunFailedValidation()
     {
         $data         = new stdClass;

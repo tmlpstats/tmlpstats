@@ -1,11 +1,14 @@
 <?php
 namespace TmlpStats\Tests\Validate\Objects;
 
+use TmlpStats\Tests\Traits\MocksMessages;
 use TmlpStats\Util;
 use TmlpStats\Validate\Objects\TmlpCourseInfoValidator;
 
 class TmlpCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
 {
+    use MocksMessages;
+
     protected $testClass = TmlpCourseInfoValidator::class;
 
     protected $dataFields = [
@@ -26,16 +29,7 @@ class TmlpCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
         $validator = $this->getObjectMock(['addMessage', 'validate']);
 
         $i = 0;
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i][0], $messages[$i][1], $messages[$i][2]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages, $i);
 
         $validator->expects($this->at($i))
                   ->method('validate')
@@ -73,16 +67,7 @@ class TmlpCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
     {
         $validator = $this->getObjectMock();
 
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages);
 
         $result = $validator->validateQuarterStartValues($data);
 
@@ -116,7 +101,9 @@ class TmlpCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
                     'quarterStartApproved'   => 3,
                     'quarterStartRegistered' => 2,
                 ]),
-                ['TMLPCOURSE_QSTART_TER_LESS_THAN_QSTART_APPROVED'],
+                [
+                    ['TMLPCOURSE_QSTART_TER_LESS_THAN_QSTART_APPROVED'],
+                ],
                 false,
             ],
         ];

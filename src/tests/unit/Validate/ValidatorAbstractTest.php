@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Tests\Validate;
 
+use Carbon\Carbon;
 use stdClass;
 
 class ValidatorAbstractImplementation extends \TmlpStats\Validate\ValidatorAbstract
@@ -24,39 +25,76 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
 
     protected $dataFields = [];
 
-    public function testRunSuccessfulValidation()
+    public function testGetter()
     {
-        $data = new stdClass;
+        $statsReport = new stdClass;
+        $statsReport->center = new stdClass;
+        $statsReport->center->name = 'Vancouver';
 
-        $validator = $this->getObjectMock([
-            'validate',
-        ]);
-        $validator->expects($this->once())
-                  ->method('validate')
-                  ->with($this->equalTo($data))
-                  ->will($this->returnValue(true));
+        $statsReport->quarter = new stdClass;
+        $statsReport->quarter->startWeekendDate = Carbon::create(2015, 11, 20);
 
-        $result = $validator->run($data);
+        $statsReport->reportingDate = Carbon::create(2015, 12, 18);
 
-        $this->assertTrue($result);
+        $validator = new ValidatorAbstractImplementation($statsReport);
+
+        $this->assertSame($statsReport->center, $validator->center);
+        $this->assertSame($statsReport->quarter, $validator->quarter);
+        $this->assertSame($statsReport->reportingDate, $validator->reportingDate);
+        $this->assertNull($validator->nonExistantProperty);
     }
 
-    public function testRunFailedValidation()
+    /**
+     * @dataProvider providerRun
+     */
+    public function testRun($data, $supplementalData, $validateResponse, $expectedResponse)
     {
-        $data = new stdClass;
-
         $validator = $this->getObjectMock([
             'validate',
         ]);
-
         $validator->expects($this->once())
                   ->method('validate')
                   ->with($this->equalTo($data))
-                  ->will($this->returnValue(false));
+                  ->will($this->returnValue($validateResponse));
 
-        $result = $validator->run($data);
+        if ($supplementalData) {
+            $result = $validator->run($data, $supplementalData);
+        } else {
+            $result = $validator->run($data);
+        }
 
-        $this->assertFalse($result);
+        $this->assertEquals($data, $this->getProperty($validator, 'data'));
+        $this->assertEquals($supplementalData, $this->getProperty($validator, 'supplementalData'));
+        $this->assertEquals($expectedResponse, $result);
+    }
+
+    public function providerRun()
+    {
+        $data = new stdClass;
+        $supplementalData = ['moreDataz'];
+        return [
+            // Successful validation
+            [
+                'data' => $data,
+                null,
+                true,
+                true,
+            ],
+            // Successful validation with $supplementalData
+            [
+                'data' => $data,
+                $supplementalData,
+                true,
+                true,
+            ],
+            // Failed validation
+            [
+                'data' => $data,
+                null,
+                false,
+                false,
+            ],
+        ];
     }
 
     public function testGetMessagesReturnsMessages()
@@ -71,6 +109,22 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
         $result = $validator->getMessages();
 
         $this->assertEquals($messages, $result);
+    }
+
+    public function testGetWorkingDataReturnsEmptyArray()
+    {
+        $validator = new ValidatorAbstractImplementation(new stdClass);
+
+        $result = $validator->getWorkingData();
+
+        $this->assertEmpty($result);
+    }
+
+    public function testResetWorkingDataIsImplemented()
+    {
+        $validator = new ValidatorAbstractImplementation(new stdClass);
+
+        $validator->resetWorkingData();
     }
 
     public function testGetOffsetReturnsOffset()

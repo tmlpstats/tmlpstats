@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Tests\Validate\Objects;
 
+use TmlpStats\Tests\Traits\MocksMessages;
 use TmlpStats\Tests\Traits\MocksSettings;
 use TmlpStats\Util;
 use TmlpStats\Validate\Objects\ClassListValidator;
@@ -9,7 +10,7 @@ use stdClass;
 
 class ClassListValidatorTest extends ObjectsValidatorTestAbstract
 {
-    use MocksSettings;
+    use MocksSettings, MocksMessages;
 
     protected $testClass = ClassListValidator::class;
 
@@ -58,16 +59,7 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
         $validator = $this->getObjectMock(['addMessage', 'validate']);
 
         $i = 0;
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i][0], $messages[$i][1], $messages[$i][2]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages, $i);
 
         $validator->expects($this->at($i))
                   ->method('validate')
@@ -462,16 +454,7 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
     {
         $validator = $this->getObjectMock();
 
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages);
 
         $result = $validator->validateGitw($data);
 
@@ -522,7 +505,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'wd'      => null,
                     'wbo'     => null,
                 ]),
-                ['CLASSLIST_GITW_LEAVE_BLANK'],
+                [
+                    ['CLASSLIST_GITW_LEAVE_BLANK'],
+                ],
                 false,
             ],
             // Fails Wd has GITW set
@@ -533,7 +518,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'wd'      => 2,
                     'wbo'     => null,
                 ]),
-                ['CLASSLIST_GITW_LEAVE_BLANK'],
+                [
+                    ['CLASSLIST_GITW_LEAVE_BLANK'],
+                ],
                 false,
             ],
             // Fails WBO has GITW set
@@ -544,7 +531,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'wd'      => null,
                     'wbo'     => 2,
                 ]),
-                ['CLASSLIST_GITW_LEAVE_BLANK'],
+                [
+                    ['CLASSLIST_GITW_LEAVE_BLANK'],
+                ],
                 false,
             ],
 
@@ -567,7 +556,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'wd'      => null,
                     'wbo'     => null,
                 ]),
-                ['CLASSLIST_GITW_MISSING'],
+                [
+                    ['CLASSLIST_GITW_MISSING'],
+                ],
                 false,
             ],
         ];
@@ -580,16 +571,7 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
     {
         $validator = $this->getObjectMock();
 
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages);
 
         $result = $validator->validateTdo($data);
 
@@ -640,7 +622,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'wd'      => null,
                     'wbo'     => null,
                 ]),
-                ['CLASSLIST_TDO_LEAVE_BLANK'],
+                [
+                    ['CLASSLIST_TDO_LEAVE_BLANK'],
+                ],
                 false,
             ],
             // Fails Wd has TDO set
@@ -651,7 +635,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'wd'      => 2,
                     'wbo'     => null,
                 ]),
-                ['CLASSLIST_TDO_LEAVE_BLANK'],
+                [
+                    ['CLASSLIST_TDO_LEAVE_BLANK'],
+                ],
                 false,
             ],
             // Fails WBO has TDO set
@@ -662,7 +648,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'wd'      => null,
                     'wbo'     => 2,
                 ]),
-                ['CLASSLIST_TDO_LEAVE_BLANK'],
+                [
+                    ['CLASSLIST_TDO_LEAVE_BLANK'],
+                ],
                 false,
             ],
 
@@ -685,7 +673,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'wd'      => null,
                     'wbo'     => null,
                 ]),
-                ['CLASSLIST_TDO_MISSING'],
+                [
+                    ['CLASSLIST_TDO_MISSING'],
+                ],
                 false,
             ],
         ];
@@ -698,16 +688,7 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
     {
         $validator = $this->getObjectMock();
 
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i][0], $messages[$i][1]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages);
 
         $result = $validator->validateTeamYear($data);
 
@@ -771,16 +752,7 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
     {
         $validator = $this->getObjectMock();
 
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages);
 
         $result = $validator->validateTransfer($data);
 
@@ -807,7 +779,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'xferOut' => null,
                     'comment' => 'Transfer to Vancouver on 5/15/15',
                 ]),
-                ['CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER'],
+                [
+                    ['CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER'],
+                ],
                 true,
             ],
             // Xfer In not null without comment
@@ -818,8 +792,8 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment' => null,
                 ]),
                 [
-                    'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER',
-                    'CLASSLIST_XFER_COMMENT_MISSING',
+                    ['CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER'],
+                    ['CLASSLIST_XFER_COMMENT_MISSING'],
                 ],
                 false,
             ],
@@ -830,7 +804,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'xferOut' => 1,
                     'comment' => 'Transfer to Vancouver on 5/15/15',
                 ]),
-                ['CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER'],
+                [
+                    ['CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER'],
+                ],
                 true,
             ],
             // Xfer Out not null without comment
@@ -841,8 +817,8 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment' => null,
                 ]),
                 [
-                    'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER',
-                    'CLASSLIST_XFER_COMMENT_MISSING',
+                    ['CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER'],
+                    ['CLASSLIST_XFER_COMMENT_MISSING'],
                 ],
                 false,
             ],
@@ -856,16 +832,7 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
     {
         $validator = $this->getObjectMock();
 
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages);
 
         $result = $validator->validateWithdraw($data);
 
@@ -934,7 +901,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment'  => '5/15/2015',
                     'teamYear' => 1,
                 ]),
-                ['CLASSLIST_WD_WBO_ONLY_ONE'],
+                [
+                    ['CLASSLIST_WD_WBO_ONLY_ONE'],
+                ],
                 false,
             ],
             // Wd & CTW set
@@ -946,7 +915,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment'  => '5/15/2015',
                     'teamYear' => 1,
                 ]),
-                ['CLASSLIST_WD_CTW_ONLY_ONE'],
+                [
+                    ['CLASSLIST_WD_CTW_ONLY_ONE'],
+                ],
                 false,
             ],
             // Wbo & CTW set
@@ -958,7 +929,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment'  => '5/15/2015',
                     'teamYear' => 1,
                 ]),
-                ['CLASSLIST_WD_CTW_ONLY_ONE'],
+                [
+                    ['CLASSLIST_WD_CTW_ONLY_ONE'],
+                ],
                 false,
             ],
 
@@ -983,7 +956,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment'  => '5/15/2015',
                     'teamYear' => 1,
                 ]),
-                ['CLASSLIST_WD_DOESNT_MATCH_YEAR'],
+                [
+                    ['CLASSLIST_WD_DOESNT_MATCH_YEAR'],
+                ],
                 false,
             ],
             // Wd set with mismatched team year
@@ -995,7 +970,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment'  => '5/15/2015',
                     'teamYear' => 1,
                 ]),
-                ['CLASSLIST_WD_DOESNT_MATCH_YEAR'],
+                [
+                    ['CLASSLIST_WD_DOESNT_MATCH_YEAR'],
+                ],
                 false,
             ],
             // Wd set with mismatched team year
@@ -1007,7 +984,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment'  => '5/15/2015',
                     'teamYear' => 2,
                 ]),
-                ['CLASSLIST_WD_DOESNT_MATCH_YEAR'],
+                [
+                    ['CLASSLIST_WD_DOESNT_MATCH_YEAR'],
+                ],
                 false,
             ],
 
@@ -1020,7 +999,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment'  => null,
                     'teamYear' => 1,
                 ]),
-                ['CLASSLIST_WD_COMMENT_MISSING'],
+                [
+                    ['CLASSLIST_WD_COMMENT_MISSING'],
+                ],
                 false,
             ],
             // Wbo set without comment
@@ -1032,7 +1013,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment'  => null,
                     'teamYear' => 1,
                 ]),
-                ['CLASSLIST_WD_COMMENT_MISSING'],
+                [
+                    ['CLASSLIST_WD_COMMENT_MISSING'],
+                ],
                 false,
             ],
 
@@ -1057,7 +1040,9 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment'  => null,
                     'teamYear' => 1,
                 ]),
-                ['CLASSLIST_CTW_COMMENT_MISSING'],
+                [
+                    ['CLASSLIST_CTW_COMMENT_MISSING'],
+                ],
                 false,
             ],
         ];
@@ -1066,22 +1051,18 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
     /**
      * @dataProvider providerValidateTravel
      */
-    public function testValidateTravel($data, $statsReport, $messages, $expectedResult)
+    public function testValidateTravel($data, $statsReport, $messages, $travelDueBy, $expectedResult)
     {
+        $this->unsetSetting('travelDueByDate');
+        if ($travelDueBy) {
+            $this->setSetting('travelDueByDate', $travelDueBy);
+        }
+
         $validator = $this->getObjectMock([
             'addMessage',
         ], [$statsReport]);
 
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages);
 
         $result = $validator->validateTravel($data);
 
@@ -1090,8 +1071,6 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateTravel()
     {
-        $this->setSetting('travelDueByDate', 'classroom2Date');
-
         $statsReport          = new stdClass;
         $statsReport->quarter = new stdClass;
         $statsReport->center  = null;
@@ -1109,6 +1088,16 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
         $statsReportLast2Weeks                = clone $statsReport;
         $statsReportLast2Weeks->reportingDate = Carbon::createFromDate(2015, 5, 15);
 
+        $statsReportWithClassroom1                          = clone $statsReport;
+        $statsReportWithClassroom1->quarter                 = clone $statsReport->quarter;
+        $statsReportWithClassroom1->quarter->classroom2Date = null;
+        $statsReportWithClassroom1->quarter->classroom1Date = $statsReport->quarter->classroom2Date;
+
+        $statsReportWithClassroom3                          = clone $statsReport;
+        $statsReportWithClassroom3->quarter                 = clone $statsReport->quarter;
+        $statsReportWithClassroom3->quarter->classroom2Date = null;
+        $statsReportWithClassroom3->quarter->classroom3Date = $statsReport->quarter->classroom2Date;
+
         return [
             // Before 2nd Classroom, all null
             [
@@ -1123,6 +1112,7 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                 ]),
                 $statsReport,
                 [],
+                'classroom2Date',
                 true,
             ],
 
@@ -1139,6 +1129,7 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                 ]),
                 null,
                 [],
+                null,
                 true,
             ],
             // Wbo set and travel/room ignored
@@ -1154,6 +1145,7 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                 ]),
                 null,
                 [],
+                null,
                 true,
             ],
             // XferOut set and travel/room ignored
@@ -1169,6 +1161,7 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                 ]),
                 null,
                 [],
+                null,
                 true,
             ],
 
@@ -1185,6 +1178,7 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                 ]),
                 $statsReportOnClassroom2,
                 [],
+                'classroom2Date',
                 true,
             ],
 
@@ -1201,6 +1195,7 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                 ]),
                 $statsReportAfterClassroom2,
                 [],
+                'classroom2Date',
                 true,
             ],
             // After 2nd Classroom, travel not set with comment
@@ -1215,7 +1210,10 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment' => 'Booked by 5/5/15',
                 ]),
                 $statsReportAfterClassroom2,
-                ['CLASSLIST_TRAVEL_COMMENT_REVIEW'],
+                [
+                    ['CLASSLIST_TRAVEL_COMMENT_REVIEW'],
+                ],
+                'classroom2Date',
                 true,
             ],
             // After 2nd Classroom, travel not set without comment
@@ -1230,7 +1228,10 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment' => null,
                 ]),
                 $statsReportAfterClassroom2,
-                ['CLASSLIST_TRAVEL_COMMENT_MISSING'],
+                [
+                    ['CLASSLIST_TRAVEL_COMMENT_MISSING'],
+                ],
+                'classroom2Date',
                 false,
             ],
             // After 2nd Classroom, room not set with comment
@@ -1245,7 +1246,10 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment' => 'Booked by 5/5/15',
                 ]),
                 $statsReportAfterClassroom2,
-                ['CLASSLIST_ROOM_COMMENT_REVIEW'],
+                [
+                    ['CLASSLIST_ROOM_COMMENT_REVIEW'],
+                ],
+                'classroom2Date',
                 true,
             ],
             // After 2nd Classroom, room not set without comment
@@ -1260,8 +1264,60 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                     'comment' => null,
                 ]),
                 $statsReportAfterClassroom2,
-                ['CLASSLIST_ROOM_COMMENT_MISSING'],
+                [
+                    ['CLASSLIST_ROOM_COMMENT_MISSING'],
+                ],
+                'classroom2Date',
                 false,
+            ],
+
+            // isTimeToCheck with setting = date
+            [
+                Util::arrayToObject([
+                    'wd'      => null,
+                    'wbo'     => null,
+                    'xferOut' => null,
+                    'ctw'     => null,
+                    'travel'  => null,
+                    'room'    => null,
+                    'comment' => null,
+                ]),
+                $statsReport,
+                [],
+                '2015-04-17',
+                true,
+            ],
+            // isTimeToCheck with setting = classroom1
+            [
+                Util::arrayToObject([
+                    'wd'      => null,
+                    'wbo'     => null,
+                    'xferOut' => null,
+                    'ctw'     => null,
+                    'travel'  => null,
+                    'room'    => null,
+                    'comment' => null,
+                ]),
+                $statsReportWithClassroom1,
+                [],
+                'classroom1Date',
+                true,
+            ],
+            // isTimeToCheck with setting = classroom3
+            [
+                Util::arrayToObject([
+                    'wd'      => null,
+                    'wbo'     => null,
+                    'xferOut' => null,
+                    'ctw'     => null,
+                    'travel'  => null,
+                    'room'    => null,
+                    'comment' => null,
+                ]),
+                $statsReportWithClassroom3,
+                [],
+                'classroom3Date',
+                true,
             ],
         ];
     }

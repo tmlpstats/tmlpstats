@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Tests\Validate\Objects;
 
+use TmlpStats\Tests\Traits\MocksMessages;
 use TmlpStats\Util;
 use TmlpStats\Validate\Objects\CommCourseInfoValidator;
 use Illuminate\Support\Facades\Log;
@@ -9,6 +10,8 @@ use stdClass;
 
 class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
 {
+    use MocksMessages;
+
     protected $testClass = CommCourseInfoValidator::class;
 
     protected $dataFields = [
@@ -45,16 +48,7 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
         $validator = $this->getObjectMock(['addMessage', 'validate']);
 
         $i = 0;
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i][0], $messages[$i][1], $messages[$i][2]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages, $i);
 
         $validator->expects($this->at($i))
                   ->method('validate')
@@ -186,22 +180,7 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             'addMessage',
         ], [$statsReport]);
 
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                if (count($messages[$i]) > 1) {
-                    $validator->expects($this->at($i))
-                              ->method('addMessage')
-                              ->with($messages[$i][0], $messages[$i][1]);
-                } else {
-                    $validator->expects($this->at($i))
-                              ->method('addMessage')
-                              ->with($messages[$i][0]);
-                }
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages);
 
         $result = $validator->validateCourseCompletionStats($data);
 
@@ -485,16 +464,7 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             'addMessage',
         ], [$statsReport]);
 
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages);
 
         $result = $validator->validateCourseStartDate($data);
 
@@ -532,7 +502,9 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
                     'startDate' => '2015-02-13',
                 ]),
                 $statsReport,
-                ['COMMCOURSE_COURSE_DATE_BEFORE_QUARTER'],
+                [
+                    ['COMMCOURSE_COURSE_DATE_BEFORE_QUARTER'],
+                ],
                 false,
             ],
         ];
@@ -545,16 +517,7 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
     {
         $validator = $this->getObjectMock();
 
-        if ($messages) {
-            for ($i = 0; $i < count($messages); $i++) {
-                $validator->expects($this->at($i))
-                          ->method('addMessage')
-                          ->with($messages[$i][0], $messages[$i][1], $messages[$i][2]);
-            }
-        } else {
-            $validator->expects($this->never())
-                      ->method('addMessage');
-        }
+        $this->setupMessageMocks($validator, $messages);
 
         $result = $validator->validateCourseBalance($data);
 
