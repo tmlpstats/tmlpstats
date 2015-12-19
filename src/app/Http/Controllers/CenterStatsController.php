@@ -104,6 +104,11 @@ class CenterStatsController extends Controller
             $centerStatsData = $this->getByStatsReport($statsReport, $onlyThisDate);
 
             foreach ($centerStatsData as $week) {
+                if (!$week) {
+                    // ignore centers with no data
+                    continue;
+                }
+
                 $dateString = $week->reportingDate->toDateString();
                 $type = $week->type;
 
