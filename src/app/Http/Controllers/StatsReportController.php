@@ -518,7 +518,7 @@ class StatsReportController extends ReportDispatchAbstractController
         $a = new GamesByWeek($centerStatsData);
         $weeklyData = $a->compose();
 
-        $a = new GamesByMilestone(['weeks' => $weeklyData['reportData'], 'quarter' => $statsReport->quarter]);
+        $a = new GamesByMilTYPOestone(['weeks' => $weeklyData['reportData'], 'quarter' => $statsReport->quarter]);
         $data = $a->compose();
 
         return view('reports.centergames.milestones', $data);
