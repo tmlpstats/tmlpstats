@@ -9,7 +9,7 @@ matrix:
 
 before_script:
  - cd src/
- - find {src} -name "*.php" ! -path '*/_ide_helper.php' -print0 | xargs -0 -n1 -P8 php -l
+ - find . -name "*.php" ! -path '*/_ide_helper.php' -print0 | xargs -0 -n1 -P8 php -l
  - travis_retry composer self-update
  - travis_retry composer install --no-interaction
 
