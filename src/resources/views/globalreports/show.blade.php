@@ -67,12 +67,14 @@
                         <button id ="applicationsoverview-button" type="button" class="btn">Overview</button>
                         <button id ="applicationsbystatus-button" type="button" class="btn">By Status</button>
                         <button id ="applicationsbycenter-button" type="button" class="btn">By Center</button>
+                        <button id ="applicationst2fromweekend-button" type="button" class="btn" title="Shows Team 2 that registered at the previous TMLP weekend and their current status">T2 Reg. at Weekend</button>
                         <button id ="applicationsoverdue-button" type="button" class="btn">Overdue</button>
                     </div>
                     <div id="applicationsoverview-container"></div>
                     <div id="applicationsbystatus-container"></div>
                     <div id="applicationsoverdue-container"></div>
                     <div id="applicationsbycenter-container"></div>
+                    <div id="applicationst2fromweekend-container"></div>
                 </div>
                 <div class="tab-pane" id="traveloverview">
                     <h3>Travel/Rooming Summary</h3>
@@ -134,8 +136,8 @@
             'applicationsbycenter',
             'applicationsoverdue',
             'applicationsoverview',
+            'applicationst2fromweekend',
             'traveloverview',
-
         ];
 
         var batchedPages = [
@@ -163,6 +165,7 @@
                 'applicationsoverdue',
                 'applicationsbycenter',
                 'applicationsbystatus',
+                'applicationst2fromweekend',
             ],
             [
                 'coursesthisweek',

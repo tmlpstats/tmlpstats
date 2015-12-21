@@ -122,7 +122,9 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
-        $('table.applicationTable').dataTable({
+        // the .not('.dataTable') will distinguish things which have already been transformed into dataTables
+        // avoiding an exception
+        $('table.applicationTable').not('.dataTable').dataTable({
             "paging":    false,
             "searching": false
         });
