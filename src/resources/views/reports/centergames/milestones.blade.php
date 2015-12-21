@@ -10,21 +10,20 @@
 @if (!$reportData)
     <p>No game information available.</p>
 @else
-    <div class="table-responsive">
-        <table>
+    <div class="container">
             @for ($k = 0; $k < 2; $k++)
-                <tr>
+                <div class="row">
                     @for ($j = $k; $j < $k+2; $j++)
-                        <td>
+                        <div class="col-lg-6">
                             <table class="table table-condensed table-bordered table-striped table-hover centerStatsTable">
                                 <thead>
                                 <tr>
                                     <th rowspan="2">&nbsp;</th>
                                     @foreach ($reportData[$j+$k] as $date => $data)
-                                        <th colspan="2" width="{{ round(500/$maxCount) }}">{{ Carbon\Carbon::createFromFormat('Y-m-d', $date)->format('M j') }}</th>
+                                        <th colspan="2" style="min-width: 5.5em">{{ Carbon\Carbon::createFromFormat('Y-m-d', $date)->format('M j') }}</th>
                                     @endforeach
                                     @for ($i = count($reportData[$j+$k]); $i <= $maxCount -1; $i++)
-                                        <th colspan="2" width="{{ round(500/$maxCount) }}"></th>
+                                        <th colspan="2" style="min-width: 5.5em"></th>
                                     @endfor
                                     <th colspan="2"></th>
                                 </tr>
@@ -50,7 +49,7 @@
                                         <th>{{ strtoupper($game) }}</th>
                                         @foreach ($reportData[$j+$k] as $date => $data)
                                             <td class="info">{{ $data['promise'][$game] }}{{ ($game == 'gitw') ? '%' : '' }}</td>
-                                            <td>{{ isset($data['actual']) ? $data['actual'][$game] : '&nbsp;' }}{{ (isset($data['actual']) && $game == 'gitw') ? '%' : '' }}</td>
+                                            <td>{{ isset($data['actual']) ? $data['actual'][$game] : '&nbsp;&nbsp;&nbsp;&nbsp;' }}{{ (isset($data['actual']) && $game == 'gitw') ? '%' : '' }}</td>
                                             <?php
                                             if (isset($data['actual'])) {
                                                 $lastWeek = $data;
@@ -58,8 +57,8 @@
                                             ?>
                                         @endforeach
                                         @for ($i = count($reportData[$j+$k]); $i <= $maxCount -1; $i++)
-                                            <td>&nbsp;</td>
-                                            <td>&nbsp;</td>
+                                            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                                            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
                                         @endfor
                                         <td>{{ isset($lastWeek['percent'][$game]) ? "{$lastWeek['percent'][$game]}%" : '' }}</td>
                                         <td>{{ isset($lastWeek['points'][$game]) ? $lastWeek['points'][$game] : '' }}</td>
@@ -76,10 +75,9 @@
                                 </tr>
                                 </tbody>
                             </table>
-                        </td>
+                        </div>
                     @endfor
-                </tr>
+                </div>
             @endfor
-        </table>
     </div>
 @endif

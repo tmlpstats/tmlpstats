@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-6">
             @include('reports.centergames.week', compact('reportData'))
         </div>
         <div class="col-md-3">
@@ -24,7 +24,7 @@
                 <dd>{{ $gitw['total'] }}%</dd>
             </dl>
 
-            <h4>Travel & Rooming</h4>
+            <h4>Travel &amp; Rooming</h4>
             <dl class="dl-horizontal">
                 <dt>Team Travel:</dt>
                 <dd>{{ $teamTravelDetails['team1']['travel'] + $teamTravelDetails['team2']['travel'] }} / {{ $teamTravelDetails['team1']['total'] + $teamTravelDetails['team2']['total'] }}</dd>
@@ -36,7 +36,7 @@
                 <dd>{{ $incomingTravelDetails['team1']['room'] + $incomingTravelDetails['team2']['room'] }} / {{ $incomingTravelDetails['team1']['total'] + $incomingTravelDetails['team2']['total'] }}</dd>
             </dl>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <h4>Application Status:</h4>
             <dl class="dl-horizontal">
                 @if ($applications['notSent'])
