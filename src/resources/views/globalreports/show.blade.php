@@ -200,6 +200,7 @@
                 $.get(url, function (response) {
                     $(container).html(response);
                     updateDates();
+                    initDataTables();
                 }).fail(function (jqXHR) {
                     var message = getErrorMessage(jqXHR.status);
                     $(container).html('<br/><p>' + message + '</p>');
@@ -218,6 +219,7 @@
                     $.each(response, function (name, data) {
                         $("#" + name + "-container").html(data);
                         updateDates();
+                        initDataTables();
                     });
                 }).fail(function (jqXHR) {
                     var message = getErrorMessage(jqXHR.status);

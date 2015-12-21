@@ -17,7 +17,7 @@
         @if (!isset($reportData[$group]) || !$reportData[$group])
             <p>None found</p>
         @else
-            <table class="table table-condensed table-striped table-hover {{ $group }}TeamMemberStatusTable">
+            <table class="table table-condensed table-striped table-hover {{ $group }}TeamMemberStatusTable want-datatable">
                 <thead>
                 <tr>
                     <th>Center</th>
@@ -73,20 +73,3 @@
         @endif
     @endforeach
 </div>
-
-<script type="text/javascript">
-    var tables = [
-        @foreach ($types as $type)
-            "{{ $type }}TeamMemberStatusTable",
-        @endforeach
-    ];
-
-    $(document).ready(function () {
-        $.each(tables, function (i, table) {
-            $('table.' + table).dataTable({
-                "paging": false,
-                "searching": false
-            });
-        });
-    });
-</script>
