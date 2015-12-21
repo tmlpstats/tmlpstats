@@ -218,6 +218,9 @@ class GlobalReportController extends ReportDispatchAbstractController
             case 'teammemberstatusall':
                 $response = $this->getTeamMemberStatusAll($globalReport, $region);
                 break;
+            case 'applicationst2fromweekend':
+                $response = $this->getTeam2RegisteredAtWeekend($globalReport, $region);
+                break;
         }
 
         return $response;
@@ -543,6 +546,30 @@ class GlobalReportController extends ReportDispatchAbstractController
         }
 
         return array_merge($data, ['registations' => $potentialsThatRegistered]);
+    }
+
+    protected function getTeam2RegisteredAtWeekend(GlobalReport $globalReport, Region $region)
+    {
+        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
+
+        $registeredAtWeekend = [];
+        if ($registrations) {
+            foreach ($registrations as $registration) {
+                $weekendStartDate = $registration->statsReport->quarter->startWeekendDate;
+                if ($registration->teamYear == 2
+                    && $registration->regDate->gt($weekendStartDate)
+                    && $registration->regDate->lte($weekendStartDate->copy()->addDays(2))
+                ) {
+                    $registeredAtWeekend[] = $registration;
+                }
+            }
+        }
+
+        $a = new Arrangements\TmlpRegistrationsByStatus(['registrationsData' => $registeredAtWeekend]);
+        $data = $a->compose();
+
+        $data = array_merge($data, ['reportingDate' => $globalReport->reportingDate]);
+        return view('globalreports.details.applicationsbystatus', $data);
     }
 
     protected function getTeamMemberStatusAll(GlobalReport $globalReport, Region $region)

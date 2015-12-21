@@ -1,7 +1,7 @@
 <div class="table-responsive">
     <br/>
     <h4>Overview</h4>
-    <table id="potentialsOverviewTable" class="table table-condensed table-striped table-hover">
+    <table id="potentialsOverviewTable" class="table table-condensed table-striped table-hover want-datatable">
         <thead>
         <tr>
             <th class="border-right">Center</th>
@@ -33,12 +33,3 @@
         </tr>
     </table>
 </div>
-
-<script type="text/javascript">
-    $(document).ready(function() {
-        $('#potentialsOverviewTable').dataTable({
-            "paging":    false,
-            "searching": false
-        });
-    });
-</script>

@@ -28,3 +28,21 @@ function updateDates() {
         $(dateElem).text(formatted);
     });
 }
+
+function initDataTables(options, tableClass) {
+    if (!options) {
+        tableClass = 'want-datatable';
+        options = {
+            "paging":    false,
+            "searching": false
+        };
+    }
+    // document.ready may fire immediately depending on the current state of the DOM
+    // We use the want-datatable class as a flip to avoid continuously binding tables
+    $(document).ready(function() {
+        $('table.' + tableClass).each(function() {
+            var table = $(this);
+            table.removeClass(tableClass).dataTable(options);
+        })
+    });
+}
