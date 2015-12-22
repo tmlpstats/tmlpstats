@@ -2,12 +2,9 @@
 namespace TmlpStats\Import;
 
 use TmlpStats\Import\Xlsx\XlsxArchiver;
-use TmlpStats\Center;
 use TmlpStats\GlobalReport;
-use TmlpStats\Quarter;
 use TmlpStats\ReportToken;
 use TmlpStats\Setting;
-use TmlpStats\Util;
 
 use Carbon\Carbon;
 
@@ -201,35 +198,12 @@ class ImportManager
         $quarter = $statsReport->quarter;
         $center = $statsReport->center;
 
-        $submittedAt = clone $statsReport->submittedAt;
-        $submittedAt->setTimezone($center->timezone);
+        $submittedAt = $statsReport->submittedAt->copy()->setTimezone($center->timezone);
 
-        // TODO: make this configurable
-        if ($statsReport->reportingDate->eq($statsReport->quarter->classroom2Date)) {
-            // Stats are due by 11:59 PM at the second classroom
-            // 11:59.59 PM local time on the reporting date.
-            $due = Carbon::create(
-                $statsReport->reportingDate->year,
-                $statsReport->reportingDate->month,
-                $statsReport->reportingDate->day,
-                23, 59, 59,
-                $center->timezone
-            );
-        } else {
-            // Stats are due by 7:00 PM every other week
-            // 7:00.59 PM local time on the reporting date.
-            $due = Carbon::create(
-                $statsReport->reportingDate->year,
-                $statsReport->reportingDate->month,
-                $statsReport->reportingDate->day,
-                19, 0, 59,
-                $center->timezone
-            );
-        }
+        $due = static::getStatsDueDateTime($statsReport);
+        $respondByDateTime = static::getRegionalRespondByDateTime($statsReport);
 
         $isLate = $submittedAt->gt($due);
-        $due = $due->format('l, F jS \a\t g:ia');
-        $time = $submittedAt->format('l, F jS \a\t g:ia');
 
         $programManager         = $center->getProgramManager($quarter);
         $classroomLeader        = $center->getClassroomLeader($quarter);
@@ -269,11 +243,8 @@ class ImportManager
         }
         $emails = array_unique($emails);
 
-        $respondByTimeSetting = Setting::get('centerReportRespondByTime', $center);
-        $respondByTime = $respondByTimeSetting ? $respondByTimeSetting->value : '10:00 am';
-
+        // Don't dump HTML into the logs
         if (env('MAIL_DRIVER') === 'log') {
-            // Don't dump HTML into the logs
             $sheet = [];
         }
 
@@ -288,7 +259,7 @@ class ImportManager
         $comment = $statsReport->submitComment;
         $reportingDate = $statsReport->reportingDate;
         try {
-            Mail::send('emails.statssubmitted', compact('user', 'centerName', 'time', 'sheet', 'isLate', 'due', 'comment', 'respondByTime', 'reportUrl', 'reportingDate'),
+            Mail::send('emails.statssubmitted', compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'due', 'comment', 'respondByDateTime', 'reportUrl', 'reportingDate'),
                 function($message) use ($emails, $emailMap, $centerName, $sheetPath, $sheetName) {
                 // Only send email to centers in production
                 if (env('APP_ENV') === 'prod') {
@@ -330,6 +301,124 @@ class ImportManager
             Log::error("Exception caught sending error email: " . $e->getMessage());
             $result['error'][] = "<span style='font-weight:bold'>Hold up.</span> There was a problem emailing your sheet to your team. Please email the sheet you just submitted to your Program Manager, Classroom Leader, T2 Team Leader, and Regional Statistician ({$emailMap['regional']}) using your center stats email ({$emailMap['center']}). <span style='font-weight:bold'>We did</span> receive your statistics.";
         }
+
         return $result;
+    }
+
+    /**
+     * Get the configured stats due Carbon object
+     *
+     * @param $statsReport
+     *
+     * @return null|Carbon date
+     */
+    public static function getStatsDueDateTime($statsReport)
+    {
+        $due = static::getDateSetting('centerReportDue', $statsReport);
+
+        // Default value
+        if (!$due) {
+            $due = Carbon::create(
+                $statsReport->reportingDate->year,
+                $statsReport->reportingDate->month,
+                $statsReport->reportingDate->day,
+                19, 0, 59,
+                $statsReport->center->timezone
+            );
+        }
+
+        return $due;
+    }
+
+    /**
+     * Get the configured regional statisitician response due Carbon bject
+     *
+     * @param $statsReport  StatsReport to use when comparing dates
+     *
+     * @return null|Carbon  Date object
+     */
+    public static function getRegionalRespondByDateTime($statsReport)
+    {
+        $due = static::getDateSetting('centerReportRespondByTime', $statsReport);
+
+        // Default value
+        if (!$due) {
+            $due = Carbon::create(
+                $statsReport->reportingDate->year,
+                $statsReport->reportingDate->month,
+                $statsReport->reportingDate->day + 1,
+                10, 0, 59,
+                $statsReport->center->timezone
+            );
+        }
+
+        return $due;
+    }
+
+    /**
+     * Lookup the specified setting, and return a Carbon object if one is found
+     *
+     * @param $name         Name of setting field
+     * @param $statsReport  StatsReport to use when comparing dates
+     *
+     * @return null|Carbon  Date object
+     */
+    public static function getDateSetting($name, $statsReport)
+    {
+        $quarterDates = [
+            'classroom1Date',
+            'classroom2Date',
+            'classroom3Date',
+            'endWeekendDate',
+        ];
+        // You can also specify it as week1 for the first week in the quarter
+
+        $due = null;
+
+        // Try to find a due time setting for center first
+        $settings = Setting::get($name, $statsReport->center);
+        if ($settings) {
+            $dates = $settings->value
+                ? json_decode($settings->value, true)
+                : [];
+
+            foreach ($dates as $dateInfo) {
+                $timezone = isset($dateInfo['timezone']) && $dateInfo['timezone']
+                    ? $dateInfo['timezone']
+                    : $statsReport->center->timezone;
+
+                $reportingDate = $dateInfo['reportingDate'];
+
+                // Dates can be specified as a classroomDate
+                if (in_array($reportingDate, $quarterDates)) {
+                    $reportingDate = $statsReport->quarter->$reportingDate;
+                } else if ($reportingDate == 'week1') {
+                    $reportingDate = $statsReport->quarter->startWeekendDate->copy()->addWeek();
+                } else {
+                    $reportingDate = Carbon::parse($reportingDate);
+                }
+
+                if (isset($dateInfo['dueDate'])) {
+                    $date = $dateInfo['dueDate'] == '+1day'
+                        ? $reportingDate->copy()->addDay()
+                        : Carbon::parse($dateInfo['dueDate'], $timezone);
+                } else {
+                    $date = $reportingDate;
+                }
+
+                $time = $dateInfo['time'];
+
+                if ($reportingDate->eq($statsReport->reportingDate)) {
+                    $dateString = $date->toDateString();
+                    $due = Carbon::parse(
+                        "{$dateString} {$time}",
+                        $timezone
+                    );
+                    break;
+                }
+            }
+        }
+
+        return $due;
     }
 }
