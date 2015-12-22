@@ -44,7 +44,7 @@ class Person extends Model
      * @param            $first
      * @param            $last
      * @param            $center
-     * @param bool|false $recursed
+     * @param bool|false $replaced
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */

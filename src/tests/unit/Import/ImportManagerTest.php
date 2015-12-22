@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use stdClass;
 use TmlpStats\Center;
 use TmlpStats\Import\ImportManager;
+use TmlpStats\Person;
 use TmlpStats\Tests\Traits\MocksSettings;
 
 class ImportManagerTest extends TestAbstract
@@ -12,6 +13,38 @@ class ImportManagerTest extends TestAbstract
     use MocksSettings;
 
     protected $testClass = ImportManager::class;
+
+    /**
+     * @dataProvider providerGetEmail
+     */
+    public function testGetEmail($person, $expectedResult)
+    {
+        $result = ImportManager::getEmail($person);
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    public function providerGetEmail()
+    {
+        $data = [];
+
+        // No person provided, should return null
+        $data[] = [null, null];
+
+        // Person is unsubscribed, should return null
+        $person = new Person([
+            'email'        => 'test@tmlpstats.com',
+            'unsubscribed' => true,
+        ]);
+        $data[] = [$person, null];
+
+        // Person is not unsubscribed, should return email
+        $person               = clone $person;
+        $person->unsubscribed = false;
+        $data[]               = [$person, 'test@tmlpstats.com'];
+
+        return $data;
+    }
 
     /**
      * @dataProvider providerGetStatsDueDateTime
@@ -203,14 +236,18 @@ class ImportManagerTest extends TestAbstract
                 $statsReport,
                 $statsReport->quarter->classroom1Date,
                 $settings,
-                Carbon::parse($statsReport->quarter->classroom1Date->copy()->addDay()->toDateString() . " 10:00:00am", $timezone),
+                Carbon::parse($statsReport->quarter->classroom1Date->copy()
+                                                                   ->addDay()
+                                                                   ->toDateString() . " 10:00:00am", $timezone),
             ],
             // Report classroom2 override next day
             [
                 $statsReport,
                 $statsReport->quarter->classroom2Date,
                 $settings,
-                Carbon::parse($statsReport->quarter->classroom2Date->copy()->addDay()->toDateString() . " 12:00:00pm", $timezone),
+                Carbon::parse($statsReport->quarter->classroom2Date->copy()
+                                                                   ->addDay()
+                                                                   ->toDateString() . " 12:00:00pm", $timezone),
             ],
             // Report classroom3 override same day
             [

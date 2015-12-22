@@ -356,9 +356,9 @@ class ImportManager
      *
      * @return array|mixed|null
      */
-    public static function getEmail(Person $person)
+    public static function getEmail(Person $person = null)
     {
-        return $person && !$person->unsubscribed
+        return ($person && !$person->unsubscribed)
             ? $person->email
             : null;
     }
