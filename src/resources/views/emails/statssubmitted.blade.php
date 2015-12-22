@@ -3,10 +3,10 @@ Hi {{ $user }},<br/>
 Thank you for submitting stats for team {{ $centerName }}.
 
 @if ($isLate)
-Your stats are late. They were due on {{ $due }}.
+Your stats are late. They were due on {{ $due->format('l, F jS \a\t g:ia') }}.
 @endif
 
-We received them on {{ $time }} your local time. Please find the submitted sheet attached.<br/>
+We received them on {{ $submittedAt->format('l, F jS \a\t g:ia') }} your local time. Please find the submitted sheet attached.<br/>
 <br/>
 
 @if (isset($sheet['errors']) && $sheet['errors'])
@@ -14,7 +14,7 @@ We received them on {{ $time }} your local time. Please find the submitted sheet
     <br/>
 @endif
 
-You are not complete yet. Your regional statistician will review your sheet and declare you complete by {{ $respondByTime }} your local time Saturday morning.<br/>
+You are not complete yet. Your regional statistician will review your sheet and declare you complete by {{ $respondByDateTime->format('l \a\t g:ia') }} your local time.<br/>
 <br/>
 
 @if ($reportUrl)

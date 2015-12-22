@@ -27,7 +27,7 @@ trait MocksSettings
      * @param     $name
      * @param int $centerId
      */
-    public function unsetSetting($name, $centerId = 0)
+    public function unsetSetting($name, $centerId = null)
     {
         ModelCache::create()->forget($name, $centerId);
     }

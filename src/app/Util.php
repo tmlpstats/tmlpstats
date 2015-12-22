@@ -2,19 +2,34 @@
 namespace TmlpStats;
 
 use Cache;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Exception;
-use Carbon\Carbon;
 use Session;
+use stdClass;
 
 class Util
 {
+    /**
+     * Convert camelCase string to lowercase words
+     *
+     * @param $str
+     *
+     * @return string
+     */
     public static function toWords($str)
     {
         $output = preg_replace("/([A-Z])/", " $1", $str);
         return strtolower($output);
     }
 
+    /**
+     * Convert snake_case string to camelCase
+     *
+     * @param $str
+     *
+     * @return mixed
+     */
     public static function camelCase($str)
     {
         $parts = explode('_', $str);
@@ -29,9 +44,16 @@ class Util
         return $output ?: $str;
     }
 
+    /**
+     * Convert an associative array to an object using the camelCase version of the keys as properties
+     *
+     * @param $array
+     *
+     * @return stdClass
+     */
     public static function arrayToObject($array)
     {
-        $object = new \stdClass;
+        $object = new stdClass;
 
         foreach ($array as $key => $value) {
 
@@ -42,9 +64,16 @@ class Util
         return $object;
     }
 
+    /**
+     * Convert an object with snake_case properties to an object with camelCase properties
+     *
+     * @param $object
+     *
+     * @return stdClass
+     */
     public static function objectToCamelCase($object)
     {
-        $new = new \stdClass;
+        $new = new stdClass;
         $properties = get_object_vars($object);
 
         foreach ($properties as $key => $value) {
@@ -55,6 +84,13 @@ class Util
         return $new;
     }
 
+    /**
+     * Convert an Excel date integer into a Carbon datetime object
+     *
+     * @param $excelDate
+     *
+     * @return bool|Carbon
+     */
     public static function getExcelDate($excelDate)
     {
         $dateObj = null;
@@ -67,6 +103,13 @@ class Util
         return $dateObj ? $dateObj->startOfDay() : false;
     }
 
+    /**
+     * Convert a string with an unknown date format into a Carbon datetime object
+     *
+     * @param $dateStr
+     *
+     * @return null|static
+     */
     public static function parseUnknownDateFormat($dateStr)
     {
         $dateObj = null;
@@ -96,17 +139,40 @@ class Util
         return $dateObj ? $dateObj->startOfDay() : null;
     }
 
+    /**
+     * Assumed report date
+     *
+     * @var null|Carbon
+     */
     protected static $reportDate = null;
+
+    /**
+     * Set the report date
+     *
+     * @param Carbon $date
+     */
     public static function setReportDate(Carbon $date)
     {
         static::$reportDate = $date;
     }
 
+    /**
+     * Get the previously set report date, or today
+     *
+     * @return Carbon
+     */
     public static function getReportDate()
     {
         return static::$reportDate ?: Carbon::now()->startOfDay();
     }
 
+    /**
+     * Alias for getReportDate() except you can optionally include the current time
+     *
+     * @param bool|false $includeTime
+     *
+     * @return Carbon|static
+     */
     public static function now($includeTime = false)
     {
         $date = static::getReportDate();
@@ -118,6 +184,13 @@ class Util
         return $date;
     }
 
+    /**
+     * Split a name string into firstName and lastName parts
+     *
+     * @param $name
+     *
+     * @return array
+     */
     public static function getNameParts($name)
     {
         $parts = array(
@@ -205,6 +278,14 @@ class Util
         return substr(strrchr(get_class($object), '\\'), 1);
     }
 
+    /**
+     * Get the date formatted using the locale
+     * e.g.
+     *      en-US => 12/25/2015
+     *      en-UK => 25/12/2015
+     *
+     * @return string
+     */
     public static function getLocaleDateFormat()
     {
         $format = 'M j, Y';
