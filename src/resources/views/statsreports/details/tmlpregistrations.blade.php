@@ -12,21 +12,18 @@
                         </tr>
                     @endif
                     <tr>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th class="data-point">Reg Date</th>
-                        <th class="data-point">App Out Date</th>
-                        <th class="data-point">App In Date</th>
-                        <th class="data-point">Approve Date</th>
+                        <th>First<span class="hs"> Name</span></th>
+                        <th>Last<span class="hs"> Name</span></th>
+                        <th class="data-point">Reg<span class="hs">istered</span></th>
+                        <th class="data-point">App Out</th>
+                        <th class="data-point">App In</th>
+                        <th class="data-point">Approve</th>
                         @if ($group == 'withdrawn')
                             <th class="data-point">Reason</th>
                             <th class="data-point">Withdraw Date</th>
-                        @elseif ($quarterName == 'next')
-                            <th class="data-point">Travel</th>
-                            <th class="data-point">Room</th>
                         @endif
-                        <th>Comments</th>
-                        <th>Committed Team Member</th>
+                        <th class="data-point">Comments</th>
+                        <th class="hs">Committed Team Member</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -68,20 +65,21 @@
                                     <td></td>
                                     <td></td>
                                 @endif
-                            @elseif ($quarterName == 'next')
-                                <td class="data-point">
-                                    @if ($registrationData->travel)
-                                        <span class="glyphicon glyphicon-ok"></span>
-                                    @endif
-                                </td>
-                                <td class="data-point">
-                                    @if ($registrationData->room)
-                                        <span class="glyphicon glyphicon-ok"></span>
-                                    @endif
-                                </td>
                             @endif
-                            <td>{{ is_numeric($registrationData->comment) ? TmlpStats\Util::getExcelDate($registrationData->comment)->format('F') : $registrationData->comment }}</td>
-                            <td>{{ $registrationData->committedTeamMember ? $registrationData->committedTeamMember->firstName . ' ' . $registrationData->committedTeamMember->lastName : '' }}</td>
+                            <?php 
+                                $comment = is_numeric($registrationData->comment) 
+                                    ? TmlpStats\Util::getExcelDate($registrationData->comment)->format('F') 
+                                    : $registrationData->comment 
+                            ?>
+                            @if ($comment)
+                                <td class="data-point comments">
+                                    <span data-toggle="tooltip" class="hl glyphicon glyphicon-th-list" title="{{ $comment }}"></span>
+                                    <span class="hs">{{ $comment }}</span>
+                                </td>
+                            @else
+                                <td>&nbsp;</td>
+                            @endif
+                            <td class="hs">{{ $registrationData->committedTeamMember ? $registrationData->committedTeamMember->firstName . ' ' . $registrationData->committedTeamMember->lastName : '' }}</td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -90,3 +88,8 @@
         @endif
     @endforeach
 </div>
+<script>
+$(document).ready(function() {
+  $('[data-toggle="tooltip"]').tooltip();
+})
+</script>
