@@ -33,11 +33,13 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         'active',
         'require_password_reset',
         'last_login_at',
+        'managed',
     ];
 
     protected $casts = [
         'active'                 => 'boolean',
         'require_password_reset' => 'boolean',
+        'managed'                => 'boolean',
     ];
 
     protected $dates = [
@@ -53,6 +55,15 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
     protected $reportToken = null;
 
+    /**
+     * Getter
+     *
+     * Used mostly to abstract relationships
+     *
+     * @param string $name
+     *
+     * @return mixed|null|string
+     */
     public function __get($name)
     {
         if ($this->reportToken) {
@@ -74,6 +85,13 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         }
     }
 
+    /**
+     * Getter to be used for report-only users
+     *
+     * @param $name
+     *
+     * @return mixed|null|string
+     */
     protected function getForReportUser($name)
     {
         switch ($name) {
@@ -98,11 +116,23 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         $this->reportToken = $reportToken;
     }
 
+    /**
+     * Is Admin convenience function
+     *
+     * @return bool
+     */
     public function isAdmin()
     {
         return $this->hasRole('administrator');
     }
 
+    /**
+     * Does user have provided accountability
+     *
+     * @param $name Accountability name
+     *
+     * @return bool
+     */
     public function hasAccountability($name)
     {
         return $this->person
@@ -110,11 +140,23 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
             : false;
     }
 
+    /**
+     * Does user have provided role
+     *
+     * @param $name Role name
+     *
+     * @return bool
+     */
     public function hasRole($name)
     {
         return ($this->role && $this->role->name === $name);
     }
 
+    /**
+     * Get the Region of the user's home center
+     *
+     * @return null|Region
+     */
     public function homeRegion()
     {
         if ($this->reportToken) {
@@ -128,61 +170,93 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
             : null;
     }
 
+    /**
+     * Set the user's center
+     *
+     * @param Center $center
+     */
     public function setCenter($center)
     {
         if (!$this->person) {
             return;
         }
 
-        $person = $this->person;
+        $person           = $this->person;
         $person->centerId = $center->id;
         $person->save();
     }
 
+    /**
+     * Set the user's First Name
+     *
+     * @param $firstName
+     */
     public function setFirstName($firstName)
     {
         if (!$this->person) {
             return;
         }
 
-        $person = $this->person;
+        $person            = $this->person;
         $person->firstName = $firstName;
         $person->save();
     }
 
+    /**
+     * Set the user's Last Name
+     *
+     * @param $lastName
+     */
     public function setLastName($lastName)
     {
         if (!$this->person) {
             return;
         }
 
-        $person = $this->person;
+        $person           = $this->person;
         $person->lastName = $lastName;
         $person->save();
     }
 
+    /**
+     * Set the user's phone number
+     *
+     * @param $phone
+     */
     public function setPhone($phone)
     {
         if (!$this->person) {
             return;
         }
 
-        $person = $this->person;
+        $person        = $this->person;
         $person->phone = $phone;
         $person->save();
     }
 
+    /**
+     * Set the user's email address
+     *
+     * @param $email
+     */
     public function setEmail($email)
     {
         if (!$this->person) {
             return;
         }
 
-        $person = $this->person;
+        $person        = $this->person;
         $person->email = $email;
         $person->save();
     }
 
+    /**
+     * Get the user's formatted phone number
+     * e.g.
+     *      (555) 555-5555
+     *
+     * @return string|void
+     */
     public function formatPhone()
     {
         if (!$this->person) {
@@ -193,6 +267,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         if (isset($this->person->phone) && preg_match('/^(\d\d\d)[\s\.\-]?(\d\d\d)[\s\.\-]?(\d\d\d\d)$/', $this->person->phone, $matches)) {
             return "({$matches[1]}) {$matches[2]}-{$matches[3]}";
         }
+
         return $this->person->phone;
     }
 

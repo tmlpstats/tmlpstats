@@ -3,6 +3,7 @@ namespace TmlpStats\Import;
 
 use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\GlobalReport;
+use TmlpStats\Person;
 use TmlpStats\ReportToken;
 use TmlpStats\Setting;
 
@@ -19,7 +20,13 @@ ini_set('max_execution_time', 240);
 ini_set('memory_limit', '512M');
 ini_set('max_file_uploads', '30');
 
-// ImportManager takes the list of uploaded files, has them all processed, and returns an array of results
+
+/**
+ * Class ImportManager
+ * @package TmlpStats\Import
+ *
+ * ImportManager takes the list of uploaded files, has them all processed, and returns an array of results
+ */
 class ImportManager
 {
     protected $files = array();
@@ -29,6 +36,13 @@ class ImportManager
 
     protected $results = array();
 
+    /**
+     * ImportManager constructor.
+     *
+     * @param             $files
+     * @param null|string $expectedDate
+     * @param bool|true   $enforceVersion
+     */
     public function __construct($files, $expectedDate = null, $enforceVersion = true)
     {
         $this->files = $files;
@@ -38,16 +52,32 @@ class ImportManager
         $this->enforceVersion = $enforceVersion;
     }
 
+    /**
+     * Specify whether or not to skip sending emails after processing a stats report
+     *
+     * @param bool|true $skip
+     */
     public function setSkipEmail($skip = true)
     {
         $this->skipEmail = $skip;
     }
 
+    /**
+     * Get the import/validation results
+     *
+     * @return array
+     */
     public function getResults()
     {
         return $this->results;
     }
 
+    /**
+     * Perform import. If $saveReport is provided and true, the files provided in the constructor will be imported
+     * and saved.
+     *
+     * @param bool|false $saveReport
+     */
     public function import($saveReport = false)
     {
         $successSheets = array();
@@ -164,6 +194,11 @@ class ImportManager
         $this->results['unknownFiles'] = $unknownFiles;
     }
 
+    /**
+     * Get the expected reported date based on day of week.
+     *
+     * @return Carbon datetime object
+     */
     public static function getExpectedReportDate()
     {
         $expectedDate = null;
@@ -186,6 +221,15 @@ class ImportManager
         return $expectedDate->startOfDay();
     }
 
+    /**
+     * Send emails for the provided report to the configured accountables
+     *
+     * @param $statsReport
+     * @param $sheet
+     *
+     * @return array
+     * @throws Exception
+     */
     public static function sendStatsSubmittedEmail($statsReport, $sheet)
     {
         if (!$statsReport || !$statsReport->submittedAt) {
@@ -214,13 +258,13 @@ class ImportManager
 
         $emailMap = array(
             'center'                 => $center->statsEmail,
-            'programManager'         => $programManager ? $programManager->email : null,
-            'classroomLeader'        => $classroomLeader ? $classroomLeader->email : null,
-            't1TeamLeader'           => $t1TeamLeader ? $t1TeamLeader->email : null,
-            't2TeamLeader'           => $t2TeamLeader ? $t2TeamLeader->email : null,
-            'statistician'           => $statistician ? $statistician->email : null,
-            'statisticianApprentice' => $statisticianApprentice ? $statisticianApprentice->email : null,
             'regional'               => $center->region->email,
+            'programManager'         => static::getEmail($programManager),
+            'classroomLeader'        => static::getEmail($classroomLeader),
+            't1TeamLeader'           => static::getEmail($t1TeamLeader),
+            't2TeamLeader'           => static::getEmail($t2TeamLeader),
+            'statistician'           => static::getEmail($statistician),
+            'statisticianApprentice' => static::getEmail($statisticianApprentice),
         );
 
         $mailingList = Setting::get('centerReportMailingList', $center);
@@ -303,6 +347,20 @@ class ImportManager
         }
 
         return $result;
+    }
+
+    /**
+     * Return person's email if they are not marked unsubscribed
+     *
+     * @param Person $person
+     *
+     * @return array|mixed|null
+     */
+    public static function getEmail(Person $person = null)
+    {
+        return ($person && !$person->unsubscribed)
+            ? $person->email
+            : null;
     }
 
     /**

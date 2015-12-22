@@ -19,6 +19,11 @@ class Person extends Model
         'email',
         'center_id',
         'identifier',
+        'unsubscribed',
+    ];
+
+    protected $casts = [
+        'unsubscribed' => 'boolean',
     ];
 
     public function __get($name)
@@ -39,24 +44,24 @@ class Person extends Model
      * @param            $first
      * @param            $last
      * @param            $center
-     * @param bool|false $recursed
+     * @param bool|false $replaced
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     protected static function findByName($first, $last, $center, $replaced = false)
     {
         $possibleMembers = Person::firstName($first)
-            ->lastName($last)
-            ->byCenter($center)
-            ->get();
+                                 ->lastName($last)
+                                 ->byCenter($center)
+                                 ->get();
 
         // If we didn't find anyone. Maybe they gave their first name here.
         // Try with just the first letter
         if ($possibleMembers->isEmpty() && strlen($last) > 1) {
             $possibleMembers = Person::firstName($first)
-                ->lastName($last[0]) // Just the first letter
-                ->byCenter($center)
-                ->get();
+                                     ->lastName($last[0])// Just the first letter
+                                     ->byCenter($center)
+                                     ->get();
         }
 
         // If we still haven't found one, try some common character replacements
@@ -85,6 +90,11 @@ class Person extends Model
         return $possibleMembers;
     }
 
+    /**
+     * Get a list of the accountabilities person currently holds
+     *
+     * @return array
+     */
     public function getAccountabilities()
     {
         $allAccountabilities = $this->accountabilities()->get();
@@ -107,6 +117,13 @@ class Person extends Model
         return $accountabilities;
     }
 
+    /**
+     * Does person hold provided accountability
+     *
+     * @param Accountability $accountability
+     *
+     * @return bool
+     */
     public function hasAccountability(Accountability $accountability)
     {
         $accountabilities = $this->getAccountabilities();
@@ -115,9 +132,17 @@ class Person extends Model
                 return true;
             }
         }
+
         return false;
     }
 
+    /**
+     * Add accountability for person
+     *
+     * @param Accountability $accountability
+     * @param Carbon|null    $starts
+     * @param Carbon|null    $ends
+     */
     public function addAccountability(Accountability $accountability, Carbon $starts = null, Carbon $ends = null)
     {
         if (!$this->hasAccountability($accountability)) {
@@ -126,27 +151,45 @@ class Person extends Model
         }
     }
 
+    /**
+     * Remove accountability from person
+     *
+     * @param Accountability $accountability
+     */
     public function removeAccountability(Accountability $accountability)
     {
         if ($this->hasAccountability($accountability)) {
             DB::table('accountability_person')
-                ->where('person_id', $this->id)
-                ->where('accountability_id', $accountability->id)
-                ->update(['ends_at' => Util::now()->copy()->subSecond()]);
+              ->where('person_id', $this->id)
+              ->where('accountability_id', $accountability->id)
+              ->update(['ends_at' => Util::now()->copy()->subSecond()]);
         }
     }
 
+    /**
+     * Get the Region where the person's center is located
+     *
+     * @return null|Center
+     */
     public function homeRegion()
     {
         return $this->center ? $this->center->region : null;
     }
 
+    /**
+     * Get the user's formatted phone number
+     * e.g.
+     *      (555) 555-5555
+     *
+     * @return string|void
+     */
     public function formatPhone()
     {
         // TODO: This handles the standard 10 digit North American phone number. Update to handle international formats
         if (isset($this->phone) && preg_match('/^(\d\d\d)[\s\.\-]?(\d\d\d)[\s\.\-]?(\d\d\d\d)$/', $this->phone, $matches)) {
             return "({$matches[1]}) {$matches[2]}-{$matches[3]}";
         }
+
         return $this->phone;
     }
 
@@ -169,11 +212,11 @@ class Person extends Model
     {
         return $query->whereHas('accountabilities', function ($query) use ($accountability) {
             $query->whereName($accountability->name)
-                ->where('starts_at', '<=', Util::now())
-                ->where(function ($query) {
-                    $query->where('ends_at', '>', Util::now())
-                        ->orWhereNull('ends_at');
-                });
+                  ->where('starts_at', '<=', Util::now())
+                  ->where(function ($query) {
+                      $query->where('ends_at', '>', Util::now())
+                            ->orWhereNull('ends_at');
+                  });
         });
     }
 
@@ -185,8 +228,8 @@ class Person extends Model
     public function accountabilities()
     {
         return $this->belongsToMany('TmlpStats\Accountability', 'accountability_person', 'person_id', 'accountability_id')
-            ->withPivot(['starts_at', 'ends_at'])
-            ->withTimestamps();
+                    ->withPivot(['starts_at', 'ends_at'])
+                    ->withTimestamps();
     }
 
     public function center()
