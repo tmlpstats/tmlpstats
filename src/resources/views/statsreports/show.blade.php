@@ -55,6 +55,7 @@
             @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
             <li><a href="#transitionsummary" data-toggle="tab">Transfer Check</a></li>
             @endif
+            <li><a href="#weekend" data-toggle="tab">Weekend</a></li>
         </ul>
 
         <div class="tab-content">
@@ -113,6 +114,15 @@
                 <div id="coursestransfersummary-container"></div>
             </div>
             @endif
+            <div class="tab-pane" id="weekend">
+                <h3>Weekend Information</h3>
+                <div class="btn-group" role="group">
+                    <button id ="teamsummary-button" type="button" class="btn">Team Summary</button>
+                    <button id ="travel-button" type="button" class="btn">Travel/Room</button>
+                </div>
+                <div id="teamsummary-container"></div>
+                <div id="travel-container"></div>
+            </div>
         </div>
     </div>
 
@@ -138,6 +148,8 @@
             'peopletransfersummary',
             'coursestransfersummary',
             @endif
+            'teamsummary',
+            'travel',
         ];
 
         var buttonGroups = [
@@ -153,6 +165,10 @@
             [
                 'peopletransfersummary',
                 'coursestransfersummary',
+            ],
+            [
+                'teamsummary',
+                'travel',
             ]
         ];
 
@@ -176,6 +192,7 @@
                 $.get(url, function (response) {
                     $(container).html(response);
                     updateDates();
+                    initDataTables();
                 }).fail(function (jqXHR) {
                     var message = getErrorMessage(jqXHR.status);
                     $(container).html('<p>' + message + '</p>');

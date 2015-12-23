@@ -13,8 +13,6 @@
                     @if ($group != 'withdrawn')
                         <th class="data-point">GITW</th>
                         <th class="data-point">TDO</th>
-                        <th class="data-point">Travel</th>
-                        <th class="data-point">Room</th>
                     @else
                         <th>Withdraw</th>
                     @endif
@@ -43,16 +41,6 @@
                             @if ($group != 'withdrawn')
                                 <td class="data-point">{{ $memberData->gitw ? 'E' : 'I' }}</td>
                                 <td class="data-point">{{ $memberData->tdo ? 'Y' : 'N' }}</td>
-                                <td class="data-point">
-                                    @if ($memberData->travel)
-                                        <span class="glyphicon glyphicon-ok"></span>
-                                    @endif
-                                </td>
-                                <td class="data-point">
-                                    @if ($memberData->travel)
-                                        <span class="glyphicon glyphicon-ok"></span>
-                                    @endif
-                                </td>
                             @else
                                 @if ($memberData->withdrawCode)
                                     <td title="{{ $memberData->withdrawCode->code }}">{{ $memberData->withdrawCode->display }}</td>
