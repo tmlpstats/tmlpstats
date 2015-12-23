@@ -30,18 +30,10 @@ body {
     width: 80px;
     margin: 50px 50px;
 }
-/*
-table.centerStatsTable {
-    width: 95%;
-}*/
 
 .centerStatsTable th, .centerStatsTable td {
     text-align: center;
 }
-/*
-.centerStatsTable td {
-    width: 4em;
-}*/
 
 .centerStatsSummaryTable th, .centerStatsSummaryTable td {
     text-align: center;
@@ -105,4 +97,42 @@ td.success > span.glyphicon {
 }
 td.danger > span.glyphicon {
     color: #a00000;
+}
+
+div.box {
+    float: left;
+    min-width: 125px;
+    height: 100px;
+
+    vertical-align: middle;
+    text-align: center;
+    padding: 10px;
+
+    border-style: solid;
+    border-top-width: 5px;
+    border-right-width: 1px;
+    border-left-width: 1px;
+    border-bottom-width: 1px;
+    border-color: #666666;
+    border-top-color: #0075b0;
+}
+
+.box span.stat {
+    font-size: 40pt;
+    line-height: 40pt;
+    color: #0075b0;
+}
+
+.box span.subStat {
+    font-size: 18pt;
+    line-height: 18pt;
+    color: #666666;
+}
+
+.box span.description {
+    color: #666666;
+}
+
+.after-box {
+    clear: left;
 }

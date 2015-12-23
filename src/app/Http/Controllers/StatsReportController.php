@@ -61,28 +61,28 @@ class StatsReportController extends ReportDispatchAbstractController
         $selectedRegion = $this->getRegion($request);
 
         $allReports = StatsReport::currentQuarter($selectedRegion)
-            ->groupBy('reporting_date')
-            ->orderBy('reporting_date', 'desc')
-            ->get();
+                                 ->groupBy('reporting_date')
+                                 ->orderBy('reporting_date', 'desc')
+                                 ->get();
         if ($allReports->isEmpty()) {
             $allReports = StatsReport::lastQuarter($selectedRegion)
-                ->groupBy('reporting_date')
-                ->orderBy('reporting_date', 'desc')
-                ->get();
+                                     ->groupBy('reporting_date')
+                                     ->orderBy('reporting_date', 'desc')
+                                     ->get();
         }
 
-        $today = Carbon::now();
-        $reportingDates = array();
+        $today          = Carbon::now();
+        $reportingDates = [];
 
         if ($today->dayOfWeek == Carbon::FRIDAY) {
             $reportingDates[$today->toDateString()] = $today->format('F j, Y');
         }
         foreach ($allReports as $report) {
-            $dateString = $report->reportingDate->toDateString();
+            $dateString                  = $report->reportingDate->toDateString();
             $reportingDates[$dateString] = $report->reportingDate->format('F j, Y');
         }
 
-        $reportingDate = null;
+        $reportingDate       = null;
         $reportingDateString = Input::has('stats_report')
             ? Input::get('stats_report')
             : '';
@@ -98,21 +98,21 @@ class StatsReportController extends ReportDispatchAbstractController
         }
 
         $centers = Center::active()
-            ->byRegion($selectedRegion)
-            ->orderBy('name', 'asc')
-            ->get();
+                         ->byRegion($selectedRegion)
+                         ->orderBy('name', 'asc')
+                         ->get();
 
-        $statsReportList = array();
+        $statsReportList = [];
         foreach ($centers as $center) {
-            $report = StatsReport::reportingDate($reportingDate)
-                ->byCenter($center)
-                ->orderBy('submitted_at', 'desc')
-                ->first();
-            $statsReportList[$center->name] = array(
+            $report                         = StatsReport::reportingDate($reportingDate)
+                                                         ->byCenter($center)
+                                                         ->orderBy('submitted_at', 'desc')
+                                                         ->first();
+            $statsReportList[$center->name] = [
                 'center'   => $center,
                 'report'   => $report,
                 'viewable' => $this->authorize('read', $report),
-            );
+            ];
         }
 
         return view('statsreports.index', compact(
@@ -149,6 +149,7 @@ class StatsReportController extends ReportDispatchAbstractController
      * Display the specified resource.
      *
      * @param  int $id
+     *
      * @return Response
      */
     public function show($id)
@@ -157,7 +158,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
         $this->authorize('read', $statsReport);
 
-        $sheetUrl = '';
+        $sheetUrl     = '';
         $globalReport = null;
 
         $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
@@ -169,8 +170,8 @@ class StatsReportController extends ReportDispatchAbstractController
         }
 
         // Other Stats Reports
-        $otherStatsReports = array();
-        $searchWeek = clone $statsReport->quarter->endWeekendDate;
+        $otherStatsReports = [];
+        $searchWeek        = clone $statsReport->quarter->endWeekendDate;
 
         while ($searchWeek->gte($statsReport->quarter->startWeekendDate)) {
             $globalReport = GlobalReport::reportingDate($searchWeek)->first();
@@ -221,6 +222,7 @@ class StatsReportController extends ReportDispatchAbstractController
      * Show the form for editing the specified resource.
      *
      * @param  int $id
+     *
      * @return Response
      */
     public function edit($id)
@@ -234,11 +236,11 @@ class StatsReportController extends ReportDispatchAbstractController
      * Currently only supports updated locked property
      *
      * @param  int $id
+     *
      * @return Response
      */
     public function update($id)
     {
-
     }
 
     /**
@@ -247,6 +249,7 @@ class StatsReportController extends ReportDispatchAbstractController
      * Currently only supports updated locked property
      *
      * @param  int $id
+     *
      * @return Response
      */
     public function submit($id)
@@ -256,17 +259,17 @@ class StatsReportController extends ReportDispatchAbstractController
         $this->authorize($statsReport);
 
         $userEmail = Auth::user()->email;
-        $response = array(
+        $response  = [
             'statsReport' => $id,
             'success'     => false,
             'message'     => '',
-        );
+        ];
 
         $action = Input::get('function', null);
         if ($action === 'submit') {
 
             $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
-            $sheet = [];
+            $sheet    = [];
 
             try {
                 // Check if we have cached the report already. If so, remove it from the cache and use it here
@@ -282,9 +285,9 @@ class StatsReportController extends ReportDispatchAbstractController
                 Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             }
 
-            $statsReport->submittedAt = Carbon::now();
+            $statsReport->submittedAt   = Carbon::now();
             $statsReport->submitComment = Input::get('comment', null);
-            $statsReport->locked = true;
+            $statsReport->locked        = true;
 
             if ($statsReport->save()) {
                 // Cache the validation results so we don't have to regenerate
@@ -297,7 +300,7 @@ class StatsReportController extends ReportDispatchAbstractController
                 $submittedAt->setTimezone($statsReport->center->timezone);
 
                 $response['submittedAt'] = $submittedAt->format('g:i A');
-                $result = ImportManager::sendStatsSubmittedEmail($statsReport, $sheet);
+                $result                  = ImportManager::sendStatsSubmittedEmail($statsReport, $sheet);
 
                 if (isset($result['success'])) {
                     $response['success'] = true;
@@ -324,11 +327,11 @@ class StatsReportController extends ReportDispatchAbstractController
      * Remove the specified resource from storage.
      *
      * @param  int $id
+     *
      * @return Response
      */
     public function destroy($id)
     {
-
     }
 
     public function downloadSheet($id)
@@ -341,6 +344,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
         if ($path) {
             $filename = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
+
             return Response::download($path, $filename, [
                 'Content-Length: ' . filesize($path),
             ]);
@@ -415,6 +419,12 @@ class StatsReportController extends ReportDispatchAbstractController
             case 'coursestransfersummary':
                 $response = $this->getCoursesTransferSummary($statsReport);
                 break;
+            case 'teamsummary':
+                $response = $this->getTeamWeekendSummary($statsReport);
+                break;
+            case 'travel':
+                $response = $this->getTeamTravelSummary($statsReport);
+                break;
         }
 
         return $response;
@@ -422,7 +432,8 @@ class StatsReportController extends ReportDispatchAbstractController
 
     protected function getSummary(StatsReport $statsReport)
     {
-        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($statsReport, $statsReport->reportingDate);
+        $centerStatsData = App::make(CenterStatsController::class)
+                              ->getByStatsReport($statsReport, $statsReport->reportingDate);
         if (!$centerStatsData) {
             return null;
         }
@@ -442,44 +453,53 @@ class StatsReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        # Center Games
-        $a = new GamesByWeek($centerStatsData);
+        // Center Games
+        $a               = new GamesByWeek($centerStatsData);
         $centerStatsData = $a->compose();
 
-        $date = $statsReport->reportingDate->toDateString();
+        $date       = $statsReport->reportingDate->toDateString();
         $reportData = $centerStatsData['reportData'][$date];
 
-        # Team Member stats
-        $a = new TeamMembersCounts(['teamMembersData' => $teamMembers]);
+        // Team Member stats
+        $a                 = new TeamMembersCounts(['teamMembersData' => $teamMembers]);
         $teamMembersCounts = $a->compose();
 
-        $tdo = $teamMembersCounts['reportData']['tdo'];
-        $gitw = $teamMembersCounts['reportData']['gitw'];
+        $tdo           = $teamMembersCounts['reportData']['tdo'];
+        $gitw          = $teamMembersCounts['reportData']['gitw'];
         $teamWithdraws = $teamMembersCounts['reportData']['withdraws'];
 
-        # Application Status
-        $a = new TmlpRegistrationsByStatus(['registrationsData' => $registrations, 'quarter' => $statsReport->quarter]);
+        // Application Status
+        $a            = new TmlpRegistrationsByStatus([
+            'registrationsData' => $registrations,
+            'quarter'           => $statsReport->quarter,
+        ]);
         $applications = $a->compose();
         $applications = $applications['reportData'];
 
-        # Application Withdraws
-        $a = new TmlpRegistrationsByIncomingQuarter(['registrationsData' => $registrations, 'quarter' => $statsReport->quarter]);
+        // Application Withdraws
+        $a                    = new TmlpRegistrationsByIncomingQuarter([
+            'registrationsData' => $registrations,
+            'quarter'           => $statsReport->quarter,
+        ]);
         $applicationWithdraws = $a->compose();
         $applicationWithdraws = $applicationWithdraws['reportData']['withdrawn'];
 
-        # Travel/Room
-        $a = new TravelRoomingByTeamYear([
+        // Travel/Room
+        $a                     = new TravelRoomingByTeamYear([
             'registrationsData' => $registrations,
             'teamMembersData'   => $teamMembers,
             'region'            => $statsReport->center->region,
         ]);
-        $travelDetails = $a->compose();
-        $travelDetails = $travelDetails['reportData'];
-        $teamTravelDetails = $travelDetails['teamMembers'];
+        $travelDetails         = $a->compose();
+        $travelDetails         = $travelDetails['reportData'];
+        $teamTravelDetails     = $travelDetails['teamMembers'];
         $incomingTravelDetails = $travelDetails['incoming'];
 
-        # Completed Courses
-        $a = new CoursesWithEffectiveness(['courses' => $courses, 'reportingDate' => $statsReport->reportingDate]);
+        // Completed Courses
+        $a       = new CoursesWithEffectiveness([
+            'courses'       => $courses,
+            'reportingDate' => $statsReport->reportingDate,
+        ]);
         $courses = $a->compose();
 
         $completedCourses = null;
@@ -515,10 +535,10 @@ class StatsReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $a = new GamesByWeek($centerStatsData);
+        $a          = new GamesByWeek($centerStatsData);
         $weeklyData = $a->compose();
 
-        $a = new GamesByMilestone(['weeks' => $weeklyData['reportData'], 'quarter' => $statsReport->quarter]);
+        $a    = new GamesByMilestone(['weeks' => $weeklyData['reportData'], 'quarter' => $statsReport->quarter]);
         $data = $a->compose();
 
         return view('reports.centergames.milestones', $data);
@@ -531,7 +551,7 @@ class StatsReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $a = new TeamMembersByQuarter(['teamMembersData' => $teamMembers]);
+        $a    = new TeamMembersByQuarter(['teamMembersData' => $teamMembers]);
         $data = $a->compose();
 
         return view('statsreports.details.classlist', $data);
@@ -544,10 +564,11 @@ class StatsReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $a = new TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
+        $a    = new TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
         $data = $a->compose();
 
         $data = array_merge($data, ['reportingDate' => $statsReport->reportingDate]);
+
         return view('statsreports.details.tmlpregistrationsbystatus', $data);
     }
 
@@ -558,7 +579,10 @@ class StatsReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $a = new TmlpRegistrationsByIncomingQuarter(['registrationsData' => $registrations, 'quarter' => $statsReport->quarter]);
+        $a    = new TmlpRegistrationsByIncomingQuarter([
+            'registrationsData' => $registrations,
+            'quarter'           => $statsReport->quarter,
+        ]);
         $data = $a->compose();
 
         return view('statsreports.details.tmlpregistrations', $data);
@@ -571,7 +595,7 @@ class StatsReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $a = new CoursesWithEffectiveness(['courses' => $courses, 'reportingDate' => $statsReport->reportingDate]);
+        $a    = new CoursesWithEffectiveness(['courses' => $courses, 'reportingDate' => $statsReport->reportingDate]);
         $data = $a->compose();
 
         return view('statsreports.details.courses', $data);
@@ -594,16 +618,17 @@ class StatsReportController extends ReportDispatchAbstractController
         $date = clone $statsReport->quarter->startWeekendDate;
         $date->addWeek();
         while ($date->lte($statsReport->reportingDate)) {
-            $globalReport = GlobalReport::reportingDate($date)->first();
-            $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
-            $weeksData[$date->toDateString()] = $report ? App::make(TeamMembersController::class)->getByStatsReport($report) : null;
+            $globalReport                     = GlobalReport::reportingDate($date)->first();
+            $report                           = $globalReport->statsReports()->byCenter($statsReport->center)->first();
+            $weeksData[$date->toDateString()] = $report ? App::make(TeamMembersController::class)
+                                                             ->getByStatsReport($report) : null;
             $date->addWeek();
         }
         if (!$weeksData) {
             return null;
         }
 
-        $a = new GitwByTeamMember(['teamMembersData' => $weeksData]);
+        $a    = new GitwByTeamMember(['teamMembersData' => $weeksData]);
         $data = $a->compose();
 
         return view('statsreports.details.teammembersweekly', $data);
@@ -616,16 +641,17 @@ class StatsReportController extends ReportDispatchAbstractController
         $date = clone $statsReport->quarter->startWeekendDate;
         $date->addWeek();
         while ($date->lte($statsReport->reportingDate)) {
-            $globalReport = GlobalReport::reportingDate($date)->first();
-            $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
-            $weeksData[$date->toDateString()] = $report ? App::make(TeamMembersController::class)->getByStatsReport($report) : null;
+            $globalReport                     = GlobalReport::reportingDate($date)->first();
+            $report                           = $globalReport->statsReports()->byCenter($statsReport->center)->first();
+            $weeksData[$date->toDateString()] = $report ? App::make(TeamMembersController::class)
+                                                             ->getByStatsReport($report) : null;
             $date->addWeek();
         }
         if (!$weeksData) {
             return null;
         }
 
-        $a = new TdoByTeamMember(['teamMembersData' => $weeksData]);
+        $a    = new TdoByTeamMember(['teamMembersData' => $weeksData]);
         $data = $a->compose();
 
         return view('statsreports.details.teammembersweekly', $data);
@@ -633,7 +659,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
     protected function getResults(StatsReport $statsReport)
     {
-        $sheet = array();
+        $sheet    = [];
         $sheetUrl = '';
 
         $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
@@ -657,12 +683,174 @@ class StatsReportController extends ReportDispatchAbstractController
         }
 
         $includeUl = true;
+
         return view('import.results', compact(
             'statsReport',
             'sheetUrl',
             'sheet',
             'includeUl'
         ));
+    }
+
+    protected function getTeamWeekendSummary(StatsReport $statsReport)
+    {
+        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
+        if (!$teamMembers) {
+            return null;
+        }
+
+        $registrationsData = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
+
+        $registrations = [];
+        if ($registrationsData) {
+            $nextQuarter = $statsReport->quarter->getNextQuarter();
+            foreach ($registrationsData as $registration) {
+                if ($registration->incomingQuarterId == $nextQuarter->id) {
+                    $registrations[] = $registration;
+                }
+            }
+        }
+
+        $a           = new TeamMembersByQuarter(['teamMembersData' => $teamMembers]);
+        $teamMembers = $a->compose();
+        $teamMembers = $teamMembers['reportData'];
+
+        $a            = new TmlpRegistrationsByStatus([
+            'registrationsData' => $registrations,
+            'quarter'           => $statsReport->quarter,
+        ]);
+        $applications = $a->compose();
+        $applications = $applications['reportData'];
+
+        $t1Continuing = 0;
+        if (isset($teamMembers['team1'])) {
+            $t1Continuing = array_sum(array_map('count', $teamMembers['team1']));
+            if (isset($teamMembers['team1']['Q4'])) {
+                $t1Continuing -= count($teamMembers['team1']['Q4']);
+            }
+        }
+        if (isset($applications['approved'])) {
+            foreach ($applications['approved'] as $app) {
+                if ($app->teamYear == 1) {
+                    $t1Continuing++;
+                }
+            }
+        }
+
+        $t2Continuing = 0;
+        if (isset($teamMembers['team2'])) {
+            $t2Continuing = array_sum(array_map('count', $teamMembers['team2']));
+            if (isset($teamMembers['team2']['Q4'])) {
+                $t2Continuing -= count($teamMembers['team2']['Q4']);
+            }
+        }
+        if (isset($applications['approved'])) {
+            foreach ($applications['approved'] as $app) {
+                if ($app->teamYear == 2) {
+                    $t2Continuing++;
+                }
+            }
+        }
+
+        $completingCount = 0;
+        if (isset($teamMembers['team1']['Q4'])) {
+            $completingCount += count($teamMembers['team1']['Q4']);
+        }
+        if (isset($teamMembers['team2']['Q4'])) {
+            $completingCount += count($teamMembers['team2']['Q4']);
+        }
+
+        $incomingCount = isset($applications['approved'])
+            ? count($applications['approved'])
+            : 0;
+
+        $boxes = [
+            [
+                'stat'        => $t1Continuing,
+                'description' => 'T1 Expected',
+            ],
+            [
+                'stat'        => $t2Continuing,
+                'description' => 'T2 Expected',
+            ],
+            [
+                'stat'        => $completingCount,
+                'description' => 'Completing',
+            ],
+            [
+                'stat'        => $incomingCount,
+                'description' => 'Incoming',
+            ],
+        ];
+
+        return view('statsreports.details.teamsummary', compact('teamMembers', 'applications', 'boxes'));
+    }
+
+    protected function getTeamTravelSummary(StatsReport $statsReport)
+    {
+        $teamMembersData = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
+        if (!$teamMembersData) {
+            return null;
+        }
+
+        $registrationsData = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
+
+        $registrations = [];
+        if ($registrationsData) {
+            $nextQuarter = $statsReport->quarter->getNextQuarter();
+            foreach ($registrationsData as $registration) {
+                if ($registration->incomingQuarterId == $nextQuarter->id) {
+                    $registrations[] = $registration;
+                }
+            }
+        }
+
+        $a           = new TeamMembersByQuarter(['teamMembersData' => $teamMembersData]);
+        $teamMembers = $a->compose();
+        $teamMembers = $teamMembers['reportData'];
+
+        $a            = new TmlpRegistrationsByStatus([
+            'registrationsData' => $registrations,
+            'quarter'           => $statsReport->quarter,
+        ]);
+        $applications = $a->compose();
+        $applications = $applications['reportData'];
+
+
+        $a                     = new TravelRoomingByTeamYear([
+            'registrationsData' => $registrations,
+            'teamMembersData'   => $teamMembersData,
+            'region'            => $statsReport->center->region,
+        ]);
+        $travelDetails         = $a->compose();
+        $travelDetails         = $travelDetails['reportData'];
+        $teamTravelDetails     = $travelDetails['teamMembers'];
+        $incomingTravelDetails = $travelDetails['incoming'];
+
+        $boxes = [
+            [
+                'stat'        => $teamTravelDetails['team1']['travel'] + $teamTravelDetails['team2']['travel'],
+                'subStat'     => $teamTravelDetails['team1']['total'] + $teamTravelDetails['team2']['total'],
+                'description' => 'Team Travel',
+            ],
+            [
+                'stat'        => $teamTravelDetails['team1']['room'] + $teamTravelDetails['team2']['room'],
+                'subStat'     => $teamTravelDetails['team1']['total'] + $teamTravelDetails['team2']['total'],
+                'description' => 'Team Rooming',
+            ],
+            [
+                'stat'        => $incomingTravelDetails['team1']['room'] + $incomingTravelDetails['team2']['room'],
+                'subStat'     => $incomingTravelDetails['team1']['total'] + $incomingTravelDetails['team2']['total'],
+                'description' => 'Incoming Travel',
+            ],
+            [
+                'stat'        => $incomingTravelDetails['team1']['travel'] + $incomingTravelDetails['team2']['travel'],
+                'subStat'     => $incomingTravelDetails['team1']['total'] + $incomingTravelDetails['team2']['total'],
+                'description' => 'Incoming Rooming',
+            ],
+        ];
+
+        return view('statsreports.details.travelsummary', compact('teamMembers', 'applications', 'boxes'));
     }
 
     protected function getPeopleTransferSummary(StatsReport $statsReport)
@@ -683,22 +871,28 @@ class StatsReportController extends ReportDispatchAbstractController
         $teamMemberDataThisWeek = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
         $teamMemberDataLastWeek = App::make(TeamMembersController::class)->getByStatsReport($lastStatsReport);
 
-        $a = new TeamMembersByQuarter(['teamMembersData' => $teamMemberDataThisWeek]);
+        $a                     = new TeamMembersByQuarter(['teamMembersData' => $teamMemberDataThisWeek]);
         $teamThisWeekByQuarter = $a->compose();
         $teamThisWeekByQuarter = $teamThisWeekByQuarter['reportData'];
 
-        $a = new TeamMembersByQuarter(['teamMembersData' => $teamMemberDataLastWeek]);
+        $a                     = new TeamMembersByQuarter(['teamMembersData' => $teamMemberDataLastWeek]);
         $teamLastWeekByQuarter = $a->compose();
         $teamLastWeekByQuarter = $teamLastWeekByQuarter['reportData'];
 
         $incomingDataThisWeek = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
         $incomingDataLastWeek = App::make(TmlpRegistrationsController::class)->getByStatsReport($lastStatsReport);
 
-        $a = new TmlpRegistrationsByIncomingQuarter(['registrationsData' => $incomingDataThisWeek, 'quarter' => $statsReport->quarter]);
+        $a                         = new TmlpRegistrationsByIncomingQuarter([
+            'registrationsData' => $incomingDataThisWeek,
+            'quarter'           => $statsReport->quarter,
+        ]);
         $incomingThisWeekByQuarter = $a->compose();
         $incomingThisWeekByQuarter = $incomingThisWeekByQuarter['reportData'];
 
-        $a = new TmlpRegistrationsByIncomingQuarter(['registrationsData' => $incomingDataLastWeek, 'quarter' => $statsReport->quarter]);
+        $a                         = new TmlpRegistrationsByIncomingQuarter([
+            'registrationsData' => $incomingDataLastWeek,
+            'quarter'           => $statsReport->quarter,
+        ]);
         $incomingLastWeekByQuarter = $a->compose();
         $incomingLastWeekByQuarter = $incomingLastWeekByQuarter['reportData'];
 
@@ -709,7 +903,10 @@ class StatsReportController extends ReportDispatchAbstractController
             foreach ($quarterData as $idx => $withdrawData) {
                 $team = "team{$withdrawData->registration->teamYear}";
 
-                list($field, $idx, $object) = $this->hasPerson(['next', 'future'], $withdrawData, $incomingLastWeekByQuarter[$team]);
+                list($field, $idx, $object) = $this->hasPerson([
+                    'next',
+                    'future',
+                ], $withdrawData, $incomingLastWeekByQuarter[$team]);
                 if ($field !== null) {
                     unset($incomingLastWeekByQuarter['withdrawn'][$field][$idx]);
                 }
@@ -718,16 +915,19 @@ class StatsReportController extends ReportDispatchAbstractController
 
         // Keep track of persons of interest
         $incomingSummary = [
-            'missing'  => [], // Was on last week's sheet but not this week
-            'changed'  => [], // On both sheets
-            'new'      => [], // New on this week (could be a WD that's now reregistered)
+            'missing' => [], // Was on last week's sheet but not this week
+            'changed' => [], // On both sheets
+            'new'     => [], // New on this week (could be a WD that's now reregistered)
         ];
 
         // Find all missing or modified applications
         foreach (['team1', 'team2'] as $team) {
             foreach ($incomingLastWeekByQuarter[$team] as $quarterNumber => $quarterData) {
                 foreach ($quarterData as $lastWeekData) {
-                    list($field, $idx, $thisWeekData) = $this->hasPerson(['next', 'future'], $lastWeekData, $incomingThisWeekByQuarter[$team]);
+                    list($field, $idx, $thisWeekData) = $this->hasPerson([
+                        'next',
+                        'future',
+                    ], $lastWeekData, $incomingThisWeekByQuarter[$team]);
                     if ($field !== null) {
                         // We only need to display existing rows that weren't copied properly
                         if (!$this->incomingCopiedCorrectly($thisWeekData, $lastWeekData)) {
@@ -746,14 +946,17 @@ class StatsReportController extends ReportDispatchAbstractController
         foreach (['team1', 'team2'] as $team) {
             foreach ($incomingThisWeekByQuarter[$team] as $quarterNumber => $quarterData) {
                 foreach ($quarterData as $thisWeekData) {
-                    list($field, $idx, $withdrawData) = $this->hasPerson(['next', 'future'], $thisWeekData, $incomingLastWeekByQuarter['withdrawn']);
+                    list($field, $idx, $withdrawData) = $this->hasPerson([
+                        'next',
+                        'future',
+                    ], $thisWeekData, $incomingLastWeekByQuarter['withdrawn']);
                     $incomingSummary['new'][] = [$thisWeekData, $withdrawData];
                 }
             }
         }
 
         $teamMemberSummary = [
-            'new' => [],
+            'new'     => [],
             'missing' => [],
         ];
 
@@ -766,7 +969,11 @@ class StatsReportController extends ReportDispatchAbstractController
                 }
 
                 foreach ($quarterData as $lasWeekData) {
-                    list($field, $idx, $data) = $this->hasPerson(['Q2', 'Q3', 'Q4'], $lasWeekData, $teamThisWeekByQuarter[$team]);
+                    list($field, $idx, $data) = $this->hasPerson([
+                        'Q2',
+                        'Q3',
+                        'Q4',
+                    ], $lasWeekData, $teamThisWeekByQuarter[$team]);
                     if ($field !== null) {
                         // We found it! remove it from the search list
                         unset($teamThisWeekByQuarter[$team][$field][$idx]);
@@ -783,7 +990,7 @@ class StatsReportController extends ReportDispatchAbstractController
         foreach (['team1', 'team2'] as $team) {
             foreach ($teamThisWeekByQuarter[$team] as $quarterNumber => $quarterData) {
                 foreach ($quarterData as $thisWeekData) {
-                    $matched = false;
+                    $matched      = false;
                     $lastWeekData = null;
                     if ($quarterNumber == 'Q1') {
                         // Match up incoming with new Q1 team
@@ -797,7 +1004,12 @@ class StatsReportController extends ReportDispatchAbstractController
                     } else if (isset($teamLastWeekByQuarter['withdrawn'][$quarterNumber])) {
 
                         // Check if the new team member was withdrawn previously
-                        list($field, $idx, $withdrawData) = $this->hasPerson(['Q1', 'Q2', 'Q3', 'Q4'], $thisWeekData, $teamLastWeekByQuarter['withdrawn']);
+                        list($field, $idx, $withdrawData) = $this->hasPerson([
+                            'Q1',
+                            'Q2',
+                            'Q3',
+                            'Q4',
+                        ], $thisWeekData, $teamLastWeekByQuarter['withdrawn']);
                         if ($withdrawData !== null) {
                             $lastWeekData = $withdrawData;
                         }
@@ -831,11 +1043,17 @@ class StatsReportController extends ReportDispatchAbstractController
         $thisWeekCourses = App::make(CoursesController::class)->getByStatsReport($statsReport);
         $lastWeekCourses = App::make(CoursesController::class)->getByStatsReport($lastStatsReport);
 
-        $a = new CoursesWithEffectiveness(['courses' => $thisWeekCourses, 'reportingDate' => $statsReport->reportingDate]);
+        $a                   = new CoursesWithEffectiveness([
+            'courses'       => $thisWeekCourses,
+            'reportingDate' => $statsReport->reportingDate,
+        ]);
         $thisWeekCoursesList = $a->compose();
         $thisWeekCoursesList = $thisWeekCoursesList['reportData'];
 
-        $a = new CoursesWithEffectiveness(['courses' => $lastWeekCourses, 'reportingDate' => $lastStatsReport->reportingDate]);
+        $a                   = new CoursesWithEffectiveness([
+            'courses'       => $lastWeekCourses,
+            'reportingDate' => $lastStatsReport->reportingDate,
+        ]);
         $lastWeekCoursesList = $a->compose();
         $lastWeekCoursesList = $lastWeekCoursesList['reportData'];
 
@@ -844,10 +1062,10 @@ class StatsReportController extends ReportDispatchAbstractController
          * Starting numbers match the completing numbers from last week
          */
         $flaggedCount = 0;
-        $flagged = [
-            'missing'  => [],
-            'changed'  => [],
-            'new'      => [],
+        $flagged      = [
+            'missing' => [],
+            'changed' => [],
+            'new'     => [],
         ];
         foreach ($thisWeekCoursesList as $type => $thisWeekCourses) {
             foreach ($thisWeekCourses as $thisWeekCourseData) {
