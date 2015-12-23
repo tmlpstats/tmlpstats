@@ -59,6 +59,12 @@ td.border-left, th.border-left {
 td.border-right, th.border-right {
     border-right: 2px solid #DDD !important;
 }
+td.border-top, th.border-top {
+    border-top: 2px solid #DDD !important;
+}
+td.border-bottom, th.border-bottom {
+    border-bottom: 2px solid #DDD !important;
+}
 
 .table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
     background-color: #EEEEEE;
