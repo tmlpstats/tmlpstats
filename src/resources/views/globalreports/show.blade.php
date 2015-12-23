@@ -40,6 +40,7 @@
                 <li><a href="#traveloverview" data-toggle="tab">Travel Summary</a></li>
                 <li><a href="#courses" data-toggle="tab">Courses</a></li>
                 <li><a href="#teammemberstatus" data-toggle="tab">Team Members</a></li>
+                <li><a href="#tdosummary" data-toggle="tab">Training &amp; Development</a></li>
                 <li><a href="#potentials" data-toggle="tab">Potentials</a></li>
             </ul>
         </div>
@@ -109,6 +110,10 @@
                     <div id="teammemberstatustransfer-container"></div>
                     <div id="teammemberstatuswithdrawn-container"></div>
                 </div>
+                <div class="tab-pane" id="tdosummary">
+                    <h3>Training and Development Opportunities</h3>
+                    <div id="tdosummary-container"></div>
+                </div>
                 <div class="tab-pane" id="potentials">
                     <h3>Team 2 Potentials</h3>
 
@@ -138,6 +143,7 @@
             'applicationsoverview',
             'applicationst2fromweekend',
             'traveloverview',
+            'tdosummary',
         ];
 
         var batchedPages = [

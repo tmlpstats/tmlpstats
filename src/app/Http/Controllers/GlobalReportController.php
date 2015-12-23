@@ -195,9 +195,6 @@ class GlobalReportController extends ReportDispatchAbstractController
             case 'traveloverview':
                 $response = $this->getTravelReport($globalReport, $region);
                 break;
-            case 'courses':
-                $response = $this->getCoursesReport($globalReport, $region);
-                break;
             case 'coursesthisweek':
             case 'coursesnextmonth':
             case 'coursesupcoming':
@@ -220,6 +217,9 @@ class GlobalReportController extends ReportDispatchAbstractController
                 break;
             case 'applicationst2fromweekend':
                 $response = $this->getTeam2RegisteredAtWeekend($globalReport, $region);
+                break;
+            case 'tdosummary':
+                $response = $this->getTdoSummary($globalReport, $region);
                 break;
         }
 
@@ -328,9 +328,9 @@ class GlobalReportController extends ReportDispatchAbstractController
         $teamMembersByCenter = $a->compose();
         $teamMembersByCenter = $teamMembersByCenter['reportData'];
 
-        $reportData = [];
+        $reportData   = [];
         $statsReports = [];
-        $teamCounts = [
+        $teamCounts   = [
             'team1' => [
                 'applications' => [],
                 'incoming'     => 0,
@@ -352,7 +352,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             ]);
             $centerRow = $a->compose();
 
-            $reportData[$centerName] = $centerRow['reportData'];
+            $reportData[$centerName]   = $centerRow['reportData'];
             $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Center::name($centerName)->first());
 
             foreach ($centerRow['reportData'] as $team => $teamData) {
@@ -420,7 +420,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         $teamMembersByCenter = $a->compose();
         $teamMembersByCenter = $teamMembersByCenter['reportData'];
 
-        $reportData = [];
+        $reportData   = [];
         $statsReports = [];
         foreach ($teamMembersByCenter as $centerName => $teamMembersData) {
 
@@ -433,12 +433,58 @@ class GlobalReportController extends ReportDispatchAbstractController
             ]);
             $centerRow = $a->compose();
 
-            $reportData[$centerName] = $centerRow['reportData'];
+            $reportData[$centerName]   = $centerRow['reportData'];
             $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Center::name($centerName)->first());
         }
         ksort($reportData);
 
         return view('globalreports.details.traveloverview', compact('reportData', 'statsReports'));
+    }
+
+    protected function getTdoSummary(GlobalReport $globalReport, Region $region)
+    {
+        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport, $region);
+        if (!$teamMembers) {
+            return null;
+        }
+
+        $a                   = new Arrangements\TeamMembersByCenter(['teamMembersData' => $teamMembers]);
+        $teamMembersByCenter = $a->compose();
+        $teamMembersByCenter = $teamMembersByCenter['reportData'];
+
+        $statsReports = [];
+        $reportData   = [];
+        $totals       = [
+            'team1' => [
+                'total'    => 0,
+                'attended' => 0,
+            ],
+            'team2' => [
+                'total'    => 0,
+                'attended' => 0,
+            ],
+        ];
+        foreach ($teamMembersByCenter as $centerName => $centerData) {
+            $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Center::name($centerName)->first());
+            foreach ($centerData as $memberData) {
+                $team = "team{$memberData->teamYear}";
+
+                if (!isset($reportData[$centerName][$team]['total'])) {
+                    $reportData[$centerName][$team]['total']    = 0;
+                    $reportData[$centerName][$team]['attended'] = 0;
+                }
+
+                $reportData[$centerName][$team]['total']++;
+                $totals[$team]['total']++;
+                if ($memberData->tdo) {
+                    $reportData[$centerName][$team]['attended']++;
+                    $totals[$team]['attended']++;
+                }
+            }
+        }
+        ksort($reportData);
+
+        return view('globalreports.details.tdosummary', compact('reportData', 'totals', 'statsReports'));
     }
 
     protected function getTeamMemberStatusWithdrawn($data, GlobalReport $globalReport, Region $region)
@@ -486,7 +532,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         }
 
         $reportData = [];
-        $totals = [
+        $totals     = [
             'total'      => 0,
             'registered' => 0,
             'approved'   => 0,
@@ -565,10 +611,11 @@ class GlobalReportController extends ReportDispatchAbstractController
             }
         }
 
-        $a = new Arrangements\TmlpRegistrationsByStatus(['registrationsData' => $registeredAtWeekend]);
+        $a    = new Arrangements\TmlpRegistrationsByStatus(['registrationsData' => $registeredAtWeekend]);
         $data = $a->compose();
 
         $data = array_merge($data, ['reportingDate' => $globalReport->reportingDate]);
+
         return view('globalreports.details.applicationsbystatus', $data);
     }
 
@@ -587,7 +634,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         $responseData = [];
         foreach ($statusTypes as $type) {
-            $response = $this->getTeamMemberStatus($globalReport, $region, $type, $data);
+            $response            = $this->getTeamMemberStatus($globalReport, $region, $type, $data);
             $responseData[$type] = $response
                 ? $response->render()
                 : '';
@@ -602,7 +649,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         ];
 
         foreach ($potentialTypes as $type) {
-            $response = $this->getTeamMemberStatus($globalReport, $region, $type, $potentialsData);
+            $response            = $this->getTeamMemberStatus($globalReport, $region, $type, $potentialsData);
             $responseData[$type] = $response
                 ? $response->render()
                 : '';
@@ -652,6 +699,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         }
 
         $a = new Arrangements\TeamMembersByStatus(['teamMembersData' => $teamMembers]);
+
         return $a->compose();
     }
 
@@ -667,9 +715,9 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         $statsReportsList = [];
 
-        $total = 0;
-        $ontime = 0;
-        $late = 0;
+        $total       = 0;
+        $ontime      = 0;
+        $late        = 0;
         $resubmitted = 0;
 
         foreach ($statsReports as $report) {
@@ -843,7 +891,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         $responseData = [];
         foreach ($statusTypes as $type) {
-            $response = $this->getCoursesStatus($globalReport, $region, $type, $coursesData);
+            $response            = $this->getCoursesStatus($globalReport, $region, $type, $coursesData);
             $responseData[$type] = $response
                 ? $response->render()
                 : '';
@@ -862,31 +910,31 @@ class GlobalReportController extends ReportDispatchAbstractController
         }
 
         $targetData = null;
-        $type = null;
-        $byType = true;
-        $flatten = true;
+        $type       = null;
+        $byType     = true;
+        $flatten    = true;
         switch ($status) {
             case 'coursesthisweek':
                 $targetData = $this->getCoursesThisWeek($data, $globalReport, $region);
-                $type = 'completed';
+                $type       = 'completed';
                 break;
             case 'coursesnextmonth':
                 $targetData = $this->getCoursesNextMonth($data, $globalReport, $region);
-                $type = 'upcoming';
-                $flatten = false;
+                $type       = 'upcoming';
+                $flatten    = false;
                 break;
             case 'coursesupcoming':
                 $targetData = $this->getCoursesUpcoming($data, $globalReport, $region);
-                $type = 'upcoming';
-                $flatten = false;
+                $type       = 'upcoming';
+                $flatten    = false;
                 break;
             case 'coursescompleted':
                 $targetData = $this->getCoursesCompleted($data, $globalReport, $region);
-                $type = 'completed';
+                $type       = 'completed';
                 break;
             case 'coursesguestgames':
                 $targetData = $this->getCoursesGuestGames($data, $globalReport, $region);
-                $type = 'guests';
+                $type       = 'guests';
                 break;
         }
 
@@ -899,7 +947,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         $coursesByCenter = $a->compose();
         $coursesByCenter = $coursesByCenter['reportData'];
 
-        $statsReports = [];
+        $statsReports     = [];
         $centerReportData = [];
         foreach ($coursesByCenter as $centerName => $coursesData) {
             $a         = new Arrangements\CoursesWithEffectiveness([
@@ -909,7 +957,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             $centerRow = $a->compose();
 
             $centerReportData[$centerName] = $centerRow['reportData'];
-            $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Center::name($centerName)->first());
+            $statsReports[$centerName]     = $globalReport->getStatsReportByCenter(Center::name($centerName)->first());
         }
         ksort($centerReportData);
 
