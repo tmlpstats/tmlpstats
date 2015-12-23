@@ -61,7 +61,7 @@
                     <div id="statsreports-container"></div>
                 </div>
                 <div class="tab-pane" id="applications">
-                    <h3>Center Reports</h3>
+                    <h3>Applications</h3>
 
                     <div class="btn-group" role="group">
                         <button id ="applicationsoverview-button" type="button" class="btn">Overview</button>
@@ -101,13 +101,13 @@
                     <h3>Team Members of Interest</h3>
 
                     <div class="btn-group" role="group">
-                        <button id ="teammemberstatuswithdrawn-button" type="button" class="btn">Withdrawn</button>
                         <button id ="teammemberstatusctw-button" type="button" class="btn">CTW</button>
                         <button id ="teammemberstatustransfer-button" type="button" class="btn">Transfers</button>
+                        <button id ="teammemberstatuswithdrawn-button" type="button" class="btn">Withdrawn</button>
                     </div>
-                    <div id="teammemberstatuswithdrawn-container"></div>
                     <div id="teammemberstatusctw-container"></div>
                     <div id="teammemberstatustransfer-container"></div>
+                    <div id="teammemberstatuswithdrawn-container"></div>
                 </div>
                 <div class="tab-pane" id="potentials">
                     <h3>Team 2 Potentials</h3>
@@ -175,9 +175,9 @@
                 'coursesguestgames',
             ],
             [
-                'teammemberstatuswithdrawn',
                 'teammemberstatusctw',
                 'teammemberstatustransfer',
+                'teammemberstatuswithdrawn',
                 'teammemberstatuspotentials',
             ],
             [

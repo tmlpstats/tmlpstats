@@ -1,10 +1,9 @@
 <div class="table-responsive">
-    <div id="errors" class="alert alert-danger" role="alert" style="display:none">
-        <a href="#" class="close" data-dismiss="alert">&times;</a>
-        <span class="message-prefix" style="font-weight:bold">Error: </span>
-        <span class="message"></span>
-    </div>
 
+    <br/>
+    @include('reports.summaryboxes', compact('boxes'))
+
+    <br/>
     <table id="centerReportsTable" class="table want-datatable">
         <thead>
         <tr>

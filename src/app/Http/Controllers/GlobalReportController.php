@@ -667,6 +667,11 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         $statsReportsList = [];
 
+        $total = 0;
+        $ontime = 0;
+        $late = 0;
+        $resubmitted = 0;
+
         foreach ($statsReports as $report) {
 
             $statsReportData = [
@@ -681,10 +686,13 @@ class GlobalReportController extends ReportDispatchAbstractController
                 'officialReport'     => $report,
             ];
 
+            $timezone = $report->center->timezone;
+
             if ($report->isOnTime()) {
                 $statsReportData['onTime']             = true;
-                $statsReportData['officialSubmitTime'] = $report->submittedAt->setTimezone($report->center->timezone)
+                $statsReportData['officialSubmitTime'] = $report->submittedAt->setTimezone($timezone)
                                                                              ->format('M j @ g:ia T');
+                $ontime++;
             } else {
                 $otherReports = StatsReport::reportingDate($globalReport->reportingDate)
                                            ->byCenter($report->center)
@@ -704,31 +712,54 @@ class GlobalReportController extends ReportDispatchAbstractController
                     }
 
                     if ($officialReport && $statsReportData['onTime'] === true) {
-                        $statsReportData['officialSubmitTime'] = $officialReport->submittedAt->setTimezone($report->center->timezone)
+                        $statsReportData['officialSubmitTime'] = $officialReport->submittedAt->setTimezone($timezone)
                                                                                              ->format('M j @ g:ia T');
                         $statsReportData['officialReport']     = $officialReport;
 
-                        $statsReportData['revisionSubmitTime'] = $report->submittedAt->setTimezone($report->center->timezone)
+                        $statsReportData['revisionSubmitTime'] = $report->submittedAt->setTimezone($timezone)
                                                                                      ->format('M j @ g:ia T');
                         $statsReportData['revisedReport']      = $report;
+                        $resubmitted++;
                     } else {
                         $first                                 = $otherReports->first();
-                        $statsReportData['officialSubmitTime'] = $first->submittedAt->setTimezone($report->center->timezone)
+                        $statsReportData['officialSubmitTime'] = $first->submittedAt->setTimezone($timezone)
                                                                                     ->format('M j @ g:ia T');
                         $statsReportData['officialReport']     = $first;
                         if ($first->id != $report->id) {
-                            $statsReportData['revisionSubmitTime'] = $report->submittedAt->setTimezone($report->center->timezone)
+                            $statsReportData['revisionSubmitTime'] = $report->submittedAt->setTimezone($timezone)
                                                                                          ->format('M j @ g:ia T');
                             $statsReportData['revisedReport']      = $report;
+                            $resubmitted++;
                         }
+                        $late++;
                     }
                 }
             }
+            $total++;
             $statsReportsList[] = $statsReportData;
         }
         usort($statsReportsList, [get_class(), 'sortByCenterName']);
 
-        return view('globalreports.details.statsreports', compact('statsReportsList'));
+        $boxes = [
+            [
+                'stat'        => $ontime,
+                'description' => 'On Time',
+            ],
+            [
+                'stat'        => $late,
+                'description' => 'Late',
+            ],
+            [
+                'stat'        => $resubmitted,
+                'description' => 'Inaccurate',
+            ],
+            [
+                'stat'        => $total,
+                'description' => 'Total',
+            ],
+        ];
+
+        return view('globalreports.details.statsreports', compact('statsReportsList', 'boxes'));
     }
 
     protected function getCoursesThisWeek($coursesData, GlobalReport $globalReport, Region $region)
@@ -927,6 +958,4 @@ class GlobalReportController extends ReportDispatchAbstractController
     {
         return strcmp($a['center'], $b['center']);
     }
-
-
 }
