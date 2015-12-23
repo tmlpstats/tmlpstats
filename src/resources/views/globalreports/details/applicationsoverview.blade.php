@@ -1,4 +1,5 @@
 <div class="table-responsive">
+    <br/>
     <h4>Applications Overview</h4>
     <table class="table table-condensed table-striped table-hover applicationTable">
         <thead>
@@ -64,15 +65,15 @@
                     @if (isset($registrationData['applications']['out']))
                         <td class="data-point success"><strong>{{ $registrationData['applications']['out'] }}</strong></td>
                     @else
-                        <td class="data-point">0</td>
+                        <td class="data-point">-</td>
                     @endif
                     @if (isset($registrationData['applications']['waiting']))
                         <td class="data-point success"><strong>{{ $registrationData['applications']['waiting'] }}</strong></td>
                     @else
-                        <td class="data-point">0</td>
+                        <td class="data-point">-</td>
                     @endif
-                    <td class="data-point">{{ isset($registrationData['applications']['approved']) ? $registrationData['applications']['approved'] : 0 }}</td>
-                    <td class="data-point border-right">{{ isset($registrationData['applications']['withdrawn']) ? $registrationData['applications']['withdrawn'] : 0 }}</td>
+                    <td class="data-point">{{ isset($registrationData['applications']['approved']) ? $registrationData['applications']['approved'] : '-' }}</td>
+                    <td class="data-point border-right">{{ isset($registrationData['applications']['withdrawn']) ? $registrationData['applications']['withdrawn'] : '-' }}</td>
                 @endforeach
                 <td class="{{ $t1TotalClass }} data-point">{{ $t1Total }}</td>
                 <td class="{{ $t2TotalClass }} data-point">{{ $t2Total }}</td>
@@ -83,10 +84,10 @@
         <tr style="font-weight:bold">
             <td class="border-right">Totals</td>
             @foreach ($teamCounts as $team => $registrationData)
-                <td class="data-point">{{ isset($registrationData['applications']['out']) ? $registrationData['applications']['out'] : 0 }}</td>
-                <td class="data-point">{{ isset($registrationData['applications']['waiting']) ? $registrationData['applications']['waiting'] : 0 }}</td>
-                <td class="data-point">{{ isset($registrationData['applications']['approved']) ? $registrationData['applications']['approved'] : 0 }}</td>
-                <td class="data-point border-right">{{ isset($registrationData['applications']['withdrawn']) ? $registrationData['applications']['withdrawn'] : 0 }}</td>
+                <td class="data-point">{{ isset($registrationData['applications']['out']) ? $registrationData['applications']['out'] : '-' }}</td>
+                <td class="data-point">{{ isset($registrationData['applications']['waiting']) ? $registrationData['applications']['waiting'] : '-' }}</td>
+                <td class="data-point">{{ isset($registrationData['applications']['approved']) ? $registrationData['applications']['approved'] : '-' }}</td>
+                <td class="data-point border-right">{{ isset($registrationData['applications']['withdrawn']) ? $registrationData['applications']['withdrawn'] : '-' }}</td>
             @endforeach
             <td class="data-point">
                 <?php
