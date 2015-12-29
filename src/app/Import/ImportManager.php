@@ -14,6 +14,7 @@ use Cache;
 use Exception;
 use Log;
 use Mail;
+use TmlpStats\StatsReport;
 
 // Required for importing multiple sheets
 ini_set('max_execution_time', 240);
@@ -244,7 +245,7 @@ class ImportManager
 
         $submittedAt = $statsReport->submittedAt->copy()->setTimezone($center->timezone);
 
-        $due = static::getStatsDueDateTime($statsReport);
+        $due = $statsReport->due();
         $respondByDateTime = static::getRegionalRespondByDateTime($statsReport);
 
         $isLate = $submittedAt->gt($due);
@@ -364,31 +365,6 @@ class ImportManager
     }
 
     /**
-     * Get the configured stats due Carbon object
-     *
-     * @param $statsReport
-     *
-     * @return null|Carbon date
-     */
-    public static function getStatsDueDateTime($statsReport)
-    {
-        $due = static::getDateSetting('centerReportDue', $statsReport);
-
-        // Default value
-        if (!$due) {
-            $due = Carbon::create(
-                $statsReport->reportingDate->year,
-                $statsReport->reportingDate->month,
-                $statsReport->reportingDate->day,
-                19, 0, 59,
-                $statsReport->center->timezone
-            );
-        }
-
-        return $due;
-    }
-
-    /**
      * Get the configured regional statisitician response due Carbon bject
      *
      * @param $statsReport  StatsReport to use when comparing dates
@@ -397,7 +373,7 @@ class ImportManager
      */
     public static function getRegionalRespondByDateTime($statsReport)
     {
-        $due = static::getDateSetting('centerReportRespondByTime', $statsReport);
+        $due = StatsReport::getDateSetting('centerReportRespondByTime', $statsReport);
 
         // Default value
         if (!$due) {
@@ -408,73 +384,6 @@ class ImportManager
                 10, 0, 59,
                 $statsReport->center->timezone
             );
-        }
-
-        return $due;
-    }
-
-    /**
-     * Lookup the specified setting, and return a Carbon object if one is found
-     *
-     * @param $name         Name of setting field
-     * @param $statsReport  StatsReport to use when comparing dates
-     *
-     * @return null|Carbon  Date object
-     */
-    public static function getDateSetting($name, $statsReport)
-    {
-        $quarterDates = [
-            'classroom1Date',
-            'classroom2Date',
-            'classroom3Date',
-            'endWeekendDate',
-        ];
-        // You can also specify it as week1 for the first week in the quarter
-
-        $due = null;
-
-        // Try to find a due time setting for center first
-        $settings = Setting::get($name, $statsReport->center);
-        if ($settings) {
-            $dates = $settings->value
-                ? json_decode($settings->value, true)
-                : [];
-
-            foreach ($dates as $dateInfo) {
-                $timezone = isset($dateInfo['timezone']) && $dateInfo['timezone']
-                    ? $dateInfo['timezone']
-                    : $statsReport->center->timezone;
-
-                $reportingDate = $dateInfo['reportingDate'];
-
-                // Dates can be specified as a classroomDate
-                if (in_array($reportingDate, $quarterDates)) {
-                    $reportingDate = $statsReport->quarter->$reportingDate;
-                } else if ($reportingDate == 'week1') {
-                    $reportingDate = $statsReport->quarter->startWeekendDate->copy()->addWeek();
-                } else {
-                    $reportingDate = Carbon::parse($reportingDate);
-                }
-
-                if (isset($dateInfo['dueDate'])) {
-                    $date = $dateInfo['dueDate'] == '+1day'
-                        ? $reportingDate->copy()->addDay()
-                        : Carbon::parse($dateInfo['dueDate'], $timezone);
-                } else {
-                    $date = $reportingDate;
-                }
-
-                $time = $dateInfo['time'];
-
-                if ($reportingDate->eq($statsReport->reportingDate)) {
-                    $dateString = $date->toDateString();
-                    $due = Carbon::parse(
-                        "{$dateString} {$time}",
-                        $timezone
-                    );
-                    break;
-                }
-            }
         }
 
         return $due;
