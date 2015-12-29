@@ -51,6 +51,8 @@ class ImportManagerTest extends TestAbstract
      */
     public function testGetStatsDueDateTime($statsReport, $reportingDate, $settingData, $expectedResponse)
     {
+        $this->markTestSkipped('Needs to be moved to StatsReport');
+
         $this->unsetSetting('centerReportDue');
         if ($settingData !== null) {
             $this->setSetting('centerReportDue', json_encode($settingData));
