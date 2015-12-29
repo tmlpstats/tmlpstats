@@ -37,12 +37,13 @@ class StatsReport extends Model
         if ($name === 'quarter') {
             return Quarter::findForCenter($this->quarterId, $this->center);
         }
+
         return parent::__get($name);
     }
 
     public function setReportingDateAttribute($value)
     {
-        $date = $this->asDateTime($value);
+        $date                               = $this->asDateTime($value);
         $this->attributes['reporting_date'] = $date->toDateString();
     }
 
@@ -54,23 +55,18 @@ class StatsReport extends Model
         return $submittedAt->lte($this->due());
     }
 
+    /**
+     * Get the configured stats due Carbon object
+     *
+     * @return null|Carbon date
+     */
     public function due()
     {
-        // TODO: make this configurable
-        if ($this->reportingDate->eq($this->quarter->classroom2Date)) {
-            // Stats are due by 11:59 PM at the second classroom
-            // 11:59.59 PM local time on the reporting date.
-            return Carbon::create(
-                $this->reportingDate->year,
-                $this->reportingDate->month,
-                $this->reportingDate->day,
-                23, 59, 59,
-                $this->center->timezone
-            );
-        } else {
-            // Stats are due by 7:00 PM every other week
-            // 7:00.59 PM local time on the reporting date.
-            return Carbon::create(
+        $due = static::getDateSetting('centerReportDue', $this);
+
+        // Default value
+        if (!$due) {
+            $due = Carbon::create(
                 $this->reportingDate->year,
                 $this->reportingDate->month,
                 $this->reportingDate->day,
@@ -78,6 +74,8 @@ class StatsReport extends Model
                 $this->center->timezone
             );
         }
+
+        return $due;
     }
 
     public function isValidated()
@@ -93,8 +91,9 @@ class StatsReport extends Model
     public function getPoints()
     {
         $data = CenterStatsData::actual()->byStatsReport($this)
-            ->reportingDate($this->reportingDate)
-            ->first();
+                               ->reportingDate($this->reportingDate)
+                               ->first();
+
         return $data ? $data->points : null;
     }
 
@@ -150,7 +149,7 @@ class StatsReport extends Model
 
     public function scopeByRegion($query, Region $region)
     {
-        $childRegions = $region->getChildRegions();
+        $childRegions    = $region->getChildRegions();
         $searchRegionIds = [];
         if ($childRegions) {
             foreach ($childRegions as $child) {
@@ -161,8 +160,8 @@ class StatsReport extends Model
 
         return $query->whereIn('center_id', function ($query) use ($searchRegionIds) {
             $query->select('id')
-                ->from('centers')
-                ->whereIn('region_id', $searchRegionIds);
+                  ->from('centers')
+                  ->whereIn('region_id', $searchRegionIds);
         });
     }
 
@@ -196,6 +195,7 @@ class StatsReport extends Model
         if (!$quarter) {
             return $query;
         }
+
         return $query->whereQuarterId($quarter->id);
     }
 
@@ -210,6 +210,7 @@ class StatsReport extends Model
         if (!$lastQuarter) {
             return $query;
         }
+
         return $query->whereQuarterId($lastQuarter->id);
     }
 
@@ -256,5 +257,73 @@ class StatsReport extends Model
     public function tmlpGamesData()
     {
         return $this->hasMany('TmlpStats\TmlpGamesData');
+    }
+
+
+    /**
+     * Lookup the specified setting, and return a Carbon object if one is found
+     *
+     * @param $name         Name of setting field
+     * @param $statsReport  StatsReport to use when comparing dates
+     *
+     * @return null|Carbon  Date object
+     */
+    public static function getDateSetting($name, $statsReport)
+    {
+        $quarterDates = [
+            'classroom1Date',
+            'classroom2Date',
+            'classroom3Date',
+            'endWeekendDate',
+        ];
+        // You can also specify it as week1 for the first week in the quarter
+
+        $due = null;
+
+        // Try to find a due time setting for center first
+        $settings = Setting::get($name, $statsReport->center);
+        if ($settings) {
+            $dates = $settings->value
+                ? json_decode($settings->value, true)
+                : [];
+
+            foreach ($dates as $dateInfo) {
+                $timezone = isset($dateInfo['timezone']) && $dateInfo['timezone']
+                    ? $dateInfo['timezone']
+                    : $statsReport->center->timezone;
+
+                $reportingDate = $dateInfo['reportingDate'];
+
+                // Dates can be specified as a classroomDate
+                if (in_array($reportingDate, $quarterDates)) {
+                    $reportingDate = $statsReport->quarter->$reportingDate;
+                } else if ($reportingDate == 'week1') {
+                    $reportingDate = $statsReport->quarter->startWeekendDate->copy()->addWeek();
+                } else {
+                    $reportingDate = Carbon::parse($reportingDate);
+                }
+
+                if (isset($dateInfo['dueDate'])) {
+                    $date = $dateInfo['dueDate'] == '+1day'
+                        ? $reportingDate->copy()->addDay()
+                        : Carbon::parse($dateInfo['dueDate'], $timezone);
+                } else {
+                    $date = $reportingDate;
+                }
+
+                $time = $dateInfo['time'];
+
+                if ($reportingDate->eq($statsReport->reportingDate)) {
+                    $dateString = $date->toDateString();
+                    $due        = Carbon::parse(
+                        "{$dateString} {$time}",
+                        $timezone
+                    );
+                    break;
+                }
+            }
+        }
+
+        return $due;
     }
 }
