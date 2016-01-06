@@ -474,6 +474,10 @@ class GlobalReportController extends ReportDispatchAbstractController
                     $reportData[$centerName][$team]['attended'] = 0;
                 }
 
+                if (!$memberData->isActiveMember()) {
+                    continue;
+                }
+
                 $reportData[$centerName][$team]['total']++;
                 $totals[$team]['total']++;
                 if ($memberData->tdo) {

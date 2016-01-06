@@ -1,7 +1,7 @@
 <div class="table-responsive">
 
     <br/>
-    <h4>Team Members at the next Weekend</h4>
+    <h4>On Team After Next Weekend</h4>
     @include('reports.summaryboxes', compact('boxes'))
 
     <br/>

@@ -62,7 +62,7 @@ class TravelRoomingByTeamYear extends BaseArrangement
         }
 
         foreach ($teamMemberDataList as $teamMemberData) {
-            if ($teamMemberData->withdrawCodeId || $teamMemberData->xferOut) {
+            if ($teamMemberData->isActiveMember()) {
                 continue;
             }
 

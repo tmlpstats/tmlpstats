@@ -53,6 +53,11 @@ class TeamMemberData extends Model
         }
     }
 
+    public function isActiveMember()
+    {
+        return ($this->withdrawCodeId === null && !$this->xferOut);
+    }
+
     public function scopeByStatsReport($query, StatsReport $statsReport)
     {
         return $query->whereStatsReportId($statsReport->id);
