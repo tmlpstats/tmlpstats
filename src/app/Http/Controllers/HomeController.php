@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use Auth;
 use Illuminate\Http\Request;
 use TmlpStats\GlobalReport;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
@@ -18,9 +19,29 @@ class HomeController extends Controller
     /**
      * Show the application dashboard to the user.
      *
-     * @return Response
+     * Local statisticians are sent to their center's dashboard
+     * Regional statisticians and admins go to the reginal overview dashboard
+     *
+     * @return \View
      */
     public function index(Request $request)
+    {
+        if (Auth::user()->hasRole('localStatistician')) {
+            $centerAbbr = strtolower(Auth::user()->center->abbreviation);
+            return redirect("center/{$centerAbbr}");
+        } else {
+            return $this->regionOverview($request);
+        }
+    }
+
+    /**
+     * Show the regional overview dashboard.
+     *
+     * @param Request $request
+     *
+     * @return \View
+     */
+    public function regionOverview(Request $request)
     {
         if (Gate::denies('index', StatsReport::class)) {
             // If they aren't allowed to see the full home page, just return a blank home page

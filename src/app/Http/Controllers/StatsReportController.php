@@ -428,7 +428,7 @@ class StatsReportController extends ReportDispatchAbstractController
         return $response;
     }
 
-    protected function getSummaryPageData(StatsReport $statsReport)
+    public function getSummaryPageData(StatsReport $statsReport)
     {
         $centerStatsData = App::make(CenterStatsController::class)
             ->getByStatsReport($statsReport, $statsReport->reportingDate);

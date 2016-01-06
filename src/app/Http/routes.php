@@ -55,6 +55,7 @@ Route::get('m/{abbr}', 'ReportsController@mobileDash');
 
 // Center Info
 Route::resource('centers', 'CenterController');
+Route::get('center/{abbr}', 'CenterController@dashboard');
 
 // Regions
 Route::resource('regions', 'RegionController');

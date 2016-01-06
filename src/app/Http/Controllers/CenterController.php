@@ -2,11 +2,13 @@
 
 namespace TmlpStats\Http\Controllers;
 
+use App;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use TmlpStats\Center;
 use TmlpStats\GlobalReport;
 use TmlpStats\Http\Requests;
+use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\StatsReport;
 
 class CenterController extends Controller
@@ -35,6 +37,7 @@ class CenterController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
+     *
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -46,6 +49,7 @@ class CenterController extends Controller
      * Display the specified resource.
      *
      * @param  int $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -57,13 +61,13 @@ class CenterController extends Controller
         $roster = $center->getTeamRoster();
 
         $latestReport = StatsReport::byCenter($center)
-            ->orderBy('reporting_date', 'desc')
-            ->first();
+                                   ->orderBy('reporting_date', 'desc')
+                                   ->first();
 
         $statsReportsThisWeek = StatsReport::byCenter($center)
-            ->reportingDate($latestReport->reportingDate)
-            ->get();
-        $reportsThisWeek = [];
+                                           ->reportingDate($latestReport->reportingDate)
+                                           ->get();
+        $reportsThisWeek      = [];
         foreach ($statsReportsThisWeek as $report) {
             $reportsThisWeek[$report->id] = $report->reportingDate->format('M d, Y');
         }
@@ -75,6 +79,7 @@ class CenterController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -86,7 +91,8 @@ class CenterController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
-     * @param  int $id
+     * @param  int                      $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -98,10 +104,46 @@ class CenterController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
         //
+    }
+
+    public function dashboard($abbr)
+    {
+        $center = Center::abbreviation($abbr)->first();
+        if (!$center) {
+            abort(404);
+        }
+
+        $statsReport = StatsReport::byCenter($center)
+                                  ->orderBy('reporting_date', 'desc')
+                                  ->submitted()
+                                  ->orderBy('submitted_at')
+                                  ->first();
+
+        $sheetPath = null;
+        $sheetUrl  = null;
+        $weekData  = [];
+
+        if ($statsReport) {
+            $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+            $sheetUrl  = $sheetPath
+                ? url("/statsreports/{$statsReport->id}/download")
+                : null;
+
+            $weekData = App::make(StatsReportController::class)->getSummaryPageData($statsReport);
+        }
+
+        $data = compact(
+            'center',
+            'statsReport',
+            'sheetUrl'
+        );
+
+        return view('centers.dashboard')->with(array_merge($data, $weekData));
     }
 }
