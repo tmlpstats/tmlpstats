@@ -37,9 +37,11 @@ abstract class TeamMemberWeeklyValue extends BaseArrangement
                 if ($data->withdrawCodeId !== null) {
                     $member['withdrawn'] = true;
                 }
-                $member[$date] = [
-                    'value' => $this->getValue($data),
-                ];
+                if (!$data->xferOut) {
+                    $member[$date] = [
+                        'value' => $this->getValue($data),
+                    ];
+                }
 
                 $members[$team][$data->teamMember->id] = $member;
             }

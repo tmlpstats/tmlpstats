@@ -767,11 +767,11 @@ class StatsReportController extends ReportDispatchAbstractController
         $boxes = [
             [
                 'stat'        => $t1Continuing,
-                'description' => 'T1 Expected',
+                'description' => 'Team 1',
             ],
             [
                 'stat'        => $t2Continuing,
-                'description' => 'T2 Expected',
+                'description' => 'Team 2',
             ],
             [
                 'stat'        => $completingCount,

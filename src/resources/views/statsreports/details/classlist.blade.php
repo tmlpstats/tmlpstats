@@ -39,8 +39,20 @@
                                 }
                                 ?></td>
                             @if ($group != 'withdrawn')
-                                <td class="data-point">{{ $memberData->gitw ? 'E' : 'I' }}</td>
-                                <td class="data-point">{{ $memberData->tdo ? 'Y' : 'N' }}</td>
+                                <td class="data-point">
+                                    @if ($memberData->isActiveMember())
+                                        {{ $memberData->gitw ? 'E' : 'I' }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td class="data-point">
+                                    @if ($memberData->isActiveMember())
+                                        {{ $memberData->tdo ? 'Y' : 'N' }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                             @else
                                 @if ($memberData->withdrawCode)
                                     <td title="{{ $memberData->withdrawCode->code }}">{{ $memberData->withdrawCode->display }}</td>
