@@ -54,7 +54,19 @@
                 <div class="tab-pane" id="regionalstats">
                     <h3>Regional Games</h3>
 
+                    <div class="btn-group" role="group">
+                        <button id ="regionalstats-button" type="button" class="btn">Scoreboard</button>
+                        <button id ="gamesbycenter-button" type="button" class="btn">By Center</button>
+                        @if ($globalReport->reportingDate->gte($quarter->classroom2Date))
+                        <button id ="repromisesbycenter-button" type="button" class="btn">Repromises</button>
+                        @endif
+                    </div>
+
                     <div id="regionalstats-container"></div>
+                    <div id="gamesbycenter-container"></div>
+                    @if ($globalReport->reportingDate->gte($quarter->classroom2Date))
+                    <div id="repromisesbycenter-container"></div>
+                    @endif
                 </div>
                 <div class="tab-pane" id="statsreports">
                     <h3>Center Reports</h3>
@@ -144,6 +156,11 @@
             'applicationst2fromweekend',
             'traveloverview',
             'tdosummary',
+            'regionalstats',
+            'gamesbycenter',
+            @if ($globalReport->reportingDate->gte($quarter->classroom2Date))
+            'repromisesbycenter',
+            @endif
         ];
 
         var batchedPages = [
@@ -189,6 +206,13 @@
             [
                 'potentialsoverview',
                 'potentialsdetails',
+            ],
+            [
+                'regionalstats',
+                'gamesbycenter',
+                @if ($globalReport->reportingDate->gte($quarter->classroom2Date))
+                'repromisesbycenter',
+                @endif
             ],
         ];
 

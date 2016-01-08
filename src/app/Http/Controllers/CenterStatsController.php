@@ -40,6 +40,7 @@ class CenterStatsController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
+     *
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -51,6 +52,7 @@ class CenterStatsController extends Controller
      * Display the specified resource.
      *
      * @param  int $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -62,6 +64,7 @@ class CenterStatsController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -73,7 +76,8 @@ class CenterStatsController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
-     * @param  int $id
+     * @param  int                      $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -85,6 +89,7 @@ class CenterStatsController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int $id
+     *
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
@@ -95,9 +100,9 @@ class CenterStatsController extends Controller
     public function getByGlobalReport(GlobalReport $globalReport, Region $region = null, Carbon $onlyThisDate = null)
     {
         $statsReports = $globalReport->statsReports()
-            ->validated()
-            ->byRegion($region)
-            ->get();
+                                     ->validated()
+                                     ->byRegion($region)
+                                     ->get();
 
         $cumulativeData = [];
         foreach ($statsReports as $statsReport) {
@@ -110,13 +115,13 @@ class CenterStatsController extends Controller
                 }
 
                 $dateString = $week->reportingDate->toDateString();
-                $type = $week->type;
+                $type       = $week->type;
 
                 if (isset($cumulativeData[$dateString][$type])) {
                     $weekData = $cumulativeData[$dateString][$type];
                 } else {
-                    $weekData = new \stdClass();
-                    $weekData->type = $type;
+                    $weekData                = new \stdClass();
+                    $weekData->type          = $type;
                     $weekData->reportingDate = $week->reportingDate;
                 }
 
@@ -131,11 +136,11 @@ class CenterStatsController extends Controller
         }
 
         $globalReportData = [];
-        $count = count($statsReports);
+        $count            = count($statsReports);
         foreach ($cumulativeData as $date => $week) {
             foreach ($week as $type => $data) {
                 // GITW is calculated as an average, so we need the total first
-                $total = $data->gitw;
+                $total      = $data->gitw;
                 $data->gitw = round($total / $count);
 
                 $globalReportData[] = $data;
@@ -145,27 +150,50 @@ class CenterStatsController extends Controller
         return $globalReportData;
     }
 
+    public function getByGlobalReportUnprocessed(GlobalReport $globalReport, Region $region = null, Carbon $onlyThisDate = null, $includeOriginalPromise = false)
+    {
+        $statsReports = $globalReport->statsReports()
+                                     ->validated()
+                                     ->byRegion($region)
+                                     ->get();
+
+        $globalReportData = [];
+        foreach ($statsReports as $statsReport) {
+            $statsReportData  = $this->getByStatsReport($statsReport, $onlyThisDate, $includeOriginalPromise);
+            $globalReportData = array_merge($globalReportData, $statsReportData);
+        }
+
+        return $globalReportData;
+    }
+
     protected $statsReport = null;
 
-    public function getByStatsReport(StatsReport $statsReport, Carbon $onlyThisDate = null)
+    public function getByStatsReport(StatsReport $statsReport, Carbon $onlyThisDate = null, $includeOriginalPromise = false)
     {
         $this->statsReport = $statsReport;
 
         $centerStatsData = [];
         if ($onlyThisDate) {
             // Get only the data for the requested date
-            $centerStatsData = $this->getWeekData($onlyThisDate, $statsReport->center, $statsReport->quarter);
+            $centerStatsData = $this->getWeekData(
+                $onlyThisDate,
+                $statsReport->center,
+                $statsReport->quarter,
+                false,
+                $includeOriginalPromise
+            );
         } else {
             // Get all weeks for stats report
             $week = clone $statsReport->quarter->startWeekendDate;
             $week->addWeek();
             while ($week->lte($statsReport->quarter->endWeekendDate)) {
 
-                $weekData = $this->getWeekData(
+                $weekData        = $this->getWeekData(
                     $week,
                     $statsReport->center,
                     $statsReport->quarter,
-                    $week->gt($statsReport->reportingDate)
+                    $week->gt($statsReport->reportingDate),
+                    $includeOriginalPromise
                 );
                 $centerStatsData = array_merge($centerStatsData, $weekData);
 
@@ -176,12 +204,18 @@ class CenterStatsController extends Controller
         return $centerStatsData;
     }
 
-    public function getWeekData(Carbon $date, Center $center, Quarter $quarter, $excludeActual = false)
+    public function getWeekData(Carbon $date, Center $center, Quarter $quarter, $excludeActual = false, $includeOriginalPromise = false)
     {
-        $output = [];
+        $output   = [];
         $output[] = $this->getPromiseData($date, $center, $quarter);
         if (!$excludeActual) {
             $output[] = $this->getActualData($date, $center, $quarter);
+        }
+
+        if ($includeOriginalPromise) {
+            $data       = $this->getPromiseData($date, $center, $quarter, true);
+            $data->type = 'original';
+            $output[]   = $data;
         }
 
         return $output;
@@ -193,25 +227,29 @@ class CenterStatsController extends Controller
      * Get global report by date, and cache it for later
      *
      * @param Carbon $reportingDate
+     *
      * @return mixed
      */
     protected function getGlobalReport(Carbon $reportingDate)
     {
         $date = $reportingDate->toDateString();
         if (!isset($this->globalReportCache[$date])) {
-            $this->globalReportCache[$date] = GlobalReport::reportingDate($reportingDate)->with('statsReports')->first();
+            $this->globalReportCache[$date] = GlobalReport::reportingDate($reportingDate)
+                                                          ->with('statsReports')
+                                                          ->first();
         }
+
         return $this->globalReportCache[$date];
     }
 
     // TODO: Refactor this so we're not reusing basically the same code as in importer
-    public function getPromiseData(Carbon $date, Center $center, Quarter $quarter)
+    public function getPromiseData(Carbon $date, Center $center, Quarter $quarter, $originalPromise = false)
     {
         $globalReport = null;
-        $statsReport = null;
+        $statsReport  = null;
 
         // Usually, promises will be saved in the global report for the expected week
-        if ($this->statsReport->reportingDate->gte($quarter->classroom2Date) && $date->gt($quarter->classroom2Date)) {
+        if ($this->statsReport->reportingDate->gte($quarter->classroom2Date) && $date->gt($quarter->classroom2Date) && !$originalPromise) {
             $globalReport = $this->getGlobalReport($quarter->classroom2Date);
         } else {
             $firstWeek = clone $quarter->startWeekendDate;
@@ -230,9 +268,9 @@ class CenterStatsController extends Controller
         $promise = null;
         if ($statsReport) {
             $promise = CenterStatsData::promise()
-                ->reportingDate($date)
-                ->byStatsReport($statsReport)
-                ->first();
+                                      ->reportingDate($date)
+                                      ->byStatsReport($statsReport)
+                                      ->first();
         }
 
         // If not, search from the beginning until we find it
@@ -248,9 +286,9 @@ class CenterStatsController extends Controller
         }
 
         return CenterStatsData::promise()
-            ->reportingDate($date)
-            ->byStatsReport($statsReport)
-            ->first();
+                              ->reportingDate($date)
+                              ->byStatsReport($statsReport)
+                              ->first();
     }
 
     // TODO: Refactor this so we're not reusing basically the same code as in importer
@@ -269,9 +307,9 @@ class CenterStatsController extends Controller
         $actual = null;
         if ($statsReport) {
             $actual = CenterStatsData::actual()
-                ->reportingDate($date)
-                ->byStatsReport($statsReport)
-                ->first();
+                                     ->reportingDate($date)
+                                     ->byStatsReport($statsReport)
+                                     ->first();
         }
 
         // If not, search from the beginning until we find it
@@ -286,12 +324,13 @@ class CenterStatsController extends Controller
         }
 
         return CenterStatsData::actual()
-            ->reportingDate($date)
-            ->byStatsReport($statsReport)
-            ->first();
+                              ->reportingDate($date)
+                              ->byStatsReport($statsReport)
+                              ->first();
     }
 
     protected $firstStatsReportCache = [];
+
     public function findFirstWeek(Center $center, Quarter $quarter, $type)
     {
         // Promises should all be saved during the same week. Let's remember where we found the
@@ -301,15 +340,15 @@ class CenterStatsController extends Controller
         }
 
         $statsReportResult = DB::table('stats_reports')
-            ->select('stats_reports.id')
-            ->join('center_stats_data', 'center_stats_data.stats_report_id', '=', 'stats_reports.id')
-            ->join('global_report_stats_report', 'global_report_stats_report.stats_report_id', '=', 'stats_reports.id')
-            ->join('global_reports', 'global_reports.id', '=', 'global_report_stats_report.global_report_id')
-            ->where('stats_reports.center_id', '=', $center->id)
-            ->where('global_reports.reporting_date', '>', $quarter->startWeekendDate)
-            ->where('center_stats_data.type', '=', $type)
-            ->orderBy('global_reports.reporting_date', 'ASC')
-            ->first();
+                               ->select('stats_reports.id')
+                               ->join('center_stats_data', 'center_stats_data.stats_report_id', '=', 'stats_reports.id')
+                               ->join('global_report_stats_report', 'global_report_stats_report.stats_report_id', '=', 'stats_reports.id')
+                               ->join('global_reports', 'global_reports.id', '=', 'global_report_stats_report.global_report_id')
+                               ->where('stats_reports.center_id', '=', $center->id)
+                               ->where('global_reports.reporting_date', '>', $quarter->startWeekendDate)
+                               ->where('center_stats_data.type', '=', $type)
+                               ->orderBy('global_reports.reporting_date', 'ASC')
+                               ->first();
 
         if ($statsReportResult) {
             $this->firstStatsReportCache[$center->id] = StatsReport::find($statsReportResult->id);

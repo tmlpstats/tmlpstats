@@ -10,6 +10,7 @@
 @if (!$reportData)
     <p>No game information available.</p>
 @else
+    <br/>
     <div class="container">
         @for ($k = 0; $k < 2; $k++)
             <div class="row">
