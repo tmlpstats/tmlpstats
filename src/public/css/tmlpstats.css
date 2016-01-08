@@ -25,6 +25,14 @@ body {
     color: orange !important;
 }
 
+.bg-green {
+    background-color: #00a000 !important;
+}
+
+.bg-red {
+    background-color: red !important;
+}
+
 .loader {
     position: relative;
     width: 80px;
@@ -59,10 +67,10 @@ td.border-left, th.border-left {
 td.border-right, th.border-right {
     border-right: 2px solid #DDD !important;
 }
-td.border-top, th.border-top {
+td.border-top, th.border-top, tr.border-top {
     border-top: 2px solid #DDD !important;
 }
-td.border-bottom, th.border-bottom {
+td.border-bottom, th.border-bottom, tr.border-bottom {
     border-bottom: 2px solid #DDD !important;
 }
 

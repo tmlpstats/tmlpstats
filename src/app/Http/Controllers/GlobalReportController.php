@@ -77,10 +77,13 @@ class GlobalReportController extends ReportDispatchAbstractController
             ? ReportToken::get($globalReport)
             : null;
 
+        $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
+
         return view('globalreports.show', compact(
             'globalReport',
             'region',
-            'reportToken'
+            'reportToken',
+            'quarter'
         ));
     }
 
@@ -176,6 +179,12 @@ class GlobalReportController extends ReportDispatchAbstractController
                 break;
             case 'regionalstats':
                 $response = $this->getRegionalStats($globalReport, $region);
+                break;
+            case 'gamesbycenter':
+                $response = $this->getGamesByCenter($globalReport, $region);
+                break;
+            case 'repromisesbycenter':
+                $response = $this->getRepromisesByCenter($globalReport, $region);
                 break;
             case 'statsreports':
                 $response = $this->getCenterStatsReports($globalReport, $region);
@@ -273,6 +282,122 @@ class GlobalReportController extends ReportDispatchAbstractController
         $data = $a->compose();
 
         return view('reports.centergames.milestones', $data);
+    }
+
+    protected function getGamesByCenter(GlobalReport $globalReport, Region $region)
+    {
+        $globalReportData = App::make(CenterStatsController::class)
+                               ->getByGlobalReportUnprocessed($globalReport, $region, $globalReport->reportingDate);
+        if (!$globalReportData) {
+            return null;
+        }
+
+        $centersData = [];
+        foreach ($globalReportData as $centerStatsData) {
+            $centerName = $centerStatsData->statsReport->center->name;
+
+            $centersData[$centerName][] = $centerStatsData;
+        }
+
+        $reportData = [];
+        foreach ($centersData as $centerName => $centerData) {
+            $a                       = new Arrangements\GamesByWeek($centerData);
+            $dataReport              = $a->compose();
+            $reportData[$centerName] = $dataReport['reportData'][$globalReport->reportingDate->toDateString()];
+        }
+
+        $totals = [];
+        foreach ($reportData as $centerName => $centerData) {
+            foreach ($centerData['promise'] as $game => $gameData) {
+                if (!isset($totals[$game])) {
+                    $totals[$game]['promise'] = 0;
+                    if (isset($centerData['actual'])) {
+                        $totals[$game]['actual'] = 0;
+                    }
+                }
+
+                $totals[$game]['promise'] += $centerData['promise'][$game];
+                if (isset($centerData['actual'])) {
+                    $totals[$game]['actual'] += $centerData['actual'][$game];
+                }
+            }
+        }
+
+        $totals['gitw']['promise'] = round($totals['gitw']['promise'] / count($reportData));
+        if (isset($centerData['actual'])) {
+            $totals['gitw']['actual'] = round($totals['gitw']['actual'] / count($reportData));
+        }
+
+        $includeActual = true;
+
+        return view('globalreports.details.centergames', compact(
+            'reportData',
+            'totals',
+            'includeActual'
+        ));
+    }
+
+    protected function getRepromisesByCenter(GlobalReport $globalReport, Region $region)
+    {
+        $globalReportData = App::make(CenterStatsController::class)
+                               ->getByGlobalReportUnprocessed($globalReport, $region, $globalReport->reportingDate, true);
+        if (!$globalReportData) {
+            return null;
+        }
+
+        $centersData = [];
+        foreach ($globalReportData as $centerStatsData) {
+            $centerName = $centerStatsData->statsReport->center->name;
+
+            $centersData[$centerName][] = $centerStatsData;
+        }
+
+        $reportData = [];
+        foreach ($centersData as $centerName => $centerData) {
+            $a                       = new Arrangements\GamesByWeek($centerData);
+            $dataReport              = $a->compose();
+            $reportData[$centerName] = $dataReport['reportData'][$globalReport->reportingDate->toDateString()];
+        }
+
+        $totals = [];
+        foreach ($reportData as $centerName => $centerData) {
+            foreach ($centerData['promise'] as $game => $gameData) {
+                if (!isset($totals[$game])) {
+                    $totals[$game]['original'] = 0;
+                    $totals[$game]['promise']  = 0;
+                    $totals[$game]['delta']    = 0;
+                    if (isset($centerData['actual'])) {
+                        $totals[$game]['actual'] = 0;
+                    }
+                }
+
+                $totals[$game]['original'] += $centerData['original'][$game];
+                $totals[$game]['promise'] += $centerData['promise'][$game];
+                $totals[$game]['delta'] = ($totals[$game]['promise'] - $totals[$game]['original']);
+                if (isset($centerData['actual'])) {
+                    $totals[$game]['actual'] += $centerData['actual'][$game];
+                }
+            }
+        }
+
+        $totals['gitw']['original'] = round($totals['gitw']['original'] / count($reportData));
+        $totals['gitw']['promise']  = round($totals['gitw']['promise'] / count($reportData));
+        $totals['gitw']['delta']    = ($totals['gitw']['promise'] - $totals['gitw']['original']);
+        if (isset($centerData['actual'])) {
+            $totals['gitw']['actual'] = round($totals['gitw']['actual'] / count($reportData));
+        }
+
+        $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
+
+        $includeActual   = $globalReport->reportingDate->eq($quarter->endWeekendDate);
+        $includeOriginal = true;
+
+        return view('globalreports.details.centergames', compact(
+            'reportData',
+            'totals',
+            'includeActual',
+            'includeOriginal'
+        ));
     }
 
     protected function getTmlpRegistrationsByStatus(GlobalReport $globalReport, Region $region)
