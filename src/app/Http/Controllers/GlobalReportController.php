@@ -322,6 +322,7 @@ class GlobalReportController extends ReportDispatchAbstractController
                 }
             }
         }
+        ksort($reportData);
 
         $totals['gitw']['promise'] = round($totals['gitw']['promise'] / count($reportData));
         if (isset($centerData['actual'])) {
@@ -339,14 +340,20 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getRepromisesByCenter(GlobalReport $globalReport, Region $region)
     {
+        $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
+
         $globalReportData = App::make(CenterStatsController::class)
-                               ->getByGlobalReportUnprocessed($globalReport, $region, $globalReport->reportingDate, true);
+                               ->getByGlobalReportUnprocessed($globalReport, $region, $quarter->endWeekendDate, true);
         if (!$globalReportData) {
             return null;
         }
 
         $centersData = [];
         foreach ($globalReportData as $centerStatsData) {
+            if (!$centerStatsData) {
+                continue;
+            }
+
             $centerName = $centerStatsData->statsReport->center->name;
 
             $centersData[$centerName][] = $centerStatsData;
@@ -356,7 +363,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         foreach ($centersData as $centerName => $centerData) {
             $a                       = new Arrangements\GamesByWeek($centerData);
             $dataReport              = $a->compose();
-            $reportData[$centerName] = $dataReport['reportData'][$globalReport->reportingDate->toDateString()];
+            $reportData[$centerName] = $dataReport['reportData'][$quarter->endWeekendDate->toDateString()];
         }
 
         $totals = [];
@@ -379,6 +386,7 @@ class GlobalReportController extends ReportDispatchAbstractController
                 }
             }
         }
+        ksort($reportData);
 
         $totals['gitw']['original'] = round($totals['gitw']['original'] / count($reportData));
         $totals['gitw']['promise']  = round($totals['gitw']['promise'] / count($reportData));
@@ -386,8 +394,6 @@ class GlobalReportController extends ReportDispatchAbstractController
         if (isset($centerData['actual'])) {
             $totals['gitw']['actual'] = round($totals['gitw']['actual'] / count($reportData));
         }
-
-        $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
 
         $includeActual   = $globalReport->reportingDate->eq($quarter->endWeekendDate);
         $includeOriginal = true;
