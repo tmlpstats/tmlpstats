@@ -19,6 +19,13 @@
     }
 ?>
 <br>
+<h5>
+    @if ($includeOriginal)
+        Data for last week of the quarter
+    @else
+        Data from this week
+    @endif
+</h5>
 <div class="table-responsive">
     <table class="table table-condensed table-bordered">
         <thead>
