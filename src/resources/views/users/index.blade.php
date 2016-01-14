@@ -3,6 +3,8 @@
 @section('content')
 <h2>Users</h2>
 <a href="{{ url('/admin/users/create') }}">+ Add one</a>
+<br/>
+<a href="{{ url('/users/invites/create') }}">+ Invite User</a>
 <br/><br/>
 
 <div class="table-responsive">

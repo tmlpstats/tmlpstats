@@ -26,6 +26,11 @@ Route::post('admin/centers', 'AdminCenterController@batchUpdate');
 
 Route::resource('admin/users', 'UserController');
 
+
+Route::resource('users/invites', 'InviteController');
+Route::get('invites/{token}', 'InviteController@viewInvite');
+Route::post('invites/{token}', 'InviteController@acceptInvite');
+
 // Stats Reports
 Route::resource('statsreports', 'StatsReportController');
 Route::post('statsreports/{id}/submit', 'StatsReportController@submit');
