@@ -26,8 +26,9 @@ Route::post('admin/centers', 'AdminCenterController@batchUpdate');
 
 Route::resource('admin/users', 'UserController');
 
-
+// Invites
 Route::resource('users/invites', 'InviteController');
+Route::delete('users/invites/{id}/revoke', 'InviteController@revokeInvite');
 Route::get('invites/{token}', 'InviteController@viewInvite');
 Route::post('invites/{token}', 'InviteController@acceptInvite');
 

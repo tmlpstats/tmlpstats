@@ -191,7 +191,9 @@ class InviteController extends Controller
             }
         }
 
-        $invite->save();
+        if ($invite->isDirty()) {
+            $invite->save();
+        }
 
         if ($request->has('resend_invite')) {
             // TODO: display result messages
@@ -227,6 +229,34 @@ class InviteController extends Controller
             : 'users/invites';
 
         return redirect($redirect);
+    }
+
+    /**
+     * Revoke an invite
+     *
+     * @param Request $request
+     * @param         $id
+     *
+     * @return array
+     */
+    protected function revokeInvite(Request $request, $id)
+    {
+        $invite = Invite::findOrFail($id);
+
+        $this->authorize($invite);
+
+        $response = [
+            'invite' => $id,
+        ];
+        if ($invite->delete()) {
+            $response['success'] = true;
+            $response['message'] = "Invitation for {$invite->firstName} revoked.";
+        } else {
+            $response['success'] = false;
+            $response['message'] = 'Unable to revoke invitation. Please try again.';
+        }
+
+        return $response;
     }
 
     /**

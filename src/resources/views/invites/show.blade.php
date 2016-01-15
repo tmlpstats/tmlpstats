@@ -30,6 +30,15 @@
                 <th>Center:</th>
                 <td>{{ $invite->center ? $invite->center->name : '' }}</td>
             </tr>
+            <tr>
+                <th></th>
+                <td>
+                    {!! Form::model($invite, ['url' => "/users/invites/{$invite->id}", 'method' => 'PUT', 'class' => 'form-horizontal']) !!}
+                    {!! Form::hidden('resend_invite', 1) !!}
+                    {!! Form::submit('Resend Invite', ['class' => 'btn btn-default btn-primary']) !!}
+                    {!! Form::close() !!}
+                </td>
+            </tr>
         </table>
     </div>
 

@@ -42,6 +42,15 @@
     </div>
 </div>
 
+@if ($submitButtonText == 'Update')
+    <div class="form-group">
+        {!! Form::label('resend_invite', 'Resend Invite:', ['class' => 'col-sm-2 control-label']) !!}
+        <div class="col-sm-5">
+            {!! Form::checkbox('resend_invite', 1, false, ['class' => 'form-control']) !!}
+        </div>
+    </div>
+@endif
+
 <div class="btn-group col-sm-offset-2">
     {!! link_to($submitButtonText == 'Create' ? url('users/invites') : URL::previous(), 'Cancel', ['class' => 'btn btn-default']) !!}
     {!! Form::submit($submitButtonText, ['class' => 'btn btn-default btn-primary']) !!}
