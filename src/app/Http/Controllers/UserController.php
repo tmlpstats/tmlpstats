@@ -2,6 +2,8 @@
 namespace TmlpStats\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Log;
+use Mail;
 use TmlpStats\User;
 use TmlpStats\Role;
 use TmlpStats\Center;
@@ -267,4 +269,57 @@ class UserController extends Controller
 
         return redirect('user/profile');
     }
+
+    /**
+     * Send activation email
+     *
+     * @param Request $request
+     * @param User    $user
+     *
+     * @return mixed
+     */
+    protected function sendActivate(Request $request, User $user)
+    {
+        $activateUrl = url("/users/activate/{$user->token}");
+
+        try {
+            Mail::send('emails.activate', compact('invite', 'activateUrl'),
+                function($message) use ($user) {
+                    // Only send email to person in production
+                    if (env('APP_ENV') === 'prod') {
+                        $message->to($user->email);
+                    } else {
+                        $message->to(env('ADMIN_EMAIL'));
+                    }
+
+                    $message->subject("Your TMLP Stats Account Invitation");
+                });
+            $successMessage = "Success! You are officially registered. We sent an email to {$user->email}. Please follow the instructions in the email to activate your account.";
+            if (env('APP_ENV') === 'prod') {
+                Log::info("User activation email sent to {$user->email} for invite {$user->id}");
+            } else {
+                Log::info("User activation email sent to " . env('ADMIN_EMAIL') . " for invite {$user->id}");
+                $successMessage .= "<br/><br/><strong>Since this is development, we sent it to " . env('ADMIN_EMAIL') . " instead.</strong>";
+            }
+            $result['success'][] = $successMessage;
+
+        } catch (\Exception $e) {
+            Log::error("Exception caught sending user activation email: " . $e->getMessage());
+            $result['error'][] = "Failed to send user activation email to {$user->firstName}. Please try again.";
+        }
+
+        return $result;
+    }
+
+    // TODO: add feature to activate new accounts
+    // TODO: update invite code
+    //public function activate(Request $request, $token)
+    //{
+    //    $user = User::token($token)->first();
+    //    if ($user) {
+    //        abort(404);
+    //    }
+    //
+    //    $activateUrl = url("/user/activate/{$user->token}");
+    //}
 }

@@ -6,8 +6,10 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 
 use TmlpStats\Center;
 use TmlpStats\GlobalReport;
+use TmlpStats\Invite;
 use TmlpStats\Policies\CenterPolicy;
 use TmlpStats\Policies\GlobalReportPolicy;
+use TmlpStats\Policies\InvitePolicy;
 use TmlpStats\Policies\RegionPolicy;
 use TmlpStats\Policies\ReportTokenPolicy;
 use TmlpStats\Policies\StatsReportPolicy;
@@ -31,6 +33,7 @@ class AuthServiceProvider extends ServiceProvider
         ReportToken::class  => ReportTokenPolicy::class,
         StatsReport::class  => StatsReportPolicy::class,
         User::class         => UserPolicy::class,
+        Invite::class       => InvitePolicy::class,
     ];
 
     /**
