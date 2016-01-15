@@ -1,7 +1,7 @@
 @extends('template')
 
 @section('content')
-    <h2>Add a User</h2>
+    <h2>Create an Invitation</h2>
 
     @include('errors.list')
 
