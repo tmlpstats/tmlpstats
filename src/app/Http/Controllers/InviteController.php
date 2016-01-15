@@ -105,7 +105,6 @@ class InviteController extends Controller
 
         $invite->save();
 
-        // TODO: display result messages
         $results = $this->sendInvite($invite);
         Session::flash('results', $results);
 
@@ -196,7 +195,6 @@ class InviteController extends Controller
         }
 
         if ($request->has('resend_invite')) {
-            // TODO: display result messages
             $results = $this->sendInvite($invite);
             Session::flash('results', $results);
         }
