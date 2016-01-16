@@ -2,7 +2,6 @@
 
 @section('content')
     <h2>Regions</h2>
-    {{--<a href="{{ url('/regions/create') }}">+ Add one</a>--}}
     <br/><br/>
 
     <div class="table-responsive">

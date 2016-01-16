@@ -666,7 +666,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
         if ($sheetPath) {
             try {
-                $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, false);
+                $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, true);
                 $importer->import(false);
                 $sheet = $importer->getResults();
             } catch (Exception $e) {
