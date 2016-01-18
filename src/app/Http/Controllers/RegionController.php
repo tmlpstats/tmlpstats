@@ -4,6 +4,7 @@ namespace TmlpStats\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use Session;
 use TmlpStats\Http\Requests;
 use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\Region;

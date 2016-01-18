@@ -56,7 +56,11 @@
         <tbody>
         @foreach ($reportData as $centerName => $centerData)
         <tr>
-            <th class="border-right">{{ $centerName }}</th>
+            <th class="border-right">
+                @statsReportLink($centerData['statsReport'])
+                {{ $centerName }}
+                @endStatsReportLink
+            </th>
             @foreach ($games as $game)
                 <?php
 

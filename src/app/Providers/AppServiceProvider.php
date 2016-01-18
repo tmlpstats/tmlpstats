@@ -52,12 +52,13 @@ class AppServiceProvider extends ServiceProvider
                 $query = trim(str_replace('"', '', $query));
             }
 
-            $href = "url('/statsreports/' . {$data}->id . '{$query}')";
+            $href = "<?php echo \\TmlpStats\\Http\\Controllers\\StatsReportController::getUrl({$data}) . '{$query}'; ?>";
+
 
             // Build php scripts. Have to break it down since {{ }} notation creates additional php tags
             $returnPhp = "<?php \$condition = Gate::allows('read', {$data}); ?>";
             $returnPhp .= "<?php if (\$condition): ?>";
-            $returnPhp .= "<a href='{{ {$href} }}'>";
+            $returnPhp .= "<a href='{$href}'>";
             $returnPhp .= "<?php endif; ?>";
 
             return $returnPhp;

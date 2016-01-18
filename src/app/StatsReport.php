@@ -184,6 +184,14 @@ class StatsReport extends Model
         }
     }
 
+    public function scopeOfficial($query)
+    {
+        return $query->whereIn('id', function ($query) {
+            $query->select('stats_report_id')
+                  ->from('global_report_stats_report');
+        });
+    }
+
     public function scopeByCenter($query, Center $center)
     {
         return $query->whereCenterId($center->id);

@@ -29,6 +29,11 @@ function updateDates() {
     });
 }
 
+/**
+ * Initialize all uninitialized datatables
+ * @param options
+ * @param tableClass
+ */
 function initDataTables(options, tableClass) {
     if (!options) {
         tableClass = 'want-datatable';

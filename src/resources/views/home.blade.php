@@ -7,33 +7,6 @@
     @else
         <h1>Results for Week Ending {{ $reportingDate->format('F j, Y') }}</h1>
 
-        <div class="table-responsive" style="overflow: hidden">
-            {!! Form::open(['url' => 'home']) !!}
-            <div class="row">
-                <div class="col-md-3" style="align-content: center">
-                    {!! Form::label('region', 'Other Regions:', ['class' => 'control-label']) !!}
-                </div>
-                <div class="col-md-3" style="align-content: center">
-                    {!! Form::label('reportingDate', 'Other Weeks:', ['class' => 'control-label']) !!}
-                </div>
-                <div class="col-md-6"></div>
-            </div>
-            <div class="row">
-                <div class="col-md-3" style="align-content: center">
-                    @include('partials.forms.regions', ['selectedRegion' => $selectedRegion, 'autoSubmit' => true])
-                </div>
-                <div class="col-md-3" style="align-content: center">
-                    {!! Form::select('reportingDate', $reportingDates, $reportingDate->toDateString(), ['class' => 'form-control',  'onchange' => 'this.form.submit()']) !!}
-                </div>
-                <div class="col-md-6">
-                    @if ($globalReport)
-                        <a class="btn btn-primary" href="{{ url("globalreports/{$globalReport->id}?region={$selectedRegion}") }}">View Regional Report</a>
-                    @endif
-                </div>
-            </div>
-            {!! Form::close() !!}
-        </div>
-
         @foreach ($regionsData as $data)
             <h3>{{ $data['displayName'] }}</h3>
             <h4>({{ $data['completeCount'] }} of {{ $data['validatedCount'] }} centers are complete)</h4>

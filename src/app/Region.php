@@ -91,6 +91,11 @@ class Region extends Model
         return $query->whereParentId($parent->id);
     }
 
+    public function scopeIsGlobal($query)
+    {
+        return $query->whereNull('parent_id');
+    }
+
     public function parent()
     {
         return $this->hasOne('TmlpStats\Region', 'id', 'parent_id');

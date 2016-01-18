@@ -12,7 +12,6 @@
 */
 
 // Admin Area
-use TmlpStats\ReportToken;
 
 Route::match(['get', 'post'], 'admin/dashboard', 'AdminController@index');
 Route::get('admin/status', 'AdminController@status');
@@ -43,23 +42,15 @@ Route::get('globalreports/{id}/{report}', 'GlobalReportController@dispatchReport
 // Report Tokens
 Route::resource('reporttokens', 'ReportTokenController');
 
-Route::get('report/{token}', function ($token) {
+// Reports
+Route::get('report/{token}', 'ReportsController@getByToken');
+Route::get('reports/centers/{abbr?}/{date?}', 'ReportsController@getCenterReport');
+Route::get('reports/regions/{abbr?}/{date?}', 'ReportsController@getRegionReport');
 
-    $reportToken = ReportToken::token($token)->first();
-    if (!$reportToken) {
-        abort(404);
-    }
+Route::post('reports/centers/setActive', 'ReportsController@setCenter');
+Route::post('reports/regions/setActive', 'ReportsController@setRegion');
+Route::post('reports/dates/setActive', 'ReportsController@setReportingDate');
 
-    Session::set('reportTokenId', $reportToken->id);
-
-    $reportUrl = $reportToken->getReportPath();
-
-    if ($reportUrl) {
-        return redirect($reportUrl);
-    } else {
-        abort(404);
-    }
-});
 
 // Center Info
 Route::resource('centers', 'CenterController');
