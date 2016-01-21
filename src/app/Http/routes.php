@@ -9,7 +9,7 @@
 | It's a breeze. Simply tell Laravel the URIs it should respond to
 | and give it the controller to call when that URI is requested.
 |
-*/
+ */
 
 // Admin Area
 
@@ -19,7 +19,6 @@ Route::get('admin/peoplereport', 'AdminController@getPeopleReport');
 
 Route::resource('admin/centers', 'AdminCenterController');
 Route::post('admin/centers', 'AdminCenterController@batchUpdate');
-
 
 Route::resource('admin/users', 'UserController');
 
@@ -50,7 +49,7 @@ Route::get('reports/regions/{abbr?}/{date?}', 'ReportsController@getRegionReport
 Route::post('reports/centers/setActive', 'ReportsController@setCenter');
 Route::post('reports/regions/setActive', 'ReportsController@setRegion');
 Route::post('reports/dates/setActive', 'ReportsController@setReportingDate');
-
+Route::get('m/{abbr}', 'ReportsController@mobileDash');
 
 // Center Info
 Route::resource('centers', 'CenterController');

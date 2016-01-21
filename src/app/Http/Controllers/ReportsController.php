@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Session;
 use TmlpStats\Center;
 use TmlpStats\GlobalReport;
-use TmlpStats\Http\Requests;
 use TmlpStats\Region;
 use TmlpStats\ReportToken;
 use TmlpStats\StatsReport;
@@ -29,6 +28,7 @@ class ReportsController extends Controller
         // Require auth everywhere except when we are initially reviewing the reportToken
         $this->middleware('auth', ['except' => [
             'getByToken',
+            'mobileDash',
         ]]);
     }
 
@@ -231,8 +231,8 @@ class ReportsController extends Controller
 
         if (!Session::has('viewCenterId')) {
             $center = $abbr
-                ? Center::abbreviation($abbr)->firstOrFail()
-                : $this->getCenter($request);
+            ? Center::abbreviation($abbr)->firstOrFail()
+            : $this->getCenter($request);
             Session::set('viewCenterId', $center->id);
         }
 
@@ -268,8 +268,8 @@ class ReportsController extends Controller
 
         if (!Session::has('viewRegionId')) {
             $region = $abbr
-                ? Region::abbreviation($abbr)->firstOrFail()
-                : $this->getRegion($request);
+            ? Region::abbreviation($abbr)->firstOrFail()
+            : $this->getRegion($request);
             Session::set('viewRegionId', $region->id);
         }
 
@@ -330,18 +330,35 @@ class ReportsController extends Controller
         $report = null;
         if ($reportType == 'region') {
             $report = $globalReport ?: GlobalReport::reportingDate($reportingDate)
-                                                   ->firstOrFail();
+                ->firstOrFail();
             $redirectUrl = App::make(GlobalReportController::class)->getUrl($report, $reportTarget);
         } else {
             $report = StatsReport::byCenter($reportTarget)
-                                 ->reportingDate($reportingDate)
-                                 ->official()
-                                 ->firstOrFail();
+                ->reportingDate($reportingDate)
+                ->official()
+                ->firstOrFail();
             $redirectUrl = App::make(StatsReportController::class)->getUrl($report);
         }
 
         return $reportViewUpdate
-            ? redirect($redirectUrl)
-            : App::make($controllerClass)->show($request, $report->id);
+        ? redirect($redirectUrl)
+        : App::make($controllerClass)->show($request, $report->id);
+    }
+
+    /**
+     * The mobile dash summary is an experiment on an auth-less dashboard.
+     * Therefore it bypasses all authentication but only for a specific view
+     */
+    public function mobileDash(Request $request, $abbr)
+    {
+        $center = Center::abbreviation($abbr)->firstOrFail();
+        $reportingDate = $this->getReportingDate($request);
+
+        $report = StatsReport::byCenter($center)->official()->reportingDate($reportingDate)->first();
+        if ($report == null) {
+            $report = StatsReport::byCenter($center)->official()->orderBy('reporting_date', 'desc')->first();
+        }
+
+        return App::make(StatsReportController::class)->runDispatcher($request, $report, 'mobile_summary');
     }
 }

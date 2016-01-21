@@ -25,9 +25,10 @@
     @yield('headers')
 </head>
 <body>
-    @include('partials.navbar')
-
-    <div class="container">
+    @if (!isset($skip_navbar) || $skip_navbar == false)
+        @include('partials.navbar')
+    @endif
+    <div class="container-fluid">
         @yield('content')
     </div>
 

@@ -423,12 +423,14 @@ class StatsReportController extends ReportDispatchAbstractController
             case 'travel':
                 $response = $this->getTeamTravelSummary($statsReport);
                 break;
+            case 'mobile_summary':
+                $response = $this->getMobileSummary($statsReport);
         }
 
         return $response;
     }
 
-    protected function getSummary(StatsReport $statsReport)
+    protected function getSummaryPageData(StatsReport $statsReport)
     {
         $centerStatsData = App::make(CenterStatsController::class)
                               ->getByStatsReport($statsReport, $statsReport->reportingDate);
@@ -512,7 +514,7 @@ class StatsReportController extends ReportDispatchAbstractController
             }
         }
 
-        return view('statsreports.details.summary', compact(
+        return compact(
             'reportData',
             'date',
             'tdo',
@@ -523,7 +525,21 @@ class StatsReportController extends ReportDispatchAbstractController
             'completedCourses',
             'teamTravelDetails',
             'incomingTravelDetails'
-        ));
+        );
+    }
+
+    protected function getSummary(StatsReport $statsReport)
+    {
+        $data = $this->getSummaryPageData($statsReport);
+        return view('statsreports.details.summary', $data);
+    }
+
+    protected function getMobileSummary(StatsReport $statsReport)
+    {
+        $data = $this->getSummaryPageData($statsReport);
+        $data['skip_navbar'] = true;
+        $data['statsReport'] = $statsReport;
+        return view('statsreports.details.mobile_summary', $data);
     }
 
     protected function getCenterStats(StatsReport $statsReport)

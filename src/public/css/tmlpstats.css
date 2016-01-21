@@ -6,6 +6,11 @@
     .nav-tabs.brief-tabs .long {
          display: none;
      }
+
+    .container-fluid {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
 }
 
 @media (min-width: 992px) {
@@ -15,6 +20,11 @@
 
     .nav-tabs.brief-tabs .brief {
          display: none;
+     }
+
+     .container-fluid {
+        padding-left: 55px;
+        padding-right: 5px;
      }
 }
 
