@@ -53,9 +53,9 @@
                             }
                             ?>
                             <td class="data-point">{{ $teamData['travel'] }}/{{ $teamData['total'] }}</td>
-                            <td class="data-point" class="{{ $travelClass }}">{{ $travelPercent }}%</td>
+                            <td class="data-point {{ $travelClass }}">{{ $travelPercent }}%</td>
                             <td class="data-point">{{ $teamData['room'] }}/{{ $teamData['total'] }}</td>
-                            <td class="data-point border-right" class="{{ $roomClass }}">{{ $roomPercent }}%</td>
+                            <td class="data-point border-right {{ $roomClass }}">{{ $roomPercent }}%</td>
                         @else
                             <td colspan="2" class="data-point">N/A</td>
                             <td colspan="2" class="data-point border-right">N/A</td>

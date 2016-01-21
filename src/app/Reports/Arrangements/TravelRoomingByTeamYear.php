@@ -62,7 +62,7 @@ class TravelRoomingByTeamYear extends BaseArrangement
         }
 
         foreach ($teamMemberDataList as $teamMemberData) {
-            if ($teamMemberData->isActiveMember()) {
+            if (!$teamMemberData->isActiveMember()) {
                 continue;
             }
 
