@@ -18,10 +18,10 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-3">
+                <div class="col-sm-3">
                     @include('partials.forms.regions', ['selectedRegion' => $region->abbreviation, 'includeLocalRegions' => true, 'autoSubmit' => true])
                 </div>
-                <div class="col-md-9">
+                <div class="col-sm-9">
                     @if ($reportToken)
                         <input size="80" type="text" value="{{ url($reportToken->getUrl()) }}" id="reportTokenUrl" />
                     @endif
@@ -30,21 +30,20 @@
             {!! Form::close() !!}
         </div>
         <br /><br />
-
-        <div class="col-xs-2">
-            <ul id="tabs" class="nav nav-tabs tabs-left" data-tabs="tabs">
-                <li class="active"><a href="#ratingsummary" data-toggle="tab">Ratings Summary</a></li>
-                <li><a href="#regionalstats" data-toggle="tab">Regional Games</a></li>
-                <li><a href="#statsreports" data-toggle="tab">Center Reports</a></li>
+        <div class="row">
+            <ul id="tabs" class="nav nav-tabs tabs-top brief-tabs" data-tabs="tabs">
+                <li class="active"><a href="#ratingsummary" data-toggle="tab"><span class="long">Ratings </span>Summary</a></li>
+                <li><a href="#regionalstats" data-toggle="tab"><span class="long">Regional </span>Games</a></li>
+                <li><a href="#statsreports" data-toggle="tab"><span class="long">Center Reports</span><span class="brief">Centers</span></a></li>
                 <li><a href="#applications" data-toggle="tab">Applications</a></li>
-                <li><a href="#traveloverview" data-toggle="tab">Travel Summary</a></li>
+                <li><a href="#traveloverview" data-toggle="tab">Travel<span class="long"> Summary</span></a></li>
                 <li><a href="#courses" data-toggle="tab">Courses</a></li>
                 <li><a href="#teammemberstatus" data-toggle="tab">Team Members</a></li>
-                <li><a href="#tdosummary" data-toggle="tab">Training &amp; Development</a></li>
+                <li><a href="#tdosummary" data-toggle="tab"><span class="long">Training &amp; Development</span><span class="brief">TDO</span></a></li>
                 <li><a href="#potentials" data-toggle="tab">Potentials</a></li>
             </ul>
         </div>
-        <div class="col-xs-10">
+        <div class="row">
             <div class="tab-content">
                 <div class="tab-pane active" id="ratingsummary">
                     <h3>Ratings Summary</h3>

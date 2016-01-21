@@ -2,13 +2,29 @@
     .hs {
         display: none;
     }
+
+    .nav-tabs.brief-tabs .long {
+        display: none;
+    }
 }
 
 @media (min-width: 992px) {
     .hl {
         display: none;
     }
+
+    .nav-tabs.brief-tabs .brief {
+        display: none;
+    }
 }
+
+/*
+.nav-tabs.brief-tabs .active .brief {
+    display: none;
+}
+.nav-tabs.brief-tabs .active .long {
+    display: inline;
+}*/
 
 
 body {
