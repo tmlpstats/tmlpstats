@@ -31,7 +31,24 @@ class Parser {
             $r->reports[] = new Domain\Report($id, $body);
         }
 
+        // Parse API methods
+        $r->api = self::parseApi($yaml['api'], '');
         return $r;
+    }
+
+    private static function parseApi($apiItems, $prefix) {
+        $result = [];
+        foreach ($apiItems as $name => $item) {
+            $item['absName'] = $prefix . $name;
+            if (array_get($item, 'type') == 'namespace') {
+                $item['children'] = self::parseApi($item['children'], $item['absName'] . '.');
+                $ns = new Domain\ApiNamespace($name, $item);
+                $result[] = $ns;
+            } else {
+                $result[] = new Domain\ApiMethod($name, $item);
+            }
+        }
+        return $result;
     }
 }
 
@@ -40,6 +57,7 @@ class ParseResult {
     public $scopes = [];
     public $access_levels = [];
     public $access_level_aliases = [];
+    public $api = [];
 
     public function scope($id) {
         if (!array_key_exists($id, $this->scopes)) {
@@ -56,5 +74,21 @@ class ParseResult {
             }
         }
         return $result;
+    }
+
+    public function apiFlat() {
+        $output = [];
+        $this->flattenedApi($this->api, $output);
+        return $output;
+    }
+
+    private function flattenedApi($api, &$output) {
+        foreach ($api as $item) {
+            if ($item instanceof Domain\ApiNamespace) {
+                $this->flattenedApi($item->children, $output);
+            } else {
+                $output[] = $item;
+            }
+        }
     }
 }

@@ -33,6 +33,8 @@ arrangements:
       Teams are shown ordered by their points, and grouped into buckets by each
       rating level: "Ineffective", "Effective", etc.
 
+api: {}
+
 reports:
   # --- Local Statistician
 
