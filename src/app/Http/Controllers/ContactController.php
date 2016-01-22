@@ -12,6 +12,10 @@ class ContactController extends Controller
 {
     public function processFeedback(Request $request)
     {
+        if (!Auth::check()) {
+            abort(401);
+        }
+
         if (!$request->has('message')) {
             return [
                 'success' => false,
