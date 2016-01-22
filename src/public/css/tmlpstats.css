@@ -150,3 +150,34 @@ div.box {
 .after-box {
     clear: left;
 }
+
+#contactLink {
+    display: block;
+    left: -40px;
+    background-color: black;
+    border: none;
+    outline:none;
+
+    color: #FFFFFF;
+    font-size: large;
+    text-align: center;
+
+    margin: 0;
+    cursor: pointer;
+    overflow: hidden;
+    position: fixed;
+    height: 25px;
+    min-width: 110px;
+    z-index: 10000;
+    white-space: nowrap;
+    padding: 10px 10px 35px 10px;
+
+    top: 70%;
+
+    background-position: right 0;
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+}
