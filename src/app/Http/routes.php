@@ -12,9 +12,7 @@
 */
 
 // Admin Area
-use TmlpStats\GlobalReport;
 use TmlpStats\ReportToken;
-use TmlpStats\User;
 
 Route::match(['get', 'post'], 'admin/dashboard', 'AdminController@index');
 Route::get('admin/status', 'AdminController@status');
@@ -90,6 +88,8 @@ Route::post('home/clientsettings', function () {
         Session::put('locale', Request::get('locale'));
     }
 });
+
+Route::post('feedback', 'ContactController@processFeedback');
 
 Route::controllers([
     'auth' => 'Auth\AuthController',
