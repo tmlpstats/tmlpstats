@@ -22,7 +22,18 @@ class InviteController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest');
+        // Only require authentication for admin actions
+        $this->middleware('auth', ['only' => [
+            'index',
+            'create',
+            'store',
+            'show',
+            'edit',
+            'update',
+            'destroy',
+            'revokeInvite',
+            'sendInvite',
+        ]]);
     }
 
     /**
@@ -361,6 +372,10 @@ class InviteController extends Controller
             'password'  => bcrypt($request->get('password')),
             'role_id'   => $invite->roleId,
         ]);
+
+        if (Auth::check()) {
+            Auth::logout();
+        }
 
         Log::info("User {$user->id} accepted invite {$invite->id}. Deleting invite.");
         $invite->delete();
