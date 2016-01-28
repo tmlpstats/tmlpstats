@@ -35,7 +35,7 @@ class Quarter extends Model
                 if (!$this->regionQuarterDetails) {
                     throw new Exception("Cannot call __get({$name}) before setting region.");
                 }
-                return $this->regionQuarterDetails->$name;
+                return $this->getQuarterDate($name);
 
             case 'firstWeekDate':
                 $startDate = clone $this->startWeekendDate;
@@ -43,6 +43,67 @@ class Quarter extends Model
             default:
                 return parent::__get($name);
         }
+    }
+
+    public function getQuarterStartDate(Center $center = null)
+    {
+        return $this->getQuarterDate('startWeekendDate', $center);
+    }
+
+    public function getQuarterEndDate(Center $center = null)
+    {
+        return $this->getQuarterDate('endWeekendDate', $center);
+    }
+
+    public function getClassroom1Date(Center $center = null)
+    {
+        return $this->getQuarterDate('classroom1Date', $center);
+    }
+
+    public function getClassroom2Date(Center $center = null)
+    {
+        return $this->getQuarterDate('classroom2Date', $center);
+    }
+
+    public function getClassroom3Date(Center $center = null)
+    {
+        return $this->getQuarterDate('classroom3Date', $center);
+    }
+
+    public function getQuarterDate($field, Center $center = null)
+    {
+        $validFields = [
+            'startWeekendDate',
+            'endWeekendDate',
+            'classroom1Date',
+            'classroom2Date',
+            'classroom3Date',
+        ];
+
+        if (!in_array($field, $validFields)) {
+            throw new \Exception("{$field} is not a valid date field.");
+        }
+
+        if (!$this->regionQuarterDetails) {
+            throw new \Exception("regionQuarterDetails not set. Cannot determine {$field}.");
+        }
+
+        $date = $this->regionQuarterDetails->$field;
+
+        $settings = Setting::get('regionQuarterOverride', $center);
+        if ($settings) {
+            // Settings should be in the format:
+            // {"classroom2Date":"2016-01-15", "classroom3Date":"2016-02-07"}
+            $dateSettings = $settings->value
+                ? json_decode($settings->value, true)
+                : [];
+
+            if (isset($dateSettings[$field])) {
+                $date = Carbon::parse($dateSettings[$field]);
+            }
+        }
+
+        return $date;
     }
 
     public static function isFirstWeek(Region $region)
