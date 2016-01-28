@@ -184,9 +184,8 @@ class CenterStatsController extends Controller
             );
         } else {
             // Get all weeks for stats report
-            $week = clone $statsReport->quarter->startWeekendDate;
-            $week->addWeek();
-            while ($week->lte($statsReport->quarter->endWeekendDate)) {
+            $week = $statsReport->quarter->getFirstWeekDate($statsReport->center);
+            while ($week->lte($statsReport->quarter->getQuarterEndDate($statsReport->center))) {
 
                 $weekData        = $this->getWeekData(
                     $week,
@@ -249,11 +248,11 @@ class CenterStatsController extends Controller
         $statsReport  = null;
 
         // Usually, promises will be saved in the global report for the expected week
-        if ($this->statsReport->reportingDate->gte($quarter->classroom2Date) && $date->gt($quarter->classroom2Date) && !$originalPromise) {
-            $globalReport = $this->getGlobalReport($quarter->classroom2Date);
+        $classroom2Date = $quarter->getClassroom2Date($center);
+        if ($this->statsReport->reportingDate->gte($classroom2Date) && $date->gt($classroom2Date) && !$originalPromise) {
+            $globalReport = $this->getGlobalReport($classroom2Date);
         } else {
-            $firstWeek = clone $quarter->startWeekendDate;
-            $firstWeek->addWeek();
+            $firstWeek = $quarter->getFirstWeekDate($center);
 
             $globalReport = $this->getGlobalReport($firstWeek);
         }
@@ -345,7 +344,7 @@ class CenterStatsController extends Controller
                                ->join('global_report_stats_report', 'global_report_stats_report.stats_report_id', '=', 'stats_reports.id')
                                ->join('global_reports', 'global_reports.id', '=', 'global_report_stats_report.global_report_id')
                                ->where('stats_reports.center_id', '=', $center->id)
-                               ->where('global_reports.reporting_date', '>', $quarter->startWeekendDate)
+                               ->where('global_reports.reporting_date', '>', $quarter->getQuarterStartDate($center))
                                ->where('center_stats_data.type', '=', $type)
                                ->orderBy('global_reports.reporting_date', 'ASC')
                                ->first();

@@ -25,7 +25,7 @@
                                 <td>{{ $registrationData->firstName }} {{ $registrationData->lastName }}</td>
                                 <td>
                                     @if ($registrationData->regDate)
-                                        @if ($registrationData->regDate->gt($registrationData->statsReport->quarter->startWeekendDate))
+                                        @if ($registrationData->regDate->gt($registrationData->statsReport->quarter->getQuarterStartDate($registrationData->center)))
                                             Current
                                         @else
                                             Prior

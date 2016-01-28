@@ -36,13 +36,16 @@ class Quarter extends Model
                     throw new Exception("Cannot call __get({$name}) before setting region.");
                 }
                 return $this->getQuarterDate($name);
-
-            case 'firstWeekDate':
-                $startDate = clone $this->startWeekendDate;
-                return $startDate->addWeek();
             default:
                 return parent::__get($name);
         }
+    }
+
+    public function getFirstWeekDate(Center $center = null)
+    {
+        $quarterStart = $this->getQuarterStartDate($center);
+
+        return $quarterStart->addWeek();
     }
 
     public function getQuarterStartDate(Center $center = null)
@@ -112,8 +115,7 @@ class Quarter extends Model
         $quarter = Quarter::getQuarterByDate($reportingDate, $region);
 
         if ($quarter) {
-            $firstWeek = clone $quarter->startWeekendDate;
-            $firstWeek->addWeek();
+            $firstWeek = $quarter->getFirstWeekDate();
             return $firstWeek->eq($reportingDate);
         }
         return false;

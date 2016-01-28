@@ -287,16 +287,17 @@ class TmlpRegistrationValidator extends ObjectsValidatorAbstract
 
         // Make sure Weekend Reg fields match registration date
         if ($data->incomingWeekend == 'current') {
-            $dateStr = $this->statsReport->quarter->startWeekendDate->format('M d, Y');
-            if (!is_null($data->bef) && $regDate && $regDate->gt($this->statsReport->quarter->startWeekendDate)) {
+            $quarterStartDate = $this->statsReport->quarter->getQuarterStartDate($this->statsReport->center);
+            $dateStr = $quarterStartDate->format('M d, Y');
+            if (!is_null($data->bef) && $regDate && $regDate->gt($quarterStartDate)) {
                 $this->addMessage('TMLPREG_BEF_REG_DATE_NOT_BEFORE_WEEKEND', $dateStr, $data->bef);
                 $isValid = false;
             }
-            if (!is_null($data->dur) && $regDate && $regDate->diffInDays($this->statsReport->quarter->startWeekendDate) > 3) {
+            if (!is_null($data->dur) && $regDate && $regDate->diffInDays($quarterStartDate) > 3) {
                 $this->addMessage('TMLPREG_DUR_REG_DATE_NOT_DURING_WEEKEND', $dateStr, $data->dur);
                 $isValid = false;
             }
-            if (!is_null($data->aft) && $regDate && $regDate->lte($this->statsReport->quarter->startWeekendDate)) {
+            if (!is_null($data->aft) && $regDate && $regDate->lte($quarterStartDate)) {
                 $this->addMessage('TMLPREG_AFT_REG_DATE_NOT_AFTER_WEEKEND', $dateStr, $data->aft);
                 $isValid = false;
             }

@@ -123,7 +123,7 @@ class CenterStatsImporter extends DataImporterAbstract
 
     public function postProcess()
     {
-        $isRepromiseWeek = $this->statsReport->reportingDate->eq($this->statsReport->quarter->classroom2Date);
+        $isRepromiseWeek = $this->statsReport->reportingDate->eq($this->statsReport->quarter->getClassroom2Date($this->statsReport->center));
 
         foreach ($this->data as $week) {
 
@@ -205,15 +205,15 @@ class CenterStatsImporter extends DataImporterAbstract
         $globalReport = null;
         $statsReport = null;
 
-        $firstWeek = clone $quarter->startWeekendDate;
-        $firstWeek->addWeek();
+        $firstWeek = $quarter->getFirstWeekDate($center);
 
         // Don't reuse promises on the first week, as they may change between submits
         if ($this->statsReport->reportingDate->ne($firstWeek)) {
 
             // Usually, promises will be saved in the global report for the expected week
-            if ($this->statsReport->reportingDate->gt($quarter->classroom2Date) && $date->gt($quarter->classroom2Date)) {
-                $globalReport = GlobalReport::reportingDate($quarter->classroom2Date)->first();
+            $classroom2Date = $quarter->getClassroom2Date($center);
+            if ($this->statsReport->reportingDate->gt($classroom2Date) && $date->gt($classroom2Date)) {
+                $globalReport = GlobalReport::reportingDate($classroom2Date)->first();
             } else {
                 $globalReport = GlobalReport::reportingDate($firstWeek)->first();
             }
@@ -256,7 +256,7 @@ class CenterStatsImporter extends DataImporterAbstract
             ->join('global_report_stats_report', 'global_report_stats_report.stats_report_id', '=', 'stats_reports.id')
             ->join('global_reports', 'global_reports.id', '=', 'global_report_stats_report.global_report_id')
             ->where('stats_reports.center_id', '=', $center->id)
-            ->where('global_reports.reporting_date', '>', $quarter->startWeekendDate)
+            ->where('global_reports.reporting_date', '>', $quarter->getQuarterStartDate($center))
             ->where('center_stats_data.type', '=', $type)
             ->orderBy('global_reports.reporting_date', 'ASC')
             ->first();

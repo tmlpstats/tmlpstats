@@ -151,6 +151,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
         $sheetUrl     = '';
         $globalReport = null;
+        $center = $statsReport->center;
 
         $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
 
@@ -160,14 +161,17 @@ class StatsReportController extends ReportDispatchAbstractController
                 : null;
         }
 
+        $quarterStartDate = $statsReport->quarter->getQuarterStartDate($center);
+        $quarterEndDate = $statsReport->quarter->getQuarterEndDate($center);
+
         // Other Stats Reports
         $otherStatsReports = [];
-        $searchWeek        = clone $statsReport->quarter->endWeekendDate;
+        $searchWeek        = $quarterEndDate->copy();
 
-        while ($searchWeek->gte($statsReport->quarter->startWeekendDate)) {
+        while ($searchWeek->gte($quarterStartDate)) {
             $globalReport = GlobalReport::reportingDate($searchWeek)->first();
             if ($globalReport) {
-                $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
+                $report = $globalReport->statsReports()->byCenter($center)->first();
                 if ($report) {
                     $otherStatsReports[$report->id] = $report->reportingDate->format('M d, Y');
                 }
@@ -176,18 +180,18 @@ class StatsReportController extends ReportDispatchAbstractController
         }
 
         // Only show last quarter's completion report on the first week
-        if ($statsReport->reportingDate->diffInWeeks($statsReport->quarter->startWeekendDate) > 1) {
+        if ($statsReport->reportingDate->diffInWeeks($quarterStartDate) > 1) {
             array_pop($otherStatsReports);
         }
 
         // When showing last quarter's data, make sure we also show this week's report
-        if ($statsReport->quarter->endWeekendDate->lt(Carbon::now())) {
-            $firstWeek = clone $statsReport->quarter->endWeekendDate;
+        if ($quarterEndDate->lt(Carbon::now())) {
+            $firstWeek = $quarterEndDate->copy();
             $firstWeek->addWeek();
 
             $globalReport = GlobalReport::reportingDate($firstWeek)->first();
             if ($globalReport) {
-                $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
+                $report = $globalReport->statsReports()->byCenter($center)->first();
                 if ($report) {
                     $otherStatsReports = [$report->id => $report->reportingDate->format('M d, Y')] + $otherStatsReports;
                 }
@@ -197,7 +201,7 @@ class StatsReportController extends ReportDispatchAbstractController
         $globalReport = GlobalReport::reportingDate($statsReport->reportingDate)->first();
 
         $reportToken = Gate::allows('readLink', ReportToken::class)
-            ? ReportToken::get($globalReport, $statsReport->center)
+            ? ReportToken::get($globalReport, $center)
             : null;
 
         return view('statsreports.show', compact(
@@ -606,8 +610,7 @@ class StatsReportController extends ReportDispatchAbstractController
     {
         $weeksData = [];
 
-        $date = clone $statsReport->quarter->startWeekendDate;
-        $date->addWeek();
+        $date = $statsReport->quarter->getFirstWeekDate($statsReport->center);
         while ($date->lte($statsReport->reportingDate)) {
             $globalReport                     = GlobalReport::reportingDate($date)->first();
             $report                           = $globalReport->statsReports()->byCenter($statsReport->center)->first();
@@ -629,8 +632,7 @@ class StatsReportController extends ReportDispatchAbstractController
     {
         $weeksData = [];
 
-        $date = clone $statsReport->quarter->startWeekendDate;
-        $date->addWeek();
+        $date = $statsReport->quarter->getFirstWeekDate($statsReport->center);
         while ($date->lte($statsReport->reportingDate)) {
             $globalReport                     = GlobalReport::reportingDate($date)->first();
             $report                           = $globalReport->statsReports()->byCenter($statsReport->center)->first();

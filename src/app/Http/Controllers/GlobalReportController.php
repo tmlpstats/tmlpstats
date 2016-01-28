@@ -343,7 +343,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
 
         $globalReportData = App::make(CenterStatsController::class)
-                               ->getByGlobalReportUnprocessed($globalReport, $region, $quarter->endWeekendDate, true);
+                               ->getByGlobalReportUnprocessed($globalReport, $region, $quarter->getQuarterEndDate(), true);
         if (!$globalReportData) {
             return null;
         }
@@ -363,7 +363,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         foreach ($centersData as $centerName => $centerData) {
             $a                       = new Arrangements\GamesByWeek($centerData);
             $dataReport              = $a->compose();
-            $reportData[$centerName] = $dataReport['reportData'][$quarter->endWeekendDate->toDateString()];
+            $reportData[$centerName] = $dataReport['reportData'][$quarter->getQuarterEndDate()->toDateString()];
         }
 
         $totals = [];
@@ -395,7 +395,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             $totals['gitw']['actual'] = round($totals['gitw']['actual'] / count($reportData));
         }
 
-        $includeActual   = $globalReport->reportingDate->eq($quarter->endWeekendDate);
+        $includeActual   = $globalReport->reportingDate->eq($quarter->getQuarterEndDate());
         $includeOriginal = true;
 
         return view('globalreports.details.centergames', compact(
@@ -736,7 +736,8 @@ class GlobalReportController extends ReportDispatchAbstractController
         $registeredAtWeekend = [];
         if ($registrations) {
             foreach ($registrations as $registration) {
-                $weekendStartDate = $registration->statsReport->quarter->startWeekendDate;
+                $statsReport = $registration->statsReport;
+                $weekendStartDate = $statsReport->quarter->getQuarterStartDate($statsReport->center);
                 if ($registration->teamYear == 2
                     && $registration->regDate->gt($weekendStartDate)
                     && $registration->regDate->lte($weekendStartDate->copy()->addDays(2))

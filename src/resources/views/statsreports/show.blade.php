@@ -52,7 +52,7 @@
             @can ('readContactInfo', $statsReport)
             <li><a href="#contactinfo" data-toggle="tab">Contact Info</a></li>
             @endcan
-            @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
+            @if ($statsReport->reportingDate->eq($statsReport->quarter->getFirstWeekDate($statsReport->center)))
             <li><a href="#transitionsummary" data-toggle="tab">Transfer Check</a></li>
             @endif
             <li><a href="#weekend" data-toggle="tab">Weekend</a></li>
@@ -103,7 +103,7 @@
                 <div id="contactinfo-container"></div>
             </div>
             @endcan
-            @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
+            @if ($statsReport->reportingDate->eq($statsReport->quarter->getFirstWeekDate($statsReport->center)))
             <div class="tab-pane" id="transitionsummary">
                 <h3>Transfer Check</h3>
                 <div class="btn-group" role="group">
@@ -144,7 +144,7 @@
             @can ('readContactInfo', $statsReport)
             'contactinfo',
             @endcan
-            @if ($statsReport->reportingDate->eq($statsReport->quarter->firstWeekDate))
+            @if ($statsReport->reportingDate->eq($statsReport->quarter->getFirstWeekDate($statsReport->center)))
             'peopletransfersummary',
             'coursestransfersummary',
             @endif

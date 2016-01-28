@@ -13,8 +13,7 @@ class TeamExpansionValidator extends ValidatorAbstract
     {
         $calculatedCounts = $this->calculateQuarterStartingCounts($data['tmlpRegistration']);
 
-        $quarterStart  = clone $this->quarter->startWeekendDate;
-        $firstWeekDate = $quarterStart->addDays(7);
+        $firstWeekDate = $this->quarter->getFirstWeekDate($this->statsReport->center);
 
         $reportedCounts = [
             'team1' => [
@@ -122,14 +121,16 @@ class TeamExpansionValidator extends ValidatorAbstract
 
             $regDate = Util::parseUnknownDateFormat($registration['regDate']);
 
-            if ($regDate && $regDate->lte($this->quarter->startWeekendDate)) {
+            $quarterStartDate = $this->quarter->getQuarterStartDate($this->statsReport->center);
+
+            if ($regDate && $regDate->lte($quarterStartDate)) {
                 $output[$team][$weekend]['registered']++;
             }
 
             if ($registration['apprDate']) {
                 $apprDate = Util::parseUnknownDateFormat($registration['apprDate']);
 
-                if ($apprDate && $apprDate->lte($this->quarter->startWeekendDate)) {
+                if ($apprDate && $apprDate->lte($quarterStartDate)) {
                     $output[$team][$weekend]['approved']++;
                 }
             }
