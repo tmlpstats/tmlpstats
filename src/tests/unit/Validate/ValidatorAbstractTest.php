@@ -3,6 +3,7 @@ namespace TmlpStats\Tests\Validate;
 
 use Carbon\Carbon;
 use stdClass;
+use TmlpStats\Tests\Traits\MocksQuarters;
 
 class ValidatorAbstractImplementation extends \TmlpStats\Validate\ValidatorAbstract
 {
@@ -21,6 +22,8 @@ class ValidatorAbstractImplementation extends \TmlpStats\Validate\ValidatorAbstr
 
 class ValidatorAbstractTest extends ValidatorTestAbstract
 {
+    use MocksQuarters;
+
     protected $testClass = ValidatorAbstractImplementation::class;
 
     protected $dataFields = [];
@@ -31,8 +34,9 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
         $statsReport->center = new stdClass;
         $statsReport->center->name = 'Vancouver';
 
-        $statsReport->quarter = new stdClass;
-        $statsReport->quarter->startWeekendDate = Carbon::create(2015, 11, 20);
+        $statsReport->quarter = $this->getQuarterMock([], [
+            'startWeekendDate' => Carbon::createFromDate(2015, 11, 20)->startOfDay(),
+        ]);
 
         $statsReport->reportingDate = Carbon::create(2015, 12, 18);
 

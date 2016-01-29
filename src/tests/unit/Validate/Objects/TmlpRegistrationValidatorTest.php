@@ -1,8 +1,9 @@
 <?php
 namespace TmlpStats\Tests\Validate\Objects;
 
-use TmlpStats\ModelCache;
+use TmlpStats\Center;
 use TmlpStats\Tests\Traits\MocksMessages;
+use TmlpStats\Tests\Traits\MocksQuarters;
 use TmlpStats\Tests\Traits\MocksSettings;
 use TmlpStats\Util;
 use TmlpStats\Validate\Objects\TmlpRegistrationValidator;
@@ -12,7 +13,7 @@ use stdClass;
 
 class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 {
-    use MocksSettings, MocksMessages;
+    use MocksSettings, MocksMessages, MocksQuarters;
 
     protected $testClass = TmlpRegistrationValidator::class;
 
@@ -685,7 +686,7 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'              => null,
                 ]),
                 [],
-                true
+                true,
             ],
             // validateWeekendReg Passes bef with team 1
             [
@@ -696,7 +697,7 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'              => null,
                 ]),
                 [],
-                true
+                true,
             ],
             // validateWeekendReg Passes dur
             [
@@ -707,7 +708,7 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'              => null,
                 ]),
                 [],
-                true
+                true,
             ],
             // validateWeekendReg Passes aft
             [
@@ -718,7 +719,7 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                     'aft'              => 2,
                 ]),
                 [],
-                true
+                true,
             ],
             // validateWeekendReg Fails When Both Bef And Dur Set
             [
@@ -1301,10 +1302,12 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
     public function providerValidateDates()
     {
         $statsReport          = new stdClass;
-        $statsReport->quarter = new stdClass;
+        $statsReport->center  = new Center();
+        $statsReport->quarter = $this->getQuarterMock([], [
+            'startWeekendDate' => Carbon::createFromDate(2014, 11, 14)->startOfDay(),
+        ]);
 
-        $statsReport->reportingDate             = Carbon::createFromDate(2015, 1, 21);
-        $statsReport->quarter->startWeekendDate = Carbon::createFromDate(2014, 11, 14);
+        $statsReport->reportingDate = Carbon::createFromDate(2015, 1, 21);
 
         return [
             // Withdraw date OK
@@ -2199,11 +2202,12 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
     public function providerValidateTravelPasses()
     {
         $statsReport          = new stdClass;
-        $statsReport->quarter = new stdClass;
+        $statsReport->quarter = $this->getQuarterMock([], [
+            'classroom2Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
+        ]);
         $statsReport->center  = null;
 
-        $statsReport->reportingDate           = Carbon::createFromDate(2015, 5, 8);
-        $statsReport->quarter->classroom2Date = Carbon::createFromDate(2015, 4, 17);
+        $statsReport->reportingDate = Carbon::createFromDate(2015, 5, 8);
 
         return [
             // validateTravel Passes When Before Second Classroom
@@ -2301,12 +2305,13 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
     public function providerValidateTravelFails()
     {
         $statsReport          = new stdClass;
-        $statsReport->quarter = new stdClass;
+        $statsReport->quarter = $this->getQuarterMock([], [
+            'classroom2Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
+            'endWeekendDate' => Carbon::createFromDate(2015, 5, 29)->startOfDay(),
+        ]);
         $statsReport->center  = null;
 
-        $statsReport->reportingDate           = Carbon::createFromDate(2015, 5, 8);
-        $statsReport->quarter->classroom2Date = Carbon::createFromDate(2015, 4, 17);
-        $statsReport->quarter->endWeekendDate = Carbon::createFromDate(2015, 5, 29);
+        $statsReport->reportingDate = Carbon::createFromDate(2015, 5, 8);
 
         $statsReportLastTwoWeeks                = clone $statsReport;
         $statsReportLastTwoWeeks->reportingDate = Carbon::createFromDate(2015, 5, 15);

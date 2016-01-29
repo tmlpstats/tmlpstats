@@ -381,7 +381,7 @@ class ImportManager
                 $statsReport->reportingDate->year,
                 $statsReport->reportingDate->month,
                 $statsReport->reportingDate->day + 1,
-                10, 0, 59,
+                10, 0, 0,
                 $statsReport->center->timezone
             );
         }

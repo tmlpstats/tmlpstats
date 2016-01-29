@@ -296,7 +296,7 @@ class StatsReport extends Model
 
                 // Dates can be specified as a classroomDate
                 if (in_array($reportingDate, $quarterDates)) {
-                    $reportingDate = $statsReport->quarter->$reportingDate;
+                    $reportingDate = $statsReport->quarter->getQuarterDate($reportingDate, $statsReport->center);
                 } else if ($reportingDate == 'week1') {
                     $reportingDate = $statsReport->quarter->getFirstWeekDate($statsReport->center);
                 } else {

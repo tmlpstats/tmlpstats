@@ -106,7 +106,7 @@ class Quarter extends Model
             }
         }
 
-        return $date;
+        return $date->startOfDay();
     }
 
     public static function isFirstWeek(Region $region)

@@ -20,7 +20,7 @@ trait ValidatesTravelWithConfig
         if ($travelDueSetting) {
             $settingValue = $travelDueSetting->value;
             if (in_array($settingValue, $classroomNames)) {
-                $dueDate = $this->statsReport->quarter->$settingValue;
+                $dueDate = $this->statsReport->quarter->getQuarterDate($settingValue, $this->statsReport->center);
             } else if (preg_match('/^\d\d\d\d-\d\d-\d\d$/', $settingValue)) {
                 $dueDate = Carbon::parse($settingValue);
             }

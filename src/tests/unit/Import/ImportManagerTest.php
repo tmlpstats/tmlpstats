@@ -6,11 +6,12 @@ use stdClass;
 use TmlpStats\Center;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Person;
+use TmlpStats\Tests\Traits\MocksQuarters;
 use TmlpStats\Tests\Traits\MocksSettings;
 
 class ImportManagerTest extends TestAbstract
 {
-    use MocksSettings;
+    use MocksSettings, MocksQuarters;
 
     protected $testClass = ImportManager::class;
 
@@ -75,12 +76,13 @@ class ImportManagerTest extends TestAbstract
         $statsReport->center->id       = 0;
         $statsReport->center->timezone = $timezone;
 
-        $statsReport->quarter                   = new stdClass;
-        $statsReport->quarter->startWeekendDate = Carbon::create(2015, 11, 20)->startOfDay();
-        $statsReport->quarter->classroom1Date   = Carbon::create(2015, 12, 4)->startOfDay();
-        $statsReport->quarter->classroom2Date   = Carbon::create(2016, 1, 8)->startOfDay();
-        $statsReport->quarter->classroom3Date   = Carbon::create(2016, 2, 5)->startOfDay();
-        $statsReport->quarter->endWeekendDate   = Carbon::create(2016, 2, 19)->startOfDay();
+        $statsReport->quarter          = $this->getQuarterMock([], [
+            'startWeekendDate' => Carbon::create(2015, 11, 20)->startOfDay(),
+            'classroom1Date'   => Carbon::create(2015, 12, 4)->startOfDay(),
+            'classroom2Date'   => Carbon::create(2016, 1, 8)->startOfDay(),
+            'classroom3Date'   => Carbon::create(2016, 2, 5)->startOfDay(),
+            'endWeekendDate'   => Carbon::create(2016, 2, 19)->startOfDay(),
+        ]);
 
         $settings = [
             [
@@ -129,30 +131,30 @@ class ImportManagerTest extends TestAbstract
             // Report classroom1 override
             [
                 $statsReport,
-                $statsReport->quarter->classroom1Date,
+                $statsReport->quarter->getClassroom1Date(),
                 $settings,
-                Carbon::parse($statsReport->quarter->classroom1Date->toDateString() . " 7:00:59pm", $timezone),
+                Carbon::parse($statsReport->quarter->getClassroom1Date()->toDateString() . " 7:00:59pm", $timezone),
             ],
             // Report classroom2 override
             [
                 $statsReport,
-                $statsReport->quarter->classroom2Date,
+                $statsReport->quarter->getClassroom2Date(),
                 $settings,
-                Carbon::parse($statsReport->quarter->classroom2Date->toDateString() . " 11:59:59pm", $timezone),
+                Carbon::parse($statsReport->quarter->getClassroom2Date()->toDateString() . " 11:59:59pm", $timezone),
             ],
             // Report classroom3 override
             [
                 $statsReport,
-                $statsReport->quarter->classroom3Date,
+                $statsReport->quarter->getClassroom3Date(),
                 $settings,
-                Carbon::parse($statsReport->quarter->classroom3Date->toDateString() . " 7:00:59pm", $timezone),
+                Carbon::parse($statsReport->quarter->getClassroom3Date()->toDateString() . " 7:00:59pm", $timezone),
             ],
             // Report weekend completion override
             [
                 $statsReport,
-                $statsReport->quarter->endWeekendDate,
+                $statsReport->quarter->getQuarterEndDate(),
                 $settings,
-                Carbon::parse($statsReport->quarter->endWeekendDate->toDateString() . " 5:00:59pm", 'America/Chicago'),
+                Carbon::parse($statsReport->quarter->getQuarterEndDate()->toDateString() . " 5:00:59pm", 'America/Chicago'),
             ],
             // Report specific reportingDate override
             [
@@ -191,12 +193,13 @@ class ImportManagerTest extends TestAbstract
         $statsReport->center->id       = 0;
         $statsReport->center->timezone = $timezone;
 
-        $statsReport->quarter                   = new stdClass;
-        $statsReport->quarter->startWeekendDate = Carbon::create(2015, 11, 20)->startOfDay();
-        $statsReport->quarter->classroom1Date   = Carbon::create(2015, 12, 4)->startOfDay();
-        $statsReport->quarter->classroom2Date   = Carbon::create(2016, 1, 8)->startOfDay();
-        $statsReport->quarter->classroom3Date   = Carbon::create(2016, 2, 5)->startOfDay();
-        $statsReport->quarter->endWeekendDate   = Carbon::create(2016, 2, 19)->startOfDay();
+        $statsReport->quarter          = $this->getQuarterMock([], [
+            'startWeekendDate' => Carbon::create(2015, 11, 20)->startOfDay(),
+            'classroom1Date'   => Carbon::create(2015, 12, 4)->startOfDay(),
+            'classroom2Date'   => Carbon::create(2016, 1, 8)->startOfDay(),
+            'classroom3Date'   => Carbon::create(2016, 2, 5)->startOfDay(),
+            'endWeekendDate'   => Carbon::create(2016, 2, 19)->startOfDay(),
+        ]);
 
         $settings = [
             [
@@ -231,39 +234,35 @@ class ImportManagerTest extends TestAbstract
                 $statsReport,
                 Carbon::create(2015, 11, 27)->startOfDay(),
                 [],
-                Carbon::create(2015, 11, 28, 10, 0, 59, $timezone),
+                Carbon::create(2015, 11, 28, 10, 0, 0, $timezone),
             ],
             // Report classroom1 override next day
             [
                 $statsReport,
-                $statsReport->quarter->classroom1Date,
+                $statsReport->quarter->getClassroom1Date(),
                 $settings,
-                Carbon::parse($statsReport->quarter->classroom1Date->copy()
-                                                                   ->addDay()
-                                                                   ->toDateString() . " 10:00:00am", $timezone),
+                Carbon::create(2015, 12, 5, 10, 0, 0, $timezone),
             ],
             // Report classroom2 override next day
             [
                 $statsReport,
-                $statsReport->quarter->classroom2Date,
+                $statsReport->quarter->getClassroom2Date(),
                 $settings,
-                Carbon::parse($statsReport->quarter->classroom2Date->copy()
-                                                                   ->addDay()
-                                                                   ->toDateString() . " 12:00:00pm", $timezone),
+                Carbon::create(2016, 1, 9, 12, 0, 0, $timezone),
             ],
             // Report classroom3 override same day
             [
                 $statsReport,
-                $statsReport->quarter->classroom3Date,
+                $statsReport->quarter->getClassroom3Date(),
                 $settings,
-                Carbon::parse($statsReport->quarter->classroom3Date->toDateString() . " 9:00:00pm", $timezone),
+                Carbon::create(2016, 2, 5, 21, 0, 0, $timezone),
             ],
             // Report specific reportingDate specific response date
             [
                 $statsReport,
                 Carbon::create(2016, 1, 1)->startOfDay(),
                 $settings,
-                Carbon::create(2015, 12, 31, 21, 0, 00, $timezone),
+                Carbon::create(2015, 12, 31, 21, 0, 0, $timezone),
             ],
         ];
     }

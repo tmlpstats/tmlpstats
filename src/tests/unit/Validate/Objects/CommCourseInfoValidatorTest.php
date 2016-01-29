@@ -1,7 +1,9 @@
 <?php
 namespace TmlpStats\Tests\Validate\Objects;
 
+use TmlpStats\Center;
 use TmlpStats\Tests\Traits\MocksMessages;
+use TmlpStats\Tests\Traits\MocksQuarters;
 use TmlpStats\Util;
 use TmlpStats\Validate\Objects\CommCourseInfoValidator;
 use Illuminate\Support\Facades\Log;
@@ -10,7 +12,7 @@ use stdClass;
 
 class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
 {
-    use MocksMessages;
+    use MocksMessages, MocksQuarters;
 
     protected $testClass = CommCourseInfoValidator::class;
 
@@ -473,9 +475,11 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateCourseStartDate()
     {
-        $statsReport                            = new stdClass;
-        $statsReport->quarter                   = new stdClass;
-        $statsReport->quarter->startWeekendDate = Carbon::createFromDate(2015, 2, 20);
+        $statsReport          = new stdClass;
+        $statsReport->center  = new Center();
+        $statsReport->quarter = $this->getQuarterMock([], [
+            'startWeekendDate' => Carbon::createFromDate(2015, 2, 20)->startOfDay(),
+        ]);
 
         return [
             // Gracefully handle null start date (don't blow up - required validator will catch this error)

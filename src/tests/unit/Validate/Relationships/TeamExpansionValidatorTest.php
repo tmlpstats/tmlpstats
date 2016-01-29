@@ -3,6 +3,8 @@ namespace TmlpStats\Tests\Validate\Relationships;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use TmlpStats\Center;
+use TmlpStats\Tests\Traits\MocksQuarters;
 use TmlpStats\Tests\Validate\ValidatorTestAbstract;
 use TmlpStats\Validate\Relationships\TeamExpansionValidator;
 
@@ -10,6 +12,8 @@ use stdClass;
 
 class TeamExpansionValidatorTest extends ValidatorTestAbstract
 {
+    use MocksQuarters;
+
     protected $testClass = TeamExpansionValidator::class;
 
     /**
@@ -46,9 +50,11 @@ class TeamExpansionValidatorTest extends ValidatorTestAbstract
 
     public function providerValidate()
     {
-        $statsReport                            = new stdClass;
-        $statsReport->quarter                   = new stdClass;
-        $statsReport->quarter->startWeekendDate = Carbon::createFromDate(2015, 5, 29)->startOfDay();
+        $statsReport          = new stdClass;
+        $statsReport->center  = new Center();
+        $statsReport->quarter = $this->getQuarterMock([], [
+            'startWeekendDate' => Carbon::createFromDate(2015, 5, 29)->startOfDay(),
+        ]);
 
         $statsReport->reportingDate = Carbon::createFromDate(2015, 6, 5)->startOfDay();
 
