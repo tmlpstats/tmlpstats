@@ -3,13 +3,15 @@ namespace TmlpStats\Tests\Validate\Objects;
 
 use Carbon\Carbon;
 use stdClass;
+use TmlpStats\Center;
 use TmlpStats\Tests\Traits\MocksMessages;
+use TmlpStats\Tests\Traits\MocksQuarters;
 use TmlpStats\Tests\Validate\ValidatorTestAbstract;
 use TmlpStats\Validate\Objects\StatsReportValidator;
 
 class StatsReportValidatorTest extends ValidatorTestAbstract
 {
-    use MocksMessages;
+    use MocksMessages, MocksQuarters;
 
     protected $testClass = StatsReportValidator::class;
 
@@ -32,20 +34,21 @@ class StatsReportValidatorTest extends ValidatorTestAbstract
     public function providerValidate()
     {
         $statsReport                = new stdClass;
-        $statsReport->reportingDate = Carbon::createFromDate(2015, 12, 18);
+        $statsReport->reportingDate = Carbon::createFromDate(2015, 12, 18)->startOfDay();
 
-        $statsReport->quarter                 = new stdClass;
-        $statsReport->quarter->endWeekendDate = Carbon::createFromDate(2016, 02, 19);
+        $statsReport->quarter       = $this->getQuarterMock([], [
+            'endWeekendDate' => Carbon::createFromDate(2016, 2, 19)->startOfDay(),
+        ]);
 
-        $statsReport->center               = new stdClass;
+        $statsReport->center               = new Center();
         $statsReport->center->sheetVersion = '15.4.2';
 
         $statsReportLastWeek                = clone $statsReport;
-        $statsReportLastWeek->reportingDate = Carbon::createFromDate(2016, 02, 17);
+        $statsReportLastWeek->reportingDate = Carbon::createFromDate(2016, 2, 17)->startOfDay();
 
 
         $statsReportCorrectLastWeek                = clone $statsReport;
-        $statsReportCorrectLastWeek->reportingDate = Carbon::createFromDate(2016, 02, 19);
+        $statsReportCorrectLastWeek->reportingDate = Carbon::createFromDate(2016, 2, 19)->startOfDay();
 
         return [
             // Success Case
@@ -124,7 +127,7 @@ class StatsReportValidatorTest extends ValidatorTestAbstract
             [
                 [
                     'expectedVersion' => '15.4.2',
-                    'expectedDate'    => $statsReportLastWeek->quarter->endWeekendDate,
+                    'expectedDate'    => $statsReportLastWeek->quarter->getQuarterEndDate(),
                 ],
                 $statsReportLastWeek,
                 [
@@ -136,7 +139,7 @@ class StatsReportValidatorTest extends ValidatorTestAbstract
             [
                 [
                     'expectedVersion' => '15.4.2',
-                    'expectedDate'    => $statsReportCorrectLastWeek->quarter->endWeekendDate,
+                    'expectedDate'    => $statsReportCorrectLastWeek->quarter->getQuarterEndDate(),
                 ],
                 $statsReportCorrectLastWeek,
                 [],

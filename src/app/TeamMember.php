@@ -69,7 +69,7 @@ class TeamMember extends Model
 
         $incomingQuarter = Quarter::findForCenter($attributes['incoming_quarter_id'], $center);
 
-        $quarterStartDateString = $incomingQuarter->startWeekendDate->toDateString();
+        $quarterStartDateString = $incomingQuarter->getQuarterStartDate($center)->toDateString();
 
         // This identifier is designed to help us distinguish between 'people' from a center
         // with the same name. It's not perfect, but it should work well enough

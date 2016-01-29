@@ -57,14 +57,14 @@
                     <div class="btn-group" role="group">
                         <button id ="regionalstats-button" type="button" class="btn">Scoreboard</button>
                         <button id ="gamesbycenter-button" type="button" class="btn">By Center</button>
-                        @if ($globalReport->reportingDate->gte($quarter->classroom2Date))
+                        @if ($globalReport->reportingDate->gte($quarter->getClassroom2Date()))
                         <button id ="repromisesbycenter-button" type="button" class="btn">Repromises</button>
                         @endif
                     </div>
 
                     <div id="regionalstats-container"></div>
                     <div id="gamesbycenter-container"></div>
-                    @if ($globalReport->reportingDate->gte($quarter->classroom2Date))
+                    @if ($globalReport->reportingDate->gte($quarter->getClassroom2Date()))
                     <div id="repromisesbycenter-container"></div>
                     @endif
                 </div>
@@ -158,7 +158,7 @@
             'tdosummary',
             'regionalstats',
             'gamesbycenter',
-            @if ($globalReport->reportingDate->gte($quarter->classroom2Date))
+            @if ($globalReport->reportingDate->gte($quarter->getClassroom2Date()))
             'repromisesbycenter',
             @endif
         ];
@@ -210,7 +210,7 @@
             [
                 'regionalstats',
                 'gamesbycenter',
-                @if ($globalReport->reportingDate->gte($quarter->classroom2Date))
+                @if ($globalReport->reportingDate->gte($quarter->getClassroom2Date()))
                 'repromisesbycenter',
                 @endif
             ],

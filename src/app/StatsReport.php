@@ -206,7 +206,7 @@ class StatsReport extends Model
             return $query;
         }
 
-        $lastQuarter = Quarter::getQuarterByDate($currentQuarter->startWeekendDate, $region);
+        $lastQuarter = Quarter::getQuarterByDate($currentQuarter->getQuarterStartDate(), $region);
         if (!$lastQuarter) {
             return $query;
         }
@@ -296,9 +296,9 @@ class StatsReport extends Model
 
                 // Dates can be specified as a classroomDate
                 if (in_array($reportingDate, $quarterDates)) {
-                    $reportingDate = $statsReport->quarter->$reportingDate;
+                    $reportingDate = $statsReport->quarter->getQuarterDate($reportingDate, $statsReport->center);
                 } else if ($reportingDate == 'week1') {
-                    $reportingDate = $statsReport->quarter->startWeekendDate->copy()->addWeek();
+                    $reportingDate = $statsReport->quarter->getFirstWeekDate($statsReport->center);
                 } else {
                     $reportingDate = Carbon::parse($reportingDate);
                 }

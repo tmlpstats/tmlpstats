@@ -102,7 +102,7 @@ class CommCourseInfoValidator extends ObjectsValidatorAbstract
         $isValid = true;
 
         $startDate = $this->getDateObject($data->startDate);
-        if ($startDate && $startDate->lt($this->statsReport->quarter->startWeekendDate)) {
+        if ($startDate && $startDate->lt($this->statsReport->quarter->getQuarterStartDate($this->statsReport->center))) {
             $this->addMessage('COMMCOURSE_COURSE_DATE_BEFORE_QUARTER');
             $isValid = false;
         }

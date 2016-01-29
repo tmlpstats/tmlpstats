@@ -25,10 +25,11 @@ class StatsReportValidator extends ValidatorAbstract
 
         if ($expectedDate && $expectedDate->ne($this->statsReport->reportingDate)) {
 
-            if ($this->statsReport->reportingDate->diffInDays($this->statsReport->quarter->endWeekendDate) < 7) {
+            $quarterEndDate = $this->statsReport->quarter->getQuarterEndDate($this->statsReport->center);
+            if ($this->statsReport->reportingDate->diffInDays($quarterEndDate) < 7) {
                 // Reporting in the last week of quarter
-                if ($this->statsReport->reportingDate->ne($this->statsReport->quarter->endWeekendDate)) {
-                    $this->addMessage('IMPORTDOC_SPREADSHEET_DATE_MISMATCH_LAST_WEEK', $this->statsReport->reportingDate->toDateString(), $this->statsReport->quarter->endWeekendDate->toDateString());
+                if ($this->statsReport->reportingDate->ne($quarterEndDate)) {
+                    $this->addMessage('IMPORTDOC_SPREADSHEET_DATE_MISMATCH_LAST_WEEK', $this->statsReport->reportingDate->toDateString(), $quarterEndDate->toDateString());
                     $this->isValid = false;
                 }
             } else {

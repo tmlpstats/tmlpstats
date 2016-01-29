@@ -77,8 +77,7 @@ class TmlpGameInfoImporter extends DataImporterAbstract
 
     public function getGameData($type, Center $center, Quarter $quarter)
     {
-        $firstWeek = clone $quarter->startWeekendDate;
-        $firstWeek->addWeek();
+        $firstWeek = $quarter->getFirstWeekDate($center);
 
         $globalReport = null;
         $statsReport = null;
@@ -121,7 +120,7 @@ class TmlpGameInfoImporter extends DataImporterAbstract
             ->join('global_report_stats_report', 'global_report_stats_report.stats_report_id', '=', 'stats_reports.id')
             ->join('global_reports', 'global_reports.id', '=', 'global_report_stats_report.global_report_id')
             ->where('stats_reports.center_id', '=', $center->id)
-            ->where('global_reports.reporting_date', '>', $quarter->startWeekendDate)
+            ->where('global_reports.reporting_date', '>', $quarter->getQuarterStartDate($center))
             ->where('tmlp_games_data.type', '=', $type)
             ->orderBy('global_reports.reporting_date', 'ASC')
             ->first();
