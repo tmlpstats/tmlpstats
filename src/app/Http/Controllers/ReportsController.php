@@ -194,6 +194,16 @@ class ReportsController extends Controller
      */
     public function getCenterReport(Request $request, $abbr = null, $date = null)
     {
+        if ($request->has('reportRedirect')) {
+            Session::set('reportRedirect', $request->get('reportRedirect'));
+
+            // If the redirect is coming from an HTTP request, then reset the Session variable
+            // so we pick up the new version
+            if ($abbr && $request->get('reportRedirect') == 'center') {
+                Session::forget('viewCenterId');
+            }
+        }
+
         if (Session::has('reportRedirect') && Session::get('reportRedirect') == 'region') {
             return $this->getRegionReport($request, $abbr, $date);
         }
@@ -209,7 +219,7 @@ class ReportsController extends Controller
             Session::set('viewCenterId', $center->id);
         }
 
-        return $this->getReport($request, $abbr, $date, 'CenterReport', 'viewCenterId');
+        return $this->getReport($request, $abbr, $date, 'center', 'viewCenterId');
     }
 
     /**
@@ -223,6 +233,14 @@ class ReportsController extends Controller
      */
     public function getRegionReport(Request $request, $abbr = null, $date = null)
     {
+        if ($request->has('reportRedirect')) {
+            Session::set('reportRedirect', $request->get('reportRedirect'));
+
+            if ($abbr && $request->get('reportRedirect') == 'region') {
+                Session::forget('viewRegionId'); // it will be reset to the requested version below
+            }
+        }
+
         if (Session::has('reportRedirect') && Session::get('reportRedirect') == 'center') {
             return $this->getCenterReport($request, $abbr, $date);
         }
@@ -238,17 +256,17 @@ class ReportsController extends Controller
             Session::set('viewRegionId', $region->id);
         }
 
-        return $this->getReport($request, $abbr, $date, 'RegionReport', 'viewRegionId');
+        return $this->getReport($request, $abbr, $date, 'region', 'viewRegionId');
     }
 
     protected function getReport(Request $request, $abbr, $date, $reportType, $sessionField)
     {
         $reportingDate = null;
 
-        if ($reportType == 'RegionReport') {
+        if ($reportType == 'region') {
             $reportTargetClass = Region::class;
             $controllerClass = GlobalReportController::class;
-        } else if ($reportType == 'CenterReport') {
+        } else if ($reportType == 'center') {
             $reportTargetClass = Center::class;
             $controllerClass = StatsReportController::class;
         } else {
@@ -279,7 +297,7 @@ class ReportsController extends Controller
         }
 
         $report = null;
-        if ($reportType == 'RegionReport') {
+        if ($reportType == 'region') {
             $report = GlobalReport::reportingDate($reportingDate)
                                   ->firstOrFail();
             $redirectUrl = App::make(GlobalReportController::class)->getUrl($report, $reportTarget);

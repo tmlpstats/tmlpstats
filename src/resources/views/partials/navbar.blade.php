@@ -42,17 +42,6 @@
                         </li>
                     @endcan
 
-                    {{-- Reports --}}
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                            Reports <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu" role="menu">
-                            <li><a href="{{ url('/reports/centers') }}">Center</a></li>
-                            <li><a href="{{ url('/reports/regions') }}">Region</a></li>
-                        </ul>
-                    </li>
-
                     {{-- Admin --}}
                     @if (Auth::user()->hasRole('administrator'))
                         <li class="dropdown {{ Request::is('admin') || Request::is('admin/*') ? 'active' : '' }}">
@@ -78,7 +67,7 @@
                 @if (Auth::check())
                     {{-- Reporting Date --}}
                     <li class="dropdown">
-                        <a href="#" class="btn btn-default btn-outline navbar-btn dropdown-toggle"
+                        <a href="#" class="btn btn-default btn-outline btn-circular navbar-btn dropdown-toggle"
                            data-toggle="dropdown" role="button" aria-expanded="false">
                             @if ($reportingDate)
                                 {{ $reportingDate->format('M j, Y')}}
@@ -102,6 +91,22 @@
                         </ul>
                     </li>
 
+                    {{-- Region/Center toggle --}}
+                    <li class="dropdown">
+                        <?php
+                            $url = Request::is('reports/regions/*')
+                                ? url('/reports/centers')
+                                : url('/reports/regions');
+                        ?>
+                        <a href="{{ $url }}" class="btn btn-primary navbar-btn btn-circular btn-toggle" role="button">
+                            @if (Request::is('reports/centers/*'))
+                                Region Report
+                            @else (Request::is('reports/regions/*'))
+                                Center Report
+                            @endif
+                        </a>
+                    </li>
+
                     {{-- Center --}}
                     @if ($showNavCenterSelect && (Auth::user()->isAdmin() || Auth::user()->hasRole('globalStatistician')))
                         <li class="dropdown">
@@ -110,7 +115,7 @@
                             </a>
                             <ul id="centerSelect" class="dropdown-menu" role="menu">
                                 @foreach ($centers as $center)
-                                    <li class="menu-option" data-url="{{ url("/reports/centers/setActive") }}" data-value="{{ $center->id }}">
+                                    <li class="menu-option" data-url="{{ url("/reports/centers/{$center->abbreviation}") }}?reportRedirect=center">
                                         <a href="#">
                                             @if ($currentCenter && $center->id == $currentCenter->id)
                                                 <span class="glyphicon glyphicon-ok"></span>
@@ -132,7 +137,7 @@
                         </a>
                         <ul id="regionSelect" class="dropdown-menu" role="menu">
                             @foreach ($regions as $region)
-                                <li class="menu-option" data-url="{{ url("/reports/regions/setActive") }}" data-value="{{ $region->id }}">
+                                <li class="menu-option" data-url="{{ url("/reports/regions/{$region->abbreviation}") }}?reportRedirect=region">
                                     <a href="#">
                                         @if ($currentRegion && $region->id == $currentRegion->id)
                                             <span class="glyphicon glyphicon-ok"></span>
@@ -203,42 +208,12 @@
 
         $("#regionSelect").on("click", "li.menu-option", function(e) {
             var url = $(this).attr('data-url');
-            var data = {};
-            data.id = $(this).attr('data-value');
-
-            $.ajax({
-                type: "POST",
-                url: url,
-                beforeSend: function (request) {
-                    request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
-                },
-                data: $.param(data),
-                success: function (response) {
-                    if (response.success) {
-                        window.location.replace("{{ url('/reports/regions') }}");
-                    }
-                }
-            });
+            window.location.replace(url);
         });
 
         $("#centerSelect").on("click", "li.menu-option", function(e) {
             var url = $(this).attr('data-url');
-            var data = {};
-            data.id = $(this).attr('data-value');
-
-            $.ajax({
-                type: "POST",
-                url: url,
-                beforeSend: function (request) {
-                    request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
-                },
-                data: $.param(data),
-                success: function (response) {
-                    if (response.success) {
-                        window.location.replace("{{ url('/reports/centers') }}");
-                    }
-                }
-            });
+            window.location.replace(url);
         });
     });
 </script>
