@@ -99,10 +99,10 @@
                                 : url('/reports/regions');
                         ?>
                         <a href="{{ $url }}" class="btn btn-primary navbar-btn btn-circular btn-toggle" role="button">
-                            @if (Request::is('reports/centers/*'))
-                                Region Report
-                            @else (Request::is('reports/regions/*'))
+                            @if (Request::is('reports/regions/*'))
                                 Center Report
+                            @else
+                                Regional Report
                             @endif
                         </a>
                     </li>
