@@ -79,11 +79,14 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
 
+        $showNavCenterSelect = true;
+
         return view('globalreports.show', compact(
             'globalReport',
             'region',
             'reportToken',
-            'quarter'
+            'quarter',
+            'showNavCenterSelect'
         ));
     }
 
@@ -292,9 +295,11 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
+        $statsReports = [];
         $centersData = [];
         foreach ($globalReportData as $centerStatsData) {
             $centerName = $centerStatsData->statsReport->center->name;
+            $statsReports[$centerName] = $centerStatsData->statsReport;
 
             $centersData[$centerName][] = $centerStatsData;
         }
@@ -304,6 +309,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             $a                       = new Arrangements\GamesByWeek($centerData);
             $dataReport              = $a->compose();
             $reportData[$centerName] = $dataReport['reportData'][$globalReport->reportingDate->toDateString()];
+            $reportData[$centerName]['statsReport'] = $statsReports[$centerName];
         }
 
         $totals = [];
@@ -348,6 +354,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
+        $statsReports = [];
         $centersData = [];
         foreach ($globalReportData as $centerStatsData) {
             if (!$centerStatsData) {
@@ -355,6 +362,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             }
 
             $centerName = $centerStatsData->statsReport->center->name;
+            $statsReports[$centerName] = $centerStatsData->statsReport;
 
             $centersData[$centerName][] = $centerStatsData;
         }
@@ -364,6 +372,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             $a                       = new Arrangements\GamesByWeek($centerData);
             $dataReport              = $a->compose();
             $reportData[$centerName] = $dataReport['reportData'][$quarter->getQuarterEndDate()->toDateString()];
+            $reportData[$centerName]['statsReport'] = $statsReports[$centerName];
         }
 
         $totals = [];
@@ -1141,5 +1150,13 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected static function sortByCenterName($a, $b)
     {
         return strcmp($a['center'], $b['center']);
+    }
+
+    public static function getUrl(GlobalReport $globalReport, Region $region)
+    {
+        $abbr = strtolower($region->abbreviation);
+        $date = $globalReport->reportingDate->toDateString();
+
+        return url("/reports/regions/{$abbr}/{$date}");
     }
 }

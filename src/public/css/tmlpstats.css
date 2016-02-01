@@ -181,3 +181,14 @@ div.box {
     -ms-transform: rotate(-90deg);
     transform: rotate(-90deg);
 }
+
+.navbar-btn.btn-outline {
+    border-radius: 30px;
+    background-color: transparent;
+    padding: 8px;
+}
+
+.reportLink {
+    font-weight: normal;
+    font-size: medium;
+}

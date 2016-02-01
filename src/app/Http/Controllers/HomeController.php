@@ -4,17 +4,14 @@ namespace TmlpStats\Http\Controllers;
 use Illuminate\Http\Request;
 use TmlpStats\GlobalReport;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
-use TmlpStats\Import\ImportManager;
 use TmlpStats\Center;
 use TmlpStats\User;
 use TmlpStats\StatsReport;
-use TmlpStats\Quarter;
 
 use Carbon\Carbon;
 
 use Gate;
 use Session;
-use Input;
 
 class HomeController extends Controller
 {
@@ -120,7 +117,7 @@ class HomeController extends Controller
                     ? url("/statsreports/{$statsReport->id}/download")
                     : null;
                 $reportUrl = $statsReport
-                    ? url("/statsreports/{$statsReport->id}")
+                    ? StatsReportController::getUrl($statsReport)
                     : null;
             }
 

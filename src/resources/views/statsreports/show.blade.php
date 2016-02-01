@@ -3,44 +3,31 @@
 @section('content')
 
 @if ($statsReport)
-    <h2>{{ $statsReport->center->name }} - {{ $statsReport->reportingDate->format('F j, Y') }}</h2>
+    <h2>
+        {{ $statsReport->center->name }} - {{ $statsReport->reportingDate->format('F j, Y') }}
+        @if ($reportToken)
+            &nbsp;<a class="reportLink" href="#" data-toggle="modal" data-target="#reportLinkModel">(View Report Link)</a>
+        @endif
+    </h2>
     @can ('index', TmlpStats\StatsReport::class)
     <a href="{{ url('/home') }}"><< See All</a><br/><br/>
     @endcan
-
-    <div class="table-responsive" style="overflow: hidden">
-        {!! Form::open(['url' => "statsreports", 'method' => 'GET', 'class' => 'form-horizontal', 'id' => 'reportSelectorForm']) !!}
-        <div class="row">
-            <div class="col-md-3" style="align-content: center">
-                {!! Form::label('report_id', 'Other Weekly Reports:', ['class' => 'control-label']) !!}
-            </div>
-            <div class="col-md-2"></div>
-            <div class="col-md-7">
-                @if ($reportToken)
-                {!! Form::label('reportTokenUrl', 'Report Link:', ['class' => 'control-label']) !!}
-                @endif
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3" style="align-content: center">
-                {!! Form::select('report_id', $otherStatsReports, $statsReport->id, ['class' => 'form-control reportSelector']) !!}
-            </div>
-            <div class="col-md-2">
-                @if ($globalReport)
-                    <a class="btn btn-primary" href="{{ url("globalreports/{$globalReport->id}?region={$statsReport->center->region->abbreviation}") }}">View Regional Report</a>
-                @endif
-            </div>
-            <div class="col-md-7">
-                @if ($reportToken)
-                    <input size="80" type="text" value="{{ url($reportToken->getUrl()) }}" id="reportTokenUrl" />
-                @endif
+    @if ($reportToken)
+        <div class="modal fade" id="reportLinkModel" tabindex="-1" role="dialog" aria-labelledby="reportLinkModelLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="reportLinkModelLabel">Report Link</h4>
+                    </div>
+                    <div class="modal-body">
+                        <textarea id="reportTokenUrl" rows="2" cols="78" >{{ url($reportToken->getUrl()) }}</textarea>
+                    </div>
+                </div>
             </div>
         </div>
-        {!! Form::close() !!}
-    </div>
+    @endif
     <br />
-    <br />
-
     <div id="content">
         <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
             <li class="active"><a href="#summary" data-toggle="tab">Weekly Summary</a></li>

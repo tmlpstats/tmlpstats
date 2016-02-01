@@ -27,18 +27,10 @@
                 </td>
                 <td>{{ $data['region'] }}</td>
                 <td class="data-point">{{ $data['onTime'] ? 'Yes' : 'No' }}</td>
-                <td>
-                    @statsReportLink($data['officialReport'])
-                        {{ $data['officialSubmitTime'] }}
-                    @endStatsReportLink
-                </td>
+                <td>{{ $data['officialSubmitTime'] }}</td>
                 @if (isset($data['revisedReport']))
                     <td class="data-point">Yes</td>
-                    <td>
-                        @statsReportLink($data['revisedReport'])
-                            {{ $data['revisionSubmitTime'] }}
-                        @endStatsReportLink
-                    </td>
+                    <td>{{ $data['revisionSubmitTime'] }}</td>
                 @else
                     <td class="data-point">No</td>
                     <td></td>

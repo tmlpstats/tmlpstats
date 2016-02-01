@@ -1,5 +1,23 @@
 <?php
     $homeUrl = Session::get('homePath', '/');
+
+    $regions = TmlpStats\Region::isGlobal()->get();
+    $currentRegion = App::make(TmlpStats\Http\Controllers\Controller::class)
+                        ->getRegion(Request::instance());
+
+    $centers = TmlpStats\Center::byRegion($currentRegion)->orderBy('name')->get();
+    $currentCenter = App::make(TmlpStats\Http\Controllers\Controller::class)
+                        ->getCenter(Request::instance());
+
+    $reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)
+                        ->getReportingDate(Request::instance());
+    $quarter = TmlpStats\Quarter::getQuarterByDate($reportingDate, $currentRegion);
+
+    $reports = TmlpStats\GlobalReport::between($quarter->startWeekendDate, $quarter->endWeekendDate)
+                                     ->orderBy('reporting_date', 'desc')
+                                     ->get();
+
+    $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : false;
 ?>
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
@@ -13,17 +31,29 @@
             </button>
             <a class="navbar-brand" href="{{ url($homeUrl) }}">TMLP Stats</a>
         </div>
-        <div id="navbar" class="collapse navbar-collapse">
-            <ul class="nav navbar-nav">
-                @if (Auth::check())
-                    <li {{ Request::is($homeUrl) ? 'class="active"' : '' }}>
-                        <a href="{{ url($homeUrl) }}">Home</a>
-                    </li>
+
+        @if (Auth::check())
+            <div id="navbar" class="collapse navbar-collapse navbar-left">
+                <ul class="nav navbar-nav">
+                    {{-- Validate Stats --}}
                     @can ('validate', TmlpStats\StatsReport::class)
                         <li {!! Request::is('validate') ? 'class="active"' : '' !!}>
-                            <a href="{{ url('validate') }}">Validate Stats</a>
+                            <a href="{{ url('validate') }}">Validate</a>
                         </li>
                     @endcan
+
+                    {{-- Reports --}}
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                            Reports <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="{{ url('/reports/centers') }}">Center</a></li>
+                            <li><a href="{{ url('/reports/regions') }}">Region</a></li>
+                        </ul>
+                    </li>
+
+                    {{-- Admin --}}
                     @if (Auth::user()->hasRole('administrator'))
                         <li class="dropdown {{ Request::is('admin') || Request::is('admin/*') ? 'active' : '' }}">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -39,13 +69,88 @@
                             </ul>
                         </li>
                     @endif
-                @endif
-            </ul>
+                </ul>
+            </div>
+        @endif
 
-            <ul class="nav navbar-nav navbar-right">
+        <div id="navbar" class="collapse navbar-collapse navbar-right">
+            <ul class="nav navbar-nav">
+                @if (Auth::check())
+                    {{-- Reporting Date --}}
+                    <li class="dropdown">
+                        <a href="#" class="btn btn-default btn-outline navbar-btn dropdown-toggle"
+                           data-toggle="dropdown" role="button" aria-expanded="false">
+                            @if ($reportingDate)
+                                {{ $reportingDate->format('M j, Y')}}
+                            @else
+                                Report <span class="caret"></span>
+                            @endif
+                        </a>
+                        <ul id="reportSelect" class="dropdown-menu" role="menu">
+                            @foreach ($reports as $report)
+                                <li class="menu-option" data-url="{{ url("/reports/dates/setActive") }}" data-value="{{ $report->reportingDate->toDateString() }}">
+                                    <a href="#">
+                                        @if ($reportingDate && $report->reportingDate->eq($reportingDate))
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        @else
+                                            <span class="glyphicon">&nbsp;</span>
+                                        @endif
+                                        {{ $report->reportingDate->format('M j, Y')}}
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </li>
+
+                    {{-- Center --}}
+                    @if ($showNavCenterSelect && (Auth::user()->isAdmin() || Auth::user()->hasRole('globalStatistician')))
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                Center <span class="caret"></span>
+                            </a>
+                            <ul id="centerSelect" class="dropdown-menu" role="menu">
+                                @foreach ($centers as $center)
+                                    <li class="menu-option" data-url="{{ url("/reports/centers/setActive") }}" data-value="{{ $center->id }}">
+                                        <a href="#">
+                                            @if ($currentCenter && $center->id == $currentCenter->id)
+                                                <span class="glyphicon glyphicon-ok"></span>
+                                            @else
+                                                <span class="glyphicon">&nbsp;</span>
+                                            @endif
+                                            {{ $center->name }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </li>
+                    @endif
+
+                    {{-- Region --}}
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                            Region <span class="caret"></span>
+                        </a>
+                        <ul id="regionSelect" class="dropdown-menu" role="menu">
+                            @foreach ($regions as $region)
+                                <li class="menu-option" data-url="{{ url("/reports/regions/setActive") }}" data-value="{{ $region->id }}">
+                                    <a href="#">
+                                        @if ($currentRegion && $region->id == $currentRegion->id)
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        @else
+                                            <span class="glyphicon">&nbsp;</span>
+                                        @endif
+                                        {{ $region->name }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </li>
+                @endif
+
+                {{-- Login/Profile --}}
                 @if (Auth::guest() || Auth::user()->hasRole('readonly')))
                     <li {!! Request::is('/') ? 'class="active"' : '' !!}>
-                        <a href="{{ url('/auth/login') }}">Login/Register</a>
+                        <a href="{{ url('/auth/login') }}">Login</a>
                     </li>
                 @else
                     <li class="dropdown">
@@ -75,5 +180,65 @@
                 $('b', this).toggleClass("caret caret-up");
             }
         );
+
+        $("#reportSelect").on("click", "li.menu-option", function(e) {
+            var url = $(this).attr('data-url');
+            var data = {};
+            data.date = $(this).attr('data-value');
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                beforeSend: function (request) {
+                    request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
+                },
+                data: $.param(data),
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    }
+                }
+            });
+        });
+
+        $("#regionSelect").on("click", "li.menu-option", function(e) {
+            var url = $(this).attr('data-url');
+            var data = {};
+            data.id = $(this).attr('data-value');
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                beforeSend: function (request) {
+                    request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
+                },
+                data: $.param(data),
+                success: function (response) {
+                    if (response.success) {
+                        window.location.replace("{{ url('/reports/regions') }}");
+                    }
+                }
+            });
+        });
+
+        $("#centerSelect").on("click", "li.menu-option", function(e) {
+            var url = $(this).attr('data-url');
+            var data = {};
+            data.id = $(this).attr('data-value');
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                beforeSend: function (request) {
+                    request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
+                },
+                data: $.param(data),
+                success: function (response) {
+                    if (response.success) {
+                        window.location.replace("{{ url('/reports/centers') }}");
+                    }
+                }
+            });
+        });
     });
 </script>

@@ -143,7 +143,7 @@ class StatsReportController extends ReportDispatchAbstractController
      *
      * @return Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $statsReport = StatsReport::findOrFail($id);
 
@@ -204,12 +204,15 @@ class StatsReportController extends ReportDispatchAbstractController
             ? ReportToken::get($globalReport, $center)
             : null;
 
+        $showNavCenterSelect = true;
+
         return view('statsreports.show', compact(
             'statsReport',
             'globalReport',
             'otherStatsReports',
             'sheetUrl',
-            'reportToken'
+            'reportToken',
+            'showNavCenterSelect'
         ));
     }
 
@@ -1188,6 +1191,14 @@ class StatsReportController extends ReportDispatchAbstractController
         }
 
         return [null, null, null];
+    }
+
+    public static function getUrl(StatsReport $statsReport)
+    {
+        $abbr = strtolower($statsReport->center->abbreviation);
+        $date = $statsReport->reportingDate->toDateString();
+
+        return url("/reports/centers/{$abbr}/{$date}");
     }
 }
 
