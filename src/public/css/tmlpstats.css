@@ -183,9 +183,28 @@ div.box {
 }
 
 .navbar-btn.btn-outline {
-    border-radius: 30px;
     background-color: transparent;
+    color: rgb(255, 255, 255) !important;
+}
+
+.navbar-btn.btn-circular {
+    border-radius: 30px;
     padding: 8px;
+    margin: 5px
+}
+
+.navbar-inverse .navbar-btn.btn-toggle {
+     background-color: rgb(111, 84, 153) !important;
+     border-color: rgb(111, 84, 153) !important;
+     color: rgb(255, 255, 255) !important;
+}
+
+.navbar-inverse .navbar-nav>.open>a.btn-toggle,
+.navbar-inverse .navbar-nav>.open>a.btn-toggle:focus,
+.navbar-inverse .navbar-nav>.open>a.btn-toggle:hover {
+    background-color: rgb(90, 65, 130) !important;
+    border-color: rgb(111, 84, 153) !important;
+    color: rgb(255, 255, 255) !important;
 }
 
 .reportLink {
