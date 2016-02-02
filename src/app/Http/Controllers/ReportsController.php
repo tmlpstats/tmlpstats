@@ -16,6 +16,23 @@ use TmlpStats\StatsReport;
 class ReportsController extends Controller
 {
     /**
+     * Create a new controller instance.
+     */
+    public function __construct()
+    {
+        // Only allow token auth for the reports
+        $this->middleware('auth.token', ['only' => [
+            'getCenterReport',
+            'getRegionReport',
+        ]]);
+
+        // Require auth everywhere except when we are initially reviewing the reportToken
+        $this->middleware('auth', ['except' => [
+            'getByToken',
+        ]]);
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
