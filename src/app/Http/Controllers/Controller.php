@@ -12,6 +12,7 @@ use TmlpStats\Region;
 
 use Auth;
 use Session;
+use TmlpStats\ReportToken;
 
 class Controller extends BaseController
 {
@@ -93,15 +94,32 @@ class Controller extends BaseController
     {
         $reportingDate = null;
         $reportingDateString = '';
+
+        // First try to get the date from the request
         if ($request->has('reportingDate') && preg_match('/^\d\d\d\d-\d\d-\d\d$/', $request->get('reportingDate'))) {
             $reportingDateString = $request->get('reportingDate');
             Session::set('viewReportingDate', $reportingDateString);
         }
 
+        // Then try to pull it from the session if it's there
         if (!$reportingDateString && Session::has('viewReportingDate')) {
             $reportingDateString = Session::get('viewReportingDate');
         }
 
+        // If we have a reportToken, use the reportingDate from that report
+        if (!$reportingDateString && Session::has('reportTokenId')) {
+            $reportToken = ReportToken::find(Session::get('reportTokenId'));
+            $report = $reportToken
+                ? $reportToken->getReport()
+                : null;
+
+            if ($report) {
+                $reportingDateString = $report->reportingDate->toDateString();
+                Session::set('viewReportingDate', $reportingDateString);
+            }
+        }
+
+        // Finally, if we don't have it yet make an educated guess
         if ($reportingDateString && in_array($reportingDateString, $reportingDates)) {
             $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
         } else if (!$reportingDateString && $reportingDates) {

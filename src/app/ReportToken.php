@@ -2,10 +2,13 @@
 
 namespace TmlpStats;
 
+use App;
 use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Request;
+use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\Traits\CachedRelationships;
 
 
@@ -62,16 +65,31 @@ class ReportToken extends Model
     {
         $globalReport = GlobalReport::findOrFail($this->reportId);
 
+        $date = $globalReport->reportingDate->toDateString();
+
         $reportUrl = null;
         if ($this->center) {
             $statsReport = $globalReport->getStatsReportByCenter($this->center);
             if ($statsReport) {
-                $reportUrl = "statsreports/{$statsReport->id}";
+                $reportUrl = "reports/centers/{$this->center->abbreviation}/{$date}";
             }
         } else {
-            $reportUrl = "globalreports/{$globalReport->id}";
+            $region = App::make(Controller::class)->getRegion(Request::instance());
+            $reportUrl = "reports/regions/{$region->abbreviation}/{$date}";
         }
-        return $reportUrl;
+        return strtolower($reportUrl);
+    }
+
+    /**
+     * Get the report for this ReportToken
+     *
+     * @return mixed
+     */
+    public function getReport()
+    {
+        $reportClass = $this->reportType;
+
+        return $reportClass::find($this->reportId);
     }
 
     /**
