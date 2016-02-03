@@ -278,8 +278,6 @@ class ReportsController extends Controller
 
     protected function getReport(Request $request, $abbr, $date, $reportType, $sessionField)
     {
-        $reportingDate = null;
-
         if ($reportType == 'region') {
             $reportTargetClass = Region::class;
             $controllerClass = GlobalReportController::class;
@@ -291,6 +289,7 @@ class ReportsController extends Controller
         }
 
         $reportTarget = null;
+        $reportingDate = null;
         $reportViewUpdate = Session::has('reportRedirect');
         if ($reportViewUpdate) {
             Session::forget('reportRedirect');
@@ -303,20 +302,35 @@ class ReportsController extends Controller
         }
 
         if (!$reportTarget) {
-            $reportTarget = $reportTargetClass::abbreviation($abbr)
-                                              ->firstOrFail();
+            $reportTarget = $reportTargetClass::abbreviation($abbr)->firstOrFail();
         }
 
+        if (!$reportingDate && $date) {
+            $reportingDate = Carbon::parse($date);
+        }
+
+        // If we get here and still don't have a reporting date, then none was provided or set in the session
+        // Make sure we have an actual report since Controller::getReportingDate() may return the current date
+        // even if there hasn't been a report created yet
+        $globalReport = null;
         if (!$reportingDate) {
-            $reportingDate = $date
-                ? Carbon::parse($date)
-                : $this->getReportingDate($request);
+            $reportingDate = $this->getReportingDate($request);
+
+            $globalReport = GlobalReport::reportingDate($reportingDate)->first();
+            if (!$globalReport) {
+                $reportingDate->subWeek();
+                $globalReport = GlobalReport::reportingDate($reportingDate)->first();
+            }
+
+            if ($globalReport) {
+                Session::set('viewReportingDate', $reportingDate->toDateString());
+            }
         }
 
         $report = null;
         if ($reportType == 'region') {
-            $report = GlobalReport::reportingDate($reportingDate)
-                                  ->firstOrFail();
+            $report = $globalReport ?: GlobalReport::reportingDate($reportingDate)
+                                                   ->firstOrFail();
             $redirectUrl = App::make(GlobalReportController::class)->getUrl($report, $reportTarget);
         } else {
             $report = StatsReport::byCenter($reportTarget)
