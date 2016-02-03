@@ -115,7 +115,7 @@
                             </a>
                             <ul id="centerSelect" class="dropdown-menu" role="menu">
                                 @foreach ($centers as $center)
-                                    <li class="menu-option" data-url="{{ url("/reports/centers/{$center->abbreviation}") }}?reportRedirect=center">
+                                    <li class="menu-option" data-url="{{ url("/reports/centers/{$center->abbreviation}") }}?reportRedirect=center" data-value="{{ $center->id }}">
                                         <a href="#">
                                             @if ($currentCenter && $center->id == $currentCenter->id)
                                                 <span class="glyphicon glyphicon-ok"></span>
@@ -137,7 +137,7 @@
                         </a>
                         <ul id="regionSelect" class="dropdown-menu" role="menu">
                             @foreach ($regions as $region)
-                                <li class="menu-option" data-url="{{ url("/reports/regions/{$region->abbreviation}") }}?reportRedirect=region">
+                                <li class="menu-option" data-url="{{ url("/reports/regions/{$region->abbreviation}") }}?reportRedirect=region" data-value="{{ $region->id }}">
                                     <a href="#">
                                         @if ($currentRegion && $region->id == $currentRegion->id)
                                             <span class="glyphicon glyphicon-ok"></span>
@@ -207,13 +207,49 @@
         });
 
         $("#regionSelect").on("click", "li.menu-option", function(e) {
-            var url = $(this).attr('data-url');
-            window.location.replace(url);
+            @if (Request::is('reports/*'))
+                var url = $(this).attr('data-url');
+                window.location.replace(url);
+            @else
+                var data = {};
+                data.id = $(this).attr('data-value');
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url("/reports/regions/setActive") }}",
+                    beforeSend: function (request) {
+                        request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
+                    },
+                    data: $.param(data),
+                    success: function (response) {
+                        if (response.success) {
+                            location.reload();
+                        }
+                    }
+                });
+            @endif
         });
 
         $("#centerSelect").on("click", "li.menu-option", function(e) {
-            var url = $(this).attr('data-url');
-            window.location.replace(url);
+            @if (Request::is('reports/*'))
+                var url = $(this).attr('data-url');
+                window.location.replace(url);
+            @else
+                var data = {};
+                data.id = $(this).attr('data-value');
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url("/reports/centers/setActive") }}",
+                    beforeSend: function (request) {
+                        request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
+                    },
+                    data: $.param(data),
+                    success: function (response) {
+                        if (response.success) {
+                            location.reload();
+                        }
+                    }
+                });
+            @endif
         });
     });
 </script>
