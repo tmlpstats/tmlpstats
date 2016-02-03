@@ -248,9 +248,9 @@ class CenterStatsController extends Controller
         $statsReport  = null;
 
         // Usually, promises will be saved in the global report for the expected week
-        $classroom2Date = $quarter->getClassroom2Date($center);
-        if ($this->statsReport->reportingDate->gte($classroom2Date) && $date->gt($classroom2Date) && !$originalPromise) {
-            $globalReport = $this->getGlobalReport($classroom2Date);
+        $repromiseDate = $quarter->getRepromiseDate($center);
+        if ($this->statsReport->reportingDate->gte($repromiseDate) && $date->gt($repromiseDate) && !$originalPromise) {
+            $globalReport = $this->getGlobalReport($repromiseDate);
         } else {
             $firstWeek = $quarter->getFirstWeekDate($center);
 
