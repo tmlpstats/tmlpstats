@@ -14,9 +14,9 @@ trait ValidatesTravelWithConfig
             'classroom3Date',
         ];
 
-        $travelDueSetting = Setting::get('travelDueByDate', $this->statsReport->center);
-
         $dueDate = $this->statsReport->quarter->getClassroom2Date($this->statsReport->center);
+
+        $travelDueSetting = Setting::get('travelDueByDate', $this->statsReport->center, $this->statsReport->quarter);
         if ($travelDueSetting) {
             $settingValue = $travelDueSetting->value;
             if (in_array($settingValue, $classroomNames)) {

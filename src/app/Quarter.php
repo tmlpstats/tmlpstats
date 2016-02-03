@@ -93,7 +93,7 @@ class Quarter extends Model
 
         $date = $this->regionQuarterDetails->$field;
 
-        $settings = Setting::get('regionQuarterOverride', $center);
+        $settings = Setting::get('regionQuarterOverride', $center, $this);
         if ($settings) {
             // Settings should be in the format:
             // {"classroom2Date":"2016-01-15", "classroom3Date":"2016-02-07"}
