@@ -123,7 +123,11 @@ class CenterStatsImporter extends DataImporterAbstract
 
     public function postProcess()
     {
-        $isRepromiseWeek = $this->statsReport->reportingDate->eq($this->statsReport->quarter->getClassroom2Date($this->statsReport->center));
+        $center = $this->statsReport->center;
+        $quarter = $this->statsReport->quarter;
+        $reportingDate = $this->statsReport->reportingDate;
+
+        $isRepromiseWeek = $quarter->isRepromiseWeek($reportingDate, $center);
 
         foreach ($this->data as $week) {
 
@@ -136,9 +140,9 @@ class CenterStatsImporter extends DataImporterAbstract
             }
 
             $weekDate = Carbon::createFromFormat('Y-m-d', $week['reportingDate'])->startOfDay();
-            $promiseData = $this->getPromiseData($weekDate, $this->statsReport->center, $this->statsReport->quarter);
+            $promiseData = $this->getPromiseData($weekDate, $center, $quarter);
 
-            if (!$promiseData || ($isRepromiseWeek && $weekDate->gt($this->statsReport->reportingDate))) {
+            if (!$promiseData || ($isRepromiseWeek && $weekDate->gt($reportingDate))) {
 
                 $promiseData = CenterStatsData::firstOrNew(array(
                     'type'            => $week['type'],
@@ -168,14 +172,14 @@ class CenterStatsImporter extends DataImporterAbstract
 
             $weekDate = Carbon::createFromFormat('Y-m-d', $week['reportingDate'])->startOfDay();
 
-            $actualData = $this->getActualData($weekDate, $this->statsReport->center, $this->statsReport->quarter);
+            $actualData = $this->getActualData($weekDate, $center, $quarter);
 
             // Always allow setting this week
-            if ($actualData && $this->statsReport->reportingDate->ne($weekDate)) {
+            if ($actualData && $reportingDate->ne($weekDate)) {
                 continue;
             }
 
-            $promiseData = $this->getPromiseData($weekDate, $this->statsReport->center, $this->statsReport->quarter);
+            $promiseData = $this->getPromiseData($weekDate, $center, $quarter);
 
             $actualData = CenterStatsData::firstOrNew(array(
                 'type'            => $week['type'],
@@ -186,7 +190,7 @@ class CenterStatsImporter extends DataImporterAbstract
             unset($week['offset']);
             unset($week['type']);
 
-            if (!$actualData->exists || $this->statsReport->reportingDate->eq($weekDate)) {
+            if (!$actualData->exists || $reportingDate->eq($weekDate)) {
 
                 $actualData = $this->setValues($actualData, $week);
                 $actualData->points = $this->calculatePoints($actualData, $promiseData);
@@ -202,18 +206,20 @@ class CenterStatsImporter extends DataImporterAbstract
             return $this->weeks[$date->toDateString()];
         }
 
+        $reportingDate = $this->statsReport->reportingDate;
+
         $globalReport = null;
         $statsReport = null;
 
         $firstWeek = $quarter->getFirstWeekDate($center);
 
         // Don't reuse promises on the first week, as they may change between submits
-        if ($this->statsReport->reportingDate->ne($firstWeek)) {
+        if ($reportingDate->ne($firstWeek)) {
 
             // Usually, promises will be saved in the global report for the expected week
-            $classroom2Date = $quarter->getClassroom2Date($center);
-            if ($this->statsReport->reportingDate->gt($classroom2Date) && $date->gt($classroom2Date)) {
-                $globalReport = GlobalReport::reportingDate($classroom2Date)->first();
+            $repromiseDate = $quarter->getRepromiseDate($center);
+            if ($reportingDate->gt($repromiseDate) && $date->gt($repromiseDate)) {
+                $globalReport = GlobalReport::reportingDate($repromiseDate)->first();
             } else {
                 $globalReport = GlobalReport::reportingDate($firstWeek)->first();
             }
@@ -231,7 +237,7 @@ class CenterStatsImporter extends DataImporterAbstract
         }
 
         // If we can't find one, or if the only one we could find is from this week
-        if (!$statsReport || $statsReport->reportingDate->eq($this->statsReport->reportingDate)) {
+        if (!$statsReport || $statsReport->reportingDate->eq($reportingDate)) {
             return null;
         }
 

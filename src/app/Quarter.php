@@ -41,6 +41,13 @@ class Quarter extends Model
         }
     }
 
+    /**
+     * Get the date of the first week of reporting
+     *
+     * @param Center|null $center
+     *
+     * @return Carbon
+     */
     public function getFirstWeekDate(Center $center = null)
     {
         $quarterStart = $this->getQuarterStartDate($center);
@@ -48,31 +55,82 @@ class Quarter extends Model
         return $quarterStart->addWeek();
     }
 
+    /**
+     * Get the Friday date of the quarter's starting weekend
+     *
+     * @param Center|null $center
+     *
+     * @return Carbon
+     * @throws Exception
+     */
     public function getQuarterStartDate(Center $center = null)
     {
         return $this->getQuarterDate('startWeekendDate', $center);
     }
 
+    /**
+     * Get the Friday date of the quarter's ending weekend
+     *
+     * @param Center|null $center
+     *
+     * @return Carbon
+     * @throws Exception
+     */
     public function getQuarterEndDate(Center $center = null)
     {
         return $this->getQuarterDate('endWeekendDate', $center);
     }
 
+    /**
+     * Get the date of the quarter's classroom 1
+     *
+     * @param Center|null $center
+     *
+     * @return Carbon
+     * @throws Exception
+     */
     public function getClassroom1Date(Center $center = null)
     {
         return $this->getQuarterDate('classroom1Date', $center);
     }
 
+    /**
+     * Get the date of the quarter's classroom 2
+     *
+     * @param Center|null $center
+     *
+     * @return Carbon
+     * @throws Exception
+     */
     public function getClassroom2Date(Center $center = null)
     {
         return $this->getQuarterDate('classroom2Date', $center);
     }
 
+    /**
+     * Get the date of the quarter's classroom 3
+     *
+     * @param Center|null $center
+     *
+     * @return Carbon
+     * @throws Exception
+     */
     public function getClassroom3Date(Center $center = null)
     {
         return $this->getQuarterDate('classroom3Date', $center);
     }
 
+    /**
+     * Get the date for the $field value.
+     *
+     * Will check if there is a setting overriding the regional date, or return the regional date
+     *
+     * @param             $field
+     * @param Center|null $center
+     *
+     * @return Carbon
+     * @throws Exception
+     */
     public function getQuarterDate($field, Center $center = null)
     {
         $validFields = [
@@ -107,6 +165,42 @@ class Quarter extends Model
         }
 
         return $date->startOfDay();
+    }
+
+    /**
+     * Get the date when repromises are accepted
+     *
+     * Will check for a setting override, otherwise uses the classroom2 date
+     *
+     * @param Center|null $center
+     *
+     * @return Carbon|static
+     */
+    public function getRepromiseDate(Center $center = null)
+    {
+        $setting = Setting::get('repromiseDate', $center, $this);
+        if ($setting) {
+            return Carbon::parse($setting->value);
+        }
+
+        return $this->getClassroom2Date($center);
+    }
+
+    /**
+     * Is provided date the week to accept repromises?
+     *
+     * Will check for a setting override, otherwise uses the classroom2 date
+     *
+     * @param Carbon      $date
+     * @param Center|null $center
+     *
+     * @return bool
+     */
+    public function isRepromiseWeek(Carbon $date, Center $center = null)
+    {
+        $repromiseDate = $this->getRepromiseDate($center);
+
+        return $date->eq($repromiseDate);
     }
 
     public static function isFirstWeek(Region $region)
