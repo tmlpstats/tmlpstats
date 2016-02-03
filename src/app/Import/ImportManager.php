@@ -268,7 +268,7 @@ class ImportManager
             'statisticianApprentice' => static::getEmail($statisticianApprentice),
         );
 
-        $mailingList = Setting::get('centerReportMailingList', $center);
+        $mailingList = Setting::get('centerReportMailingList', $center, $quarter);
         if ($mailingList) {
             $emailMap['mailingList'] = $mailingList->value;
         }

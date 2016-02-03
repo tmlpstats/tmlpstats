@@ -289,7 +289,7 @@ class StatsReport extends Model
         $due = null;
 
         // Try to find a due time setting for center first
-        $settings = Setting::get($name, $statsReport->center);
+        $settings = Setting::get($name, $statsReport->center, $statsReport->quarter);
         if ($settings) {
             $dates = $settings->value
                 ? json_decode($settings->value, true)
