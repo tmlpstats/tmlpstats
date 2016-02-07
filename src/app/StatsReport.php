@@ -4,11 +4,14 @@ namespace TmlpStats;
 use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Settings\ReportDeadlines;
 use TmlpStats\Traits\CachedRelationships;
 
 class StatsReport extends Model
 {
     use CamelCaseModel, CachedRelationships;
+
+    protected $reportDeadlines = null;
 
     protected $fillable = [
         'reporting_date',
@@ -41,62 +44,87 @@ class StatsReport extends Model
         return parent::__get($name);
     }
 
-    public function setReportingDateAttribute($value)
-    {
-        $date                               = $this->asDateTime($value);
-        $this->attributes['reporting_date'] = $date->toDateString();
-    }
-
+    /**
+     * Was this report submitted on or before the deadline?
+     *
+     * @return bool
+     */
     public function isOnTime()
     {
-        $submittedAt = clone $this->submittedAt;
+        $submittedAt = $this->submittedAt->copy();
         $submittedAt->setTimezone($this->center->timezone);
 
         return $submittedAt->lte($this->due());
     }
 
     /**
-     * Get the configured stats due Carbon object
+     * Get datetime object for when stats are due
      *
      * @return null|Carbon date
      */
     public function due()
     {
-        $due = static::getDateSetting('centerReportDue', $this);
-
-        // Default value
-        if (!$due) {
-            $due = Carbon::create(
-                $this->reportingDate->year,
-                $this->reportingDate->month,
-                $this->reportingDate->day,
-                19, 0, 59,
-                $this->center->timezone
-            );
+        if (!$this->reportDeadlines) {
+            $this->reportDeadlines = ReportDeadlines::get($this->center, $this->quarter, $this->reportingDate);
         }
 
-        return $due;
+        return $this->reportDeadlines['report'];
     }
 
+    /**
+     * Get datetime object for when the regional statistician response is due
+     *
+     * @return null|Carbon date
+     */
+    public function responseDue()
+    {
+        if (!$this->reportDeadlines) {
+            $this->reportDeadlines = ReportDeadlines::get($this->center, $this->quarter, $this->reportingDate);
+        }
+
+        return $this->reportDeadlines['response'];
+    }
+
+    /**
+     * Did this report pass validation?
+     *
+     * @return bool
+     */
     public function isValidated()
     {
-        return (bool)$this->validated;
+        return $this->validated;
     }
 
+    /**
+     * Was this report officially submitted
+     *
+     * @return bool
+     */
     public function isSubmitted()
     {
         return $this->submitted_at !== null;
     }
 
+    /**
+     * Get the points for this reporting week
+     *
+     * @return null|integer
+     */
     public function getPoints()
     {
-        $data = CenterStatsData::actual()->byStatsReport($this)
+        $data = CenterStatsData::byStatsReport($this)
                                ->reportingDate($this->reportingDate)
+                               ->actual()
                                ->first();
 
         return $data ? $data->points : null;
     }
 
+    /**
+     * Get the rating for this reporting week
+     *
+     * @return null|string
+     */
     public function getRating()
     {
         $points = $this->getPoints();
@@ -108,6 +136,14 @@ class StatsReport extends Model
         return static::pointsToRating($points);
     }
 
+    /**
+     * Get the integer percentage of actual performance against promise
+     *
+     * @param $actual
+     * @param $promise
+     *
+     * @return int|integer
+     */
     public static function calculatePercent($actual, $promise)
     {
         return $promise > 0
@@ -115,6 +151,14 @@ class StatsReport extends Model
             : 0;
     }
 
+    /**
+     * Get the points based on gamer percentage
+     *
+     * @param $percent
+     * @param $game
+     *
+     * @return int
+     */
     public static function pointsByPercent($percent, $game)
     {
         $points = 0;
@@ -132,6 +176,13 @@ class StatsReport extends Model
         return ($game == 'cap') ? $points * 2 : $points;
     }
 
+    /**
+     * Get the rating based on number of points
+     *
+     * @param $points
+     *
+     * @return string
+     */
     public static function pointsToRating($points)
     {
         if ($points == 28) {
@@ -265,73 +316,5 @@ class StatsReport extends Model
     public function tmlpGamesData()
     {
         return $this->hasMany('TmlpStats\TmlpGamesData');
-    }
-
-
-    /**
-     * Lookup the specified setting, and return a Carbon object if one is found
-     *
-     * @param $name         Name of setting field
-     * @param $statsReport  StatsReport to use when comparing dates
-     *
-     * @return null|Carbon  Date object
-     */
-    public static function getDateSetting($name, $statsReport)
-    {
-        $quarterDates = [
-            'classroom1Date',
-            'classroom2Date',
-            'classroom3Date',
-            'endWeekendDate',
-        ];
-        // You can also specify it as week1 for the first week in the quarter
-
-        $due = null;
-
-        // Try to find a due time setting for center first
-        $settings = Setting::get($name, $statsReport->center, $statsReport->quarter);
-        if ($settings) {
-            $dates = $settings->value
-                ? json_decode($settings->value, true)
-                : [];
-
-            foreach ($dates as $dateInfo) {
-                $timezone = isset($dateInfo['timezone']) && $dateInfo['timezone']
-                    ? $dateInfo['timezone']
-                    : $statsReport->center->timezone;
-
-                $reportingDate = $dateInfo['reportingDate'];
-
-                // Dates can be specified as a classroomDate
-                if (in_array($reportingDate, $quarterDates)) {
-                    $reportingDate = $statsReport->quarter->getQuarterDate($reportingDate, $statsReport->center);
-                } else if ($reportingDate == 'week1') {
-                    $reportingDate = $statsReport->quarter->getFirstWeekDate($statsReport->center);
-                } else {
-                    $reportingDate = Carbon::parse($reportingDate);
-                }
-
-                if (isset($dateInfo['dueDate'])) {
-                    $date = $dateInfo['dueDate'] == '+1day'
-                        ? $reportingDate->copy()->addDay()
-                        : Carbon::parse($dateInfo['dueDate'], $timezone);
-                } else {
-                    $date = $reportingDate;
-                }
-
-                $time = $dateInfo['time'];
-
-                if ($reportingDate->eq($statsReport->reportingDate)) {
-                    $dateString = $date->toDateString();
-                    $due        = Carbon::parse(
-                        "{$dateString} {$time}",
-                        $timezone
-                    );
-                    break;
-                }
-            }
-        }
-
-        return $due;
     }
 }

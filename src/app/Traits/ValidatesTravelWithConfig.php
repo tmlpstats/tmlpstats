@@ -1,29 +1,23 @@
 <?php
 namespace TmlpStats\Traits;
 
-use Carbon\Carbon;
-use TmlpStats\Setting;
+use TmlpStats\Settings\Setting;
 
 trait ValidatesTravelWithConfig
 {
+    /**
+     * Is it time to check if travel and rooming are complete?
+     *
+     * @return bool
+     */
     public function isTimeToCheckTravel()
     {
-        $classroomNames = [
-            'classroom1Date',
-            'classroom2Date',
-            'classroom3Date',
-        ];
+        $dueDate = Setting::name('travelDueByDate')
+                          ->with($this->statsReport->center, $this->statsReport->quarter)
+                          ->get();
 
-        $dueDate = $this->statsReport->quarter->getClassroom2Date($this->statsReport->center);
-
-        $travelDueSetting = Setting::get('travelDueByDate', $this->statsReport->center, $this->statsReport->quarter);
-        if ($travelDueSetting) {
-            $settingValue = $travelDueSetting->value;
-            if (in_array($settingValue, $classroomNames)) {
-                $dueDate = $this->statsReport->quarter->getQuarterDate($settingValue, $this->statsReport->center);
-            } else if (preg_match('/^\d\d\d\d-\d\d-\d\d$/', $settingValue)) {
-                $dueDate = Carbon::parse($settingValue);
-            }
+        if (!$dueDate) {
+            $dueDate = $this->statsReport->quarter->getClassroom2Date($this->statsReport->center);
         }
 
         return $this->statsReport->reportingDate->gt($dueDate);

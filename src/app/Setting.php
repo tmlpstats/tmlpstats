@@ -24,6 +24,7 @@ class Setting extends Model
 
     /**
      * Get a setting by name
+     *
      * @param $name
      * @param Center|null $center
      * @param Quarter|null $quarter
@@ -32,7 +33,7 @@ class Setting extends Model
     public static function get($name, Center $center = null, Quarter $quarter = null)
     {
         $setting = static::getFromCache($name, $center ? $center->id : 0);
-        if ($setting) {
+        if ($setting !== null) {
             return $setting;
         }
 

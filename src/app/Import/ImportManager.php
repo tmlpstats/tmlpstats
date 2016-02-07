@@ -1,26 +1,22 @@
 <?php
 namespace TmlpStats\Import;
 
+use Auth;
+use Cache;
+use Carbon\Carbon;
+use Exception;
+use Log;
+use Mail;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\GlobalReport;
 use TmlpStats\Person;
 use TmlpStats\ReportToken;
-use TmlpStats\Setting;
-
-use Carbon\Carbon;
-
-use Auth;
-use Cache;
-use Exception;
-use Log;
-use Mail;
-use TmlpStats\StatsReport;
+use TmlpStats\Settings\Setting;
 
 // Required for importing multiple sheets
 ini_set('max_execution_time', 240);
 ini_set('memory_limit', '512M');
 ini_set('max_file_uploads', '30');
-
 
 /**
  * Class ImportManager
@@ -30,12 +26,12 @@ ini_set('max_file_uploads', '30');
  */
 class ImportManager
 {
-    protected $files = array();
+    protected $files = [];
     protected $expectedDate = null;
     protected $enforceVersion = false;
     protected $skipEmail = false;
 
-    protected $results = array();
+    protected $results = [];
 
     /**
      * ImportManager constructor.
@@ -81,16 +77,16 @@ class ImportManager
      */
     public function import($saveReport = false)
     {
-        $successSheets = array();
-        $warnSheets = array();
-        $errorSheets = array();
-        $unknownFiles = array();
+        $successSheets = [];
+        $warnSheets    = [];
+        $errorSheets   = [];
+        $unknownFiles  = [];
 
         foreach ($this->files as $file) {
 
             $exception = null;
             $sheetPath = null;
-            $sheet = array();
+            $sheet     = [];
 
             try {
                 if (!($file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile)) {
@@ -119,8 +115,8 @@ class ImportManager
                     throw new Exception("There was an error processing '$fileName': " . $e->getMessage());
                 }
 
-                $user = Auth::user()->email;
-                $errorCount = count($sheet['errors']);
+                $user         = Auth::user()->email;
+                $errorCount   = count($sheet['errors']);
                 $warningCount = count($sheet['warnings']);
                 Log::info("{$user} submitted sheet for {$sheet['center']} with {$errorCount} errors and {$warningCount} warnings.");
 
@@ -152,7 +148,7 @@ class ImportManager
 
                 Log::error("Error processing file: " . $e->getMessage());
                 $unknownFiles[] = $e->getMessage();
-                $exception = $e;
+                $exception      = $e;
             }
 
             if (!$sheetPath && $file) {
@@ -191,7 +187,7 @@ class ImportManager
             }
         }
 
-        $this->results['sheets'] = array_merge($successSheets, $warnSheets, $errorSheets);
+        $this->results['sheets']       = array_merge($successSheets, $warnSheets, $errorSheets);
         $this->results['unknownFiles'] = $unknownFiles;
     }
 
@@ -237,16 +233,16 @@ class ImportManager
             return false;
         }
 
-        $result = array();
+        $result = [];
 
-        $user = ucfirst(Auth::user()->firstName);
+        $user    = ucfirst(Auth::user()->firstName);
         $quarter = $statsReport->quarter;
-        $center = $statsReport->center;
+        $center  = $statsReport->center;
 
         $submittedAt = $statsReport->submittedAt->copy()->setTimezone($center->timezone);
 
-        $due = $statsReport->due();
-        $respondByDateTime = static::getRegionalRespondByDateTime($statsReport);
+        $due               = $statsReport->due();
+        $respondByDateTime = $statsReport->responseDue();
 
         $isLate = $submittedAt->gt($due);
 
@@ -257,7 +253,7 @@ class ImportManager
         $statistician           = $center->getStatistician($quarter);
         $statisticianApprentice = $center->getStatisticianApprentice($quarter);
 
-        $emailMap = array(
+        $emailMap = [
             'center'                 => $center->statsEmail,
             'regional'               => $center->region->email,
             'programManager'         => static::getEmail($programManager),
@@ -266,14 +262,17 @@ class ImportManager
             't2TeamLeader'           => static::getEmail($t2TeamLeader),
             'statistician'           => static::getEmail($statistician),
             'statisticianApprentice' => static::getEmail($statisticianApprentice),
-        );
+        ];
 
-        $mailingList = Setting::get('centerReportMailingList', $center, $quarter);
+        $mailingList = Setting::name('centerReportMailingList')
+                              ->with($center, $quarter)
+                              ->get();
+
         if ($mailingList) {
             $emailMap['mailingList'] = $mailingList->value;
         }
 
-        $emails = array();
+        $emails = [];
         foreach ($emailMap as $accountability => $email) {
 
             if (!$email || $accountability == 'center') {
@@ -296,44 +295,44 @@ class ImportManager
         $globalReport = GlobalReport::reportingDate($statsReport->reportingDate)->first();
 
         $reportToken = ReportToken::get($globalReport, $center);
-        $reportUrl = url("/report/{$reportToken->token}");
+        $reportUrl   = url("/report/{$reportToken->token}");
 
-        $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
-        $sheetName = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
-        $centerName = $center->name;
-        $comment = $statsReport->submitComment;
+        $sheetPath     = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+        $sheetName     = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
+        $centerName    = $center->name;
+        $comment       = $statsReport->submitComment;
         $reportingDate = $statsReport->reportingDate;
         try {
             Mail::send('emails.statssubmitted', compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'due', 'comment', 'respondByDateTime', 'reportUrl', 'reportingDate'),
-                function($message) use ($emails, $emailMap, $centerName, $sheetPath, $sheetName) {
-                // Only send email to centers in production
-                if (env('APP_ENV') === 'prod') {
+                function ($message) use ($emails, $emailMap, $centerName, $sheetPath, $sheetName) {
+                    // Only send email to centers in production
+                    if (env('APP_ENV') === 'prod') {
 
-                    if ($emailMap['center']) {
-                        $message->to($emailMap['center']);
+                        if ($emailMap['center']) {
+                            $message->to($emailMap['center']);
+                        } else {
+                            $message->to($emailMap['statistician']);
+                        }
+
+                        foreach ($emails as $email) {
+                            $message->cc($email);
+                        }
                     } else {
-                        $message->to($emailMap['statistician']);
+                        $message->to(env('ADMIN_EMAIL'));
                     }
 
-                    foreach ($emails as $email) {
-                        $message->cc($email);
+                    if ($emailMap['regional']) {
+                        $message->replyTo($emailMap['regional']);
                     }
-                } else {
-                    $message->to(env('ADMIN_EMAIL'));
-                }
 
-                if ($emailMap['regional']) {
-                    $message->replyTo($emailMap['regional']);
-                }
+                    $message->subject("Team {$centerName} Statistics Submitted");
 
-                $message->subject("Team {$centerName} Statistics Submitted");
-
-                if (env('MAIL_DRIVER') !== 'log') {
-                    $message->attach($sheetPath, array(
-                        'as' => $sheetName,
-                    ));
-                }
-            });
+                    if (env('MAIL_DRIVER') !== 'log') {
+                        $message->attach($sheetPath, [
+                            'as' => $sheetName,
+                        ]);
+                    }
+                });
             $successMessage = "<span style='font-weight:bold'>Thank you.</span> We received your statistics and have sent a copy to <ul><li>" . implode('</li><li>', array_values($emailMap)) . "</li></ul> Please reply-all to that email if there is anything you need to communicate.";
             if (env('APP_ENV') === 'prod') {
                 Log::info("Sent emails to the following people with team {$centerName}'s report: " . implode(', ', $emails));
@@ -362,30 +361,5 @@ class ImportManager
         return ($person && !$person->unsubscribed)
             ? $person->email
             : null;
-    }
-
-    /**
-     * Get the configured regional statisitician response due Carbon bject
-     *
-     * @param $statsReport  StatsReport to use when comparing dates
-     *
-     * @return null|Carbon  Date object
-     */
-    public static function getRegionalRespondByDateTime($statsReport)
-    {
-        $due = StatsReport::getDateSetting('centerReportRespondByTime', $statsReport);
-
-        // Default value
-        if (!$due) {
-            $due = Carbon::create(
-                $statsReport->reportingDate->year,
-                $statsReport->reportingDate->month,
-                $statsReport->reportingDate->day + 1,
-                10, 0, 0,
-                $statsReport->center->timezone
-            );
-        }
-
-        return $due;
     }
 }
