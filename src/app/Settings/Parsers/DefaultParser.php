@@ -1,9 +1,6 @@
 <?php
 namespace TmlpStats\Settings\Parsers;
 
-use TmlpStats\Center;
-use TmlpStats\Quarter;
-
 class DefaultParser extends AbstractParser
 {
     /**
