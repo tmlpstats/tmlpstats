@@ -33,9 +33,11 @@
     </div>
 
     @if (Auth::check())
-        <button id="contactLink" href="#" title="Feedback">
-            <div id="feedbackTabText">Feedback</div>
-        </button>
+        <div class="hs">
+            <button id="contactLink" href="#" title="Feedback">
+                <div id="feedbackTabText">Feedback</div>
+            </button>
+        </div>
 
         <div class="modal fade" id="feedbackModel" tabindex="-1" role="dialog" aria-labelledby="feedbackModelLabel">
             <div class="modal-dialog" role="document">
