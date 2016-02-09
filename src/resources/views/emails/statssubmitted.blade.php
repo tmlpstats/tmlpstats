@@ -14,6 +14,11 @@ We received them on {{ $submittedAt->format('l, F jS \a\t g:ia') }} your local t
     <br/>
 @endif
 
+@if (!$accountablesCopied)
+    Since your sheet did not pass validation, we weren't able to determine who else to include when sending this email. Please reply-all and add any missing accountables to the email chain.<br/>
+    <br/>
+@endif
+
 You are not complete yet. Your regional statistician will review your sheet and declare you complete by {{ $respondByDateTime->format('l \a\t g:ia') }} your local time.<br/>
 <br/>
 

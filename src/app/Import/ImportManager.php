@@ -275,6 +275,20 @@ class ImportManager
             ? $emailMap['center']
             : $emailMap['statistician'];
 
+        // If this is the first week and the report didn't validate, we also didn't import any of the
+        // new accountables. Don't send the email to last quarters accountables, and instead just send it to the
+        // center's stats email.
+        $accountablesCopied = true;
+        if ($statsReport->quarter->isFirstWeek() && !$statsReport->isValidated()) {
+            unset($emailMap['programManager']);
+            unset($emailMap['classroomLeader']);
+            unset($emailMap['t1TeamLeader']);
+            unset($emailMap['t2TeamLeader']);
+            unset($emailMap['statistician']);
+            unset($emailMap['statisticianApprentice']);
+            $accountablesCopied = false;
+        }
+
         $mailingList = Setting::name('centerReportMailingList')
                               ->with($center, $quarter)
                               ->get();
@@ -315,7 +329,7 @@ class ImportManager
         $reportingDate = $statsReport->reportingDate;
         try {
             Mail::send('emails.statssubmitted',
-                compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'due', 'comment', 'respondByDateTime', 'reportUrl', 'reportingDate'),
+                compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'due', 'comment', 'respondByDateTime', 'reportUrl', 'reportingDate', 'accountablesCopied'),
                 function ($message) use ($emails, $emailMap, $centerName, $sheetPath, $sheetName) {
                     // Only send email to centers in production
                     if (env('APP_ENV') === 'prod') {
