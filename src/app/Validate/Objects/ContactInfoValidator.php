@@ -3,7 +3,7 @@ namespace TmlpStats\Validate\Objects;
 
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use Respect\Validation\Validator as v;
-use TmlpStats\Setting;
+use TmlpStats\Settings\Setting;
 
 class ContactInfoValidator extends ObjectsValidatorAbstract
 {
@@ -11,7 +11,7 @@ class ContactInfoValidator extends ObjectsValidatorAbstract
 
     protected function populateValidators($data)
     {
-        $accountabilities = array(
+        $accountabilities = [
             'Program Manager',
             'Classroom Leader',
             'T-2 Leader',
@@ -21,13 +21,14 @@ class ContactInfoValidator extends ObjectsValidatorAbstract
             'Statistician',
             'Statistician Apprentice',
             'Reporting Statistician',
-        );
+        ];
 
         $emailValidator = v::email();
         if ($data->accountability == 'Reporting Statistician') {
             $emailValidator = v::alwaysValid();
         } else if (preg_match('/^N\/?A$/i', $data->name)) {
             $this->skipped = true;
+
             return; // Skip rows with names == NA or N/A
         }
 
@@ -70,9 +71,10 @@ class ContactInfoValidator extends ObjectsValidatorAbstract
     {
         $isValid = true;
 
-        $bouncedEmails = Setting::get('bouncedEmails');
-        if ($bouncedEmails && $bouncedEmails->value) {
-            $emails = explode(',', $bouncedEmails->value);
+        $bouncedEmails = Setting::name('bouncedEmails')->get();
+
+        if ($bouncedEmails) {
+            $emails = explode(',', $bouncedEmails);
             if (in_array($data->email, $emails)) {
                 $this->addMessage('CONTACTINFO_BOUNCED_EMAIL', $data->accountability, $data->email);
                 $isValid = false;

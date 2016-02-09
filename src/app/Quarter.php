@@ -5,18 +5,21 @@ use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Settings\Parsers\DefaultParser;
+use TmlpStats\Settings\RegionQuarterOverride;
+use TmlpStats\Settings\Setting;
 use TmlpStats\Traits\CachedRelationships;
 
 class Quarter extends Model
 {
     use CamelCaseModel, CachedRelationships;
 
-    protected $fillable = array(
+    protected $fillable = [
         't1_distinction',
         't2_distinction',
         'quarter_number',
         'year',
-    );
+    ];
 
     protected $region = null;
     protected $regionQuarterDetails = null;
@@ -35,6 +38,7 @@ class Quarter extends Model
                 if (!$this->regionQuarterDetails) {
                     throw new Exception("Cannot call __get({$name}) before setting region.");
                 }
+
                 return $this->getQuarterDate($name);
             default:
                 return parent::__get($name);
@@ -149,22 +153,27 @@ class Quarter extends Model
             throw new \Exception("regionQuarterDetails not set. Cannot determine {$field}.");
         }
 
-        $date = $this->regionQuarterDetails->$field;
+        $overridenDates = RegionQuarterOverride::get($center, $this);
 
-        $settings = Setting::get('regionQuarterOverride', $center, $this);
-        if ($settings) {
-            // Settings should be in the format:
-            // {"classroom2Date":"2016-01-15", "classroom3Date":"2016-02-07"}
-            $dateSettings = $settings->value
-                ? json_decode($settings->value, true)
-                : [];
-
-            if (isset($dateSettings[$field])) {
-                $date = Carbon::parse($dateSettings[$field]);
-            }
-        }
+        $date = isset($overridenDates[$field])
+            ? $overridenDates[$field]
+            : $this->regionQuarterDetails->$field;
 
         return $date->startOfDay();
+    }
+
+    /**
+     * Get the default date
+     *
+     * @param $field
+     *
+     * @return Carbon
+     */
+    public function getDefaultDate($field)
+    {
+        return $this->regionQuarterDetails
+            ? $this->regionQuarterDetails->$field
+            : null;
     }
 
     /**
@@ -174,16 +183,15 @@ class Quarter extends Model
      *
      * @param Center|null $center
      *
-     * @return Carbon|static
+     * @return Carbon
      */
     public function getRepromiseDate(Center $center = null)
     {
-        $setting = Setting::get('repromiseDate', $center, $this);
-        if ($setting) {
-            return Carbon::parse($setting->value);
-        }
+        $setting = Setting::name('repromiseDate')
+                          ->with($center, $this)
+                          ->get();
 
-        return $this->getClassroom2Date($center);
+        return $setting ?: $this->getClassroom2Date($center);
     }
 
     /**
@@ -203,53 +211,94 @@ class Quarter extends Model
         return $date->eq($repromiseDate);
     }
 
+    /**
+     * Is the current reportingDate the first week of the quarter?
+     *
+     * @param Region $region
+     *
+     * @return bool
+     */
     public static function isFirstWeek(Region $region)
     {
         $reportingDate = Util::getReportDate();
-        $quarter = Quarter::getQuarterByDate($reportingDate, $region);
+        $quarter       = Quarter::getQuarterByDate($reportingDate, $region);
 
         if ($quarter) {
             $firstWeek = $quarter->getFirstWeekDate();
+
             return $firstWeek->eq($reportingDate);
         }
+
         return false;
     }
 
+    /**
+     * Get the current quarter based on region and the current reportingDate
+     *
+     * @param Region $region
+     *
+     * @return null|Carbon
+     */
     public static function getCurrentQuarter(Region $region)
     {
         $date = Util::getReportDate();
+
         return static::getQuarterByDate($date, $region);
     }
 
-
+    /**
+     * Get the current quarter for the provided center
+     *
+     * @param        $id
+     * @param Center $center
+     *
+     * @return null|Quarter
+     */
     public static function findForCenter($id, Center $center)
     {
         $key = "quarter:region{$center->regionId}";
-        return static::getFromCache($key, $id, function() use ($id, $center) {
+
+        return static::getFromCache($key, $id, function () use ($id, $center) {
             $quarter = Quarter::find($id);
             if ($quarter) {
                 $quarter->setRegion($center->region);
             }
+
             return $quarter;
         });
     }
 
+    /**
+     * Get the quarter for the provided date in the provided region
+     *
+     * @param Carbon $date
+     * @param Region $region
+     *
+     * @return null|Quarter
+     */
     public static function getQuarterByDate(Carbon $date, Region $region)
     {
         $dateString = $date->toDateString();
-        $key = "quarters:region{$region->id}:dates";
-        return static::getFromCache($key, $dateString, function() use ($date, $region) {
+        $key        = "quarters:region{$region->id}:dates";
+
+        return static::getFromCache($key, $dateString, function () use ($date, $region) {
             $quarter = Quarter::byRegion($region)
-                ->date($date)
-                ->first();
+                              ->date($date)
+                              ->first();
 
             if ($quarter) {
                 $quarter->setRegion($region);
             }
+
             return $quarter;
         });
     }
 
+    /**
+     * Get next quarter
+     *
+     * @return Quarter
+     */
     public function getNextQuarter()
     {
         $quarterNumber = ($this->quarterNumber + 1) % 5;
@@ -264,9 +313,19 @@ class Quarter extends Model
         if ($this->region) {
             $quarter->setRegion($this->region);
         }
+
         return $quarter;
     }
 
+    /**
+     * Set the region for this quarter instance
+     *
+     * Required before accessing regional quarter dates
+     *
+     * @param $region
+     *
+     * @throws Exception
+     */
     public function setRegion($region)
     {
         if (!$region) {
@@ -276,8 +335,8 @@ class Quarter extends Model
         $this->region = $region;
 
         $this->regionQuarterDetails = RegionQuarterDetails::byQuarter($this)
-            ->byRegion($this->region)
-            ->first();
+                                                          ->byRegion($this->region)
+                                                          ->first();
     }
 
     public function scopeQuarterNumber($query, $number)
@@ -297,9 +356,9 @@ class Quarter extends Model
         // This may end up being redundant
         return $query->whereIn('id', function ($query) use ($region) {
             $query->select('quarter_id')
-                ->from('region_quarter_details')
-                ->where('region_id', $region->id)
-                ->orWhere('region_id', $region->parentId);
+                  ->from('region_quarter_details')
+                  ->where('region_id', $region->id)
+                  ->orWhere('region_id', $region->parentId);
         });
     }
 
@@ -307,14 +366,14 @@ class Quarter extends Model
     {
         return $query->whereIn('id', function ($query) use ($date) {
             $query->select('quarter_id')
-                ->from('region_quarter_details')
-                ->where('start_weekend_date', '<', $date->startOfDay()->toDateString())
-                ->where('end_weekend_date', '>=', $date->startOfDay()->toDateString());
+                  ->from('region_quarter_details')
+                  ->where('start_weekend_date', '<', $date->startOfDay()->toDateString())
+                  ->where('end_weekend_date', '>=', $date->startOfDay()->toDateString());
 
             if ($this->region) {
                 $query->where(function ($query) {
                     $query->where('region_id', $this->region->id)
-                        ->orWhere('region_id', $this->region->parentId);
+                          ->orWhere('region_id', $this->region->parentId);
                 });
             }
         });
@@ -323,16 +382,17 @@ class Quarter extends Model
     public function scopeCurrent($query)
     {
         $date = Util::getReportDate();
+
         return $query->whereIn('id', function ($query) use ($date) {
             $query->select('quarter_id')
-                ->from('region_quarter_details')
-                ->where('start_weekend_date', '<', $date->startOfDay())
-                ->where('end_weekend_date', '>=', $date->startOfDay());
+                  ->from('region_quarter_details')
+                  ->where('start_weekend_date', '<', $date->startOfDay())
+                  ->where('end_weekend_date', '>=', $date->startOfDay());
 
             if ($this->region) {
                 $query->where(function ($query) {
                     $query->where('region_id', $this->region->id)
-                        ->orWhere('region_id', $this->region->parentId);
+                          ->orWhere('region_id', $this->region->parentId);
                 });
             }
         });
@@ -341,15 +401,16 @@ class Quarter extends Model
     public function scopePresentAndFuture($query)
     {
         $date = Util::getReportDate();
+
         return $query->whereIn('id', function ($query) use ($date) {
             $query->select('quarter_id')
-                ->from('region_quarter_details')
-                ->where('end_weekend_date', '>=', $date->startOfDay());
+                  ->from('region_quarter_details')
+                  ->where('end_weekend_date', '>=', $date->startOfDay());
 
             if ($this->region) {
                 $query->where(function ($query) {
                     $query->where('region_id', $this->region->id)
-                        ->orWhere('region_id', $this->region->parentId);
+                          ->orWhere('region_id', $this->region->parentId);
                 });
             }
         });
