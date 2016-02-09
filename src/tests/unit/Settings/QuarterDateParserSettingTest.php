@@ -165,7 +165,7 @@ class QuarterDateParserSettingTest extends TestAbstract
                 '',
                 QuarterDateParser::class,
                 $quarterDates,
-                $quarterDates['classroom2Date'],
+                null,
             ],
         ];
     }

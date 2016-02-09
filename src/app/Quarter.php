@@ -153,12 +153,11 @@ class Quarter extends Model
             throw new \Exception("regionQuarterDetails not set. Cannot determine {$field}.");
         }
 
-        $date = $this->regionQuarterDetails->$field;
-
         $overridenDates = RegionQuarterOverride::get($center, $this);
-        if (isset($overridenDates[$field])) {
-            $date = $overridenDates[$field];
-        }
+
+        $date = isset($overridenDates[$field])
+            ? $overridenDates[$field]
+            : $this->regionQuarterDetails->$field;
 
         return $date->startOfDay();
     }

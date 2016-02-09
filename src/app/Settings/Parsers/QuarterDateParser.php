@@ -23,12 +23,9 @@ class QuarterDateParser extends DefaultParser
     protected function parse()
     {
         $setting = $this->decode();
-        if ($setting) {
-            return $this->parseQuarterDate($setting);
-        }
 
-        return $this->quarter
-            ? $this->quarter->getClassroom2Date($this->center)
+        return $setting
+            ? $this->parseQuarterDate($setting)
             : null;
     }
 }
