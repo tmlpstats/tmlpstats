@@ -4,6 +4,6 @@
     "laravel-elixir": "*"
   },
   "dependencies": {
-    "bower": "^1.6.5"
+    "bower": "^1.7"
   }
 }
