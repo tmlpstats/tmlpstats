@@ -112,6 +112,13 @@ class ImportManager
                     $sheet = $importer->getResults();
                 } catch (Exception $e) {
                     Log::error("Error processing '$fileName': " . $e->getMessage() . "\n" . $e->getTraceAsString());
+
+                    // Files starting with '~$' are usually special temp files created by Excel. Be nice and let the
+                    // user know that's probably what went wrong.
+                    if (strpos($fileName, '~$') === 0) {
+                        throw new Exception("The file you uploaded, '{$fileName}', looks like a special Excel temporary file. Please look for a file that does not start with '~$'");
+                    }
+
                     throw new Exception("There was an error processing '$fileName': " . $e->getMessage());
                 }
 
