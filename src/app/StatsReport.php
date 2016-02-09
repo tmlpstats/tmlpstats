@@ -68,7 +68,18 @@ class StatsReport extends Model
             $this->reportDeadlines = ReportDeadlines::get($this->center, $this->quarter, $this->reportingDate);
         }
 
-        return $this->reportDeadlines['report'];
+        $due = $this->reportDeadlines['report'];
+        if (!$due) {
+            $due = Carbon::create(
+                $this->reportingDate->year,
+                $this->reportingDate->month,
+                $this->reportingDate->day,
+                19, 0, 59,
+                $this->center->timezone
+            );
+        }
+
+        return $due;
     }
 
     /**
@@ -82,7 +93,18 @@ class StatsReport extends Model
             $this->reportDeadlines = ReportDeadlines::get($this->center, $this->quarter, $this->reportingDate);
         }
 
-        return $this->reportDeadlines['response'];
+        $due = $this->reportDeadlines['response'];
+        if (!$due) {
+            $due = Carbon::create(
+                $this->reportingDate->year,
+                $this->reportingDate->month,
+                $this->reportingDate->day + 1,
+                10, 0, 0,
+                $this->center->timezone
+            );
+        }
+
+        return $due;
     }
 
     /**

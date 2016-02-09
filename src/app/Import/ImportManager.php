@@ -264,12 +264,16 @@ class ImportManager
             'statisticianApprentice' => static::getEmail($statisticianApprentice),
         ];
 
+        $emailMap['to'] = $emailMap['center']
+            ? $emailMap['center']
+            : $emailMap['statistician'];
+
         $mailingList = Setting::name('centerReportMailingList')
                               ->with($center, $quarter)
                               ->get();
 
         if ($mailingList) {
-            $emailMap['mailingList'] = $mailingList->value;
+            $emailMap['mailingList'] = $mailingList;
         }
 
         $emails = [];
@@ -303,17 +307,12 @@ class ImportManager
         $comment       = $statsReport->submitComment;
         $reportingDate = $statsReport->reportingDate;
         try {
-            Mail::send('emails.statssubmitted', compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'due', 'comment', 'respondByDateTime', 'reportUrl', 'reportingDate'),
+            Mail::send('emails.statssubmitted',
+                compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'due', 'comment', 'respondByDateTime', 'reportUrl', 'reportingDate'),
                 function ($message) use ($emails, $emailMap, $centerName, $sheetPath, $sheetName) {
                     // Only send email to centers in production
                     if (env('APP_ENV') === 'prod') {
-
-                        if ($emailMap['center']) {
-                            $message->to($emailMap['center']);
-                        } else {
-                            $message->to($emailMap['statistician']);
-                        }
-
+                        $message->to($emailMap['to']);
                         foreach ($emails as $email) {
                             $message->cc($email);
                         }
@@ -327,23 +326,32 @@ class ImportManager
 
                     $message->subject("Team {$centerName} Statistics Submitted");
 
+                    // Don't include the attachment when we are logging the emails instead of sending them
                     if (env('MAIL_DRIVER') !== 'log') {
                         $message->attach($sheetPath, [
                             'as' => $sheetName,
                         ]);
                     }
-                });
-            $successMessage = "<span style='font-weight:bold'>Thank you.</span> We received your statistics and have sent a copy to <ul><li>" . implode('</li><li>', array_values($emailMap)) . "</li></ul> Please reply-all to that email if there is anything you need to communicate.";
+                }
+            );
+            $successMessage = "<strong>Thank you.</strong> We received your statistics and have sent a copy to the following emails"
+                . "<ul><li>{$emailMap['to']}</li><li>" . implode('</li><li>', array_values($emails)) . "</li></ul>"
+                . " Please reply-all to that email if there is anything you need to communicate.";
+
             if (env('APP_ENV') === 'prod') {
                 Log::info("Sent emails to the following people with team {$centerName}'s report: " . implode(', ', $emails));
             } else {
                 Log::info("Sent emails to the following people with team {$centerName}'s report: " . env('ADMIN_EMAIL'));
-                $successMessage .= "<br/><br/><strong>Since this is development, we sent it to " . env('ADMIN_EMAIL') . " instead.</strong>";
+                $successMessage .= "<br/><br/><strong>Since this is development, we sent it to "
+                    . env('ADMIN_EMAIL') . " instead.</strong>";
             }
             $result['success'][] = $successMessage;
         } catch (\Exception $e) {
             Log::error("Exception caught sending error email: " . $e->getMessage());
-            $result['error'][] = "<span style='font-weight:bold'>Hold up.</span> There was a problem emailing your sheet to your team. Please email the sheet you just submitted to your Program Manager, Classroom Leader, T2 Team Leader, and Regional Statistician ({$emailMap['regional']}) using your center stats email ({$emailMap['center']}). <span style='font-weight:bold'>We did</span> receive your statistics.";
+            $result['error'][] = "<strong>Hold up.</strong> There was a problem emailing your sheet to your team."
+                . " Please email the sheet you just submitted to your Program Manager, Classroom Leader, T2 Team Leader,"
+                . " and Regional Statistician ({$emailMap['regional']}) using your center stats email ({$emailMap['center']})."
+                . " <span style='font-weight:bold'>We did</span> receive your statistics.";
         }
 
         return $result;

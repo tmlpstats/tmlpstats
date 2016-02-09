@@ -189,7 +189,6 @@ class Quarter extends Model
     public function getRepromiseDate(Center $center = null)
     {
         $setting = Setting::name('repromiseDate')
-                          ->format(DefaultParser::FORMAT_DATE)
                           ->with($center, $this)
                           ->get();
 

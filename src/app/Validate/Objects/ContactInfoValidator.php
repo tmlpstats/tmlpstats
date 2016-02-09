@@ -73,8 +73,8 @@ class ContactInfoValidator extends ObjectsValidatorAbstract
 
         $bouncedEmails = Setting::name('bouncedEmails')->get();
 
-        if ($bouncedEmails && $bouncedEmails->value) {
-            $emails = explode(',', $bouncedEmails->value);
+        if ($bouncedEmails) {
+            $emails = explode(',', $bouncedEmails);
             if (in_array($data->email, $emails)) {
                 $this->addMessage('CONTACTINFO_BOUNCED_EMAIL', $data->accountability, $data->email);
                 $isValid = false;
