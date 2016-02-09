@@ -20,8 +20,9 @@ fi
 # Setup rollback copy
 echo ""
 echo "Backing up for rollback"
-rm -rf $ROLLBACK
-rsync -aq --exclude='storage/framework/down' $DEST/ $ROLLBACK
+rsync -aq --delete --exclude='storage/framework/down' \
+                   --exclude='storage/framework/views' \
+                   $DEST/ $ROLLBACK
 
 echo ""
 echo "Syncing files"
