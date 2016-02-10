@@ -20,6 +20,42 @@ class Course extends Model
         'start_date',
     ];
 
+    /**
+     * Special handler for firstOrCreate
+     *
+     * When set, is_international is used to differentiate between international and local registrations into a
+     * given course. As of now (Feb 2016), INTL is only used by the London center.
+     *
+     * @param array $attributes
+     *
+     * @return mixed
+     */
+    public static function firstOrCreate(array $attributes)
+    {
+        if (!isset($attributes['is_international'])) {
+            return parent::firstOrCreate($attributes);
+        }
+
+        // Special handing for INTL vs local course stats
+        $isInternational = $attributes['is_international'];
+        $centerId = $attributes['center_id'];
+
+        unset($attributes['is_international']);
+        unset($attributes['center_id']);
+
+        $query = Course::byCenter(Center::find($centerId));
+        foreach ($attributes as $field => $value) {
+            $query->where($field, $value);
+        }
+
+        $comparator = $isInternational ? '=' : '<>';
+        $query->where('location', $comparator, 'INTL');
+
+        $course = $query->first();
+
+        return $course ?: static::create(array_merge($attributes, ['center_id' => $centerId]));
+    }
+
     public function scopeType($query, $type)
     {
         return $query->whereType($type);

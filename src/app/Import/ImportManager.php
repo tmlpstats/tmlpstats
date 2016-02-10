@@ -10,6 +10,7 @@ use Mail;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\GlobalReport;
 use TmlpStats\Person;
+use TmlpStats\Quarter;
 use TmlpStats\ReportToken;
 use TmlpStats\Settings\Setting;
 
@@ -245,6 +246,7 @@ class ImportManager
         $user    = ucfirst(Auth::user()->firstName);
         $quarter = $statsReport->quarter;
         $center  = $statsReport->center;
+        $region  = $center->region;
 
         $submittedAt = $statsReport->submittedAt->copy()->setTimezone($center->timezone);
 
@@ -262,7 +264,7 @@ class ImportManager
 
         $emailMap = [
             'center'                 => $center->statsEmail,
-            'regional'               => $center->region->email,
+            'regional'               => $region->email,
             'programManager'         => static::getEmail($programManager),
             'classroomLeader'        => static::getEmail($classroomLeader),
             't1TeamLeader'           => static::getEmail($t1TeamLeader),
@@ -279,7 +281,7 @@ class ImportManager
         // new accountables. Don't send the email to last quarters accountables, and instead just send it to the
         // center's stats email.
         $accountablesCopied = true;
-        if ($statsReport->quarter->isFirstWeek() && !$statsReport->isValidated()) {
+        if (Quarter::isFirstWeek($region) && !$statsReport->isValidated()) {
             unset($emailMap['programManager']);
             unset($emailMap['classroomLeader']);
             unset($emailMap['t1TeamLeader']);

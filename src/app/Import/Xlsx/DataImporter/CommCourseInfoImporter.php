@@ -14,11 +14,11 @@ class CommCourseInfoImporter extends DataImporterAbstract
 
     protected function populateSheetRanges()
     {
-        $cap = $this->findRange(3, 'Course Start Date', 'Total (Open Courses):', 'B', 'A');
+        $cap                         = $this->findRange(3, 'Course Start Date', 'Total (Open Courses):', 'B', 'A');
         $this->blocks['cap']['cols'] = $this->excelRange('A', 'O');
         $this->blocks['cap']['rows'] = $this->excelRange($cap['start'] + 1, $cap['end']);
 
-        $cpc = $this->findRange($cap['end'], 'Course Start Date', 'Total (Open Courses):', 'B', 'A');
+        $cpc                         = $this->findRange($cap['end'], 'Course Start Date', 'Total (Open Courses):', 'B', 'A');
         $this->blocks['cpc']['cols'] = $this->excelRange('A', 'O');
         $this->blocks['cpc']['rows'] = $this->excelRange($cpc['start'] + 1, $cpc['end']);
     }
@@ -66,9 +66,10 @@ class CommCourseInfoImporter extends DataImporterAbstract
             }
 
             $course = Course::firstOrCreate([
-                'center_id'  => $this->statsReport->center->id,
-                'start_date' => $courseInput['startDate'],
-                'type'       => $courseInput['type'],
+                'center_id'        => $this->statsReport->center->id,
+                'start_date'       => $courseInput['startDate'],
+                'type'             => $courseInput['type'],
+                'is_international' => (strtoupper($courseInput['location']) == 'INTL'),
             ]);
 
             if ($course->location != $courseInput['location']) {
