@@ -68,6 +68,12 @@ class TeamMemberData extends Model
         return $query->whereNotNull('withdraw_code_id');
     }
 
+    public function scopeActive($query)
+    {
+        return $query->whereNull('withdraw_code_id')
+                     ->where('xfer_out', 0);
+    }
+
     public function statsReport()
     {
         return $this->belongsTo('TmlpStats\StatsReport');

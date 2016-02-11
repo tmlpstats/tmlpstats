@@ -51,11 +51,12 @@
                     <h3>Regional Games</h3>
 
                     <div class="btn-group" role="group">
-                        <button id ="regionalstats-button" type="button" class="btn">Scoreboard</button>
-                        <button id ="gamesbycenter-button" type="button" class="btn">By Center</button>
+                        <button id="regionalstats-button" type="button" class="btn">Scoreboard</button>
+                        <button id="gamesbycenter-button" type="button" class="btn">By Center</button>
                         @if ($globalReport->reportingDate->gte($quarter->getClassroom2Date()))
-                        <button id ="repromisesbycenter-button" type="button" class="btn">Repromises</button>
+                        <button id="repromisesbycenter-button" type="button" class="btn">Repromises</button>
                         @endif
+                        <button id="regperparticipant-button" type="button" class="btn">Reg. Per Participant</button>
                     </div>
 
                     <div id="regionalstats-container"></div>
@@ -63,6 +64,7 @@
                     @if ($globalReport->reportingDate->gte($quarter->getClassroom2Date()))
                     <div id="repromisesbycenter-container"></div>
                     @endif
+                    <div id="regperparticipant-container"></div>
                 </div>
                 <div class="tab-pane" id="statsreports">
                     <h3>Center Reports</h3>
@@ -73,11 +75,11 @@
                     <h3>Applications</h3>
 
                     <div class="btn-group" role="group">
-                        <button id ="applicationsoverview-button" type="button" class="btn">Overview</button>
-                        <button id ="applicationsbystatus-button" type="button" class="btn">By Status</button>
-                        <button id ="applicationsbycenter-button" type="button" class="btn">By Center</button>
-                        <button id ="applicationst2fromweekend-button" type="button" class="btn" title="Shows Team 2 that registered at the previous TMLP weekend and their current status">T2 Reg. at Weekend</button>
-                        <button id ="applicationsoverdue-button" type="button" class="btn">Overdue</button>
+                        <button id="applicationsoverview-button" type="button" class="btn">Overview</button>
+                        <button id="applicationsbystatus-button" type="button" class="btn">By Status</button>
+                        <button id="applicationsbycenter-button" type="button" class="btn">By Center</button>
+                        <button id="applicationst2fromweekend-button" type="button" class="btn" title="Shows Team 2 that registered at the previous TMLP weekend and their current status">T2 Reg. at Weekend</button>
+                        <button id="applicationsoverdue-button" type="button" class="btn">Overdue</button>
                     </div>
                     <div id="applicationsoverview-container"></div>
                     <div id="applicationsbystatus-container"></div>
@@ -94,11 +96,11 @@
                     <h3>Courses</h3>
 
                     <div class="btn-group" role="group">
-                        <button id ="coursesthisweek-button" type="button" class="btn">Completed This Week</button>
-                        <button id ="coursesnextmonth-button" type="button" class="btn">Next 5 Weeks</button>
-                        <button id ="coursesupcoming-button" type="button" class="btn">Upcoming</button>
-                        <button id ="coursescompleted-button" type="button" class="btn">Completed</button>
-                        <button id ="coursesguestgames-button" type="button" class="btn">Guest Games</button>
+                        <button id="coursesthisweek-button" type="button" class="btn">Completed This Week</button>
+                        <button id="coursesnextmonth-button" type="button" class="btn">Next 5 Weeks</button>
+                        <button id="coursesupcoming-button" type="button" class="btn">Upcoming</button>
+                        <button id="coursescompleted-button" type="button" class="btn">Completed</button>
+                        <button id="coursesguestgames-button" type="button" class="btn">Guest Games</button>
                     </div>
                     <div id="coursesthisweek-container"></div>
                     <div id="coursesnextmonth-container"></div>
@@ -110,9 +112,9 @@
                     <h3>Team Members of Interest</h3>
 
                     <div class="btn-group" role="group">
-                        <button id ="teammemberstatusctw-button" type="button" class="btn">CTW</button>
-                        <button id ="teammemberstatustransfer-button" type="button" class="btn">Transfers</button>
-                        <button id ="teammemberstatuswithdrawn-button" type="button" class="btn">Withdrawn</button>
+                        <button id="teammemberstatusctw-button" type="button" class="btn">CTW</button>
+                        <button id="teammemberstatustransfer-button" type="button" class="btn">Transfers</button>
+                        <button id="teammemberstatuswithdrawn-button" type="button" class="btn">Withdrawn</button>
                     </div>
                     <div id="teammemberstatusctw-container"></div>
                     <div id="teammemberstatustransfer-container"></div>
@@ -126,8 +128,8 @@
                     <h3>Team 2 Potentials</h3>
 
                     <div class="btn-group" role="group">
-                        <button id ="potentialsoverview-button" type="button" class="btn">Overview</button>
-                        <button id ="potentialsdetails-button" type="button" class="btn">Details</button>
+                        <button id="potentialsoverview-button" type="button" class="btn">Overview</button>
+                        <button id="potentialsdetails-button" type="button" class="btn">Details</button>
                     </div>
                     <div id="potentialsoverview-container"></div>
                     <div id="potentialsdetails-container"></div>
@@ -157,6 +159,7 @@
             @if ($globalReport->reportingDate->gte($quarter->getClassroom2Date()))
             'repromisesbycenter',
             @endif
+            'regperparticipant',
         ];
 
         var batchedPages = [
@@ -209,6 +212,7 @@
                 @if ($globalReport->reportingDate->gte($quarter->getClassroom2Date()))
                 'repromisesbycenter',
                 @endif
+                'regperparticipant',
             ],
         ];
 
