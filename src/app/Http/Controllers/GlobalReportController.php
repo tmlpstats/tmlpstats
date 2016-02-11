@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use App;
 use Gate;
 use Response;
+use TmlpStats\TeamMemberData;
 
 class GlobalReportController extends ReportDispatchAbstractController
 {
@@ -232,6 +233,9 @@ class GlobalReportController extends ReportDispatchAbstractController
                 break;
             case 'tdosummary':
                 $response = $this->getTdoSummary($globalReport, $region);
+                break;
+            case 'regperparticipant':
+                $response = $this->getRegPerParticipant($globalReport, $region);
                 break;
         }
 
@@ -762,6 +766,90 @@ class GlobalReportController extends ReportDispatchAbstractController
         $data = array_merge($data, ['reportingDate' => $globalReport->reportingDate]);
 
         return view('globalreports.details.applicationsbystatus', $data);
+    }
+
+    protected function getRegPerParticipant(GlobalReport $globalReport, Region $region)
+    {
+        $globalReportData = App::make(CenterStatsController::class)
+                               ->getByGlobalReportUnprocessed($globalReport, $region, $globalReport->reportingDate);
+        if (!$globalReportData) {
+            return null;
+        }
+
+        $lastGlobalReport = GlobalReport::reportingDate($globalReport->reportingDate->copy()->subWeek())->first();
+        if (!$lastGlobalReport) {
+            return null;
+        }
+
+        $lastGlobalReportData = App::make(CenterStatsController::class)
+                                   ->getByGlobalReportUnprocessed($lastGlobalReport, $region, $lastGlobalReport->reportingDate);
+        if (!$lastGlobalReportData) {
+            return null;
+        }
+
+
+        $statsReports = [];
+        $centersData = [];
+        foreach ($globalReportData as $centerStatsData) {
+            $centerName = $centerStatsData->statsReport->center->name;
+            $statsReports[$centerName] = $centerStatsData->statsReport;
+
+            $centersData[$centerName][] = $centerStatsData;
+        }
+
+        $lastWeekCentersData = [];
+        foreach ($lastGlobalReportData as $centerStatsData) {
+            $centerName = $centerStatsData->statsReport->center->name;
+
+            $lastWeekCentersData[$centerName][] = $centerStatsData;
+        }
+
+        $games = ['cap','cpc','lf'];
+        $reportData = [];
+        $lastWeekReportData = [];
+        foreach ($centersData as $centerName => $centerData) {
+            $a                       = new Arrangements\GamesByWeek($centerData);
+            $dataReport              = $a->compose();
+            $reportData[$centerName] = $dataReport['reportData'][$globalReport->reportingDate->toDateString()];
+            $reportData[$centerName]['statsReport'] = $statsReports[$centerName];
+
+            if (isset($lastWeekCentersData[$centerName])) {
+                $a          = new Arrangements\GamesByWeek($lastWeekCentersData[$centerName]);
+                $dataReport = $a->compose();
+                $lastWeekReportData[$centerName] = $dataReport['reportData'][$lastGlobalReport->reportingDate->toDateString()];
+            }
+        }
+        ksort($reportData);
+
+        foreach ($reportData as $centerName => $centerData) {
+            $participantCount = TeamMemberData::byStatsReport($statsReports[$centerName])
+                                              ->active()
+                                              ->count();
+            $totalWeekly = 0;
+            $totalQuarterly = 0;
+            foreach ($games as $game) {
+                $change = 0;
+                $rppWeekly = 0;
+                $rppQuarterly = 0;
+                if (isset($centerData['actual']) && isset($lastWeekReportData[$centerName]['actual'])) {
+                    $actual = $centerData['actual'][$game];
+                    $change = $centerData['actual'][$game] - $lastWeekReportData[$centerName]['actual'][$game];
+
+                    $totalWeekly += $change;
+                    $totalQuarterly += $actual;
+
+                    $rppWeekly = $change/$participantCount;
+                    $rppQuarterly = $actual/$participantCount;
+                }
+                $reportData[$centerName]['change'][$game] = $change;
+                $reportData[$centerName]['rpp']['week'][$game] = round($rppWeekly, 1);
+                $reportData[$centerName]['rpp']['quarter'][$game] = round($rppQuarterly, 1);
+            }
+            $reportData[$centerName]['rpp']['week']['total'] = round($totalWeekly/$participantCount, 1);
+            $reportData[$centerName]['rpp']['quarter']['total'] = round($totalQuarterly/$participantCount, 1);
+        }
+
+        return view('globalreports.details.regperparticipant', compact('reportData', 'games'));
     }
 
     protected function getTeamMemberStatusAll(GlobalReport $globalReport, Region $region)
