@@ -300,9 +300,9 @@ class GlobalReportController extends ReportDispatchAbstractController
         }
 
         $statsReports = [];
-        $centersData = [];
+        $centersData  = [];
         foreach ($globalReportData as $centerStatsData) {
-            $centerName = $centerStatsData->statsReport->center->name;
+            $centerName                = $centerStatsData->statsReport->center->name;
             $statsReports[$centerName] = $centerStatsData->statsReport;
 
             $centersData[$centerName][] = $centerStatsData;
@@ -310,9 +310,9 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         $reportData = [];
         foreach ($centersData as $centerName => $centerData) {
-            $a                       = new Arrangements\GamesByWeek($centerData);
-            $dataReport              = $a->compose();
-            $reportData[$centerName] = $dataReport['reportData'][$globalReport->reportingDate->toDateString()];
+            $a                                      = new Arrangements\GamesByWeek($centerData);
+            $dataReport                             = $a->compose();
+            $reportData[$centerName]                = $dataReport['reportData'][$globalReport->reportingDate->toDateString()];
             $reportData[$centerName]['statsReport'] = $statsReports[$centerName];
         }
 
@@ -359,13 +359,13 @@ class GlobalReportController extends ReportDispatchAbstractController
         }
 
         $statsReports = [];
-        $centersData = [];
+        $centersData  = [];
         foreach ($globalReportData as $centerStatsData) {
             if (!$centerStatsData) {
                 continue;
             }
 
-            $centerName = $centerStatsData->statsReport->center->name;
+            $centerName                = $centerStatsData->statsReport->center->name;
             $statsReports[$centerName] = $centerStatsData->statsReport;
 
             $centersData[$centerName][] = $centerStatsData;
@@ -373,9 +373,10 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         $reportData = [];
         foreach ($centersData as $centerName => $centerData) {
-            $a                       = new Arrangements\GamesByWeek($centerData);
-            $dataReport              = $a->compose();
-            $reportData[$centerName] = $dataReport['reportData'][$quarter->getQuarterEndDate()->toDateString()];
+            $a                                      = new Arrangements\GamesByWeek($centerData);
+            $dataReport                             = $a->compose();
+            $reportData[$centerName]                = $dataReport['reportData'][$quarter->getQuarterEndDate()
+                                                                                        ->toDateString()];
             $reportData[$centerName]['statsReport'] = $statsReports[$centerName];
         }
 
@@ -749,7 +750,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         $registeredAtWeekend = [];
         if ($registrations) {
             foreach ($registrations as $registration) {
-                $statsReport = $registration->statsReport;
+                $statsReport      = $registration->statsReport;
                 $weekendStartDate = $statsReport->quarter->getQuarterStartDate($statsReport->center);
                 if ($registration->teamYear == 2
                     && $registration->regDate->gt($weekendStartDate)
@@ -789,9 +790,9 @@ class GlobalReportController extends ReportDispatchAbstractController
 
 
         $statsReports = [];
-        $centersData = [];
+        $centersData  = [];
         foreach ($globalReportData as $centerStatsData) {
-            $centerName = $centerStatsData->statsReport->center->name;
+            $centerName                = $centerStatsData->statsReport->center->name;
             $statsReports[$centerName] = $centerStatsData->statsReport;
 
             $centersData[$centerName][] = $centerStatsData;
@@ -804,18 +805,18 @@ class GlobalReportController extends ReportDispatchAbstractController
             $lastWeekCentersData[$centerName][] = $centerStatsData;
         }
 
-        $games = ['cap','cpc','lf'];
-        $reportData = [];
+        $games              = ['cap', 'cpc', 'lf'];
+        $reportData         = [];
         $lastWeekReportData = [];
         foreach ($centersData as $centerName => $centerData) {
-            $a                       = new Arrangements\GamesByWeek($centerData);
-            $dataReport              = $a->compose();
-            $reportData[$centerName] = $dataReport['reportData'][$globalReport->reportingDate->toDateString()];
+            $a                                      = new Arrangements\GamesByWeek($centerData);
+            $dataReport                             = $a->compose();
+            $reportData[$centerName]                = $dataReport['reportData'][$globalReport->reportingDate->toDateString()];
             $reportData[$centerName]['statsReport'] = $statsReports[$centerName];
 
             if (isset($lastWeekCentersData[$centerName])) {
-                $a          = new Arrangements\GamesByWeek($lastWeekCentersData[$centerName]);
-                $dataReport = $a->compose();
+                $a                               = new Arrangements\GamesByWeek($lastWeekCentersData[$centerName]);
+                $dataReport                      = $a->compose();
                 $lastWeekReportData[$centerName] = $dataReport['reportData'][$lastGlobalReport->reportingDate->toDateString()];
             }
         }
@@ -825,28 +826,29 @@ class GlobalReportController extends ReportDispatchAbstractController
             $participantCount = TeamMemberData::byStatsReport($statsReports[$centerName])
                                               ->active()
                                               ->count();
-            $totalWeekly = 0;
-            $totalQuarterly = 0;
+            $totalWeekly      = 0;
+            $totalQuarterly   = 0;
             foreach ($games as $game) {
-                $change = 0;
-                $rppWeekly = 0;
+                $change       = 0;
+                $rppWeekly    = 0;
                 $rppQuarterly = 0;
-                if (isset($centerData['actual']) && isset($lastWeekReportData[$centerName]['actual'])) {
+                if (isset($centerData['actual'])) {
                     $actual = $centerData['actual'][$game];
-                    $change = $centerData['actual'][$game] - $lastWeekReportData[$centerName]['actual'][$game];
-
-                    $totalWeekly += $change;
                     $totalQuarterly += $actual;
+                    $rppQuarterly = $actual / $participantCount;
 
-                    $rppWeekly = $change/$participantCount;
-                    $rppQuarterly = $actual/$participantCount;
+                    if (isset($lastWeekReportData[$centerName]['actual'])) {
+                        $change = $actual - $lastWeekReportData[$centerName]['actual'][$game];
+                        $totalWeekly += $change;
+                        $rppWeekly = $change / $participantCount;
+                    }
                 }
-                $reportData[$centerName]['change'][$game] = $change;
-                $reportData[$centerName]['rpp']['week'][$game] = round($rppWeekly, 1);
+                $reportData[$centerName]['change'][$game]         = $change;
+                $reportData[$centerName]['rpp']['week'][$game]    = round($rppWeekly, 1);
                 $reportData[$centerName]['rpp']['quarter'][$game] = round($rppQuarterly, 1);
             }
-            $reportData[$centerName]['rpp']['week']['total'] = round($totalWeekly/$participantCount, 1);
-            $reportData[$centerName]['rpp']['quarter']['total'] = round($totalQuarterly/$participantCount, 1);
+            $reportData[$centerName]['rpp']['week']['total']    = round($totalWeekly / $participantCount, 1);
+            $reportData[$centerName]['rpp']['quarter']['total'] = round($totalQuarterly / $participantCount, 1);
         }
 
         return view('globalreports.details.regperparticipant', compact('reportData', 'games'));
