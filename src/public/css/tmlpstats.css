@@ -2,14 +2,21 @@
     .hs {
         display: none;
     }
+
+    .nav-tabs.brief-tabs .long {
+         display: none;
+     }
 }
 
 @media (min-width: 992px) {
     .hl {
         display: none;
     }
-}
 
+    .nav-tabs.brief-tabs .brief {
+         display: none;
+     }
+}
 
 body {
     padding-top: 50px;

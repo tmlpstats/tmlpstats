@@ -17,7 +17,6 @@
 
     <link href="{{ asset('/components/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('/components/datatables/media/css/dataTables.bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('/components/bootstrap-vertical-tabs/bootstrap.vertical-tabs.min.css') }}" rel="stylesheet">
     <link href="{{ asset('/components/jquery-loading/dist/jquery.loading.min.css') }}" rel="stylesheet">
     <link href="{{ asset('/components/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
 
