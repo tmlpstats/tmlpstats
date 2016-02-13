@@ -662,12 +662,12 @@ class GlobalReportController extends ReportDispatchAbstractController
         if (!$data) {
             return null;
         } else if (!isset($data['registrations'])) {
-            $potenialsData = $this->getTeamMemberStatusPotentialsData($data, $globalReport, $region);
+            $potentialsData = $this->getTeamMemberStatusPotentialsData($data, $globalReport, $region);
         } else {
-            $potenialsData = [];
+            $potentialsData = [];
         }
 
-        return array_merge($data, $potenialsData, ['types' => ['t2Potential']]);
+        return array_merge($data, $potentialsData, ['types' => ['t2Potential']]);
     }
 
     protected function getTeamMemberStatusPotentialsOverview($data, GlobalReport $globalReport, Region $region)
@@ -729,18 +729,22 @@ class GlobalReportController extends ReportDispatchAbstractController
         if ($registrations) {
 
             $potentials = $data['reportData']['t2Potential'];
-            foreach ($registrations as $registration) {
-                if ($registration->teamYear == 2) {
-                    foreach ($potentials as $member) {
-                        if ($member->teamMember->personId == $registration->registration->persionId) {
+            foreach ($potentials as $member) {
+                foreach ($registrations as $registration) {
+                    if ($registration->teamYear == 2
+                        && !$registration->isWithdrawn()
+                        && $registration->center->id == $member->center->id
+                    ) {
+                        if ($member->teamMember->personId == $registration->registration->personId) {
                             $potentialsThatRegistered[$member->teamMember->personId] = $registration;
+                            break;
                         }
                     }
                 }
             }
         }
 
-        return array_merge($data, ['registations' => $potentialsThatRegistered]);
+        return array_merge($data, ['registrations' => $potentialsThatRegistered]);
     }
 
     protected function getTeam2RegisteredAtWeekend(GlobalReport $globalReport, Region $region)
@@ -893,7 +897,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         return $responseData;
     }
 
-    protected function getTeamMemberStatus(GlobalReport $globalReport, Region $region, $status, $data = null)
+    protected function getTeamMemberStatus(GlobalReport $globalReport, Region $region, $report, $data = null)
     {
         if (!$data) {
             $data = $this->getTeamMemberStatusData($globalReport, $region);
@@ -903,7 +907,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         }
 
         $viewData = null;
-        switch ($status) {
+        switch ($report) {
             case 'teammemberstatuswithdrawn':
                 $viewData = $this->getTeamMemberStatusWithdrawn($data, $globalReport, $region);
                 break;

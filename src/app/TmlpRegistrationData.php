@@ -73,6 +73,11 @@ class TmlpRegistrationData extends Model
         }
     }
 
+    public function isWithdrawn()
+    {
+        return ($this->withdrawCodeId !== null);
+    }
+
     public function scopeApproved($query)
     {
         return $query->whereNotNull('appr_date');
