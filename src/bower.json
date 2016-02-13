@@ -31,7 +31,6 @@
     "respond": "~1.4.2",
     "font-awesome": "~4.4.0",
     "sb-admin-2": "*",
-    "bootstrap-vertical-tabs": "~1.2.1",
     "datatables.net": "~1.10.10",
     "datatables.net-bs": "~1.10.10",
     "world-flags-sprite": "*",
