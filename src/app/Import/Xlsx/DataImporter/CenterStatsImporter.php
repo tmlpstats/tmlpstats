@@ -7,6 +7,7 @@ use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\CenterStats;
 use TmlpStats\CenterStatsData;
 use TmlpStats\Quarter;
+use TmlpStats\Scoreboard;
 use TmlpStats\StatsReport;
 
 use Carbon\Carbon;
@@ -193,7 +194,7 @@ class CenterStatsImporter extends DataImporterAbstract
             if (!$actualData->exists || $reportingDate->eq($weekDate)) {
 
                 $actualData = $this->setValues($actualData, $week);
-                $actualData->points = $this->calculatePoints($actualData, $promiseData);
+                $actualData->points = Scoreboard::calculatePoints($promiseData, $actualData);
                 $actualData->save();
             }
         }
@@ -297,23 +298,5 @@ class CenterStatsImporter extends DataImporterAbstract
             ->reportingDate($date)
             ->byStatsReport($statsReport)
             ->first();
-    }
-
-    public function calculatePoints($actuals, $promises)
-    {
-        if (!$promises || !$actuals) {
-            return null;
-        }
-
-        $points = 0;
-        $games = array('cap', 'cpc', 't1x', 't2x', 'gitw', 'lf');
-        foreach ($games as $game) {
-
-            $promise = $promises->$game;
-            $actual = $actuals->$game;
-            $percent = StatsReport::calculatePercent($actual, $promise);
-            $points += StatsReport::pointsByPercent($percent, $game);
-        }
-        return $points;
     }
 }

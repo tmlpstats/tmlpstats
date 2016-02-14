@@ -155,69 +155,7 @@ class StatsReport extends Model
             return null;
         }
 
-        return static::pointsToRating($points);
-    }
-
-    /**
-     * Get the integer percentage of actual performance against promise
-     *
-     * @param $actual
-     * @param $promise
-     *
-     * @return int|integer
-     */
-    public static function calculatePercent($actual, $promise)
-    {
-        return $promise > 0
-            ? max(min(round(($actual / $promise) * 100), 100), 0)
-            : 0;
-    }
-
-    /**
-     * Get the points based on gamer percentage
-     *
-     * @param $percent
-     * @param $game
-     *
-     * @return int
-     */
-    public static function pointsByPercent($percent, $game)
-    {
-        $points = 0;
-
-        if ($percent == 100) {
-            $points = 4;
-        } else if ($percent >= 90) {
-            $points = 3;
-        } else if ($percent >= 80) {
-            $points = 2;
-        } else if ($percent >= 75) {
-            $points = 1;
-        }
-
-        return ($game == 'cap') ? $points * 2 : $points;
-    }
-
-    /**
-     * Get the rating based on number of points
-     *
-     * @param $points
-     *
-     * @return string
-     */
-    public static function pointsToRating($points)
-    {
-        if ($points == 28) {
-            return "Powerful";
-        } else if ($points >= 22) {
-            return "High Performing";
-        } else if ($points >= 16) {
-            return "Effective";
-        } else if ($points >= 9) {
-            return "Marginally Effective";
-        } else {
-            return "Ineffective";
-        }
+        return Scoreboard::getRating($points);
     }
 
     public function scopeByRegion($query, Region $region)
