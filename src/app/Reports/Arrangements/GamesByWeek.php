@@ -1,5 +1,6 @@
 <?php namespace TmlpStats\Reports\Arrangements;
 
+use TmlpStats\Scoreboard;
 use TmlpStats\StatsReport;
 
 class GamesByWeek extends BaseArrangement
@@ -30,12 +31,12 @@ class GamesByWeek extends BaseArrangement
 
                 if ($complement) {
                     if ($type == 'promise') {
-                        $percent = StatsReport::calculatePercent($complement[$game], $data->$game);
+                        $percent = Scoreboard::calculatePercent($data->$game, $complement[$game]);
                     } else {
-                        $percent = StatsReport::calculatePercent($data->$game, $complement[$game]);
+                        $percent = Scoreboard::calculatePercent($complement[$game], $data->$game);
                     }
 
-                    $points = StatsReport::pointsByPercent($percent, $game);
+                    $points = Scoreboard::getPoints($percent, $game);
 
                     $reportData[$dateString]['percent'][$game] = $percent;
                     $reportData[$dateString]['points'][$game] = $points;
@@ -44,7 +45,7 @@ class GamesByWeek extends BaseArrangement
             }
             if ($totalPoints !== null) {
                 $reportData[$dateString]['points']['total'] = $totalPoints;
-                $reportData[$dateString]['rating'] = StatsReport::pointsToRating($totalPoints);
+                $reportData[$dateString]['rating'] = Scoreboard::getRating($totalPoints);
             }
         }
 
