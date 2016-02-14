@@ -1,7 +1,7 @@
 <?php
 namespace TmlpStats\Tests\Validate\Objects;
 
-use Illuminate\Support\Facades\Log;
+use Log;
 use stdClass;
 
 class ValidatorAbstractImplementation extends \TmlpStats\Validate\Objects\ObjectsValidatorAbstract
@@ -22,12 +22,12 @@ class ValidatorAbstractImplementation extends \TmlpStats\Validate\Objects\Object
 class ObjectsValidatorAbstractTest extends ObjectsValidatorTestAbstract
 {
     protected $testClass = ValidatorAbstractImplementation::class;
-
+    protected $instantiateApp = true;
     protected $dataFields = [];
 
     public function testRunSuccessfulValidation()
     {
-        $data         = new stdClass;
+        $data = new stdClass;
         $data->field1 = 1;
         $data->field2 = '2';
         $data->field3 = 3;
@@ -35,14 +35,14 @@ class ObjectsValidatorAbstractTest extends ObjectsValidatorTestAbstract
 
         $dataValidator = $this->getObjectMock(['validate']);
         $dataValidator->expects($this->exactly(4))
-                      ->method('validate')
-                      ->withConsecutive(
-                          [$this->equalTo($data->field1)],
-                          [$this->equalTo($data->field2)],
-                          [$this->equalTo($data->field3)],
-                          [$this->equalTo($data->field4)]
-                      )
-                      ->will($this->onConsecutiveCalls(true, true, true, true));
+            ->method('validate')
+            ->withConsecutive(
+                [$this->equalTo($data->field1)],
+                [$this->equalTo($data->field2)],
+                [$this->equalTo($data->field3)],
+                [$this->equalTo($data->field4)]
+            )
+            ->will($this->onConsecutiveCalls(true, true, true, true));
 
         $dataValidators = [
             'field1' => $dataValidator,
@@ -58,13 +58,13 @@ class ObjectsValidatorAbstractTest extends ObjectsValidatorTestAbstract
             'validate',
         ]);
         $validator->expects($this->once())
-                  ->method('populateValidators');
+            ->method('populateValidators');
         $validator->expects($this->never())
-                  ->method('getValueDisplayName');
+            ->method('getValueDisplayName');
         $validator->expects($this->never())
-                  ->method('addMessage');
+            ->method('addMessage');
         $validator->expects($this->once())
-                  ->method('validate');
+            ->method('validate');
 
         $this->setProperty($validator, 'dataValidators', $dataValidators);
 
@@ -84,13 +84,13 @@ class ObjectsValidatorAbstractTest extends ObjectsValidatorTestAbstract
             'validate',
         ]);
         $validator->expects($this->once())
-                  ->method('populateValidators');
+            ->method('populateValidators');
         $validator->expects($this->never())
-                  ->method('getValueDisplayName');
+            ->method('getValueDisplayName');
         $validator->expects($this->never())
-                  ->method('addMessage');
+            ->method('addMessage');
         $validator->expects($this->once())
-                  ->method('validate');
+            ->method('validate');
 
         $result = $validator->run($data);
 
@@ -106,10 +106,9 @@ class ObjectsValidatorAbstractTest extends ObjectsValidatorTestAbstract
             'validate',
         ]);
         $validator->expects($this->once())
-                  ->method('populateValidators');
+            ->method('populateValidators');
         $validator->expects($this->never())
-                  ->method('validate');
-
+            ->method('validate');
 
         $this->setProperty($validator, 'skipped', true);
 
@@ -120,7 +119,7 @@ class ObjectsValidatorAbstractTest extends ObjectsValidatorTestAbstract
 
     public function testRunFailedValidation()
     {
-        $data         = new stdClass;
+        $data = new stdClass;
         $data->field1 = null;
         $data->field2 = '';
         $data->field3 = 3;
@@ -128,13 +127,13 @@ class ObjectsValidatorAbstractTest extends ObjectsValidatorTestAbstract
 
         $dataValidator = $this->getObjectMock(['validate']);
         $dataValidator->expects($this->exactly(4))
-                      ->method('validate')
-                      ->withConsecutive(
-                          [$this->equalTo($data->field1)],
-                          [$this->equalTo($data->field2)],
-                          [$this->equalTo($data->field3)]
-                      )
-                      ->will($this->onConsecutiveCalls(false, false, false, true));
+            ->method('validate')
+            ->withConsecutive(
+                [$this->equalTo($data->field1)],
+                [$this->equalTo($data->field2)],
+                [$this->equalTo($data->field3)]
+            )
+            ->will($this->onConsecutiveCalls(false, false, false, true));
 
         $dataValidators = [
             'field1' => $dataValidator,
@@ -150,37 +149,37 @@ class ObjectsValidatorAbstractTest extends ObjectsValidatorTestAbstract
             'validate',
         ]);
         $validator->expects($this->once())
-                  ->method('populateValidators');
+            ->method('populateValidators');
         $validator->expects($this->exactly(3))
-                  ->method('getValueDisplayName')
-                  ->withConsecutive(
-                      [$this->equalTo('field1')],
-                      [$this->equalTo('field2')],
-                      [$this->equalTo('field3')]
-                  )
-                  ->will($this->onConsecutiveCalls('Field 1', 'Field 2', 'Field 3'));
+            ->method('getValueDisplayName')
+            ->withConsecutive(
+                [$this->equalTo('field1')],
+                [$this->equalTo('field2')],
+                [$this->equalTo('field3')]
+            )
+            ->will($this->onConsecutiveCalls('Field 1', 'Field 2', 'Field 3'));
         $validator->expects($this->exactly(3))
-                  ->method('addMessage')
-                  ->withConsecutive(
-                      [
-                          $this->equalTo('INVALID_VALUE'),
-                          $this->equalTo('Field 1'),
-                          $this->equalTo('[empty]'),
-                      ],
-                      [
-                          $this->equalTo('INVALID_VALUE'),
-                          $this->equalTo('Field 2'),
-                          $this->equalTo('[empty]'),
-                      ],
-                      [
-                          $this->equalTo('INVALID_VALUE'),
-                          $this->equalTo('Field 3'),
-                          $this->equalTo(3),
-                      ]
-                  )
-                  ->will($this->onConsecutiveCalls('Field 1', 'Field 2', 'Field 3'));
+            ->method('addMessage')
+            ->withConsecutive(
+                [
+                    $this->equalTo('INVALID_VALUE'),
+                    $this->equalTo('Field 1'),
+                    $this->equalTo('[empty]'),
+                ],
+                [
+                    $this->equalTo('INVALID_VALUE'),
+                    $this->equalTo('Field 2'),
+                    $this->equalTo('[empty]'),
+                ],
+                [
+                    $this->equalTo('INVALID_VALUE'),
+                    $this->equalTo('Field 3'),
+                    $this->equalTo(3),
+                ]
+            )
+            ->will($this->onConsecutiveCalls('Field 1', 'Field 2', 'Field 3'));
         $validator->expects($this->once())
-                  ->method('validate');
+            ->method('validate');
 
         $this->setProperty($validator, 'dataValidators', $dataValidators);
 
@@ -191,11 +190,11 @@ class ObjectsValidatorAbstractTest extends ObjectsValidatorTestAbstract
 
     public function testGetValueDisplayNameReturnsWords()
     {
-        $value   = 'someValueToDisplay';
+        $value = 'someValueToDisplay';
         $display = 'Some Value To Display';
 
         $validator = new ValidatorAbstractImplementation(new stdClass);
-        $result    = $this->runMethod($validator, 'getValueDisplayName', $value);
+        $result = $this->runMethod($validator, 'getValueDisplayName', $value);
 
         $this->assertEquals($display, $result);
     }
@@ -205,7 +204,7 @@ class ObjectsValidatorAbstractTest extends ObjectsValidatorTestAbstract
         $date = '2015-05-11';
 
         $validator = new ValidatorAbstractImplementation(new stdClass);
-        $result    = $this->runMethod($validator, 'getDateObject', $date);
+        $result = $this->runMethod($validator, 'getDateObject', $date);
 
         $this->assertInstanceOf('Carbon\Carbon', $result);
         $this->assertEquals("2015-05-11 00:00:00", $result->toDateTimeString());
@@ -216,7 +215,7 @@ class ObjectsValidatorAbstractTest extends ObjectsValidatorTestAbstract
         $date = '05/11/2015';
 
         $validator = new ValidatorAbstractImplementation(new stdClass);
-        $result    = $this->runMethod($validator, 'getDateObject', $date);
+        $result = $this->runMethod($validator, 'getDateObject', $date);
 
         $this->assertInstanceOf('Carbon\Carbon', $result);
         $this->assertEquals("2015-05-11 00:00:00", $result->toDateTimeString());
@@ -229,7 +228,7 @@ class ObjectsValidatorAbstractTest extends ObjectsValidatorTestAbstract
         Log::shouldReceive('error');
 
         $validator = new ValidatorAbstractImplementation(new stdClass);
-        $result    = $this->runMethod($validator, 'getDateObject', $date);
+        $result = $this->runMethod($validator, 'getDateObject', $date);
 
         $this->assertNull($result);
     }

@@ -1,20 +1,21 @@
 <?php
 namespace TmlpStats\Tests\Validate\Objects;
 
+use Carbon\Carbon;
+use Log;
+use stdClass;
 use TmlpStats\Center;
 use TmlpStats\Tests\Traits\MocksMessages;
 use TmlpStats\Tests\Traits\MocksQuarters;
 use TmlpStats\Util;
 use TmlpStats\Validate\Objects\CommCourseInfoValidator;
-use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
-use stdClass;
 
 class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
 {
     use MocksMessages, MocksQuarters;
 
     protected $testClass = CommCourseInfoValidator::class;
+    protected $instantiateApp = true;
 
     protected $dataFields = [
         'startDate',
@@ -53,8 +54,8 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
         $this->setupMessageMocks($validator, $messages, $i);
 
         $validator->expects($this->at($i))
-                  ->method('validate')
-                  ->with($data);
+            ->method('validate')
+            ->with($data);
 
         Log::shouldReceive('error');
 
@@ -69,22 +70,22 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Test Required
             [
                 Util::arrayToObject([
-                    'startDate'                  => null,
-                    'location'                   => null,
-                    'type'                       => null,
-                    'quarterStartTer'            => null,
+                    'startDate' => null,
+                    'location' => null,
+                    'type' => null,
+                    'quarterStartTer' => null,
                     'quarterStartStandardStarts' => null,
-                    'quarterStartXfer'           => null,
-                    'currentTer'                 => null,
-                    'currentStandardStarts'      => null,
-                    'currentXfer'                => null,
-                    'completedStandardStarts'    => null,
-                    'potentials'                 => null,
-                    'registrations'              => null,
-                    'guestsPromised'             => null,
-                    'guestsInvited'              => null,
-                    'guestsConfirmed'            => null,
-                    'guestsAttended'             => null,
+                    'quarterStartXfer' => null,
+                    'currentTer' => null,
+                    'currentStandardStarts' => null,
+                    'currentXfer' => null,
+                    'completedStandardStarts' => null,
+                    'potentials' => null,
+                    'registrations' => null,
+                    'guestsPromised' => null,
+                    'guestsInvited' => null,
+                    'guestsConfirmed' => null,
+                    'guestsAttended' => null,
                 ]),
                 [
                     ['INVALID_VALUE', 'Start Date', '[empty]'],
@@ -101,22 +102,22 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Test Valid 1
             [
                 Util::arrayToObject([
-                    'startDate'                  => '2015-05-16',
-                    'location'                   => '',
-                    'type'                       => 'CAP',
-                    'quarterStartTer'            => 15,
+                    'startDate' => '2015-05-16',
+                    'location' => '',
+                    'type' => 'CAP',
+                    'quarterStartTer' => 15,
                     'quarterStartStandardStarts' => 14,
-                    'quarterStartXfer'           => 0,
-                    'currentTer'                 => 45,
-                    'currentStandardStarts'      => 39,
-                    'currentXfer'                => 1,
-                    'completedStandardStarts'    => 38,
-                    'potentials'                 => 35,
-                    'registrations'              => 25,
-                    'guestsPromised'             => null,
-                    'guestsInvited'              => null,
-                    'guestsConfirmed'            => null,
-                    'guestsAttended'             => null,
+                    'quarterStartXfer' => 0,
+                    'currentTer' => 45,
+                    'currentStandardStarts' => 39,
+                    'currentXfer' => 1,
+                    'completedStandardStarts' => 38,
+                    'potentials' => 35,
+                    'registrations' => 25,
+                    'guestsPromised' => null,
+                    'guestsInvited' => null,
+                    'guestsConfirmed' => null,
+                    'guestsAttended' => null,
                 ]),
                 [],
                 true,
@@ -124,22 +125,22 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Test Valid 2
             [
                 Util::arrayToObject([
-                    'startDate'                  => '2016-05-16',
-                    'location'                   => 'Germany',
-                    'type'                       => 'CPC',
-                    'quarterStartTer'            => 0,
+                    'startDate' => '2016-05-16',
+                    'location' => 'Germany',
+                    'type' => 'CPC',
+                    'quarterStartTer' => 0,
                     'quarterStartStandardStarts' => 0,
-                    'quarterStartXfer'           => 0,
-                    'currentTer'                 => 0,
-                    'currentStandardStarts'      => 0,
-                    'currentXfer'                => 0,
-                    'completedStandardStarts'    => 0,
-                    'potentials'                 => 0,
-                    'registrations'              => 0,
-                    'guestsPromised'             => 0,
-                    'guestsInvited'              => 0,
-                    'guestsConfirmed'            => 0,
-                    'guestsAttended'             => 0,
+                    'quarterStartXfer' => 0,
+                    'currentTer' => 0,
+                    'currentStandardStarts' => 0,
+                    'currentXfer' => 0,
+                    'completedStandardStarts' => 0,
+                    'potentials' => 0,
+                    'registrations' => 0,
+                    'guestsPromised' => 0,
+                    'guestsInvited' => 0,
+                    'guestsConfirmed' => 0,
+                    'guestsAttended' => 0,
                 ]),
                 [],
                 true,
@@ -148,22 +149,22 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Test Invalid StartDate non-date
             [
                 Util::arrayToObject([
-                    'startDate'                  => 'asdf',
-                    'location'                   => null,
-                    'type'                       => 'CPC',
-                    'quarterStartTer'            => 0,
+                    'startDate' => 'asdf',
+                    'location' => null,
+                    'type' => 'CPC',
+                    'quarterStartTer' => 0,
                     'quarterStartStandardStarts' => 0,
-                    'quarterStartXfer'           => 0,
-                    'currentTer'                 => 0,
-                    'currentStandardStarts'      => 0,
-                    'currentXfer'                => 0,
-                    'completedStandardStarts'    => 0,
-                    'potentials'                 => 0,
-                    'registrations'              => 0,
-                    'guestsPromised'             => 0,
-                    'guestsInvited'              => 0,
-                    'guestsConfirmed'            => 0,
-                    'guestsAttended'             => 0,
+                    'quarterStartXfer' => 0,
+                    'currentTer' => 0,
+                    'currentStandardStarts' => 0,
+                    'currentXfer' => 0,
+                    'completedStandardStarts' => 0,
+                    'potentials' => 0,
+                    'registrations' => 0,
+                    'guestsPromised' => 0,
+                    'guestsInvited' => 0,
+                    'guestsConfirmed' => 0,
+                    'guestsAttended' => 0,
                 ]),
                 [
                     ['INVALID_VALUE', 'Start Date', 'asdf'],
@@ -191,32 +192,32 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateCourseCompletionStats()
     {
-        $london       = new stdClass();
+        $london = new stdClass();
         $london->name = 'London';
 
-        $atlanta       = new stdClass();
+        $atlanta = new stdClass();
         $atlanta->name = 'Atlanta';
 
-        $statsReport                = new stdClass;
+        $statsReport = new stdClass;
         $statsReport->reportingDate = Carbon::createFromDate(2015, 5, 8);
-        $statsReport->center        = $atlanta;
+        $statsReport->center = $atlanta;
 
-        $statsReportLondon         = clone $statsReport;
+        $statsReportLondon = clone $statsReport;
         $statsReportLondon->center = $london;
 
-        $statsReportTwoWeeksAfterCourse                = clone $statsReport;
+        $statsReportTwoWeeksAfterCourse = clone $statsReport;
         $statsReportTwoWeeksAfterCourse->reportingDate = Carbon::createFromDate(2015, 5, 15);
 
         return [
             // Gracefully handle null start date (don't blow up - required validator will catch this error)
             [
                 Util::arrayToObject([
-                    'startDate'               => null,
-                    'location'                => 'Atlanta',
+                    'startDate' => null,
+                    'location' => 'Atlanta',
                     'completedStandardStarts' => null,
-                    'potentials'              => null,
-                    'registrations'           => null,
-                    'currentStandardStarts'   => null,
+                    'potentials' => null,
+                    'registrations' => null,
+                    'currentStandardStarts' => null,
                 ]),
                 $statsReport,
                 [],
@@ -225,12 +226,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in future
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-06-06',
-                    'location'                => 'Atlanta',
+                    'startDate' => '2015-06-06',
+                    'location' => 'Atlanta',
                     'completedStandardStarts' => null,
-                    'potentials'              => null,
-                    'registrations'           => null,
-                    'currentStandardStarts'   => null,
+                    'potentials' => null,
+                    'registrations' => null,
+                    'currentStandardStarts' => null,
                 ]),
                 $statsReport,
                 [],
@@ -239,12 +240,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in past with completion stats
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-02',
-                    'location'                => 'Atlanta',
+                    'startDate' => '2015-05-02',
+                    'location' => 'Atlanta',
                     'completedStandardStarts' => 35,
-                    'potentials'              => 30,
-                    'registrations'           => 25,
-                    'currentStandardStarts'   => 35,
+                    'potentials' => 30,
+                    'registrations' => 25,
+                    'currentStandardStarts' => 35,
                 ]),
                 $statsReport,
                 [],
@@ -254,12 +255,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in past missing completedStandardStarts
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-02',
-                    'location'                => 'Atlanta',
+                    'startDate' => '2015-05-02',
+                    'location' => 'Atlanta',
                     'completedStandardStarts' => null,
-                    'potentials'              => 30,
-                    'registrations'           => 25,
-                    'currentStandardStarts'   => 35,
+                    'potentials' => 30,
+                    'registrations' => 25,
+                    'currentStandardStarts' => 35,
                 ]),
                 $statsReport,
                 [
@@ -270,12 +271,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in past missing potentials
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-02',
-                    'location'                => 'Atlanta',
+                    'startDate' => '2015-05-02',
+                    'location' => 'Atlanta',
                     'completedStandardStarts' => 35,
-                    'potentials'              => null,
-                    'registrations'           => 25,
-                    'currentStandardStarts'   => 35,
+                    'potentials' => null,
+                    'registrations' => 25,
+                    'currentStandardStarts' => 35,
                 ]),
                 $statsReport,
                 [
@@ -286,12 +287,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in past missing registrations
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-02',
-                    'location'                => 'Atlanta',
+                    'startDate' => '2015-05-02',
+                    'location' => 'Atlanta',
                     'completedStandardStarts' => 35,
-                    'potentials'              => 30,
-                    'registrations'           => null,
-                    'currentStandardStarts'   => 35,
+                    'potentials' => 30,
+                    'registrations' => null,
+                    'currentStandardStarts' => 35,
                 ]),
                 $statsReport,
                 [
@@ -303,12 +304,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in past with more completed SS that current SS
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-02',
-                    'location'                => 'Atlanta',
+                    'startDate' => '2015-05-02',
+                    'location' => 'Atlanta',
                     'completedStandardStarts' => 40,
-                    'potentials'              => 30,
-                    'registrations'           => 25,
-                    'currentStandardStarts'   => 35,
+                    'potentials' => 30,
+                    'registrations' => 25,
+                    'currentStandardStarts' => 35,
                 ]),
                 $statsReport,
                 [
@@ -319,12 +320,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in past with more completed SS that current SS, at London center for London
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-02',
-                    'location'                => 'London',
+                    'startDate' => '2015-05-02',
+                    'location' => 'London',
                     'completedStandardStarts' => 40,
-                    'potentials'              => 30,
-                    'registrations'           => 25,
-                    'currentStandardStarts'   => 35,
+                    'potentials' => 30,
+                    'registrations' => 25,
+                    'currentStandardStarts' => 35,
                 ]),
                 $statsReportLondon,
                 [
@@ -335,12 +336,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in past with more completed SS that current SS, at London center for Germany
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-02',
-                    'location'                => 'Germany',
+                    'startDate' => '2015-05-02',
+                    'location' => 'Germany',
                     'completedStandardStarts' => 40,
-                    'potentials'              => 30,
-                    'registrations'           => 25,
-                    'currentStandardStarts'   => 35,
+                    'potentials' => 30,
+                    'registrations' => 25,
+                    'currentStandardStarts' => 35,
                 ]),
                 $statsReportLondon,
                 [],
@@ -349,12 +350,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in past with more completed SS that current SS, at London center for Into
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-02',
-                    'location'                => 'INTL',
+                    'startDate' => '2015-05-02',
+                    'location' => 'INTL',
                     'completedStandardStarts' => 40,
-                    'potentials'              => 30,
-                    'registrations'           => 25,
-                    'currentStandardStarts'   => 35,
+                    'potentials' => 30,
+                    'registrations' => 25,
+                    'currentStandardStarts' => 35,
                 ]),
                 $statsReportLondon,
                 [],
@@ -364,12 +365,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in past with more than 3 withdraw during course
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-02',
-                    'location'                => 'Atlanta',
+                    'startDate' => '2015-05-02',
+                    'location' => 'Atlanta',
                     'completedStandardStarts' => 31,
-                    'potentials'              => 30,
-                    'registrations'           => 25,
-                    'currentStandardStarts'   => 35,
+                    'potentials' => 30,
+                    'registrations' => 25,
+                    'currentStandardStarts' => 35,
                 ]),
                 $statsReport,
                 [
@@ -380,12 +381,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in past with more than 3 withdraw during course, but checked over a week after the course
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-02',
-                    'location'                => 'Atlanta',
+                    'startDate' => '2015-05-02',
+                    'location' => 'Atlanta',
                     'completedStandardStarts' => 31,
-                    'potentials'              => 30,
-                    'registrations'           => 25,
-                    'currentStandardStarts'   => 35,
+                    'potentials' => 30,
+                    'registrations' => 25,
+                    'currentStandardStarts' => 35,
                 ]),
                 $statsReportTwoWeeksAfterCourse,
                 [],
@@ -394,12 +395,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in past with <= 3 withdraw during course
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-02',
-                    'location'                => 'Atlanta',
+                    'startDate' => '2015-05-02',
+                    'location' => 'Atlanta',
                     'completedStandardStarts' => 32,
-                    'potentials'              => 30,
-                    'registrations'           => 25,
-                    'currentStandardStarts'   => 35,
+                    'potentials' => 30,
+                    'registrations' => 25,
+                    'currentStandardStarts' => 35,
                 ]),
                 $statsReport,
                 [],
@@ -409,12 +410,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in future with completion stats
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-16',
-                    'location'                => 'Atlanta',
+                    'startDate' => '2015-05-16',
+                    'location' => 'Atlanta',
                     'completedStandardStarts' => 35,
-                    'potentials'              => 30,
-                    'registrations'           => null,
-                    'currentStandardStarts'   => null,
+                    'potentials' => 30,
+                    'registrations' => null,
+                    'currentStandardStarts' => null,
                 ]),
                 $statsReport,
                 [
@@ -425,12 +426,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in future with completion stats
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-16',
-                    'location'                => 'Atlanta',
+                    'startDate' => '2015-05-16',
+                    'location' => 'Atlanta',
                     'completedStandardStarts' => 35,
-                    'potentials'              => null,
-                    'registrations'           => 30,
-                    'currentStandardStarts'   => null,
+                    'potentials' => null,
+                    'registrations' => 30,
+                    'currentStandardStarts' => null,
                 ]),
                 $statsReport,
                 [
@@ -441,12 +442,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Course in future with completion stats
             [
                 Util::arrayToObject([
-                    'startDate'               => '2015-05-16',
-                    'location'                => 'Atlanta',
+                    'startDate' => '2015-05-16',
+                    'location' => 'Atlanta',
                     'completedStandardStarts' => 35,
-                    'potentials'              => null,
-                    'registrations'           => null,
-                    'currentStandardStarts'   => 30,
+                    'potentials' => null,
+                    'registrations' => null,
+                    'currentStandardStarts' => 30,
                 ]),
                 $statsReport,
                 [
@@ -475,8 +476,8 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateCourseStartDate()
     {
-        $statsReport          = new stdClass;
-        $statsReport->center  = new Center();
+        $statsReport = new stdClass;
+        $statsReport->center = new Center();
         $statsReport->quarter = $this->getQuarterMock([], [
             'startWeekendDate' => Carbon::createFromDate(2015, 2, 20)->startOfDay(),
         ]);
@@ -534,12 +535,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // All null
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => null,
+                    'quarterStartTer' => null,
                     'quarterStartStandardStarts' => null,
-                    'quarterStartXfer'           => null,
-                    'currentTer'                 => null,
-                    'currentStandardStarts'      => null,
-                    'currentXfer'                => null,
+                    'quarterStartXfer' => null,
+                    'currentTer' => null,
+                    'currentStandardStarts' => null,
+                    'currentXfer' => null,
                 ]),
                 [],
                 true,
@@ -548,12 +549,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Quarter Start valid 1
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => 20,
+                    'quarterStartTer' => 20,
                     'quarterStartStandardStarts' => 20,
-                    'quarterStartXfer'           => 0,
-                    'currentTer'                 => null,
-                    'currentStandardStarts'      => null,
-                    'currentXfer'                => null,
+                    'quarterStartXfer' => 0,
+                    'currentTer' => null,
+                    'currentStandardStarts' => null,
+                    'currentXfer' => null,
                 ]),
                 [],
                 true,
@@ -561,12 +562,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Quarter Start valid 2
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => 20,
+                    'quarterStartTer' => 20,
                     'quarterStartStandardStarts' => 15,
-                    'quarterStartXfer'           => 0,
-                    'currentTer'                 => null,
-                    'currentStandardStarts'      => null,
-                    'currentXfer'                => null,
+                    'quarterStartXfer' => 0,
+                    'currentTer' => null,
+                    'currentStandardStarts' => null,
+                    'currentXfer' => null,
                 ]),
                 [],
                 true,
@@ -574,12 +575,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Quarter Start valid 3
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => 20,
+                    'quarterStartTer' => 20,
                     'quarterStartStandardStarts' => 15,
-                    'quarterStartXfer'           => 10,
-                    'currentTer'                 => null,
-                    'currentStandardStarts'      => null,
-                    'currentXfer'                => null,
+                    'quarterStartXfer' => 10,
+                    'currentTer' => null,
+                    'currentStandardStarts' => null,
+                    'currentXfer' => null,
                 ]),
                 [],
                 true,
@@ -588,12 +589,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Quarter Start invalid QStart TER less than QStart SS
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => 20,
+                    'quarterStartTer' => 20,
                     'quarterStartStandardStarts' => 25,
-                    'quarterStartXfer'           => 0,
-                    'currentTer'                 => null,
-                    'currentStandardStarts'      => null,
-                    'currentXfer'                => null,
+                    'quarterStartXfer' => 0,
+                    'currentTer' => null,
+                    'currentStandardStarts' => null,
+                    'currentXfer' => null,
                 ]),
                 [
                     ['COMMCOURSE_QSTART_SS_GREATER_THAN_QSTART_TER', 25, 20],
@@ -603,12 +604,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Quarter Start invalid QStart TER less than QStart xfer
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => 15,
+                    'quarterStartTer' => 15,
                     'quarterStartStandardStarts' => 15,
-                    'quarterStartXfer'           => 18,
-                    'currentTer'                 => null,
-                    'currentStandardStarts'      => null,
-                    'currentXfer'                => null,
+                    'quarterStartXfer' => 18,
+                    'currentTer' => null,
+                    'currentStandardStarts' => null,
+                    'currentXfer' => null,
                 ]),
                 [
                     ['COMMCOURSE_QSTART_XFER_GREATER_THAN_QSTART_TER', 18, 15],
@@ -619,12 +620,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Current valid 1
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => null,
+                    'quarterStartTer' => null,
                     'quarterStartStandardStarts' => null,
-                    'quarterStartXfer'           => null,
-                    'currentTer'                 => 20,
-                    'currentStandardStarts'      => 20,
-                    'currentXfer'                => 0,
+                    'quarterStartXfer' => null,
+                    'currentTer' => 20,
+                    'currentStandardStarts' => 20,
+                    'currentXfer' => 0,
                 ]),
                 [],
                 true,
@@ -632,12 +633,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Current valid 2
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => null,
+                    'quarterStartTer' => null,
                     'quarterStartStandardStarts' => null,
-                    'quarterStartXfer'           => null,
-                    'currentTer'                 => 20,
-                    'currentStandardStarts'      => 15,
-                    'currentXfer'                => 0,
+                    'quarterStartXfer' => null,
+                    'currentTer' => 20,
+                    'currentStandardStarts' => 15,
+                    'currentXfer' => 0,
                 ]),
                 [],
                 true,
@@ -645,12 +646,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Current valid 3
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => null,
+                    'quarterStartTer' => null,
                     'quarterStartStandardStarts' => null,
-                    'quarterStartXfer'           => null,
-                    'currentTer'                 => 20,
-                    'currentStandardStarts'      => 15,
-                    'currentXfer'                => 10,
+                    'quarterStartXfer' => null,
+                    'currentTer' => 20,
+                    'currentStandardStarts' => 15,
+                    'currentXfer' => 10,
                 ]),
                 [],
                 true,
@@ -659,12 +660,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Current invalid Current TER less than Current SS
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => null,
+                    'quarterStartTer' => null,
                     'quarterStartStandardStarts' => null,
-                    'quarterStartXfer'           => null,
-                    'currentTer'                 => 20,
-                    'currentStandardStarts'      => 25,
-                    'currentXfer'                => 0,
+                    'quarterStartXfer' => null,
+                    'currentTer' => 20,
+                    'currentStandardStarts' => 25,
+                    'currentXfer' => 0,
                 ]),
                 [
                     ['COMMCOURSE_CURRENT_SS_GREATER_THAN_CURRENT_TER', 25, 20],
@@ -674,12 +675,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Current invalid Current TER less than Current xfer
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => null,
+                    'quarterStartTer' => null,
                     'quarterStartStandardStarts' => null,
-                    'quarterStartXfer'           => null,
-                    'currentTer'                 => 15,
-                    'currentStandardStarts'      => 15,
-                    'currentXfer'                => 18,
+                    'quarterStartXfer' => null,
+                    'currentTer' => 15,
+                    'currentStandardStarts' => 15,
+                    'currentXfer' => 18,
                 ]),
                 [
                     ['COMMCOURSE_CURRENT_XFER_GREATER_THAN_CURRENT_TER', 18, 15],
@@ -690,12 +691,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Current and QStart values align
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => 12,
+                    'quarterStartTer' => 12,
                     'quarterStartStandardStarts' => 12,
-                    'quarterStartXfer'           => 2,
-                    'currentTer'                 => 18,
-                    'currentStandardStarts'      => 15,
-                    'currentXfer'                => 5,
+                    'quarterStartXfer' => 2,
+                    'currentTer' => 18,
+                    'currentStandardStarts' => 15,
+                    'currentXfer' => 5,
                 ]),
                 [],
                 true,
@@ -703,12 +704,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Current and QStart values align with less standard stats
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => 12,
+                    'quarterStartTer' => 12,
                     'quarterStartStandardStarts' => 12,
-                    'quarterStartXfer'           => 2,
-                    'currentTer'                 => 18,
-                    'currentStandardStarts'      => 10,
-                    'currentXfer'                => 5,
+                    'quarterStartXfer' => 2,
+                    'currentTer' => 18,
+                    'currentStandardStarts' => 10,
+                    'currentXfer' => 5,
                 ]),
                 [],
                 true,
@@ -716,12 +717,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Current TER less than QStart TER
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => 20,
+                    'quarterStartTer' => 20,
                     'quarterStartStandardStarts' => 12,
-                    'quarterStartXfer'           => 2,
-                    'currentTer'                 => 18,
-                    'currentStandardStarts'      => 15,
-                    'currentXfer'                => 5,
+                    'quarterStartXfer' => 2,
+                    'currentTer' => 18,
+                    'currentStandardStarts' => 15,
+                    'currentXfer' => 5,
                 ]),
                 [
                     ['COMMCOURSE_CURRENT_TER_LESS_THAN_QSTART_TER', 18, 20],
@@ -731,12 +732,12 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
             // Current Xfer less than QStart Xfer
             [
                 Util::arrayToObject([
-                    'quarterStartTer'            => 12,
+                    'quarterStartTer' => 12,
                     'quarterStartStandardStarts' => 12,
-                    'quarterStartXfer'           => 2,
-                    'currentTer'                 => 18,
-                    'currentStandardStarts'      => 15,
-                    'currentXfer'                => 0,
+                    'quarterStartXfer' => 2,
+                    'currentTer' => 18,
+                    'currentStandardStarts' => 15,
+                    'currentXfer' => 0,
                 ]),
                 [
                     ['COMMCOURSE_CURRENT_XFER_LESS_THAN_QSTART_XFER', 0, 2],

@@ -33,7 +33,40 @@ arrangements:
       Teams are shown ordered by their points, and grouped into buckets by each
       rating level: "Ineffective", "Effective", etc.
 
-api: {}
+api:
+  GlobalReport:
+    type: namespace
+    children:
+      getRating:
+        desc: Get ratings for all teams
+        params:
+          - name: globalReport
+            type: GlobalReport
+
+  LocalReport:
+    type: namespace
+    children:
+      getWeeklyPromises:
+        desc: Get promises for all weeks within a quarter
+        params:
+          - name: localReport
+            type: LocalReport
+          - name: enable_something
+            type: bool
+          - name: first_name
+            type: string
+
+      getClassList:
+        desc: Get the list of all team members
+        params:
+          - name: localReport
+            type: LocalReport
+
+      getClassListByQuarter:
+        desc: Get the list of all team members, arranged by by T1/T2 and by quarter
+        params:
+          - name: localReport
+            type: LocalReport
 
 reports:
   # --- Local Statistician

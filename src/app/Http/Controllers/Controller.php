@@ -1,17 +1,16 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller as BaseController;
+use Session;
 use TmlpStats\Center;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Region;
-
-use Auth;
-use Session;
 use TmlpStats\ReportToken;
 
 class Controller extends BaseController
@@ -110,8 +109,8 @@ class Controller extends BaseController
         if (!$reportingDateString && Session::has('reportTokenId')) {
             $reportToken = ReportToken::find(Session::get('reportTokenId'));
             $report = $reportToken
-                ? $reportToken->getReport()
-                : null;
+            ? $reportToken->getReport()
+            : null;
 
             if ($report) {
                 $reportingDateString = $report->reportingDate->toDateString();
@@ -131,5 +130,13 @@ class Controller extends BaseController
         }
 
         return $reportingDate->startOfDay();
+    }
+
+    protected function getApi($apiName)
+    {
+        if (strpos($apiName, '.') !== false) {
+            $apiName = str_replace('.', '\\', $apiName);
+        }
+        return App::make($apiName);
     }
 }

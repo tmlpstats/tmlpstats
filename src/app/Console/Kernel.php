@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel {
         Commands\Inspire::class,
         Commands\FlushTablesCommand::class,
         Commands\ClearTablesCommand::class,
+        Commands\ReportsCodegen::class,
         Commands\ReportsWiki::class,
         Commands\FlushReportsCacheCommand::class,
         Commands\SanitizeDb::class,

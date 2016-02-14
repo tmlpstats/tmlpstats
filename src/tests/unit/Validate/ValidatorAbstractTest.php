@@ -57,9 +57,9 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
             'validate',
         ]);
         $validator->expects($this->once())
-                  ->method('validate')
-                  ->with($this->equalTo($data))
-                  ->will($this->returnValue($validateResponse));
+            ->method('validate')
+            ->with($this->equalTo($data))
+            ->will($this->returnValue($validateResponse));
 
         if ($supplementalData) {
             $result = $validator->run($data, $supplementalData);
@@ -135,31 +135,31 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
     {
         $offset = 50;
 
-        $data         = new stdClass;
+        $data = new stdClass;
         $data->offset = $offset;
 
         $validator = new ValidatorAbstractImplementation(new stdClass);
-        $result    = $this->runMethod($validator, 'getOffset', $data);
+        $result = $this->runMethod($validator, 'getOffset', $data);
 
         $this->assertEquals($offset, $result);
     }
 
     public function testAddMessageHandlesBasicMessage()
     {
-        $offset    = 50;
-        $sheetId   = 12;
+        $offset = 50;
+        $sheetId = 12;
         $messageId = 'IMPORT_TAB_FAILED';
 
         $messageArray = [
-            'type'       => 'error',
-            'section'    => $sheetId,
-            'message'    => 'Unable to import tab.',
-            'offset'     => $offset,
+            'type' => 'error',
+            'section' => $sheetId,
+            'message' => 'Unable to import tab.',
+            'offset' => $offset,
             'offsetType' => 'row',
-            'id'         => $messageId,
+            'id' => $messageId,
         ];
 
-        $data         = new stdClass;
+        $data = new stdClass;
         $data->offset = $offset;
 
         $validator = new ValidatorAbstractImplementation(new stdClass);
@@ -174,22 +174,22 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
 
     public function testAddMessageHandlesMessageMultipleArguments()
     {
-        $offset      = 50;
-        $sheetId     = 12;
-        $messageId   = 'INVALID_VALUE';
+        $offset = 50;
+        $sheetId = 12;
+        $messageId = 'INVALID_VALUE';
         $displayName = 'My Super Special Variable';
-        $value       = 42;
+        $value = 42;
 
         $messageArray = [
-            'type'       => 'error',
-            'section'    => $sheetId,
-            'message'    => "Incorrect value provided for {$displayName} ('{$value}').",
-            'offset'     => $offset,
+            'type' => 'error',
+            'section' => $sheetId,
+            'message' => "Incorrect value provided for {$displayName} ('{$value}').",
+            'offset' => $offset,
             'offsetType' => 'row',
-            'id'         => $messageId,
+            'id' => $messageId,
         ];
 
-        $data         = new stdClass;
+        $data = new stdClass;
         $data->offset = $offset;
 
         $validator = new ValidatorAbstractImplementation(new stdClass);

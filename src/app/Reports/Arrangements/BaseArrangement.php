@@ -4,13 +4,16 @@ class BaseArrangement
 {
     public $data;
 
-    public function __construct($data)
+    public function __construct($data = null)
     {
         $this->data = $data;
     }
 
-    public function compose()
+    public function compose($data = null)
     {
-        return $this->build($this->data);
+        if ($data === null) {
+            $data = $this->data;
+        }
+        return $this->build($data);
     }
 }

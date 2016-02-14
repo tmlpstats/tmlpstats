@@ -145,6 +145,7 @@ return [
         TmlpStats\Providers\AuthServiceProvider::class,
         TmlpStats\Providers\EventServiceProvider::class,
         TmlpStats\Providers\RouteServiceProvider::class,
+        TmlpStats\Providers\ApiProvider::class,
 
         /*
          * 3rd Party Service Providers...
