@@ -141,7 +141,7 @@ class CenterStatsController extends Controller
             foreach ($week as $type => $data) {
                 // GITW is calculated as an average, so we need the total first
                 $total      = $data->gitw;
-                $data->gitw = round($total / $count);
+                $data->gitw = ($total / $count);
 
                 $globalReportData[] = $data;
             }

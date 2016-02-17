@@ -27,7 +27,8 @@ class GamesByWeek extends BaseArrangement
 
             $totalPoints = null;
             foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
-                $reportData[$dateString][$type][$game] = $data->$game;
+                // Round game because some reports calculate average game scores and values are provided as floats
+                $reportData[$dateString][$type][$game] = round($data->$game);
 
                 if ($complement) {
                     if ($type == 'promise') {
@@ -38,7 +39,7 @@ class GamesByWeek extends BaseArrangement
 
                     $points = Scoreboard::getPoints($percent, $game);
 
-                    $reportData[$dateString]['percent'][$game] = $percent;
+                    $reportData[$dateString]['percent'][$game] = round($percent);
                     $reportData[$dateString]['points'][$game] = $points;
                     $totalPoints += $points;
                 }

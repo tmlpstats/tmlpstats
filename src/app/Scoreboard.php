@@ -71,7 +71,7 @@ class Scoreboard
      * @param integer $actual
      * @param integer $promise
      *
-     * @return integer
+     * @return float
      */
     public static function calculatePercent($promise, $actual)
     {
@@ -79,18 +79,19 @@ class Scoreboard
             return 0;
         }
 
-        $percent = round(($actual / $promise) * 100);
+        $percent = ($actual / $promise) * 100;
 
-        return max(min($percent, 100), 0);
+        return max($percent, 0);
     }
 
     /**
      * Get the points based on game percentage
      *
-     * @param integer $percent
+     * @param float $percent
      * @param string $game
      *
      * @return integer
+     * @throws \Exception if $game is not recognized
      */
     public static function getPoints($percent, $game)
     {
@@ -100,6 +101,15 @@ class Scoreboard
         if (!isset(static::$games[$game])) {
             throw new \Exception("Unknown game {$game}");
         }
+
+        // The spreadsheet rounds using a formula that looks like this:
+        // =IF(Z22=""," ",IF(Z22>0.745,IF(Z22>0.795,IF(Z22>0.895,IF(Z22>0.995,4,3),2),1),0))
+        //
+        // Decoded, this rounds up from .5, but is slightly off in that 74.50000...00 is rounded down to 74
+        // but 74.50000...01 is rounded up.
+        //
+        // Here, round() does the right thing with a slight difference in behavior.
+        $percent = round($percent);
 
         foreach (static::$pointsByPercent as $gamePercent => $gamePoints) {
             if ($percent >= $gamePercent) {
@@ -121,6 +131,7 @@ class Scoreboard
      * @param integer $points
      *
      * @return string
+     * @throws \Exception if $points is out of range
      */
     public static function getRating($points)
     {

@@ -134,11 +134,11 @@ class ScoreboardTest extends TestAbstract
                 87,
                 87,
             ],
-            // over 100% returns 100%
+            // over 100% returns over 100%
             [
                 100,
                 110,
-                100,
+                110,
             ],
             // less than 0% returns 0%
             [
@@ -152,23 +152,23 @@ class ScoreboardTest extends TestAbstract
                 3,
                 75,
             ],
-            // rounds up (66.66 => 67)
+            // returns float
             [
                 3,
                 2,
-                67,
+                (float) ((2/3) * 100),
             ],
-            // rounds down (33.33 => 33)
+            // returns float
             [
                 3,
                 1,
-                33,
+                (float) ((1/3) * 100),
             ],
-            // rounds up (12.5 => 13)
+            // returns float
             [
                 8,
                 1,
-                13,
+                12.500,
             ],
             // Promise 0 always 0
             [
@@ -479,6 +479,30 @@ class ScoreboardTest extends TestAbstract
                 75,
                 'CAP',
                 2,
+            ],
+            // Float percent rounds down correctly (74.33333 => 74)
+            [
+                (float) ((1/3) + 74),
+                'cap',
+                0,
+            ],
+            // Float percent rounds up correctly (79.66666 => 80)
+            [
+                (float) ((2/3) + 79),
+                'cap',
+                4,
+            ],
+            // Float percent rounds up correctly (89.5000 => 90)
+            [
+                (float) ((1/2) + 89),
+                'cap',
+                6,
+            ],
+            // Over 100% returns max points
+            [
+                110,
+                'cap',
+                8,
             ],
         ];
     }
