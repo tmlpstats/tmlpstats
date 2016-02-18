@@ -1,23 +1,21 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
+use Carbon\Carbon;
+use DB;
 use TmlpStats\Center;
+use TmlpStats\CenterStatsData;
 use TmlpStats\GlobalReport;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
-use TmlpStats\CenterStats;
-use TmlpStats\CenterStatsData;
 use TmlpStats\Quarter;
 use TmlpStats\Scoreboard;
 use TmlpStats\StatsReport;
-
-use Carbon\Carbon;
-use DB;
 
 class CenterStatsImporter extends DataImporterAbstract
 {
     protected $sheetId = ImportDocument::TAB_WEEKLY_STATS;
 
-    protected $weeks = array();
+    protected $weeks = [];
 
     protected function populateSheetRanges()
     {
@@ -57,9 +55,9 @@ class CenterStatsImporter extends DataImporterAbstract
 
     protected function loadEntry($week, $blockParams)
     {
-        $promiseCol = $blockParams['cols'][$week];
-        $actualCol = $blockParams['cols'][$week + 1];
-        $weekCol = $blockParams['cols'][$week];
+        $promiseCol    = $blockParams['cols'][$week];
+        $actualCol     = $blockParams['cols'][$week + 1];
+        $weekCol       = $blockParams['cols'][$week];
         $blockStartRow = $blockParams['rows'][0];
 
         $weekDate = $this->reader->getWeekDate($blockStartRow, $weekCol);
@@ -70,22 +68,23 @@ class CenterStatsImporter extends DataImporterAbstract
             $weekDate = $weekDate->toDateString();
         }
 
-        $promiseData = array(
+        $promiseData = [
             'reportingDate' => $weekDate,
             'offset'        => $promiseCol,
             'type'          => 'promise',
             'tdo'           => 100,
-        );
+        ];
 
-        $actualData = array(
+        $actualData   = [
             'reportingDate' => $weekDate,
             'offset'        => $actualCol,
             'type'          => 'actual',
             'tdo'           => null,
-        );
-        $isFutureWeek = $this->statsReport->reportingDate->lt(Carbon::createFromFormat('Y-m-d', $weekDate)->startOfDay());
+        ];
+        $isFutureWeek = $this->statsReport->reportingDate->lt(Carbon::parse($weekDate)
+                                                                    ->startOfDay());
 
-        $rowHeaders = array('cap', 'cpc', 't1x', 't2x', 'gitw', 'lf');
+        $rowHeaders = ['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'];
         for ($i = 0; $i < count($rowHeaders); $i++) {
             $field = $rowHeaders[$i];
 
@@ -124,8 +123,8 @@ class CenterStatsImporter extends DataImporterAbstract
 
     public function postProcess()
     {
-        $center = $this->statsReport->center;
-        $quarter = $this->statsReport->quarter;
+        $center        = $this->statsReport->center;
+        $quarter       = $this->statsReport->quarter;
         $reportingDate = $this->statsReport->reportingDate;
 
         $isRepromiseWeek = $quarter->isRepromiseWeek($reportingDate, $center);
@@ -140,20 +139,25 @@ class CenterStatsImporter extends DataImporterAbstract
                 continue;
             }
 
-            $weekDate = Carbon::createFromFormat('Y-m-d', $week['reportingDate'])->startOfDay();
+            $weekDate    = Carbon::parse($week['reportingDate'])->startOfDay();
             $promiseData = $this->getPromiseData($weekDate, $center, $quarter);
 
-            if (!$promiseData || ($isRepromiseWeek && $weekDate->gt($reportingDate))) {
+            // Technically, we don't allow teams to update promises for the repromise week,
+            // but since some regions have classrooms days other than Friday, the reporting day,
+            // the repromises may not be submitted until the first repromised week. Soo... we have
+            // to rely on the regional to unlock the correct promises
+            if (!$promiseData || ($isRepromiseWeek && $weekDate->gte($reportingDate))) {
 
-                $promiseData = CenterStatsData::firstOrNew(array(
+                $promiseData = CenterStatsData::firstOrNew([
                     'type'            => $week['type'],
                     'reporting_date'  => $week['reportingDate'],
                     'stats_report_id' => $this->statsReport->id,
-                ));
+                ]);
+
                 unset($week['offset']);
                 unset($week['type']);
 
-                $promiseData = $this->setValues($promiseData, $week);
+                $promiseData         = $this->setValues($promiseData, $week);
                 $promiseData->points = null;
                 $promiseData->save();
             }
@@ -171,29 +175,24 @@ class CenterStatsImporter extends DataImporterAbstract
                 continue;
             }
 
-            $weekDate = Carbon::createFromFormat('Y-m-d', $week['reportingDate'])->startOfDay();
+            $weekDate = Carbon::parse($week['reportingDate'])->startOfDay();
 
             $actualData = $this->getActualData($weekDate, $center, $quarter);
 
-            // Always allow setting this week
-            if ($actualData && $reportingDate->ne($weekDate)) {
-                continue;
-            }
+            if (!$actualData || $reportingDate->eq($weekDate)) {
 
-            $promiseData = $this->getPromiseData($weekDate, $center, $quarter);
+                $promiseData = $this->getPromiseData($weekDate, $center, $quarter);
 
-            $actualData = CenterStatsData::firstOrNew(array(
-                'type'            => $week['type'],
-                'reporting_date'  => $week['reportingDate'],
-                'stats_report_id' => $this->statsReport->id,
-            ));
+                $actualData = CenterStatsData::create([
+                    'type'            => $week['type'],
+                    'reporting_date'  => $week['reportingDate'],
+                    'stats_report_id' => $this->statsReport->id,
+                ]);
 
-            unset($week['offset']);
-            unset($week['type']);
+                unset($week['offset']);
+                unset($week['type']);
 
-            if (!$actualData->exists || $reportingDate->eq($weekDate)) {
-
-                $actualData = $this->setValues($actualData, $week);
+                $actualData         = $this->setValues($actualData, $week);
                 $actualData->points = Scoreboard::calculatePoints($promiseData, $actualData);
                 $actualData->save();
             }
@@ -210,7 +209,7 @@ class CenterStatsImporter extends DataImporterAbstract
         $reportingDate = $this->statsReport->reportingDate;
 
         $globalReport = null;
-        $statsReport = null;
+        $statsReport  = null;
 
         $firstWeek = $quarter->getFirstWeekDate($center);
 
@@ -230,8 +229,7 @@ class CenterStatsImporter extends DataImporterAbstract
                 $statsReport = $globalReport->statsReports()->byCenter($center)->first();
             }
 
-            // It it wasn't found in the expected week, search all weeks from the beginning until
-            // we find it
+            // It it wasn't found in the expected week, search all weeks from the beginning until we find it
             if (!$statsReport) {
                 $statsReport = $this->findFirstWeek($center, $quarter, 'promise');
             }
@@ -243,30 +241,30 @@ class CenterStatsImporter extends DataImporterAbstract
         }
 
         return CenterStatsData::promise()
-            ->reportingDate($date)
-            ->byStatsReport($statsReport)
-            ->first();
+                              ->reportingDate($date)
+                              ->byStatsReport($statsReport)
+                              ->first();
     }
 
     protected $promiseStatsReport = null;
+
     public function findFirstWeek(Center $center, Quarter $quarter, $type)
     {
-        // Promises should all be saved during the same week. Let's remember where we found the
-        // last one.
+        // Promises should all be saved during the same week. Let's remember where we found the last one.
         if ($this->promiseStatsReport) {
             return $this->promiseStatsReport;
         }
 
         $statsReportResult = DB::table('stats_reports')
-            ->select('stats_reports.id')
-            ->join('center_stats_data', 'center_stats_data.stats_report_id', '=', 'stats_reports.id')
-            ->join('global_report_stats_report', 'global_report_stats_report.stats_report_id', '=', 'stats_reports.id')
-            ->join('global_reports', 'global_reports.id', '=', 'global_report_stats_report.global_report_id')
-            ->where('stats_reports.center_id', '=', $center->id)
-            ->where('global_reports.reporting_date', '>', $quarter->getQuarterStartDate($center))
-            ->where('center_stats_data.type', '=', $type)
-            ->orderBy('global_reports.reporting_date', 'ASC')
-            ->first();
+                               ->select('stats_reports.id')
+                               ->join('center_stats_data', 'center_stats_data.stats_report_id', '=', 'stats_reports.id')
+                               ->join('global_report_stats_report', 'global_report_stats_report.stats_report_id', '=', 'stats_reports.id')
+                               ->join('global_reports', 'global_reports.id', '=', 'global_report_stats_report.global_report_id')
+                               ->where('stats_reports.center_id', '=', $center->id)
+                               ->where('global_reports.reporting_date', '>', $quarter->getQuarterStartDate($center))
+                               ->where('center_stats_data.type', '=', $type)
+                               ->orderBy('global_reports.reporting_date', 'ASC')
+                               ->first();
 
         if ($statsReportResult) {
             $this->promiseStatsReport = StatsReport::find($statsReportResult->id);
@@ -285,7 +283,8 @@ class CenterStatsImporter extends DataImporterAbstract
             $statsReport = $globalReport->statsReports()->byCenter($center)->first();
         }
 
-        // If not, search from the beginning until we find it
+        // If not, search from the beginning until we find it.
+        // The first report submitted for the quarter was after week 1
         if (!$statsReport) {
             $statsReport = $this->findFirstWeek($center, $quarter, 'actual');
         }
@@ -295,8 +294,8 @@ class CenterStatsImporter extends DataImporterAbstract
         }
 
         return CenterStatsData::actual()
-            ->reportingDate($date)
-            ->byStatsReport($statsReport)
-            ->first();
+                              ->reportingDate($date)
+                              ->byStatsReport($statsReport)
+                              ->first();
     }
 }
