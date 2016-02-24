@@ -16,16 +16,16 @@ class TmlpRegistrationImporter extends DataImporterAbstract
 
     protected function populateSheetRanges()
     {
-        $t1Reg = $this->findRange(32, 'Team 1 Registrations', 'Team 2 Registrations');
-        $this->blocks['t1Reg']['cols'] = $this->excelRange('A','AG');
+        $t1Reg                         = $this->findRange(32, 'Team 1 Registrations', 'Team 2 Registrations');
+        $this->blocks['t1Reg']['cols'] = $this->excelRange('A', 'AG');
         $this->blocks['t1Reg']['rows'] = $this->excelRange($t1Reg['start'] + 1, $t1Reg['end']);
 
-        $t2Reg = $this->findRange($t1Reg['end'], 'Team 2 Registrations', 'Future Weekend Reg');
-        $this->blocks['t2Reg']['cols'] = $this->excelRange('A','AG');
+        $t2Reg                         = $this->findRange($t1Reg['end'], 'Team 2 Registrations', 'Future Weekend Reg');
+        $this->blocks['t2Reg']['cols'] = $this->excelRange('A', 'AG');
         $this->blocks['t2Reg']['rows'] = $this->excelRange($t2Reg['start'] + 1, $t2Reg['end']);
 
-        $futureReg = $this->findRange($t2Reg['end'], 'Future Weekend Reg', 'REMEMBER TO ENTER THE COURSE INFORMATION ON THE "CAP & CPC Course Info" Tab');
-        $this->blocks['futureReg']['cols'] = $this->excelRange('A','AE');
+        $futureReg                         = $this->findRange($t2Reg['end'], 'Future Weekend Reg', 'REMEMBER TO ENTER THE COURSE INFORMATION ON THE "CAP & CPC Course Info" Tab');
+        $this->blocks['futureReg']['cols'] = $this->excelRange('A', 'AE');
         $this->blocks['futureReg']['rows'] = $this->excelRange($futureReg['start'] + 1, $futureReg['end']);
     }
 
@@ -41,9 +41,11 @@ class TmlpRegistrationImporter extends DataImporterAbstract
 
     protected function loadEntry($row, $type)
     {
-        if ($this->reader->isEmptyCell($row,'A') && $this->reader->isEmptyCell($row,'B')) return;
+        if ($this->reader->isEmptyCell($row, 'A') && $this->reader->isEmptyCell($row, 'B')) {
+            return;
+        }
 
-        $this->data[] = array(
+        $data = [
             'offset'                  => $row,
             'firstName'               => $this->reader->getFirstName($row),
             'lastName'                => $this->reader->getLastInitial($row),
@@ -66,7 +68,13 @@ class TmlpRegistrationImporter extends DataImporterAbstract
             'incomingTeamYear'        => is_numeric($type) ? $type : $this->reader->getIncomingTeamYear($row),
             'travel'                  => $this->reader->getTravel($row),
             'room'                    => $this->reader->getRoom($row),
-        );
+        ];
+
+        if (strtoupper($data['incomingTeamYear']) === 'R') {
+            $data['incomingTeamYear'] = 2;
+        }
+
+        $this->data[] = $data;
     }
 
     public function postProcess()
@@ -81,35 +89,35 @@ class TmlpRegistrationImporter extends DataImporterAbstract
                 ? 2
                 : $incomingInput['incomingTeamYear'];
 
-            $incoming = TmlpRegistration::firstOrNew(array(
+            $incoming = TmlpRegistration::firstOrNew([
                 'first_name' => $incomingInput['firstName'],
                 'last_name'  => trim(str_replace('.', '', $incomingInput['lastName'])),
                 'center_id'  => $this->statsReport->center->id,
                 'reg_date'   => $incomingInput['regDate'],
                 'team_year'  => $incomingInput['teamYear'],
-            ));
+            ]);
 
             if ($incoming->teamYear === 2 && $incomingInput['incomingTeamYear'] === 'R') {
                 $incoming->isReviewer = true;
             }
             $incoming->save();
 
-            $incomingData = TmlpRegistrationData::firstOrNew(array(
+            $incomingData = TmlpRegistrationData::firstOrNew([
                 'tmlp_registration_id' => $incoming->id,
                 'stats_report_id'      => $this->statsReport->id,
-            ));
+            ]);
 
             $withdrawCodeId = null;
             if ($incomingInput['wd']) {
-                $code = substr($incomingInput['wd'], 2);
-                $withdrawCode = WithdrawCode::code($code)->first();
+                $code                         = substr($incomingInput['wd'], 2);
+                $withdrawCode                 = WithdrawCode::code($code)->first();
                 $incomingData->withdrawCodeId = $withdrawCode ? $withdrawCode->id : null;
             } else {
                 // Reset withdraw code if they were moved from current to future quarters
                 $incomingData->withdrawCodeId = null;
             }
 
-            $thisQuarter = $this->statsReport->quarter;
+            $thisQuarter   = $this->statsReport->quarter;
             $quarterNumber = ($thisQuarter->quarterNumber % 4) + 1;
             if ($incomingInput['incomingWeekend'] !== 'current') {
                 $quarterNumber = ($quarterNumber % 4) + 1;
@@ -126,7 +134,7 @@ class TmlpRegistrationImporter extends DataImporterAbstract
             }
 
             $incomingInput['travel'] = $incomingInput['travel'] ? true : false;
-            $incomingInput['room'] = $incomingInput['room'] ? true : false;
+            $incomingInput['room']   = $incomingInput['room'] ? true : false;
 
             $teamMember = $this->getTeamMember($incomingInput['committedTeamMemberName']);
             if ($teamMember) {
@@ -163,9 +171,9 @@ class TmlpRegistrationImporter extends DataImporterAbstract
         $nameParts = Util::getNameParts($name);
 
         $person = Person::firstName($nameParts['firstName'])
-            ->lastName($nameParts['lastName'])
-            ->byCenter($this->statsReport->center)
-            ->first();
+                        ->lastName($nameParts['lastName'])
+                        ->byCenter($this->statsReport->center)
+                        ->first();
 
         return $person
             ? TeamMember::byPerson($person)->first()
