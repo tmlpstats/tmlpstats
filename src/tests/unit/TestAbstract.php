@@ -1,9 +1,34 @@
 <?php
 namespace TmlpStats\Tests;
 
-class TestAbstract extends \PHPUnit_Framework_TestCase
+class TestAbstract extends \Illuminate\Foundation\Testing\TestCase
 {
+    /**
+     * The base URL to use while testing the application.
+     *
+     * @var string
+     */
+    protected $baseUrl = 'http://localhost';
     protected $testClass = '';
+    protected $instantiateApp = false;
+
+    /**
+     * Creates the application.
+     *
+     * @return \Illuminate\Foundation\Application
+     */
+    public function createApplication()
+    {
+        if (!$this->instantiateApp) {
+            return;
+        }
+
+        $app = require __DIR__ . '/../../bootstrap/app.php';
+
+        $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
+        return $app;
+    }
 
     protected function getObjectMock($methods = [], $constructorArgs = [])
     {
@@ -13,9 +38,9 @@ class TestAbstract extends \PHPUnit_Framework_TestCase
         }
 
         return $this->getMockBuilder($this->testClass)
-                    ->setMethods($methods)
-                    ->setConstructorArgs($constructorArgs)
-                    ->getMock();
+            ->setMethods($methods)
+            ->setConstructorArgs($constructorArgs)
+            ->getMock();
     }
 
     protected function mergeMockMethods($defaultMethods, $methods)

@@ -13,6 +13,8 @@
 
 // Admin Area
 
+Route::post('api', 'ApiController@apiCall');
+
 Route::match(['get', 'post'], 'admin/dashboard', 'AdminController@index');
 Route::get('admin/status', 'AdminController@status');
 Route::get('admin/peoplereport', 'AdminController@getPeopleReport');

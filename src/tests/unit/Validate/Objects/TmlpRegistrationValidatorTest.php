@@ -1,20 +1,21 @@
 <?php
 namespace TmlpStats\Tests\Validate\Objects;
 
+use Carbon\Carbon;
+use Log;
+use stdClass;
 use TmlpStats\Center;
 use TmlpStats\Tests\Traits\MocksMessages;
 use TmlpStats\Tests\Traits\MocksQuarters;
 use TmlpStats\Tests\Traits\MocksSettings;
 use TmlpStats\Util;
 use TmlpStats\Validate\Objects\TmlpRegistrationValidator;
-use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
-use stdClass;
 
 class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 {
     use MocksSettings, MocksMessages, MocksQuarters;
 
+    protected $instantiateApp = true;
     protected $testClass = TmlpRegistrationValidator::class;
 
     protected $dataFields = [
@@ -53,11 +54,11 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
     //
     public function testPopulateValidatorsSetsValidatorsForEachInput($data = null)
     {
-        $data                   = new stdClass;
+        $data = new stdClass;
         $data->incomingTeamYear = 2;
-        $data->bef              = 2;
-        $data->dur              = null;
-        $data->aft              = null;
+        $data->bef = 2;
+        $data->dur = null;
+        $data->aft = null;
 
         parent::testPopulateValidatorsSetsValidatorsForEachInput($data);
     }
@@ -73,8 +74,8 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
         $this->setupMessageMocks($validator, $messages, $i);
 
         $validator->expects($this->at($i))
-                  ->method('validate')
-                  ->with($data);
+            ->method('validate')
+            ->with($data);
 
         Log::shouldReceive('error');
 
@@ -89,26 +90,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Required
             [
                 Util::arrayToObject([
-                    'firstName'               => null,
-                    'lastName'                => null,
-                    'weekendReg'              => null,
-                    'incomingWeekend'         => null,
-                    'incomingTeamYear'        => null,
-                    'bef'                     => null,
-                    'dur'                     => null,
-                    'aft'                     => null,
-                    'appOut'                  => null,
-                    'appIn'                   => null,
-                    'appr'                    => null,
-                    'wd'                      => null,
-                    'regDate'                 => null,
-                    'appOutDate'              => null,
-                    'appInDate'               => null,
-                    'apprDate'                => null,
-                    'wdDate'                  => null,
+                    'firstName' => null,
+                    'lastName' => null,
+                    'weekendReg' => null,
+                    'incomingWeekend' => null,
+                    'incomingTeamYear' => null,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => null,
+                    'appOut' => null,
+                    'appIn' => null,
+                    'appr' => null,
+                    'wd' => null,
+                    'regDate' => null,
+                    'appOutDate' => null,
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'wdDate' => null,
                     'committedTeamMemberName' => null,
-                    'travel'                  => null,
-                    'room'                    => null,
+                    'travel' => null,
+                    'room' => null,
                 ]),
                 [
                     ['INVALID_VALUE', 'First Name', '[empty]'],
@@ -123,26 +124,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Valid (Variable 1)
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'before',
-                    'incomingWeekend'         => 'current',
-                    'incomingTeamYear'        => '1',
-                    'bef'                     => '1',
-                    'dur'                     => '1',
-                    'aft'                     => '1',
-                    'appOut'                  => '1',
-                    'appIn'                   => '1',
-                    'appr'                    => '1',
-                    'wd'                      => '1 AP',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'before',
+                    'incomingWeekend' => 'current',
+                    'incomingTeamYear' => '1',
+                    'bef' => '1',
+                    'dur' => '1',
+                    'aft' => '1',
+                    'appOut' => '1',
+                    'appIn' => '1',
+                    'appr' => '1',
+                    'wd' => '1 AP',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [],
                 true,
@@ -150,26 +151,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Valid (Variable 2)
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'during',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '2',
-                    'bef'                     => '2',
-                    'dur'                     => '2',
-                    'aft'                     => '2',
-                    'appOut'                  => '2',
-                    'appIn'                   => '2',
-                    'appr'                    => '2',
-                    'wd'                      => '2 FIN',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'during',
+                    'incomingWeekend' => 'future',
+                    'incomingTeamYear' => '2',
+                    'bef' => '2',
+                    'dur' => '2',
+                    'aft' => '2',
+                    'appOut' => '2',
+                    'appIn' => '2',
+                    'appr' => '2',
+                    'wd' => '2 FIN',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [],
                 true,
@@ -177,26 +178,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Valid (Variable 3)
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '2',
-                    'bef'                     => 'R',
-                    'dur'                     => 'R',
-                    'aft'                     => 'R',
-                    'appOut'                  => 'R',
-                    'appIn'                   => 'R',
-                    'appr'                    => 'R',
-                    'wd'                      => 'R WB',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'after',
+                    'incomingWeekend' => 'future',
+                    'incomingTeamYear' => '2',
+                    'bef' => 'R',
+                    'dur' => 'R',
+                    'aft' => 'R',
+                    'appOut' => 'R',
+                    'appIn' => 'R',
+                    'appr' => 'R',
+                    'wd' => 'R WB',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [],
                 true,
@@ -205,26 +206,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Invalid First Name
             [
                 Util::arrayToObject([
-                    'firstName'               => '',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'before',
-                    'incomingWeekend'         => 'current',
-                    'incomingTeamYear'        => '1',
-                    'bef'                     => '1',
-                    'dur'                     => '1',
-                    'aft'                     => '1',
-                    'appOut'                  => '1',
-                    'appIn'                   => '1',
-                    'appr'                    => '1',
-                    'wd'                      => '1 AP',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => '',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'before',
+                    'incomingWeekend' => 'current',
+                    'incomingTeamYear' => '1',
+                    'bef' => '1',
+                    'dur' => '1',
+                    'aft' => '1',
+                    'appOut' => '1',
+                    'appIn' => '1',
+                    'appr' => '1',
+                    'wd' => '1 AP',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [
                     ['INVALID_VALUE', 'First Name', '[empty]'],
@@ -234,26 +235,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Invalid Last Name
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => '',
-                    'weekendReg'              => 'before',
-                    'incomingWeekend'         => 'current',
-                    'incomingTeamYear'        => '1',
-                    'bef'                     => '1',
-                    'dur'                     => '1',
-                    'aft'                     => '1',
-                    'appOut'                  => '1',
-                    'appIn'                   => '1',
-                    'appr'                    => '1',
-                    'wd'                      => '1 AP',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => '',
+                    'weekendReg' => 'before',
+                    'incomingWeekend' => 'current',
+                    'incomingTeamYear' => '1',
+                    'bef' => '1',
+                    'dur' => '1',
+                    'aft' => '1',
+                    'appOut' => '1',
+                    'appIn' => '1',
+                    'appr' => '1',
+                    'wd' => '1 AP',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [
                     ['INVALID_VALUE', 'Last Name', '[empty]'],
@@ -263,26 +264,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Invalid weekendReg
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'sometime',
-                    'incomingWeekend'         => 'current',
-                    'incomingTeamYear'        => '1',
-                    'bef'                     => '1',
-                    'dur'                     => '1',
-                    'aft'                     => '1',
-                    'appOut'                  => '1',
-                    'appIn'                   => '1',
-                    'appr'                    => '1',
-                    'wd'                      => '1 AP',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'sometime',
+                    'incomingWeekend' => 'current',
+                    'incomingTeamYear' => '1',
+                    'bef' => '1',
+                    'dur' => '1',
+                    'aft' => '1',
+                    'appOut' => '1',
+                    'appIn' => '1',
+                    'appr' => '1',
+                    'wd' => '1 AP',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [
                     ['INVALID_VALUE', 'Weekend Reg', 'sometime'],
@@ -292,26 +293,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Invalid incomingWeekend
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'before',
-                    'incomingWeekend'         => 'past',
-                    'incomingTeamYear'        => '1',
-                    'bef'                     => '1',
-                    'dur'                     => '1',
-                    'aft'                     => '1',
-                    'appOut'                  => '1',
-                    'appIn'                   => '1',
-                    'appr'                    => '1',
-                    'wd'                      => '1 AP',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'before',
+                    'incomingWeekend' => 'past',
+                    'incomingTeamYear' => '1',
+                    'bef' => '1',
+                    'dur' => '1',
+                    'aft' => '1',
+                    'appOut' => '1',
+                    'appIn' => '1',
+                    'appr' => '1',
+                    'wd' => '1 AP',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [
                     ['INVALID_VALUE', 'Incoming Weekend', 'past'],
@@ -322,26 +323,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Mismatched Incoming year 1 & R
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '1',
-                    'bef'                     => 'R',
-                    'dur'                     => 'R',
-                    'aft'                     => 'R',
-                    'appOut'                  => 'R',
-                    'appIn'                   => 'R',
-                    'appr'                    => 'R',
-                    'wd'                      => 'R WB',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'after',
+                    'incomingWeekend' => 'future',
+                    'incomingTeamYear' => '1',
+                    'bef' => 'R',
+                    'dur' => 'R',
+                    'aft' => 'R',
+                    'appOut' => 'R',
+                    'appIn' => 'R',
+                    'appr' => 'R',
+                    'wd' => 'R WB',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [
                     ['INVALID_VALUE', 'Bef', 'R'],
@@ -356,26 +357,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Mismatched Incoming year 1 & 2
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '1',
-                    'bef'                     => '2',
-                    'dur'                     => '2',
-                    'aft'                     => '2',
-                    'appOut'                  => '2',
-                    'appIn'                   => '2',
-                    'appr'                    => '2',
-                    'wd'                      => '2 WB',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'after',
+                    'incomingWeekend' => 'future',
+                    'incomingTeamYear' => '1',
+                    'bef' => '2',
+                    'dur' => '2',
+                    'aft' => '2',
+                    'appOut' => '2',
+                    'appIn' => '2',
+                    'appr' => '2',
+                    'wd' => '2 WB',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [
                     ['INVALID_VALUE', 'Bef', '2'],
@@ -390,26 +391,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Mismatched Incoming year 2 & 1
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '2',
-                    'bef'                     => '1',
-                    'dur'                     => '1',
-                    'aft'                     => '1',
-                    'appOut'                  => '1',
-                    'appIn'                   => '1',
-                    'appr'                    => '1',
-                    'wd'                      => '1 WB',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'after',
+                    'incomingWeekend' => 'future',
+                    'incomingTeamYear' => '2',
+                    'bef' => '1',
+                    'dur' => '1',
+                    'aft' => '1',
+                    'appOut' => '1',
+                    'appIn' => '1',
+                    'appr' => '1',
+                    'wd' => '1 WB',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [
                     ['INVALID_VALUE', 'Bef', '1'],
@@ -424,26 +425,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Incoming year 2 is valid with R
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '2',
-                    'bef'                     => 'R',
-                    'dur'                     => 'R',
-                    'aft'                     => 'R',
-                    'appOut'                  => 'R',
-                    'appIn'                   => 'R',
-                    'appr'                    => 'R',
-                    'wd'                      => 'R WB',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'after',
+                    'incomingWeekend' => 'future',
+                    'incomingTeamYear' => '2',
+                    'bef' => 'R',
+                    'dur' => 'R',
+                    'aft' => 'R',
+                    'appOut' => 'R',
+                    'appIn' => 'R',
+                    'appr' => 'R',
+                    'wd' => 'R WB',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [],
                 true,
@@ -452,26 +453,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Invalid regDate
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '2',
-                    'bef'                     => 'R',
-                    'dur'                     => 'R',
-                    'aft'                     => 'R',
-                    'appOut'                  => 'R',
-                    'appIn'                   => 'R',
-                    'appr'                    => 'R',
-                    'wd'                      => 'R WB',
-                    'regDate'                 => 'asdf',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'after',
+                    'incomingWeekend' => 'future',
+                    'incomingTeamYear' => '2',
+                    'bef' => 'R',
+                    'dur' => 'R',
+                    'aft' => 'R',
+                    'appOut' => 'R',
+                    'appIn' => 'R',
+                    'appr' => 'R',
+                    'wd' => 'R WB',
+                    'regDate' => 'asdf',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [
                     ['INVALID_VALUE', 'Reg Date', 'asdf'],
@@ -481,26 +482,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Invalid appOutDate
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '2',
-                    'bef'                     => 'R',
-                    'dur'                     => 'R',
-                    'aft'                     => 'R',
-                    'appOut'                  => 'R',
-                    'appIn'                   => 'R',
-                    'appr'                    => 'R',
-                    'wd'                      => 'R WB',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => 'asdf',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'after',
+                    'incomingWeekend' => 'future',
+                    'incomingTeamYear' => '2',
+                    'bef' => 'R',
+                    'dur' => 'R',
+                    'aft' => 'R',
+                    'appOut' => 'R',
+                    'appIn' => 'R',
+                    'appr' => 'R',
+                    'wd' => 'R WB',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => 'asdf',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [
                     ['INVALID_VALUE', 'App Out Date', 'asdf'],
@@ -510,26 +511,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Invalid appInDate
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '2',
-                    'bef'                     => 'R',
-                    'dur'                     => 'R',
-                    'aft'                     => 'R',
-                    'appOut'                  => 'R',
-                    'appIn'                   => 'R',
-                    'appr'                    => 'R',
-                    'wd'                      => 'R WB',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => 'asdf',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'after',
+                    'incomingWeekend' => 'future',
+                    'incomingTeamYear' => '2',
+                    'bef' => 'R',
+                    'dur' => 'R',
+                    'aft' => 'R',
+                    'appOut' => 'R',
+                    'appIn' => 'R',
+                    'appr' => 'R',
+                    'wd' => 'R WB',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => 'asdf',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [
                     ['INVALID_VALUE', 'App In Date', 'asdf'],
@@ -539,26 +540,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Invalid apprDate
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '2',
-                    'bef'                     => 'R',
-                    'dur'                     => 'R',
-                    'aft'                     => 'R',
-                    'appOut'                  => 'R',
-                    'appIn'                   => 'R',
-                    'appr'                    => 'R',
-                    'wd'                      => 'R WB',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => 'asdf',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'after',
+                    'incomingWeekend' => 'future',
+                    'incomingTeamYear' => '2',
+                    'bef' => 'R',
+                    'dur' => 'R',
+                    'aft' => 'R',
+                    'appOut' => 'R',
+                    'appIn' => 'R',
+                    'appr' => 'R',
+                    'wd' => 'R WB',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => 'asdf',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [
                     ['INVALID_VALUE', 'Appr Date', 'asdf'],
@@ -568,26 +569,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Invalid wdDate
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '2',
-                    'bef'                     => 'R',
-                    'dur'                     => 'R',
-                    'aft'                     => 'R',
-                    'appOut'                  => 'R',
-                    'appIn'                   => 'R',
-                    'appr'                    => 'R',
-                    'wd'                      => 'R WB',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => 'asdf',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'after',
+                    'incomingWeekend' => 'future',
+                    'incomingTeamYear' => '2',
+                    'bef' => 'R',
+                    'dur' => 'R',
+                    'aft' => 'R',
+                    'appOut' => 'R',
+                    'appIn' => 'R',
+                    'appr' => 'R',
+                    'wd' => 'R WB',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => 'asdf',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'y',
+                    'travel' => 'Y',
+                    'room' => 'y',
                 ]),
                 [
                     ['INVALID_VALUE', 'Wd Date', 'asdf'],
@@ -595,30 +596,29 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
                 false,
             ],
 
-
             // Test Invalid committedTeamMemberName
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '2',
-                    'bef'                     => 'R',
-                    'dur'                     => 'R',
-                    'aft'                     => 'R',
-                    'appOut'                  => 'R',
-                    'appIn'                   => 'R',
-                    'appr'                    => 'R',
-                    'wd'                      => 'R WB',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'after',
+                    'incomingWeekend' => 'future',
+                    'incomingTeamYear' => '2',
+                    'bef' => 'R',
+                    'dur' => 'R',
+                    'aft' => 'R',
+                    'appOut' => 'R',
+                    'appIn' => 'R',
+                    'appr' => 'R',
+                    'wd' => 'R WB',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'H',
-                    'room'                    => 'y',
+                    'travel' => 'H',
+                    'room' => 'y',
                 ]),
                 [
                     ['INVALID_VALUE', 'Travel', 'H'],
@@ -628,26 +628,26 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Test Invalid committedTeamMemberName
             [
                 Util::arrayToObject([
-                    'firstName'               => 'Keith',
-                    'lastName'                => 'Stone',
-                    'weekendReg'              => 'after',
-                    'incomingWeekend'         => 'future',
-                    'incomingTeamYear'        => '2',
-                    'bef'                     => 'R',
-                    'dur'                     => 'R',
-                    'aft'                     => 'R',
-                    'appOut'                  => 'R',
-                    'appIn'                   => 'R',
-                    'appr'                    => 'R',
-                    'wd'                      => 'R WB',
-                    'regDate'                 => '2015-01-01',
-                    'appOutDate'              => '2015-01-01',
-                    'appInDate'               => '2015-01-01',
-                    'apprDate'                => '2015-01-01',
-                    'wdDate'                  => '2015-01-01',
+                    'firstName' => 'Keith',
+                    'lastName' => 'Stone',
+                    'weekendReg' => 'after',
+                    'incomingWeekend' => 'future',
+                    'incomingTeamYear' => '2',
+                    'bef' => 'R',
+                    'dur' => 'R',
+                    'aft' => 'R',
+                    'appOut' => 'R',
+                    'appIn' => 'R',
+                    'appr' => 'R',
+                    'wd' => 'R WB',
+                    'regDate' => '2015-01-01',
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => '2015-01-01',
+                    'wdDate' => '2015-01-01',
                     'committedTeamMemberName' => 'Jeff B',
-                    'travel'                  => 'Y',
-                    'room'                    => 'H',
+                    'travel' => 'Y',
+                    'room' => 'H',
                 ]),
                 [
                     ['INVALID_VALUE', 'Room', 'H'],
@@ -681,9 +681,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             [
                 Util::arrayToObject([
                     'incomingTeamYear' => 2,
-                    'bef'              => 2,
-                    'dur'              => null,
-                    'aft'              => null,
+                    'bef' => 2,
+                    'dur' => null,
+                    'aft' => null,
                 ]),
                 [],
                 true,
@@ -692,9 +692,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             [
                 Util::arrayToObject([
                     'incomingTeamYear' => 1,
-                    'bef'              => 1,
-                    'dur'              => null,
-                    'aft'              => null,
+                    'bef' => 1,
+                    'dur' => null,
+                    'aft' => null,
                 ]),
                 [],
                 true,
@@ -703,9 +703,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             [
                 Util::arrayToObject([
                     'incomingTeamYear' => 2,
-                    'bef'              => null,
-                    'dur'              => 2,
-                    'aft'              => null,
+                    'bef' => null,
+                    'dur' => 2,
+                    'aft' => null,
                 ]),
                 [],
                 true,
@@ -714,9 +714,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             [
                 Util::arrayToObject([
                     'incomingTeamYear' => 2,
-                    'bef'              => null,
-                    'dur'              => null,
-                    'aft'              => 2,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 2,
                 ]),
                 [],
                 true,
@@ -725,9 +725,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             [
                 Util::arrayToObject([
                     'incomingTeamYear' => 2,
-                    'bef'              => 2,
-                    'dur'              => 2,
-                    'aft'              => null,
+                    'bef' => 2,
+                    'dur' => 2,
+                    'aft' => null,
                 ]),
                 [
                     ['TMLPREG_MULTIPLE_WEEKENDREG', 2],
@@ -738,9 +738,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             [
                 Util::arrayToObject([
                     'incomingTeamYear' => 2,
-                    'bef'              => 2,
-                    'dur'              => null,
-                    'aft'              => 2,
+                    'bef' => 2,
+                    'dur' => null,
+                    'aft' => 2,
                 ]),
                 [
                     ['TMLPREG_MULTIPLE_WEEKENDREG', 2],
@@ -751,9 +751,9 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             [
                 Util::arrayToObject([
                     'incomingTeamYear' => 2,
-                    'bef'              => null,
-                    'dur'              => 2,
-                    'aft'              => 2,
+                    'bef' => null,
+                    'dur' => 2,
+                    'aft' => 2,
                 ]),
                 [
                     ['TMLPREG_MULTIPLE_WEEKENDREG', 2],
@@ -787,19 +787,19 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and no other steps complete
             [
                 Util::arrayToObject([
-                    'wd'                      => '1 T',
-                    'wdDate'                  => '2015-01-28',
-                    'appOut'                  => null,
-                    'appOutDate'              => null,
-                    'appIn'                   => null,
-                    'appInDate'               => null,
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => '1 T',
+                    'wdDate' => '2015-01-28',
+                    'appOut' => null,
+                    'appOutDate' => null,
+                    'appIn' => null,
+                    'appInDate' => null,
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => null,
-                    'bef'                     => 1,
-                    'dur'                     => null,
-                    'aft'                     => null,
+                    'incomingTeamYear' => null,
+                    'bef' => 1,
+                    'dur' => null,
+                    'aft' => null,
                 ]),
                 [],
                 true,
@@ -807,19 +807,19 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and all steps complete
             [
                 Util::arrayToObject([
-                    'wd'                      => '1 T',
-                    'wdDate'                  => '2015-01-28',
-                    'appOut'                  => null,
-                    'appOutDate'              => '2015-01-13',
-                    'appIn'                   => null,
-                    'appInDate'               => '2015-01-20',
-                    'appr'                    => null,
-                    'apprDate'                => '2015-01-27',
+                    'wd' => '1 T',
+                    'wdDate' => '2015-01-28',
+                    'appOut' => null,
+                    'appOutDate' => '2015-01-13',
+                    'appIn' => null,
+                    'appInDate' => '2015-01-20',
+                    'appr' => null,
+                    'apprDate' => '2015-01-27',
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => null,
-                    'bef'                     => 1,
-                    'dur'                     => null,
-                    'aft'                     => null,
+                    'incomingTeamYear' => null,
+                    'bef' => 1,
+                    'dur' => null,
+                    'aft' => null,
                 ]),
                 [],
                 true,
@@ -827,19 +827,19 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and missing wd
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => '2015-01-01',
-                    'appOut'                  => null,
-                    'appOutDate'              => null,
-                    'appIn'                   => null,
-                    'appInDate'               => null,
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => null,
+                    'wdDate' => '2015-01-01',
+                    'appOut' => null,
+                    'appOutDate' => null,
+                    'appIn' => null,
+                    'appInDate' => null,
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
-                    'bef'                     => 1,
-                    'dur'                     => null,
-                    'aft'                     => null,
+                    'incomingTeamYear' => 1,
+                    'bef' => 1,
+                    'dur' => null,
+                    'aft' => null,
                 ]),
                 [
                     ['TMLPREG_WD_MISSING', 'wd', 1],
@@ -849,19 +849,19 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and missing date
             [
                 Util::arrayToObject([
-                    'wd'                      => '1 T',
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => null,
-                    'appIn'                   => null,
-                    'appInDate'               => null,
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => '1 T',
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => null,
+                    'appIn' => null,
+                    'appInDate' => null,
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
-                    'bef'                     => 1,
-                    'dur'                     => null,
-                    'aft'                     => null,
+                    'incomingTeamYear' => 1,
+                    'bef' => 1,
+                    'dur' => null,
+                    'aft' => null,
                 ]),
                 [
                     ['TMLPREG_WD_DATE_MISSING', 'wd', 1],
@@ -871,19 +871,19 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and mismatched team year
             [
                 Util::arrayToObject([
-                    'wd'                      => '1 T',
-                    'wdDate'                  => '2015-01-01',
-                    'appOut'                  => null,
-                    'appOutDate'              => null,
-                    'appIn'                   => null,
-                    'appInDate'               => null,
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => '1 T',
+                    'wdDate' => '2015-01-01',
+                    'appOut' => null,
+                    'appOutDate' => null,
+                    'appIn' => null,
+                    'appInDate' => null,
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 2,
-                    'bef'                     => 2,
-                    'dur'                     => null,
-                    'aft'                     => null,
+                    'incomingTeamYear' => 2,
+                    'bef' => 2,
+                    'dur' => null,
+                    'aft' => null,
                 ]),
                 [
                     ['TMLPREG_WD_DOESNT_MATCH_INCOMING_YEAR'],
@@ -893,19 +893,19 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and appOut set
             [
                 Util::arrayToObject([
-                    'wd'                      => '1 T',
-                    'wdDate'                  => '2015-01-01',
-                    'appOut'                  => 1,
-                    'appOutDate'              => null,
-                    'appIn'                   => null,
-                    'appInDate'               => null,
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => '1 T',
+                    'wdDate' => '2015-01-01',
+                    'appOut' => 1,
+                    'appOutDate' => null,
+                    'appIn' => null,
+                    'appInDate' => null,
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
-                    'bef'                     => 1,
-                    'dur'                     => null,
-                    'aft'                     => null,
+                    'incomingTeamYear' => 1,
+                    'bef' => 1,
+                    'dur' => null,
+                    'aft' => null,
                 ]),
                 [
                     ['TMLPREG_WD_ONLY_ONE_YEAR_INDICATOR', 'wd', 1],
@@ -915,19 +915,19 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and appIn set
             [
                 Util::arrayToObject([
-                    'wd'                      => '1 T',
-                    'wdDate'                  => '2015-01-01',
-                    'appOut'                  => null,
-                    'appOutDate'              => null,
-                    'appIn'                   => 1,
-                    'appInDate'               => null,
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => '1 T',
+                    'wdDate' => '2015-01-01',
+                    'appOut' => null,
+                    'appOutDate' => null,
+                    'appIn' => 1,
+                    'appInDate' => null,
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
-                    'bef'                     => 1,
-                    'dur'                     => null,
-                    'aft'                     => null,
+                    'incomingTeamYear' => 1,
+                    'bef' => 1,
+                    'dur' => null,
+                    'aft' => null,
                 ]),
                 [
                     ['TMLPREG_WD_ONLY_ONE_YEAR_INDICATOR', 'wd', 1],
@@ -937,19 +937,19 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and appr set
             [
                 Util::arrayToObject([
-                    'wd'                      => '1 T',
-                    'wdDate'                  => '2015-01-01',
-                    'appOut'                  => null,
-                    'appOutDate'              => null,
-                    'appIn'                   => null,
-                    'appInDate'               => null,
-                    'appr'                    => 1,
-                    'apprDate'                => null,
+                    'wd' => '1 T',
+                    'wdDate' => '2015-01-01',
+                    'appOut' => null,
+                    'appOutDate' => null,
+                    'appIn' => null,
+                    'appInDate' => null,
+                    'appr' => 1,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
-                    'bef'                     => 1,
-                    'dur'                     => null,
-                    'aft'                     => null,
+                    'incomingTeamYear' => 1,
+                    'bef' => 1,
+                    'dur' => null,
+                    'aft' => null,
                 ]),
                 [
                     ['TMLPREG_WD_ONLY_ONE_YEAR_INDICATOR', 'wd', 1],
@@ -960,16 +960,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => '2015-01-14',
-                    'appIn'                   => null,
-                    'appInDate'               => '2015-01-21',
-                    'appr'                    => 2,
-                    'apprDate'                => '2015-01-28',
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => '2015-01-14',
+                    'appIn' => null,
+                    'appInDate' => '2015-01-21',
+                    'appr' => 2,
+                    'apprDate' => '2015-01-28',
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [],
                 true,
@@ -977,16 +977,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved and missing appr
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => '2015-01-14',
-                    'appIn'                   => null,
-                    'appInDate'               => '2015-01-21',
-                    'appr'                    => null,
-                    'apprDate'                => '2015-01-28',
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => '2015-01-14',
+                    'appIn' => null,
+                    'appInDate' => '2015-01-21',
+                    'appr' => null,
+                    'apprDate' => '2015-01-28',
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [
                     ['TMLPREG_APPR_MISSING', 'appr', 1],
@@ -996,16 +996,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved and missing apprDate
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => '2015-01-14',
-                    'appIn'                   => null,
-                    'appInDate'               => '2015-01-21',
-                    'appr'                    => 1,
-                    'apprDate'                => null,
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => '2015-01-14',
+                    'appIn' => null,
+                    'appInDate' => '2015-01-21',
+                    'appr' => 1,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [
                     ['TMLPREG_APPR_DATE_MISSING', 'appr', 1],
@@ -1015,16 +1015,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved and missing appInDate
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => '2015-01-14',
-                    'appIn'                   => null,
-                    'appInDate'               => null,
-                    'appr'                    => 1,
-                    'apprDate'                => '2015-01-28',
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => '2015-01-14',
+                    'appIn' => null,
+                    'appInDate' => null,
+                    'appr' => 1,
+                    'apprDate' => '2015-01-28',
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [
                     ['TMLPREG_APPR_MISSING_APPIN_DATE'],
@@ -1034,16 +1034,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved and missing appOutDate
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => null,
-                    'appIn'                   => null,
-                    'appInDate'               => '2015-01-21',
-                    'appr'                    => 1,
-                    'apprDate'                => '2015-01-28',
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => null,
+                    'appIn' => null,
+                    'appInDate' => '2015-01-21',
+                    'appr' => 1,
+                    'apprDate' => '2015-01-28',
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [
                     ['TMLPREG_APPR_MISSING_APPOUT_DATE'],
@@ -1053,16 +1053,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved and appOut set
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => 1,
-                    'appOutDate'              => '2015-01-14',
-                    'appIn'                   => null,
-                    'appInDate'               => '2015-01-21',
-                    'appr'                    => 1,
-                    'apprDate'                => '2015-01-28',
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => 1,
+                    'appOutDate' => '2015-01-14',
+                    'appIn' => null,
+                    'appInDate' => '2015-01-21',
+                    'appr' => 1,
+                    'apprDate' => '2015-01-28',
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [
                     ['TMLPREG_APPR_ONLY_ONE_YEAR_INDICATOR', 'appr', 1],
@@ -1072,16 +1072,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved and appIn set
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => '2015-01-14',
-                    'appIn'                   => 1,
-                    'appInDate'               => '2015-01-21',
-                    'appr'                    => 1,
-                    'apprDate'                => '2015-01-28',
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => '2015-01-14',
+                    'appIn' => 1,
+                    'appInDate' => '2015-01-21',
+                    'appr' => 1,
+                    'apprDate' => '2015-01-28',
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [
                     ['TMLPREG_APPR_ONLY_ONE_YEAR_INDICATOR', 'appr', 1],
@@ -1092,16 +1092,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // App In
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => '2015-01-14',
-                    'appIn'                   => 1,
-                    'appInDate'               => '2015-01-21',
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => '2015-01-14',
+                    'appIn' => 1,
+                    'appInDate' => '2015-01-21',
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [],
                 true,
@@ -1109,16 +1109,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // App In and missing appIn
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => '2015-01-14',
-                    'appIn'                   => null,
-                    'appInDate'               => '2015-01-28',
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => '2015-01-14',
+                    'appIn' => null,
+                    'appInDate' => '2015-01-28',
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [
                     ['TMLPREG_APPIN_MISSING', 'in', 1],
@@ -1128,16 +1128,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // App In and missing appInDate
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => '2015-01-14',
-                    'appIn'                   => 1,
-                    'appInDate'               => null,
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => '2015-01-14',
+                    'appIn' => 1,
+                    'appInDate' => null,
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [
                     ['TMLPREG_APPIN_DATE_MISSING', 'in', 1],
@@ -1147,16 +1147,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // App In and missing appOutDate
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => null,
-                    'appIn'                   => 1,
-                    'appInDate'               => '2015-01-21',
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => null,
+                    'appIn' => 1,
+                    'appInDate' => '2015-01-21',
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [
                     ['TMLPREG_APPIN_MISSING_APPOUT_DATE'],
@@ -1166,16 +1166,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // App In and appOut set
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => 1,
-                    'appOutDate'              => '2015-01-14',
-                    'appIn'                   => 1,
-                    'appInDate'               => '2015-01-21',
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => 1,
+                    'appOutDate' => '2015-01-14',
+                    'appIn' => 1,
+                    'appInDate' => '2015-01-21',
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [
                     ['TMLPREG_APPIN_ONLY_ONE_YEAR_INDICATOR', 'in', 1],
@@ -1186,16 +1186,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // App Out
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => '2015-01-14',
-                    'appIn'                   => 1,
-                    'appInDate'               => '2015-01-21',
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => '2015-01-14',
+                    'appIn' => 1,
+                    'appInDate' => '2015-01-21',
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [],
                 true,
@@ -1203,16 +1203,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // App Out and missing appOut
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => '2015-01-14',
-                    'appIn'                   => null,
-                    'appInDate'               => null,
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => '2015-01-14',
+                    'appIn' => null,
+                    'appInDate' => null,
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [
                     ['TMLPREG_APPOUT_MISSING', 'out', 1],
@@ -1222,16 +1222,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // App Out and missing appOutDate
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => 1,
-                    'appOutDate'              => null,
-                    'appIn'                   => null,
-                    'appInDate'               => null,
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => 1,
+                    'appOutDate' => null,
+                    'appIn' => null,
+                    'appInDate' => null,
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => 1,
+                    'incomingTeamYear' => 1,
                 ]),
                 [
                     ['TMLPREG_APPOUT_DATE_MISSING', 'out', 1],
@@ -1242,16 +1242,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // No approval steps complete
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => null,
-                    'appIn'                   => null,
-                    'appInDate'               => null,
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => null,
+                    'appIn' => null,
+                    'appInDate' => null,
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => 'Keith Stone',
-                    'incomingTeamYear'        => null,
+                    'incomingTeamYear' => null,
                 ]),
                 [],
                 true,
@@ -1259,16 +1259,16 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Missing committed team member
             [
                 Util::arrayToObject([
-                    'wd'                      => null,
-                    'wdDate'                  => null,
-                    'appOut'                  => null,
-                    'appOutDate'              => null,
-                    'appIn'                   => null,
-                    'appInDate'               => null,
-                    'appr'                    => null,
-                    'apprDate'                => null,
+                    'wd' => null,
+                    'wdDate' => null,
+                    'appOut' => null,
+                    'appOutDate' => null,
+                    'appIn' => null,
+                    'appInDate' => null,
+                    'appr' => null,
+                    'apprDate' => null,
                     'committedTeamMemberName' => null,
-                    'incomingTeamYear'        => null,
+                    'incomingTeamYear' => null,
                 ]),
                 [
                     ['TMLPREG_NO_COMMITTED_TEAM_MEMBER'],
@@ -1277,7 +1277,6 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             ],
         ];
     }
-
 
     //
     // validateDates()
@@ -1301,8 +1300,8 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateDates()
     {
-        $statsReport          = new stdClass;
-        $statsReport->center  = new Center();
+        $statsReport = new stdClass;
+        $statsReport->center = new Center();
         $statsReport->quarter = $this->getQuarterMock([], [
             'startWeekendDate' => Carbon::createFromDate(2014, 11, 14)->startOfDay(),
         ]);
@@ -1313,15 +1312,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw date OK
             [
                 Util::arrayToObject([
-                    'wdDate'          => '2015-01-21',
-                    'appOutDate'      => null,
-                    'appInDate'       => null,
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => '2015-01-21',
+                    'appOutDate' => null,
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1330,15 +1329,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw date invalid and doesn't blow up
             [
                 Util::arrayToObject([
-                    'wdDate'          => 'asdf',
-                    'appOutDate'      => null,
-                    'appInDate'       => null,
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => 'asdf',
+                    'appOutDate' => null,
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1347,15 +1346,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and wdDate before regDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => '2015-01-01',
-                    'appOutDate'      => null,
-                    'appInDate'       => null,
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => '2015-01-01',
+                    'appOutDate' => null,
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -1366,15 +1365,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and approve dates OK
             [
                 Util::arrayToObject([
-                    'wdDate'          => '2015-01-21',
-                    'appOutDate'      => null,
-                    'appInDate'       => null,
-                    'apprDate'        => '2015-01-14',
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => '2015-01-21',
+                    'appOutDate' => null,
+                    'appInDate' => null,
+                    'apprDate' => '2015-01-14',
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1383,15 +1382,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and wdDate before apprDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => '2015-01-14',
-                    'appOutDate'      => null,
-                    'appInDate'       => null,
-                    'apprDate'        => '2015-01-21',
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => '2015-01-14',
+                    'appOutDate' => null,
+                    'appInDate' => null,
+                    'apprDate' => '2015-01-21',
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -1402,15 +1401,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and appIn dates OK
             [
                 Util::arrayToObject([
-                    'wdDate'          => '2015-01-21',
-                    'appOutDate'      => null,
-                    'appInDate'       => '2015-01-14',
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => '2015-01-21',
+                    'appOutDate' => null,
+                    'appInDate' => '2015-01-14',
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1419,15 +1418,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and wdDate before appInDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => '2015-01-14',
-                    'appOutDate'      => null,
-                    'appInDate'       => '2015-01-21',
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => '2015-01-14',
+                    'appOutDate' => null,
+                    'appInDate' => '2015-01-21',
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -1438,15 +1437,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and appOut dates OK
             [
                 Util::arrayToObject([
-                    'wdDate'          => '2015-01-21',
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => null,
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => '2015-01-21',
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1455,15 +1454,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and wdDate before appOutDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => '2015-01-14',
-                    'appOutDate'      => '2015-01-21',
-                    'appInDate'       => null,
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => '2015-01-14',
+                    'appOutDate' => '2015-01-21',
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -1475,15 +1474,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved date OK
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => '2015-01-14',
-                    'apprDate'        => '2015-01-21',
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => '2015-01-14',
+                    'apprDate' => '2015-01-21',
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1492,15 +1491,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved invalid and doesn't blow up
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => '2015-01-14',
-                    'apprDate'        => 'asdf',
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => '2015-01-14',
+                    'apprDate' => 'asdf',
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1509,15 +1508,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved and apprDate before regDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => '2015-01-14',
-                    'apprDate'        => '2015-01-01',
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => '2015-01-14',
+                    'apprDate' => '2015-01-01',
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -1530,15 +1529,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved and appIn dates OK
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => '2015-01-14',
-                    'apprDate'        => '2015-01-21',
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => '2015-01-14',
+                    'apprDate' => '2015-01-21',
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1547,15 +1546,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved and apprDate before appInDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => '2015-01-14',
-                    'apprDate'        => '2015-01-13',
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => '2015-01-14',
+                    'apprDate' => '2015-01-13',
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -1566,15 +1565,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved and appOut dates OK
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => '2015-01-14',
-                    'apprDate'        => '2015-01-21',
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => '2015-01-14',
+                    'apprDate' => '2015-01-21',
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1583,15 +1582,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved and apprDate before appOutDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => '2015-01-08',
-                    'apprDate'        => '2015-01-08',
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => '2015-01-08',
+                    'apprDate' => '2015-01-08',
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -1603,15 +1602,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppIn date OK
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => '2015-01-14',
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => '2015-01-14',
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1620,15 +1619,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppIn date invalid and doesn't blow up
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => 'asdf',
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => 'asdf',
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1637,15 +1636,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppIn and appInDate before regDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => '2015-01-01',
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => '2015-01-01',
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -1656,15 +1655,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppIn and appOut dates OK
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => '2015-01-14',
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => '2015-01-14',
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1673,15 +1672,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppIn and appInDate before appOutDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => '2015-01-08',
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => '2015-01-08',
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -1693,15 +1692,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppOut date OK
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-09',
-                    'appInDate'       => null,
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-09',
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1710,15 +1709,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppOut date invalid and doesn't blow up
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => 'asdf',
-                    'appInDate'       => null,
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => 'asdf',
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1727,15 +1726,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppOut and appOutDate before regDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-01',
-                    'appInDate'       => null,
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-01',
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'regDate' => '2015-01-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -1747,15 +1746,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // RegDate before weekend start
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2014-11-07',
-                    'appInDate'       => '2014-11-07',
-                    'apprDate'        => '2014-11-07',
-                    'regDate'         => '2014-11-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2014-11-07',
+                    'appInDate' => '2014-11-07',
+                    'apprDate' => '2014-11-07',
+                    'regDate' => '2014-11-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => 1,
-                    'dur'             => null,
-                    'aft'             => null,
+                    'bef' => 1,
+                    'dur' => null,
+                    'aft' => null,
                 ]),
                 $statsReport,
                 [],
@@ -1764,15 +1763,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // RegDate invalid and doesn't blow up
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2014-11-07',
-                    'appInDate'       => '2014-11-07',
-                    'apprDate'        => '2014-11-07',
-                    'regDate'         => 'asdf',
+                    'wdDate' => null,
+                    'appOutDate' => '2014-11-07',
+                    'appInDate' => '2014-11-07',
+                    'apprDate' => '2014-11-07',
+                    'regDate' => 'asdf',
                     'incomingWeekend' => 'current',
-                    'bef'             => 1,
-                    'dur'             => null,
-                    'aft'             => null,
+                    'bef' => 1,
+                    'dur' => null,
+                    'aft' => null,
                 ]),
                 $statsReport,
                 [],
@@ -1781,15 +1780,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // RegDate not before weekend start
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2014-11-21',
-                    'appInDate'       => '2014-11-21',
-                    'apprDate'        => '2014-11-21',
-                    'regDate'         => '2014-11-21',
+                    'wdDate' => null,
+                    'appOutDate' => '2014-11-21',
+                    'appInDate' => '2014-11-21',
+                    'apprDate' => '2014-11-21',
+                    'regDate' => '2014-11-21',
                     'incomingWeekend' => 'current',
-                    'bef'             => 1,
-                    'dur'             => null,
-                    'aft'             => null,
+                    'bef' => 1,
+                    'dur' => null,
+                    'aft' => null,
                 ]),
                 $statsReport,
                 [
@@ -1800,15 +1799,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // RegDate during weekend start
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2014-11-16',
-                    'appInDate'       => '2014-11-16',
-                    'apprDate'        => '2014-11-16',
-                    'regDate'         => '2014-11-16',
+                    'wdDate' => null,
+                    'appOutDate' => '2014-11-16',
+                    'appInDate' => '2014-11-16',
+                    'apprDate' => '2014-11-16',
+                    'regDate' => '2014-11-16',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => 2,
-                    'aft'             => null,
+                    'bef' => null,
+                    'dur' => 2,
+                    'aft' => null,
                 ]),
                 $statsReport,
                 [],
@@ -1817,15 +1816,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // RegDate not during weekend start
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2014-11-21',
-                    'appInDate'       => '2014-11-21',
-                    'apprDate'        => '2014-11-21',
-                    'regDate'         => '2014-11-21',
+                    'wdDate' => null,
+                    'appOutDate' => '2014-11-21',
+                    'appInDate' => '2014-11-21',
+                    'apprDate' => '2014-11-21',
+                    'regDate' => '2014-11-21',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => 2,
-                    'aft'             => null,
+                    'bef' => null,
+                    'dur' => 2,
+                    'aft' => null,
                 ]),
                 $statsReport,
                 [
@@ -1836,15 +1835,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // RegDate after weekend start
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2014-11-21',
-                    'appInDate'       => '2014-11-21',
-                    'apprDate'        => '2014-11-21',
-                    'regDate'         => '2014-11-21',
+                    'wdDate' => null,
+                    'appOutDate' => '2014-11-21',
+                    'appInDate' => '2014-11-21',
+                    'apprDate' => '2014-11-21',
+                    'regDate' => '2014-11-21',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 'R',
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 'R',
                 ]),
                 $statsReport,
                 [],
@@ -1853,15 +1852,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // RegDate not after weekend start
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2014-11-07',
-                    'appInDate'       => '2014-11-07',
-                    'apprDate'        => '2014-11-07',
-                    'regDate'         => '2014-11-07',
+                    'wdDate' => null,
+                    'appOutDate' => '2014-11-07',
+                    'appInDate' => '2014-11-07',
+                    'apprDate' => '2014-11-07',
+                    'regDate' => '2014-11-07',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 'R',
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 'R',
                 ]),
                 $statsReport,
                 [
@@ -1873,15 +1872,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppOut within 2 days of regDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-15',
-                    'appInDate'       => null,
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-14',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-15',
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'regDate' => '2015-01-14',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1890,15 +1889,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppOut not within 2 days of regDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => null,
-                    'appInDate'       => null,
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-14',
+                    'wdDate' => null,
+                    'appOutDate' => null,
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'regDate' => '2015-01-14',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -1909,15 +1908,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppIn within 14 days of regDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-15',
-                    'appInDate'       => '2015-01-21',
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-14',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-15',
+                    'appInDate' => '2015-01-21',
+                    'apprDate' => null,
+                    'regDate' => '2015-01-14',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1926,15 +1925,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppIn not within 14 days of regDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-02',
-                    'appInDate'       => null,
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-01',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-02',
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'regDate' => '2015-01-01',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -1945,15 +1944,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Appr within 14 days of regDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-15',
-                    'appInDate'       => '2015-01-18',
-                    'apprDate'        => '2015-01-21',
-                    'regDate'         => '2015-01-14',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-15',
+                    'appInDate' => '2015-01-18',
+                    'apprDate' => '2015-01-21',
+                    'regDate' => '2015-01-14',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -1962,15 +1961,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Appr not within 14 days of regDate
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-02',
-                    'appInDate'       => '2015-01-03',
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-01',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-02',
+                    'appInDate' => '2015-01-03',
+                    'apprDate' => null,
+                    'regDate' => '2015-01-01',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -1982,15 +1981,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // RegDate in future
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => null,
-                    'appInDate'       => null,
-                    'apprDate'        => null,
-                    'regDate'         => '2015-02-01',
+                    'wdDate' => null,
+                    'appOutDate' => null,
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'regDate' => '2015-02-01',
                     'incomingWeekend' => 'future',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -2001,15 +2000,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // WdDate in future
             [
                 Util::arrayToObject([
-                    'wdDate'          => '2015-02-14',
-                    'appOutDate'      => '2015-01-14',
-                    'appInDate'       => '2015-01-14',
-                    'apprDate'        => '2015-01-14',
-                    'regDate'         => '2015-01-14',
+                    'wdDate' => '2015-02-14',
+                    'appOutDate' => '2015-01-14',
+                    'appInDate' => '2015-01-14',
+                    'apprDate' => '2015-01-14',
+                    'regDate' => '2015-01-14',
                     'incomingWeekend' => 'future',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -2020,15 +2019,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // ApprDate in future
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-14',
-                    'appInDate'       => '2015-01-14',
-                    'apprDate'        => '2015-02-14',
-                    'regDate'         => '2015-01-14',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-14',
+                    'appInDate' => '2015-01-14',
+                    'apprDate' => '2015-02-14',
+                    'regDate' => '2015-01-14',
                     'incomingWeekend' => 'future',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -2039,15 +2038,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppInDate in future
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-01-14',
-                    'appInDate'       => '2015-02-14',
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-14',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-01-14',
+                    'appInDate' => '2015-02-14',
+                    'apprDate' => null,
+                    'regDate' => '2015-01-14',
                     'incomingWeekend' => 'future',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -2058,15 +2057,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // AppOutDate in future
             [
                 Util::arrayToObject([
-                    'wdDate'          => null,
-                    'appOutDate'      => '2015-02-14',
-                    'appInDate'       => null,
-                    'apprDate'        => null,
-                    'regDate'         => '2015-01-14',
+                    'wdDate' => null,
+                    'appOutDate' => '2015-02-14',
+                    'appInDate' => null,
+                    'apprDate' => null,
+                    'regDate' => '2015-01-14',
                     'incomingWeekend' => 'future',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [
@@ -2078,15 +2077,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Invalid dates don't blow up
             [
                 Util::arrayToObject([
-                    'wdDate'          => 'asdf',
-                    'appOutDate'      => 'asdf',
-                    'appInDate'       => 'asdf',
-                    'apprDate'        => 'asdf',
-                    'regDate'         => 'asdf',
+                    'wdDate' => 'asdf',
+                    'appOutDate' => 'asdf',
+                    'appInDate' => 'asdf',
+                    'apprDate' => 'asdf',
+                    'regDate' => 'asdf',
                     'incomingWeekend' => 'current',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -2095,15 +2094,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // Invalid dates don't blow up
             [
                 Util::arrayToObject([
-                    'wdDate'          => 'asdf',
-                    'appOutDate'      => 'asdf',
-                    'appInDate'       => 'asdf',
-                    'apprDate'        => 'asdf',
-                    'regDate'         => 'asdf',
+                    'wdDate' => 'asdf',
+                    'appOutDate' => 'asdf',
+                    'appInDate' => 'asdf',
+                    'apprDate' => 'asdf',
+                    'regDate' => 'asdf',
                     'incomingWeekend' => 'future',
-                    'bef'             => null,
-                    'dur'             => null,
-                    'aft'             => 1,
+                    'bef' => null,
+                    'dur' => null,
+                    'aft' => 1,
                 ]),
                 $statsReport,
                 [],
@@ -2123,7 +2122,7 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
     {
         $validator = $this->getObjectMock();
         $validator->expects($this->never())
-                  ->method('addMessage');
+            ->method('addMessage');
 
         $result = $validator->validateComment($data);
 
@@ -2136,25 +2135,25 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // validateComment Passes When Incoming Weekend Equals Current
             [
                 Util::arrayToObject([
-                    'comment'         => null,
+                    'comment' => null,
                     'incomingWeekend' => 'current',
-                    'wd'              => null,
+                    'wd' => null,
                 ]),
             ],
             // validateComment Passes When Comment Provided
             [
                 Util::arrayToObject([
-                    'comment'         => 'Nov 2015',
+                    'comment' => 'Nov 2015',
                     'incomingWeekend' => 'future',
-                    'wd'              => null,
+                    'wd' => null,
                 ]),
             ],
             // validateComment Passes Ignored When Wd Set
             [
                 Util::arrayToObject([
-                    'comment'         => null,
+                    'comment' => null,
                     'incomingWeekend' => 'future',
-                    'wd'              => 2,
+                    'wd' => 2,
                 ]),
             ],
         ];
@@ -2162,15 +2161,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 
     public function testValidateCommentFailsWhenNoCommentProvidedForFutureIncomingWeekend()
     {
-        $data                  = new stdClass;
-        $data->comment         = null;
+        $data = new stdClass;
+        $data->comment = null;
         $data->incomingWeekend = 'future';
-        $data->wd              = null;
+        $data->wd = null;
 
         $validator = $this->getObjectMock();
         $validator->expects($this->once())
-                  ->method('addMessage')
-                  ->with($this->equalTo('TMLPREG_COMMENT_MISSING_FUTURE_WEEKEND'));
+            ->method('addMessage')
+            ->with($this->equalTo('TMLPREG_COMMENT_MISSING_FUTURE_WEEKEND'));
 
         $result = $validator->validateComment($data);
 
@@ -2192,7 +2191,7 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 
         $validator = $this->getObjectMock([], [$statsReport]);
         $validator->expects($this->never())
-                  ->method('addMessage');
+            ->method('addMessage');
 
         $result = $validator->validateTravel($data);
 
@@ -2201,11 +2200,11 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateTravelPasses()
     {
-        $statsReport          = new stdClass;
+        $statsReport = new stdClass;
         $statsReport->quarter = $this->getQuarterMock([], [
             'classroom2Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
         ]);
-        $statsReport->center  = null;
+        $statsReport->center = null;
 
         $statsReport->reportingDate = Carbon::createFromDate(2015, 5, 8);
 
@@ -2213,10 +2212,10 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // validateTravel Passes When Before Second Classroom
             [
                 Util::arrayToObject([
-                    'travel'          => null,
-                    'room'            => null,
-                    'comment'         => null,
-                    'wd'              => null,
+                    'travel' => null,
+                    'room' => null,
+                    'comment' => null,
+                    'wd' => null,
                     'incomingWeekend' => 'current',
                 ]),
                 $statsReport,
@@ -2224,10 +2223,10 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // validateTravel Passes When Travel And Room Complete
             [
                 Util::arrayToObject([
-                    'travel'          => 'Y',
-                    'room'            => 'Y',
-                    'comment'         => null,
-                    'wd'              => null,
+                    'travel' => 'Y',
+                    'room' => 'Y',
+                    'comment' => null,
+                    'wd' => null,
                     'incomingWeekend' => 'current',
                 ]),
                 $statsReport,
@@ -2235,10 +2234,10 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // validateTravel Passes When Comments Provided
             [
                 Util::arrayToObject([
-                    'travel'          => null,
-                    'room'            => null,
-                    'comment'         => 'Travel and rooming booked by May 4',
-                    'wd'              => null,
+                    'travel' => null,
+                    'room' => null,
+                    'comment' => 'Travel and rooming booked by May 4',
+                    'wd' => null,
                     'incomingWeekend' => 'current',
                 ]),
                 $statsReport,
@@ -2264,20 +2263,20 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // validateTravel Ignored When Wd Set
             [
                 Util::arrayToObject([
-                    'travel'          => null,
-                    'room'            => null,
-                    'comment'         => null,
-                    'wd'              => 1,
+                    'travel' => null,
+                    'room' => null,
+                    'comment' => null,
+                    'wd' => 1,
                     'incomingWeekend' => 'current',
                 ]),
             ],
             // validateTravel Ignored When Incoming Weekend Equals Future
             [
                 Util::arrayToObject([
-                    'travel'          => null,
-                    'room'            => null,
-                    'comment'         => null,
-                    'wd'              => null,
+                    'travel' => null,
+                    'room' => null,
+                    'comment' => null,
+                    'wd' => null,
                     'incomingWeekend' => 'future',
                 ]),
             ],
@@ -2304,28 +2303,28 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateTravelFails()
     {
-        $statsReport          = new stdClass;
+        $statsReport = new stdClass;
         $statsReport->quarter = $this->getQuarterMock([], [
             'classroom2Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
             'endWeekendDate' => Carbon::createFromDate(2015, 5, 29)->startOfDay(),
         ]);
-        $statsReport->center  = null;
+        $statsReport->center = null;
 
         $statsReport->reportingDate = Carbon::createFromDate(2015, 5, 8);
 
-        $statsReportLastTwoWeeks                = clone $statsReport;
+        $statsReportLastTwoWeeks = clone $statsReport;
         $statsReportLastTwoWeeks->reportingDate = Carbon::createFromDate(2015, 5, 15);
 
         return [
             // ValidateTravel Fails When Missing Travel
             [
                 Util::arrayToObject([
-                    'travel'          => null,
-                    'room'            => 'Y',
-                    'comment'         => null,
-                    'wd'              => null,
+                    'travel' => null,
+                    'room' => 'Y',
+                    'comment' => null,
+                    'wd' => null,
                     'incomingWeekend' => 'current',
-                    'appr'            => null,
+                    'appr' => null,
                 ]),
                 $statsReport,
                 [
@@ -2336,12 +2335,12 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // ValidateTravel Fails When Missing Room
             [
                 Util::arrayToObject([
-                    'travel'          => 'Y',
-                    'room'            => null,
-                    'comment'         => null,
-                    'wd'              => null,
+                    'travel' => 'Y',
+                    'room' => null,
+                    'comment' => null,
+                    'wd' => null,
                     'incomingWeekend' => 'current',
-                    'appr'            => null,
+                    'appr' => null,
                 ]),
                 $statsReport,
                 [
@@ -2352,12 +2351,12 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // ValidateTravel Throws Warning When Missing Room In Last 2 Weeks
             [
                 Util::arrayToObject([
-                    'travel'          => null,
-                    'room'            => 'Y',
-                    'comment'         => 'By 5/15/2015',
-                    'wd'              => null,
+                    'travel' => null,
+                    'room' => 'Y',
+                    'comment' => 'By 5/15/2015',
+                    'wd' => null,
                     'incomingWeekend' => 'current',
-                    'appr'            => 1,
+                    'appr' => 1,
                 ]),
                 $statsReportLastTwoWeeks,
                 [
@@ -2368,12 +2367,12 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             // ValidateTravel Throws Warning When Missing Room In Last 2 Weeks
             [
                 Util::arrayToObject([
-                    'travel'          => 'Y',
-                    'room'            => null,
-                    'comment'         => 'By 5/15/2015',
-                    'wd'              => null,
+                    'travel' => 'Y',
+                    'room' => null,
+                    'comment' => 'By 5/15/2015',
+                    'wd' => null,
                     'incomingWeekend' => 'current',
-                    'appr'            => 1,
+                    'appr' => 1,
                 ]),
                 $statsReportLastTwoWeeks,
                 [
