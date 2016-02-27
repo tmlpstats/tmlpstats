@@ -743,7 +743,7 @@ class CenterGamesValidatorTest extends ValidatorTestAbstract
                 [
                     ['IMPORTDOC_T1X_ACTUAL_INCORRECT', 6, 4],
                 ],
-                true,
+                false,
             ],
             // BFT - Incorrect T2x
             [
@@ -904,7 +904,7 @@ class CenterGamesValidatorTest extends ValidatorTestAbstract
                 [
                     ['IMPORTDOC_T2X_ACTUAL_INCORRECT', 5, 2],
                 ],
-                true,
+                false,
             ],
             // BFT - Incorrect GITW
             [

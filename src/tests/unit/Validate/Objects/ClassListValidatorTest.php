@@ -699,11 +699,12 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
     public function providerValidateTeamYear()
     {
         return [
-            // Wknd and Xfer In are both not set
+            // Wknd, Xfer In, Rereg are both not set
             [
                 Util::arrayToObject([
                     'wknd'     => null,
                     'xferIn'   => null,
+                    'rereg'    => null,
                     'teamYear' => 1,
                 ]),
                 [
@@ -711,33 +712,47 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
                 ],
                 false,
             ],
-            // Wknd and Xfer In are both set
+            // Wknd, Xfer In, Rereg are set
             [
                 Util::arrayToObject([
                     'wknd'     => 2,
                     'xferIn'   => 2,
+                    'rereg'    => 2,
                     'teamYear' => 2,
                 ]),
                 [
-                    ['CLASSLIST_WKND_XIN_ONLY_ONE', 2],
+                    ['CLASSLIST_WKND_XIN_REREG_ONLY_ONE', 2],
                 ],
                 false,
             ],
-            // Wknd set and Xfer In not set
+            // Wknd set and Xfer In/Rereg not set
             [
                 Util::arrayToObject([
                     'wknd'     => 1,
                     'xferIn'   => null,
+                    'rereg'    => null,
                     'teamYear' => 1,
                 ]),
                 [],
                 true,
             ],
-            // Wknd now set and Xfer In set
+            // Wknd/Rereg not set and Xfer In set
             [
                 Util::arrayToObject([
                     'wknd'     => null,
                     'xferIn'   => 1,
+                    'rereg'    => null,
+                    'teamYear' => 1,
+                ]),
+                [],
+                true,
+            ],
+            // Wknd/Xfer In not set and Rereg set
+            [
+                Util::arrayToObject([
+                    'wknd'     => null,
+                    'xferIn'   => null,
+                    'rereg'    => 1,
                     'teamYear' => 1,
                 ]),
                 [],

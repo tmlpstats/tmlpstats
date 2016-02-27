@@ -600,7 +600,7 @@ class Message
             ],
         ],
         'IMPORTDOC_T1X_ACTUAL_INCORRECT'                => [
-            'type'      => Message::WARNING,
+            'type'      => Message::ERROR,
             'format'    => "The T1X actual that you reported this week (%%reported%%) does not match the net number of T1 incoming approved this quarter (%%calculated%%). If the sheet does flag this in purple, the quarter starting totals are likely inaccurate.",
             'arguments' => [
                 '%%reported%%',
@@ -608,7 +608,7 @@ class Message
             ],
         ],
         'IMPORTDOC_T2X_ACTUAL_INCORRECT'                => [
-            'type'      => Message::WARNING,
+            'type'      => Message::ERROR,
             'format'    => "The T2X actual that you reported this week (%%reported%%) does not match the net number of T2 incoming approved this quarter (%%calculated%%). If the sheet does flag this in purple, the quarter starting totals are likely inaccurate.",
             'arguments' => [
                 '%%reported%%',
