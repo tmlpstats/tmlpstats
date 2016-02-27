@@ -1069,7 +1069,7 @@ class StatsReportController extends ReportDispatchAbstractController
                 $found = false;
                 if (isset($lastWeekCoursesList[$type])) {
                     foreach ($lastWeekCoursesList[$type] as $idx => $lastWeekCourseData) {
-                        if ($thisWeekCourseData['courseId'] == $lastWeekCourseData['courseId']) {
+                        if ($this->coursesEqual($thisWeekCourseData, $lastWeekCourseData)) {
                             if (!$this->courseCopiedCorrectly($thisWeekCourseData, $lastWeekCourseData)) {
                                 $flagged['changed'][$type][] = [$thisWeekCourseData, $lastWeekCourseData];
                                 $flaggedCount++;
@@ -1097,6 +1097,15 @@ class StatsReportController extends ReportDispatchAbstractController
         }
 
         return view('statsreports.details.coursestransfersummary', compact('flagged', 'flaggedCount'));
+    }
+
+    protected function coursesEqual($new, $old)
+    {
+        if ($new['courseId'] == $old['courseId']) {
+            return true;
+        }
+
+        return $new['startDate']->eq($old['startDate']);
     }
 
     public function courseCopiedCorrectly($new, $old)

@@ -65,12 +65,18 @@ class CommCourseInfoImporter extends DataImporterAbstract
                 continue;
             }
 
-            $course = Course::firstOrCreate([
+            $data = [
                 'center_id'        => $this->statsReport->center->id,
                 'start_date'       => $courseInput['startDate'],
                 'type'             => $courseInput['type'],
-                'is_international' => (strtoupper($courseInput['location']) == 'INTL'),
-            ]);
+            ];
+
+            // London has a special situation where INTL and local stats are reported separately for courses
+            if ($this->statsReport->center->name == 'London') {
+                $data['is_international'] = (strtoupper($courseInput['location']) == 'INTL');
+            }
+
+            $course = Course::firstOrCreate($data);
 
             if ($course->location != $courseInput['location']) {
                 $course->location = $courseInput['location'];
