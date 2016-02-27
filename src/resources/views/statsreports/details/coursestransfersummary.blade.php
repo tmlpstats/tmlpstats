@@ -54,7 +54,7 @@
                             if ($status == 'changed') {
                                 foreach (array_keys($mappings) as $field) {
                                     if ($new[$field] != $old[$mappings[$field]]) {
-                                        $attributes[$field] = 'class="bg-warning"';
+                                        $attributes[$field] = 'bg-warning';
                                     }
                                 }
                             }
@@ -63,19 +63,19 @@
                                 <td>{{ $status }}</td>
                                 <td>{{ $course['location'] }}</td>
                                 <td class="data-point">@date($course['startDate'])</td>
-                                <td {!! $attributes['quarterStartTer'] !!} class="data-point border-left">
+                                <td class="data-point border-left {{ $attributes['quarterStartTer'] }}">
                                     {{ $course['quarterStartTer'] }}
                                     @if ($attributes['quarterStartTer'])
                                         was {{ $old['currentTer'] }}
                                     @endif
                                 </td>
-                                <td {!! $attributes['quarterStartStandardStarts'] !!} class="data-point">
+                                <td class="data-point {{ $attributes['quarterStartStandardStarts'] }}">
                                     {{ $course['quarterStartStandardStarts'] }}
                                     @if ($attributes['quarterStartStandardStarts'])
                                         was {{ $old['currentStandardStarts'] }}
                                     @endif
                                 </td>
-                                <td {!! $attributes['quarterStartXfer'] !!} class="data-point">
+                                <td class="data-point {{ $attributes['quarterStartXfer'] }}">
                                     {{ $course['quarterStartXfer'] }}
                                     @if ($attributes['quarterStartXfer'])
                                         was {{ $old['currentXfer'] }}
