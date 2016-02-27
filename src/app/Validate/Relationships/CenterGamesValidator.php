@@ -105,10 +105,12 @@ class CenterGamesValidator extends ValidatorAbstract
             if ($thisWeekActual['t1x'] != $t1xGame) {
                 // This is a warning since the regional is asked to verify
                 $this->addMessage('IMPORTDOC_T1X_ACTUAL_INCORRECT', $thisWeekActual['t1x'], $t1xGame);
+                $this->isValid = false;
             }
 
             if ($thisWeekActual['t2x'] != $t2xGame) {
                 $this->addMessage('IMPORTDOC_T2X_ACTUAL_INCORRECT', $thisWeekActual['t2x'], $t2xGame);
+                $this->isValid = false;
             }
 
             if ($thisWeekActual['gitw'] != $gitwGame) {
