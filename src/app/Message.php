@@ -455,14 +455,14 @@ class Message
         ],
         'CLASSLIST_WKND_MISSING'                                        => [
             'type'      => Message::ERROR,
-            'format'    => "No value provided for Wknd or X In. One should be %%teamYear%%.",
+            'format'    => "No value provided for Wknd, X In or Rereg. One should be %%teamYear%%.",
             'arguments' => [
                 '%%teamYear%%',
             ],
         ],
-        'CLASSLIST_WKND_XIN_ONLY_ONE'                                   => [
+        'CLASSLIST_WKND_XIN_REREG_ONLY_ONE'                             => [
             'type'      => Message::ERROR,
-            'format'    => "Only one of Wknd and X In should have a '%%teamYear%%'.",
+            'format'    => "Only one of Wknd, X In and Rereg should have a '%%teamYear%%'.",
             'arguments' => [
                 '%%teamYear%%',
             ],

@@ -134,12 +134,25 @@ class ClassListValidator extends ObjectsValidatorAbstract
     {
         $isValid = true;
 
-        if (is_null($data->wknd) && is_null($data->xferIn)) {
+        if (is_null($data->wknd) && is_null($data->xferIn) && is_null($data->rereg)) {
             $this->addMessage('CLASSLIST_WKND_MISSING', $data->teamYear);
             $isValid = false;
-        } else if (!is_null($data->wknd) && !is_null($data->xferIn)) {
-            $this->addMessage('CLASSLIST_WKND_XIN_ONLY_ONE', $data->teamYear);
-            $isValid = false;
+        } else {
+            $cellCount = 0;
+            if (!is_null($data->wknd)) {
+                $cellCount++;
+            }
+            if (!is_null($data->xferIn)) {
+                $cellCount++;
+            }
+            if (!is_null($data->rereg)) {
+                $cellCount++;
+            }
+
+            if ($cellCount !== 1) {
+                $this->addMessage('CLASSLIST_WKND_XIN_REREG_ONLY_ONE', $data->teamYear);
+                $isValid = false;
+            }
         }
 
         return $isValid;
