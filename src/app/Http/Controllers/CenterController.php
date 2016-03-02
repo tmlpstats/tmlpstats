@@ -3,12 +3,9 @@
 namespace TmlpStats\Http\Controllers;
 
 use App;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use TmlpStats\Center;
-use TmlpStats\GlobalReport;
 use TmlpStats\Http\Requests;
-use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\StatsReport;
 
 class CenterController extends Controller
@@ -125,23 +122,18 @@ class CenterController extends Controller
                                   ->orderBy('submitted_at')
                                   ->first();
 
-        $sheetPath = null;
-        $sheetUrl  = null;
-        $weekData  = [];
+        $weekData = $statsReport
+            ? App::make(StatsReportController::class)->getSummaryPageData($statsReport)
+            : [];
 
-        if ($statsReport) {
-            $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
-            $sheetUrl  = $sheetPath
-                ? url("/statsreports/{$statsReport->id}/download")
-                : null;
-
-            $weekData = App::make(StatsReportController::class)->getSummaryPageData($statsReport);
-        }
+        $reportUrl = $statsReport
+            ? StatsReportController::getUrl($statsReport)
+            : '';
 
         $data = compact(
             'center',
             'statsReport',
-            'sheetUrl'
+            'reportUrl'
         );
 
         return view('centers.dashboard')->with(array_merge($data, $weekData));

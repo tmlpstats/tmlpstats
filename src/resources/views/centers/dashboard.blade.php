@@ -16,7 +16,7 @@
             <div class="col-md-5" style="align-content: center">
                 <h3>
                     Stats from {{ $statsReport->reportingDate->format('M j, Y') }}
-                    <small>(<a href="{{ url("/statsreports/{$statsReport->id}") }}">View Report</a>)</small>
+                    <small>(<a href="{{ $reportUrl }}">View Report</a>)</small>
                 </h3>
             </div>
         </div>
