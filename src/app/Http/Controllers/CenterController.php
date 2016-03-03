@@ -137,6 +137,10 @@ class CenterController extends Controller
             $statsReport = null;
         }
 
+        if ($weekData === null) {
+            $weekData = [];
+        }
+
         $data = compact(
             'center',
             'statsReport',
