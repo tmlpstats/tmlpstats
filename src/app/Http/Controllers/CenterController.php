@@ -122,13 +122,20 @@ class CenterController extends Controller
                                   ->orderBy('submitted_at')
                                   ->first();
 
-        $weekData = $statsReport
-            ? App::make(StatsReportController::class)->getSummaryPageData($statsReport)
-            : [];
+        $weekData = [];
+        $reportUrl = '';
+        try {
+            $weekData = $statsReport
+                ? App::make(StatsReportController::class)->getSummaryPageData($statsReport)
+                : [];
 
-        $reportUrl = $statsReport
-            ? StatsReportController::getUrl($statsReport)
-            : '';
+            $reportUrl = $statsReport
+                ? StatsReportController::getUrl($statsReport)
+                : '';
+        } catch (\Exception $e) {
+            // An exception may be thrown if a stats report is from a previous quarter and there is incomplete promise data.
+            $statsReport = null;
+        }
 
         $data = compact(
             'center',
