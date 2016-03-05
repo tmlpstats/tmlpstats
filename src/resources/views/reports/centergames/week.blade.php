@@ -26,14 +26,14 @@
                     : null;
                 ?>
                 <td>{{ ($gap !== null) ? $game == 'gitw' ? "{$gap}%" : "{$gap}" : '' }}</td>
-                <td>{{ "{$reportData['percent'][$game]}%" }}</td>
-                <td>{{ $reportData['points'][$game] }}</td>
+                <td>{{ isset($reportData['percent']) ? "{$reportData['percent'][$game]}%" : '' }}</td>
+                <td>{{ isset($reportData['points']) ? $reportData['points'][$game] : '' }}</td>
             </tr>
         @endforeach
         <tr>
-            <th colspan="4">{{ $reportData['rating'] }}</th>
+            <th colspan="4">{{ isset($reportData['rating']) ? $reportData['rating'] : '' }}</th>
             <th style="text-align: right">Total:</th>
-            <th>{{ $reportData['points']['total'] }}</th>
+            <th>{{ isset($reportData['points']) ? $reportData['points']['total'] : '' }}</th>
         </tr>
         </tbody>
     </table>
