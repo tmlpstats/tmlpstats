@@ -500,11 +500,12 @@ class StatsReportController extends ReportDispatchAbstractController
         ]);
         $courses = $a->compose();
 
-        $completedCourses = null;
 
+        $lastWeek = $statsReport->reportingDate->copy()->subWeek();
+
+        $completedCourses = [];
         if (isset($courses['reportData']['completed'])) {
-            $lastWeek = clone $statsReport->reportingDate;
-            $lastWeek->subWeek();
+
             foreach ($courses['reportData']['completed'] as $course) {
                 if ($course['startDate']->gte($lastWeek)) {
                     $completedCourses[] = $course;
@@ -512,7 +513,26 @@ class StatsReportController extends ReportDispatchAbstractController
             }
         }
 
+        $courseList = [];
+        if (isset($courses['reportData']['CAP'])) {
+            $courseList = array_merge($courseList, $courses['reportData']['CAP']);
+        }
+
+        if (isset($courses['reportData']['CPC'])) {
+            $courseList = array_merge($courseList, $courses['reportData']['CPC']);
+        }
+
+        $upcomingCourses = [];
+        foreach ($courseList as $course) {
+            if ($course['startDate']->gt($statsReport->reportingDate)
+                && $course['startDate']->lt($statsReport->reportingDate->copy()->addWeeks(3))
+            ) {
+                $upcomingCourses[] = $course;
+            }
+        }
+
         return compact(
+            'statsReport',
             'reportData',
             'date',
             'tdo',
@@ -521,6 +541,7 @@ class StatsReportController extends ReportDispatchAbstractController
             'teamWithdraws',
             'applicationWithdraws',
             'completedCourses',
+            'upcomingCourses',
             'teamTravelDetails',
             'incomingTravelDetails'
         );
@@ -536,7 +557,6 @@ class StatsReportController extends ReportDispatchAbstractController
     {
         $data = $this->getSummaryPageData($statsReport);
         $data['skip_navbar'] = true;
-        $data['statsReport'] = $statsReport;
         return view('statsreports.details.mobile_summary', $data);
     }
 
