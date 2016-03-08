@@ -68,16 +68,16 @@ class TeamMembersCounts extends BaseArrangement
         $total = $t1Total + $t2Total;
 
         if ($t1Total) {
-            $tdo['team1'] = round(($tdo['team1'] / $t1Total) * 100);
-            $gitw['team1'] = round(($gitw['team1'] / $t1Total) * 100);
+            $tdo['percent']['team1'] = round(($tdo['team1'] / $t1Total) * 100);
+            $gitw['percent']['team1'] = round(($gitw['team1'] / $t1Total) * 100);
         }
         if ($t2Total) {
-            $tdo['team2'] = round(($tdo['team2'] / $t2Total) * 100);
-            $gitw['team2'] = round(($gitw['team2'] / $t2Total) * 100);
+            $tdo['percent']['team2'] = round(($tdo['team2'] / $t2Total) * 100);
+            $gitw['percent']['team2'] = round(($gitw['team2'] / $t2Total) * 100);
         }
         if ($t1Total + $t2Total) {
-            $tdo['total'] = round(($tdo['total'] / $total) * 100);
-            $gitw['total'] = round(($gitw['total'] / $total) * 100);
+            $tdo['percent']['total'] = round(($tdo['total'] / $total) * 100);
+            $gitw['percent']['total'] = round(($gitw['total'] / $total) * 100);
         }
 
         $reportData['tdo'] = $tdo;
