@@ -1,4 +1,8 @@
-<!DOCTYPE html>
+<?php
+if (!isset($skip_navbar)) {
+    $skip_navbar = false;
+}
+?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -24,8 +28,8 @@
 
     @yield('headers')
 </head>
-<body>
-    @if (!isset($skip_navbar) || $skip_navbar == false)
+<body <?php if($skip_navbar) { ?>class="no-navbar"<?php } ?>>
+    @if (!$skip_navbar)
         @include('partials.navbar')
     @endif
     <div class="container-fluid">

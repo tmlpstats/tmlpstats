@@ -20,6 +20,8 @@ class ApiController extends ApiControllerBase
         "LocalReport.getWeeklyPromises" => "LocalReport__getWeeklyPromises",
         "LocalReport.getClassList" => "LocalReport__getClassList",
         "LocalReport.getClassListByQuarter" => "LocalReport__getClassListByQuarter",
+        "LiveScoreboard.getCurrentScores" => "LiveScoreboard__getCurrentScores",
+        "LiveScoreboard.setScore" => "LiveScoreboard__setScore",
     ];
 
     protected function GlobalReport__getRating($input)
@@ -46,6 +48,21 @@ class ApiController extends ApiControllerBase
     {
         return App::make(Api\LocalReport::class)->getClassListByQuarter(
             $this->parse_LocalReport($input, 'localReport')
+        );
+    }
+    protected function LiveScoreboard__getCurrentScores($input)
+    {
+        return App::make(Api\LiveScoreboard::class)->getCurrentScores(
+            $this->parse_Center($input, 'center')
+        );
+    }
+    protected function LiveScoreboard__setScore($input)
+    {
+        return App::make(Api\LiveScoreboard::class)->setScore(
+            $this->parse_Center($input, 'center'),
+            $this->parse_string($input, 'game'),
+            $this->parse_string($input, 'type'),
+            $this->parse_int($input, 'value')
         );
     }
 }

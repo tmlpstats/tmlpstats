@@ -8,8 +8,6 @@
      }
 
     .container-fluid {
-        padding-left: 5px;
-        padding-right: 5px;
     }
 }
 
@@ -24,12 +22,15 @@
 
      .container-fluid {
         padding-left: 55px;
-        padding-right: 5px;
      }
 }
 
 body {
     padding-top: 50px;
+}
+
+body.no-navbar{
+    padding-top: 0;
 }
 
 .ok {
