@@ -428,12 +428,24 @@ class StatsReportController extends ReportDispatchAbstractController
         return $response;
     }
 
-    public function getSummaryPageData(StatsReport $statsReport)
+    public function getSummaryPageData(StatsReport $statsReport, $live = false)
     {
-        $centerStatsData = App::make(CenterStatsController::class)
-            ->getByStatsReport($statsReport, $statsReport->reportingDate);
-        if (!$centerStatsData) {
-            return null;
+        $date = $statsReport->reportingDate->toDateString();
+
+        if ($live) {
+            $reportData = App::make(Api\LiveScoreboard::class)->getCurrentScores($statsReport->center);
+        } else {
+            $centerStatsData = App::make(CenterStatsController::class)
+                ->getByStatsReport($statsReport, $statsReport->reportingDate);
+            if (!$centerStatsData) {
+                return null;
+            }
+
+            // Center Games
+            $a = new Arrangements\GamesByWeek($centerStatsData);
+            $centerStatsData = $a->compose();
+
+            $reportData = $centerStatsData['reportData'][$date];
         }
 
         $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
@@ -450,13 +462,6 @@ class StatsReportController extends ReportDispatchAbstractController
         if (!$courses) {
             return null;
         }
-
-        // Center Games
-        $a = new Arrangements\GamesByWeek($centerStatsData);
-        $centerStatsData = $a->compose();
-
-        $date = $statsReport->reportingDate->toDateString();
-        $reportData = $centerStatsData['reportData'][$date];
 
         // Team Member stats
         $a = new Arrangements\TeamMembersCounts(['teamMembersData' => $teamMembers]);
@@ -499,7 +504,6 @@ class StatsReportController extends ReportDispatchAbstractController
             'reportingDate' => $statsReport->reportingDate,
         ]);
         $courses = $a->compose();
-
 
         $lastWeek = $statsReport->reportingDate->copy()->subWeek();
 
@@ -555,7 +559,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
     protected function getMobileSummary(StatsReport $statsReport)
     {
-        $data = $this->getSummaryPageData($statsReport);
+        $data = $this->getSummaryPageData($statsReport, true);
         $data['skip_navbar'] = true;
         return view('statsreports.details.mobile_summary', $data);
     }

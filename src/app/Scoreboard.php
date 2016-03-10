@@ -12,29 +12,30 @@ class Scoreboard
 {
     const MAX_POINTS = 28;
     const MIN_POINTS = 0;
+    const GAME_KEYS = ['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'];
 
     protected static $ratingsByPoints = [
         '28' => 'Powerful',
         '22' => 'High Performing',
         '16' => 'Effective',
-        '9'  => 'Marginally Effective',
-        '0'  => 'Ineffective',
+        '9' => 'Marginally Effective',
+        '0' => 'Ineffective',
     ];
 
     protected static $pointsByPercent = [
         '100' => 4,
-        '90'  => 3,
-        '80'  => 2,
-        '75'  => 1,
+        '90' => 3,
+        '80' => 2,
+        '75' => 1,
     ];
 
     protected static $games = [
-        'cap'  => ['x' => 2],
-        'cpc'  => ['x' => 1],
-        't1x'  => ['x' => 1],
-        't2x'  => ['x' => 1],
+        'cap' => ['x' => 2],
+        'cpc' => ['x' => 1],
+        't1x' => ['x' => 1],
+        't2x' => ['x' => 1],
         'gitw' => ['x' => 1],
-        'lf'   => ['x' => 1],
+        'lf' => ['x' => 1],
     ];
 
     /**
@@ -53,10 +54,10 @@ class Scoreboard
         }
 
         $points = 0;
-        $games  = array_keys(static::$games);
+        $games = array_keys(static::$games);
         foreach ($games as $game) {
             $promise = $promises->$game;
-            $actual  = $actuals->$game;
+            $actual = $actuals->$game;
 
             $percent = static::calculatePercent($promise, $actual);
             $points += static::getPoints($percent, $game);
@@ -119,8 +120,8 @@ class Scoreboard
         }
 
         $multiplier = isset(static::$games[$game]['x'])
-            ? static::$games[$game]['x']
-            : 1;
+        ? static::$games[$game]['x']
+        : 1;
 
         return ($points * $multiplier);
     }

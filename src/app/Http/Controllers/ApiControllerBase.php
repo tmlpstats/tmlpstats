@@ -4,6 +4,7 @@ namespace TmlpStats\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Response;
+use TmlpStats\Center;
 use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\StatsReport;
 
@@ -58,6 +59,25 @@ class ApiControllerBase extends Controller
     protected function parse_string($input, $key)
     {
         return (string) $input->get($key);
+    }
+
+    protected function parse_int($input, $key)
+    {
+        return intval($input->get($key));
+    }
+
+    protected function parse_Center($input, $key)
+    {
+        if ($input->has($key)) {
+            $val = $input->get($key);
+            if (is_numeric($val)) {
+                $center = Center::findOrFail(intval($val));
+            } else {
+                $center = Center::abbreviation($val)->firstOrFail();
+            }
+            return $center;
+        }
+        abort(400);
     }
 
 }

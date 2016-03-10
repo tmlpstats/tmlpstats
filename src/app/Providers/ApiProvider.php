@@ -22,5 +22,6 @@ class ApiProvider extends ServiceProvider
     {
         $this->app->singleton(Api\GlobalReport::class);
         $this->app->singleton(Api\LocalReport::class);
+        $this->app->singleton(Api\LiveScoreboard::class);
     }
 }

@@ -39,3 +39,7 @@
     </div>
 </div>
 @endsection
+
+@section('scripts')
+    <script src="{{ asset('/js/api.js') }}" type="text/javascript"></script>
+@endsection

@@ -68,6 +68,28 @@ api:
           - name: localReport
             type: LocalReport
 
+  LiveScoreboard:
+    type: namespace
+    children:
+      getCurrentScores:
+        desc: Get scores for a center
+        params:
+          - name: center
+            type: Center
+      setScore:
+        desc: Set a single score
+        params:
+          - name: center
+            type: Center
+          - name: game
+            type: string
+            desc: The game being updated, short name (cap, cpc, etc)
+          - name: type
+            type: string
+            desc: promise or actual.
+          - name: value
+            type: int
+
 reports:
   # --- Local Statistician
 

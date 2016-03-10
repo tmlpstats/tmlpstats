@@ -1,10 +1,11 @@
 <?php namespace TmlpStats\Reports\Arrangements;
 
 use TmlpStats\Scoreboard;
-use TmlpStats\StatsReport;
 
 class GamesByWeek extends BaseArrangement
 {
+    protected static $scored_games = Scoreboard::GAME_KEYS;
+
     /*
      * Builds an array of weekly promise/actual pairs
      * broken down by week
@@ -22,11 +23,11 @@ class GamesByWeek extends BaseArrangement
             $reportData[$dateString][$type] = [];
 
             $complement = isset($reportData[$dateString][$this->getComplementType($type)])
-                ? $reportData[$dateString][$this->getComplementType($type)]
-                : null;
+            ? $reportData[$dateString][$this->getComplementType($type)]
+            : null;
 
             $totalPoints = null;
-            foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
+            foreach (self::$scored_games as $game) {
                 // Round game because some reports calculate average game scores and values are provided as floats
                 $reportData[$dateString][$type][$game] = round($data->$game);
 
@@ -53,10 +54,27 @@ class GamesByWeek extends BaseArrangement
         return compact('reportData');
     }
 
+    public static function blankLayout()
+    {
+        $v = [
+            'promise' => [],
+            'actual' => [],
+            'percent' => [],
+            'points' => ['total' => 0],
+            'rating' => 'Ineffective',
+        ];
+        foreach (self::$scored_games as $game) {
+            foreach (['promise', 'actual', 'percent', 'points'] as $key) {
+                $v[$key][$game] = 0;
+            }
+        }
+        return $v;
+    }
+
     protected function getComplementType($type)
     {
         return ($type === 'promise')
-            ? 'actual'
-            : 'promise';
+        ? 'actual'
+        : 'promise';
     }
 }
