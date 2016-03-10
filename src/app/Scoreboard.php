@@ -120,8 +120,8 @@ class Scoreboard
         }
 
         $multiplier = isset(static::$games[$game]['x'])
-        ? static::$games[$game]['x']
-        : 1;
+            ? static::$games[$game]['x']
+            : 1;
 
         return ($points * $multiplier);
     }

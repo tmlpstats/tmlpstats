@@ -23,11 +23,11 @@ class GamesByWeek extends BaseArrangement
             $reportData[$dateString][$type] = [];
 
             $complement = isset($reportData[$dateString][$this->getComplementType($type)])
-            ? $reportData[$dateString][$this->getComplementType($type)]
-            : null;
+                ? $reportData[$dateString][$this->getComplementType($type)]
+                : null;
 
             $totalPoints = null;
-            foreach (self::$scored_games as $game) {
+            foreach (static::$scored_games as $game) {
                 // Round game because some reports calculate average game scores and values are provided as floats
                 $reportData[$dateString][$type][$game] = round($data->$game);
 
@@ -63,7 +63,7 @@ class GamesByWeek extends BaseArrangement
             'points' => ['total' => 0],
             'rating' => 'Ineffective',
         ];
-        foreach (self::$scored_games as $game) {
+        foreach (static::$scored_games as $game) {
             foreach (['promise', 'actual', 'percent', 'points'] as $key) {
                 $v[$key][$game] = 0;
             }
@@ -74,7 +74,7 @@ class GamesByWeek extends BaseArrangement
     protected function getComplementType($type)
     {
         return ($type === 'promise')
-        ? 'actual'
-        : 'promise';
+            ? 'actual'
+            : 'promise';
     }
 }
