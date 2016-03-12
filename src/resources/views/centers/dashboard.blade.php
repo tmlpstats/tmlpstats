@@ -4,7 +4,6 @@
     <h1>Team {{ $center->name }}</h1>
     <p>Welcome to Team {{ $center->name }}'s dashboard. Here you'll find details about your team's stats.</p>
 
-
     @if (!$statsReport)
         <p>
             You can use the <i>Validate</i> link in the menu above to validate and submit your team statistics.

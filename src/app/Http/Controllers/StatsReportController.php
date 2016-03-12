@@ -428,6 +428,134 @@ class StatsReportController extends ReportDispatchAbstractController
         return $response;
     }
 
+
+    public function getCoursesSummary(StatsReport $statsReport)
+    {
+        $courses = App::make(CoursesController::class)->getByStatsReport($statsReport);
+
+        $completedCourses = [];
+        $upcomingCourses = [];
+        if ($courses) {
+            // Completed Courses
+            $a = new Arrangements\CoursesWithEffectiveness([
+                'courses' => $courses,
+                'reportingDate' => $statsReport->reportingDate,
+            ]);
+            $courses = $a->compose();
+
+            $lastWeek = $statsReport->reportingDate->copy()->subWeek();
+
+            if (isset($courses['reportData']['completed'])) {
+                foreach ($courses['reportData']['completed'] as $course) {
+                    if ($course['startDate']->gte($lastWeek)) {
+                        $completedCourses[] = $course;
+                    }
+                }
+            }
+
+            $courseList = [];
+            if (isset($courses['reportData']['CAP'])) {
+                $courseList = array_merge($courseList, $courses['reportData']['CAP']);
+            }
+
+            if (isset($courses['reportData']['CPC'])) {
+                $courseList = array_merge($courseList, $courses['reportData']['CPC']);
+            }
+
+            foreach ($courseList as $course) {
+                if ($course['startDate']->gt($statsReport->reportingDate)
+                    && $course['startDate']->lt($statsReport->reportingDate->copy()->addWeeks(3))
+                ) {
+                    $upcomingCourses[] = $course;
+                }
+            }
+        }
+
+        return compact(
+            'completedCourses',
+            'upcomingCourses'
+        );
+    }
+
+    public function getTeamMembersSummary(StatsReport $statsReport)
+    {
+        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
+
+        $tdo = [];
+        $gitw = [];
+        $teamWithdraws = [];
+        if ($teamMembers) {
+            // Team Member stats
+            $a = new Arrangements\TeamMembersCounts(['teamMembersData' => $teamMembers]);
+            $teamMembersCounts = $a->compose();
+
+            $tdo = $teamMembersCounts['reportData']['tdo'];
+            $gitw = $teamMembersCounts['reportData']['gitw'];
+            $teamWithdraws = $teamMembersCounts['reportData']['withdraws'];
+        }
+
+        return compact(
+            'teamMembers',
+            'tdo',
+            'gitw',
+            'teamWithdraws'
+        );
+    }
+
+    public function getRegistrationsSummary(StatsReport $statsReport)
+    {
+        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
+
+        $applications = [];
+        $applicationWithdraws = [];
+        if ($registrations) {
+            // Application Status
+            $a            = new Arrangements\TmlpRegistrationsByStatus([
+                'registrationsData' => $registrations,
+                'quarter'           => $statsReport->quarter,
+            ]);
+            $applications = $a->compose();
+            $applications = $applications['reportData'];
+
+            // Application Withdraws
+            $a                    = new Arrangements\TmlpRegistrationsByIncomingQuarter([
+                'registrationsData' => $registrations,
+                'quarter'           => $statsReport->quarter,
+            ]);
+            $applicationWithdraws = $a->compose();
+            $applicationWithdraws = $applicationWithdraws['reportData']['withdrawn'];
+        }
+
+        return compact(
+            'registrations',
+            'applications',
+            'applicationWithdraws'
+        );
+    }
+
+    public function getTravelSummary(StatsReport $statsReport, $teamMembersSummary, $registrationsSummary)
+    {
+        $teamTravelDetails = [];
+        $incomingTravelDetails = [];
+        if ($teamMembersSummary['teamMembers'] && $registrationsSummary['registrations']) {
+            // Travel/Room
+            $a = new Arrangements\TravelRoomingByTeamYear([
+                'registrationsData' => $registrationsSummary['registrations'],
+                'teamMembersData' => $teamMembersSummary['teamMembers'],
+                'region' => $statsReport->center->region,
+            ]);
+            $travelDetails = $a->compose();
+            $travelDetails = $travelDetails['reportData'];
+            $teamTravelDetails = $travelDetails['teamMembers'];
+            $incomingTravelDetails = $travelDetails['incoming'];
+        }
+
+        return compact(
+            'teamTravelDetails',
+            'incomingTravelDetails'
+        );
+    }
+
     public function getSummaryPageData(StatsReport $statsReport, $live = false)
     {
         $date = $statsReport->reportingDate->toDateString();
@@ -437,118 +565,31 @@ class StatsReportController extends ReportDispatchAbstractController
         } else {
             $centerStatsData = App::make(CenterStatsController::class)
                 ->getByStatsReport($statsReport, $statsReport->reportingDate);
-            if (!$centerStatsData) {
-                return null;
-            }
 
-            // Center Games
-            $a = new Arrangements\GamesByWeek($centerStatsData);
-            $centerStatsData = $a->compose();
+            $reportData = [];
+            if ($centerStatsData) {
+                // Center Games
+                $a = new Arrangements\GamesByWeek($centerStatsData);
+                $centerStatsData = $a->compose();
 
-            $reportData = $centerStatsData['reportData'][$date];
-        }
-
-        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
-        if (!$teamMembers) {
-            return null;
-        }
-
-        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
-        if (!$registrations) {
-            return null;
-        }
-
-        $courses = App::make(CoursesController::class)->getByStatsReport($statsReport);
-        if (!$courses) {
-            return null;
-        }
-
-        // Team Member stats
-        $a = new Arrangements\TeamMembersCounts(['teamMembersData' => $teamMembers]);
-        $teamMembersCounts = $a->compose();
-
-        $tdo = $teamMembersCounts['reportData']['tdo'];
-        $gitw = $teamMembersCounts['reportData']['gitw'];
-        $teamWithdraws = $teamMembersCounts['reportData']['withdraws'];
-
-        // Application Status
-        $a = new Arrangements\TmlpRegistrationsByStatus([
-            'registrationsData' => $registrations,
-            'quarter' => $statsReport->quarter,
-        ]);
-        $applications = $a->compose();
-        $applications = $applications['reportData'];
-
-        // Application Withdraws
-        $a = new Arrangements\TmlpRegistrationsByIncomingQuarter([
-            'registrationsData' => $registrations,
-            'quarter' => $statsReport->quarter,
-        ]);
-        $applicationWithdraws = $a->compose();
-        $applicationWithdraws = $applicationWithdraws['reportData']['withdrawn'];
-
-        // Travel/Room
-        $a = new Arrangements\TravelRoomingByTeamYear([
-            'registrationsData' => $registrations,
-            'teamMembersData' => $teamMembers,
-            'region' => $statsReport->center->region,
-        ]);
-        $travelDetails = $a->compose();
-        $travelDetails = $travelDetails['reportData'];
-        $teamTravelDetails = $travelDetails['teamMembers'];
-        $incomingTravelDetails = $travelDetails['incoming'];
-
-        // Completed Courses
-        $a = new Arrangements\CoursesWithEffectiveness([
-            'courses' => $courses,
-            'reportingDate' => $statsReport->reportingDate,
-        ]);
-        $courses = $a->compose();
-
-        $lastWeek = $statsReport->reportingDate->copy()->subWeek();
-
-        $completedCourses = [];
-        if (isset($courses['reportData']['completed'])) {
-
-            foreach ($courses['reportData']['completed'] as $course) {
-                if ($course['startDate']->gte($lastWeek)) {
-                    $completedCourses[] = $course;
-                }
+                $reportData = $centerStatsData['reportData'][$date];
             }
         }
 
-        $courseList = [];
-        if (isset($courses['reportData']['CAP'])) {
-            $courseList = array_merge($courseList, $courses['reportData']['CAP']);
-        }
+        $coursesSummary = $this->getCoursesSummary($statsReport);
+        $teamMembersSummary = $this->getTeamMembersSummary($statsReport);
+        $registrationsSummary = $this->getRegistrationsSummary($statsReport);
+        $travelSummary = $this->getTravelSummary($statsReport, $teamMembersSummary, $registrationsSummary);
 
-        if (isset($courses['reportData']['CPC'])) {
-            $courseList = array_merge($courseList, $courses['reportData']['CPC']);
-        }
-
-        $upcomingCourses = [];
-        foreach ($courseList as $course) {
-            if ($course['startDate']->gt($statsReport->reportingDate)
-                && $course['startDate']->lt($statsReport->reportingDate->copy()->addWeeks(3))
-            ) {
-                $upcomingCourses[] = $course;
-            }
-        }
-
-        return compact(
+        $data = compact(
             'statsReport',
             'reportData',
             'date',
-            'tdo',
-            'gitw',
-            'applications',
-            'teamWithdraws',
-            'applicationWithdraws',
-            'completedCourses',
-            'upcomingCourses',
             'teamTravelDetails',
             'incomingTravelDetails'
         );
+
+        return array_merge($data, $coursesSummary, $teamMembersSummary, $registrationsSummary, $travelSummary);
     }
 
     protected function getSummary(StatsReport $statsReport)
