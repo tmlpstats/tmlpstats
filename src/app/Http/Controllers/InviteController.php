@@ -23,17 +23,19 @@ class InviteController extends Controller
     public function __construct()
     {
         // Only require authentication for admin actions
-        $this->middleware('auth', ['only' => [
-            'index',
-            'create',
-            'store',
-            'show',
-            'edit',
-            'update',
-            'destroy',
-            'revokeInvite',
-            'sendInvite',
-        ]]);
+        $this->middleware('auth', [
+            'only' => [
+                'index',
+                'create',
+                'store',
+                'show',
+                'edit',
+                'update',
+                'destroy',
+                'revokeInvite',
+                'sendInvite',
+            ],
+        ]);
     }
 
     /**
@@ -112,7 +114,7 @@ class InviteController extends Controller
         }
 
         $invite->invitedByUserId = Auth::user()->id;
-        $invite->token = Util::getRandomString();
+        $invite->token           = Util::getRandomString();
 
         $invite->save();
 
@@ -279,7 +281,7 @@ class InviteController extends Controller
 
         try {
             Mail::send('emails.invite', compact('invite', 'acceptUrl'),
-                function($message) use ($invite) {
+                function ($message) use ($invite) {
                     // Only send email to person in production
                     if (env('APP_ENV') === 'prod') {
                         $message->to($invite->email);
@@ -288,8 +290,8 @@ class InviteController extends Controller
                     }
 
                     $message->subject("Your TMLP Stats Account Invitation");
-            });
-            $name = $invite->firstName ?: $invite->email;
+                });
+            $name           = $invite->firstName ?: $invite->email;
             $successMessage = "Success! Invitation email sent to {$name}.";
             if (env('APP_ENV') === 'prod') {
                 Log::info("Invite email sent to {$invite->email} for invite {$invite->id}");
@@ -303,7 +305,7 @@ class InviteController extends Controller
             $invite->save();
         } catch (\Exception $e) {
             Log::error("Exception caught sending invite email: " . $e->getMessage());
-            $name = $invite->firstName ?: $invite->email;
+            $name               = $invite->firstName ?: $invite->email;
             $results['error'][] = "Failed to send invitation email to {$name}. Please try again.";
         }
 
@@ -321,6 +323,12 @@ class InviteController extends Controller
     {
         $invite = Invite::token($token)->first();
         if (!$invite) {
+            $invite = Invite::withTrashed()
+                            ->token($token)
+                            ->first();
+            if ($invite) {
+                return view('invites.deleted', compact('invite'));
+            }
             abort(404);
         }
 
@@ -343,11 +351,11 @@ class InviteController extends Controller
         }
 
         $this->validate($request, [
-            'first_name'  => 'required|max:255',
-            'last_name'   => 'required|max:255',
-            'phone'       => 'regex:/^[\s\d\+\-\.]+$/',
-            'email'       => 'required|email|max:255|unique:users',
-            'password'    => 'required|confirmed|min:8|max:4096|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
+            'first_name' => 'required|max:255',
+            'last_name'  => 'required|max:255',
+            'phone'      => 'regex:/^[\s\d\+\-\.]+$/',
+            'email'      => 'required|email|max:255|unique:users',
+            'password'   => 'required|confirmed|min:8|max:4096|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
         ], [
             'password.regex' => 'The password must contain at least one upper case letter, one lower case letter, and one number.',
         ]);
