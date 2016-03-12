@@ -128,13 +128,21 @@
 </div>
 
 <script>
+    <?php
+        $tdoNotPresent = $tdo['percent']['total'] > 0
+            ? round($tdo['total']/($tdo['percent']['total']/100)) - $tdo['total']
+            : 0;
+        $gitwNotPresent = $tdo['percent']['total'] > 0
+            ? round($gitw['total']/($gitw['percent']['total']/100)) - $gitw['total']
+            : 0;
+    ?>
     var tdoData = [
         ["{{ $tdo['total'] }}", {{ $tdo['percent']['total'] }}],
-        ["{{ round($tdo['total']/($tdo['percent']['total']/100)) - $tdo['total'] }}", {{ 100 - $tdo['percent']['total'] }}],
+        ["{{ $tdoNotPresent }}", {{ 100 - $tdo['percent']['total'] }}],
     ];
     var gitwData = [
         ["{{ $gitw['total'] }}", {{ $gitw['percent']['total'] }}],
-        ["{{ round($gitw['total']/($gitw['percent']['total']/100)) - $gitw['total'] }}", {{ 100 - $gitw['percent']['total'] }}],
+        ["{{ $gitwNotPresent }}", {{ 100 - $gitw['percent']['total'] }}],
     ];
 
     $(function () {
