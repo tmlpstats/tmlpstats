@@ -130,10 +130,10 @@
 <script>
     var tdoData = [
         <?php
-        $tdoTotal = $tdo['percent']['total'] > 0
+        $tdoTotal = $tdo && $tdo['percent']['total'] > 0
             ? round($tdo['total'] / ($tdo['percent']['total'] / 100))
             : 0;
-        $tdoNotPresent = $tdo['percent']['total'] > 0
+        $tdoNotPresent = $tdo && $tdo['percent']['total'] > 0
             ? $tdoTotal - $tdo['total']
             : 0;
         ?>
@@ -147,10 +147,10 @@
     ];
     var gitwData = [
         <?php
-        $gitwTotal = $gitw['percent']['total'] > 0
+        $gitwTotal = $gitw && $gitw['percent']['total'] > 0
             ? round($gitw['total'] / ($gitw['percent']['total'] / 100))
             : 0;
-        $gitwNotPresent = $gitw['percent']['total'] > 0
+        $gitwNotPresent = $gitw && $gitw['percent']['total'] > 0
             ? $gitwTotal - $gitw['total']
             : 0;
         ?>
