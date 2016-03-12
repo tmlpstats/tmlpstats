@@ -32,7 +32,7 @@
                 </div>
             @endif
 
-            @if ($applications['total'])
+            @if ($applications && $applications['total'])
                 <div class="col-md-6">
                     <h4>Application Status:</h4>
                     <dl class="dl-horizontal">
@@ -62,7 +62,7 @@
                 </div>
             @endif
 
-            @if ($teamWithdraws['total'])
+            @if ($teamWithdraws && $teamWithdraws['total'])
                 <div class="col-md-6">
                     <h4>Team Members Withdrawn:</h4>
                     <dl class="dl-horizontal">
@@ -128,21 +128,33 @@
 </div>
 
 <script>
-    <?php
-        $tdoNotPresent = $tdo['percent']['total'] > 0
-            ? round($tdo['total']/($tdo['percent']['total']/100)) - $tdo['total']
-            : 0;
-        $gitwNotPresent = $tdo['percent']['total'] > 0
-            ? round($gitw['total']/($gitw['percent']['total']/100)) - $gitw['total']
-            : 0;
-    ?>
     var tdoData = [
-        ["{{ $tdo['total'] }}", {{ $tdo['percent']['total'] }}],
-        ["{{ $tdoNotPresent }}", {{ 100 - $tdo['percent']['total'] }}],
+        @if ($tdo)
+            <?php
+            $tdoNotPresent = $tdo['percent']['total'] > 0
+                ? round($tdo['total'] / ($tdo['percent']['total'] / 100)) - $tdo['total']
+                : 0;
+            ?>
+            ["{{ $tdo['total'] }}", {{ $tdo['percent']['total'] }}],
+            ["{{ $tdoNotPresent }}", {{ 100 - $tdo['percent']['total'] }}],
+        @else
+            ["0", 0],
+            ["0", 100]
+        @endif
     ];
     var gitwData = [
-        ["{{ $gitw['total'] }}", {{ $gitw['percent']['total'] }}],
-        ["{{ $gitwNotPresent }}", {{ 100 - $gitw['percent']['total'] }}],
+        @if ($gitw)
+            <?php
+            $gitwNotPresent = $gitw['percent']['total'] > 0
+                ? round($gitw['total'] / ($gitw['percent']['total'] / 100)) - $gitw['total']
+                : 0;
+            ?>
+            ["{{ $gitw['total'] }}", {{ $gitw['percent']['total'] }}],
+            ["{{ $gitwNotPresent }}", {{ 100 - $gitw['percent']['total'] }}],
+        @else
+            ["0", 0],
+            ["0", 100]
+        @endif
     ];
 
     $(function () {
