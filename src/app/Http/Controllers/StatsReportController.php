@@ -584,9 +584,7 @@ class StatsReportController extends ReportDispatchAbstractController
         $data = compact(
             'statsReport',
             'reportData',
-            'date',
-            'teamTravelDetails',
-            'incomingTravelDetails'
+            'date'
         );
 
         return array_merge($data, $coursesSummary, $teamMembersSummary, $registrationsSummary, $travelSummary);
