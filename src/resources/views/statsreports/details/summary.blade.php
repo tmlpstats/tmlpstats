@@ -129,28 +129,34 @@
 
 <script>
     var tdoData = [
+        <?php
+        $tdoTotal = $tdo && $tdo['percent']['total'] > 0
+            ? round($tdo['total'] / ($tdo['percent']['total'] / 100))
+            : 0;
+        $tdoNotPresent = $tdo && $tdo['percent']['total'] > 0
+            ? $tdoTotal - $tdo['total']
+            : 0;
+        ?>
         @if ($tdo)
-            <?php
-            $tdoNotPresent = $tdo['percent']['total'] > 0
-                ? round($tdo['total'] / ($tdo['percent']['total'] / 100)) - $tdo['total']
-                : 0;
-            ?>
-            ["{{ $tdo['total'] }}", {{ $tdo['percent']['total'] }}],
-            ["{{ $tdoNotPresent }}", {{ 100 - $tdo['percent']['total'] }}],
+            ["{{ $tdo['percent']['total'] }}%", {{ $tdo['percent']['total'] }}],
+            ["{{ 100 - $tdo['percent']['total'] }}%", {{ 100 - $tdo['percent']['total'] }}],
         @else
             ["0", 0],
             ["0", 100]
         @endif
     ];
     var gitwData = [
+        <?php
+        $gitwTotal = $gitw && $gitw['percent']['total'] > 0
+            ? round($gitw['total'] / ($gitw['percent']['total'] / 100))
+            : 0;
+        $gitwNotPresent = $gitw && $gitw['percent']['total'] > 0
+            ? $gitwTotal - $gitw['total']
+            : 0;
+        ?>
         @if ($gitw)
-            <?php
-            $gitwNotPresent = $gitw['percent']['total'] > 0
-                ? round($gitw['total'] / ($gitw['percent']['total'] / 100)) - $gitw['total']
-                : 0;
-            ?>
-            ["{{ $gitw['total'] }}", {{ $gitw['percent']['total'] }}],
-            ["{{ $gitwNotPresent }}", {{ 100 - $gitw['percent']['total'] }}],
+            ["{{ $gitw['percent']['total'] }}%", {{ $gitw['percent']['total'] }}],
+            ["{{ 100 - $gitw['percent']['total'] }}%", {{ 100 - $gitw['percent']['total'] }}],
         @else
             ["0", 0],
             ["0", 100]
@@ -178,7 +184,7 @@
             title: {
                 align: 'center',
                 verticalAlign: 'middle',
-                y: 25
+                y: 5
             },
             credits: {enabled: false},
             tooltip: {
@@ -218,7 +224,7 @@
         tdoSeries = $.extend(true, {}, pieSeriesTemplate);
         $('#tdo-container').highcharts($.extend(true, tdoChart, {
             title: {
-                text: 'Training &<br>Development'
+                text: 'Training &<br>Development<br><span style="font-size:small">{{ $tdo['total'] }}/{{ $tdoTotal }}</style>'
             },
             series: [$.extend(true, tdoSeries, {
                 name: 'TDO Participation',
@@ -226,16 +232,16 @@
             })]
         }));
 
-        gitwChart = $.extend(true, {}, pieTheme);
-        gitwSeries = $.extend(true, {}, pieSeriesTemplate);
-        $('#gitw-container').highcharts($.extend(true, gitwChart, {
-            title: {
-                text: 'Game in<br>the World'
-            },
-            series: [$.extend(true, gitwSeries, {
-                name: 'GITW Effectiveness',
-                data: gitwData
-            })]
-        }));
-    });
+gitwChart = $.extend(true, {}, pieTheme);
+gitwSeries = $.extend(true, {}, pieSeriesTemplate);
+$('#gitw-container').highcharts($.extend(true, gitwChart, {
+    title: {
+        text: 'Game in<br>the World<br><span style="font-size:small">{{ $gitw['total'] }}/{{ $gitwTotal }}</style>'
+    },
+    series: [$.extend(true, gitwSeries, {
+        name: 'GITW Effectiveness',
+        data: gitwData
+    })]
+}));
+});
 </script>
