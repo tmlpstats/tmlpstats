@@ -603,10 +603,17 @@ class GlobalReportController extends ReportDispatchAbstractController
             'team1' => [
                 'total'    => 0,
                 'attended' => 0,
+                'percent'  => 0,
             ],
             'team2' => [
                 'total'    => 0,
                 'attended' => 0,
+                'percent'  => 0,
+            ],
+            'total' => [
+                'total'    => 0,
+                'attended' => 0,
+                'percent'  => 0,
             ],
         ];
         foreach ($teamMembersByCenter as $centerName => $centerData) {
@@ -617,6 +624,7 @@ class GlobalReportController extends ReportDispatchAbstractController
                 if (!isset($reportData[$centerName][$team]['total'])) {
                     $reportData[$centerName][$team]['total']    = 0;
                     $reportData[$centerName][$team]['attended'] = 0;
+                    $reportData[$centerName][$team]['percent']  = 0;
                 }
 
                 if (!$memberData->isActiveMember()) {
@@ -625,13 +633,32 @@ class GlobalReportController extends ReportDispatchAbstractController
 
                 $reportData[$centerName][$team]['total']++;
                 $totals[$team]['total']++;
+                $totals['total']['total']++;
                 if ($memberData->tdo) {
                     $reportData[$centerName][$team]['attended']++;
                     $totals[$team]['attended']++;
+                    $totals['total']['attended']++;
                 }
             }
         }
         ksort($reportData);
+
+        foreach ($reportData as $centerName => $data) {
+            $total = 0;
+            $attended = 0;
+            foreach ($data as $team => $subData) {
+                $reportData[$centerName][$team]['percent'] = round(($reportData[$centerName][$team]['attended']/$reportData[$centerName][$team]['total'])*100);
+                $total += $reportData[$centerName][$team]['total'];
+                $attended += $reportData[$centerName][$team]['attended'];
+            }
+            $reportData[$centerName]['total']['total'] = $total;
+            $reportData[$centerName]['total']['attended'] = $attended;
+            $reportData[$centerName]['total']['percent'] = round(($attended/$total)*100);
+        }
+
+        foreach ($totals as $team => $data) {
+            $totals[$team]['percent'] = round(($totals[$team]['attended']/$totals[$team]['total'])*100);
+        }
 
         return view('globalreports.details.tdosummary', compact('reportData', 'totals', 'statsReports'));
     }
