@@ -362,8 +362,12 @@ class Quarter extends Model
         });
     }
 
-    public function scopeDate($query, Carbon $date)
+    public function scopeDate($query, Carbon $date, Region $region = null)
     {
+        if ($region) {
+            $this->region = $region;
+        }
+
         return $query->whereIn('id', function ($query) use ($date) {
             $query->select('quarter_id')
                   ->from('region_quarter_details')
@@ -379,8 +383,12 @@ class Quarter extends Model
         });
     }
 
-    public function scopeCurrent($query)
+    public function scopeCurrent($query, Region $region = null)
     {
+        if ($region) {
+            $this->region = $region;
+        }
+
         $date = Util::getReportDate();
 
         return $query->whereIn('id', function ($query) use ($date) {
@@ -398,8 +406,12 @@ class Quarter extends Model
         });
     }
 
-    public function scopePresentAndFuture($query)
+    public function scopePresentAndFuture($query, Region $region = null)
     {
+        if ($region) {
+            $this->region = $region;
+        }
+
         $date = Util::getReportDate();
 
         return $query->whereIn('id', function ($query) use ($date) {
