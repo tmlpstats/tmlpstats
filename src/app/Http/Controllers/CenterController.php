@@ -116,10 +116,11 @@ class CenterController extends Controller
             abort(404);
         }
 
+        $this->setCenter($center);
+
         $statsReport = StatsReport::byCenter($center)
+                                  ->official()
                                   ->orderBy('reporting_date', 'desc')
-                                  ->submitted()
-                                  ->orderBy('submitted_at')
                                   ->first();
 
         $weekData = [];

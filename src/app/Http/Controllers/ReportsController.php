@@ -120,7 +120,7 @@ class ReportsController extends Controller
      *
      * @return array
      */
-    public function setCenter(Request $request)
+    public function setActiveCenter(Request $request)
     {
         if (!$request->has('id') || !is_numeric($request->get('id'))) {
             abort(400);
@@ -128,7 +128,8 @@ class ReportsController extends Controller
 
         $center = Center::findOrFail($request->get('id'));
 
-        Session::set('viewCenterId', $center->id);
+        $this->setCenter($center);
+
         Session::set('reportRedirect', 'center');
 
         return ['success' => true];
@@ -141,7 +142,7 @@ class ReportsController extends Controller
      *
      * @return array
      */
-    public function setRegion(Request $request)
+    public function setActiveRegion(Request $request)
     {
         if (!$request->has('id') || !is_numeric($request->get('id'))) {
             abort(400);
@@ -149,7 +150,8 @@ class ReportsController extends Controller
 
         $region = Region::findOrFail($request->get('id'));
 
-        Session::set('viewRegionId', $region->id);
+        $this->setRegion($region);
+
         Session::set('reportRedirect', 'region');
 
         return ['success' => true];
@@ -162,7 +164,7 @@ class ReportsController extends Controller
      *
      * @return array
      */
-    public function setReportingDate(Request $request)
+    public function setActiveReportingDate(Request $request)
     {
         if (!$request->has('date') || !preg_match('/^\d\d\d\d-\d\d-\d\d$/', $request->get('date'))) {
             abort(400);
@@ -231,8 +233,8 @@ class ReportsController extends Controller
 
         if (!Session::has('viewCenterId')) {
             $center = $abbr
-            ? Center::abbreviation($abbr)->firstOrFail()
-            : $this->getCenter($request);
+                ? Center::abbreviation($abbr)->firstOrFail()
+                : $this->getCenter($request);
             Session::set('viewCenterId', $center->id);
         }
 
@@ -268,8 +270,8 @@ class ReportsController extends Controller
 
         if (!Session::has('viewRegionId')) {
             $region = $abbr
-            ? Region::abbreviation($abbr)->firstOrFail()
-            : $this->getRegion($request);
+                ? Region::abbreviation($abbr)->firstOrFail()
+                : $this->getRegion($request);
             Session::set('viewRegionId', $region->id);
         }
 
@@ -329,8 +331,7 @@ class ReportsController extends Controller
 
         $report = null;
         if ($reportType == 'region') {
-            $report = $globalReport ?: GlobalReport::reportingDate($reportingDate)
-                ->firstOrFail();
+            $report = $globalReport ?: GlobalReport::reportingDate($reportingDate)->firstOrFail();
             $redirectUrl = App::make(GlobalReportController::class)->getUrl($report, $reportTarget);
         } else {
             $report = StatsReport::byCenter($reportTarget)
@@ -338,11 +339,13 @@ class ReportsController extends Controller
                 ->official()
                 ->firstOrFail();
             $redirectUrl = App::make(StatsReportController::class)->getUrl($report);
+
+            $this->setCenter($report->center);
         }
 
         return $reportViewUpdate
-        ? redirect($redirectUrl)
-        : App::make($controllerClass)->show($request, $report->id);
+            ? redirect($redirectUrl)
+            : App::make($controllerClass)->show($request, $report->id);
     }
 
     /**
@@ -353,6 +356,8 @@ class ReportsController extends Controller
     {
         $center = Center::abbreviation($abbr)->firstOrFail();
         $reportingDate = $this->getReportingDate($request);
+
+        $this->setCenter($center);
 
         $report = StatsReport::byCenter($center)->official()->reportingDate($reportingDate)->first();
         if ($report == null) {

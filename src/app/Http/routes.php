@@ -48,9 +48,9 @@ Route::get('report/{token}', 'ReportsController@getByToken');
 Route::get('reports/centers/{abbr?}/{date?}', 'ReportsController@getCenterReport');
 Route::get('reports/regions/{abbr?}/{date?}', 'ReportsController@getRegionReport');
 
-Route::post('reports/centers/setActive', 'ReportsController@setCenter');
-Route::post('reports/regions/setActive', 'ReportsController@setRegion');
-Route::post('reports/dates/setActive', 'ReportsController@setReportingDate');
+Route::post('reports/centers/setActive', 'ReportsController@setActiveCenter');
+Route::post('reports/regions/setActive', 'ReportsController@setActiveRegion');
+Route::post('reports/dates/setActive', 'ReportsController@setActiveReportingDate');
 Route::get('m/{abbr}', 'ReportsController@mobileDash');
 
 // Center Info

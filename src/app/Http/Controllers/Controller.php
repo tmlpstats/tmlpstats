@@ -63,7 +63,11 @@ class Controller extends BaseController
             $region = $region->getParentGlobalRegion();
         }
 
-        return $this->region = $region;
+        if ($region) {
+            $this->setRegion($region);
+        }
+
+        return $region;
     }
 
     public function getCenter(Request $request)
@@ -86,7 +90,11 @@ class Controller extends BaseController
             $center = Auth::user()->center;
         }
 
-        return $this->center = $center;
+        if ($center) {
+            $this->setCenter($center);
+        }
+
+        return $center;
     }
 
     public function getReportingDate(Request $request, $reportingDates = [])
@@ -129,7 +137,38 @@ class Controller extends BaseController
             $reportingDate = ImportManager::getExpectedReportDate();
         }
 
-        return $reportingDate->startOfDay();
+        $reportingDate = $reportingDate->startOfDay();
+
+        $this->setReportingDate($reportingDate);
+
+        return $reportingDate;
+    }
+
+    public function setRegion(Region $region)
+    {
+        if ($region) {
+            Session::set('viewRegionId', $region->id);
+        }
+
+        $this->region = $region;
+    }
+
+    public function setCenter(Center $center)
+    {
+        if ($center) {
+            Session::set('viewCenterId', $center->id);
+        }
+
+        $this->center = $center;
+    }
+
+    public function setReportingDate(Carbon $reportingDate)
+    {
+        if ($reportingDate) {
+            Session::set('viewReportingDateId', $reportingDate->toDateString());
+        }
+
+        $this->reportingDate = $reportingDate;
     }
 
     protected function getApi($apiName)

@@ -373,6 +373,9 @@ class StatsReportController extends ReportDispatchAbstractController
 
     public function runDispatcher(Request $request, $statsReport, $report)
     {
+        $this->setCenter($statsReport->center);
+        $this->setReportingDate($statsReport->reportingDate);
+
         if (!$statsReport->isValidated() && $report != 'results') {
             return '<p>This report did not pass validation. See Report Details for more information.</p>';
         }

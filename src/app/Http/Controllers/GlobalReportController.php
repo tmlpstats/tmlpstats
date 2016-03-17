@@ -175,6 +175,7 @@ class GlobalReportController extends ReportDispatchAbstractController
     public function runDispatcher(Request $request, $globalReport, $report)
     {
         $region = $this->getRegion($request, true);
+        $this->setReportingDate($globalReport->reportingDate);
 
         $response = null;
         switch ($report) {
