@@ -11,7 +11,7 @@
     <div class="row">
         <div class="col-sm-11">
             @include('reports.centergames.week', compact('reportData'))
-            Updated {{ $statsReport->submittedAt }} 
+            Updated {{ $statsReport->submittedAt }}
         </div>
     </div>
     <div class="row">

@@ -603,6 +603,7 @@ class StatsReportController extends ReportDispatchAbstractController
     {
         $data = $this->getSummaryPageData($statsReport, true);
         $data['skip_navbar'] = true;
+        $data['liveScoreboard'] = true;
         return view('statsreports.details.mobile_summary', $data);
     }
 
