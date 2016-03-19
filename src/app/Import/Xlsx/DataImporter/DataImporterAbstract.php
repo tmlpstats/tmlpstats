@@ -76,7 +76,7 @@ abstract class DataImporterAbstract
     protected function findRange($startRow, $targetStartText, $targetEndText, $targetStartColumn = 'A', $targetEndColumn = null)
     {
         $maxSearchRows = 500;
-        $maxConsecutiveBlankRows = 3;
+        $maxConsecutiveBlankRows = 100;
 
         $rangeStart = null;
         $rangeEnd = null;
@@ -107,7 +107,11 @@ abstract class DataImporterAbstract
                     $blankCount = 0;
                 }
 
-                if ($value == $targetEndText || $blankCount >= $maxConsecutiveBlankRows || $row >= $maxRows) {
+                if ((is_array($targetEndText) && in_array($value, $targetEndText))
+                    || $value == $targetEndText
+                    || $blankCount >= $maxConsecutiveBlankRows
+                    || $row >= $maxRows
+                ) {
                     $rangeEnd = $row - 1; // Range ends the row before end text
                     $searching = false;
                 }
