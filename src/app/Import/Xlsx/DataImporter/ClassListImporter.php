@@ -49,7 +49,10 @@ class ClassListImporter extends DataImporterAbstract
         $this->blocks['T1Q1']['cols'] = $this->excelRange('A', 'S');
         $this->blocks['T1Q1']['rows'] = $this->excelRange($t1q1['start'] + 1, $t1q1['end']);
 
-        $t2q1 = $this->findRange($t1q1['end'], 'Team 2 Completing', 'Please e-mail the completed performance report to your Regional Statistician(s)');
+        $t2q1 = $this->findRange($t1q1['end'], 'Team 2 Completing', [
+            'Please e-mail the completed performance report to your Regional Statistician(s)', // ANZ/EME/IND
+            'Please upload accurate and complete sheet to Validator by 7pm Friday each week.', // NA
+        ]);
         $this->blocks['T2Q1']['cols'] = $this->excelRange('A', 'S');
         $this->blocks['T2Q1']['rows'] = $this->excelRange($t2q1['start'] + 1, $t2q1['end']);
     }
