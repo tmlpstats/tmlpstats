@@ -70,13 +70,12 @@ table.centerStatsSummaryTable {
     border-left-width: 1px;
 }
 
-.centerStatsSummaryTable th, .centerStatsSummaryTable td {
+table.centerStatsSummaryTable > thead > tr > th,
+table.centerStatsSummaryTable > tbody > tr > th,
+table.centerStatsSummaryTable > tbody > tr > td {
     text-align: center;
-    width: 4em;
-}
-
-span .centerStatsSummaryTable th, span .centerStatsSummaryTable td {
     vertical-align: middle;
+    width: 4em;
 }
 
 .centerStatsSummaryTable th.promise, .centerStatsSummaryTable td.promise {

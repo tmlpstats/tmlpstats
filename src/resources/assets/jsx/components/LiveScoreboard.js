@@ -130,24 +130,24 @@ var LiveScoreboard = React.createClass({
             <div className="table-responsive">
                 <table className="table table-condensed table-bordered table-striped centerStatsSummaryTable">
                     <thead>
-                        <tr>
+                        <tr className="border-top-thin">
                             <th rowSpan="2">&nbsp;</th>
-                            <th colSpan="5" className="date border-top-thin border-right-thin">{date}</th>
+                            <th colSpan="5">{date}</th>
                         </tr>
                         <tr>
                             <th className="promise">P</th>
                             <th>A</th>
                             <th>Gap</th>
                             <th>%</th>
-                            <th className="border-right-thin">Pts</th>
+                            <th>Pts</th>
                         </tr>
                     </thead>
                     <tbody>
                         {Object.keys(games).map(this.renderGameRow)}
-                        <tr>
-                            <th className="border-left-thin" colSpan="4">{rating}</th>
+                        <tr className="border-top">
+                            <th colSpan="4">{rating}</th>
                             <th className="total">Total:</th>
-                            <th className="border-right-thin">{points}</th>
+                            <th>{points}</th>
                         </tr>
                     </tbody>
                 </table>
