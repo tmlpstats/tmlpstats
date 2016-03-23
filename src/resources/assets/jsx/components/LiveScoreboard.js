@@ -4,7 +4,7 @@ import GameRow from './GameRow';
 var LiveScoreboard = React.createClass({
     getInitialState: function() {
         return {
-            editable: true,
+            editable: false,
             rating: '',
             points: 0,
             games: {
@@ -51,8 +51,6 @@ var LiveScoreboard = React.createClass({
         var self = this,
             request = {center: settings.center.abbreviation};
 
-        console.log("Getting stats for center: " + settings.center.name)
-
         Api.LiveScoreboard.getCurrentScores(request, function (data) {
             self.updateScoreboard(data);
         });
@@ -68,6 +66,7 @@ var LiveScoreboard = React.createClass({
             games: games,
             rating: data.rating,
             points: data.points.total,
+            editable: settings.LiveScoreboard.editable,
         });
     },
     updateGameData: function (game, field) {

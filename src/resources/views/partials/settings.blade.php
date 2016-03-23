@@ -35,5 +35,9 @@
         @if ($reportingDate)
         reportingDate: "{{ $reportingDate->toDateString() }}",
         @endif
+
+        LiveScoreboard: {
+            editable: {{ (isset($editableLiveScoreboard) && $editableLiveScoreboard) ? 'true' : 'false' }},
+        },
     };
 </script>
