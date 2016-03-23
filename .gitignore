@@ -6,3 +6,5 @@ ansible/templates/etc/ssl
 ansible/templates/home/ubuntu/bin/sync
 email-output.log
 export
+node_modules
+npm-debug.log

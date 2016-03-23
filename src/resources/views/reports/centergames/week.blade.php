@@ -1,3 +1,6 @@
+@if (isset($liveScoreboard) && $liveScoreboard)
+    <div id="live-scoreboard"></div>
+@else
 <div class="table-responsive">
     <table class="table table-condensed table-bordered table-striped centerStatsSummaryTable">
         <thead>
@@ -38,3 +41,4 @@
         </tbody>
     </table>
 </div>
+@endif

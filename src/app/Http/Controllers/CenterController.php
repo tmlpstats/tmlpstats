@@ -142,10 +142,15 @@ class CenterController extends Controller
             $weekData = [];
         }
 
+        $liveScoreboard = true;
+        $editableLiveScoreboard = false;
+
         $data = compact(
             'center',
             'statsReport',
-            'reportUrl'
+            'reportUrl',
+            'liveScoreboard',
+            'editableLiveScoreboard'
         );
 
         return view('centers.dashboard')->with(array_merge($data, $weekData));

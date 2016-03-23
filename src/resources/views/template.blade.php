@@ -2,7 +2,13 @@
 if (!isset($skip_navbar)) {
     $skip_navbar = false;
 }
-?><!DOCTYPE html>
+
+$center = App::make(TmlpStats\Http\Controllers\Controller::class)->getCenter(Request::instance());
+$region = App::make(TmlpStats\Http\Controllers\Controller::class)->getRegion(Request::instance());
+$reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getReportingDate(Request::instance());
+
+?>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -32,7 +38,7 @@ if (!isset($skip_navbar)) {
     @if (!$skip_navbar)
         @include('partials.navbar')
     @endif
-    <div class="container-fluid">
+    <div id="main-container" class="container-fluid">
         @yield('content')
     </div>
 
@@ -84,6 +90,8 @@ if (!isset($skip_navbar)) {
         </div>
     @endif
 
+    @include('partials.settings')
+
     <script src="{{ asset('/components/bootstrap/dist/js/bootstrap.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('/components/datatables.net/js/jquery.dataTables.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('/components/datatables.net-bs/js/dataTables.bootstrap.min.js') }}" type="text/javascript"></script>
@@ -93,6 +101,12 @@ if (!isset($skip_navbar)) {
     <script src="{{ asset('/components/highcharts/highcharts.js') }}" type="text/javascript"></script>
     <script src="{{ asset('/components/jstz/jstz.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('/js/tmlpstats.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('/js/api.js') }}" type="text/javascript"></script>
+    @if (env('APP_ENV') === 'prod')
+        <script src="{{ asset('/js/main.min.js') }}" type="text/javascript"></script>
+    @else
+        <script src="{{ asset('/js/main.js') }}" type="text/javascript"></script>
+    @endif
 
     <script type="text/javascript">
         $(document).ready(function () {

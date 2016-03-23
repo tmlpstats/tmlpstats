@@ -33,8 +33,17 @@ class LiveScoreboard extends AuthenticatedApiBase
         // cap, cpc, etc, check for overrides
         foreach (Models\Scoreboard::GAME_KEYS as $game) {
             $value = $cache->get($this->key($center, $game, 'actual'));
-            if ($value) {
+            if ($value !== null && $value != $reportData['actual'][$game]) {
+                $percent = Models\Scoreboard::calculatePercent($reportData['promise'][$game], $value);
+                $updatedPoints = Models\Scoreboard::getPoints($percent, $game);
+
                 $reportData['actual'][$game] = intval($value);
+                $reportData['percent'][$game] = round($percent);
+
+                if ($updatedPoints != $reportData['points'][$game]) {
+                    $reportData['points']['total'] += $updatedPoints - $reportData['points'][$game];
+                    $reportData['points'][$game] = $updatedPoints;
+                }
             }
         }
         // TODO re-calculate points, etc (Probably going to write a class to do this)
@@ -47,7 +56,11 @@ class LiveScoreboard extends AuthenticatedApiBase
             throw new Exception("Currently, changing promises is not supported.");
         }
         $this->cache->put($this->key($center, $game, $type), $value, self::CACHE_TIMEOUT);
-        return ['success' => true];
+
+        $reportData = $this->getCurrentScores($center);
+        $reportData['success'] = true;
+
+        return $reportData;
     }
 
     /** Separated out so that we can easily mock this without having to mock the ORM */

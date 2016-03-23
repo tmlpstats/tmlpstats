@@ -61,13 +61,38 @@ body.no-navbar{
     text-align: center;
 }
 
-.centerStatsSummaryTable th, .centerStatsSummaryTable td {
+table.centerStatsSummaryTable {
+    max-width: 550px;
+}
+
+.centerStatsSummaryTable th.date {
+    border-top-width: 1px;
+    border-left-width: 1px;
+}
+
+table.centerStatsSummaryTable > thead > tr > th,
+table.centerStatsSummaryTable > tbody > tr > th,
+table.centerStatsSummaryTable > tbody > tr > td {
     text-align: center;
+    vertical-align: middle;
     width: 4em;
 }
 
-table.centerStatsSummaryTable {
-  max-width: 550px;
+.centerStatsSummaryTable th.promise, .centerStatsSummaryTable td.promise {
+    font-weight: bold;
+    background-color: #d9edf7;
+}
+
+.centerStatsSummaryTable th.total {
+    text-align: right;
+}
+
+input .centerStatsSummaryTable .actual {
+    text-align: center;
+}
+
+table .live-scoreboard .centerStatsSummaryTable {
+    border-width: 1px;
 }
 
 table {
@@ -90,6 +115,19 @@ td.border-top, th.border-top, tr.border-top {
 }
 td.border-bottom, th.border-bottom, tr.border-bottom {
     border-bottom: 2px solid #DDD !important;
+}
+
+td.border-left-thin, th.border-left-thin {
+    border-left: 1px solid #DDD !important;
+}
+td.border-right-thin, th.border-right-thin {
+    border-right: 1px solid #DDD !important;
+}
+td.border-top-thin, th.border-top-thin, tr.border-top-thin {
+    border-top: 1px solid #DDD !important;
+}
+td.border-bottom-thin, th.border-bottom-thin, tr.border-bottom-thin {
+    border-bottom: 1px solid #DDD !important;
 }
 
 .table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
