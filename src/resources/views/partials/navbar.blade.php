@@ -95,6 +95,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                         </li>
 
                         {{-- Region/Center toggle --}}
+                        @can ('showReportButton', Request::is('reports/regions/*') ? TmlpStats\StatsReport::class : TmlpStats\GlobalReport::class)
                         <li class="dropdown">
                             <?php
                             $url = Request::is('reports/regions/*')
@@ -110,6 +111,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                                 @endif
                             </a>
                         </li>
+                        @endcan
 
                         {{-- Center --}}
                         @if ($showNavCenterSelect && (Auth::user()->isAdmin() || Auth::user()->hasRole('globalStatistician')))
