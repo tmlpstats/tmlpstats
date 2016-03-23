@@ -131,4 +131,13 @@ class StatsReportPolicy extends Policy
     {
         return $this->read($user, $statsReport) && !$user->hasRole('readonly');
     }
+
+    public function showReportButton(User $user)
+    {
+        if ($user->hasRole('readonly')) {
+            return ($user->reportToken && $user->reportToken->centerId);
+        }
+
+        return true;
+    }
 }

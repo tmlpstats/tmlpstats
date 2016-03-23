@@ -40,4 +40,13 @@ class GlobalReportPolicy extends Policy
     {
         return $this->update($user, $globalReport);
     }
+
+    public function showReportButton(User $user)
+    {
+        if ($user->hasRole('readonly')) {
+            return ($user->reportToken != null);
+        }
+
+        return true;
+    }
 }

@@ -4,6 +4,7 @@ namespace TmlpStats\Http\Controllers;
 
 use App;
 use Carbon\Carbon;
+use Log;
 use Illuminate\Http\Request;
 use Session;
 use TmlpStats\Center;
@@ -196,6 +197,7 @@ class ReportsController extends Controller
         $reportUrl = $reportToken->getReportPath();
 
         if ($reportUrl) {
+            Log::info("Token {$reportToken->id} user logged in from " . $request->ip());
             return redirect($reportUrl);
         } else {
             abort(404);
