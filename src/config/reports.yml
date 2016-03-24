@@ -1,9 +1,10 @@
 access_levels:
-  primary: [local, regional, global, global_leader, classroom_leader, program_manager]
+  primary: [local, regional, global, global_leader, classroom_leader, program_manager, __any__]
   aliases:
     all: [local, regional, global, global_leader, classroom_leader, program_manager]
     TBD: [TBD, global]
     regional_up: [regional, global, global_leader]
+    any: __any__
 
 scopes:
   local:
@@ -91,6 +92,7 @@ api:
     type: namespace
     children:
       getCurrentScores:
+        access: any
         desc: Get scores for a center
         params:
           - name: center

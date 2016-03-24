@@ -24,6 +24,8 @@ class ApiMethod
 
     public $desc = '';
 
+    public $access = '';
+
     public function __construct($name, $body)
     {
         $this->name = $name;
@@ -38,6 +40,9 @@ class ApiMethod
         }
         if (isset($body['desc'])) {
             $this->desc = $body['desc'];
+        }
+        if (isset($body['access'])) {
+            $this->access = $body['access'];
         }
     }
 

@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Providers;
+<?php
+namespace TmlpStats\Providers;
 
 ///////////////////////////////
 // THIS CODE IS AUTO-GENERATED
@@ -7,6 +8,9 @@
 // To edit the resulting API code, instead edit config/reports.yml
 // and then run the command:
 //   php artisan reports:codegen
+//
+///////////////////////////////
+
 use Illuminate\Support\ServiceProvider;
 use TmlpStats\Api;
 
