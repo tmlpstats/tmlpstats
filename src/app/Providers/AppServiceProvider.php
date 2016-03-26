@@ -69,6 +69,11 @@ class AppServiceProvider extends ServiceProvider
             $tag = "'</a>'";
             return "<?php if (\$condition) { echo {$tag}; } ?>";
         });
+
+        // Using @json($foo) works out to the equivalent of {!! json_encode($foo) !!}
+        Blade::directive('json', function($expression) {
+            return "<?php echo json_encode({$expression}) ?>";
+        });
     }
 
 }

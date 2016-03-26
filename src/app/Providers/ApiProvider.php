@@ -12,6 +12,7 @@ use TmlpStats\Api;
 
 class ApiProvider extends ServiceProvider
 {
+    protected $defer = true;
 
     /**
      * Register the application services.
@@ -20,8 +21,19 @@ class ApiProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton(Api\Context::class);
         $this->app->singleton(Api\GlobalReport::class);
         $this->app->singleton(Api\LocalReport::class);
         $this->app->singleton(Api\LiveScoreboard::class);
+    }
+
+    public function provides()
+    {
+        return [
+            'TmlpStats\Api\Context',
+            'TmlpStats\Api\GlobalReport',
+            'TmlpStats\Api\LocalReport',
+            'TmlpStats\Api\LiveScoreboard',
+        ];
     }
 }

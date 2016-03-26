@@ -1,43 +1,38 @@
+@inject('context', 'TmlpStats\Api\Context')
+<?php
+$currentUser = Auth::user();
+?>
 <script type="text/javascript">
     var settings = {
         session: {
-            viewCenterId: "{{ Session::get('viewCenterId') }}",
-            viewRegionId: "{{ Session::get('viewRegionId') }}",
-            viewReportingDate: "{{ Session::get('viewReportingDate') }}",
+            viewCenterId: @json(Session::get('viewCenterId')),
+            viewRegionId: @json(Session::get('viewRegionId')),
+            viewReportingDate: @json(Session::get('viewReportingDate')),
         },
 
-        @if (Auth::user())
+        @if ($currentUser)
         user: {
-            id: "{{ Auth::user()->id }}",
-            firstName: "{{ Auth::user()->firstName }}",
-            lastName: "{{ Auth::user()->lastName }}",
-            email: "{{ Auth::user()->email }}",
+            id: @json($currentUser->id),
+            firstName: @json($currentUser->firstName),
+            lastName: @json($currentUser->lastName),
+            email: @json($currentUser->email),
         },
         @endif
 
         @if ($center)
-        center: {
-            id: "{{ $center->id }}",
-            name: "{{ $center->name }}",
-            abbreviation: "{{ $center->abbreviation }}",
-            timezone: "{{ $center->timezone }}",
-        },
+        center: @json(array_only($center->toArray(), ['id', 'name', 'abbreviation', 'timezone'])),
         @endif
 
         @if ($region)
-        region: {
-            id: "{{ $region->id }}",
-            name: "{{ $region->name }}",
-            abbreviation: "{{ $region->abbreviation }}",
-        },
+        region: @json(array_only($region->toArray(), ['id', 'name', 'abbreviation'])),
         @endif
 
         @if ($reportingDate)
-        reportingDate: "{{ $reportingDate->toDateString() }}",
+        reportingDate: @json($reportingDate->toDateString()),
         @endif
 
         LiveScoreboard: {
-            editable: {{ (isset($editableLiveScoreboard) && $editableLiveScoreboard) ? 'true' : 'false' }},
+            editable: @json(($currentUser != null) && $context->getSetting('editableLiveScoreboard'))
         },
     };
 </script>

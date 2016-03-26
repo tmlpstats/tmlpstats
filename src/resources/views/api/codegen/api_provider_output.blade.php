@@ -12,6 +12,7 @@ use TmlpStats\Api;
 
 class ApiProvider extends ServiceProvider
 {
+    protected $defer = true;
 
     /**
      * Register the application services.
@@ -23,5 +24,14 @@ class ApiProvider extends ServiceProvider
 @foreach ($packageNames as $package)
         $this->app->singleton(Api\{{ $package }}::class);
 @endforeach
+    }
+
+    public function provides()
+    {
+        return [
+@foreach ($packageNames as $package)
+            'TmlpStats\Api\{{ $package }}',
+@endforeach
+        ];
     }
 }

@@ -18,6 +18,36 @@ function apiCall(name, params, callback) {
 
 var Api = {};
 
+Api.Context = {
+
+    /*
+    Get the current center
+    Parameters:
+    */
+    getCenter: function(params, callback) {
+        apiCall('Context.getCenter', params, callback);
+    },
+
+    /*
+    Set the current center
+    Parameters:
+      center: center
+      permanent: bool
+    */
+    setCenter: function(params, callback) {
+        apiCall('Context.setCenter', params, callback);
+    },
+
+    /*
+    Get a single setting value given a center
+    Parameters:
+      name: string
+      center: Center
+    */
+    getSetting: function(params, callback) {
+        apiCall('Context.getSetting', params, callback);
+    }
+};
 Api.GlobalReport = {
 
     /*

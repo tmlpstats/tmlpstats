@@ -16,6 +16,9 @@ use TmlpStats\Http\Controllers\ApiControllerBase;
 class ApiController extends ApiControllerBase
 {
     protected $methods = [
+        "Context.getCenter" => "Context__getCenter",
+        "Context.setCenter" => "Context__setCenter",
+        "Context.getSetting" => "Context__getSetting",
         "GlobalReport.getRating" => "GlobalReport__getRating",
         "LocalReport.getWeeklyPromises" => "LocalReport__getWeeklyPromises",
         "LocalReport.getClassList" => "LocalReport__getClassList",
@@ -24,6 +27,25 @@ class ApiController extends ApiControllerBase
         "LiveScoreboard.setScore" => "LiveScoreboard__setScore",
     ];
 
+    protected function Context__getCenter($input)
+    {
+        return App::make(Api\Context::class)->getCenter(
+        );
+    }
+    protected function Context__setCenter($input)
+    {
+        return App::make(Api\Context::class)->setCenter(
+            $this->parse_center($input, 'center'),
+            $this->parse_bool($input, 'permanent')
+        );
+    }
+    protected function Context__getSetting($input)
+    {
+        return App::make(Api\Context::class)->getSetting(
+            $this->parse_string($input, 'name'),
+            $this->parse_Center($input, 'center')
+        );
+    }
     protected function GlobalReport__getRating($input)
     {
         return App::make(Api\GlobalReport::class)->getRating(
