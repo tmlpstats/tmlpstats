@@ -431,7 +431,6 @@ class StatsReportController extends ReportDispatchAbstractController
         return $response;
     }
 
-
     public function getCoursesSummary(StatsReport $statsReport)
     {
         $courses = App::make(CoursesController::class)->getByStatsReport($statsReport);
@@ -513,17 +512,17 @@ class StatsReportController extends ReportDispatchAbstractController
         $applicationWithdraws = [];
         if ($registrations) {
             // Application Status
-            $a            = new Arrangements\TmlpRegistrationsByStatus([
+            $a = new Arrangements\TmlpRegistrationsByStatus([
                 'registrationsData' => $registrations,
-                'quarter'           => $statsReport->quarter,
+                'quarter' => $statsReport->quarter,
             ]);
             $applications = $a->compose();
             $applications = $applications['reportData'];
 
             // Application Withdraws
-            $a                    = new Arrangements\TmlpRegistrationsByIncomingQuarter([
+            $a = new Arrangements\TmlpRegistrationsByIncomingQuarter([
                 'registrationsData' => $registrations,
-                'quarter'           => $statsReport->quarter,
+                'quarter' => $statsReport->quarter,
             ]);
             $applicationWithdraws = $a->compose();
             $applicationWithdraws = $applicationWithdraws['reportData']['withdrawn'];
@@ -604,7 +603,6 @@ class StatsReportController extends ReportDispatchAbstractController
         $data = $this->getSummaryPageData($statsReport, true);
         $data['skip_navbar'] = true;
         $data['liveScoreboard'] = true;
-        $data['editableLiveScoreboard'] = false;
         return view('statsreports.details.mobile_summary', $data);
     }
 

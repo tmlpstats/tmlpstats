@@ -1,53 +1,37 @@
 <?php namespace TmlpStats\Api;
 
 use App;
-use Illuminate\Contracts\Cache\Repository;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
+use TmlpStats\Domain\Scoreboard;
+use TmlpStats\Domain\ScoreboardGame;
 use TmlpStats\Http\Controllers\CenterStatsController;
 use TmlpStats\Reports\Arrangements;
 
 class LiveScoreboard extends AuthenticatedApiBase
 {
-    const CACHE_TIMEOUT = 5; // minutes
-    protected $cache = null;
-
-    public function __construct(Models\User $user, Repository $cache)
-    {
-        parent::__construct($user);
-        $this->cache = $cache;
-    }
 
     public function getCurrentScores(Models\Center $center)
     {
         $report = $this->getLatestReport($center);
-        // BUG FIXME this currently returns last weeks scores. Current scores should really be for current week, or optionally be configurable.
         $reportData = $this->getOfficialScores($report);
         if (!$reportData) {
-            // fill with an empty structure
-            $reportData = Arrangements\GamesByWeek::blankLayout();
+            $scoreboard = Scoreboard::blank();
+        } else {
+            $scoreboard = Scoreboard::fromArray($reportData);
         }
 
-        $cache = $this->cache;
-
+        $tempScores = Models\TempScoreboard::allValidFromCenter($center->id, $report->reportingDate);
+        //throw new \Exception("$tempScores");
         // cap, cpc, etc, check for overrides
-        foreach (Models\Scoreboard::GAME_KEYS as $game) {
-            $value = $cache->get($this->key($center, $game, 'actual'));
-            if ($value !== null && $value != $reportData['actual'][$game]) {
-                $percent = Models\Scoreboard::calculatePercent($reportData['promise'][$game], $value);
-                $updatedPoints = Models\Scoreboard::getPoints($percent, $game);
-
-                $reportData['actual'][$game] = intval($value);
-                $reportData['percent'][$game] = round($percent);
-
-                if ($updatedPoints != $reportData['points'][$game]) {
-                    $reportData['points']['total'] += $updatedPoints - $reportData['points'][$game];
-                    $reportData['points'][$game] = $updatedPoints;
-                }
+        $scoreboard->eachGame(function (ScoreboardGame &$game) use ($tempScores) {
+            $key = self::key($game->key, 'actual');
+            if (array_key_exists($key, $tempScores)) {
+                $value = $tempScores[$key]->value;
+                $game->setActual($value);
             }
-        }
-        // TODO re-calculate points, etc (Probably going to write a class to do this)
-        return $reportData;
+        });
+        return $scoreboard;
     }
 
     public function setScore(Models\Center $center, $game, $type, $value)
@@ -55,9 +39,21 @@ class LiveScoreboard extends AuthenticatedApiBase
         if ($type != 'actual') {
             throw new Exception("Currently, changing promises is not supported.");
         }
-        $this->cache->put($this->key($center, $game, $type), $value, self::CACHE_TIMEOUT);
+        Models\TempScoreboardLog::create([
+            'center_id' => $center->id,
+            'game' => $game,
+            'type' => $type,
+            'value' => $value,
+        ]);
 
-        $reportData = $this->getCurrentScores($center);
+        $item = Models\TempScoreboard::firstOrNew([
+            'center_id' => $center->id,
+            'routing_key' => static::key($game, $type),
+        ]);
+        $item->value = $value;
+        $item->save();
+
+        $reportData = $this->getCurrentScores($center)->toArray();
         $reportData['success'] = true;
 
         return $reportData;
@@ -85,11 +81,11 @@ class LiveScoreboard extends AuthenticatedApiBase
         return $reportData;
     }
 
-    private function key($center, $game, $type)
+    private static function key($game, $type)
     {
         if ($type != 'promise' && $type != 'actual') {
             throw new Exception("type must be 'promise' or 'actual'");
         }
-        return "temp_score.{$center->id}.{$game}.{$type}";
+        return "live.{$game}.{$type}";
     }
 }
