@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Api\Base;
+<?php
+namespace TmlpStats\Api\Base;
 
 use Gate;
 use TmlpStats\User;

@@ -8,6 +8,8 @@ namespace TmlpStats\Http\Controllers;
 // To edit the resulting API code, instead edit config/reports.yml
 // and then run the command:
 //   php artisan reports:codegen
+//
+///////////////////////////////
 
 use App;
 use TmlpStats\Api;
@@ -25,6 +27,10 @@ class ApiController extends ApiControllerBase
         "LocalReport.getClassListByQuarter" => "LocalReport__getClassListByQuarter",
         "LiveScoreboard.getCurrentScores" => "LiveScoreboard__getCurrentScores",
         "LiveScoreboard.setScore" => "LiveScoreboard__setScore",
+    ];
+
+    protected $unauthenticatedMethods = [
+        "LiveScoreboard__getCurrentScores",
     ];
 
     protected function Context__getCenter($input)

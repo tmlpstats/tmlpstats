@@ -11,6 +11,20 @@ use TmlpStats\StatsReport;
 class ApiControllerBase extends Controller
 {
     /**
+     * List of any method that does not require authentication.
+     *
+     * This is populated by the codegen if method has access: any
+     *
+     * @var array
+     */
+    protected $unauthenticatedMethods = [];
+
+    public function __construct()
+    {
+        // Disable default middleware
+    }
+
+    /**
      * Handle an API call.
      *
      * @return \Illuminate\Http\Response
@@ -24,6 +38,11 @@ class ApiControllerBase extends Controller
             abort(400, 'API method not found');
         }
         $callable = $this->methods[$method];
+
+        if (!in_array($callable, $this->unauthenticatedMethods) && !Auth::guard('auth')->login($this->user)) {
+            abort(401, 'You must be authenticated to access the api.');
+        }
+
         $result = $this->$callable($input);
         return Response::json($result);
     }

@@ -1,5 +1,4 @@
 <?php
-
 namespace TmlpStats\Console\Commands;
 
 use Illuminate\Console\Command;
