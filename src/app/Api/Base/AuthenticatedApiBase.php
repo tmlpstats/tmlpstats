@@ -2,16 +2,17 @@
 namespace TmlpStats\Api\Base;
 
 use Gate;
-use TmlpStats\User;
+use TmlpStats\Api;
 
 class AuthenticatedApiBase
 {
     protected $user = null;
     protected $gate = null;
 
-    public function __construct(User $user)
+    public function __construct(Api\Context $context)
     {
-        $this->user = $user;
-        $this->gate = Gate::forUser($user);
+        $this->context = $context;
+        $this->user = $context->getUser();
+        $this->gate = Gate::forUser($this->user);
     }
 }
