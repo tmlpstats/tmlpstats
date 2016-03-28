@@ -12,7 +12,7 @@ class ScoreboardGame
 {
     public $key;
     private $promise = 0;
-    private $actual = 0;
+    private $actual = null;
 
     public function __construct($gameKey)
     {
@@ -31,6 +31,9 @@ class ScoreboardGame
 
     public function percent()
     {
+        if ($this->actual == null) {
+            return 0;
+        }
         return round(static::calculatePercent($this->promise, $this->actual));
     }
 
@@ -67,7 +70,6 @@ class ScoreboardGame
     public static function calculatePercent($promise, $actual)
     {
         return Models\Scoreboard::calculatePercent($promise, $actual);
-
     }
 
     public static function getPoints($gameKey, $percent)
