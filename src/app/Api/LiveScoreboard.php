@@ -1,6 +1,7 @@
 <?php namespace TmlpStats\Api;
 
 use App;
+use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Domain\Scoreboard;
@@ -68,16 +69,34 @@ class LiveScoreboard extends AuthenticatedApiBase
     /** Separated out for both abstraction and easy mocking */
     protected function getOfficialScores(Models\StatsReport $report)
     {
-        $centerStatsData = App::make(CenterStatsController::class)->getByStatsReport($report, $report->reportingDate);
-        if (!$centerStatsData) {
-            return null;
+        // Step 1: Determine the week for promises to use (may be same week)
+        $actualDate = $report->reportingDate;
+        $quarterEndDate = $report->quarter->getQuarterEndDate($report->center);
+        $promiseWeek = $actualDate->copy();
+        while ($promiseWeek->lt(Carbon::now()) && $promiseWeek->lte($quarterEndDate)) {
+            $promiseWeek->addWeek();
         }
 
-        // Center Games
-        $a = new Arrangements\GamesByWeek($centerStatsData);
+        // Step 2: Fill an input array with both values, faking them into the same week.
+        $csc = App::make(CenterStatsController::class);
+        // BUG calling getPromiseData relies on getByStatsReport being called to set a private value it needs
+        $csc->getByStatsReport($report);
+
+        $inputData = [];
+        $promised = $csc->getPromiseData($promiseWeek, $report->center, $report->quarter);
+        if ($promised === null) {
+            throw new \Exception("Could not get promise for prom: {$promiseWeek->toDateString()}, actual: {$actualDate->toDateString()}");
+        }
+
+        $promised->reportingDate = $report->reportingDate; // Temporarily fake the reporting date
+        $inputData[] = $promised;
+        $inputData[] = $csc->getActualData($report->reportingDate, $report->center, $report->quarter);
+
+        // Step 3: Use the arrangement to do the work
+        $a = new Arrangements\GamesByWeek($inputData);
         $centerStatsData = $a->compose();
-        $date = $report->reportingDate->toDateString();
-        $reportData = $centerStatsData['reportData'][$date];
+        $promised->reportingDate = $promiseWeek; // Set the date back in case it affects our in-memory cache.
+        $reportData = $centerStatsData['reportData'][$actualDate->toDateString()];
         return $reportData;
     }
 

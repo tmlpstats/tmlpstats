@@ -3,48 +3,22 @@ import GameRow from './GameRow';
 
 var LiveScoreboard = React.createClass({
     getInitialState: function() {
+        var games = {};
+
+        ['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'].forEach(function(gameName) {
+            games[gameName] = {
+                promise: '',
+                actual: '',
+                percent: '',
+                points: '',
+            };
+        });
+
         return {
             editable: false,
             rating: '',
             points: 0,
-            games: {
-                cap: {
-                    promise: '',
-                    actual: '',
-                    percent: '',
-                    points: '',
-                },
-                cpc: {
-                    promise: '',
-                    actual: '',
-                    percent: '',
-                    points: '',
-                },
-                t1x: {
-                    promise: '',
-                    actual: '',
-                    percent: '',
-                    points: '',
-                },
-                t2x: {
-                    promise: '',
-                    actual: '',
-                    percent: '',
-                    points: '',
-                },
-                gitw: {
-                    promise: '',
-                    actual: '',
-                    percent: '',
-                    points: '',
-                },
-                lf: {
-                    promise: '',
-                    actual: '',
-                    percent: '',
-                    points: '',
-                },
-            }
+            games: games
         };
     },
     refreshData: function () {
@@ -89,7 +63,7 @@ var LiveScoreboard = React.createClass({
 
         console.log("updating " + game);
 
-        Api.LiveScoreboard.setScore(request, function (data) {
+        return Api.LiveScoreboard.setScore(request, function (data) {
             self.updateScoreboard(data);
         });
     },

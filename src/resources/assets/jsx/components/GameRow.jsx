@@ -3,7 +3,7 @@ import GameField from './GameField';
 
 var GameRow = React.createClass({
     updateGameValue: function(field) {
-        this.props.updateGameData(this.props.game, field);
+        return this.props.updateGameData(this.props.game, field);
     },
     handleFieldOnChange: function (field, value) {
         var game = this.props.game;

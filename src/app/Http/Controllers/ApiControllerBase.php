@@ -2,6 +2,7 @@
 
 namespace TmlpStats\Http\Controllers;
 
+use Auth;
 use Illuminate\Http\Request;
 use Response;
 use TmlpStats\Center;
@@ -39,7 +40,7 @@ class ApiControllerBase extends Controller
         }
         $callable = $this->methods[$method];
 
-        if (!in_array($callable, $this->unauthenticatedMethods) && !Auth::guard('auth')->login($this->user)) {
+        if (!in_array($callable, $this->unauthenticatedMethods) && Auth::user() == null) {
             abort(401, 'You must be authenticated to access the api.');
         }
 

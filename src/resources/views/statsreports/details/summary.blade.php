@@ -1,5 +1,22 @@
+@inject('context', 'TmlpStats\Api\Context')
+<?php
+$mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->abbreviation);
+?>
 <div class="row">
     <div class="col-md-5">
+        @if ($context->getSetting('editableLiveScoreboard'))
+            <div class="data-api panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><span class="glyphicon glyphicon-info-sign"></span> Live Scoreboard</h3>
+                </div>
+                <div class="panel-body">
+                    <p>This is a new feature we have made available to you that allows you to set a "live scoreboard" that you can edit as often as you want.</p>
+
+                    <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#liveScoreboardHelp" aria-expanded="false" aria-controls="liveScoreboardHelp">Click for help</button>
+                    @include('statsreports.details.live_scoreboard_help')
+                </div>
+            </div>
+        @endif
         @include('reports.centergames.week', compact('reportData'))
     </div>
     <div class="col-md-7">

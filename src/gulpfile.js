@@ -73,8 +73,11 @@ function buildScript(file, watch) {
   var props = {
     entries: [config.jsSource + file],
     debug : true,
+    extensions: ['.jsx', '.js'],
+    paths: ['./node_modules/', './public/components/react'],
     transform: [
       babelify.configure({
+        //extensions: ['.jsx', '.js'],
         presets: ["react", "es2015"]
       })
     ]
