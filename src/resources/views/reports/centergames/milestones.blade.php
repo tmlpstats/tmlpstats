@@ -48,15 +48,17 @@
                             <tr>
                                 <th>{{ strtoupper($game) }}</th>
                                 @foreach ($reportData[$j+$k] as $date => $data)
-                                    <td class="info">{{ $data['promise'][$game] }}{{ ($game == 'gitw') ? '%' : '' }}</td>
-                                    <td>{{ isset($data['actual']) ? $data['actual'][$game] : '&nbsp;&nbsp;&nbsp;&nbsp;' }}{{ (isset($data['actual']) && $game == 'gitw') ? '%' : '' }}</td>
                                     <?php
-                                    if (isset($data['actual'])) {
+                                    $hasActual = (isset($data['actual']) && isset($data['actual'][$game]));
+                                    if ($hasActual) {
                                         $lastWeek = $data;
                                     }
                                     ?>
+
+                                    <td class="info">{{ $data['promise'][$game] }}{{ ($game == 'gitw') ? '%' : '' }}</td>
+                                    <td>{{ $hasActual ? $data['actual'][$game] : '&nbsp;&nbsp;&nbsp;&nbsp;' }}{{ ($hasActual && $game == 'gitw') ? '%' : '' }}</td>
                                 @endforeach
-                                @for ($i = count($reportData[$j+$k]); $i <= $maxCount -1; $i++)
+                                @for ($i = count($reportData[$j+$k]); $i < $maxCount; $i++)
                                     <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
                                     <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
                                 @endfor
