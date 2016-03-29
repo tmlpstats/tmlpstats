@@ -30,7 +30,7 @@ $reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getRep
     <link href="{{ asset('/components/jquery-loading/dist/jquery.loading.min.css') }}" rel="stylesheet">
     <link href="{{ asset('/components/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
 
-    <link href="{{ asset('/css/tmlpstats.css') }}" rel="stylesheet">
+    <link href="{{ elixir('css/tmlpstats.css') }}" rel="stylesheet">
 
     @yield('headers')
 </head>
@@ -100,13 +100,9 @@ $reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getRep
     <script src="{{ asset('/components/moment/min/moment-with-locales.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('/components/highcharts/highcharts.js') }}" type="text/javascript"></script>
     <script src="{{ asset('/components/jstz/jstz.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('/js/tmlpstats.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('/js/api.js') }}" type="text/javascript"></script>
-    @if (env('APP_ENV') === 'prod')
-        <script src="{{ asset('/js/main.min.js') }}" type="text/javascript"></script>
-    @else
-        <script src="{{ asset('/js/main.js') }}" type="text/javascript"></script>
-    @endif
+    <script src="{{ elixir('js/tmlpstats.js') }}" type="text/javascript"></script>
+    <script src="{{ elixir('js/api.js') }}" type="text/javascript"></script>
+    <script src="{{ elixir('js/bundle.js') }}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {

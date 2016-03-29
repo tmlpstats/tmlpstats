@@ -8,3 +8,7 @@ email-output.log
 export
 node_modules
 npm-debug.log
+src/public/**/*.map
+src/public/build/
+src/public/js/bundle.js
+src/public/css/app.css

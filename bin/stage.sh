@@ -48,6 +48,10 @@ echo "Running bower"
 node_modules/.bin/bower install --production
 
 echo ""
+echo "Running gulp"
+gulp
+
+echo ""
 echo "Snapping the database"
 # Setup up temporary .my.cnf file
 echo "[mysqldump]" > $HOME/.my.cnf
