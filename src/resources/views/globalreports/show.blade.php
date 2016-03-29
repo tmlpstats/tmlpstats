@@ -27,7 +27,7 @@
         @endif
         <br />
 
-        <div class="row">
+        <div>
             <ul id="tabs" class="nav nav-tabs tabs-top brief-tabs" data-tabs="tabs">
                 <li class="active"><a href="#ratingsummary" data-toggle="tab"><span class="long">Ratings </span>Summary</a></li>
                 <li><a href="#regionalstats" data-toggle="tab"><span class="long">Regional </span>Games</a></li>
@@ -40,7 +40,7 @@
                 <li><a href="#potentials" data-toggle="tab">Potentials</a></li>
             </ul>
         </div>
-        <div class="row">
+        <div>
             <div class="tab-content">
                 <div class="tab-pane active" id="ratingsummary">
                     <h3>Ratings Summary</h3>
