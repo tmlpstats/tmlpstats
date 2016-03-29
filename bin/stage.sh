@@ -51,7 +51,7 @@ node_modules/.bin/bower install --production
 
 echo ""
 echo "Running gulp"
-gulp
+NODE_ENV=production gulp --production
 
 echo ""
 echo "Snapping the database"

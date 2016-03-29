@@ -11,7 +11,7 @@ DEST="/var/www/tmlpstats.com"
 ROLLBACK="$HOME/tmlpstats.rollback"
 
 cd $SOURCE
-gulp --production
+NODE_ENV=production gulp --production
 
 cd $DEST/
 php artisan down
@@ -37,6 +37,7 @@ rsync -av --delete --filter='protect .env' \
                    --filter='protect storage/logs/*' \
                    --filter='protect storage/app/*' \
                    --filter='protect public/error_log' \
+                   --filter='protect public/build/**' \
                    --exclude='node_modules' \
                    --exclude='storage/debugbar' \
                    --exclude='tests' \
