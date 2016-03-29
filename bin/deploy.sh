@@ -4,9 +4,14 @@
 # Deploy website
 #
 
+set -e
+
 SOURCE="$HOME/tmlpstats.git/src"
 DEST="/var/www/tmlpstats.com"
 ROLLBACK="$HOME/tmlpstats.rollback"
+
+cd $SOURCE
+gulp --production
 
 cd $DEST/
 php artisan down
