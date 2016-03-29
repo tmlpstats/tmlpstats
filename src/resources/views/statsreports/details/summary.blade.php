@@ -4,7 +4,7 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
 ?>
 <div class="row">
     <div class="col-md-5">
-        @if ($context->getSetting('editableLiveScoreboard'))
+        @if (isset($liveScoreboard) && $liveScoreboard && $context->getSetting('editableLiveScoreboard'))
             <div class="data-api panel panel-info">
                 <div class="panel-heading">
                     <h3 class="panel-title"><span class="glyphicon glyphicon-info-sign"></span> Live Scoreboard</h3>

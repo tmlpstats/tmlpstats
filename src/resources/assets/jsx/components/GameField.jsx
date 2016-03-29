@@ -38,34 +38,37 @@ var GameField = React.createClass({
         }
     },
     renderEditable: function() {
-        var after = <span className="glyphicon glyphicon-info-sign" data-toggle="tooltip" title="Use the field to the left and hit enter to set a score."></span>
-        var disabled=false;
-        var container='';
+        var after = <span className="glyphicon glyphicon-pencil" data-toggle="tooltip" title="Use the field to the left and hit enter to set a score."></span>
+        if (this.props.suffix) {
+            after = this.props.suffix;
+        }
+        var disabled = false;
+        var container = '';
         switch (this.state.op) {
             case "updating":
                 disabled = true;
                 after = <span className="glyphicon glyphicon-refresh"></span>
                 break;
             case "success":
-                container="has-success";
+                container = "has-success";
                 after = <span className="glyphicon glyphicon-ok" style={{color: "green"}}></span>
                 break;
             case "failed":
-                container="has-failure";
-                after = <span className="glyphicon glyphicon-ok" style={{color: "red"}}></span>
+                container = "has-failure";
+                after = <span className="glyphicon glyphicon-remove" style={{color: "red"}}></span>
                 break;
         }
         
         return (
-            <div className="input-group {container}">
+            <div className="input-group live-scoreboard-group {container}">
                 <input
+                    type="text"
                     value={this.props.gameValue}
                     onChange={this.handleChange}
                     onBlur={this.handleBlur}
                     onKeyPress={this.handleKeyPress}
                     disabled={disabled}
                     className="form-control"
-                    style={{textAlign:"center"}}
                 />
                 <span className="input-group-addon" aria-hidden="true">
                     {after}

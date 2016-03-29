@@ -267,3 +267,10 @@ div.box {
     font-weight: normal;
     font-size: medium;
 }
+
+/* Live scoreboard */
+
+.live-scoreboard-group input {
+    text-align: center;
+    min-width: 3.5em;
+}
