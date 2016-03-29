@@ -4,6 +4,8 @@
 # Deploy website
 #
 
+set -e
+
 SOURCE="$HOME/tmlpstats.git/src"
 DEST="/var/www/tmlpstats.com"
 ROLLBACK="$HOME/tmlpstats.rollback"

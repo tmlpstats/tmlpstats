@@ -4,6 +4,8 @@
 # Stage website
 #
 
+set -e
+
 die() {
     echo $1
     exit 1
@@ -26,7 +28,7 @@ fi
 
 cd $SOURCE/
 echo "Pulling latest sources"
-git pull --rebase
+git pull
 
 if [ "$1" == "refresh" ]; then
     echo ""
