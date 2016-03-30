@@ -572,22 +572,13 @@ class StatsReportController extends ReportDispatchAbstractController
     public function getSummaryPageData(StatsReport $statsReport, $live = false)
     {
         $date = $statsReport->reportingDate->toDateString();
+
         $liveData = null;
         if ($live) {
             $liveData = App::make(Api\LiveScoreboard::class)->getCurrentScores($statsReport->center);
         }
 
-        $centerStatsData = App::make(CenterStatsController::class)
-            ->getByStatsReport($statsReport, $statsReport->reportingDate);
-
-        $reportData = [];
-        if ($centerStatsData) {
-            // Center Games
-            $a = new Arrangements\GamesByWeek($centerStatsData);
-            $centerStatsData = $a->compose();
-
-            $reportData = $centerStatsData['reportData'][$date];
-        }
+        $reportData = App::make(Api\LocalReport::class)->getWeekScoreboard($statsReport);
 
         $coursesSummary = $this->getCoursesSummary($statsReport);
         $teamMembersSummary = $this->getTeamMembersSummary($statsReport);
@@ -621,7 +612,7 @@ class StatsReportController extends ReportDispatchAbstractController
     protected function getCenterStats(StatsReport $statsReport)
     {
         $a = new Arrangements\GamesByMilestone([
-            'weeks' => App::make(Api\LocalReport::class)->getWeeklyPromises($statsReport),
+            'weeks' => App::make(Api\LocalReport::class)->getQuarterScoreboard($statsReport),
             'quarter' => $statsReport->quarter,
         ]);
         $data = $a->compose();

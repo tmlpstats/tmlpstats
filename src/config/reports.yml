@@ -54,6 +54,7 @@ api:
             type: string
           - name: center
             type: Center
+
   GlobalReport:
     type: namespace
     children:
@@ -62,31 +63,34 @@ api:
         params:
           - name: globalReport
             type: GlobalReport
+          - name: region
+            type: Region
 
-  LocalReport:
-    type: namespace
-    children:
-      getWeeklyPromises:
-        desc: Get promises for all weeks within a quarter
+      getQuarterScoreboard:
+        desc: Get scoreboard for all weeks within a quarter
         params:
-          - name: localReport
-            type: LocalReport
-          - name: enable_something
-            type: bool
-          - name: first_name
-            type: string
+          - name: globalReport
+            type: GlobalReport
+          - name: region
+            type: Region
 
-      getClassList:
-        desc: Get the list of all team members
+      getWeekScoreboard:
+        desc: Get scoreboard for a single week within a quarter
         params:
-          - name: localReport
-            type: LocalReport
+          - name: globalReport
+            type: GlobalReport
+          - name: region
+            type: Region
 
-      getClassListByQuarter:
-        desc: Get the list of all team members, arranged by by T1/T2 and by quarter
+      getWeekScoreboardByCenter:
+        desc: Get scoreboard for a single week within a quarter by center
         params:
-          - name: localReport
-            type: LocalReport
+          - name: globalReport
+            type: GlobalReport
+          - name: region
+            type: Region
+          - name: options
+            type: array
 
   LiveScoreboard:
     type: namespace
@@ -111,6 +115,35 @@ api:
           - name: value
             type: int
 
+  LocalReport:
+    type: namespace
+    children:
+      getQuarterScoreboard:
+        desc: Get scoreboard for all weeks within a quarter
+        params:
+          - name: localReport
+            type: LocalReport
+          - name: options
+            type: array
+
+      getWeekScoreboard:
+        desc: Get scoreboard for a single week within a quarter
+        params:
+          - name: localReport
+            type: LocalReport
+
+      getClassList:
+        desc: Get the list of all team members
+        params:
+          - name: localReport
+            type: LocalReport
+
+      getClassListByQuarter:
+        desc: Get the list of all team members, arranged by T1/T2 and by quarter
+        params:
+          - name: localReport
+            type: LocalReport
+
   UserProfile:
     type: namespace
     children:
@@ -121,7 +154,6 @@ api:
             type: string
           - name: timezone
             type: string
-
 
 reports:
   # --- Local Statistician

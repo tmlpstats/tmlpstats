@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Domain\Scoreboard;
-use TmlpStats\Http\Controllers\CenterStatsController;
+use TmlpStats\Domain\ScoreboardGame;
 use TmlpStats\Reports\Arrangements;
 
 class LiveScoreboard extends AuthenticatedApiBase
@@ -82,6 +82,54 @@ class LiveScoreboard extends AuthenticatedApiBase
     }
 
     /**
+     * Get the scoreboard for given report
+     *
+     * @param  Models\StatsReport $report
+     * @return array
+     */
+    protected function getOfficialScores(Models\StatsReport $report)
+    {
+        // Step 1: Determine the week for promises to use (may be same week)
+        $quarterEndDate = $report->quarter->getQuarterEndDate($report->center);
+        $actualDate = $report->reportingDate;
+        $promiseDate = $actualDate->copy();
+        while ($promiseDate->lt(Carbon::now()) && $promiseDate->lte($quarterEndDate)) {
+            $promiseDate->addWeek();
+        }
+
+        // Step 2: Fill an input array with both values, faking them into the same week.
+        if ($actualDate->ne($promiseDate)) {
+            $quarterData = App::make(LocalReport::class)->getQuarterScoreboard($report, ['returnUnprocessed' => true]);
+
+            $actualWeekData = $quarterData[$actualDate->toDateString()];
+            $promiseWeekData = $quarterData[$promiseDate->toDateString()];
+
+            if (!isset($promiseWeekData['promise'])) {
+                throw new \Exception("Could not get promise for promise: {$promiseDate->toDateString()}, actual: {$actualDate->toDateString()}");
+            }
+            if (!isset($actualWeekData['actual'])) {
+                throw new \Exception("Could not get actual for promise: {$promiseDate->toDateString()}, actual: {$actualDate->toDateString()}");
+            }
+
+            // Temporarily fake the reporting date so arrangement works properly
+            $promiseWeekData['promise']->reportingDate = $actualDate;
+
+            // Step 3: Use the arrangement to do the work
+            $a = new Arrangements\GamesByWeek([
+                $actualWeekData['actual'],
+                $promiseWeekData['promise'],
+            ]);
+            $weekData = $a->compose();
+            $reportData = $weekData['reportData'][$actualDate->toDateString()];
+        } else {
+            // Step 3: LocalReport already did the work for us
+            $reportData = App::make(LocalReport::class)->getWeekScoreboard($report);
+        }
+
+        return $reportData;
+    }
+
+    /**
      * Get all of the valid temporary scoreboard values for center
      *
      * @param  integer $centerId      Center's id
@@ -135,46 +183,6 @@ class LiveScoreboard extends AuthenticatedApiBase
             ->official()
             ->orderBy('reporting_date', 'desc')
             ->first();
-    }
-
-    /**
-     * [getOfficialScores description]
-     *
-     * @param  Models\StatsReport $report [description]
-     * @return [type]                     [description]
-     */
-    protected function getOfficialScores(Models\StatsReport $report)
-    {
-        // Step 1: Determine the week for promises to use (may be same week)
-        $actualDate = $report->reportingDate;
-        $quarterEndDate = $report->quarter->getQuarterEndDate($report->center);
-        $promiseWeek = $actualDate->copy();
-        while ($promiseWeek->lt(Carbon::now()) && $promiseWeek->lte($quarterEndDate)) {
-            $promiseWeek->addWeek();
-        }
-
-        // Step 2: Fill an input array with both values, faking them into the same week.
-        $csc = App::make(CenterStatsController::class);
-        // BUG calling getPromiseData relies on getByStatsReport being called to set a private value it needs
-        $csc->getByStatsReport($report);
-
-        $inputData = [];
-        $promised = $csc->getPromiseData($promiseWeek, $report->center, $report->quarter);
-        if ($promised === null) {
-            throw new \Exception("Could not get promise for prom: {$promiseWeek->toDateString()}, actual: {$actualDate->toDateString()}");
-        }
-
-        $promised->reportingDate = $report->reportingDate; // Temporarily fake the reporting date
-        $inputData[] = $promised;
-        $inputData[] = $csc->getActualData($report->reportingDate, $report->center, $report->quarter);
-
-        // Step 3: Use the arrangement to do the work
-        $a = new Arrangements\GamesByWeek($inputData);
-        $centerStatsData = $a->compose();
-        $promised->reportingDate = $promiseWeek; // Set the date back in case it affects our in-memory cache.
-        $reportData = $centerStatsData['reportData'][$actualDate->toDateString()];
-
-        return $reportData;
     }
 
     private static function key($game, $type)

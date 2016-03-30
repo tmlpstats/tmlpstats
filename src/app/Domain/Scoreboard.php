@@ -148,9 +148,11 @@ class Scoreboard implements Arrayable
             $v['actual'][$gameKey] = $g['actual'] = $game->actual();
             $v['percent'][$gameKey] = $g['percent'] = $game->percent();
             $v['points'][$gameKey] = $g['points'] = $game->points();
+
             if ($game->originalPromise()) {
                 $v['original'][$gameKey] = $g['original'] = $game->originalPromise();
             }
+
             // set the additional key for great format switch
             $v['games'][$gameKey] = $g;
         }

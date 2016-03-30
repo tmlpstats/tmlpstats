@@ -3,6 +3,7 @@ namespace TmlpStats\Tests\Api;
 
 use App;
 use Carbon\Carbon;
+use Mockery;
 use TmlpStats as Models;
 use TmlpStats\Domain;
 use TmlpStats\Api;
@@ -13,6 +14,49 @@ class LiveScoreboardTest extends TestAbstract
 {
     protected $instantiateApp = true;
     protected $testClass = Api\LiveScoreboard::class;
+
+    public function testGetOfficialScores()
+    {
+        $expectedResult = [];
+        $quarterData = [];
+
+
+        $center = new \stdClass;
+        $reportDate = Carbon::create(2016, 3, 25);
+
+        $quarter = Mockery::mock(Models\Quarter::class)getQuarterEndDate
+        $quarter->shouldReceive('getQuarterEndDate')
+                ->with($center)
+                ->andReturn($quarter);
+
+        $report = Mockery::mock(Models\StatsReport::class);
+        $report->shouldReceive('getAttribute')
+                ->with('quarter')
+                ->andReturn($quarter);
+        $report->shouldReceive('getAttribute')
+                ->with('center')
+                ->andReturn($center);
+        $report->shouldReceive('getAttribute')
+                ->with('reportingDate')
+                ->andReturn($reportingDate);
+
+        // Set carbon now override
+
+        $reportData = []
+
+
+        $localReport = Mockery::mock();
+
+        $localReport->shouldReceive('getQuarterScoreboard')
+                    ->once()
+                    ->with($report, true)
+                    ->andReturn($quarterData);
+
+        App::instance(LocalReport::class, $localReport);
+
+        $class = App::make(Api\LiveScoreboard::class);
+        $this->assertEquals('yey!', $class->methodToTest());
+    }
 
     public function testSetScore()
     {
