@@ -6,6 +6,7 @@ use App;
 use Illuminate\Http\Request;
 use TmlpStats\Center;
 use TmlpStats\Http\Requests;
+use TmlpStats\Api;
 use TmlpStats\StatsReport;
 
 class CenterController extends Controller
@@ -115,7 +116,8 @@ class CenterController extends Controller
         if (!$center) {
             abort(404);
         }
-
+        $context = App::make(Api\Context::class);
+        $context->setCenter($center);
         $this->setCenter($center);
 
         $statsReport = StatsReport::byCenter($center)
