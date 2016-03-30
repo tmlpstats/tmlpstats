@@ -4,8 +4,8 @@ namespace TmlpStats\Http\Controllers;
 
 use App;
 use Carbon\Carbon;
-use Log;
 use Illuminate\Http\Request;
+use Log;
 use Session;
 use TmlpStats\Center;
 use TmlpStats\GlobalReport;
@@ -235,8 +235,8 @@ class ReportsController extends Controller
 
         if (!Session::has('viewCenterId')) {
             $center = $abbr
-                ? Center::abbreviation($abbr)->firstOrFail()
-                : $this->getCenter($request);
+            ? Center::abbreviation($abbr)->firstOrFail()
+            : $this->getCenter($request);
             Session::set('viewCenterId', $center->id);
         }
 
@@ -272,8 +272,8 @@ class ReportsController extends Controller
 
         if (!Session::has('viewRegionId')) {
             $region = $abbr
-                ? Region::abbreviation($abbr)->firstOrFail()
-                : $this->getRegion($request);
+            ? Region::abbreviation($abbr)->firstOrFail()
+            : $this->getRegion($request);
             Session::set('viewRegionId', $region->id);
         }
 
@@ -335,6 +335,9 @@ class ReportsController extends Controller
         if ($reportType == 'region') {
             $report = $globalReport ?: GlobalReport::reportingDate($reportingDate)->firstOrFail();
             $redirectUrl = App::make(GlobalReportController::class)->getUrl($report, $reportTarget);
+            if (!$reportViewUpdate) {
+                return App::make($controllerClass)->showForRegion($request, $report, $reportTarget);
+            }
         } else {
             $report = StatsReport::byCenter($reportTarget)
                 ->reportingDate($reportingDate)
@@ -346,8 +349,8 @@ class ReportsController extends Controller
         }
 
         return $reportViewUpdate
-            ? redirect($redirectUrl)
-            : App::make($controllerClass)->show($request, $report->id);
+        ? redirect($redirectUrl)
+        : App::make($controllerClass)->show($request, $report->id);
     }
 
     /**

@@ -221,7 +221,7 @@
 
             // Load all of the pages
             $.each(pages, function (index, page) {
-                var url = "{{ url("/globalreports/{$globalReport->id}") }}/" + page + "?region={{$region->abbreviation}}";
+                var url = "{{ url("/globalreports/{$globalReport->id}") }}/" + page + "/{{$region->abbreviation}}";
                 var container = "#" + page + "-container";
 
                 // Display loader by default

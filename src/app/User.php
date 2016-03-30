@@ -4,14 +4,16 @@ namespace TmlpStats;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use TmlpStats\Traits\CachedRelationships;
 
-class User extends Model implements AuthenticatableContract, CanResetPasswordContract
+class User extends Model implements AuthenticatableContract, CanResetPasswordContract, AuthorizableContract
 {
-    use Authenticatable, CanResetPassword, CamelCaseModel, CachedRelationships;
+    use Authenticatable, Authorizable, CanResetPassword, CamelCaseModel, CachedRelationships;
 
     /**
      * The database table used by the model.
@@ -37,9 +39,9 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     ];
 
     protected $casts = [
-        'active'                 => 'boolean',
+        'active' => 'boolean',
         'require_password_reset' => 'boolean',
-        'managed'                => 'boolean',
+        'managed' => 'boolean',
     ];
 
     protected $dates = [
@@ -78,8 +80,8 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
             case 'phone':
             case 'center':
                 return $this->person
-                    ? $this->person->$name
-                    : null;
+                ? $this->person->$name
+                : null;
             default:
                 return parent::__get($name);
         }
@@ -101,8 +103,8 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
                 return $this->reportToken;
             case 'center':
                 return $this->reportToken
-                    ? $this->reportToken->center
-                    : null;
+                ? $this->reportToken->center
+                : null;
             case 'lastName':
             case 'phone':
                 return null;
@@ -136,8 +138,8 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     public function hasAccountability($name)
     {
         return $this->person
-            ? $this->person->hasAccountability($name)
-            : false;
+        ? $this->person->hasAccountability($name)
+        : false;
     }
 
     /**
@@ -161,13 +163,13 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     {
         if ($this->reportToken) {
             return $this->reportToken->center
-                ? $this->reportToken->center->region
-                : null;
+            ? $this->reportToken->center->region
+            : null;
         }
 
         return $this->person && $this->person->center
-            ? $this->person->center->region
-            : null;
+        ? $this->person->center->region
+        : null;
     }
 
     /**
@@ -181,7 +183,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
             return;
         }
 
-        $person           = $this->person;
+        $person = $this->person;
         $person->centerId = $center->id;
         $person->save();
     }
@@ -197,7 +199,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
             return;
         }
 
-        $person            = $this->person;
+        $person = $this->person;
         $person->firstName = $firstName;
         $person->save();
     }
@@ -213,7 +215,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
             return;
         }
 
-        $person           = $this->person;
+        $person = $this->person;
         $person->lastName = $lastName;
         $person->save();
     }
@@ -229,7 +231,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
             return;
         }
 
-        $person        = $this->person;
+        $person = $this->person;
         $person->phone = $phone;
         $person->save();
     }
@@ -245,7 +247,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
             return;
         }
 
-        $person        = $this->person;
+        $person = $this->person;
         $person->email = $email;
         $person->save();
     }
@@ -294,5 +296,11 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     public function role()
     {
         return $this->belongsTo('TmlpStats\Role');
+    }
+
+    // special case of 'can' builtin for a specific purpose of getting user-global perms
+    public function userCan($ability)
+    {
+        return $this->can($ability, $this);
     }
 }

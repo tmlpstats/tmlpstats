@@ -1,18 +1,19 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use App;
 use Auth;
+use Carbon\Carbon;
+use Gate;
 use Illuminate\Http\Request;
+use Session;
+use TmlpStats\Api;
+use TmlpStats\Center;
 use TmlpStats\GlobalReport;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
-use TmlpStats\Center;
-use TmlpStats\User;
+use TmlpStats\Region;
 use TmlpStats\StatsReport;
-
-use Carbon\Carbon;
-
-use Gate;
-use Session;
+use TmlpStats\User;
 
 class HomeController extends Controller
 {
@@ -30,8 +31,17 @@ class HomeController extends Controller
             $centerAbbr = strtolower(Auth::user()->center->abbreviation);
             return redirect("center/{$centerAbbr}");
         } else {
-            return $this->regionOverview($request);
+            $region = $this->getRegion($request);
+            if ($region != null) {
+                return redirect(action('HomeController@home', ['abbr' => strtolower($region->abbreviation)]));
+            }
         }
+    }
+
+    public function home(Request $request, $abbr)
+    {
+        $region = Region::abbreviation($abbr)->firstorFail();
+        return $this->regionOverview($request, $region);
     }
 
     /**
@@ -41,8 +51,10 @@ class HomeController extends Controller
      *
      * @return \View
      */
-    public function regionOverview(Request $request)
+    public function regionOverview(Request $request, Region $region)
     {
+        App::make(Api\Context::class)->setRegion($region);
+
         if (Gate::denies('index', StatsReport::class)) {
             // If they aren't allowed to see the full home page, just return a blank home page
             return view('home');
@@ -54,8 +66,6 @@ class HomeController extends Controller
         if (Session::has('timezone')) {
             $timezone = Session::get('timezone');
         }
-
-        $region = $this->getRegion($request);
 
         $allReports = StatsReport::currentQuarter($region)->submitted()->orderBy('reporting_date', 'desc')->get();
         if ($allReports->isEmpty() || $allReports->count() == 1) {
@@ -127,19 +137,19 @@ class HomeController extends Controller
                 ->first();
 
             $user = $statsReport
-                ? User::find($statsReport->user_id)
-                : null;
+            ? User::find($statsReport->user_id)
+            : null;
 
             $sheetUrl = null;
             $reportUrl = null;
 
             if (Gate::allows('downloadSheet', $statsReport)) {
                 $sheetUrl = $statsReport && XlsxArchiver::getInstance()->getSheetPath($statsReport)
-                    ? url("/statsreports/{$statsReport->id}/download")
-                    : null;
+                ? url("/statsreports/{$statsReport->id}/download")
+                : null;
                 $reportUrl = $statsReport
-                    ? StatsReportController::getUrl($statsReport)
-                    : null;
+                ? StatsReportController::getUrl($statsReport)
+                : null;
             }
 
             $submittedAt = null;
@@ -149,15 +159,15 @@ class HomeController extends Controller
             }
 
             $centerResults = array(
-                'name'        => $center->name,
+                'name' => $center->name,
                 'localRegion' => $localRegion,
-                'submitted'   => $statsReport ? $statsReport->isSubmitted() : false,
-                'validated'   => $statsReport ? $statsReport->isValidated() : false,
-                'rating'      => $statsReport && $statsReport->isValidated() ? $statsReport->getRating() . " (" . $statsReport->getPoints() . " pts)" : '-',
-                'updatedAt'   => $submittedAt ? $submittedAt->format('M j, Y @ g:ia T') : '-',
-                'updatedBy'   => $user ? $user->firstName : '-',
-                'sheet'       => $sheetUrl,
-                'reportUrl'   => $reportUrl,
+                'submitted' => $statsReport ? $statsReport->isSubmitted() : false,
+                'validated' => $statsReport ? $statsReport->isValidated() : false,
+                'rating' => $statsReport && $statsReport->isValidated() ? $statsReport->getRating() . " (" . $statsReport->getPoints() . " pts)" : '-',
+                'updatedAt' => $submittedAt ? $submittedAt->format('M j, Y @ g:ia T') : '-',
+                'updatedBy' => $user ? $user->firstName : '-',
+                'sheet' => $sheetUrl,
+                'reportUrl' => $reportUrl,
             );
 
             if ($statsReport && $statsReport->submittedAt) {
@@ -174,8 +184,10 @@ class HomeController extends Controller
 
         $selectedRegion = $region->abbreviation;
         $globalReport = GlobalReport::reportingDate($reportingDate)->first();
+        $regionSelectAction = 'HomeController@home'; // Allow the region selector to do a different action
 
         return view('home', compact(
+            'regionSelectAction',
             'reportingDate',
             'reportingDates',
             'timezone',
