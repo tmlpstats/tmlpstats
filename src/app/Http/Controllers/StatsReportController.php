@@ -375,7 +375,7 @@ class StatsReportController extends ReportDispatchAbstractController
         }
     }
 
-    public function runDispatcher(Request $request, $statsReport, $report, $extra)
+    public function runDispatcher(Request $request, $statsReport, $report, $extra = null)
     {
         $this->setCenter($statsReport->center);
         $this->context->setCenter($statsReport->center);

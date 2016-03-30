@@ -2,6 +2,8 @@
 
 namespace TmlpStats\Policies;
 
+use TmlpStats\User;
+
 class UserPolicy extends Policy
 {
 
