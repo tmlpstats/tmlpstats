@@ -1,9 +1,11 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use App;
+use Auth;
 use Illuminate\Http\Request;
+use TmlpStats\Api;
 use TmlpStats\Import\ImportManager;
-
 use TmlpStats\StatsReport;
 
 class ImportController extends Controller
@@ -17,6 +19,7 @@ class ImportController extends Controller
     {
         $this->middleware('auth');
         $this->middleware('role:statistician');
+        $this->context = App::make(Api\Context::class);
     }
 
     /**
@@ -24,15 +27,16 @@ class ImportController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexValidateSheet()
+    public function indexValidateSheet(Request $request)
     {
+        $this->context->setRegion(Auth::user()->homeRegion());
         $this->authorize('validate', StatsReport::class);
 
         return view('import.index')->with([
-            'submitReport'            => false, // Controls whether or not to show Submit button
-            'showUploadForm'          => true,
+            'submitReport' => false, // Controls whether or not to show Submit button
+            'showUploadForm' => true,
             'showReportCheckSettings' => true,
-            'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),
+            'expectedDate' => ImportManager::getExpectedReportDate()->toDateString(),
         ]);
     }
 
@@ -44,6 +48,7 @@ class ImportController extends Controller
      */
     public function validateSheet(Request $request)
     {
+        $this->context->setRegion(Auth::user()->homeRegion());
         $this->authorize('validate', StatsReport::class);
 
         $enforceVersion = ($request->get('ignoreVersion') != 1);
@@ -63,11 +68,11 @@ class ImportController extends Controller
         $request->flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
         return view('import.index')->with([
-            'submitReport'            => true,
-            'showUploadForm'          => true,
+            'submitReport' => true,
+            'showUploadForm' => true,
             'showReportCheckSettings' => true,
-            'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),
-            'results'                 => $results,
+            'expectedDate' => ImportManager::getExpectedReportDate()->toDateString(),
+            'results' => $results,
         ]);
     }
 
@@ -81,8 +86,8 @@ class ImportController extends Controller
         $this->authorize('import', StatsReport::class);
 
         return view('admin.import')->with([
-            'submitReport'            => false, // Controls whether or not to show Submit button
-            'showUploadForm'          => true,
+            'submitReport' => false, // Controls whether or not to show Submit button
+            'showUploadForm' => true,
             'showReportCheckSettings' => false,
         ]);
     }
@@ -108,11 +113,11 @@ class ImportController extends Controller
         $request->flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
         return view('admin.import')->with([
-            'submitReport'            => false, // Controls whether or not to show Submit button
-            'showUploadForm'          => true,
+            'submitReport' => false, // Controls whether or not to show Submit button
+            'showUploadForm' => true,
             'showReportCheckSettings' => false,
-            'expectedDate'            => ImportManager::getExpectedReportDate()->toDateString(),
-            'results'                 => $results,
+            'expectedDate' => ImportManager::getExpectedReportDate()->toDateString(),
+            'results' => $results,
         ]);
     }
 

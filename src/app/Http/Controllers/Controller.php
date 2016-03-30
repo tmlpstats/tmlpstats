@@ -19,6 +19,7 @@ class Controller extends BaseController
 
     protected $region = null;
     protected $center = null;
+    protected $reportingDate = null;
 
     /**
      * Create a new controller instance.
@@ -105,7 +106,6 @@ class Controller extends BaseController
         // First try to get the date from the request
         if ($request->has('reportingDate') && preg_match('/^\d\d\d\d-\d\d-\d\d$/', $request->get('reportingDate'))) {
             $reportingDateString = $request->get('reportingDate');
-            Session::set('viewReportingDate', $reportingDateString);
         }
 
         // Then try to pull it from the session if it's there
@@ -127,11 +127,13 @@ class Controller extends BaseController
         }
 
         // Finally, if we don't have it yet make an educated guess
-        if ($reportingDateString && in_array($reportingDateString, $reportingDates)) {
-            $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
-        } else if (!$reportingDateString && $reportingDates) {
-            $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDates[0]);
-        } else if ($reportingDateString && !$reportingDates) {
+        if ($reportingDates) {
+            if (in_array($reportingDateString, $reportingDates)) {
+                $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
+            } else {
+                $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDates[0]);
+            }
+        } else if ($reportingDateString) {
             $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
         } else {
             $reportingDate = ImportManager::getExpectedReportDate();
@@ -165,7 +167,7 @@ class Controller extends BaseController
     public function setReportingDate(Carbon $reportingDate)
     {
         if ($reportingDate) {
-            Session::set('viewReportingDateId', $reportingDate->toDateString());
+            Session::set('viewReportingDate', $reportingDate->toDateString());
         }
 
         $this->reportingDate = $reportingDate;

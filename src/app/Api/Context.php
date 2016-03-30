@@ -13,6 +13,8 @@ class Context
 {
     protected $user = null;
     protected $request = null;
+    protected $region = null;
+    protected $center = null;
 
     public function __construct(Guard $auth, Request $request)
     {
@@ -25,16 +27,45 @@ class Context
         return $this->user;
     }
 
-    public function getCenter()
+    public function getCenter($fallback = false)
     {
-        // TODO do this right, don't make it reliant on controller state, invert the paradigm.
-        return App::make(Controller::class)->getCenter($this->request);
+        $center = $this->center;
+        if ($center == null && $fallback) {
+            // TODO do this right, don't make it reliant on controller state, invert the paradigm.
+            return App::make(Controller::class)->getCenter($this->request);
+        }
+        return $center;
     }
 
-    public function getRegion()
+    public function setCenter(Models\Center $center, $setRegion = true)
     {
-        // TODO do this right, don't make it reliant on controller state, invert the paradigm.
-        return App::make(Controller::class)->getRegion($this->request);
+        $this->center = $center;
+        if ($setRegion) {
+            $this->setRegion($center->region);
+        }
+    }
+
+    public function getGlobalRegion($fallback = false)
+    {
+        if ($region = $this->getRegion($fallback)) {
+            $region = $region->getParentGlobalRegion();
+        }
+        return $region;
+    }
+
+    public function getRegion($fallback = false)
+    {
+        $region = $this->region;
+        if ($region == null && $fallback) {
+            // TODO do this right, don't make it reliant on controller state, invert the paradigm.
+            $region = App::make(Controller::class)->getRegion($this->request);
+        }
+        return $region;
+    }
+
+    public function setRegion(Models\Region $region)
+    {
+        $this->region = $region;
     }
 
     public function getRawSetting($name, $center = null)
@@ -57,5 +88,11 @@ class Context
             return true;
         }
         return $value;
+    }
+
+    /** Currently unused. */
+    public function setReportingDate($reportingDate)
+    {
+        // TODO
     }
 }

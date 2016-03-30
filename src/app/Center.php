@@ -161,4 +161,15 @@ class Center extends Model
     {
         return $this->belongsTo('TmlpStats\Region');
     }
+
+    public function getUriCenterReport($reportingDate = null)
+    {
+        if ($reportingDate instanceof Carbon) {
+            $reportingDate = $reportingDate->toDateString();
+        }
+        return action('ReportsController@getCenterReport', [
+            'abbr' => strtolower($this->abbreviation),
+            'date' => $reportingDate,
+        ]);
+    }
 }

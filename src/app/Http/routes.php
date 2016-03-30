@@ -38,7 +38,7 @@ Route::get('statsreports/{id}/{report}', 'StatsReportController@dispatchReport')
 
 // Global Reports
 Route::resource('globalreports', 'GlobalReportController');
-Route::get('globalreports/{id}/{report}', 'GlobalReportController@dispatchReport');
+Route::get('globalreports/{id}/{report}/{regionAbbr?}', 'GlobalReportController@dispatchReport');
 
 // Report Tokens
 Route::resource('reporttokens', 'ReportTokenController');
@@ -61,7 +61,7 @@ Route::get('center/{abbr}', 'CenterController@dashboard');
 Route::resource('regions', 'RegionController');
 
 // Validate
-Route::get('validate', 'ImportController@indexValidateSheet');
+Route::get('validate', 'ImportController@indexValidateSheet')->name('validate');
 Route::post('validate', 'ImportController@validateSheet');
 
 // Import
@@ -69,6 +69,8 @@ Route::get('import', 'ImportController@indexImportSheet');
 Route::post('import', 'ImportController@importSheet');
 
 Route::match(['get', 'post'], 'home', 'HomeController@index');
+Route::match(['get', 'post'], 'home/{abbr}', 'HomeController@home');
+
 Route::get('/', 'WelcomeController@index');
 
 Route::post('home/clientsettings', function () {

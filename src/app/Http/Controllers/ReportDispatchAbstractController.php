@@ -37,7 +37,7 @@ abstract class ReportDispatchAbstractController extends Controller
      * @param $report
      * @return \Illuminate\View\View
      */
-    abstract public function runDispatcher(Request $request, $model, $report);
+    abstract public function runDispatcher(Request $request, $model, $report, $extra);
 
     /**
      * Get the cache key to use for given model/report combo
@@ -77,7 +77,7 @@ abstract class ReportDispatchAbstractController extends Controller
      * @param $report
      * @return View|string|null
      */
-    public function dispatchReport(Request $request, $id, $report)
+    public function dispatchReport(Request $request, $id, $report, $extra = null)
     {
         $model = $this->getById($id);
 
@@ -102,7 +102,7 @@ abstract class ReportDispatchAbstractController extends Controller
             // Note: Make sure you don't write to the session during runDispatcher.
             session_write_close();
 
-            $response = $this->runDispatcher($request, $model, $report);
+            $response = $this->runDispatcher($request, $model, $report, $extra);
         }
 
         if ($this->useCache($report) && $response) {

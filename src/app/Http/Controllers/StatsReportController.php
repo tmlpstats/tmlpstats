@@ -27,6 +27,7 @@ use TmlpStats\TmlpRegistrationData;
 class StatsReportController extends ReportDispatchAbstractController
 {
     const CACHE_TTL = 7 * 24 * 60;
+    protected $context;
 
     /**
      * Create a new controller instance.
@@ -35,6 +36,7 @@ class StatsReportController extends ReportDispatchAbstractController
     {
         $this->middleware('auth.token');
         $this->middleware('auth');
+        $this->context = App::make(Api\Context::class);
     }
 
     /**
@@ -143,6 +145,8 @@ class StatsReportController extends ReportDispatchAbstractController
     public function show(Request $request, $id)
     {
         $statsReport = StatsReport::findOrFail($id);
+        $this->context->setCenter($statsReport->center);
+        $this->context->setReportingDate($statsReport->reportingDate);
 
         $this->authorize('read', $statsReport);
 
@@ -371,10 +375,12 @@ class StatsReportController extends ReportDispatchAbstractController
         }
     }
 
-    public function runDispatcher(Request $request, $statsReport, $report)
+    public function runDispatcher(Request $request, $statsReport, $report, $extra = null)
     {
         $this->setCenter($statsReport->center);
+        $this->context->setCenter($statsReport->center);
         $this->setReportingDate($statsReport->reportingDate);
+        $this->context->setReportingDate($statsReport->reportingDate);
 
         if (!$statsReport->isValidated() && $report != 'results') {
             return '<p>This report did not pass validation. See Report Details for more information.</p>';

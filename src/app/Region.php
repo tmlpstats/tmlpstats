@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats;
 
+use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Model;
 use TmlpStats\Traits\CachedRelationships;
@@ -104,5 +105,21 @@ class Region extends Model
     public function centers()
     {
         return $this->hasMany('TmlpStats\Center');
+    }
+
+    public function abbrLower()
+    {
+        return strtolower($this->abbreviation);
+    }
+
+    public function getUriRegionReport($reportingDate = null)
+    {
+        if ($reportingDate instanceof Carbon) {
+            $reportingDate = $reportingDate->toDateString();
+        }
+        return action('ReportsController@getRegionReport', [
+            'abbr' => $this->abbrLower(),
+            'date' => $reportingDate,
+        ]);
     }
 }
