@@ -68,6 +68,11 @@ class Scoreboard implements Arrayable
         return $this->games[$gameKey];
     }
 
+    public function games()
+    {
+        return $this->games;
+    }
+
     ////////////
     /// Helpers for client code (quick set/get, etc)
 
