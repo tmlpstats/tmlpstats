@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Domain\Scoreboard;
-use TmlpStats\Domain\ScoreboardGame;
 use TmlpStats\Http\Controllers\CenterStatsController;
 use TmlpStats\Reports\Arrangements;
 
@@ -29,16 +28,20 @@ class LiveScoreboard extends AuthenticatedApiBase
         }
 
         $tempScores = $this->getTempScoreboardForCenter($center->id, $report->reportingDate);
+        $updatedAt = $report->submittedAt;
 
         // cap, cpc, etc, check for overrides
-        $scoreboard->eachGame(function (ScoreboardGame $game) use ($tempScores) {
+        foreach ($scoreboard->games() as $gameKey => $game) {
             $key = static::key($game->key, 'actual');
             if (isset($tempScores[$key])) {
-                $value = $tempScores[$key]->value;
-                $game->setActual($value);
+                $score = $tempScores[$key];
+                if ($updatedAt == null || $score->updatedAt->gt($updatedAt)) {
+                    $updatedAt = $score->updatedAt;
+                }
+                $game->setActual($score->value);
             }
-        });
-
+        }
+        $scoreboard->meta['updatedAt'] = $updatedAt;
         return $scoreboard;
     }
 

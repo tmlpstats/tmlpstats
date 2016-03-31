@@ -567,21 +567,21 @@ class StatsReportController extends ReportDispatchAbstractController
     public function getSummaryPageData(StatsReport $statsReport, $live = false)
     {
         $date = $statsReport->reportingDate->toDateString();
-
+        $liveData = null;
         if ($live) {
-            $reportData = App::make(Api\LiveScoreboard::class)->getCurrentScores($statsReport->center);
-        } else {
-            $centerStatsData = App::make(CenterStatsController::class)
-                ->getByStatsReport($statsReport, $statsReport->reportingDate);
+            $liveData = App::make(Api\LiveScoreboard::class)->getCurrentScores($statsReport->center);
+        }
 
-            $reportData = [];
-            if ($centerStatsData) {
-                // Center Games
-                $a = new Arrangements\GamesByWeek($centerStatsData);
-                $centerStatsData = $a->compose();
+        $centerStatsData = App::make(CenterStatsController::class)
+            ->getByStatsReport($statsReport, $statsReport->reportingDate);
 
-                $reportData = $centerStatsData['reportData'][$date];
-            }
+        $reportData = [];
+        if ($centerStatsData) {
+            // Center Games
+            $a = new Arrangements\GamesByWeek($centerStatsData);
+            $centerStatsData = $a->compose();
+
+            $reportData = $centerStatsData['reportData'][$date];
         }
 
         $coursesSummary = $this->getCoursesSummary($statsReport);
@@ -590,6 +590,7 @@ class StatsReportController extends ReportDispatchAbstractController
         $travelSummary = $this->getTravelSummary($statsReport, $teamMembersSummary, $registrationsSummary);
 
         $data = compact(
+            'liveData',
             'statsReport',
             'reportData',
             'date'

@@ -13,9 +13,11 @@ use TmlpStats as Models;
 class Scoreboard implements Arrayable
 {
     protected $games = [];
+    public $meta = null;
 
     protected function __construct()
     {
+        $this->meta = [];
         foreach (Models\Scoreboard::GAME_KEYS as $gameKey) {
             $this->games[$gameKey] = new ScoreboardGame($gameKey);
         }
