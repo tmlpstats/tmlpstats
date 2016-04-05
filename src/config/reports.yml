@@ -111,6 +111,18 @@ api:
           - name: value
             type: int
 
+  UserProfile:
+    type: namespace
+    children:
+      setLocale:
+        desc: Set locale information
+        params:
+          - name: locale
+            type: string
+          - name: timezone
+            type: string
+
+
 reports:
   # --- Local Statistician
 

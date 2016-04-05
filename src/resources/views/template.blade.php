@@ -105,24 +105,22 @@ $reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getRep
     <script src="{{ elixir('js/bundle.js') }}" type="text/javascript"></script>
 
     <script type="text/javascript">
-        $(document).ready(function () {
-
+        $(document).ready(function() {
             @if (Auth::check())
                 Tmlp.enableFeedback({
-                    firstName: '{{ Auth::user() ? Auth::user()->firstName : '' }}',
-                    email: '{{ Auth::user() ? Auth::user()->email : '' }}',
-                    feedbackUrl: '{{ url('/feedback') }}',
-                    csrfToken: '{{ csrf_token() }}'
+                    firstName: @json(Auth::user() ? Auth::user()->firstName : ''),
+                    email: @json(Auth::user() ? Auth::user()->email : ''),
+                    feedbackUrl: @json(url('/feedback')),
+                    csrfToken: @json(csrf_token())
                 });
+                @if (!Session::has('timezone') && !Session::has('locale'))
+                    Tmlp.setTimezone({
+                        isHome: @json(Request::is('/home'))
+                    });
+                @endif
+
             @endif
 
-            @if (!Session::has('timezone') || !Session::has('locale'))
-                Tmlp.setTimezone({
-                    clientSettingsUrl: '{{ url('/home/clientsettings') }}',
-                    csrfToken: '{{ csrf_token() }}',
-                    isHome: <?= Request::is('/home')? 'true': 'false' ?>
-                });
-            @endif
         });
     </script>
 

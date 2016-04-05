@@ -174,17 +174,9 @@ window.Tmlp = (function(window, $) {
         }
 
         if (!$.isEmptyObject(data)) {
-            $.ajax({
-                type: "POST",
-                url: config.clientSettingsUrl,
-                beforeSend: function (request) {
-                    request.setRequestHeader("X-CSRF-TOKEN", config.csrfToken);
-                },
-                data: $.param(data),
-                success: function () {
-                    if (config.isHome){
-                        location.reload();
-                    }
+            Api.UserProfile.setLocale(data, function() {
+                if (config.isHome){
+                    location.reload();
                 }
             });
         }

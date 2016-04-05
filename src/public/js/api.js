@@ -119,3 +119,15 @@ Api.LiveScoreboard = {
         return apiCall('LiveScoreboard.setScore', params, (callback || null), (errback || null));
     }
 };
+Api.UserProfile = {
+
+    /*
+    Set locale information
+    Parameters:
+      locale: string
+      timezone: string
+    */
+    setLocale: function(params, callback, errback) {
+        return apiCall('UserProfile.setLocale', params, (callback || null), (errback || null));
+    }
+};
