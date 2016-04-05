@@ -6,6 +6,8 @@ if (!isset($regionSelectAction)) {
     $regionSelectAction = 'ReportsController@getRegionReport';
 }
 
+$dateSelectAction = $context->dateSelectAction('foo');
+$reportingDate = $context->getReportingDate();
 $regions = TmlpStats\Region::isGlobal()->get();
 $currentRegion = $context->getGlobalRegion(false);
 $reports = null;
@@ -22,8 +24,7 @@ if ($currentRegion != null) {
 
 $currentCenter = $context->getCenter(true);
 
-$reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)
-                    ->getReportingDate(Request::instance());
+
 $reportingDateString = ($reportingDate != null) ? $reportingDate->toDateString() : null;
 
 
@@ -89,6 +90,11 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                             </a>
                             <ul id="reportSelect" class="dropdown-menu" role="menu">
                                 @foreach ($reports as $report)
+                                    @if ($dateSelectAction)
+                                        <li class="menu-option">
+                                            <a href="{{ $context->dateSelectAction($report->reportingDate) }}">{{ $report->reportingDate->format('M j, Y')}}</a>
+                                        </li>
+                                    @else
                                     <li class="menu-option" data-url="{{ url("/reports/dates/setActive") }}"
                                         data-value="{{ $report->reportingDate->toDateString() }}">
                                         <a href="#">
@@ -100,6 +106,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                                             {{ $report->reportingDate->format('M j, Y')}}
                                         </a>
                                     </li>
+                                    @endif
                                 @endforeach
                             </ul>
                         </li>
@@ -193,6 +200,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
             }
         );
 
+        @if (!$dateSelectAction)
         $("#reportSelect").on("click", "li.menu-option", function (e) {
             var url = $(this).attr('data-url');
             var data = {};
@@ -212,5 +220,6 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                 }
             });
         });
+        @endif
     });
 </script>

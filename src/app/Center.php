@@ -172,4 +172,9 @@ class Center extends Model
             'date' => $reportingDate,
         ]);
     }
+
+    public function abbrLower()
+    {
+        return strtolower($this->abbreviation);
+    }
 }
