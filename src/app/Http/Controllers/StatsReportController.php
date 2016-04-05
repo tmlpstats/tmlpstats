@@ -491,6 +491,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
         $tdo = [];
         $gitw = [];
+        $totals = [];
         $teamWithdraws = [];
         if ($teamMembers) {
             // Team Member stats
@@ -499,6 +500,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
             $tdo = $teamMembersCounts['reportData']['tdo'];
             $gitw = $teamMembersCounts['reportData']['gitw'];
+            $totals = $teamMembersCounts['reportData']['totals'];
             $teamWithdraws = $teamMembersCounts['reportData']['withdraws'];
         }
 
@@ -506,7 +508,8 @@ class StatsReportController extends ReportDispatchAbstractController
             'teamMembers',
             'tdo',
             'gitw',
-            'teamWithdraws'
+            'teamWithdraws',
+            'totals'
         );
     }
 

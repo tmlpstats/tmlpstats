@@ -147,8 +147,8 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
 <script>
     var tdoData = [
         <?php
-        $tdoTotal = $tdo && $tdo['percent']['total'] > 0
-            ? round($tdo['total'] / ($tdo['percent']['total'] / 100))
+        $tdoTotal = $totals
+            ? $totals['active']['team1'] + $totals['active']['team2']
             : 0;
         $tdoNotPresent = $tdo && $tdo['percent']['total'] > 0
             ? $tdoTotal - $tdo['total']
@@ -164,8 +164,8 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
     ];
     var gitwData = [
         <?php
-        $gitwTotal = $gitw && $gitw['percent']['total'] > 0
-            ? round($gitw['total'] / ($gitw['percent']['total'] / 100))
+        $gitwTotal = $totals
+            ? $totals['active']['team1'] + $totals['active']['team2']
             : 0;
         $gitwNotPresent = $gitw && $gitw['percent']['total'] > 0
             ? $gitwTotal - $gitw['total']

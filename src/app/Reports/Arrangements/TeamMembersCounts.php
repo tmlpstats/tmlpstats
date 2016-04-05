@@ -32,6 +32,10 @@ class TeamMembersCounts extends BaseArrangement
         $totals = [
             'team1' => 0,
             'team2' => 0,
+            'active' => [
+                'team1' => 0,
+                'team2' => 0,
+            ]
         ];
         $reportData = [];
         foreach ($teamMembersData as $data) {
@@ -65,6 +69,10 @@ class TeamMembersCounts extends BaseArrangement
 
         $t1Total = $totals['team1'] - $withdraws['team1'];
         $t2Total = $totals['team2'] - $withdraws['team2'];
+
+        $totals['active']['team1'] = $t1Total;
+        $totals['active']['team2'] = $t2Total;
+
         $total = $t1Total + $t2Total;
 
         if ($t1Total) {
