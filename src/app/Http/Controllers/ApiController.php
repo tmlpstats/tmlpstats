@@ -27,6 +27,7 @@ class ApiController extends ApiControllerBase
         "LocalReport.getClassListByQuarter" => "LocalReport__getClassListByQuarter",
         "LiveScoreboard.getCurrentScores" => "LiveScoreboard__getCurrentScores",
         "LiveScoreboard.setScore" => "LiveScoreboard__setScore",
+        "UserProfile.setLocale" => "UserProfile__setLocale",
     ];
 
     protected $unauthenticatedMethods = [
@@ -91,6 +92,13 @@ class ApiController extends ApiControllerBase
             $this->parse_string($input, 'game'),
             $this->parse_string($input, 'type'),
             $this->parse_int($input, 'value')
+        );
+    }
+    protected function UserProfile__setLocale($input)
+    {
+        return App::make(Api\UserProfile::class)->setLocale(
+            $this->parse_string($input, 'locale'),
+            $this->parse_string($input, 'timezone')
         );
     }
 }
