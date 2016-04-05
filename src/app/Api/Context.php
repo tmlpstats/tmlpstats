@@ -1,6 +1,7 @@
 <?php namespace TmlpStats\Api;
 
 use App;
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Request;
 use TmlpStats as Models;
@@ -15,6 +16,10 @@ class Context
     protected $request = null;
     protected $region = null;
     protected $center = null;
+    protected $reportingDate = null;
+
+    protected $dateSelectAction = null;
+    protected $dateSelectActionParams = [];
 
     public function __construct(Guard $auth, Request $request)
     {
@@ -90,9 +95,35 @@ class Context
         return $value;
     }
 
-    /** Currently unused. */
     public function setReportingDate($reportingDate)
     {
-        // TODO
+        $this->reportingDate = $reportingDate;
+    }
+
+    public function getReportingDate()
+    {
+        $reportingDate = $this->reportingDate;
+        if (!$reportingDate) {
+            $reportingDate = App::make(Controller::class)->getReportingDate($this->request);
+        }
+        return $reportingDate;
+    }
+
+    public function setDateSelectAction($action, $params = [])
+    {
+        $this->dateSelectAction = $action;
+        $this->dateSelectActionParams = $params;
+    }
+
+    public function dateSelectAction($date)
+    {
+        if ($date instanceof Carbon) {
+            $date = $date->toDateString();
+        }
+        if ($this->dateSelectAction) {
+            $params = array_merge($this->dateSelectActionParams, ['date' => $date]);
+            return action($this->dateSelectAction, $params);
+        }
+        return null;
     }
 }

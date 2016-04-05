@@ -76,6 +76,8 @@ class GlobalReportController extends ReportDispatchAbstractController
     public function showForRegion(Request $request, GlobalReport $globalReport, Region $region)
     {
         $this->context->setRegion($region);
+        $this->context->setReportingDate($globalReport->reportingDate);
+        $this->context->setDateSelectAction('ReportsController@getRegionReport', ['abbr' => $region->abbrLower()]);
         $this->authorize('read', $globalReport);
 
         $reportToken = Gate::allows('readLink', ReportToken::class) ? ReportToken::get($globalReport) : null;
@@ -175,16 +177,19 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     public function dispatchReport(Request $request, $id, $report, $regionAbbr = null)
     {
-        return parent::dispatchReport($request, $id, $report, ['regionAbbr' => $regionAbbr]);
+        $extra = [];
+        if ($regionAbbr) {
+            $region = Region::abbreviation($regionAbbr)->firstOrFail();
+            $this->context->setRegion($region);
+            $extra['region'] = $region;
+        }
+
+        return parent::dispatchReport($request, $id, $report, $extra);
     }
 
     public function runDispatcher(Request $request, $globalReport, $report, $extra)
     {
-        if ($regionAbbr = array_get($extra, 'regionAbbr', null)) {
-            $region = Region::abbreviation($regionAbbr)->firstOrFail();
-        } else {
-            $region = $this->getRegion($request, true);
-        }
+        $region = array_get($extra, 'region', $this->context->getRegion(true));
         $this->context->setRegion($region);
         $this->context->setReportingDate($globalReport->reportingDate);
         $this->setReportingDate($globalReport->reportingDate);

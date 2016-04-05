@@ -33,13 +33,19 @@ class HomeController extends Controller
         } else {
             $region = $this->getRegion($request);
             if ($region != null) {
-                return redirect(action('HomeController@home', ['abbr' => strtolower($region->abbreviation)]));
+                return redirect(action('HomeController@home', [
+                    'abbr' => $region->abbrLower(),
+                ]));
             }
         }
     }
 
-    public function home(Request $request, $abbr)
+    public function home(Request $request, $abbr, $date = null)
     {
+        if ($date) {
+            // yuck, going back and forth on date, but we'll deal for now.
+            $this->setReportingDate(Carbon::parse($date));
+        }
         $region = Region::abbreviation($abbr)->firstorFail();
         return $this->regionOverview($request, $region);
     }
@@ -53,7 +59,11 @@ class HomeController extends Controller
      */
     public function regionOverview(Request $request, Region $region)
     {
-        App::make(Api\Context::class)->setRegion($region);
+        $context = App::make(Api\Context::class);
+        $context->setRegion($region);
+        $context->setDateSelectAction('HomeController@home', [
+            'abbr' => $region->abbrLower(),
+        ]);
 
         if (Gate::denies('index', StatsReport::class)) {
             // If they aren't allowed to see the full home page, just return a blank home page
@@ -84,7 +94,6 @@ class HomeController extends Controller
         }
 
         $reportingDate = $this->getReportingDate($request, array_keys($reportingDates));
-
         $centers = Center::active()
             ->byRegion($region)
             ->orderBy('name', 'asc')

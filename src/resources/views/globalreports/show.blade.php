@@ -221,7 +221,7 @@
 
             // Load all of the pages
             $.each(pages, function (index, page) {
-                var url = "{{ url("/globalreports/{$globalReport->id}") }}/" + page + "/{{$region->abbreviation}}";
+                var url = "{{ url("/globalreports/{$globalReport->id}") }}/" + page + "/{{$region->abbrLower()}}";
                 var container = "#" + page + "-container";
 
                 // Display loader by default
@@ -239,7 +239,7 @@
 
             $.each(batchedPages, function (index, batch) {
                 var query = batch.shift();
-                var url = "{{ url("/globalreports/{$globalReport->id}") }}/" + query + "?region={{$region->abbreviation}}";
+                var url = "{{ url("/globalreports/{$globalReport->id}") }}/" + query + "/{{$region->abbrLower()}}";
 
                 $.each(batch, function (i, name) {
                     $("#" + name + "-container").html($("#loader").html());

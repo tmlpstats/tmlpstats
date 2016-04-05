@@ -147,7 +147,9 @@ class StatsReportController extends ReportDispatchAbstractController
         $statsReport = StatsReport::findOrFail($id);
         $this->context->setCenter($statsReport->center);
         $this->context->setReportingDate($statsReport->reportingDate);
-
+        $this->context->setDateSelectAction('ReportsController@getCenterReport', [
+            'abbr' => $statsReport->center->abbrLower(),
+        ]);
         $this->authorize('read', $statsReport);
 
         $sheetUrl = '';
