@@ -13,6 +13,7 @@ class LocalReport
     public function getQuarterScoreboard(Models\StatsReport $statsReport, $options = [])
     {
         $returnUnprocessed = isset($options['returnUnprocessed']) ? (bool) $options['returnUnprocessed'] : false;
+        $returnUnflattened = isset($options['returnUnflattened']) ? (bool) $options['returnUnflattened'] : false;
         $includeOriginalPromise = isset($options['includeOriginalPromise']) ? (bool) $options['includeOriginalPromise'] : false;
 
         $scoreboardData = [];
@@ -54,6 +55,9 @@ class LocalReport
         }
 
         if ($returnUnprocessed) {
+            if ($returnUnflattened) {
+                return $scoreboardData;
+            }
             return array_flatten($scoreboardData);
         }
 

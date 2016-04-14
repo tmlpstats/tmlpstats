@@ -99,7 +99,10 @@ class LiveScoreboard extends AuthenticatedApiBase
 
         // Step 2: Fill an input array with both values, faking them into the same week.
         if ($actualDate->ne($promiseDate)) {
-            $quarterData = App::make(LocalReport::class)->getQuarterScoreboard($report, ['returnUnprocessed' => true]);
+            $quarterData = App::make(LocalReport::class)->getQuarterScoreboard($report, [
+                'returnUnprocessed' => true,
+                'returnUnflattened' => true,
+            ]);
 
             $actualWeekData = $quarterData[$actualDate->toDateString()];
             $promiseWeekData = $quarterData[$promiseDate->toDateString()];
