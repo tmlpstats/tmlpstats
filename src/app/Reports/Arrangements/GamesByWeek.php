@@ -5,7 +5,7 @@ use TmlpStats\Scoreboard;
 
 class GamesByWeek extends BaseArrangement
 {
-    protected static $scored_games = Scoreboard::GAME_KEYS;
+    protected static $scoredGames = Scoreboard::GAME_KEYS;
 
     /*
      * Builds an array of weekly promise/actual pairs
@@ -32,7 +32,7 @@ class GamesByWeek extends BaseArrangement
 
             $scoreboard = $weeks->ensureWeek($data->reportingDate);
 
-            foreach (static::$scored_games as $game) {
+            foreach (static::$scoredGames as $game) {
                 // Round game because some reports calculate average game scores and values are provided as floats
                 $scoreboard->setValue($game, $data->type, round($data->$game));
             }

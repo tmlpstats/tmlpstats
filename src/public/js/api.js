@@ -60,40 +60,41 @@ Api.GlobalReport = {
     Get ratings for all teams
     Parameters:
       globalReport: GlobalReport
+      region: Region
     */
     getRating: function(params, callback, errback) {
         return apiCall('GlobalReport.getRating', params, (callback || null), (errback || null));
-    }
-};
-Api.LocalReport = {
-
-    /*
-    Get promises for all weeks within a quarter
-    Parameters:
-      localReport: LocalReport
-      enable_something: bool
-      first_name: string
-    */
-    getWeeklyPromises: function(params, callback, errback) {
-        return apiCall('LocalReport.getWeeklyPromises', params, (callback || null), (errback || null));
     },
 
     /*
-    Get the list of all team members
+    Get scoreboard for all weeks within a quarter
     Parameters:
-      localReport: LocalReport
+      globalReport: GlobalReport
+      region: Region
     */
-    getClassList: function(params, callback, errback) {
-        return apiCall('LocalReport.getClassList', params, (callback || null), (errback || null));
+    getQuarterScoreboard: function(params, callback, errback) {
+        return apiCall('GlobalReport.getQuarterScoreboard', params, (callback || null), (errback || null));
     },
 
     /*
-    Get the list of all team members, arranged by by T1/T2 and by quarter
+    Get scoreboard for a single week within a quarter
     Parameters:
-      localReport: LocalReport
+      globalReport: GlobalReport
+      region: Region
     */
-    getClassListByQuarter: function(params, callback, errback) {
-        return apiCall('LocalReport.getClassListByQuarter', params, (callback || null), (errback || null));
+    getWeekScoreboard: function(params, callback, errback) {
+        return apiCall('GlobalReport.getWeekScoreboard', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get scoreboard for a single week within a quarter by center
+    Parameters:
+      globalReport: GlobalReport
+      region: Region
+      options: array
+    */
+    getWeekScoreboardByCenter: function(params, callback, errback) {
+        return apiCall('GlobalReport.getWeekScoreboardByCenter', params, (callback || null), (errback || null));
     }
 };
 Api.LiveScoreboard = {
@@ -117,6 +118,45 @@ Api.LiveScoreboard = {
     */
     setScore: function(params, callback, errback) {
         return apiCall('LiveScoreboard.setScore', params, (callback || null), (errback || null));
+    }
+};
+Api.LocalReport = {
+
+    /*
+    Get scoreboard for all weeks within a quarter
+    Parameters:
+      localReport: LocalReport
+      options: array
+    */
+    getQuarterScoreboard: function(params, callback, errback) {
+        return apiCall('LocalReport.getQuarterScoreboard', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get scoreboard for a single week within a quarter
+    Parameters:
+      localReport: LocalReport
+    */
+    getWeekScoreboard: function(params, callback, errback) {
+        return apiCall('LocalReport.getWeekScoreboard', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get the list of all team members
+    Parameters:
+      localReport: LocalReport
+    */
+    getClassList: function(params, callback, errback) {
+        return apiCall('LocalReport.getClassList', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get the list of all team members, arranged by T1/T2 and by quarter
+    Parameters:
+      localReport: LocalReport
+    */
+    getClassListByQuarter: function(params, callback, errback) {
+        return apiCall('LocalReport.getClassListByQuarter', params, (callback || null), (errback || null));
     }
 };
 Api.UserProfile = {

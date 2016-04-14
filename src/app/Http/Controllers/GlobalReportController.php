@@ -271,38 +271,24 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $globalReportData = App::make(CenterStatsController::class)
-            ->getByGlobalReport($globalReport, $region, $globalReport->reportingDate);
-        if (!$globalReportData) {
-            return null;
-        }
-
-        $a = new Arrangements\GamesByWeek($globalReportData);
-        $weeklyData = $a->compose();
+        $weeklyData = App::make(Api\GlobalReport::class)->getQuarterScoreboard($globalReport, $region);
 
         $a = new Arrangements\RegionByRating($statsReports);
         $data = $a->compose();
 
         $dateString = $globalReport->reportingDate->toDateString();
-        $data['summary']['points'] = $weeklyData['reportData'][$dateString]['points']['total'];
-        $data['summary']['rating'] = $weeklyData['reportData'][$dateString]['rating'];
+        $data['summary']['points'] = $weeklyData[$dateString]['points']['total'];
+        $data['summary']['rating'] = $weeklyData[$dateString]['rating'];
 
         return view('globalreports.details.ratingsummary', $data);
     }
 
     protected function getRegionalStats(GlobalReport $globalReport, Region $region)
     {
-        $globalReportData = App::make(CenterStatsController::class)->getByGlobalReport($globalReport, $region);
-        if (!$globalReportData) {
-            return null;
-        }
-
-        $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
-
-        $a = new Arrangements\GamesByWeek($globalReportData);
-        $weeklyData = $a->compose();
-
-        $a = new Arrangements\GamesByMilestone(['weeks' => $weeklyData['reportData'], 'quarter' => $quarter]);
+        $a = new Arrangements\GamesByMilestone([
+            'weeks' => App::make(Api\GlobalReport::class)->getQuarterScoreboard($globalReport, $region),
+            'quarter' => Quarter::getQuarterByDate($globalReport->reportingDate, $region),
+        ]);
         $data = $a->compose();
 
         return view('reports.centergames.milestones', $data);
@@ -310,27 +296,16 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getGamesByCenter(GlobalReport $globalReport, Region $region)
     {
-        $globalReportData = App::make(CenterStatsController::class)
-            ->getByGlobalReportUnprocessed($globalReport, $region, $globalReport->reportingDate);
-        if (!$globalReportData) {
-            return null;
-        }
+        $reportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region);
 
-        $statsReports = [];
-        $centersData = [];
-        foreach ($globalReportData as $centerStatsData) {
-            $centerName = $centerStatsData->statsReport->center->name;
-            $statsReports[$centerName] = $centerStatsData->statsReport;
+        $statsReports = $globalReport->statsReports()
+                                     ->validated()
+                                     ->byRegion($region)
+                                     ->get();
 
-            $centersData[$centerName][] = $centerStatsData;
-        }
-
-        $reportData = [];
-        foreach ($centersData as $centerName => $centerData) {
-            $a = new Arrangements\GamesByWeek($centerData);
-            $dataReport = $a->compose();
-            $reportData[$centerName] = $dataReport['reportData'][$globalReport->reportingDate->toDateString()];
-            $reportData[$centerName]['statsReport'] = $statsReports[$centerName];
+        foreach ($statsReports as $statsReport) {
+            $centerName = $statsReport->center->name;
+            $reportData[$centerName]['statsReport'] = $statsReport;
         }
 
         $totals = [];
@@ -368,33 +343,22 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getRepromisesByCenter(GlobalReport $globalReport, Region $region)
     {
         $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
+        $quarterEndDate = $quarter->getQuarterEndDate();
 
-        $globalReportData = App::make(CenterStatsController::class)
-            ->getByGlobalReportUnprocessed($globalReport, $region, $quarter->getQuarterEndDate(), true);
-        if (!$globalReportData) {
-            return null;
-        }
+        $reportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region, [
+            'includeOriginalPromise' => true,
+            'date' => $quarterEndDate,
+        ]);
 
-        $statsReports = [];
-        $centersData = [];
-        foreach ($globalReportData as $centerStatsData) {
-            if (!$centerStatsData) {
-                continue;
-            }
+        $statsReportsAll = $globalReport->statsReports()
+                                        ->validated()
+                                        ->byRegion($region)
+                                        ->reportingDate($globalReport->reportingDate)
+                                        ->get();
 
-            $centerName = $centerStatsData->statsReport->center->name;
-            $statsReports[$centerName] = $centerStatsData->statsReport;
-
-            $centersData[$centerName][] = $centerStatsData;
-        }
-
-        $reportData = [];
-        foreach ($centersData as $centerName => $centerData) {
-            $a = new Arrangements\GamesByWeek($centerData);
-            $dataReport = $a->compose();
-            $reportData[$centerName] = $dataReport['reportData'][$quarter->getQuarterEndDate()
-                    ->toDateString()];
-            $reportData[$centerName]['statsReport'] = $statsReports[$centerName];
+        foreach ($statsReportsAll as $report) {
+            $centerName = $report->center->name;
+            $reportData[$centerName]['statsReport'] = $report;
         }
 
         $totals = [];
@@ -426,7 +390,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             $totals['gitw']['actual'] = round($totals['gitw']['actual'] / count($reportData));
         }
 
-        $includeActual = $globalReport->reportingDate->eq($quarter->getQuarterEndDate());
+        $includeActual = $globalReport->reportingDate->eq($quarterEndDate);
         $includeOriginal = true;
 
         return view('globalreports.details.centergames', compact(
@@ -813,53 +777,30 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getRegPerParticipant(GlobalReport $globalReport, Region $region)
     {
-        $globalReportData = App::make(CenterStatsController::class)
-            ->getByGlobalReportUnprocessed($globalReport, $region, $globalReport->reportingDate);
-        if (!$globalReportData) {
-            return null;
-        }
+        $reportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region);
 
         $lastGlobalReport = GlobalReport::reportingDate($globalReport->reportingDate->copy()->subWeek())->first();
         if (!$lastGlobalReport) {
             return null;
         }
 
-        $lastGlobalReportData = App::make(CenterStatsController::class)
-            ->getByGlobalReportUnprocessed($lastGlobalReport, $region, $lastGlobalReport->reportingDate);
-        if (!$lastGlobalReportData) {
-            return null;
-        }
+        $lastWeekReportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($lastGlobalReport, $region);
+
+        $statsReportsAll = $globalReport->statsReports()
+                                        ->validated()
+                                        ->byRegion($region)
+                                        ->reportingDate($globalReport->reportingDate)
+                                        ->get();
 
         $statsReports = [];
-        $centersData = [];
-        foreach ($globalReportData as $centerStatsData) {
-            $centerName = $centerStatsData->statsReport->center->name;
-            $statsReports[$centerName] = $centerStatsData->statsReport;
-
-            $centersData[$centerName][] = $centerStatsData;
-        }
-
-        $lastWeekCentersData = [];
-        foreach ($lastGlobalReportData as $centerStatsData) {
-            $centerName = $centerStatsData->statsReport->center->name;
-
-            $lastWeekCentersData[$centerName][] = $centerStatsData;
+        foreach ($statsReportsAll as $report) {
+            $centerName = $report->center->name;
+            $statsReports[$centerName] = $report;
         }
 
         $games = ['cap', 'cpc', 'lf'];
-        $reportData = [];
-        $lastWeekReportData = [];
-        foreach ($centersData as $centerName => $centerData) {
-            $a = new Arrangements\GamesByWeek($centerData);
-            $dataReport = $a->compose();
-            $reportData[$centerName] = $dataReport['reportData'][$globalReport->reportingDate->toDateString()];
+        foreach ($reportData as $centerName => $centerData) {
             $reportData[$centerName]['statsReport'] = $statsReports[$centerName];
-
-            if (isset($lastWeekCentersData[$centerName])) {
-                $a = new Arrangements\GamesByWeek($lastWeekCentersData[$centerName]);
-                $dataReport = $a->compose();
-                $lastWeekReportData[$centerName] = $dataReport['reportData'][$lastGlobalReport->reportingDate->toDateString()];
-            }
         }
         ksort($reportData);
 

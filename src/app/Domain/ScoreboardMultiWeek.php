@@ -16,7 +16,7 @@ class ScoreboardMultiWeek
     public function ensureWeek(Carbon $day)
     {
         $key = $day->toDateString();
-        if (!array_key_exists($key, $this->weeks)) {
+        if (!isset($this->weeks[$key])) {
             $this->weeks[$key] = Scoreboard::blank();
         }
         return $this->weeks[$key];
@@ -31,7 +31,7 @@ class ScoreboardMultiWeek
         $output = [];
         $weeks = $this->weeks;
         ksort($weeks);
-        foreach ($weeks as $key => &$scoreboard) {
+        foreach ($weeks as $key => $scoreboard) {
             $output[$key] = $scoreboard->toArray();
         }
         return $output;

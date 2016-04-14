@@ -22,11 +22,15 @@ class ApiController extends ApiControllerBase
         "Context.setCenter" => "Context__setCenter",
         "Context.getSetting" => "Context__getSetting",
         "GlobalReport.getRating" => "GlobalReport__getRating",
-        "LocalReport.getWeeklyPromises" => "LocalReport__getWeeklyPromises",
-        "LocalReport.getClassList" => "LocalReport__getClassList",
-        "LocalReport.getClassListByQuarter" => "LocalReport__getClassListByQuarter",
+        "GlobalReport.getQuarterScoreboard" => "GlobalReport__getQuarterScoreboard",
+        "GlobalReport.getWeekScoreboard" => "GlobalReport__getWeekScoreboard",
+        "GlobalReport.getWeekScoreboardByCenter" => "GlobalReport__getWeekScoreboardByCenter",
         "LiveScoreboard.getCurrentScores" => "LiveScoreboard__getCurrentScores",
         "LiveScoreboard.setScore" => "LiveScoreboard__setScore",
+        "LocalReport.getQuarterScoreboard" => "LocalReport__getQuarterScoreboard",
+        "LocalReport.getWeekScoreboard" => "LocalReport__getWeekScoreboard",
+        "LocalReport.getClassList" => "LocalReport__getClassList",
+        "LocalReport.getClassListByQuarter" => "LocalReport__getClassListByQuarter",
         "UserProfile.setLocale" => "UserProfile__setLocale",
     ];
 
@@ -56,27 +60,30 @@ class ApiController extends ApiControllerBase
     protected function GlobalReport__getRating($input)
     {
         return App::make(Api\GlobalReport::class)->getRating(
-            $this->parse_GlobalReport($input, 'globalReport')
+            $this->parse_GlobalReport($input, 'globalReport'),
+            $this->parse_Region($input, 'region')
         );
     }
-    protected function LocalReport__getWeeklyPromises($input)
+    protected function GlobalReport__getQuarterScoreboard($input)
     {
-        return App::make(Api\LocalReport::class)->getWeeklyPromises(
-            $this->parse_LocalReport($input, 'localReport'),
-            $this->parse_bool($input, 'enable_something'),
-            $this->parse_string($input, 'first_name')
+        return App::make(Api\GlobalReport::class)->getQuarterScoreboard(
+            $this->parse_GlobalReport($input, 'globalReport'),
+            $this->parse_Region($input, 'region')
         );
     }
-    protected function LocalReport__getClassList($input)
+    protected function GlobalReport__getWeekScoreboard($input)
     {
-        return App::make(Api\LocalReport::class)->getClassList(
-            $this->parse_LocalReport($input, 'localReport')
+        return App::make(Api\GlobalReport::class)->getWeekScoreboard(
+            $this->parse_GlobalReport($input, 'globalReport'),
+            $this->parse_Region($input, 'region')
         );
     }
-    protected function LocalReport__getClassListByQuarter($input)
+    protected function GlobalReport__getWeekScoreboardByCenter($input)
     {
-        return App::make(Api\LocalReport::class)->getClassListByQuarter(
-            $this->parse_LocalReport($input, 'localReport')
+        return App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter(
+            $this->parse_GlobalReport($input, 'globalReport'),
+            $this->parse_Region($input, 'region'),
+            $this->parse_array($input, 'options')
         );
     }
     protected function LiveScoreboard__getCurrentScores($input)
@@ -92,6 +99,31 @@ class ApiController extends ApiControllerBase
             $this->parse_string($input, 'game'),
             $this->parse_string($input, 'type'),
             $this->parse_int($input, 'value')
+        );
+    }
+    protected function LocalReport__getQuarterScoreboard($input)
+    {
+        return App::make(Api\LocalReport::class)->getQuarterScoreboard(
+            $this->parse_LocalReport($input, 'localReport'),
+            $this->parse_array($input, 'options')
+        );
+    }
+    protected function LocalReport__getWeekScoreboard($input)
+    {
+        return App::make(Api\LocalReport::class)->getWeekScoreboard(
+            $this->parse_LocalReport($input, 'localReport')
+        );
+    }
+    protected function LocalReport__getClassList($input)
+    {
+        return App::make(Api\LocalReport::class)->getClassList(
+            $this->parse_LocalReport($input, 'localReport')
+        );
+    }
+    protected function LocalReport__getClassListByQuarter($input)
+    {
+        return App::make(Api\LocalReport::class)->getClassListByQuarter(
+            $this->parse_LocalReport($input, 'localReport')
         );
     }
     protected function UserProfile__setLocale($input)

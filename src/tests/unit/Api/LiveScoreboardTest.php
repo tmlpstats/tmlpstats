@@ -3,6 +3,7 @@ namespace TmlpStats\Tests\Api;
 
 use App;
 use Carbon\Carbon;
+use Mockery;
 use TmlpStats as Models;
 use TmlpStats\Domain;
 use TmlpStats\Api;
@@ -13,6 +14,11 @@ class LiveScoreboardTest extends TestAbstract
 {
     protected $instantiateApp = true;
     protected $testClass = Api\LiveScoreboard::class;
+
+    public function testGetOfficialScores()
+    {
+        $this->markTestIncomplete('Test needs to be rewritten after we have db testing support.');
+    }
 
     public function testSetScore()
     {
