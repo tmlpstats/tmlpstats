@@ -50,7 +50,7 @@ class Scoreboard implements Arrayable
     public function points()
     {
         $total = 0;
-        foreach ($this->games as &$game) {
+        foreach ($this->games as $game) {
             $total += $game->points();
         }
         return $total;
@@ -84,8 +84,7 @@ class Scoreboard implements Arrayable
      */
     public function eachGame(\Closure $callback)
     {
-        foreach ($this->games as &$game) {
-            //$bound = $callback->bindTo($game);
+        foreach ($this->games as $game) {
             $callback($game);
         }
     }
@@ -98,8 +97,7 @@ class Scoreboard implements Arrayable
      */
     public function setValue($gameKey, $type, $value)
     {
-        $game = &$this->games[$gameKey];
-        $game->set($type, $value);
+        $this->games[$gameKey]->set($type, $value);
     }
 
     ////////////
@@ -107,12 +105,15 @@ class Scoreboard implements Arrayable
 
     public function parseArray($data)
     {
-        foreach ($this->games as $gameKey => &$game) {
+        foreach ($this->games as $gameKey => $game) {
             if (($promise = array_get($data, "promise.{$gameKey}", null)) !== null) {
-                $game->setPromise($promise);
+                $this->games[$gameKey]->setPromise($promise);
             }
             if (($actual = array_get($data, "actual.{$gameKey}", null)) !== null) {
-                $game->setActual($actual);
+                $this->games[$gameKey]->setActual($actual);
+            }
+            if (($original = array_get($data, "original.{$gameKey}", null)) !== null) {
+                $this->games[$gameKey]->setActual($original);
             }
         }
     }
@@ -141,16 +142,18 @@ class Scoreboard implements Arrayable
             'games' => [],
         ];
 
-        foreach ($this->games as $gameKey => &$game) {
+        foreach ($this->games as $gameKey => $game) {
             $g = [];
             $v['promise'][$gameKey] = $g['promise'] = $game->promise();
             $v['actual'][$gameKey] = $g['actual'] = $game->actual();
             $v['percent'][$gameKey] = $g['percent'] = $game->percent();
             $v['points'][$gameKey] = $g['points'] = $game->points();
+            if ($game->originalPromise()) {
+                $v['original'][$gameKey] = $g['original'] = $game->originalPromise();
+            }
             // set the additional key for great format switch
             $v['games'][$gameKey] = $g;
         }
         return $v;
     }
-
 }
