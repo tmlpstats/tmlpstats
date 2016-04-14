@@ -13,6 +13,7 @@ class ScoreboardGame
     public $key;
     private $promise = 0;
     private $actual = null;
+    private $originalPromise = null;
 
     public function __construct($gameKey)
     {
@@ -27,6 +28,11 @@ class ScoreboardGame
     public function actual()
     {
         return $this->actual;
+    }
+
+    public function originalPromise()
+    {
+        return $this->originalPromise;
     }
 
     public function percent()
@@ -48,6 +54,11 @@ class ScoreboardGame
         $this->promise = $promise;
     }
 
+    public function setOriginalPromise($promise)
+    {
+        $this->originalPromise = $promise;
+    }
+
     public function setActual($actual)
     {
         $this->actual = $actual;
@@ -59,6 +70,8 @@ class ScoreboardGame
             $this->setPromise($value);
         } else if ($type == 'actual') {
             $this->setActual($value);
+        } else if ($type == 'original') {
+            $this->setOriginalPromise($value);
         } else {
             throw new \Exception("Unknown type {$type}");
         }
@@ -77,5 +90,4 @@ class ScoreboardGame
         // note the intentional inversion of these two values from the one on Scoreboard
         return Models\Scoreboard::getPoints($percent, $gameKey);
     }
-
 }
