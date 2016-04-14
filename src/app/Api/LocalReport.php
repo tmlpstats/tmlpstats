@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Api;
+<?php
+namespace TmlpStats\Api;
 
 // This is an API servicer. All API methods are simple static methods
 // that take typed input and return array responses.
