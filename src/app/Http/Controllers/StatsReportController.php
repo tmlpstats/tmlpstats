@@ -681,18 +681,33 @@ class StatsReportController extends ReportDispatchAbstractController
         return view('statsreports.details.contactinfo', compact('contacts'));
     }
 
-    protected function getGitwSummary(StatsReport $statsReport)
+    protected function getMemberSummaryData(StatsReport $statsReport)
     {
         $weeksData = [];
 
         $date = $statsReport->quarter->getFirstWeekDate($statsReport->center);
         while ($date->lte($statsReport->reportingDate)) {
             $globalReport = GlobalReport::reportingDate($date)->first();
-            $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
-            $weeksData[$date->toDateString()] = $report ? App::make(TeamMembersController::class)
-                ->getByStatsReport($report) : null;
+
+            $report = null;
+            if ($globalReport) {
+                $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
+            }
+
+            $weeksData[$date->toDateString()] = null;
+            if ($report) {
+                $weeksData[$date->toDateString()] = App::make(TeamMembersController::class)->getByStatsReport($report);
+            }
+
             $date->addWeek();
         }
+
+        return $weeksData;
+    }
+
+    protected function getGitwSummary(StatsReport $statsReport)
+    {
+        $weeksData = $this->getMemberSummaryData($statsReport);
         if (!$weeksData) {
             return null;
         }
@@ -705,16 +720,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
     protected function getTdoSummary(StatsReport $statsReport)
     {
-        $weeksData = [];
-
-        $date = $statsReport->quarter->getFirstWeekDate($statsReport->center);
-        while ($date->lte($statsReport->reportingDate)) {
-            $globalReport = GlobalReport::reportingDate($date)->first();
-            $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
-            $weeksData[$date->toDateString()] = $report ? App::make(TeamMembersController::class)
-                ->getByStatsReport($report) : null;
-            $date->addWeek();
-        }
+        $weeksData = $this->getMemberSummaryData($statsReport);
         if (!$weeksData) {
             return null;
         }
