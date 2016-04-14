@@ -25,10 +25,12 @@ class ApiController extends ApiControllerBase
         "GlobalReport.getQuarterScoreboard" => "GlobalReport__getQuarterScoreboard",
         "GlobalReport.getWeekScoreboard" => "GlobalReport__getWeekScoreboard",
         "GlobalReport.getWeekScoreboardByCenter" => "GlobalReport__getWeekScoreboardByCenter",
+        "GlobalReport.getIncomingTeamMembersListByCenter" => "GlobalReport__getIncomingTeamMembersListByCenter",
         "LiveScoreboard.getCurrentScores" => "LiveScoreboard__getCurrentScores",
         "LiveScoreboard.setScore" => "LiveScoreboard__setScore",
         "LocalReport.getQuarterScoreboard" => "LocalReport__getQuarterScoreboard",
         "LocalReport.getWeekScoreboard" => "LocalReport__getWeekScoreboard",
+        "LocalReport.getIncomingTeamMembersList" => "LocalReport__getIncomingTeamMembersList",
         "LocalReport.getClassList" => "LocalReport__getClassList",
         "LocalReport.getClassListByQuarter" => "LocalReport__getClassListByQuarter",
         "UserProfile.setLocale" => "UserProfile__setLocale",
@@ -86,6 +88,14 @@ class ApiController extends ApiControllerBase
             $this->parse_array($input, 'options')
         );
     }
+    protected function GlobalReport__getIncomingTeamMembersListByCenter($input)
+    {
+        return App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter(
+            $this->parse_GlobalReport($input, 'globalReport'),
+            $this->parse_Region($input, 'region'),
+            $this->parse_array($input, 'options')
+        );
+    }
     protected function LiveScoreboard__getCurrentScores($input)
     {
         return App::make(Api\LiveScoreboard::class)->getCurrentScores(
@@ -112,6 +122,13 @@ class ApiController extends ApiControllerBase
     {
         return App::make(Api\LocalReport::class)->getWeekScoreboard(
             $this->parse_LocalReport($input, 'localReport')
+        );
+    }
+    protected function LocalReport__getIncomingTeamMembersList($input)
+    {
+        return App::make(Api\LocalReport::class)->getIncomingTeamMembersList(
+            $this->parse_LocalReport($input, 'localReport'),
+            $this->parse_array($input, 'options')
         );
     }
     protected function LocalReport__getClassList($input)

@@ -92,6 +92,16 @@ api:
           - name: options
             type: array
 
+      getIncomingTeamMembersListByCenter:
+        desc: Get the list of incoming team members by center
+        params:
+          - name: globalReport
+            type: GlobalReport
+          - name: region
+            type: Region
+          - name: options
+            type: array
+
   LiveScoreboard:
     type: namespace
     children:
@@ -131,6 +141,14 @@ api:
         params:
           - name: localReport
             type: LocalReport
+
+      getIncomingTeamMembersList:
+        desc: Get the list of incoming team members
+        params:
+          - name: localReport
+            type: LocalReport
+          - name: options
+            type: array
 
       getClassList:
         desc: Get the list of all team members

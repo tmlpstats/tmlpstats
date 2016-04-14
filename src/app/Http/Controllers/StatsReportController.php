@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Http\Controllers;
+<?php
+namespace TmlpStats\Http\Controllers;
 
 use App;
 use Auth;
@@ -517,7 +518,9 @@ class StatsReportController extends ReportDispatchAbstractController
 
     public function getRegistrationsSummary(StatsReport $statsReport)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
+        $registrations = App::make(Api\LocalReport::class)->getIncomingTeamMembersList($statsReport, [
+            'returnUnprocessed' => true,
+        ]);
 
         $applications = [];
         $applicationWithdraws = [];
@@ -629,33 +632,24 @@ class StatsReportController extends ReportDispatchAbstractController
 
     protected function getTmlpRegistrationsByStatus(StatsReport $statsReport)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
-        if (!$registrations) {
-            return null;
-        }
+        $registrations = App::make(Api\LocalReport::class)->getIncomingTeamMembersList($statsReport, [
+            'returnUnprocessed' => true,
+        ]);
 
         $a = new Arrangements\TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
         $data = $a->compose();
 
-        $data = array_merge($data, ['reportingDate' => $statsReport->reportingDate]);
-
-        return view('statsreports.details.tmlpregistrationsbystatus', $data);
+        return view('statsreports.details.tmlpregistrationsbystatus', [
+            'reportData' => $data['reportData'],
+            'reportingDate' => $statsReport->reportingDate,
+        ]);
     }
 
     protected function getTmlpRegistrations(StatsReport $statsReport)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
-        if (!$registrations) {
-            return null;
-        }
-
-        $a = new Arrangements\TmlpRegistrationsByIncomingQuarter([
-            'registrationsData' => $registrations,
-            'quarter' => $statsReport->quarter,
+        return view('statsreports.details.tmlpregistrations', [
+            'reportData' => App::make(Api\LocalReport::class)->getIncomingTeamMembersList($statsReport),
         ]);
-        $data = $a->compose();
-
-        return view('statsreports.details.tmlpregistrations', $data);
     }
 
     protected function getCourses(StatsReport $statsReport)
@@ -773,7 +767,9 @@ class StatsReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $registrationsData = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
+        $registrationsData = App::make(Api\LocalReport::class)->getIncomingTeamMembersList($statsReport, [
+            'returnUnprocessed' => true,
+        ]);
 
         $registrations = [];
         if ($registrationsData) {
@@ -867,7 +863,9 @@ class StatsReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $registrationsData = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
+        $registrationsData = App::make(Api\LocalReport::class)->getIncomingTeamMembersList($statsReport, [
+            'returnUnprocessed' => true,
+        ]);
 
         $registrations = [];
         if ($registrationsData) {
@@ -952,22 +950,8 @@ class StatsReportController extends ReportDispatchAbstractController
         $teamLastWeekByQuarter = $a->compose();
         $teamLastWeekByQuarter = $teamLastWeekByQuarter['reportData'];
 
-        $incomingDataThisWeek = App::make(TmlpRegistrationsController::class)->getByStatsReport($statsReport);
-        $incomingDataLastWeek = App::make(TmlpRegistrationsController::class)->getByStatsReport($lastStatsReport);
-
-        $a = new Arrangements\TmlpRegistrationsByIncomingQuarter([
-            'registrationsData' => $incomingDataThisWeek,
-            'quarter' => $statsReport->quarter,
-        ]);
-        $incomingThisWeekByQuarter = $a->compose();
-        $incomingThisWeekByQuarter = $incomingThisWeekByQuarter['reportData'];
-
-        $a = new Arrangements\TmlpRegistrationsByIncomingQuarter([
-            'registrationsData' => $incomingDataLastWeek,
-            'quarter' => $statsReport->quarter,
-        ]);
-        $incomingLastWeekByQuarter = $a->compose();
-        $incomingLastWeekByQuarter = $incomingLastWeekByQuarter['reportData'];
+        $incomingThisWeekByQuarter = App::make(Api\LocalReport::class)->getIncomingTeamMembersList($statsReport);
+        $incomingLastWeekByQuarter = App::make(Api\LocalReport::class)->getIncomingTeamMembersList($lastStatsReport);
 
         // Cleanup incoming withdraws
         // Remove people that were withdrawn and moved to the future weekend section
