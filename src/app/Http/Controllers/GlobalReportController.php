@@ -403,25 +403,24 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getTmlpRegistrationsByStatus(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
-        if (!$registrations) {
-            return null;
-        }
+        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+            'returnUnprocessed' => true,
+        ]);
 
         $a = new Arrangements\TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
         $data = $a->compose();
 
-        $data = array_merge($data, ['reportingDate' => $globalReport->reportingDate]);
-
-        return view('globalreports.details.applicationsbystatus', $data);
+        return view('globalreports.details.applicationsbystatus', [
+            'reportData' => $data['reportData'],
+            'reportingDate' => $globalReport->reportingDate,
+        ]);
     }
 
     protected function getTmlpRegistrationsOverdue(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
-        if (!$registrations) {
-            return null;
-        }
+        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+            'returnUnprocessed' => true,
+        ]);
 
         $a = new Arrangements\TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
         $statusData = $a->compose();
@@ -429,17 +428,17 @@ class GlobalReportController extends ReportDispatchAbstractController
         $a = new Arrangements\TmlpRegistrationsByOverdue(['registrationsData' => $statusData['reportData']]);
         $data = $a->compose();
 
-        $data = array_merge($data, ['reportingDate' => $globalReport->reportingDate]);
-
-        return view('globalreports.details.applicationsoverdue', $data);
+        return view('globalreports.details.applicationsoverdue', [
+            'reportData' => $data['reportData'],
+            'reportingDate' => $globalReport->reportingDate,
+        ]);
     }
 
     protected function getTmlpRegistrationsOverview(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
-        if (!$registrations) {
-            return null;
-        }
+        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+            'returnUnprocessed' => true,
+        ]);
 
         $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport, $region);
         if (!$teamMembers) {
@@ -501,10 +500,9 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getTmlpRegistrationsByCenter(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
-        if (!$registrations) {
-            return null;
-        }
+        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+            'returnUnprocessed' => true,
+        ]);
 
         $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
 
@@ -528,10 +526,9 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getTravelReport(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
-        if (!$registrations) {
-            return null;
-        }
+        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+            'returnUnprocessed' => true,
+        ]);
 
         $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport, $region);
         if (!$teamMembers) {
@@ -725,7 +722,9 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
+        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+            'returnUnprocessed' => true,
+        ]);
 
         $potentialsThatRegistered = [];
         if ($registrations) {
@@ -751,28 +750,29 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getTeam2RegisteredAtWeekend(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(TmlpRegistrationsController::class)->getByGlobalReport($globalReport, $region);
+        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+            'returnUnprocessed' => true,
+        ]);
 
         $registeredAtWeekend = [];
-        if ($registrations) {
-            foreach ($registrations as $registration) {
-                $statsReport = $registration->statsReport;
-                $weekendStartDate = $statsReport->quarter->getQuarterStartDate($statsReport->center);
-                if ($registration->teamYear == 2
-                    && $registration->regDate->gt($weekendStartDate)
-                    && $registration->regDate->lte($weekendStartDate->copy()->addDays(2))
-                ) {
-                    $registeredAtWeekend[] = $registration;
-                }
+        foreach ($registrations as $registration) {
+            $statsReport = $registration->statsReport;
+            $weekendStartDate = $statsReport->quarter->getQuarterStartDate($statsReport->center);
+            if ($registration->teamYear == 2
+                && $registration->regDate->gt($weekendStartDate)
+                && $registration->regDate->lte($weekendStartDate->copy()->addDays(2))
+            ) {
+                $registeredAtWeekend[] = $registration;
             }
         }
 
         $a = new Arrangements\TmlpRegistrationsByStatus(['registrationsData' => $registeredAtWeekend]);
         $data = $a->compose();
 
-        $data = array_merge($data, ['reportingDate' => $globalReport->reportingDate]);
-
-        return view('globalreports.details.applicationsbystatus', $data);
+        return view('globalreports.details.applicationsbystatus', [
+            'reportData' => $data['reportData'],
+            'reportingDate' => $globalReport->reportingDate,
+        ]);
     }
 
     protected function getRegPerParticipant(GlobalReport $globalReport, Region $region)

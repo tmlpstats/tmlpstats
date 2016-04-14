@@ -3,7 +3,7 @@
 class TmlpRegistrationsByIncomingQuarter extends BaseArrangement
 {
     /*
-     * Builds an array of Tmlp Registration by incoming quarter
+     * Builds an array of Tmlp Registrations by incoming quarter
      */
     public function build($data)
     {
@@ -20,9 +20,10 @@ class TmlpRegistrationsByIncomingQuarter extends BaseArrangement
 
         foreach ($registrationsData as $data) {
 
-            $index = $data->withdrawCodeId !== null
-                ? 'withdrawn'
-                : "team{$data->registration->teamYear}";
+            $index = "team{$data->registration->teamYear}";
+            if ($data->withdrawCodeId !== null) {
+                $index = 'withdrawn';
+            }
 
             if ($data->incomingQuarterId == $nextQuarter->id) {
                 $reportData[$index]['next'][] = $data;

@@ -112,4 +112,28 @@ class GlobalReport
 
         return $reportData;
     }
+
+    public function getIncomingTeamMembersListByCenter(Models\GlobalReport $report, Models\Region $region, $options = [])
+    {
+        $returnUnprocessed = isset($options['returnUnprocessed']) ? (bool) $options['returnUnprocessed'] : false;
+
+        $statsReports = $report->statsReports()
+            ->byRegion($region)
+            ->reportingDate($report->reportingDate)
+            ->get();
+
+        $registrations = [];
+        foreach ($statsReports as $statsReport) {
+
+            $reportRegistrations = App::make(LocalReport::class)->getIncomingTeamMembersList($statsReport, [
+                'returnUnprocessed' => $returnUnprocessed,
+            ]);
+
+            foreach ($reportRegistrations as $registration) {
+                $registrations[] = $registration;
+            }
+        }
+
+        return $registrations;
+    }
 }

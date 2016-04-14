@@ -95,6 +95,17 @@ Api.GlobalReport = {
     */
     getWeekScoreboardByCenter: function(params, callback, errback) {
         return apiCall('GlobalReport.getWeekScoreboardByCenter', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get the list of incoming team members by center
+    Parameters:
+      globalReport: GlobalReport
+      region: Region
+      options: array
+    */
+    getIncomingTeamMembersListByCenter: function(params, callback, errback) {
+        return apiCall('GlobalReport.getIncomingTeamMembersListByCenter', params, (callback || null), (errback || null));
     }
 };
 Api.LiveScoreboard = {
@@ -139,6 +150,16 @@ Api.LocalReport = {
     */
     getWeekScoreboard: function(params, callback, errback) {
         return apiCall('LocalReport.getWeekScoreboard', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get the list of incoming team members
+    Parameters:
+      localReport: LocalReport
+      options: array
+    */
+    getIncomingTeamMembersList: function(params, callback, errback) {
+        return apiCall('LocalReport.getIncomingTeamMembersList', params, (callback || null), (errback || null));
     },
 
     /*

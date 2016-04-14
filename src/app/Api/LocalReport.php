@@ -75,6 +75,28 @@ class LocalReport
         return [];
     }
 
+    public function getIncomingTeamMembersList(Models\StatsReport $statsReport, $options = [])
+    {
+        $returnUnprocessed = isset($options['returnUnprocessed']) ? (bool) $options['returnUnprocessed'] : false;
+
+        $registrations = Models\TmlpRegistrationData::byStatsReport($statsReport)
+                                                    ->with('registration.person', 'committedTeamMember.person')
+                                                    ->get();
+        if (!$registrations) {
+            return [];
+        } else if ($returnUnprocessed) {
+            return $registrations;
+        }
+
+        $a = new Arrangements\TmlpRegistrationsByIncomingQuarter([
+            'registrationsData' => $registrations,
+            'quarter' => $statsReport->quarter,
+        ]);
+        $data = $a->compose();
+
+        return $data['reportData'];
+    }
+
     // TODO decide if we want this to be a public API function. Right now it's not exactly API-valid
     public function getClassList(Models\StatsReport $statsReport)
     {
