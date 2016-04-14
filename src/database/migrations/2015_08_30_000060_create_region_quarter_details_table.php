@@ -26,7 +26,11 @@ class CreateRegionQuarterDetailsTable extends Migration
         });
 
         Schema::table('region_quarter_details', function (Blueprint $table) {
-            $table->unique(array('quarter_id', 'region_id', 'start_weekend_date'), 'region_quarter_start_weekend_date_unique');
+            $table->unique([
+                'quarter_id',
+                'region_id',
+                'start_weekend_date',
+            ], 'region_quarter_start_weekend_date_unique');
 
             $table->foreign('quarter_id')->references('id')->on('quarters');
             $table->foreign('region_id')->references('id')->on('regions');

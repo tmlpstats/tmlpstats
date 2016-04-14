@@ -16,11 +16,10 @@ class CreateAccountabilityPersonTable extends Migration
         Schema::create('accountability_person', function (Blueprint $table) {
             $table->integer('person_id')->unsigned()->index();
             $table->integer('accountability_id')->unsigned()->index();
-            $table->boolean('active')->default(true); // We can't use soft deletes on a pivot
+            $table->timestamp('starts_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('ends_at')->nullable()->default(null);
             $table->timestamps();
-        });
 
-        Schema::table('accountability_person', function (Blueprint $table) {
             $table->foreign('person_id')->references('id')->on('people')->onDelete('cascade');
             $table->foreign('accountability_id')->references('id')->on('accountabilities')->onDelete('cascade');
         });

@@ -7,7 +7,8 @@ use Illuminate\Database\Migrations\Migration;
 // Moved migrations into table creation migration to avoid issues with migrate:refresh
 //
 
-class AddRegionToQuartersTable extends Migration {
+class AddRegionToQuartersTable extends Migration
+{
 
     /**
      * Run the migrations.
@@ -16,14 +17,14 @@ class AddRegionToQuartersTable extends Migration {
      */
     public function up()
     {
-        Schema::table('quarters', function(Blueprint $table)
-        {
-            // $table->string('global_region', 64);
-            // $table->string('local_region', 64);
-
-            // $table->dropUnique('quarters_start_weekend_date_unique');
-            // $table->unique(array('global_region','local_region','start_weekend_date'));
-        });
+        //Schema::table('quarters', function(Blueprint $table)
+        //{
+        //     $table->string('global_region', 64);
+        //     $table->string('local_region', 64);
+        //
+        //     $table->dropUnique('quarters_start_weekend_date_unique');
+        //     $table->unique(array('global_region','local_region','start_weekend_date'));
+        //});
     }
 
     /**
@@ -33,14 +34,14 @@ class AddRegionToQuartersTable extends Migration {
      */
     public function down()
     {
-        Schema::table('quarters', function(Blueprint $table)
-        {
-            // $table->dropUnique(array('global_region','local_region','start_weekend_date'));
-            // $table->unique('start_weekend_date');
-
-            // $table->dropColumn('global_region');
-            // $table->dropColumn('local_region');
-        });
+        //Schema::table('quarters', function(Blueprint $table)
+        //{
+        //     $table->dropUnique(array('global_region','local_region','start_weekend_date'));
+        //     $table->unique('start_weekend_date');
+        //
+        //     $table->dropColumn('global_region');
+        //     $table->dropColumn('local_region');
+        //});
     }
 
 }

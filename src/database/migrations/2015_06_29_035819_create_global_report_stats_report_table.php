@@ -3,7 +3,8 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateGlobalReportStatsReportTable extends Migration {
+class CreateGlobalReportStatsReportTable extends Migration
+{
 
     /**
      * Run the migrations.
@@ -12,8 +13,7 @@ class CreateGlobalReportStatsReportTable extends Migration {
      */
     public function up()
     {
-        Schema::create('global_report_stats_report', function(Blueprint $table)
-        {
+        Schema::create('global_report_stats_report', function (Blueprint $table) {
             $table->integer('stats_report_id')->unsigned()->index();
             $table->integer('global_report_id')->unsigned()->index();
 

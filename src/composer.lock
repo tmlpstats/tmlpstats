@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "d877b0e22922ecc7c3f67110e0043e15",
-    "content-hash": "1841f5de36eda59e25a418bae7043b59",
+    "hash": "d500536ebca5e755fd4fc449d305dcd3",
+    "content-hash": "c2e50c34f814fdb9c9da3d5484ee45fb",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -735,6 +735,58 @@
                 "parser"
             ],
             "time": "2014-09-09 13:34:57"
+        },
+        {
+            "name": "fzaninotto/faker",
+            "version": "v1.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/fzaninotto/Faker.git",
+                "reference": "d0190b156bcca848d401fb80f31f504f37141c8d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fzaninotto/Faker/zipball/d0190b156bcca848d401fb80f31f504f37141c8d",
+                "reference": "d0190b156bcca848d401fb80f31f504f37141c8d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.0",
+                "squizlabs/php_codesniffer": "~1.5"
+            },
+            "suggest": {
+                "ext-intl": "*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.5.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Faker\\": "src/Faker/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "François Zaninotto"
+                }
+            ],
+            "description": "Faker is a PHP library that generates fake data for you.",
+            "keywords": [
+                "data",
+                "faker",
+                "fixtures"
+            ],
+            "time": "2015-05-29 06:29:14"
         },
         {
             "name": "geoip/geoip",

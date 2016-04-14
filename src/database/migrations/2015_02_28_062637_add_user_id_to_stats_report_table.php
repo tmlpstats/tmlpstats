@@ -3,7 +3,8 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddUserIdToStatsReportTable extends Migration {
+class AddUserIdToStatsReportTable extends Migration
+{
 
     /**
      * Run the migrations.
@@ -12,11 +13,11 @@ class AddUserIdToStatsReportTable extends Migration {
      */
     public function up()
     {
-        Schema::table('stats_reports', function(Blueprint $table)
-        {
-            $table->integer('user_id')->unsigned()->nullable();
-            $table->foreign('user_id')->references('id')->on('users');
-        });
+        //Schema::table('stats_reports', function(Blueprint $table)
+        //{
+        //    $table->integer('user_id')->unsigned()->nullable();
+        //    $table->foreign('user_id')->references('id')->on('users');
+        //});
     }
 
     /**
@@ -26,11 +27,11 @@ class AddUserIdToStatsReportTable extends Migration {
      */
     public function down()
     {
-        Schema::table('stats_reports', function(Blueprint $table)
-        {
-            $table->dropForeign('stats_reports_user_id_foreign');
-            $table->dropColumn('user_id');
-        });
+        //Schema::table('stats_reports', function(Blueprint $table)
+        //{
+        //    $table->dropForeign('stats_reports_user_id_foreign');
+        //    $table->dropColumn('user_id');
+        //});
     }
 
 }

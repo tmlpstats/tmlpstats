@@ -25,6 +25,18 @@ class TmlpRegistration extends Model
         'is_reviewer' => 'boolean',
     ];
 
+    public function __get($name)
+    {
+        switch ($name) {
+            case 'firstName':
+            case 'lastName':
+            case 'center':
+                return $this->person->$name;
+            default:
+                return parent::__get($name);
+        }
+    }
+
     public static function firstOrNew(array $attributes)
     {
         $regDateString = $attributes['reg_date']->toDateString();
@@ -79,8 +91,19 @@ class TmlpRegistration extends Model
 
             if (Quarter::isFirstWeek($center->region)) {
                 $person->identifier = $identifier;
-                $person->save();
             }
+        }
+
+        if (isset($attributes['email'])) {
+            $person->email = $attributes['email'];
+        }
+
+        if (isset($attributes['phone'])) {
+            $person->phone = $attributes['phone'];
+        }
+
+        if ($person->isDirty()) {
+            $person->save();
         }
 
         return parent::firstOrNew([

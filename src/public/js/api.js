@@ -24,6 +24,55 @@ function apiCall(name, params, callback, errback) {
 
 var Api = {};
 
+Api.Application = {
+
+    /*
+    Create new application
+    Parameters:
+      firstName: string
+      lastName: string
+      center: Center
+      teamYear: int
+      regDate: date
+      isReviewer: bool
+      email: string
+      phone: string
+    */
+    create: function(params, callback, errback) {
+        return apiCall('Application.create', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Update an application
+    Parameters:
+      application: Application
+      data: array
+    */
+    update: function(params, callback, errback) {
+        return apiCall('Application.update', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get the weekly data for an application
+    Parameters:
+      application: Application
+      reportingDate: date
+    */
+    getWeekData: function(params, callback, errback) {
+        return apiCall('Application.getWeekData', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Set the weekly data for an application
+    Parameters:
+      application: Application
+      reportingDate: date
+      data: array
+    */
+    setWeekData: function(params, callback, errback) {
+        return apiCall('Application.setWeekData', params, (callback || null), (errback || null));
+    }
+};
 Api.Context = {
 
     /*
@@ -104,8 +153,8 @@ Api.GlobalReport = {
       region: Region
       options: array
     */
-    getIncomingTeamMembersListByCenter: function(params, callback, errback) {
-        return apiCall('GlobalReport.getIncomingTeamMembersListByCenter', params, (callback || null), (errback || null));
+    getApplicationsListByCenter: function(params, callback, errback) {
+        return apiCall('GlobalReport.getApplicationsListByCenter', params, (callback || null), (errback || null));
     }
 };
 Api.LiveScoreboard = {
@@ -158,8 +207,8 @@ Api.LocalReport = {
       localReport: LocalReport
       options: array
     */
-    getIncomingTeamMembersList: function(params, callback, errback) {
-        return apiCall('LocalReport.getIncomingTeamMembersList', params, (callback || null), (errback || null));
+    getApplicationsList: function(params, callback, errback) {
+        return apiCall('LocalReport.getApplicationsList', params, (callback || null), (errback || null));
     },
 
     /*

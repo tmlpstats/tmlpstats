@@ -3,7 +3,8 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddLockedToStatsReportsTable extends Migration {
+class AddLockedToStatsReportsTable extends Migration
+{
 
     /**
      * Run the migrations.
@@ -12,10 +13,10 @@ class AddLockedToStatsReportsTable extends Migration {
      */
     public function up()
     {
-        Schema::table('stats_reports', function(Blueprint $table)
-        {
-            $table->integer('locked')->tinyInteger()->default(0);
-        });
+        //Schema::table('stats_reports', function(Blueprint $table)
+        //{
+        //    $table->integer('locked')->tinyInteger()->default(0);
+        //});
     }
 
     /**
@@ -25,10 +26,10 @@ class AddLockedToStatsReportsTable extends Migration {
      */
     public function down()
     {
-        Schema::table('stats_reports', function(Blueprint $table)
-        {
-            $table->dropColumn('locked');
-        });
+        //Schema::table('stats_reports', function(Blueprint $table)
+        //{
+        //    $table->dropColumn('locked');
+        //});
     }
 
 }

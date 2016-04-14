@@ -113,7 +113,7 @@ class GlobalReport
         return $reportData;
     }
 
-    public function getIncomingTeamMembersListByCenter(Models\GlobalReport $report, Models\Region $region, $options = [])
+    public function getApplicationsListByCenter(Models\GlobalReport $report, Models\Region $region, $options = [])
     {
         $returnUnprocessed = isset($options['returnUnprocessed']) ? (bool) $options['returnUnprocessed'] : false;
 
@@ -125,7 +125,7 @@ class GlobalReport
         $registrations = [];
         foreach ($statsReports as $statsReport) {
 
-            $reportRegistrations = App::make(LocalReport::class)->getIncomingTeamMembersList($statsReport, [
+            $reportRegistrations = App::make(LocalReport::class)->getApplicationsList($statsReport, [
                 'returnUnprocessed' => $returnUnprocessed,
             ]);
 

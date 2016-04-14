@@ -3,7 +3,8 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddSubmittedAtToStatsReportsTable extends Migration {
+class AddSubmittedAtToStatsReportsTable extends Migration
+{
 
     /**
      * Run the migrations.
@@ -12,10 +13,10 @@ class AddSubmittedAtToStatsReportsTable extends Migration {
      */
     public function up()
     {
-        Schema::table('stats_reports', function(Blueprint $table)
-        {
-            $table->timestamp('submitted_at')->nullable()->default(null);
-        });
+        //Schema::table('stats_reports', function(Blueprint $table)
+        //{
+        //    $table->timestamp('submitted_at')->nullable()->default(null);
+        //});
     }
 
     /**
@@ -25,9 +26,9 @@ class AddSubmittedAtToStatsReportsTable extends Migration {
      */
     public function down()
     {
-        Schema::table('stats_reports', function(Blueprint $table)
-        {
-            $table->dropColumn('submitted_at');
-        });
+        //Schema::table('stats_reports', function(Blueprint $table)
+        //{
+        //    $table->dropColumn('submitted_at');
+        //});
     }
 }

@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Http\Controllers;
+<?php
+namespace TmlpStats\Http\Controllers;
 
 use App;
 use Gate;
@@ -414,7 +415,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getTmlpRegistrationsByStatus(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+        $registrations = App::make(Api\GlobalReport::class)->getApplicationsListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
         if (!$registrations) {
@@ -432,7 +433,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getTmlpRegistrationsOverdue(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+        $registrations = App::make(Api\GlobalReport::class)->getApplicationsListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
         if (!$registrations) {
@@ -453,7 +454,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getTmlpRegistrationsOverview(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+        $registrations = App::make(Api\GlobalReport::class)->getApplicationsListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
         if (!$registrations) {
@@ -520,7 +521,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getTmlpRegistrationsByCenter(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+        $registrations = App::make(Api\GlobalReport::class)->getApplicationsListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
         if (!$registrations) {
@@ -549,7 +550,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getTravelReport(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+        $registrations = App::make(Api\GlobalReport::class)->getApplicationsListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
 
@@ -745,7 +746,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+        $registrations = App::make(Api\GlobalReport::class)->getApplicationsListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
 
@@ -773,7 +774,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getTeam2RegisteredAtWeekend(GlobalReport $globalReport, Region $region)
     {
-        $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
+        $registrations = App::make(Api\GlobalReport::class)->getApplicationsListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
         if (!$registrations) {

@@ -35,6 +35,55 @@ arrangements:
       rating level: "Ineffective", "Effective", etc.
 
 api:
+  Application:
+    type: namespace
+    children:
+      create:
+        desc: Create new application
+        params:
+          - name: firstName
+            type: string
+          - name: lastName
+            type: string
+          - name: center
+            type: Center
+          - name: teamYear
+            type: int
+          - name: regDate
+            type: date
+          - name: isReviewer
+            type: bool
+            required: false
+          - name: email
+            type: string
+            required: false
+          - name: phone
+            type: string
+            required: false
+      update:
+        desc: Update an application
+        params:
+          - name: application
+            type: Application
+          - name: data
+            type: array
+      getWeekData:
+        desc: Get the weekly data for an application
+        params:
+          - name: application
+            type: Application
+          - name: reportingDate
+            type: date
+      setWeekData:
+        desc: Set the weekly data for an application
+        params:
+          - name: application
+            type: Application
+          - name: reportingDate
+            type: date
+          - name: data
+            type: array
+
   Context:
     type: namespace
     children:
@@ -91,8 +140,9 @@ api:
             type: Region
           - name: options
             type: array
+            required: false
 
-      getIncomingTeamMembersListByCenter:
+      getApplicationsListByCenter:
         desc: Get the list of incoming team members by center
         params:
           - name: globalReport
@@ -101,6 +151,7 @@ api:
             type: Region
           - name: options
             type: array
+            required: false
 
   LiveScoreboard:
     type: namespace
@@ -135,6 +186,7 @@ api:
             type: LocalReport
           - name: options
             type: array
+            required: false
 
       getWeekScoreboard:
         desc: Get scoreboard for a single week within a quarter
@@ -142,13 +194,14 @@ api:
           - name: localReport
             type: LocalReport
 
-      getIncomingTeamMembersList:
+      getApplicationsList:
         desc: Get the list of incoming team members
         params:
           - name: localReport
             type: LocalReport
           - name: options
             type: array
+            required: false
 
       getClassList:
         desc: Get the list of all team members

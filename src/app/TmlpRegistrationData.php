@@ -115,7 +115,7 @@ class TmlpRegistrationData extends Model
 
     public function incomingQuarter()
     {
-        return $this->belongsTo('TmlpStats\Quarter', 'id', 'incoming_quarter_id');
+        return $this->hasOne('TmlpStats\Quarter', 'id', 'incoming_quarter_id');
     }
 
     public function registration()

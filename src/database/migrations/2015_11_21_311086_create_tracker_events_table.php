@@ -19,6 +19,11 @@ class CreateTrackerEventsTable extends Migration {
 	 */
 	public function up()
 	{
+        // Do not run this migration in testing env
+        if (!env('TRACKER_ENABLED')) {
+            return;
+        }
+
         Schema::connection('tracker')->create($this->table, function (Blueprint $table) {
             $table->bigIncrements('id');
 
@@ -36,7 +41,12 @@ class CreateTrackerEventsTable extends Migration {
 	 */
 	public function down()
 	{
-		Schema::drop($this->table);
+        // Do not run this migration in testing env
+        if (env('APP_ENV') == 'testing') {
+            return;
+        }
+
+        Schema::drop($this->table);
 	}
 
 }

@@ -12,35 +12,21 @@ class DatabaseSeeder extends Seeder {
     {
         Model::unguard();
 
-        $this->call('QuarterTableSeeder');
-        $this->call('CenterTableSeeder');
-        $this->call('RoleTableSeeder');
-        $this->call('AccountabilityTableSeeder');
+        $this->call('RegionsTableSeeder');
+        $this->call('CentersTableSeeder');
+        $this->call('QuartersTableSeeder');
+        $this->call('RegionQuarterDetailsTableSeeder');
+        $this->call('RolesTableSeeder');
+        $this->call('AccountabilitiesTableSeeder');
 
-        try {
-            $this->call('UserTableSeeder');
-            $this->call('RoleUserTableSeeder');
-            $this->call('CenterUserTableSeeder');
+        // Import people and people related objects
+        $this->call('PeopleObjectSeeder');
 
-            $this->call('CenterStatsDataTableSeeder');
-            $this->call('CenterStatsTableSeeder');
-            $this->call('TeamMemberTableSeeder');
-            $this->call('TeamMemberDataTableSeeder');
-            $this->call('CourseTableSeeder');
-            $this->call('CourseDataTableSeeder');
-            $this->call('TmlpGameTableSeeder');
-            $this->call('TmlpGameDataTableSeeder');
-            $this->call('ProgramTeamMemberTableSeeder');
-            $this->call('TmlpRegistrationTableSeeder');
-            $this->call('TmlpRegistrationDataTableSeeder');
-            $this->call('StatsReportTableSeeder');
-
-            if (env('APP_ENV') === 'local') {
-                $this->call('DefaultAdminSeeder');
-            }
-        } catch (\ReflectionException $e) {
-            throw $e;
+        if (env('APP_ENV') === 'local') {
+            $this->call('DefaultAdminSeeder');
         }
+        
+        Model::reguard();
     }
 }
 
