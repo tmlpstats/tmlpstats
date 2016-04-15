@@ -285,8 +285,13 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getRegionalStats(GlobalReport $globalReport, Region $region)
     {
+        $weeks = App::make(Api\GlobalReport::class)->getQuarterScoreboard($globalReport, $region);
+        if (!$weeks) {
+            return null;
+        }
+
         $a = new Arrangements\GamesByMilestone([
-            'weeks' => App::make(Api\GlobalReport::class)->getQuarterScoreboard($globalReport, $region),
+            'weeks' => $weeks,
             'quarter' => Quarter::getQuarterByDate($globalReport->reportingDate, $region),
         ]);
         $data = $a->compose();
@@ -297,6 +302,9 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getGamesByCenter(GlobalReport $globalReport, Region $region)
     {
         $reportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region);
+        if (!$reportData) {
+            return null;
+        }
 
         $statsReports = $globalReport->statsReports()
                                      ->validated()
@@ -349,6 +357,9 @@ class GlobalReportController extends ReportDispatchAbstractController
             'includeOriginalPromise' => true,
             'date' => $quarterEndDate,
         ]);
+        if (!$reportData) {
+            return null;
+        }
 
         $statsReportsAll = $globalReport->statsReports()
                                         ->validated()
@@ -406,6 +417,9 @@ class GlobalReportController extends ReportDispatchAbstractController
         $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
+        if (!$registrations) {
+            return null;
+        }
 
         $a = new Arrangements\TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
         $data = $a->compose();
@@ -421,6 +435,9 @@ class GlobalReportController extends ReportDispatchAbstractController
         $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
+        if (!$registrations) {
+            return null;
+        }
 
         $a = new Arrangements\TmlpRegistrationsByStatus(['registrationsData' => $registrations]);
         $statusData = $a->compose();
@@ -439,6 +456,9 @@ class GlobalReportController extends ReportDispatchAbstractController
         $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
+        if (!$registrations) {
+            return null;
+        }
 
         $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport, $region);
         if (!$teamMembers) {
@@ -503,6 +523,9 @@ class GlobalReportController extends ReportDispatchAbstractController
         $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
+        if (!$registrations) {
+            return null;
+        }
 
         $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
 
@@ -753,6 +776,9 @@ class GlobalReportController extends ReportDispatchAbstractController
         $registrations = App::make(Api\GlobalReport::class)->getIncomingTeamMembersListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
+        if (!$registrations) {
+            return null;
+        }
 
         $registeredAtWeekend = [];
         foreach ($registrations as $registration) {
@@ -778,6 +804,9 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getRegPerParticipant(GlobalReport $globalReport, Region $region)
     {
         $reportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region);
+        if (!$reportData) {
+            return null;
+        }
 
         $lastGlobalReport = GlobalReport::reportingDate($globalReport->reportingDate->copy()->subWeek())->first();
         if (!$lastGlobalReport) {
