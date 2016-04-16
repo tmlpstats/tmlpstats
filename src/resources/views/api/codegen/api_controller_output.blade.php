@@ -36,7 +36,7 @@ class ApiController extends ApiControllerBase
     {
         return App::make(Api\{{ $method->packageName() }}::class)->{{ $method->name }}(
 @foreach ($method->params as $param)
-            $this->parse_{{ $param->type }}($input, '{{ $param->name }}')<?php if (!$param->isLast) { ?>,<?php } ?>
+            $this->parse($input, '{{ $param->name }}', '{{ $param->type }}')<?php if (!$param->isLast) { ?>,<?php } ?>
 
 @endforeach
         );
