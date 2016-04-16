@@ -37,7 +37,7 @@ Api.Context = {
     /*
     Set the current center
     Parameters:
-      center: center
+      center: Center
       permanent: bool
     */
     setCenter: function(params, callback, errback) {

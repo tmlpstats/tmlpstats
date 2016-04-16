@@ -44,7 +44,7 @@ api:
         desc: Set the current center
         params:
           - name: center
-            type: center
+            type: Center
           - name: permanent
             type: bool
       getSetting:
