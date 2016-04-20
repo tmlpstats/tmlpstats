@@ -3,6 +3,8 @@ namespace TmlpStats\Tests;
 
 use Artisan;
 
+set_time_limit(600);
+
 class TestAbstract extends \Illuminate\Foundation\Testing\TestCase
 {
     /**
