@@ -1,4 +1,4 @@
-<table class="table table-condensed table-striped table-hover">
+<table class="table table-condensed table-striped table-hover want-datatable" style="width: 100%;">
     <thead>
         <tr>
             <th>&nbsp;</th>
@@ -20,9 +20,9 @@
             @endunless
         </tr>
         <tr>
-            <th>&nbsp;</th>
+            <th>Date</th>
             <th>Location</th>
-            <th class="data-point">Date</th>
+            <th class="data-point">Course</th>
             <th class="data-point border-left" title="Total Ever Registered">TER</th>
             <th class="data-point" title="Standard Starts">SS</th>
             <th class="data-point" title="Transferred from previous course">Xfer</th>
@@ -46,7 +46,7 @@
     <tbody>
     @foreach ($coursesData as $courseData)
         <tr>
-            <td>{{ $courseData['type'] }}</td>
+            <td data-order="{{ $courseData['startDate']->getTimestamp() }}">@date($courseData['startDate'])</td>
             <td>
                 @if (isset($statsReports))
                     @statsReportLink($statsReports[$courseData['centerName']])
@@ -56,7 +56,7 @@
                     {{ $courseData['location'] != $courseData['centerName'] ? "{$courseData['centerName']} ({$courseData['location']})" : $courseData['centerName'] }}
                 @endif
             </td>
-            <td class="data-point">@date($courseData['startDate'])</td>
+            <td class="data-point">{{ $courseData['type'] }}</td>
             <td class="data-point border-left">{{ $courseData['quarterStartTer'] }}</td>
             <td class="data-point">{{ $courseData['quarterStartStandardStarts'] }}</td>
             <td class="data-point">{{ $courseData['quarterStartXfer'] }}</td>

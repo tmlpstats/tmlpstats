@@ -1162,7 +1162,7 @@ class GlobalReportController extends ReportDispatchAbstractController
                 break;
             case 'coursesnextmonth':
                 $targetData = $this->getCoursesNextMonth($data, $globalReport, $region);
-                $type = 'upcoming';
+                $type = 'next5weeks';
                 $flatten = false;
                 break;
             case 'coursesupcoming':
