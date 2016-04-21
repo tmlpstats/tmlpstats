@@ -1,6 +1,10 @@
 <?php
 namespace TmlpStats\Tests;
 
+use Artisan;
+
+set_time_limit(600);
+
 class TestAbstract extends \Illuminate\Foundation\Testing\TestCase
 {
     /**
@@ -11,6 +15,8 @@ class TestAbstract extends \Illuminate\Foundation\Testing\TestCase
     protected $baseUrl = 'http://localhost';
     protected $testClass = '';
     protected $instantiateApp = false;
+    protected $runMigrations = false;
+    protected $runSeeds = false;
 
     /**
      * Creates the application.
@@ -19,13 +25,19 @@ class TestAbstract extends \Illuminate\Foundation\Testing\TestCase
      */
     public function createApplication()
     {
-        if (!$this->instantiateApp) {
-            return;
+        $app = null;
+        if ($this->instantiateApp) {
+            $app = require __DIR__ . '/../../bootstrap/app.php';
+            $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
         }
 
-        $app = require __DIR__ . '/../../bootstrap/app.php';
+        if ($this->runMigrations) {
+            Artisan::call('migrate');
+        }
 
-        $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+        if ($this->runSeeds) {
+            Artisan::call('db:seed');
+        }
 
         return $app;
     }

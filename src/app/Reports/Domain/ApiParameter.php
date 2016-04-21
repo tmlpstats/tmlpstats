@@ -12,6 +12,7 @@ class ApiParameter
      */
     public $name = '';
     public $type = '';
+    public $required = true;
     /**
      * [$isLast description]
      * @var boolean
@@ -22,6 +23,10 @@ class ApiParameter
     {
         $this->name = $body['name'];
         $this->type = $body['type'];
+
+        if (isset($body['required'])) {
+            $this->required = ($body['required'] == 'true');
+        }
     }
 
     public function absNameLocal()

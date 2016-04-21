@@ -21,10 +21,23 @@ class CreatePeopleTable extends Migration
             $table->integer('center_id')->unsigned()->nullable();
             $table->string('identifier');
             $table->timestamps();
+
+            $table->foreign('center_id')->references('id')->on('centers');
         });
 
-        Schema::table('people', function (Blueprint $table) {
-            $table->foreign('center_id')->references('id')->on('centers');
+        Schema::table('users', function (Blueprint $table) {
+            $table->integer('person_id')->unsigned()->nullable()->index()->nullable()->after('managed');
+            $table->foreign('person_id')->references('id')->on('people');
+        });
+
+        Schema::table('team_members', function (Blueprint $table) {
+            $table->integer('person_id')->unsigned()->nullable()->index()->after('id');
+            $table->foreign('person_id')->references('id')->on('people');
+        });
+
+        Schema::table('tmlp_registrations', function (Blueprint $table) {
+            $table->integer('person_id')->unsigned()->nullable()->after('id');
+            $table->foreign('person_id')->references('id')->on('people');
         });
     }
 

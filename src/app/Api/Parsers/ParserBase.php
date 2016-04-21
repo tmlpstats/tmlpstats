@@ -14,8 +14,12 @@ abstract class ParserBase
 
     public function run($input, $key, $required = true)
     {
-        if ($required && !$input->has($key)) {
-            throw new ApiExceptions\MissingParameterException("{$key} is a required parameter and is missing.");
+        if (!$input->has($key)) {
+            if ($required) {
+                throw new ApiExceptions\MissingParameterException("{$key} is a required parameter and is missing.");
+            } else {
+                return null;
+            }
         }
 
         $value = $input->get($key);

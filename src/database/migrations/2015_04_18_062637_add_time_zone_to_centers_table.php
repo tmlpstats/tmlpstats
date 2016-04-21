@@ -3,7 +3,8 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddTimeZoneToCentersTable extends Migration {
+class AddTimeZoneToCentersTable extends Migration
+{
 
     /**
      * Run the migrations.
@@ -12,10 +13,10 @@ class AddTimeZoneToCentersTable extends Migration {
      */
     public function up()
     {
-        Schema::table('centers', function(Blueprint $table)
-        {
-            $table->string('time_zone');
-        });
+        //Schema::table('centers', function(Blueprint $table)
+        //{
+        //    $table->string('time_zone');
+        //});
     }
 
     /**
@@ -25,10 +26,10 @@ class AddTimeZoneToCentersTable extends Migration {
      */
     public function down()
     {
-        Schema::table('centers', function(Blueprint $table)
-        {
-            $table->dropColumn('time_zone');
-        });
+        //Schema::table('centers', function(Blueprint $table)
+        //{
+        //    $table->dropColumn('time_zone');
+        //});
     }
 
 }

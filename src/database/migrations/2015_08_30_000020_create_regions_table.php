@@ -20,10 +20,13 @@ class CreateRegionsTable extends Migration
             $table->string('email')->nullable();
             $table->integer('parent_id')->unsigned()->nullable();
             $table->timestamps();
+
+            $table->foreign('parent_id')->references('id')->on('regions');
         });
 
-        Schema::table('regions', function (Blueprint $table) {
-            $table->foreign('parent_id')->references('id')->on('regions');
+        Schema::table('centers', function (Blueprint $table) {
+            $table->integer('region_id')->unsigned()->nullable()->after('team_name');
+            $table->foreign('region_id')->references('id')->on('regions');
         });
     }
 

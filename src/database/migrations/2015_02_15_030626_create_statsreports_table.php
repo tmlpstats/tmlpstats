@@ -12,29 +12,47 @@ class CreateStatsreportsTable extends Migration {
      */
     public function up()
     {
-        Schema::create('stats_reports', function(Blueprint $table)
-        {
+        Schema::create('stats_reports', function(Blueprint $table) {
             $table->increments('id');
             $table->date('reporting_date');
-            $table->string('spreadsheet_version');
-            $table->integer('center_stats_id')->unsigned()->nullable();
+            $table->string('version');
             $table->boolean('validated')->default(false);
             $table->integer('reporting_statistician_id')->unsigned()->nullable();
-            $table->string('program_manager_attending_weekend')->default(false);
-            $table->string('classroom_leader_attending_weekend')->default(false);
             $table->integer('center_id')->unsigned();
             $table->integer('quarter_id')->unsigned();
+            $table->integer('user_id')->unsigned()->nullable();
+            $table->integer('locked')->tinyInteger()->default(0);
+            $table->timestamp('submitted_at')->nullable()->default(null);
+            $table->string('submit_comment', 8096)->nullable()->default(null);
             $table->timestamps();
-        });
 
-        Schema::table('stats_reports', function(Blueprint $table)
-        {
             $table->foreign('center_id')->references('id')->on('centers');
             $table->foreign('quarter_id')->references('id')->on('quarters');
-            $table->foreign('center_stats_id')->references('id')->on('center_stats');
-            $table->foreign('reporting_statistician_id')->references('id')->on('program_team_members');
-            // Not adding a foreign key for stats_reports because there's a circular reference. Adding stats_report
-            // to make it easier to delete all data added by a stats_report if it fails validation
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->index('reporting_date');
+        });
+
+        Schema::table('team_members_data', function (Blueprint $table) {
+            $table->integer('stats_report_id')->unsigned()->nullable()->index()->after('tdo');
+            $table->foreign('stats_report_id')->references('id')->on('stats_reports');
+        });
+
+        Schema::table('courses_data', function (Blueprint $table) {
+            $table->integer('stats_report_id')->unsigned()->nullable()->after('guests_attended');
+            $table->foreign('stats_report_id')->references('id')->on('stats_reports');
+            $table->index('stats_report_id');
+        });
+
+        Schema::table('tmlp_games_data', function (Blueprint $table) {
+            $table->integer('stats_report_id')->unsigned()->nullable()->after('quarter_start_approved');
+            $table->foreign('stats_report_id')->references('id')->on('stats_reports');
+            $table->index('stats_report_id');
+        });
+
+        Schema::table('tmlp_registrations_data', function (Blueprint $table) {
+            $table->integer('stats_report_id')->unsigned()->nullable()->after('room');
+            $table->foreign('stats_report_id')->references('id')->on('stats_reports');
+            $table->index('stats_report_id');
         });
     }
 

@@ -23,7 +23,6 @@ class TeamMember extends Model
     public function __get($name)
     {
         switch ($name) {
-
             case 'firstName':
             case 'lastName':
             case 'center':

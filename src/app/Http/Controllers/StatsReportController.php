@@ -518,7 +518,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
     public function getRegistrationsSummary(StatsReport $statsReport)
     {
-        $registrations = App::make(Api\LocalReport::class)->getIncomingTeamMembersList($statsReport, [
+        $registrations = App::make(Api\LocalReport::class)->getApplicationsList($statsReport, [
             'returnUnprocessed' => true,
         ]);
 
@@ -632,7 +632,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
     protected function getTmlpRegistrationsByStatus(StatsReport $statsReport)
     {
-        $registrations = App::make(Api\LocalReport::class)->getIncomingTeamMembersList($statsReport, [
+        $registrations = App::make(Api\LocalReport::class)->getApplicationsList($statsReport, [
             'returnUnprocessed' => true,
         ]);
 
@@ -648,7 +648,7 @@ class StatsReportController extends ReportDispatchAbstractController
     protected function getTmlpRegistrations(StatsReport $statsReport)
     {
         return view('statsreports.details.tmlpregistrations', [
-            'reportData' => App::make(Api\LocalReport::class)->getIncomingTeamMembersList($statsReport),
+            'reportData' => App::make(Api\LocalReport::class)->getApplicationsList($statsReport),
         ]);
     }
 
@@ -767,7 +767,7 @@ class StatsReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $registrationsData = App::make(Api\LocalReport::class)->getIncomingTeamMembersList($statsReport, [
+        $registrationsData = App::make(Api\LocalReport::class)->getApplicationsList($statsReport, [
             'returnUnprocessed' => true,
         ]);
 
@@ -863,7 +863,7 @@ class StatsReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $registrationsData = App::make(Api\LocalReport::class)->getIncomingTeamMembersList($statsReport, [
+        $registrationsData = App::make(Api\LocalReport::class)->getApplicationsList($statsReport, [
             'returnUnprocessed' => true,
         ]);
 
@@ -950,8 +950,8 @@ class StatsReportController extends ReportDispatchAbstractController
         $teamLastWeekByQuarter = $a->compose();
         $teamLastWeekByQuarter = $teamLastWeekByQuarter['reportData'];
 
-        $incomingThisWeekByQuarter = App::make(Api\LocalReport::class)->getIncomingTeamMembersList($statsReport);
-        $incomingLastWeekByQuarter = App::make(Api\LocalReport::class)->getIncomingTeamMembersList($lastStatsReport);
+        $incomingThisWeekByQuarter = App::make(Api\LocalReport::class)->getApplicationsList($statsReport);
+        $incomingLastWeekByQuarter = App::make(Api\LocalReport::class)->getApplicationsList($lastStatsReport);
 
         // Cleanup incoming withdraws
         // Remove people that were withdrawn and moved to the future weekend section

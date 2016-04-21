@@ -12,9 +12,9 @@ class AddManagedToUsersTable extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->boolean('managed')->default(false)->after('active');
-        });
+        //Schema::table('users', function (Blueprint $table) {
+        //    $table->boolean('managed')->default(false)->after('active');
+        //});
     }
 
     /**
@@ -24,8 +24,8 @@ class AddManagedToUsersTable extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('managed');
-        });
+        //Schema::table('users', function (Blueprint $table) {
+        //    $table->dropColumn('managed');
+        //});
     }
 }

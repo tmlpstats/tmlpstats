@@ -15,15 +15,15 @@ class ConvertRolesTable extends Migration
      */
     public function up()
     {
-        Schema::table('roles', function (Blueprint $table) {
-            $table->string('display')->after('name');
-        });
-
-        $roles = Role::all();
-        foreach ($roles as $role) {
-            $role->display = ucwords(Util::toWords($role->name));
-            $role->save();
-        }
+        //Schema::table('roles', function (Blueprint $table) {
+        //    $table->string('display')->after('name');
+        //});
+        //
+        //$roles = Role::all();
+        //foreach ($roles as $role) {
+        //    $role->display = ucwords(Util::toWords($role->name));
+        //    $role->save();
+        //}
     }
 
     /**
@@ -33,9 +33,9 @@ class ConvertRolesTable extends Migration
      */
     public function down()
     {
-        Schema::table('roles', function (Blueprint $table) {
-            $table->dropColumn('display');
-        });
+        //Schema::table('roles', function (Blueprint $table) {
+        //    $table->dropColumn('display');
+        //});
     }
 
 }

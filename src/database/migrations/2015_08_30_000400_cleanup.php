@@ -14,23 +14,23 @@ class Cleanup extends Migration
      */
     public function up()
     {
-        $quarters = Quarter::all();
+        //$quarters = Quarter::all();
+        //
+        //foreach ($quarters as $quarter) {
+        //    if ($quarter->deleteMe) {
+        //        $quarter->delete();
+        //    }
+        //}
+        //Schema::table('quarters', function (Blueprint $table) {
+        //    $table->dropColumn('delete_me');
+        //    $table->unique(array('quarter_number', 'year'));
+        //});
 
-        foreach ($quarters as $quarter) {
-            if ($quarter->deleteMe) {
-                $quarter->delete();
-            }
-        }
-        Schema::table('quarters', function (Blueprint $table) {
-            $table->dropColumn('delete_me');
-            $table->unique(array('quarter_number', 'year'));
-        });
-
-        Schema::drop('program_team_members');
-        Schema::drop('tmlp_games');
-        Schema::drop('center_user');
-        Schema::drop('role_user');
-        Schema::drop('center_stats');
+        //Schema::drop('program_team_members');
+        //Schema::drop('tmlp_games');
+        //Schema::drop('center_user');
+        //Schema::drop('role_user');
+        //Schema::drop('center_stats');
     }
 
     /**

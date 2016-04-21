@@ -12,12 +12,12 @@ class AddGuestGameToCoursesDataTable extends Migration
      */
     public function up()
     {
-        Schema::table('courses_data', function (Blueprint $table) {
-            $table->integer('guests_promised')->nullable()->after('registrations');
-            $table->integer('guests_invited')->nullable()->after('guests_promised');
-            $table->integer('guests_confirmed')->nullable()->after('guests_invited');
-            $table->integer('guests_attended')->nullable()->after('guests_confirmed');
-        });
+        //Schema::table('courses_data', function (Blueprint $table) {
+        //    $table->integer('guests_promised')->nullable()->after('registrations');
+        //    $table->integer('guests_invited')->nullable()->after('guests_promised');
+        //    $table->integer('guests_confirmed')->nullable()->after('guests_invited');
+        //    $table->integer('guests_attended')->nullable()->after('guests_confirmed');
+        //});
     }
 
     /**
@@ -27,11 +27,11 @@ class AddGuestGameToCoursesDataTable extends Migration
      */
     public function down()
     {
-        Schema::table('courses_data', function (Blueprint $table) {
-            $table->dropColumn('guests_promised');
-            $table->dropColumn('guests_invited');
-            $table->dropColumn('guests_confirmed');
-            $table->dropColumn('guests_attended');
-        });
+        //Schema::table('courses_data', function (Blueprint $table) {
+        //    $table->dropColumn('guests_promised');
+        //    $table->dropColumn('guests_invited');
+        //    $table->dropColumn('guests_confirmed');
+        //    $table->dropColumn('guests_attended');
+        //});
     }
 }

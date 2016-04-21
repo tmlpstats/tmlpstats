@@ -15,21 +15,21 @@ class ConvertAccountabilitiesTable extends Migration
      */
     public function up()
     {
-        Schema::table('accountabilities', function (Blueprint $table) {
-            $table->string('display')->after('context');
-        });
-
-        $accountabilities = Accountability::all();
-        foreach ($accountabilities as $accountability) {
-            $accountability->display = ucwords(Util::toWords($accountability->name));
-            $accountability->save();
-        }
-
-        Accountability::create([
-            'name' => 'teamMailingList',
-            'context' => 'team',
-            'display' => 'Team Mailing List',
-        ]);
+        //Schema::table('accountabilities', function (Blueprint $table) {
+        //    $table->string('display')->after('context');
+        //});
+        //
+        //$accountabilities = Accountability::all();
+        //foreach ($accountabilities as $accountability) {
+        //    $accountability->display = ucwords(Util::toWords($accountability->name));
+        //    $accountability->save();
+        //}
+        //
+        //Accountability::create([
+        //    'name' => 'teamMailingList',
+        //    'context' => 'team',
+        //    'display' => 'Team Mailing List',
+        //]);
     }
 
     /**
@@ -39,9 +39,9 @@ class ConvertAccountabilitiesTable extends Migration
      */
     public function down()
     {
-        Schema::table('accountabilities', function (Blueprint $table) {
-            $table->dropColumn('display');
-        });
+        //Schema::table('accountabilities', function (Blueprint $table) {
+        //    $table->dropColumn('display');
+        //});
     }
 
 }

@@ -3,7 +3,8 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddLocationToCoursesTable extends Migration {
+class AddLocationToCoursesTable extends Migration
+{
 
     /**
      * Run the migrations.
@@ -12,8 +13,7 @@ class AddLocationToCoursesTable extends Migration {
      */
     public function up()
     {
-        Schema::table('courses', function(Blueprint $table)
-        {
+        Schema::table('courses', function (Blueprint $table) {
             $table->string('location')->nullable()->default(null)->after('type');
         });
     }
@@ -25,8 +25,7 @@ class AddLocationToCoursesTable extends Migration {
      */
     public function down()
     {
-        Schema::table('courses', function(Blueprint $table)
-        {
+        Schema::table('courses', function (Blueprint $table) {
             $table->dropColumn('location');
         });
     }

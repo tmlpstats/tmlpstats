@@ -13,9 +13,9 @@ class ConvertCoursesTable extends Migration
      */
     public function up()
     {
-        Schema::table('courses', function (Blueprint $table) {
-            $table->dropColumn('stats_report_id');
-        });
+        //Schema::table('courses', function (Blueprint $table) {
+        //    $table->dropColumn('stats_report_id');
+        //});
     }
 
     /**

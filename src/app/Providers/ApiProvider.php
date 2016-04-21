@@ -25,6 +25,7 @@ class ApiProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton(Api\Application::class);
         $this->app->singleton(Api\Context::class);
         $this->app->singleton(Api\GlobalReport::class);
         $this->app->singleton(Api\LiveScoreboard::class);
@@ -35,6 +36,7 @@ class ApiProvider extends ServiceProvider
     public function provides()
     {
         return [
+            'TmlpStats\Api\Application',
             'TmlpStats\Api\Context',
             'TmlpStats\Api\GlobalReport',
             'TmlpStats\Api\LiveScoreboard',

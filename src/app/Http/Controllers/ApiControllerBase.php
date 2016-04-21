@@ -5,8 +5,8 @@ namespace TmlpStats\Http\Controllers;
 use Auth;
 use Illuminate\Http\Request;
 use Response;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use TmlpStats as Models;
-use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Api\Parsers;
 
@@ -33,8 +33,9 @@ class ApiControllerBase extends Controller
      */
     public function apiCall(Request $request)
     {
-        $input = $request->json();
+        $input = new ParameterBag($request->all());
         $method = $input->get('method');
+
         if (!isset($this->methods[$method])) {
             throw new ApiExceptions\NotAllowedException('API method not allowed.');
         }
@@ -45,38 +46,23 @@ class ApiControllerBase extends Controller
         }
 
         $result = $this->$callable($input);
+
         return Response::json($result);
     }
 
     /**
      * Parse the input parameter
      *
-     * @param  array $input  Input array
-     * @param  string $key   Parameter key inside of input array
-     * @param  string $type  Parameter type. Used to choose parser
+     * @param  array  $input     Input array
+     * @param  string $key       Parameter key inside of input array
+     * @param  string $type      Parameter type. Used to choose parser
+     * @param  bool   $required  Is input parameter required?
+     *
      * @return mixed         Parsed parameter
      */
-    protected function parse($input, $key, $type)
+    protected function parse($input, $key, $type, $required = true)
     {
-        switch ($type) {
-            case 'int':
-                return Parsers\IntParser::create()->run($input, $key);
-            case 'string':
-                return Parsers\StringParser::create()->run($input, $key);
-            case 'bool':
-                return Parsers\BoolParser::create()->run($input, $key);
-            case 'array':
-                return Parsers\ArrayParser::create()->run($input, $key);
-            case 'Center':
-                return Parsers\CenterParser::create()->run($input, $key);
-            case 'Region':
-                return Parsers\RegionParser::create()->run($input, $key);
-            case 'LocalReport':
-                return Parsers\LocalReportParser::create()->run($input, $key);
-            case 'GlobalReport':
-                return Parsers\GlobalReportParser::create()->run($input, $key);
-            default:
-                throw new ApiExceptions\UnknownException("Unknown parameter type {$type}");
-        }
+        $parser = Parsers\Factory::build($type);
+        return $parser->run($input, $key, $required);
     }
 }

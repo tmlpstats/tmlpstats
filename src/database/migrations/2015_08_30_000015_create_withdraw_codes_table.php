@@ -22,6 +22,16 @@ class CreateWithdrawCodesTable extends Migration
             $table->timestamps();
         });
 
+        Schema::table('team_members_data', function (Blueprint $table) {
+            $table->integer('withdraw_code_id')->unsigned()->nullable()->after('ctw');
+            $table->foreign('withdraw_code_id')->references('id')->on('withdraw_codes');
+        });
+
+        Schema::table('tmlp_registrations_data', function (Blueprint $table) {
+            $table->integer('withdraw_code_id')->unsigned()->nullable()->after('wd_date');
+            $table->foreign('withdraw_code_id')->references('id')->on('withdraw_codes');
+        });
+
         $codes = [
             ['AP', 'Chose another program'],
             ['NW', 'Doesn\'t want the training'],
@@ -41,7 +51,6 @@ class CreateWithdrawCodesTable extends Migration
                 'display' => $code[1],
             ]);
         }
-
     }
 
     /**

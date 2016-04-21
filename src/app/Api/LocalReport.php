@@ -79,7 +79,7 @@ class LocalReport
         return [];
     }
 
-    public function getIncomingTeamMembersList(Models\StatsReport $statsReport, $options = [])
+    public function getApplicationsList(Models\StatsReport $statsReport, $options = [])
     {
         $returnUnprocessed = isset($options['returnUnprocessed']) ? (bool) $options['returnUnprocessed'] : false;
 

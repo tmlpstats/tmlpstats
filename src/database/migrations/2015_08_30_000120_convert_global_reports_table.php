@@ -19,56 +19,56 @@ class ConvertGlobalReportsTable extends Migration
      */
     public function up()
     {
-        Schema::table('global_reports', function (Blueprint $table) {
-            $table->index('reporting_date');
-            $table->dropColumn('quarter_id');
-        });
-
-        $date = new Carbon('last friday');
-        $quarterStart = Carbon::create(2015, 8, 21);
-
-        while ($date->gt($quarterStart)) {
-            $globalReport = GlobalReport::create(array(
-                'reporting_date' => $date->toDateString(),
-            ));
-
-            // Make sure CenterStatsData rows reference the correct statsReport
-            $centers = Center::all();
-            foreach ($centers as $center) {
-                $statsReport = StatsReport::byCenter($center)
-                    ->reportingDate($date)
-                    ->submitted()
-                    ->orderBy('submitted_at', 'desc')
-                    ->first();
-
-                if ($statsReport) {
-                    $globalReport->statsReports()->attach($statsReport->id);
-
-                    $centerStats = CenterStats::find($statsReport->centerStatsId);
-                    if ($centerStats) {
-                        if ($date->toDateString() === '2015-08-28') {
-
-                            $promises = CenterStatsData::promise()
-                                ->byCenter($statsReport->center)
-                                ->byQuarter($statsReport->quarter)
-                                ->get();
-
-                            foreach ($promises as $promise) {
-                                $promise->statsReportId = $statsReport->id;
-                                $promise->save();
-                            }
-                        }
-                        $actual = $centerStats->actualData;
-                        if ($actual) {
-                            $actual->statsReportId = $statsReport->id;
-                            $actual->save();
-                        }
-                    }
-                }
-            }
-
-            $date->subWeek();
-        }
+        //Schema::table('global_reports', function (Blueprint $table) {
+        //    $table->index('reporting_date');
+        //    $table->dropColumn('quarter_id');
+        //});
+        //
+        //$date = new Carbon('last friday');
+        //$quarterStart = Carbon::create(2015, 8, 21);
+        //
+        //while ($date->gt($quarterStart)) {
+        //    $globalReport = GlobalReport::create(array(
+        //        'reporting_date' => $date->toDateString(),
+        //    ));
+        //
+        //    // Make sure CenterStatsData rows reference the correct statsReport
+        //    $centers = Center::all();
+        //    foreach ($centers as $center) {
+        //        $statsReport = StatsReport::byCenter($center)
+        //            ->reportingDate($date)
+        //            ->submitted()
+        //            ->orderBy('submitted_at', 'desc')
+        //            ->first();
+        //
+        //        if ($statsReport) {
+        //            $globalReport->statsReports()->attach($statsReport->id);
+        //
+        //            $centerStats = CenterStats::find($statsReport->centerStatsId);
+        //            if ($centerStats) {
+        //                if ($date->toDateString() === '2015-08-28') {
+        //
+        //                    $promises = CenterStatsData::promise()
+        //                        ->byCenter($statsReport->center)
+        //                        ->byQuarter($statsReport->quarter)
+        //                        ->get();
+        //
+        //                    foreach ($promises as $promise) {
+        //                        $promise->statsReportId = $statsReport->id;
+        //                        $promise->save();
+        //                    }
+        //                }
+        //                $actual = $centerStats->actualData;
+        //                if ($actual) {
+        //                    $actual->statsReportId = $statsReport->id;
+        //                    $actual->save();
+        //                }
+        //            }
+        //        }
+        //    }
+        //
+        //    $date->subWeek();
+        //}
     }
 
     /**
@@ -78,10 +78,10 @@ class ConvertGlobalReportsTable extends Migration
      */
     public function down()
     {
-        Schema::table('global_reports', function (Blueprint $table) {
-            $table->dropIndex('reporting_date');
-            $table->integer('quarter_id')->unsigned();
-        });
+        //Schema::table('global_reports', function (Blueprint $table) {
+        //    $table->dropIndex('reporting_date');
+        //    $table->integer('quarter_id')->unsigned();
+        //});
     }
 
 }
