@@ -1,9 +1,9 @@
-<table class="table table-condensed table-striped table-hover">
+<table class="table table-condensed table-striped table-hover want-datatable" style="width: 100%;">
     <thead>
     <tr>
-        <th>&nbsp;</th>
-        <th>Location</th>
         <th>Date</th>
+        <th>Location</th>
+        <th>Course</th>
         <th class="data-point border-left">Standard Starts</th>
         <th class="data-point border-left">Promised</th>
         <th class="data-point">Invited</th>
@@ -15,7 +15,7 @@
     <tbody>
     @foreach ($coursesData as $courseData)
         <tr>
-            <td>{{ $courseData['type'] }}</td>
+            <td data-order="{{ $courseData['startDate']->getTimestamp() }}">@date($courseData['startDate'])</td>
             <td>
                 @if (isset($statsReports))
                     @statsReportLink($statsReports[$courseData['centerName']])
@@ -25,7 +25,7 @@
                     {{ $courseData['location'] != $courseData['centerName'] ? "{$courseData['centerName']} ({$courseData['location']})" : $courseData['centerName'] }}
                 @endif
             </td>
-            <td class="data-point">@date($courseData['startDate'])</td>
+            <td class="data-point">{{ $courseData['type'] }}</td>
             <td class="data-point border-left">{{ $courseData['currentStandardStarts'] }}</td>
             <td class="data-point border-left">{{ $courseData['guestsPromised'] or '-' }}</td>
             <td class="data-point">{{ $courseData['guestsInvited'] or '-' }}</td>

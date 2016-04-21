@@ -13,9 +13,13 @@
             <p>No completed courses.</p>
         @endif
     @else
-        @forelse ($reportData as $type => $coursesData)
-            <h4>{{ $type }}</h4>
-            @include('reports.courses.upcoming', ['coursesData' => $coursesData, 'excludeGuestGame' => true])
+        @forelse ($reportData as $courseType => $coursesData)
+            <h4>{{ $courseType }}</h4>
+            @if ($type == 'next5weeks')
+                @include('reports.courses.next5weeks', ['coursesData' => $coursesData, 'excludeGuestGame' => true])
+            @else
+                @include('reports.courses.upcoming', ['coursesData' => $coursesData, 'excludeGuestGame' => true])
+            @endif
             <br />
         @empty
             <p>No upcoming courses.</p>
