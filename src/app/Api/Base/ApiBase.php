@@ -27,7 +27,7 @@ class ApiBase
         $this->request = $request;
     }
 
-    public function parseInputs($data)
+    public function parseInputs($data, $requiredParams = [])
     {
         $output = [];
         foreach ($data as $key => $value) {
@@ -40,8 +40,10 @@ class ApiBase
                 $data = new ParameterBag($data);
             }
 
+            $required = isset($requiredParams[$key]);
+
             $parser = Parsers\Factory::build($this->validProperties[$key]['type']);
-            $output[$key] = $parser->run($data, $key);
+            $output[$key] = $parser->run($data, $key, $required);
         }
         return $output;
     }

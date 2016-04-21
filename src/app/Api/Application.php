@@ -103,13 +103,7 @@ class Application extends ApiBase
 
     public function create(array $data)
     {
-        $data = $this->parseInputs($data);
-
-        foreach (['firstName', 'lastName', 'center', 'teamYear', 'regDate'] as $key) {
-            if (!isset($data[$key])) {
-                throw new ApiExceptions\MissingParameterException("{$key} is a required parameter and is missing.");
-            }
-        }
+        $data = $this->parseInputs($data, ['firstName', 'lastName', 'center', 'teamYear', 'regDate']);
 
         $application = Models\TmlpRegistration::firstOrNew([
             'first_name' => $data['firstName'],
