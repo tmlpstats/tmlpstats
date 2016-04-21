@@ -33,7 +33,7 @@ class ApplicationTest extends TestAbstract
             'incoming_quarter_id' => $this->lastQuarter->id,
         ]);
         $this->application = factory(Models\TmlpRegistration::class)->create([
-            'reg_date'    => Carbon::parse('2016-04-08'),
+            'reg_date' => Carbon::parse('2016-04-08'),
         ]);
 
         $this->report = Models\StatsReport::firstOrCreate([
@@ -67,12 +67,14 @@ class ApplicationTest extends TestAbstract
     public function testCreate($parameterUpdates, $expectedResponseUpdates)
     {
         $parameters = [
-            'method'    => 'Application.create',
-            'firstName' => $this->faker->firstName(),
-            'lastName'  => $this->faker->lastName(),
-            'center'    => $this->center->id,
-            'teamYear'  => 2,
-            'regDate'   => '2016-04-15',
+            'method' => 'Application.create',
+            'data'   => [
+                'firstName' => $this->faker->firstName(),
+                'lastName'  => $this->faker->lastName(),
+                'center'  => $this->center->id,
+                'teamYear'  => 2,
+                'regDate'   => '2016-04-15',
+            ],
         ];
 
         $lastPersonId = Models\Person::count();
@@ -80,14 +82,14 @@ class ApplicationTest extends TestAbstract
 
         $expectedResponse = [
             'id'         => $lastApplicationId + 1,
-            'regDate'    => "{$parameters['regDate']} 00:00:00",
-            'teamYear'   => $parameters['teamYear'],
+            'regDate'    => "{$parameters['data']['regDate']} 00:00:00",
+            'teamYear'   => $parameters['data']['teamYear'],
             'personId'   => $lastPersonId + 1,
             'isReviewer' => false,
             'person'     => [
                 'id'           => $lastPersonId + 1,
-                'firstName'    => $parameters['firstName'],
-                'lastName'     => $parameters['lastName'],
+                'firstName'    => $parameters['data']['firstName'],
+                'lastName'     => $parameters['data']['lastName'],
                 'phone'        => null,
                 'email'        => null,
                 'centerId'     => $this->center->id,
@@ -109,12 +111,12 @@ class ApplicationTest extends TestAbstract
             // Additional Parameters
             [
                 [ // Request
-                    'isReviewer' => true,
-                    'phone'      => '555-555-1234',
-                    'email'      => 'peter.tests.a.lot@tmlpstats.com',
+                    'data.isReviewer' => true,
+                    'data.phone'      => '555-555-1234',
+                    'data.email'      => 'peter.tests.a.lot@tmlpstats.com',
                 ],
                 [ // Response
-                    'isReviewer' => true,
+                    'isReviewer'   => true,
                     'person.phone' => '555-555-1234',
                     'person.email' => 'peter.tests.a.lot@tmlpstats.com',
                 ],
@@ -291,7 +293,7 @@ class ApplicationTest extends TestAbstract
 
         $expected = array_dot($expected);
         foreach ($expected as $key => $value) {
-            $this->assertEquals($value, array_get($actual, $key), "Unable to find JSON fragment actual[{$key}] = {$value} within [".print_r($actual, true)."].");
+            $this->assertEquals($value, array_get($actual, $key), "Unable to find JSON fragment actual[{$key}] = {$value} within [" . print_r($actual, true) . "].");
         }
 
         return $this;

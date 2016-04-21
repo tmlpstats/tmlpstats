@@ -13,81 +13,85 @@ use TmlpStats\Api\Exceptions as ApiExceptions;
 class Application extends ApiBase
 {
     protected $validProperties = [
-        'firstName' => [
+        'firstName'           => [
             'owner' => 'person',
-            'type' => 'string',
+            'type'  => 'string',
         ],
-        'lastName' => [
+        'lastName'            => [
             'owner' => 'person',
-            'type' => 'string',
+            'type'  => 'string',
         ],
-        'phone' => [
+        'phone'               => [
             'owner' => 'person',
-            'type' => 'string',
+            'type'  => 'string',
         ],
-        'email' => [
+        'email'               => [
             'owner' => 'person',
-            'type' => 'string',
+            'type'  => 'string',
         ],
-        'centerId' => [
+        'center'            => [
             'owner' => 'person',
-            'type' => 'Center',
+            'type'  => 'Center',
         ],
-        'unsubscribed' => [
+        'centerId'            => [
             'owner' => 'person',
-            'type' => 'bool',
+            'type'  => 'Center',
         ],
-        'teamYear' => [
+        'unsubscribed'        => [
+            'owner' => 'person',
+            'type'  => 'bool',
+        ],
+        'teamYear'            => [
             'owner' => 'application',
-            'type' => 'int',
+            'type'  => 'int',
         ],
-        'regDate' => [
+        'regDate'             => [
             'owner' => 'application',
-            'type' => 'date',
+            'type'  => 'date',
         ],
-        'isReviewer' => [
+        'isReviewer'          => [
             'owner' => 'application',
-            'type' => 'bool',
+            'type'  => 'bool',
         ],
-        'appOutDate' => [
+        'appOutDate'          => [
             'owner' => 'applicationData',
-            'type' => 'date',
+            'type'  => 'date',
         ],
-        'appInDate' => [
+        'appInDate'           => [
             'owner' => 'applicationData',
-            'type' => 'date',
+            'type'  => 'date',
         ],
-        'apprDate' => [
+        'apprDate'            => [
             'owner' => 'applicationData',
-            'type' => 'date',
+            'type'  => 'date',
         ],
-        'wdDate' => [
+        'wdDate'              => [
             'owner' => 'applicationData',
-            'type' => 'date',
+            'type'  => 'date',
         ],
-        'withdrawCodeId' => [
+        'withdrawCodeId'      => [
             'owner' => 'applicationData',
-            'type' => 'int',
+            'type'  => 'int',
         ],
         'committedTeamMember' => [
             'owner' => 'applicationData',
-            'type' => 'TeamMember',
+            'type'  => 'TeamMember',
         ],
-        'incomingQuarter' => [
+        'incomingQuarter'     => [
             'owner' => 'applicationData',
-            'type' => 'Quarter',
+            'type'  => 'Quarter',
         ],
-        'comment' => [
+        'comment'             => [
             'owner' => 'applicationData',
-            'type' => 'string',
+            'type'  => 'string',
         ],
-        'travel' => [
+        'travel'              => [
             'owner' => 'applicationData',
-            'type' => 'bool',
+            'type'  => 'bool',
         ],
-        'room' => [
+        'room'                => [
             'owner' => 'applicationData',
-            'type' => 'bool',
+            'type'  => 'bool',
         ],
     ];
 
@@ -97,25 +101,43 @@ class Application extends ApiBase
         $this->request = $request;
     }
 
-    public function create($firstName, $lastName, Models\Center $center, $teamYear, Carbon $regDate, $isReviewer = false, $email = null, $phone = null)
+    public function create(array $data)
     {
+        $data = $this->parseInputs($data);
+
+        foreach (['firstName', 'lastName', 'center', 'teamYear', 'regDate'] as $key) {
+            if (!isset($data[$key])) {
+                throw new ApiExceptions\MissingParameterException("{$key} is a required parameter and is missing.");
+            }
+        }
+
         $application = Models\TmlpRegistration::firstOrNew([
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'phone' => $phone,
-            'email' => $email,
-            'center_id' => $center->id,
-            'team_year' => $teamYear,
-            'reg_date' => $regDate,
+            'first_name' => $data['firstName'],
+            'last_name'  => $data['lastName'],
+            'center_id'  => $data['center']->id,
+            'team_year'  => $data['teamYear'],
+            'reg_date'   => $data['regDate'],
         ]);
 
-        $application->isReviewer = (bool) $isReviewer;
+        if (isset($data['email'])) {
+            $application->person->email = $data['email'];
+        }
+        if (isset($data['phone'])) {
+            $application->person->phone = $data['phone'];
+        }
+        if (isset($data['isReviewer'])) {
+            $application->isReviewer = $data['isReviewer'];
+        }
+
+        if ($application->person->isDirty()) {
+            $application->person->save();
+        }
         $application->save();
 
         return $application->load('person');
     }
 
-    public function update(Models\TmlpRegistration $application, $data)
+    public function update(Models\TmlpRegistration $application, array $data)
     {
         $data = $this->parseInputs($data);
 
@@ -162,11 +184,11 @@ class Application extends ApiBase
 
         return Models\TmlpRegistrationData::firstOrCreate([
             'tmlp_registration_id' => $application->id,
-            'stats_report_id' => $report->id,
+            'stats_report_id'      => $report->id,
         ])->load('registration.person', 'incomingQuarter', 'statsReport', 'withdrawCode', 'committedTeamMember.person');
     }
 
-    public function setWeekData(Models\TmlpRegistration $application, Carbon $reportingDate, $data)
+    public function setWeekData(Models\TmlpRegistration $application, Carbon $reportingDate, array $data)
     {
         $data = $this->parseInputs($data);
 
@@ -188,12 +210,14 @@ class Application extends ApiBase
 
         $applicationData = Models\TmlpRegistrationData::firstOrCreate([
             'tmlp_registration_id' => $application->id,
-            'stats_report_id' => $report->id,
+            'stats_report_id'      => $report->id,
         ]);
 
         foreach ($data as $property => $value) {
             if ($this->validProperties[$property]['owner'] == 'applicationData') {
-                if (($applicationData->$property instanceof Carbon) && Carbon::parse($value)->ne($applicationData->$property)) {
+                if (($applicationData->$property instanceof Carbon) && Carbon::parse($value)
+                                                                             ->ne($applicationData->$property)
+                ) {
                     $applicationData->$property = Carbon::parse($value)->startOfDay();
                 } else if ($applicationData->$property != $value) {
                     $applicationData->$property = $value;

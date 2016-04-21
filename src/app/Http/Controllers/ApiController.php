@@ -47,14 +47,7 @@ class ApiController extends ApiControllerBase
     protected function Application__create($input)
     {
         return App::make(Api\Application::class)->create(
-            $this->parse($input, 'firstName', 'string'),
-            $this->parse($input, 'lastName', 'string'),
-            $this->parse($input, 'center', 'Center'),
-            $this->parse($input, 'teamYear', 'int'),
-            $this->parse($input, 'regDate', 'date'),
-            $this->parse($input, 'isReviewer', 'bool', false),
-            $this->parse($input, 'email', 'string', false),
-            $this->parse($input, 'phone', 'string', false)
+            $this->parse($input, 'data', 'array')
         );
     }
     protected function Application__update($input)

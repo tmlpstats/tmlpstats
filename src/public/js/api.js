@@ -29,14 +29,7 @@ Api.Application = {
     /*
     Create new application
     Parameters:
-      firstName: string
-      lastName: string
-      center: Center
-      teamYear: int
-      regDate: date
-      isReviewer: bool
-      email: string
-      phone: string
+      data: array
     */
     create: function(params, callback, errback) {
         return apiCall('Application.create', params, (callback || null), (errback || null));

@@ -41,25 +41,8 @@ api:
       create:
         desc: Create new application
         params:
-          - name: firstName
-            type: string
-          - name: lastName
-            type: string
-          - name: center
-            type: Center
-          - name: teamYear
-            type: int
-          - name: regDate
-            type: date
-          - name: isReviewer
-            type: bool
-            required: false
-          - name: email
-            type: string
-            required: false
-          - name: phone
-            type: string
-            required: false
+          - name: data
+            type: array
       update:
         desc: Update an application
         params:
