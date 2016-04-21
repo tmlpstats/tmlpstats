@@ -1,15 +1,9 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
-use TmlpStats\Accountability;
-use TmlpStats\CenterStatsData;
-use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
-use TmlpStats\Quarter;
-use TmlpStats\TeamMember;
-use TmlpStats\TeamMemberData;
-use TmlpStats\WithdrawCode;
-
 use Log;
+use TmlpStats as Models;
+use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 
 class ClassListImporter extends DataImporterAbstract
 {
@@ -72,21 +66,23 @@ class ClassListImporter extends DataImporterAbstract
         $this->loadBlock($this->blocks['T2Q1'], 2);
     }
 
-    protected function loadBlock($blockParams, $teamYear = NULL)
+    protected function loadBlock($blockParams, $teamYear = null)
     {
         foreach ($blockParams['rows'] as $row) {
 
             $completionQuarterRow = $blockParams['rows'][0] - 2;
             $completionQuarterDate = $this->reader->getCompletionQuarter($completionQuarterRow);
-            $this->loadEntry($row, array($teamYear, $completionQuarterDate));
+            $this->loadEntry($row, [$teamYear, $completionQuarterDate]);
         }
     }
 
     protected function loadEntry($row, $args)
     {
-        if ($this->reader->isEmptyCell($row, 'A')) return;
+        if ($this->reader->isEmptyCell($row, 'A')) {
+            return;
+        }
 
-        $this->data[] = array(
+        $this->data[] = [
             'centerId'          => $this->statsReport->center->id,
             'teamYear'          => $args[0],
             'completionQuarter' => $args[1],
@@ -104,10 +100,10 @@ class ClassListImporter extends DataImporterAbstract
             'travel'            => $this->reader->getTravel($row),
             'room'              => $this->reader->getRoom($row),
             'comment'           => $this->reader->getComment($row),
-            'accountability'    => $this->reader->getAccountability($row), // intentionally set twice to keep track of changes
+            'accountability'    => $this->reader->getAccountability($row),
             'gitw'              => $this->reader->getGitw($row),
             'tdo'               => $this->reader->getTdo($row),
-        );
+        ];
     }
 
     public function postProcess()
@@ -128,9 +124,9 @@ class ClassListImporter extends DataImporterAbstract
                 $quarterNumber = $matches[1];
                 $year = $matches[2];
 
-                $incomingQuarter = Quarter::year($year - 1)
-                    ->quarterNumber($quarterNumber)
-                    ->first();
+                $incomingQuarter = Models\Quarter::year($year - 1)
+                                                 ->quarterNumber($quarterNumber)
+                                                 ->first();
             }
 
             if (!$incomingQuarter) {
@@ -138,39 +134,43 @@ class ClassListImporter extends DataImporterAbstract
                 continue;
             }
 
-            $memberQuarterNumber = TeamMember::getQuarterNumber($incomingQuarter, $this->statsReport->center->region);
+            $memberQuarterNumber = Models\TeamMember::getQuarterNumber($incomingQuarter, $this->statsReport->center->region);
 
-            $member = TeamMember::firstOrNew(array(
+            $member = Models\TeamMember::firstOrNew([
                 'center_id'           => $memberInput['centerId'],
                 'first_name'          => $memberInput['firstName'],
                 'last_name'           => trim(str_replace('.', '', $memberInput['lastName'])),
                 'team_year'           => $memberInput['teamYear'],
                 'incoming_quarter_id' => $incomingQuarter->id,
                 'team_quarter'        => $memberQuarterNumber,
-            ));
+            ]);
 
             $accountability = $memberInput['accountability']
                 ? $this->getAccountability($memberInput['accountability'])
                 : null;
             if ($accountability) {
-                $member->person->addAccountability($accountability);
+                $member->person->addAccountability(
+                    $accountability,
+                    $this->statsReport->reportingDate,
+                    $this->statsReport->quarter->endWeekendDate
+                );
             }
 
             if ($member->isDirty()) {
                 $member->save();
             }
 
-            $memberData = TeamMemberData::firstOrNew(array(
+            $memberData = Models\TeamMemberData::firstOrNew([
                 'team_member_id'  => $member->id,
                 'stats_report_id' => $this->statsReport->id,
-            ));
+            ]);
 
             if ($memberInput['wd']) {
                 // TODO: Handle error gracefully
-                $withdrawCode = WithdrawCode::code(substr($memberInput['wd'], 2))->first();
+                $withdrawCode = Models\WithdrawCode::code(substr($memberInput['wd'], 2))->first();
                 $memberInput['withdraw_code_id'] = $withdrawCode->id;
             } else if ($memberInput['wbo']) {
-                $withdrawCode = WithdrawCode::code('WB')->first();
+                $withdrawCode = Models\WithdrawCode::code('WB')->first();
                 $memberInput['withdraw_code_id'] = $withdrawCode->id;
             }
 
@@ -205,7 +205,9 @@ class ClassListImporter extends DataImporterAbstract
             $memberData = $this->setValues($memberData, $memberInput);
             $memberData->save();
 
-            if ($memberData->withdrawCodeId || $memberData->xferOut) continue;
+            if ($memberData->withdrawCodeId || $memberData->xferOut) {
+                continue;
+            }
 
             $tdo = $memberData->tdo ? 1 : 0;
             if ($tdo > 0) {
@@ -215,10 +217,10 @@ class ClassListImporter extends DataImporterAbstract
             $totalTeamMembers++;
         }
 
-        $data = CenterStatsData::actual()
-            ->byStatsReport($this->statsReport)
-            ->reportingDate($this->statsReport->reportingDate)
-            ->first();
+        $data = Models\CenterStatsData::actual()
+                                      ->byStatsReport($this->statsReport)
+                                      ->reportingDate($this->statsReport->reportingDate)
+                                      ->first();
 
         if ($data) {
             $tdoActual = 0;
@@ -253,7 +255,7 @@ class ClassListImporter extends DataImporterAbstract
 
         $accountability = null;
         if ($accountabilityName) {
-            $accountability = Accountability::name($name)->first();
+            $accountability = Models\Accountability::name($name)->first();
         }
 
         return $accountability;
