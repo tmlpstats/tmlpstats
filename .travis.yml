@@ -19,4 +19,4 @@ script:
 
 after_script:
  - ls -l build/logs/
- - travis_retry php vendor/bin/coveralls -v
+ - travis_retry php -d max_execution_time=600 vendor/bin/coveralls -v
