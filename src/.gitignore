@@ -1,6 +1,12 @@
 .DS_STORE
 .env
+vendor
 _ide_helper*
+bower_components
 node_modules
-public/components
-/vendor
+public/**/*.map
+public/build/
+public/css/app.css
+public/css/main.css
+public/js/bundle.js
+public/js/main.js
