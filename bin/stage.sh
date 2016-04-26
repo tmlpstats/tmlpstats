@@ -78,6 +78,7 @@ rsync -av --delete --filter='protect .env' \
                    --filter='protect storage/logs/*' \
                    --filter='protect storage/app/*' \
                    --filter='protect public/error_log' \
+                   --exclude='bower_components' \
                    --exclude='node_modules' \
                    --exclude='storage/debugbar' \
                    --exclude='tests' \
@@ -91,7 +92,7 @@ rsync -av --delete --filter='protect .env' \
                    --exclude='phpunit.xml' \
                    --exclude='*.md' \
                    --exclude='bower.json' \
-                   --exclude='.bowerrc' \
+                   --exclude='.babelrc' \
                    $SOURCE/ $DEST
 
 echo ""
