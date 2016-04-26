@@ -1,13 +1,13 @@
 <?php
-namespace TmlpStats\Tests;
+namespace TmlpStats\Tests\Functional\Api;
 
 use Carbon\Carbon;
-use Faker\Factory;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use TmlpStats as Models;
+use TmlpStats\Tests\Functional\FunctionalTestAbstract;
 
-class ApplicationTest extends TestAbstract
+class ApplicationTest extends FunctionalTestAbstract
 {
     use DatabaseTransactions;
     use WithoutMiddleware;
@@ -19,10 +19,6 @@ class ApplicationTest extends TestAbstract
     public function setUp()
     {
         parent::setUp();
-        $this->faker = Factory::create();
-
-        $this->now = Carbon::now();
-        Carbon::setTestNow($this->now);
 
         $this->center = Models\Center::abbreviation('VAN')->first();
         $this->quarter = Models\Quarter::year(2016)->quarterNumber(1)->first();
@@ -48,17 +44,6 @@ class ApplicationTest extends TestAbstract
             'tmlp_registration_id' => $this->application->id,
             'stats_report_id'      => $this->report->id,
         ]);
-
-        $this->user = factory(Models\User::class)->create();
-        $this->be($this->user);
-    }
-
-    public function tearDown()
-    {
-        parent::tearDown();
-
-        // Reset testing datetime
-        Carbon::setTestNow();
     }
 
     /**
@@ -248,54 +233,5 @@ class ApplicationTest extends TestAbstract
     {
         // Test that the exceptions is thrown properly
         $this->markTestIncomplete('Not yet implemented');
-    }
-
-    /**
-     * Takes a multidimensional array, and replaces values using the replace array.
-     *
-     * Replace should use the dot notation similar to what's returned by calling array_dot($array);
-     *
-     * @param $array    array with hierarchical data
-     * @param $replace  array with dotted replacement data
-     *
-     * @return mixed
-     */
-    public function replaceInto($array, $replace)
-    {
-        foreach ($replace as $key => $value) {
-            array_set($array, $key, $value);
-        }
-
-        return $array;
-    }
-
-    /**
-     * Check if $expected exists within the actual result. Matches array hierarchy
-     *
-     * @param array|null $expected
-     *
-     * @return $this|void
-     */
-    public function seeJsonHas(array $expected = null)
-    {
-        if (is_null($expected)) {
-            $this->assertJson(
-                $this->response->getContent(), "JSON was not returned from [{$this->currentUri}]."
-            );
-
-            return $this;
-        }
-
-        $actual = json_decode($this->response->getContent(), true);
-        if (is_null($actual) || $actual === false) {
-            return $this->fail('Invalid JSON was returned from the route. Perhaps an exception was thrown?');
-        }
-
-        $expected = array_dot($expected);
-        foreach ($expected as $key => $value) {
-            $this->assertEquals($value, array_get($actual, $key), "Unable to find JSON fragment actual[{$key}] = {$value} within [" . print_r($actual, true) . "].");
-        }
-
-        return $this;
     }
 }

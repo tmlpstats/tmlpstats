@@ -1,5 +1,5 @@
 <?php
-namespace TmlpStats\Tests\Validate\Objects;
+namespace TmlpStats\Tests\Unit\Validate\Objects;
 
 use Log;
 use stdClass;

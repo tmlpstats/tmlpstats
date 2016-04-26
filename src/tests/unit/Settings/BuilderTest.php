@@ -1,5 +1,5 @@
 <?php
-namespace TmlpStats\Tests\Settings;
+namespace TmlpStats\Tests\Unit\Settings;
 
 use TmlpStats\Center;
 use TmlpStats\Quarter;
@@ -8,7 +8,7 @@ use TmlpStats\Settings\Parsers\AbstractParser;
 use TmlpStats\Settings\Parsers\DefaultParser;
 use TmlpStats\Settings\Parsers\QuarterDateParser;
 use TmlpStats\Tests\TestAbstract;
-use TmlpStats\Tests\Traits\MocksSettings;
+use TmlpStats\Tests\Unit\Traits\MocksSettings;
 
 
 class BuilderTest extends TestAbstract

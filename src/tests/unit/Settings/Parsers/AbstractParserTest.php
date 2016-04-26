@@ -1,5 +1,5 @@
 <?php
-namespace TmlpStats\Tests\Settings\Parsers;
+namespace TmlpStats\Tests\Unit\Settings\Parsers;
 
 use Carbon\Carbon;
 use TmlpStats\Center;
@@ -7,7 +7,7 @@ use TmlpStats\Quarter;
 use TmlpStats\Setting;
 use TmlpStats\Settings\Parsers\AbstractParser;
 use TmlpStats\Tests\TestAbstract;
-use TmlpStats\Tests\Traits\MocksSettings;
+use TmlpStats\Tests\Unit\Traits\MocksSettings;
 
 class AbstractSettingsImplementation extends AbstractParser
 {

@@ -1,13 +1,13 @@
 <?php
-namespace TmlpStats\Tests\Settings;
+namespace TmlpStats\Tests\Unit\Settings;
 
 use Carbon\Carbon;
 use TmlpStats\Center;
 use TmlpStats\Settings\ReportDeadlines;
 use TmlpStats\StatsReport;
 use TmlpStats\Tests\TestAbstract;
-use TmlpStats\Tests\Traits\MocksQuarters;
-use TmlpStats\Tests\Traits\MocksSettings;
+use TmlpStats\Tests\Unit\Traits\MocksQuarters;
+use TmlpStats\Tests\Unit\Traits\MocksSettings;
 
 class ReportDeadlinesTest extends TestAbstract
 {

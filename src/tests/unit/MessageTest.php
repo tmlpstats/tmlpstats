@@ -1,8 +1,9 @@
 <?php
-namespace TmlpStats\Tests;
+namespace TmlpStats\Tests\Unit;
 
 use TmlpStats\Message;
 use Exception;
+use TmlpStats\Tests\TestAbstract;
 
 class MessageTest extends TestAbstract
 {

@@ -1,12 +1,12 @@
 <?php
-namespace TmlpStats\Tests\Validate\Objects;
+namespace TmlpStats\Tests\Unit\Validate\Objects;
 
 use Carbon\Carbon;
 use Log;
 use stdClass;
 use TmlpStats\Center;
-use TmlpStats\Tests\Traits\MocksMessages;
-use TmlpStats\Tests\Traits\MocksQuarters;
+use TmlpStats\Tests\Unit\Traits\MocksMessages;
+use TmlpStats\Tests\Unit\Traits\MocksQuarters;
 use TmlpStats\Util;
 use TmlpStats\Validate\Objects\CommCourseInfoValidator;
 

@@ -1,11 +1,11 @@
 <?php
-namespace TmlpStats\Tests\Settings;
+namespace TmlpStats\Tests\Unit\Settings;
 
 use Carbon\Carbon;
 use TmlpStats\Settings\Parsers\DefaultParser;
 use TmlpStats\Settings\Setting;
 use TmlpStats\Tests\TestAbstract;
-use TmlpStats\Tests\Traits\MocksSettings;
+use TmlpStats\Tests\Unit\Traits\MocksSettings;
 
 class DefaultParserSettingTest extends TestAbstract
 {

@@ -1,5 +1,5 @@
 <?php
-namespace TmlpStats\Tests\Api\Parsers;
+namespace TmlpStats\Tests\Unit\Api\Parsers;
 
 use TmlpStats\Api\Parsers;
 use TmlpStats\Tests\TestAbstract;

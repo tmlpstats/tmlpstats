@@ -1,9 +1,9 @@
 <?php
-namespace TmlpStats\Tests\Validate;
+namespace TmlpStats\Tests\Unit\Validate;
 
 use Carbon\Carbon;
 use stdClass;
-use TmlpStats\Tests\Traits\MocksQuarters;
+use TmlpStats\Tests\Unit\Traits\MocksQuarters;
 
 class ValidatorAbstractImplementation extends \TmlpStats\Validate\ValidatorAbstract
 {

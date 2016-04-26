@@ -2,6 +2,7 @@
 namespace TmlpStats\Tests;
 
 use Artisan;
+use Carbon\Carbon;
 
 set_time_limit(600);
 
@@ -18,6 +19,8 @@ class TestAbstract extends \Illuminate\Foundation\Testing\TestCase
     protected $runMigrations = false;
     protected $runSeeds = false;
 
+    protected $now;
+
     /**
      * Creates the application.
      *
@@ -27,7 +30,7 @@ class TestAbstract extends \Illuminate\Foundation\Testing\TestCase
     {
         $app = null;
         if ($this->instantiateApp) {
-            $app = require __DIR__ . '/../../bootstrap/app.php';
+            $app = require __DIR__ . '/../bootstrap/app.php';
             $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
         }
 
@@ -40,6 +43,22 @@ class TestAbstract extends \Illuminate\Foundation\Testing\TestCase
         }
 
         return $app;
+    }
+
+    public function setUp()
+    {
+        parent::setUp();
+
+        $this->now = Carbon::now();
+        Carbon::setTestNow($this->now);
+    }
+
+    public function tearDown()
+    {
+        parent::tearDown();
+
+        // Reset testing datetime
+        Carbon::setTestNow();
     }
 
     protected function getObjectMock($methods = [], $constructorArgs = [])

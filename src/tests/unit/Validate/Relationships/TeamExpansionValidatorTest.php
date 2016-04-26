@@ -1,12 +1,12 @@
 <?php
-namespace TmlpStats\Tests\Validate\Relationships;
+namespace TmlpStats\Tests\Unit\Validate\Relationships;
 
 use Carbon\Carbon;
 use Log;
 use stdClass;
 use TmlpStats\Center;
-use TmlpStats\Tests\Traits\MocksQuarters;
-use TmlpStats\Tests\Validate\ValidatorTestAbstract;
+use TmlpStats\Tests\Unit\Traits\MocksQuarters;
+use TmlpStats\Tests\Unit\Validate\ValidatorTestAbstract;
 use TmlpStats\Validate\Relationships\TeamExpansionValidator;
 
 class TeamExpansionValidatorTest extends ValidatorTestAbstract

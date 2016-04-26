@@ -1,5 +1,5 @@
 <?php
-namespace TmlpStats\Tests\Validate;
+namespace TmlpStats\Tests\Unit\Validate;
 
 use TmlpStats\Validate\NullValidator;
 use stdClass;

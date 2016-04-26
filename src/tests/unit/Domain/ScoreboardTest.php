@@ -1,5 +1,5 @@
 <?php
-namespace TmlpStats\Tests\Domain;
+namespace TmlpStats\Tests\Unit\Domain;
 
 use TmlpStats\Domain\Scoreboard;
 use TmlpStats\Tests\TestAbstract;

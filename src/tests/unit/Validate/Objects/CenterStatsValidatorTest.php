@@ -1,7 +1,7 @@
 <?php
-namespace TmlpStats\Tests\Validate\Objects;
+namespace TmlpStats\Tests\Unit\Validate\Objects;
 
-use TmlpStats\Tests\Traits\MocksMessages;
+use TmlpStats\Tests\Unit\Traits\MocksMessages;
 use TmlpStats\Util;
 use TmlpStats\Validate\Objects\CenterStatsValidator;
 

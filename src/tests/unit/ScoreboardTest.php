@@ -1,8 +1,9 @@
 <?php
-namespace TmlpStats\Tests;
+namespace TmlpStats\Tests\Unit;
 
 use stdClass;
 use TmlpStats\Scoreboard;
+use TmlpStats\Tests\TestAbstract;
 use TmlpStats\Util;
 
 class ScoreboardTest extends TestAbstract
