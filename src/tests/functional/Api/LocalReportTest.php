@@ -41,8 +41,10 @@ class LocalReportTest extends FunctionalTestAbstract
         $weekNumber = 1;
         $date = $this->quarter->getFirstWeekDate($center);
         while ($date->lte($this->quarter->endWeekendDate)) {
-            if ($date->lte($reportingDate)) {
 
+            $promiseValue = $weekNumber * 2;
+
+            if ($date->lte($reportingDate)) {
                 $globalReport = Models\GlobalReport::firstOrCreate([
                     'reporting_date' => $date,
                 ]);
@@ -62,12 +64,12 @@ class LocalReportTest extends FunctionalTestAbstract
                     'reporting_date' => $date->toDateString(),
                     'stats_report_id' => $report->id,
                     'type' => 'actual',
-                    'cap' => $weekNumber * 2 - 1,
-                    'cpc' => $weekNumber * 2 - 1,
-                    't1x' => $weekNumber * 2 - 1,
-                    't2x' => $weekNumber * 2 - 1,
+                    'cap' => $promiseValue - 1,
+                    'cpc' => $promiseValue - 1,
+                    't1x' => $promiseValue - 1,
+                    't2x' => $promiseValue - 1,
                     'gitw' => 80 + $weekNumber - 1,
-                    'lf' => $weekNumber * 2 - 1,
+                    'lf' => $promiseValue - 1,
                     'tdo' => mt_rand(25, 100),
                 ]);
             }
@@ -75,16 +77,16 @@ class LocalReportTest extends FunctionalTestAbstract
             $reports[] = $report;
 
             $scoreboard[$date->toDateString()]['promise'] = Models\CenterStatsData::firstOrCreate([
-                'reporting_date'  => $date->toDateString(),
+                'reporting_date' => $date->toDateString(),
                 'stats_report_id' => $reports[0]->id, // Always attached to week 1
-                'type'            => 'promise',
-                'cap'             => $weekNumber * 2,
-                'cpc'             => $weekNumber * 2,
-                't1x'             => $weekNumber * 2,
-                't2x'             => $weekNumber * 2,
-                'gitw'            => 80 + $weekNumber,
-                'lf'              => $weekNumber * 2,
-                'tdo'             => 100,
+                'type' => 'promise',
+                'cap' => $promiseValue,
+                'cpc' => $promiseValue,
+                't1x' => $promiseValue,
+                't2x' => $promiseValue,
+                'gitw' => 80 + $weekNumber,
+                'lf' => $promiseValue,
+                'tdo' => 100,
             ]);
 
             $weekNumber++;
