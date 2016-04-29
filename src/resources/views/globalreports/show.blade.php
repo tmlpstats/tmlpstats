@@ -29,7 +29,7 @@
 
         <div>
             <ul id="tabs" class="nav nav-tabs tabs-top brief-tabs" data-tabs="tabs">
-                <li class="active"><a href="#ratingsummary" data-toggle="tab"><span class="long">Ratings </span>Summary</a></li>
+                <li class="active"><a href="#ratingsummary" data-toggle="tab"><span class="long">Weekly </span>Summary</a></li>
                 <li><a href="#regionalstats" data-toggle="tab"><span class="long">Regional </span>Games</a></li>
                 <li><a href="#statsreports" data-toggle="tab"><span class="long">Center Reports</span><span class="brief">Centers</span></a></li>
                 <li><a href="#applications" data-toggle="tab">Applications</a></li>
@@ -43,9 +43,14 @@
         <div>
             <div class="tab-content">
                 <div class="tab-pane active" id="ratingsummary">
-                    <h3>Ratings Summary</h3>
+                    <h3>Weekly Summary</h3>
+                    <div class="btn-group" role="group">
+                        <button id="ratingsummary-button" type="button" class="btn">Ratings</button>
+                        <button id="regionsummary-button" type="button" class="btn">At A Glance</button>
+                    </div>
 
                     <div id="ratingsummary-container"></div>
+                    <div id="regionsummary-container"></div>
                 </div>
                 <div class="tab-pane" id="regionalstats">
                     <h3>Regional Games</h3>
@@ -145,6 +150,7 @@
     <script type="text/javascript">
         var pages = [
             'ratingsummary',
+            'regionsummary',
             'regionalstats',
             'statsreports',
             'applicationsbystatus',
@@ -182,6 +188,10 @@
         ];
 
         var buttonGroups = [
+            [
+                'ratingsummary',
+                'regionsummary',
+            ],
             [
                 'applicationsoverview',
                 'applicationsoverdue',
