@@ -1,3 +1,4 @@
+require('es6-promise').polyfill();
 var elixir = require('laravel-elixir');
 
 // Allow us to use the .jsx extension for React files
