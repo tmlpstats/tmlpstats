@@ -274,6 +274,11 @@ class StatsReportController extends ReportDispatchAbstractController
             $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
             $sheet = [];
 
+            // We don't need the value, but we need to make sure a global report exists for this date
+            $globalReport = GlobalReport::firstOrCreate([
+                'reporting_date' => $statsReport->reportingDate,
+            ]);
+
             try {
                 // Check if we have cached the report already. If so, remove it from the cache and use it here
                 $cacheKey = "statsReport{$id}:importdata";
