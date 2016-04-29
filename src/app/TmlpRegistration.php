@@ -106,11 +106,25 @@ class TmlpRegistration extends Model
             $person->save();
         }
 
-        return parent::firstOrNew([
+        // TODO: FIXME
+        // No idea why I have to do this, but it was breaking because parent::firstOfNew
+        // was actually re-calling this method
+        $attributes = [
             'reg_date'  => $attributes['reg_date'],
             'team_year' => $attributes['team_year'],
             'person_id' => $person->id,
-        ]);
+        ];
+
+        if (! is_null($instance = (new static)->newQueryWithoutScopes()->where($attributes)->first())) {
+            return $instance;
+        }
+
+        return new static($attributes);
+        //return parent::firstOrNew([
+        //    'reg_date'  => $attributes['reg_date'],
+        //    'team_year' => $attributes['team_year'],
+        //    'person_id' => $person->id,
+        //]);
     }
 
     public function scopeTeamYear($query, $teamYear)

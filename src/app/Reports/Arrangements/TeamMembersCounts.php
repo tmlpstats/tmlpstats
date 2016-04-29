@@ -13,12 +13,22 @@ class TeamMembersCounts extends BaseArrangement
             'team1' => 0,
             'team2' => 0,
             'total' => 0,
+            'percent' => [
+                'team1' => 0,
+                'team2' => 0,
+                'total' => 0,
+            ],
         ];
 
         $gitw = [
             'team1' => 0,
             'team2' => 0,
             'total' => 0,
+            'percent' => [
+                'team1' => 0,
+                'team2' => 0,
+                'total' => 0,
+            ],
         ];
 
         $withdraws = [

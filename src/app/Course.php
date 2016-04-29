@@ -33,7 +33,15 @@ class Course extends Model
     public static function firstOrCreate(array $attributes)
     {
         if (!isset($attributes['is_international'])) {
-            return parent::firstOrCreate($attributes);
+            // TODO: FIXME
+            // No idea why I have to do this, but it was breaking because parent::firstOfNew
+            // was actually re-calling this method
+            if (! is_null($instance = (new static)->newQueryWithoutScopes()->where($attributes)->first())) {
+                return $instance;
+            }
+
+            return static::create($attributes);
+            //return parent::firstOrCreate($attributes);
         }
 
         // Special handing for INTL vs local course stats
