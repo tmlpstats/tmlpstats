@@ -5,13 +5,11 @@ elixir.config.js.browserify.options.extensions = ['.jsx', '.js'];
 
 elixir(function(mix) {
     // Compile, and package all css into a single file
-    mix.less('app.less')
-       .styles([
+    mix.styles([
             'bower_components/bootstrap/dist/css/bootstrap.min.css',
             'bower_components/datatables/media/css/dataTables.bootstrap.min.css',
             'bower_components/jquery-loading/dist/jquery.loading.min.css',
             'bower_components/font-awesome/css/font-awesome.min.css',
-            'public/css/app.css',
             'public/css/tmlpstats.css'
         ], 'public/css/main.css', './')
        .copy( 'public/fonts', 'public/build/fonts' );
