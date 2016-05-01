@@ -22,7 +22,7 @@
             @foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game)
                 <tr>
                     <th class="border-left border-right">{{ strtoupper($game) }}</th>
-                    @foreach ($regionsData as $name => $obj)
+                    @foreach ($regionsData as $name => $data)
                         <?php
                         $data = $regionsData[$name][$globalReport->reportingDate->toDateString()];
                         if ($data['percent'][$game] < 50) {
