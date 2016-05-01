@@ -69,7 +69,7 @@
     </table>
 </div>
 <div class="row">
-    @include('reports.charts.ratings.chart', ['globalReport' => $globalReport, 'regions' => $regions])
+    @include('reports.charts.ratings.chart')
 </div>
 
-@include('reports.charts.ratings.setup', ['globalReport' => $globalReport, 'regions' => $regions])
+@include('reports.charts.ratings.setup')
