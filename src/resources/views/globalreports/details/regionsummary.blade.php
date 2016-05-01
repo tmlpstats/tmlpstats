@@ -1,5 +1,5 @@
-<div class="table-responsive">
-    <br>
+<br>
+<div class="row">
     <table class="table table-condensed table-bordered">
         <thead>
         <tr>
@@ -24,6 +24,7 @@
                     <th class="border-left border-right">{{ strtoupper($game) }}</th>
                     @foreach ($regionsData as $name => $data)
                         <?php
+                        $data = $regionsData[$name][$globalReport->reportingDate->toDateString()];
                         if ($data['percent'][$game] < 50) {
                             $effectivenessClass = 'danger';
                         } else if ($data['percent'][$game] < 75) {
@@ -51,6 +52,9 @@
             <tr class="border-top">
                 <th class="border-right">&nbsp;</th>
                 @foreach ($regionsData as $name => $data)
+                    <?php
+                    $data = $regionsData[$name][$globalReport->reportingDate->toDateString()];
+                    ?>
                     <th colspan="3" class="data-point"><span style="text-transform: uppercase">{{ $data['rating'] }}</span></th>
                     <th class="data-point">{{ $data['points']['total'] }}</th>
                     <th class="border-right">&nbsp;</th>
@@ -64,3 +68,8 @@
         </tbody>
     </table>
 </div>
+<div class="row">
+    @include('reports.charts.ratings.chart')
+</div>
+
+@include('reports.charts.ratings.setup')
