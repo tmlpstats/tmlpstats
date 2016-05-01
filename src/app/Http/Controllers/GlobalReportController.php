@@ -94,7 +94,6 @@ class GlobalReportController extends ReportDispatchAbstractController
             'quarter',
             'showNavCenterSelect'
         ));
-
     }
 
     /**
@@ -135,9 +134,9 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getStatsReportsNotOnList(GlobalReport $globalReport)
     {
         $statsReports = StatsReport::reportingDate($globalReport->reportingDate)
-            ->submitted()
-            ->validated(true)
-            ->get();
+                                   ->submitted()
+                                   ->validated(true)
+                                   ->get();
 
         $centers = [];
         foreach ($statsReports as $statsReport) {
@@ -199,6 +198,9 @@ class GlobalReportController extends ReportDispatchAbstractController
         switch ($report) {
             case 'ratingsummary':
                 $response = $this->getRatingSummary($globalReport, $region);
+                break;
+            case 'regionsummary':
+                $response = $this->getRegionSummary($globalReport, $region);
                 break;
             case 'regionalstats':
                 $response = $this->getRegionalStats($globalReport, $region);
@@ -264,9 +266,9 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getRatingSummary(GlobalReport $globalReport, Region $region)
     {
         $statsReports = $globalReport->statsReports()
-            ->byRegion($region)
-            ->validated()
-            ->get();
+                                     ->byRegion($region)
+                                     ->validated()
+                                     ->get();
 
         if ($statsReports->isEmpty()) {
             return null;
@@ -282,6 +284,47 @@ class GlobalReportController extends ReportDispatchAbstractController
         $data['summary']['rating'] = $weeklyData[$dateString]['rating'];
 
         return view('globalreports.details.ratingsummary', $data);
+    }
+
+    protected function getRegionSummary(GlobalReport $globalReport, Region $region)
+    {
+        $children = Region::byParent($region)->orderby('name')->get();
+
+        $regions = [];
+        $regionsData = [];
+        if ($children) {
+            foreach ($children as $childRegion) {
+                $regions[] = $childRegion;
+                $regionsData[$childRegion->abbreviation] = App::make(Api\GlobalReport::class)
+                                                              ->getWeekScoreboard($globalReport, $childRegion);
+            }
+        }
+        $regions[] = $region;
+        $regionsData[$region->abbreviation] = App::make(Api\GlobalReport::class)
+                                                 ->getWeekScoreboard($globalReport, $region);
+
+        // This should get merged with the other reg per participant code and put in the api
+        $rpp = [];
+        foreach ($regions as $thisRegion) {
+            $abbr = $thisRegion->abbreviation;
+            $statsReports = $globalReport->statsReports()
+                                         ->byRegion($thisRegion)
+                                         ->validated()
+                                         ->get();
+            $participantCount = 0;
+            foreach ($statsReports as $report) {
+                $participantCount += TeamMemberData::byStatsReport($report)
+                                                   ->active()
+                                                   ->count();
+            }
+
+            foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
+                $rpp[$abbr][$game] = $regionsData[$abbr]['actual'][$game] / $participantCount;
+                $rpp[$abbr]['participantCount'] = $participantCount;
+            }
+        }
+
+        return view('globalreports.details.regionsummary', compact('regions', 'regionsData', 'rpp'));
     }
 
     protected function getRegionalStats(GlobalReport $globalReport, Region $region)
@@ -490,10 +533,8 @@ class GlobalReportController extends ReportDispatchAbstractController
         ];
         foreach ($teamMembersByCenter as $centerName => $unused) {
             $a = new Arrangements\TeamMemberIncomingOverview([
-                'registrationsData' => isset($registrationsByCenter[$centerName]) ? $registrationsByCenter[$centerName]
-                : [],
-                'teamMembersData' => isset($teamMembersByCenter[$centerName]) ? $teamMembersByCenter[$centerName]
-                : [],
+                'registrationsData' => isset($registrationsByCenter[$centerName]) ? $registrationsByCenter[$centerName] : [],
+                'teamMembersData' => isset($teamMembersByCenter[$centerName]) ? $teamMembersByCenter[$centerName] : [],
                 'region' => $region,
             ]);
             $centerRow = $a->compose();
@@ -572,10 +613,8 @@ class GlobalReportController extends ReportDispatchAbstractController
         foreach ($teamMembersByCenter as $centerName => $teamMembersData) {
 
             $a = new Arrangements\TravelRoomingByTeamYear([
-                'registrationsData' => isset($registrationsByCenter[$centerName]) ? $registrationsByCenter[$centerName]
-                : [],
-                'teamMembersData' => isset($teamMembersByCenter[$centerName]) ? $teamMembersByCenter[$centerName]
-                : [],
+                'registrationsData' => isset($registrationsByCenter[$centerName]) ? $registrationsByCenter[$centerName] : [],
+                'teamMembersData' => isset($teamMembersByCenter[$centerName]) ? $teamMembersByCenter[$centerName] : [],
                 'region' => $region,
             ]);
             $centerRow = $a->compose();
@@ -836,8 +875,8 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         foreach ($reportData as $centerName => $centerData) {
             $participantCount = TeamMemberData::byStatsReport($statsReports[$centerName])
-                ->active()
-                ->count();
+                                              ->active()
+                                              ->count();
             $totalWeekly = 0;
             $totalQuarterly = 0;
             foreach ($games as $game) {
@@ -932,6 +971,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         if ($viewData) {
             return view('globalreports.details.teammemberstatus', $viewData);
         }
+
         return null;
     }
 
@@ -950,8 +990,8 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getCenterStatsReports(GlobalReport $globalReport, Region $region)
     {
         $statsReports = $globalReport->statsReports()
-            ->byRegion($region)
-            ->get();
+                                     ->byRegion($region)
+                                     ->get();
 
         if ($statsReports->isEmpty()) {
             return null;
@@ -983,14 +1023,14 @@ class GlobalReportController extends ReportDispatchAbstractController
             if ($report->isOnTime()) {
                 $statsReportData['onTime'] = true;
                 $statsReportData['officialSubmitTime'] = $report->submittedAt->setTimezone($timezone)
-                    ->format('M j @ g:ia T');
+                                                                             ->format('M j @ g:ia T');
                 $ontime++;
             } else {
                 $otherReports = StatsReport::reportingDate($globalReport->reportingDate)
-                    ->byCenter($report->center)
-                    ->whereNotNull('submitted_at')
-                    ->orderBy('submitted_at', 'asc')
-                    ->get();
+                                           ->byCenter($report->center)
+                                           ->whereNotNull('submitted_at')
+                                           ->orderBy('submitted_at', 'asc')
+                                           ->get();
 
                 if (!$otherReports->isEmpty()) {
 
@@ -1005,21 +1045,21 @@ class GlobalReportController extends ReportDispatchAbstractController
 
                     if ($officialReport && $statsReportData['onTime'] === true) {
                         $statsReportData['officialSubmitTime'] = $officialReport->submittedAt->setTimezone($timezone)
-                            ->format('M j @ g:ia T');
+                                                                                             ->format('M j @ g:ia T');
                         $statsReportData['officialReport'] = $officialReport;
 
                         $statsReportData['revisionSubmitTime'] = $report->submittedAt->setTimezone($timezone)
-                            ->format('M j @ g:ia T');
+                                                                                     ->format('M j @ g:ia T');
                         $statsReportData['revisedReport'] = $report;
                         $resubmitted++;
                     } else {
                         $first = $otherReports->first();
                         $statsReportData['officialSubmitTime'] = $first->submittedAt->setTimezone($timezone)
-                            ->format('M j @ g:ia T');
+                                                                                    ->format('M j @ g:ia T');
                         $statsReportData['officialReport'] = $first;
                         if ($first->id != $report->id) {
                             $statsReportData['revisionSubmitTime'] = $report->submittedAt->setTimezone($timezone)
-                                ->format('M j @ g:ia T');
+                                                                                         ->format('M j @ g:ia T');
                             $statsReportData['revisedReport'] = $report;
                             $resubmitted++;
                         }
