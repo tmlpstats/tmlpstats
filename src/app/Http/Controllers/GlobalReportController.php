@@ -18,6 +18,10 @@ use TmlpStats\TeamMemberData;
 
 class GlobalReportController extends ReportDispatchAbstractController
 {
+    protected $dontCache = [
+        'ratingsummary',
+        'regionsummary',
+    ];
     /**
      * Create a new controller instance.
      */
@@ -295,10 +299,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         $rpp = [];
         foreach ($regions as $thisRegion) {
             $abbr = $thisRegion->abbreviation;
-            $statsReports = $globalReport->statsReports()
-                                         ->byRegion($thisRegion)
-                                         ->validated()
-                                         ->get();
+            $statsReports = $this->getStatsReports($globalReport, $thisRegion);
             $participantCount = 0;
             foreach ($statsReports as $report) {
                 $participantCount += TeamMemberData::byStatsReport($report)
@@ -377,10 +378,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $statsReports = $globalReport->statsReports()
-                                     ->validated()
-                                     ->byRegion($region)
-                                     ->get();
+        $statsReports = $this->getStatsReports($globalReport, $region);
 
         foreach ($statsReports as $statsReport) {
             $centerName = $statsReport->center->name;
@@ -432,11 +430,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $statsReportsAll = $globalReport->statsReports()
-                                        ->validated()
-                                        ->byRegion($region)
-                                        ->reportingDate($globalReport->reportingDate)
-                                        ->get();
+        $statsReportsAll = $this->getStatsReports($globalReport, $region);
 
         foreach ($statsReportsAll as $report) {
             $centerName = $report->center->name;
@@ -882,11 +876,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         $lastWeekReportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($lastGlobalReport, $region);
 
-        $statsReportsAll = $globalReport->statsReports()
-                                        ->validated()
-                                        ->byRegion($region)
-                                        ->reportingDate($globalReport->reportingDate)
-                                        ->get();
+        $statsReportsAll = $this->getStatsReports($globalReport, $region);
 
         $statsReports = [];
         foreach ($statsReportsAll as $report) {
@@ -1097,7 +1087,9 @@ class GlobalReportController extends ReportDispatchAbstractController
             $total++;
             $statsReportsList[] = $statsReportData;
         }
-        usort($statsReportsList, [get_class(), 'sortByCenterName']);
+        usort($statsReportsList, function($a, $b) {
+            return strcmp($a['center'], $b['center']);
+        });
 
         $boxes = [
             [
@@ -1310,16 +1302,19 @@ class GlobalReportController extends ReportDispatchAbstractController
         return view('globalreports.details.courses', compact('reportData', 'type', 'statsReports'));
     }
 
-    protected static function sortByCenterName($a, $b)
-    {
-        return strcmp($a['center'], $b['center']);
-    }
-
     public static function getUrl(GlobalReport $globalReport, Region $region)
     {
         $abbr = strtolower($region->abbreviation);
         $date = $globalReport->reportingDate->toDateString();
 
         return url("/reports/regions/{$abbr}/{$date}");
+    }
+
+    protected function getStatsReports(GlobalReport $report, Region $region)
+    {
+        return $report->statsReports()
+                      ->validated()
+                      ->byRegion($region)
+                      ->get();
     }
 }

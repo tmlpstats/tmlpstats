@@ -5,22 +5,25 @@
 use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
+use TmlpStats\Api\Base\ApiBase;
 use TmlpStats\Reports\Arrangements;
 
-class GlobalReport
+class GlobalReport extends ApiBase
 {
     public function getRating(Models\GlobalReport $report, Models\Region $region)
     {
-        $statsReports = $report->statsReports()
-                               ->byRegion($region)
-                               ->validated()
-                               ->get();
+        $cacheObjs = compact('report', 'region');
+        $cached = $this->checkCache($cacheObjs);
+        if ($cached) {
+            return $cached;
+        }
 
+        $statsReports = $this->getStatsReports($report, $region);
         if ($statsReports->isEmpty()) {
             return null;
         }
 
-        $weeklyData = App::make(GlobalReport::class)->getQuarterScoreboard($report, $region);
+        $weeklyData = $this->getQuarterScoreboard($report, $region);
 
         $a = new Arrangements\RegionByRating($statsReports);
         $data = $a->compose();
@@ -29,15 +32,23 @@ class GlobalReport
         $data['summary']['points'] = $weeklyData[$dateString]['points']['total'];
         $data['summary']['rating'] = $weeklyData[$dateString]['rating'];
 
+        $this->putCache($cacheObjs, $data);
+
         return $data;
     }
 
     public function getQuarterScoreboard(Models\GlobalReport $report, Models\Region $region)
     {
-        $statsReports = $report->statsReports()
-                               ->validated()
-                               ->byRegion($region)
-                               ->get();
+        $cacheObjs = compact('report', 'region');
+        $cached = $this->checkCache($cacheObjs);
+        if ($cached) {
+            return $cached;
+        }
+
+        $statsReports = $this->getStatsReports($report, $region);
+        if ($statsReports->isEmpty()) {
+            return [];
+        }
 
         $cumulativeData = [];
         foreach ($statsReports as $statsReport) {
@@ -88,23 +99,41 @@ class GlobalReport
         $a = new Arrangements\GamesByWeek($scoreboardData);
         $weeklyData = $a->compose();
 
+        $this->putCache($cacheObjs, $weeklyData['reportData']);
+
         return $weeklyData['reportData'];
     }
 
     public function getWeekScoreboard(Models\GlobalReport $report, Models\Region $region, Carbon $futureDate = null)
     {
+        $cacheObjs = compact('report', 'region');
+        $cached = $this->checkCache($cacheObjs);
+        if ($cached) {
+            return $cached;
+        }
+
         $scoreboardData = $this->getQuarterScoreboard($report, $region);
 
         $dateStr = $futureDate ? $futureDate->toDateString() : $report->reportingDate->toDateString();
+
+        $reportData = [];
         if (isset($scoreboardData[$dateStr])) {
-            return $scoreboardData[$dateStr];
+            $reportData = $scoreboardData[$dateStr];
         }
 
-        return [];
+        $this->putCache($cacheObjs, $reportData);
+
+        return $reportData;
     }
 
     public function getWeekScoreboardByCenter(Models\GlobalReport $report, Models\Region $region, $options = [])
     {
+        $cacheObjs = $this->merge(compact('report', 'region'), $options);
+        $cached = $this->checkCache($cacheObjs);
+        if ($cached) {
+            return $cached;
+        }
+
         $date = $report->reportingDate;
         if (isset($options['date']) && ($options['date'] instanceof Carbon || is_string($options['date']))) {
             $date = is_string($options['date']) ? Carbon::parse($options['date']) : $options['date'];
@@ -112,10 +141,10 @@ class GlobalReport
 
         $includeOriginalPromise = isset($options['includeOriginalPromise']) ? (bool) $options['includeOriginalPromise'] : false;
 
-        $statsReports = $report->statsReports()
-                               ->validated()
-                               ->byRegion($region)
-                               ->get();
+        $statsReports = $this->getStatsReports($report, $region);
+        if ($statsReports->isEmpty()) {
+            return [];
+        }
 
         $dateStr = $date->toDateString();
 
@@ -128,17 +157,25 @@ class GlobalReport
             $reportData[$centerName] = $centerStatsData[$dateStr];
         }
 
+        $this->putCache($cacheObjs, $reportData);
+
         return $reportData;
     }
 
     public function getApplicationsListByCenter(Models\GlobalReport $report, Models\Region $region, $options = [])
     {
+        $cacheObjs = $this->merge(compact('report', 'region'), $options);
+        $cached = $this->checkCache($cacheObjs);
+        if ($cached) {
+            return $cached;
+        }
+
         $returnUnprocessed = isset($options['returnUnprocessed']) ? (bool) $options['returnUnprocessed'] : false;
 
-        $statsReports = $report->statsReports()
-            ->byRegion($region)
-            ->reportingDate($report->reportingDate)
-            ->get();
+        $statsReports = $this->getStatsReports($report, $region);
+        if ($statsReports->isEmpty()) {
+            return [];
+        }
 
         $registrations = [];
         foreach ($statsReports as $statsReport) {
@@ -152,6 +189,16 @@ class GlobalReport
             }
         }
 
+        $this->putCache($cacheObjs, $registrations);
+
         return $registrations;
+    }
+
+    protected function getStatsReports(Models\GlobalReport $report, Models\Region $region)
+    {
+        return $report->statsReports()
+                      ->validated()
+                      ->byRegion($region)
+                      ->get();
     }
 }

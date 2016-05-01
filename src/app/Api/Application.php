@@ -95,12 +95,6 @@ class Application extends ApiBase
         ],
     ];
 
-    public function __construct(Guard $auth, Request $request)
-    {
-        $this->user = $auth->user();
-        $this->request = $request;
-    }
-
     public function create(array $data)
     {
         $data = $this->parseInputs($data, ['firstName', 'lastName', 'center', 'teamYear', 'regDate']);
@@ -160,6 +154,12 @@ class Application extends ApiBase
 
     public function getWeekData(Models\TmlpRegistration $application, Carbon $reportingDate)
     {
+        $cacheObjs = compact('application', 'reportingDate');
+        $cached = $this->checkCache($cacheObjs);
+        if ($cached) {
+            return $cached;
+        }
+
         $quarter = Models\Quarter::getQuarterByDate($reportingDate, $application->center->region);
         if (!$quarter) {
             throw new ApiExceptions\BadRequestException("Unable to find quarter which is required for fetching this data");
@@ -176,10 +176,14 @@ class Application extends ApiBase
             $report->save();
         }
 
-        return Models\TmlpRegistrationData::firstOrCreate([
+        $response = Models\TmlpRegistrationData::firstOrCreate([
             'tmlp_registration_id' => $application->id,
             'stats_report_id'      => $report->id,
         ])->load('registration.person', 'incomingQuarter', 'statsReport', 'withdrawCode', 'committedTeamMember.person');
+
+        $this->putCache($cacheObjs, $response);
+
+        return $response;
     }
 
     public function setWeekData(Models\TmlpRegistration $application, Carbon $reportingDate, array $data)

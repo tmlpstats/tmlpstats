@@ -20,6 +20,7 @@ class Kernel extends ConsoleKernel {
         Commands\FlushReportsCacheCommand::class,
         Commands\SanitizeDb::class,
         Commands\MergeDuplicatePeople::class,
+        Commands\FlushCacheTagCommand::class,
     ];
 
     /**
