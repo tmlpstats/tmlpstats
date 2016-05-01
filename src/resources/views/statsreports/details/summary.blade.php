@@ -143,6 +143,11 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
         </div>
     </div>
 </div>
+<div class="row">
+    @include('reports.charts.ratings.chart')
+</div>
+
+@include('reports.charts.ratings.setup')
 
 <script>
     var tdoData = [
@@ -180,7 +185,7 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
         @endif
     ];
 
-    $(function () {
+    $(function() {
         var pieTheme,
             pieSeriesTemplate,
             tdoChart,
@@ -249,16 +254,16 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
             })]
         }));
 
-gitwChart = $.extend(true, {}, pieTheme);
-gitwSeries = $.extend(true, {}, pieSeriesTemplate);
-$('#gitw-container').highcharts($.extend(true, gitwChart, {
-    title: {
-        text: 'Game in<br>the World<br><span style="font-size:small">{{ $gitw['total'] }}/{{ $gitwTotal }}</style>'
-    },
-    series: [$.extend(true, gitwSeries, {
-        name: 'GITW Effectiveness',
-        data: gitwData
-    })]
-}));
-});
+        gitwChart = $.extend(true, {}, pieTheme);
+        gitwSeries = $.extend(true, {}, pieSeriesTemplate);
+        $('#gitw-container').highcharts($.extend(true, gitwChart, {
+            title: {
+                text: 'Game in<br>the World<br><span style="font-size:small">{{ $gitw['total'] }}/{{ $gitwTotal }}</style>'
+            },
+            series: [$.extend(true, gitwSeries, {
+                name: 'GITW Effectiveness',
+                data: gitwData
+            })]
+        }));
+}   );
 </script>

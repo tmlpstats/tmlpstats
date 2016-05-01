@@ -296,12 +296,12 @@ class GlobalReportController extends ReportDispatchAbstractController
             foreach ($children as $childRegion) {
                 $regions[] = $childRegion;
                 $regionsData[$childRegion->abbreviation] = App::make(Api\GlobalReport::class)
-                                                              ->getWeekScoreboard($globalReport, $childRegion);
+                                                              ->getQuarterScoreboard($globalReport, $childRegion);
             }
         }
         $regions[] = $region;
         $regionsData[$region->abbreviation] = App::make(Api\GlobalReport::class)
-                                                 ->getWeekScoreboard($globalReport, $region);
+                                                 ->getQuarterScoreboard($globalReport, $region);
 
         // This should get merged with the other reg per participant code and put in the api
         $rpp = [];
@@ -318,13 +318,14 @@ class GlobalReportController extends ReportDispatchAbstractController
                                                    ->count();
             }
 
+            $dateStr = $globalReport->reportingDate->toDateString();
             foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
-                $rpp[$abbr][$game] = $regionsData[$abbr]['actual'][$game] / $participantCount;
+                $rpp[$abbr][$game] = $regionsData[$abbr][$dateStr]['actual'][$game] / $participantCount;
                 $rpp[$abbr]['participantCount'] = $participantCount;
             }
         }
 
-        return view('globalreports.details.regionsummary', compact('regions', 'regionsData', 'rpp'));
+        return view('globalreports.details.regionsummary', compact('globalReport', 'regions', 'regionsData', 'rpp'));
     }
 
     protected function getRegionalStats(GlobalReport $globalReport, Region $region)
