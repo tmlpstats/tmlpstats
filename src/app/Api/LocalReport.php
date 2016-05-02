@@ -5,13 +5,19 @@ namespace TmlpStats\Api;
 // that take typed input and return array responses.
 use App;
 use TmlpStats as Models;
+use TmlpStats\Api\Base\ApiBase;
 use TmlpStats\Http\Controllers;
 use TmlpStats\Reports\Arrangements;
 
-class LocalReport
+class LocalReport extends ApiBase
 {
     public function getQuarterScoreboard(Models\StatsReport $statsReport, $options = [])
     {
+        $cached = $this->checkCache($this->merge(compact('statsReport'), $options));
+        if (false && $cached) {
+            return $cached;
+        }
+
         $returnUnprocessed = isset($options['returnUnprocessed']) ? (bool) $options['returnUnprocessed'] : false;
         $returnUnflattened = isset($options['returnUnflattened']) ? (bool) $options['returnUnflattened'] : false;
         $includeOriginalPromise = isset($options['includeOriginalPromise']) ? (bool) $options['includeOriginalPromise'] : false;
@@ -56,31 +62,52 @@ class LocalReport
 
         if ($returnUnprocessed) {
             if ($returnUnflattened) {
-                return $scoreboardData;
+                $response = $scoreboardData;
+            } else {
+                $response = array_flatten($scoreboardData);
             }
-            return array_flatten($scoreboardData);
+
+            $this->putCache($response);
+
+            return $response;
         }
 
         $a = new Arrangements\GamesByWeek(array_flatten($scoreboardData));
         $centerStatsData = $a->compose();
+
+        $this->putCache($centerStatsData['reportData']);
 
         return $centerStatsData['reportData'];
     }
 
     public function getWeekScoreboard(Models\StatsReport $statsReport)
     {
+        $cached = $this->checkCache(compact('statsReport'));
+        if (false && $cached) {
+            return $cached;
+        }
+
         $scoreboardData = $this->getQuarterScoreboard($statsReport);
 
         $dateStr = $statsReport->reportingDate->toDateString();
+
+        $response = [];
         if (isset($scoreboardData[$dateStr])) {
-            return $scoreboardData[$dateStr];
+            $response = $scoreboardData[$dateStr];
         }
 
-        return [];
+        $this->putCache($response);
+
+        return $response;
     }
 
     public function getApplicationsList(Models\StatsReport $statsReport, $options = [])
     {
+        $cached = $this->checkCache($this->merge(compact('statsReport'), $options));
+        if (false && $cached) {
+            return $cached;
+        }
+
         $returnUnprocessed = isset($options['returnUnprocessed']) ? (bool) $options['returnUnprocessed'] : false;
 
         $registrations = Models\TmlpRegistrationData::byStatsReport($statsReport)
@@ -89,6 +116,7 @@ class LocalReport
         if (!$registrations) {
             return [];
         } else if ($returnUnprocessed) {
+            $this->putCache($registrations);
             return $registrations;
         }
 
@@ -97,6 +125,8 @@ class LocalReport
             'quarter' => $statsReport->quarter,
         ]);
         $data = $a->compose();
+
+        $this->putCache($data['reportData']);
 
         return $data['reportData'];
     }
