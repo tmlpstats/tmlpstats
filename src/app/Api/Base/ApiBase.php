@@ -12,16 +12,16 @@ use TmlpStats\Api\Parsers;
 
 class ApiBase
 {
-    const CACHE_TTL = 1440 * 14;
+    const CACHE_TTL = 1440 * 14; // 14 days
 
     /**
-     * Is cache enabled by default? Override this in derived classes
+     * Is cache enabled by default?
      * @var bool
      */
     protected $cacheEnabled = true;
 
     /**
-     * Methods to not cache. Override this in derived classes
+     * Methods to not cache.
      * @var array
      */
     protected $dontCache = [];
@@ -126,6 +126,12 @@ class ApiBase
         foreach ($objects as $name => $value) {
             if ($value instanceof Model) {
                 $value = $value->id;
+            } else if (is_array($value) || is_object($value)) {
+                if (is_array($value)) {
+                    // Canonicalize list by sorting
+                    ksort($value);
+                }
+                $value = json_encode($value);
             }
             $keyBase .= ":{$name}{$value}";
         }
