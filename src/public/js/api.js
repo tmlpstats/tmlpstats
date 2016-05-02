@@ -123,6 +123,7 @@ Api.GlobalReport = {
     Parameters:
       globalReport: GlobalReport
       region: Region
+      futureDate: date
     */
     getWeekScoreboard: function(params, callback, errback) {
         return apiCall('GlobalReport.getWeekScoreboard', params, (callback || null), (errback || null));

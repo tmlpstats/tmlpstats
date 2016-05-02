@@ -162,6 +162,23 @@ class Quarter extends Model
         return $date->startOfDay();
     }
 
+    public function getNextMilestone(Carbon $now)
+    {
+        if ($now->gt($this->getClassroom3Date())) {
+            $nextMilestone = $this->getQuarterEndDate();
+        } else if ($now->gt($this->getClassroom2Date())) {
+            $nextMilestone = $this->getClassroom3Date();
+        } else if ($now->gt($this->getClassroom1Date())) {
+            $nextMilestone = $this->getClassroom2Date();
+        } else if ($now->gt($this->getQuarterStartDate())) {
+            $nextMilestone = $this->getClassroom1Date();
+        } else {
+            $nextMilestone = $this->getQuarterStartDate();
+        }
+
+        return $nextMilestone;
+    }
+
     /**
      * Get the default date
      *

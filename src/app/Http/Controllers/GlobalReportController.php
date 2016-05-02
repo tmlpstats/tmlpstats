@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Response;
 use TmlpStats\Api;
 use TmlpStats\Center;
+use TmlpStats\Domain\Scoreboard;
 use TmlpStats\GlobalReport;
 use TmlpStats\Quarter;
 use TmlpStats\Region;
@@ -258,6 +259,9 @@ class GlobalReportController extends ReportDispatchAbstractController
             case 'regperparticipant':
                 $response = $this->getRegPerParticipant($globalReport, $region);
                 break;
+            case 'gaps':
+                $response = $this->getGaps($globalReport, $region);
+                break;
         }
 
         return $response;
@@ -326,6 +330,44 @@ class GlobalReportController extends ReportDispatchAbstractController
         }
 
         return view('globalreports.details.regionsummary', compact('globalReport', 'regions', 'regionsData', 'rpp'));
+    }
+
+    protected function getGaps(GlobalReport $globalReport, Region $region)
+    {
+        $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
+        $nextMilestone = $quarter->getNextMilestone($globalReport->reportDate);
+
+        $children = Region::byParent($region)->orderby('name')->get();
+
+        $regions = [];
+        if ($children) {
+            foreach ($children as $childRegion) {
+                $regions[] = $childRegion;
+            }
+        }
+        $regions[] = $region;
+
+        $regionsData = [];
+        foreach ($regions as $childRegion) {
+            $regionsData[$childRegion->abbreviation] = App::make(Api\GlobalReport::class)
+                                                          ->getWeekScoreboard($globalReport, $childRegion);
+
+            if ($nextMilestone->ne($globalReport->reportingDate)) {
+                $promises = App::make(Api\GlobalReport::class)
+                               ->getWeekScoreboard($globalReport, $childRegion, $nextMilestone);
+
+                $scoreboard = Scoreboard::blank();
+
+                foreach ($scoreboard->games() as $game) {
+                    $scoreboard->setValue($game->key, 'promise', $promises['promise'][$game->key]);
+                    $scoreboard->setValue($game->key, 'actual', $regionsData[$childRegion->abbreviation]['actual'][$game->key]);
+                }
+
+                $regionsData[$childRegion->abbreviation] = $scoreboard->toArray();
+            }
+        }
+
+        return view('globalreports.details.gaps', compact('globalReport', 'regions', 'regionsData'));
     }
 
     protected function getRegionalStats(GlobalReport $globalReport, Region $region)

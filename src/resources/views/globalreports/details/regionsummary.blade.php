@@ -40,9 +40,10 @@
                         } else {
                             $rppClass = 'ok';
                         }
+                        $suffix = ($game === 'gitw') ? '%' : '';
                         ?>
-                        <td class="data-point">{{ $data['promise'][$game] }}</td>
-                        <td class="data-point">{{ $data['actual'][$game] }}</td>
+                        <td class="data-point">{{ $data['promise'][$game] }}{{ $suffix }}</td>
+                        <td class="data-point">{{ $data['actual'][$game] }}{{ $suffix }}</td>
                         <td class="data-point {{ $effectivenessClass }}">{{ $data['percent'][$game] }}%</td>
                         <td class="data-point">{{ $data['points'][$game] }}</td>
                         <td class="data-point border-right {{ $rppClass }}">{{ $game === 'gitw' ? "--" : number_format($rpp[$name][$game], 2) }}</td>
