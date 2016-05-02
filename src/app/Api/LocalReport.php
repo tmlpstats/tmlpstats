@@ -13,8 +13,7 @@ class LocalReport extends ApiBase
 {
     public function getQuarterScoreboard(Models\StatsReport $statsReport, $options = [])
     {
-        $cacheObjs = $this->merge(compact('statsReport'), $options);
-        $cached = $this->checkCache($cacheObjs);
+        $cached = $this->checkCache($this->merge(compact('statsReport'), $options));
         if (false && $cached) {
             return $cached;
         }
@@ -68,7 +67,7 @@ class LocalReport extends ApiBase
                 $response = array_flatten($scoreboardData);
             }
 
-            $this->putCache($cacheObjs, $response);
+            $this->putCache($response);
 
             return $response;
         }
@@ -76,15 +75,14 @@ class LocalReport extends ApiBase
         $a = new Arrangements\GamesByWeek(array_flatten($scoreboardData));
         $centerStatsData = $a->compose();
 
-        $this->putCache($cacheObjs, $centerStatsData['reportData']);
+        $this->putCache($centerStatsData['reportData']);
 
         return $centerStatsData['reportData'];
     }
 
     public function getWeekScoreboard(Models\StatsReport $statsReport)
     {
-        $cacheObjs = compact('statsReport');
-        $cached = $this->checkCache($cacheObjs);
+        $cached = $this->checkCache(compact('statsReport'));
         if (false && $cached) {
             return $cached;
         }
@@ -98,15 +96,14 @@ class LocalReport extends ApiBase
             $response = $scoreboardData[$dateStr];
         }
 
-        $this->putCache($cacheObjs, $response);
+        $this->putCache($response);
 
         return $response;
     }
 
     public function getApplicationsList(Models\StatsReport $statsReport, $options = [])
     {
-        $cacheObjs = $this->merge(compact('statsReport'), $options);
-        $cached = $this->checkCache($cacheObjs);
+        $cached = $this->checkCache($this->merge(compact('statsReport'), $options));
         if (false && $cached) {
             return $cached;
         }
@@ -119,7 +116,7 @@ class LocalReport extends ApiBase
         if (!$registrations) {
             return [];
         } else if ($returnUnprocessed) {
-            $this->putCache($cacheObjs, $registrations);
+            $this->putCache($registrations);
             return $registrations;
         }
 
@@ -129,7 +126,7 @@ class LocalReport extends ApiBase
         ]);
         $data = $a->compose();
 
-        $this->putCache($cacheObjs, $data['reportData']);
+        $this->putCache($data['reportData']);
 
         return $data['reportData'];
     }

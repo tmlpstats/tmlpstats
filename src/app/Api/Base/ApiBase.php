@@ -27,6 +27,12 @@ class ApiBase
     protected $dontCache = [];
 
     /**
+     * Working stack for keeping track of objects being cached
+     * @var array
+     */
+    protected $targetObjCache = [];
+
+    /**
      * Array of valid properties and their config.
      *  example:
      *      'firstName' => [
@@ -152,6 +158,7 @@ class ApiBase
             return null;
         }
         $objects['method'] = $method;
+        $this->targetObjCache[$method] = $objects;
 
         $tags = $this->getCacheTags($objects);
         $cacheKey = $this->getCacheKey($objects);
@@ -166,11 +173,16 @@ class ApiBase
      *
      * @return null
      */
-    public function putCache($objects, $value)
+    public function putCache($value, $objects = null)
     {
         $method = debug_backtrace()[1]['function'];
         if (!$this->useCache($method)) {
             return null;
+        }
+
+        if ($objects === null) {
+            $objects = isset($this->targetObjCache[$method]) ? $this->targetObjCache[$method] : [];
+            array_forget($this->targetObjCache, $method);
         }
         $objects['method'] = $method;
 

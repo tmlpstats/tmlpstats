@@ -12,8 +12,7 @@ class GlobalReport extends ApiBase
 {
     public function getRating(Models\GlobalReport $report, Models\Region $region)
     {
-        $cacheObjs = compact('report', 'region');
-        $cached = $this->checkCache($cacheObjs);
+        $cached = $this->checkCache(compact('report', 'region'));
         if ($cached) {
             return $cached;
         }
@@ -32,15 +31,14 @@ class GlobalReport extends ApiBase
         $data['summary']['points'] = $weeklyData[$dateString]['points']['total'];
         $data['summary']['rating'] = $weeklyData[$dateString]['rating'];
 
-        $this->putCache($cacheObjs, $data);
+        $this->putCache($data);
 
         return $data;
     }
 
     public function getQuarterScoreboard(Models\GlobalReport $report, Models\Region $region)
     {
-        $cacheObjs = compact('report', 'region');
-        $cached = $this->checkCache($cacheObjs);
+        $cached = $this->checkCache(compact('report', 'region'));
         if ($cached) {
             return $cached;
         }
@@ -99,15 +97,14 @@ class GlobalReport extends ApiBase
         $a = new Arrangements\GamesByWeek($scoreboardData);
         $weeklyData = $a->compose();
 
-        $this->putCache($cacheObjs, $weeklyData['reportData']);
+        $this->putCache($weeklyData['reportData']);
 
         return $weeklyData['reportData'];
     }
 
     public function getWeekScoreboard(Models\GlobalReport $report, Models\Region $region, Carbon $futureDate = null)
     {
-        $cacheObjs = compact('report', 'region');
-        $cached = $this->checkCache($cacheObjs);
+        $cached = $this->checkCache(compact('report', 'region'));
         if ($cached) {
             return $cached;
         }
@@ -121,15 +118,14 @@ class GlobalReport extends ApiBase
             $reportData = $scoreboardData[$dateStr];
         }
 
-        $this->putCache($cacheObjs, $reportData);
+        $this->putCache($reportData);
 
         return $reportData;
     }
 
     public function getWeekScoreboardByCenter(Models\GlobalReport $report, Models\Region $region, $options = [])
     {
-        $cacheObjs = $this->merge(compact('report', 'region'), $options);
-        $cached = $this->checkCache($cacheObjs);
+        $cached = $this->checkCache($this->merge(compact('report', 'region'), $options));
         if ($cached) {
             return $cached;
         }
@@ -157,15 +153,14 @@ class GlobalReport extends ApiBase
             $reportData[$centerName] = $centerStatsData[$dateStr];
         }
 
-        $this->putCache($cacheObjs, $reportData);
+        $this->putCache($reportData);
 
         return $reportData;
     }
 
     public function getApplicationsListByCenter(Models\GlobalReport $report, Models\Region $region, $options = [])
     {
-        $cacheObjs = $this->merge(compact('report', 'region'), $options);
-        $cached = $this->checkCache($cacheObjs);
+        $cached = $this->checkCache($this->merge(compact('report', 'region'), $options));
         if ($cached) {
             return $cached;
         }
@@ -189,7 +184,7 @@ class GlobalReport extends ApiBase
             }
         }
 
-        $this->putCache($cacheObjs, $registrations);
+        $this->putCache($registrations);
 
         return $registrations;
     }

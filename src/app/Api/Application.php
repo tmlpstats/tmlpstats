@@ -154,8 +154,7 @@ class Application extends ApiBase
 
     public function getWeekData(Models\TmlpRegistration $application, Carbon $reportingDate)
     {
-        $cacheObjs = compact('application', 'reportingDate');
-        $cached = $this->checkCache($cacheObjs);
+        $cached = $this->checkCache(compact('application', 'reportingDate'));
         if ($cached) {
             return $cached;
         }
@@ -181,7 +180,7 @@ class Application extends ApiBase
             'stats_report_id'      => $report->id,
         ])->load('registration.person', 'incomingQuarter', 'statsReport', 'withdrawCode', 'committedTeamMember.person');
 
-        $this->putCache($cacheObjs, $response);
+        $this->putCache($response);
 
         return $response;
     }
