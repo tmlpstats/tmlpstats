@@ -63,7 +63,8 @@ php artisan migrate
 echo ""
 echo "Flushing Reports Cache"
 cd $DEST/
-php artisan cache:clear-reports
+php artisan cache:clear-tag reports
+php artisan cache:clear-tag api
 
 echo ""
 echo "Fixing file permissions"
