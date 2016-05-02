@@ -113,6 +113,9 @@ api:
             type: GlobalReport
           - name: region
             type: Region
+          - name: futureDate
+            type: date
+            required: false
 
       getWeekScoreboardByCenter:
         desc: Get scoreboard for a single week within a quarter by center

@@ -109,7 +109,8 @@ class ApiController extends ApiControllerBase
     {
         return App::make(Api\GlobalReport::class)->getWeekScoreboard(
             $this->parse($input, 'globalReport', 'GlobalReport'),
-            $this->parse($input, 'region', 'Region')
+            $this->parse($input, 'region', 'Region'),
+            $this->parse($input, 'futureDate', 'date', false)
         );
     }
     protected function GlobalReport__getWeekScoreboardByCenter($input)

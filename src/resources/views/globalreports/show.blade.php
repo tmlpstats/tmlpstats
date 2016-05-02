@@ -62,6 +62,7 @@
                         <button id="repromisesbycenter-button" type="button" class="btn">Repromises</button>
                         @endif
                         <button id="regperparticipant-button" type="button" class="btn">Reg. Per Participant</button>
+                        <button id="gaps-button" type="button" class="btn">Gaps</button>
                     </div>
 
                     <div id="regionalstats-container"></div>
@@ -70,6 +71,7 @@
                     <div id="repromisesbycenter-container"></div>
                     @endif
                     <div id="regperparticipant-container"></div>
+                    <div id="gaps-container"></div>
                 </div>
                 <div class="tab-pane" id="statsreports">
                     <h3>Center Reports</h3>
@@ -166,6 +168,7 @@
             'repromisesbycenter',
             @endif
             'regperparticipant',
+            'gaps',
         ];
 
         var batchedPages = [
@@ -223,6 +226,7 @@
                 'repromisesbycenter',
                 @endif
                 'regperparticipant',
+                'gaps',
             ],
         ];
 

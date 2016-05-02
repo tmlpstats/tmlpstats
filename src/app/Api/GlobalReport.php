@@ -73,11 +73,11 @@ class GlobalReport
         return $weeklyData['reportData'];
     }
 
-    public function getWeekScoreboard(Models\GlobalReport $report, Models\Region $region)
+    public function getWeekScoreboard(Models\GlobalReport $report, Models\Region $region, Carbon $futureDate = null)
     {
         $scoreboardData = $this->getQuarterScoreboard($report, $region);
 
-        $dateStr = $report->reportingDate->toDateString();
+        $dateStr = $futureDate ? $futureDate->toDateString() : $report->reportingDate->toDateString();
         if (isset($scoreboardData[$dateStr])) {
             return $scoreboardData[$dateStr];
         }
