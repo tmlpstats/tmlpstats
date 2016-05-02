@@ -335,7 +335,7 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getGaps(GlobalReport $globalReport, Region $region)
     {
         $quarter = Quarter::getQuarterByDate($globalReport->reportingDate, $region);
-        $nextMilestone = $quarter->getNextMilestone($globalReport->reportDate);
+        $nextMilestone = $quarter->getNextMilestone($globalReport->reportingDate);
 
         $children = Region::byParent($region)->orderby('name')->get();
 
