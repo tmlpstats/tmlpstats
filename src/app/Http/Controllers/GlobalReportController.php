@@ -269,23 +269,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getRatingSummary(GlobalReport $globalReport, Region $region)
     {
-        $statsReports = $globalReport->statsReports()
-                                     ->byRegion($region)
-                                     ->validated()
-                                     ->get();
-
-        if ($statsReports->isEmpty()) {
-            return null;
-        }
-
-        $weeklyData = App::make(Api\GlobalReport::class)->getQuarterScoreboard($globalReport, $region);
-
-        $a = new Arrangements\RegionByRating($statsReports);
-        $data = $a->compose();
-
-        $dateString = $globalReport->reportingDate->toDateString();
-        $data['summary']['points'] = $weeklyData[$dateString]['points']['total'];
-        $data['summary']['rating'] = $weeklyData[$dateString]['rating'];
+        $data = App::make(Api\GlobalReport::class)->getRating($globalReport, $region);
 
         return view('globalreports.details.ratingsummary', $data);
     }
