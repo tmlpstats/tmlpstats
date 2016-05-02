@@ -9,9 +9,27 @@ use TmlpStats\Reports\Arrangements;
 
 class GlobalReport
 {
-    public function getRating(Models\GlobalReport $report)
+    public function getRating(Models\GlobalReport $report, Models\Region $region)
     {
-        return []; // TODO
+        $statsReports = $report->statsReports()
+                               ->byRegion($region)
+                               ->validated()
+                               ->get();
+
+        if ($statsReports->isEmpty()) {
+            return null;
+        }
+
+        $weeklyData = App::make(GlobalReport::class)->getQuarterScoreboard($report, $region);
+
+        $a = new Arrangements\RegionByRating($statsReports);
+        $data = $a->compose();
+
+        $dateString = $report->reportingDate->toDateString();
+        $data['summary']['points'] = $weeklyData[$dateString]['points']['total'];
+        $data['summary']['rating'] = $weeklyData[$dateString]['rating'];
+
+        return $data;
     }
 
     public function getQuarterScoreboard(Models\GlobalReport $report, Models\Region $region)
