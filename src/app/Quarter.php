@@ -170,10 +170,8 @@ class Quarter extends Model
             $nextMilestone = $this->getClassroom3Date();
         } else if ($now->gt($this->getClassroom1Date())) {
             $nextMilestone = $this->getClassroom2Date();
-        } else if ($now->gt($this->getQuarterStartDate())) {
-            $nextMilestone = $this->getClassroom1Date();
         } else {
-            $nextMilestone = $this->getQuarterStartDate();
+            $nextMilestone = $this->getClassroom1Date();
         }
 
         return $nextMilestone;
