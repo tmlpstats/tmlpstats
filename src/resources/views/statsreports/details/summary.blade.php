@@ -4,6 +4,7 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
 ?>
 <div class="row">
     <div class="col-md-5">
+        <br>
         @if (isset($liveScoreboard) && $liveScoreboard && $context->getSetting('editableLiveScoreboard'))
             <div class="data-api panel panel-info">
                 <div class="panel-heading">
@@ -20,6 +21,14 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
         @include('reports.centergames.week', compact('reportData'))
     </div>
     <div class="col-md-7">
+        <div class="row">
+            <div class="col-md-12" style="align-content: center">
+                <h3>
+                    Stats from {{ $statsReport->reportingDate->format('M j, Y') }}
+                    <small>(<a href="{{ $reportUrl }}">View Report</a>)</small>
+                </h3>
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-6">
                 <div id="tdo-container" style="width: 250px; height: 150px; margin: 0 auto"></div>
