@@ -24,14 +24,6 @@
         </p>
     @else
         <p>Below you will find the most recent statistics report from your team. Click <i>View Report</i> to see the full report details.</p>
-        <div class="row">
-            <div class="col-md-5" style="align-content: center">
-                <h3>
-                    Stats from {{ $statsReport->reportingDate->format('M j, Y') }}
-                    <small>(<a href="{{ $reportUrl }}">View Report</a>)</small>
-                </h3>
-            </div>
-        </div>
 
         @include('statsreports.details.summary')
 
