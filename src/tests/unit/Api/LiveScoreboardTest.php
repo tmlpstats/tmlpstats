@@ -1,5 +1,5 @@
 <?php
-namespace TmlpStats\Tests\Api;
+namespace TmlpStats\Tests\Unit\Api;
 
 use App;
 use Carbon\Carbon;

@@ -1,5 +1,5 @@
 <?php
-namespace TmlpStats\Tests\Traits;
+namespace TmlpStats\Tests\Unit\Traits;
 
 use TmlpStats\Quarter;
 

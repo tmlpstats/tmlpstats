@@ -36,7 +36,6 @@ class LocalReport extends ApiBase
                                         ->reportingDate($week)
                                         ->official()
                                         ->first();
-
             if ($report) {
                 $weekData = $report->centerStatsData()->get();
                 foreach ($weekData as $data) {

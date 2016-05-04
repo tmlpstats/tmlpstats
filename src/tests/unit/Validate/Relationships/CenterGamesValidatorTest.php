@@ -1,8 +1,8 @@
 <?php
-namespace TmlpStats\Tests\Validate\Relationships;
+namespace TmlpStats\Tests\Unit\Validate\Relationships;
 
 use Carbon\Carbon;
-use TmlpStats\Tests\Validate\ValidatorTestAbstract;
+use TmlpStats\Tests\Unit\Validate\ValidatorTestAbstract;
 use TmlpStats\Validate\Relationships\CenterGamesValidator;
 
 use stdClass;

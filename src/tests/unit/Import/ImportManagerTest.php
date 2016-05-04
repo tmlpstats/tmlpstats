@@ -1,13 +1,14 @@
 <?php
-namespace TmlpStats\Tests;
+namespace TmlpStats\Tests\Unit;
 
 use Carbon\Carbon;
 use stdClass;
 use TmlpStats\Center;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Person;
-use TmlpStats\Tests\Traits\MocksQuarters;
-use TmlpStats\Tests\Traits\MocksSettings;
+use TmlpStats\Tests\TestAbstract;
+use TmlpStats\Tests\Unit\Traits\MocksQuarters;
+use TmlpStats\Tests\Unit\Traits\MocksSettings;
 
 class ImportManagerTest extends TestAbstract
 {

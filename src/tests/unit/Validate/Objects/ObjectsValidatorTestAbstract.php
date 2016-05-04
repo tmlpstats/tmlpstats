@@ -1,8 +1,8 @@
 <?php
-namespace TmlpStats\Tests\Validate\Objects;
+namespace TmlpStats\Tests\Unit\Validate\Objects;
 
 use stdClass;
-use TmlpStats\Tests\Validate\ValidatorTestAbstract;
+use TmlpStats\Tests\Unit\Validate\ValidatorTestAbstract;
 
 class ObjectsValidatorTestAbstract extends ValidatorTestAbstract
 {
