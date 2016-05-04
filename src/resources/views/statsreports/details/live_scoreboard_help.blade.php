@@ -6,7 +6,7 @@
         <h4 class="modal-title">Live Scoreboard Help</h4>
       </div>
       <div class="modal-body">
-        <p>The live scoreboard is a tool that lets statisticians (you) update their team's actuals throughout the week.</p>
+        <p>The live scoreboard is a tool that lets statisticians update their team's actuals throughout the week.</p>
 
         <h4>How to use</h4>
         <p>The statistician goes and edits the scoreboard however often they want. They can then send the scoreboard to their team by sending them the link to this mobile friendly dashboard:</p>
