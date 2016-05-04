@@ -56,3 +56,11 @@ $factory->define(TmlpStats\TeamMember::class, function (Faker\Generator $faker) 
         'incoming_quarter_id' => 1,
     ];
 });
+
+$factory->define(TmlpStats\Course::class, function (Faker\Generator $faker) {
+    return [
+        'center_id'  => $faker->numberBetween(1, 24),
+        'start_date' => Carbon::parse('2016-04-23'),
+        'type'       => 'CAP',
+    ];
+});

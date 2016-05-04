@@ -24,6 +24,10 @@ abstract class ParserBase
 
         $value = $input->get($key);
 
+        if ($value === null && !$required) {
+            return null;
+        }
+
         if (!$this->validate($value)) {
             throw new ApiExceptions\BadRequestException("{$key} is not a valid {$this->type}.");
         }

@@ -31,6 +31,8 @@ class Factory
                 return Parsers\QuarterParser::create();
             case 'Application':
                 return Parsers\ApplicationParser::create();
+            case 'Course':
+                return Parsers\CourseParser::create();
             case 'TeamMember':
                 return Parsers\TeamMemberParser::create();
             default:

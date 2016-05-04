@@ -447,7 +447,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
     public function getCoursesSummary(StatsReport $statsReport)
     {
-        $courses = App::make(CoursesController::class)->getByStatsReport($statsReport);
+        $courses = App::make(Api\LocalReport::class)->getCourseList($statsReport);
 
         $completedCourses = [];
         $upcomingCourses = [];
@@ -659,7 +659,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
     protected function getCourses(StatsReport $statsReport)
     {
-        $courses = App::make(CoursesController::class)->getByStatsReport($statsReport);
+        $courses = App::make(Api\LocalReport::class)->getCourseList($statsReport);
         if (!$courses) {
             return null;
         }
@@ -1101,8 +1101,8 @@ class StatsReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $thisWeekCourses = App::make(CoursesController::class)->getByStatsReport($statsReport);
-        $lastWeekCourses = App::make(CoursesController::class)->getByStatsReport($lastStatsReport);
+        $thisWeekCourses = App::make(Api\LocalReport::class)->getCourseList($statsReport);
+        $lastWeekCourses = App::make(Api\LocalReport::class)->getCourseList($lastStatsReport);
 
         $a = new Arrangements\CoursesWithEffectiveness([
             'courses' => $thisWeekCourses,

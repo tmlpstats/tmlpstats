@@ -110,4 +110,92 @@ class LocalReportTest extends FunctionalTestAbstract
 
         $this->post('/api', $parameters)->dump();//seeJsonHas($expectedResponse);
     }
+
+    public function testGetCourseList()
+    {
+        $course = factory(Models\Course::class)->create([
+            'center_id'  => $this->center->id,
+            'start_date' => Carbon::parse('2016-04-23'),
+        ]);
+        $courseData = Models\CourseData::create([
+            'course_id' => $course->id,
+            'stats_report_id' => $this->report->id,
+            'quarter_start_ter' => 10,
+            'quarter_start_standard_starts' => 10,
+            'quarter_start_xfer' => 0,
+            'current_ter' => 35,
+            'current_standard_starts' => 33,
+            'current_xfer' => 2,
+        ]);
+
+        $pastCourse = factory(Models\Course::class)->create([
+            'center_id'  => $this->center->id,
+            'start_date' => Carbon::parse('2016-04-09'),
+        ]);
+        $pastCourseData = Models\CourseData::create([
+            'course_id' => $pastCourse->id,
+            'stats_report_id' => $this->report->id,
+            'quarter_start_ter' => 10,
+            'quarter_start_standard_starts' => 10,
+            'quarter_start_xfer' => 0,
+            'current_ter' => 35,
+            'current_standard_starts' => 33,
+            'current_xfer' => 2,
+            'completed_standard_starts' => 32,
+            'potentials' => 25,
+            'registrations' => 23,
+            'guests_promised' => 50,
+            'guests_invited' => 45,
+            'guests_confirmed' => 25,
+            'guests_attended' => 15,
+        ]);
+
+        $parameters = [
+            'method' => 'LocalReport.getCourseList',
+            'localReport' => $this->report->id,
+        ];
+
+        $expectedResponse = [
+            [
+                'id' => $courseData->id,
+                'courseId' => $course->id,
+                'quarterStartTer' => 10,
+                'quarterStartStandardStarts' => 10,
+                'quarterStartXfer' => 0,
+                'currentTer' => 35,
+                'currentStandardStarts' => 33,
+                'currentXfer' => 2,
+                'completedStandardStarts' => null,
+                'potentials' => null,
+                'registrations' => null,
+                'guestsPromised' => null,
+                'guestsInvited' => null,
+                'guestsConfirmed' => null,
+                'guestsAttended' => null,
+                'statsReportId' => $this->report->id,
+                'course' => $course->toArray(),
+            ],
+            [
+                'id' => $pastCourseData->id,
+                'courseId' => $pastCourse->id,
+                'quarterStartTer' => 10,
+                'quarterStartStandardStarts' => 10,
+                'quarterStartXfer' => 0,
+                'currentTer' => 35,
+                'currentStandardStarts' => 33,
+                'currentXfer' => 2,
+                'completedStandardStarts' => 32,
+                'potentials' => 25,
+                'registrations' => 23,
+                'guestsPromised' => 50,
+                'guestsInvited' => 45,
+                'guestsConfirmed' => 25,
+                'guestsAttended' => 15,
+                'statsReportId' => $this->report->id,
+                'course' => $pastCourse->toArray(),
+            ],
+        ];
+
+        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+    }
 }

@@ -1,8 +1,6 @@
 <?php namespace TmlpStats\Api;
 
 use Carbon\Carbon;
-use Illuminate\Contracts\Auth\Guard;
-use Illuminate\Http\Request;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\ApiBase;
 use TmlpStats\Api\Exceptions as ApiExceptions;
@@ -131,12 +129,12 @@ class Application extends ApiBase
 
         foreach ($data as $property => $value) {
             if ($this->validProperties[$property]['owner'] == 'application') {
-                if ($application->$property != $value) {
+                if ($application->$property !== $value) {
                     $application->$property = $value;
                 }
             }
             if ($this->validProperties[$property]['owner'] == 'person') {
-                if ($application->person->$property != $value) {
+                if ($application->person->$property !== $value) {
                     $application->person->$property = $value;
                 }
             }
@@ -159,21 +157,7 @@ class Application extends ApiBase
             return $cached;
         }
 
-        $quarter = Models\Quarter::getQuarterByDate($reportingDate, $application->center->region);
-        if (!$quarter) {
-            throw new ApiExceptions\BadRequestException("Unable to find quarter which is required for fetching this data");
-        }
-
-        $report = Models\StatsReport::firstOrNew([
-            'center_id'      => $application->center->id,
-            'quarter_id'     => $quarter->id,
-            'reporting_date' => $reportingDate->toDateTimeString(),
-            'submitted_at'   => null,
-        ]);
-        if (!$report->exists) {
-            $report->version = 'api';
-            $report->save();
-        }
+        $report = LocalReport::getStatsReport($application->center, $reportingDate);
 
         $response = Models\TmlpRegistrationData::firstOrCreate([
             'tmlp_registration_id' => $application->id,
@@ -189,21 +173,7 @@ class Application extends ApiBase
     {
         $data = $this->parseInputs($data);
 
-        $quarter = Models\Quarter::getQuarterByDate($reportingDate, $application->center->region);
-        if (!$quarter) {
-            throw new ApiExceptions\BadRequestException("Unable to find quarter for date {$reportingDate} and center {$application->center->name}");
-        }
-
-        $report = Models\StatsReport::firstOrNew([
-            'center_id'      => $application->center->id,
-            'quarter_id'     => $quarter->id,
-            'reporting_date' => $reportingDate->toDateTimeString(),
-            'submitted_at'   => null,
-        ]);
-        if (!$report->exists) {
-            $report->version = 'api';
-            $report->save();
-        }
+        $report = LocalReport::getStatsReport($application->center, $reportingDate);
 
         $applicationData = Models\TmlpRegistrationData::firstOrCreate([
             'tmlp_registration_id' => $application->id,
@@ -216,12 +186,12 @@ class Application extends ApiBase
                                                                              ->ne($applicationData->$property)
                 ) {
                     $applicationData->$property = Carbon::parse($value)->startOfDay();
-                } else if ($applicationData->$property != $value) {
+                } else if ($applicationData->$property !== $value) {
                     $applicationData->$property = $value;
                 }
             }
             if ($this->validProperties[$property]['owner'] == 'application') {
-                if ($application->$property != $value) {
+                if ($application->$property !== $value) {
                     $application->$property = $value;
                 }
             }

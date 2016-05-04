@@ -1187,7 +1187,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             'coursesguestgames',
         ];
 
-        $coursesData = App::make(CoursesController::class)->getByGlobalReport($globalReport, $region);
+        $coursesData = App::make(Api\GlobalReport::class)->getCourseList($globalReport, $region);
         if (!$coursesData) {
             return null;
         }
@@ -1204,7 +1204,7 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getCoursesStatus(GlobalReport $globalReport, Region $region, $status, $data = null)
     {
         if (!$data) {
-            $data = App::make(CoursesController::class)->getByGlobalReport($globalReport, $region);
+            $data = App::make(Api\GlobalReport::class)->getCourseList($globalReport, $region);
             if (!$data) {
                 return null;
             }
