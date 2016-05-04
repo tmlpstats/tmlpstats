@@ -19,6 +19,12 @@ class DateParser extends ParserBase
             return false;
         }
 
+        // Make sure it's a valid date string. Carbon can parse more than this, but this is all we should expect from
+        // the api
+        if (!preg_match("/\d\d\d\d-\d\d-\d\d( \d\d:\d\d(:\d\d)?)?/", $value)) {
+            return false;
+        }
+
         try {
             $this->parsed = $this->parse($value);
             return ($this->parsed instanceof Carbon);

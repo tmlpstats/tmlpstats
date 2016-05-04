@@ -29,7 +29,7 @@ class DateParserTest extends TestAbstract
             [true, false],
             [false, false],
             [null, false],
-            // ['a', false], // oddly, Carbon is able to parse this
+            ['a', false],
             ['asdf', false],
             [[], false],
             [['asdf'], false],

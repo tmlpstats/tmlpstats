@@ -98,6 +98,8 @@ class LocalReportTest extends FunctionalTestAbstract
 
     public function testGetCurrentScore()
     {
+        $this->markTestIncomplete('Test no fully implemented');
+
         $parameters = [
             'method' => 'LocalReport.getQuarterScoreboard',
             'localReport' => $this->report->id,
