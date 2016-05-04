@@ -11,7 +11,7 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
                     <h3 class="panel-title"><span class="glyphicon glyphicon-info-sign"></span> Live Scoreboard</h3>
                 </div>
                 <div class="panel-body">
-                    <p>This is a new feature we have made available to you that allows you to set a "live scoreboard" that you can edit as often as you want.</p>
+                    <p>This is a "live scoreboard" that allows you to update your team's actuals often as you want throughout the week. The updates are saved and visible to the rest of your team. Click the button below to get the shareable link.</p>
 
                     <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#liveScoreboardHelp" aria-expanded="false" aria-controls="liveScoreboardHelp">Click for help</button>
                     @include('statsreports.details.live_scoreboard_help')
