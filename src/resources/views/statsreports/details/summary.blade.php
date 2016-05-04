@@ -21,6 +21,7 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
         @include('reports.centergames.week', compact('reportData'))
     </div>
     <div class="col-md-7">
+        @if (isset($reportUrl))
         <div class="row">
             <div class="col-md-12" style="align-content: center">
                 <h3>
@@ -29,6 +30,7 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
                 </h3>
             </div>
         </div>
+        @endif
         <div class="row">
             <div class="col-md-6">
                 <div id="tdo-container" style="width: 250px; height: 150px; margin: 0 auto"></div>
