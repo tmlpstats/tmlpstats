@@ -14,7 +14,7 @@ class LocalReport extends ApiBase
     public function getQuarterScoreboard(Models\StatsReport $statsReport, $options = [])
     {
         $cached = $this->checkCache($this->merge(compact('statsReport'), $options));
-        if (false && $cached) {
+        if ($cached) {
             return $cached;
         }
 
@@ -82,7 +82,7 @@ class LocalReport extends ApiBase
     public function getWeekScoreboard(Models\StatsReport $statsReport)
     {
         $cached = $this->checkCache(compact('statsReport'));
-        if (false && $cached) {
+        if ($cached) {
             return $cached;
         }
 
@@ -103,7 +103,7 @@ class LocalReport extends ApiBase
     public function getApplicationsList(Models\StatsReport $statsReport, $options = [])
     {
         $cached = $this->checkCache($this->merge(compact('statsReport'), $options));
-        if (false && $cached) {
+        if ($cached) {
             return $cached;
         }
 
