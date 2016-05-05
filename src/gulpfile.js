@@ -13,11 +13,9 @@ elixir(function(mix) {
             'bower_components/font-awesome/css/font-awesome.min.css',
             'public/css/tmlpstats.css'
         ], 'public/css/main.css', './')
-       .copy( 'public/fonts', 'public/build/fonts' );
-
-    // Compile, and package all js into a single file. Copy a few files we need to include separately
-    mix.browserify(['main.jsx'])
-       .scripts([
+        .copy( 'public/fonts', 'public/build/fonts' )
+        .browserify(['main.jsx'])
+        .scripts([
             'bower_components/bootstrap/dist/js/bootstrap.min.js',
             'bower_components/datatables.net/js/jquery.dataTables.min.js',
             'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js',
@@ -32,9 +30,7 @@ elixir(function(mix) {
         ], 'public/js/main.js', './')
         .copy('bower_components/html5shiv/dist/html5shiv.min.js', 'public/vendor/js/html5shiv.min.js')
         .copy('bower_components/respond/dest/respond.min.js', 'public/vendor/js/respond.min.js')
-        .copy('bower_components/jquery/dist/jquery.min.js', 'public/vendor/js/jquery.min.js');
-
-    // Setup versioning
-    mix.version(['css/main.css', 'js/main.js'])
-       .browserSync({proxy: 'vagrant.tmlpstats.com'})
+        .copy('bower_components/jquery/dist/jquery.min.js', 'public/vendor/js/jquery.min.js')
+        .version(['css/main.css', 'js/main.js'])
+        .browserSync({proxy: 'vagrant.tmlpstats.com'})
 });
