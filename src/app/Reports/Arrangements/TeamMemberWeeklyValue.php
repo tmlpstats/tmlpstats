@@ -36,6 +36,10 @@ abstract class TeamMemberWeeklyValue extends BaseArrangement
                 }
                 if ($data->withdrawCodeId !== null) {
                     $member['withdrawn'] = true;
+                } else {
+                    // We need this to allow for team members that were withdrawn then
+                    // rejoined team within the same quarter. Kind of a special case.
+                    $member['withdrawn'] = false;
                 }
                 if (!$data->xferOut) {
                     $member[$date] = [
