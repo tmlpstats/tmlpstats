@@ -275,7 +275,7 @@ class GlobalReportController extends ReportDispatchAbstractController
     {
         $data = App::make(Api\GlobalReport::class)->getRating($globalReport, $region);
 
-        return view('globalreports.details.ratingsummary', $data);
+        return view('globalreports.details.ratingsummary', $data ?: []);
     }
 
     protected function getRegionSummary(GlobalReport $globalReport, Region $region)
