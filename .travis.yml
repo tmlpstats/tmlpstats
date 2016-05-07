@@ -15,7 +15,7 @@ before_script:
 
 script:
  - mkdir -p build/logs
- - php vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+ - php -d max_execution_time=600 vendor/bin/phpunit --coverage-clover build/logs/clover.xml
 
 after_script:
  - ls -l build/logs/
