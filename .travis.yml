@@ -8,12 +8,13 @@ matrix:
     - php: 7.0
 
 before_script:
+ - echo "max_execution_time = 600\nmemory_limit = 512M\n" > phpenv.ini
+ - phpenv config-add phpenv.ini
+ - phpenv config-rm xdebug.ini
  - cd src/
  - find . -name "*.php" ! -path '*/_ide_helper.php' -print0 | xargs -0 -n1 -P8 php -l
  - travis_retry composer self-update
  - travis_retry composer install --no-interaction
- - echo "max_execution_time=600" > phpenv.ini
- - phpenv config-add phpenv.ini
 
 script:
  - mkdir -p build/logs
