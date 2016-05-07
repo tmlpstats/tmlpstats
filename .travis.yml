@@ -8,8 +8,6 @@ matrix:
     - php: 7.0
 
 before_script:
- - echo "max_execution_time = 600\nmemory_limit = 512M\n" > phpenv.ini
- - phpenv config-add phpenv.ini
  - phpenv config-rm xdebug.ini
  - cd src/
  - find . -name "*.php" ! -path '*/_ide_helper.php' -print0 | xargs -0 -n1 -P8 php -l
