@@ -14,12 +14,11 @@ cache:
 before_script:
  - cd src/
  - find . -name "*.php" ! -path '*/_ide_helper.php' -print0 | xargs -0 -n1 -P8 php -l
- - travis_retry composer self-update
  - travis_retry composer install --no-interaction
 
 script:
  - mkdir -p build/logs
- - php -d max_execution_time=600 -d memory_limit="512M" vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+ - php -d max_execution_time="600" -d memory_limit="512M" vendor/bin/phpunit --coverage-clover build/logs/clover.xml
 
 after_script:
  - ls -l build/logs/
