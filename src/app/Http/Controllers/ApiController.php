@@ -25,11 +25,16 @@ class ApiController extends ApiControllerBase
         "Context.getCenter" => "Context__getCenter",
         "Context.setCenter" => "Context__setCenter",
         "Context.getSetting" => "Context__getSetting",
+        "Course.create" => "Course__create",
+        "Course.update" => "Course__update",
+        "Course.getWeekData" => "Course__getWeekData",
+        "Course.setWeekData" => "Course__setWeekData",
         "GlobalReport.getRating" => "GlobalReport__getRating",
         "GlobalReport.getQuarterScoreboard" => "GlobalReport__getQuarterScoreboard",
         "GlobalReport.getWeekScoreboard" => "GlobalReport__getWeekScoreboard",
         "GlobalReport.getWeekScoreboardByCenter" => "GlobalReport__getWeekScoreboardByCenter",
         "GlobalReport.getApplicationsListByCenter" => "GlobalReport__getApplicationsListByCenter",
+        "GlobalReport.getCourseList" => "GlobalReport__getCourseList",
         "LiveScoreboard.getCurrentScores" => "LiveScoreboard__getCurrentScores",
         "LiveScoreboard.setScore" => "LiveScoreboard__setScore",
         "LocalReport.getQuarterScoreboard" => "LocalReport__getQuarterScoreboard",
@@ -37,6 +42,7 @@ class ApiController extends ApiControllerBase
         "LocalReport.getApplicationsList" => "LocalReport__getApplicationsList",
         "LocalReport.getClassList" => "LocalReport__getClassList",
         "LocalReport.getClassListByQuarter" => "LocalReport__getClassListByQuarter",
+        "LocalReport.getCourseList" => "LocalReport__getCourseList",
         "UserProfile.setLocale" => "UserProfile__setLocale",
     ];
 
@@ -91,6 +97,34 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'center', 'Center')
         );
     }
+    protected function Course__create($input)
+    {
+        return App::make(Api\Course::class)->create(
+            $this->parse($input, 'data', 'array')
+        );
+    }
+    protected function Course__update($input)
+    {
+        return App::make(Api\Course::class)->update(
+            $this->parse($input, 'course', 'Course'),
+            $this->parse($input, 'data', 'array')
+        );
+    }
+    protected function Course__getWeekData($input)
+    {
+        return App::make(Api\Course::class)->getWeekData(
+            $this->parse($input, 'course', 'Course'),
+            $this->parse($input, 'reportingDate', 'date')
+        );
+    }
+    protected function Course__setWeekData($input)
+    {
+        return App::make(Api\Course::class)->setWeekData(
+            $this->parse($input, 'course', 'Course'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'data', 'array')
+        );
+    }
     protected function GlobalReport__getRating($input)
     {
         return App::make(Api\GlobalReport::class)->getRating(
@@ -127,6 +161,13 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'globalReport', 'GlobalReport'),
             $this->parse($input, 'region', 'Region'),
             $this->parse($input, 'options', 'array', false)
+        );
+    }
+    protected function GlobalReport__getCourseList($input)
+    {
+        return App::make(Api\GlobalReport::class)->getCourseList(
+            $this->parse($input, 'globalReport', 'GlobalReport'),
+            $this->parse($input, 'region', 'Region')
         );
     }
     protected function LiveScoreboard__getCurrentScores($input)
@@ -173,6 +214,12 @@ class ApiController extends ApiControllerBase
     protected function LocalReport__getClassListByQuarter($input)
     {
         return App::make(Api\LocalReport::class)->getClassListByQuarter(
+            $this->parse($input, 'localReport', 'LocalReport')
+        );
+    }
+    protected function LocalReport__getCourseList($input)
+    {
+        return App::make(Api\LocalReport::class)->getCourseList(
             $this->parse($input, 'localReport', 'LocalReport')
         );
     }

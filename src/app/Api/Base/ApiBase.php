@@ -30,7 +30,7 @@ class ApiBase
      * Working stack for keeping track of objects being cached
      * @var array
      */
-    protected $targetObjCache = [];
+    private $targetObjCache = [];
 
     /**
      * Array of valid properties and their config.
@@ -71,7 +71,7 @@ class ApiBase
                 $data = new ParameterBag($data);
             }
 
-            $required = isset($requiredParams[$key]);
+            $required = in_array($key, $requiredParams);
 
             $parser = Parsers\Factory::build($this->validProperties[$key]['type']);
             $output[$key] = $parser->run($data, $key, $required);
@@ -110,7 +110,7 @@ class ApiBase
                 continue;
             }
 
-            $basename = lcfirst(class_basename(get_class($object)));
+            $basename = lcfirst(class_basename($object));
             $tags[] = "{$basename}{$object->id}";
         }
         return $tags;
@@ -125,7 +125,7 @@ class ApiBase
      */
     public function getCacheKey($objects = [])
     {
-        // Canonicalize list by sorting
+        // Canonicalize list by sorting on keys
         ksort($objects);
 
         $keyBase = '';
@@ -134,7 +134,7 @@ class ApiBase
                 $value = $value->id;
             } else if (is_array($value) || is_object($value)) {
                 if (is_array($value)) {
-                    // Canonicalize list by sorting
+                    // Canonicalize list by sorting on keys
                     ksort($value);
                 }
                 $value = json_encode($value);
@@ -192,7 +192,8 @@ class ApiBase
     }
 
     /**
-     * Merge arrays of objects together. Works like array_merge but will handle non-array input
+     * Merge arrays of objects together. Works like array_merge but will handle non-array input for when it's not easy
+     * to pre-check
      *
      * Useful when input may be null instead of and empty array
      *

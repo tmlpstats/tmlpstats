@@ -86,6 +86,37 @@ api:
             type: string
           - name: center
             type: Center
+  Course:
+    type: namespace
+    children:
+      create:
+        desc: Create new course
+        params:
+          - name: data
+            type: array
+      update:
+        desc: Update a course
+        params:
+          - name: course
+            type: Course
+          - name: data
+            type: array
+      getWeekData:
+        desc: Get the weekly data for an course
+        params:
+          - name: course
+            type: Course
+          - name: reportingDate
+            type: date
+      setWeekData:
+        desc: Set the weekly data for an course
+        params:
+          - name: course
+            type: Course
+          - name: reportingDate
+            type: date
+          - name: data
+            type: array
 
   GlobalReport:
     type: namespace
@@ -138,6 +169,14 @@ api:
           - name: options
             type: array
             required: false
+
+      getCourseList:
+        desc: Get the list of courses
+        params:
+          - name: globalReport
+            type: GlobalReport
+          - name: region
+            type: Region
 
   LiveScoreboard:
     type: namespace
@@ -197,6 +236,12 @@ api:
 
       getClassListByQuarter:
         desc: Get the list of all team members, arranged by T1/T2 and by quarter
+        params:
+          - name: localReport
+            type: LocalReport
+
+      getCourseList:
+        desc: Get the list of courses
         params:
           - name: localReport
             type: LocalReport

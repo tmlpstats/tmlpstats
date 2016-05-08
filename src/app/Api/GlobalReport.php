@@ -189,6 +189,21 @@ class GlobalReport extends ApiBase
         return $registrations;
     }
 
+    public function getCourseList(Models\GlobalReport $report, Models\Region $region)
+    {
+        $statsReports = $this->getStatsReports($report, $region);
+
+        $courses = [];
+        foreach ($statsReports as $statsReport) {
+            $reportCourses = App::make(LocalReport::class)->getCourseList($statsReport);
+            foreach ($reportCourses as $course) {
+                $courses[] = $course;
+            }
+        }
+
+        return $courses;
+    }
+
     protected function getStatsReports(Models\GlobalReport $report, Models\Region $region)
     {
         return $report->statsReports()

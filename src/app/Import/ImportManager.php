@@ -15,8 +15,12 @@ use TmlpStats\ReportToken;
 use TmlpStats\Settings\Setting;
 
 // Required for importing multiple sheets
-ini_set('max_execution_time', 240);
-ini_set('memory_limit', '512M');
+if (ini_get('max_execution_time') < 240) {
+    ini_set('max_execution_time', 240);
+}
+if (str_replace('M', '', ini_get('memory_limit')) < 512) {
+    ini_set('memory_limit', '512M');
+}
 ini_set('max_file_uploads', '30');
 
 /**

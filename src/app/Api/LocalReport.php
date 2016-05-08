@@ -4,8 +4,10 @@ namespace TmlpStats\Api;
 // This is an API servicer. All API methods are simple static methods
 // that take typed input and return array responses.
 use App;
+use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\ApiBase;
+use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Http\Controllers;
 use TmlpStats\Reports\Arrangements;
 
@@ -147,5 +149,37 @@ class LocalReport extends ApiBase
         $a = new Arrangements\TeamMembersByQuarter(['teamMembersData' => $teamMembers]);
         $data = $a->compose();
         return $data['reportData'];
+    }
+
+    public function getCourseList(Models\StatsReport $statsReport)
+    {
+        $courses = [];
+        $courseData = Models\CourseData::byStatsReport($statsReport)->with('course')->get();
+        foreach ($courseData as $data) {
+            $courses[] = $data;
+        }
+
+        return $courses;
+    }
+
+    public static function getStatsReport(Models\Center $center, Carbon $reportingDate)
+    {
+        $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
+        if (!$quarter) {
+            throw new ApiExceptions\BadRequestException('Unable to find quarter which is required for fetching this data');
+        }
+
+        $report = Models\StatsReport::firstOrNew([
+            'center_id'      => $center->id,
+            'quarter_id'     => $quarter->id,
+            'reporting_date' => $reportingDate->toDateTimeString(),
+            'submitted_at'   => null,
+        ]);
+        if (!$report->exists) {
+            $report->version = 'api';
+            $report->save();
+        }
+
+        return $report;
     }
 }

@@ -96,6 +96,48 @@ Api.Context = {
         return apiCall('Context.getSetting', params, (callback || null), (errback || null));
     }
 };
+Api.Course = {
+
+    /*
+    Create new course
+    Parameters:
+      data: array
+    */
+    create: function(params, callback, errback) {
+        return apiCall('Course.create', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Update a course
+    Parameters:
+      course: Course
+      data: array
+    */
+    update: function(params, callback, errback) {
+        return apiCall('Course.update', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get the weekly data for an course
+    Parameters:
+      course: Course
+      reportingDate: date
+    */
+    getWeekData: function(params, callback, errback) {
+        return apiCall('Course.getWeekData', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Set the weekly data for an course
+    Parameters:
+      course: Course
+      reportingDate: date
+      data: array
+    */
+    setWeekData: function(params, callback, errback) {
+        return apiCall('Course.setWeekData', params, (callback || null), (errback || null));
+    }
+};
 Api.GlobalReport = {
 
     /*
@@ -149,6 +191,16 @@ Api.GlobalReport = {
     */
     getApplicationsListByCenter: function(params, callback, errback) {
         return apiCall('GlobalReport.getApplicationsListByCenter', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get the list of courses
+    Parameters:
+      globalReport: GlobalReport
+      region: Region
+    */
+    getCourseList: function(params, callback, errback) {
+        return apiCall('GlobalReport.getCourseList', params, (callback || null), (errback || null));
     }
 };
 Api.LiveScoreboard = {
@@ -221,6 +273,15 @@ Api.LocalReport = {
     */
     getClassListByQuarter: function(params, callback, errback) {
         return apiCall('LocalReport.getClassListByQuarter', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get the list of courses
+    Parameters:
+      localReport: LocalReport
+    */
+    getCourseList: function(params, callback, errback) {
+        return apiCall('LocalReport.getCourseList', params, (callback || null), (errback || null));
     }
 };
 Api.UserProfile = {
