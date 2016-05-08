@@ -1,7 +1,7 @@
 <?php
-    $name = isset($elementName) ? $elementName : 'timezone';
+    $elementName = isset($elementName) ? $elementName : 'timezone';
     $timezones = isset($timezones) ? $timezones : DateTimeZone::listIdentifiers();
-    $selected = isset($selectedTimezone) ? $selectedTimezone : null;
+    $selectedTimezone = isset($selectedTimezone) ? $selectedTimezone : null;
 ?>
-{!! Form::select($name, $timezones, $selected,
+{!! Form::select($elementName, $timezones, $selectedTimezone,
    ['class' => 'form-control', 'onchange' => (isset($autoSubmit) && $autoSubmit) ? 'this.form.submit()' : '']) !!}
