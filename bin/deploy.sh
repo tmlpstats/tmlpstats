@@ -10,9 +10,6 @@ SOURCE="$HOME/tmlpstats.git/src"
 DEST="/var/www/tmlpstats.com"
 ROLLBACK="$HOME/tmlpstats.rollback"
 
-cd $SOURCE
-NODE_ENV=production gulp --production
-
 cd $DEST/
 php artisan down
 
