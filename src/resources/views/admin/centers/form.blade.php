@@ -3,7 +3,7 @@
     <div class="form-group">
         {!! Form::label('name', 'Name:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-5">
-            {!! Form::text('name', null, ['class' => 'form-control']) !!}
+            {!! Form::text('name', null, ['class' => 'form-control', 'autocomplete' => 'off']) !!}
         </div>
     </div>
 
@@ -38,7 +38,7 @@
     <div class="form-group">
         {!! Form::label('timezone', 'Timezone:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-5">
-            @include('partials.forms.timezones', compact('timezones', 'selectedTimezone'))
+            @include('partials.forms.timezones')
         </div>
     </div>
 

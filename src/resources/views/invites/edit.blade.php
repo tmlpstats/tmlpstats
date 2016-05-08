@@ -5,7 +5,7 @@
 
     @include('errors.list')
 
-    {!! Form::model($invite, ['url' => "/users/invites/{$invite->id}", 'method' => 'PUT', 'class' => 'form-horizontal']) !!}
+    {!! Form::model($invite, ['url' => "/users/invites/{$invite->id}", 'method' => 'PUT', 'class' => 'form-horizontal', 'autocomplete' => 'off']) !!}
 
     @include('invites.form', ['submitButtonText' => 'Update', 'roles' => $roles])
 

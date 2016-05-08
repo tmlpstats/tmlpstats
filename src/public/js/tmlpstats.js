@@ -53,6 +53,28 @@ function initDataTables(options, tableClass) {
 }
 
 /**
+ * Super gross workaround for Chrome not respecting autocomplete settings.
+ * Only using this to prevent autofilling the user's name and email into forms that
+ * take info about a different person
+ */
+$(function() {
+    $('form[autocomplete="off"] input, input[autocomplete="off"]').each(function () {
+
+        var input = this;
+        var name = $(input).attr('name');
+        var id = $(input).attr('id');
+
+        $(input).removeAttr('name');
+        $(input).removeAttr('id');
+
+        setTimeout(function () {
+            $(input).attr('name', name);
+            $(input).attr('id', id);
+        }, 1);
+    });
+});
+
+/**
  * JS API for TMLP things.
  *
  * This API is designed to be optimized by javascript optimizing compilers

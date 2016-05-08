@@ -5,7 +5,7 @@
 
     @include('errors.list')
 
-    {!! Form::open(['url' => '/users/invites', 'class' => 'form-horizontal']) !!}
+    {!! Form::open(['url' => '/users/invites', 'class' => 'form-horizontal', 'autocomplete' => 'off']) !!}
 
     @include('invites.form', ['submitButtonText' => 'Create', 'invite' => null, 'roles' => $roles])
 
