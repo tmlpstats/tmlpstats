@@ -198,7 +198,7 @@ class Application extends ApiBase
             $applicationData->statsReportId = $report->id;
         }
 
-        if (!$applicationData->regDate != $application->regDate) {
+        if ($applicationData->regDate != $application->regDate) {
             $applicationData->regDate = $application->regDate;
         }
 
