@@ -43,6 +43,7 @@ class ApplicationTest extends FunctionalTestAbstract
         $this->applicationData = Models\TmlpRegistrationData::firstOrCreate([
             'tmlp_registration_id' => $this->application->id,
             'stats_report_id'      => $this->report->id,
+            'reg_date'             => $this->application->regDate,
         ]);
     }
 

@@ -194,11 +194,6 @@ class TeamMember extends ApiBase
                     $teamMemberData->$property = $value;
                 }
             }
-            if ($this->validProperties[$property]['owner'] == 'teamMember') {
-                if ($teamMember->$property !== $value) {
-                    $teamMember->$property = $value;
-                }
-            }
         }
 
         if (!$teamMemberData->statsReportId) {
@@ -207,9 +202,6 @@ class TeamMember extends ApiBase
 
         if ($teamMemberData->isDirty()) {
             $teamMemberData->save();
-        }
-        if ($teamMember->isDirty()) {
-            $teamMember->save();
         }
 
         return $teamMemberData->load('teamMember.person', 'teamMember.incomingQuarter', 'statsReport', 'withdrawCode');

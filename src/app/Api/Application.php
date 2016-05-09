@@ -31,10 +31,6 @@ class Application extends ApiBase
             'owner' => 'person',
             'type'  => 'Center',
         ],
-        'centerId' => [
-            'owner' => 'person',
-            'type'  => 'Center',
-        ],
         'unsubscribed' => [
             'owner' => 'person',
             'type'  => 'bool',
@@ -189,10 +185,11 @@ class Application extends ApiBase
                 } else if ($applicationData->$property !== $value) {
                     $applicationData->$property = $value;
                 }
-            }
-            if ($this->validProperties[$property]['owner'] == 'application') {
-                if ($application->$property !== $value) {
+            } else if ($property === 'regDate') {
+                if ($applicationData->$property !== $value || $application->$property !== $value) {
+                    $applicationData->$property = $value;
                     $application->$property = $value;
+                    $application->save();
                 }
             }
         }
@@ -201,15 +198,12 @@ class Application extends ApiBase
             $applicationData->statsReportId = $report->id;
         }
 
-        if ($applicationData->regDate != $application->regDate) {
+        if (!$applicationData->regDate != $application->regDate) {
             $applicationData->regDate = $application->regDate;
         }
 
         if ($applicationData->isDirty()) {
             $applicationData->save();
-        }
-        if ($application->isDirty()) {
-            $application->save();
         }
 
         return $applicationData->load('registration.person', 'incomingQuarter', 'statsReport', 'withdrawCode', 'committedTeamMember.person');
