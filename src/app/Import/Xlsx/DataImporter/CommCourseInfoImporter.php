@@ -1,7 +1,8 @@
 <?php
 namespace TmlpStats\Import\Xlsx\DataImporter;
 
-use App;
+use TmlpStats\Course;
+use TmlpStats\CourseData;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\Api;
 
@@ -62,9 +63,36 @@ class CommCourseInfoImporter extends DataImporterAbstract
                 continue;
             }
 
-            $data = array_merge(['center' => $this->statsReport->center->id], $courseInput);
-            $course = App::make(Api\Course::class)->create($data);
-            $courseData = App::make(Api\Course::class)->setWeekData($course, $this->statsReport->reportingDate, $courseInput);
+            $data = [
+                'center_id'  => $this->statsReport->center->id,
+                'start_date' => $courseInput['startDate'],
+                'type'       => $courseInput['type'],
+            ];
+
+            // London has a special situation where INTL and local stats are reported separately for courses
+            if ($this->statsReport->center->name == 'London') {
+                $data['is_international'] = (strtoupper($courseInput['location']) == 'INTL');
+            }
+
+            $course = Course::firstOrCreate($data);
+
+            if ($course->location != $courseInput['location']) {
+                $course->location = $courseInput['location'];
+                $course->save();
+            }
+
+            $courseData = CourseData::firstOrNew([
+                'course_id'       => $course->id,
+                'stats_report_id' => $this->statsReport->id,
+            ]);
+
+            unset($courseInput['startDate']);
+            unset($courseInput['type']);
+            unset($courseInput['offset']);
+            unset($courseInput['location']);
+
+            $courseData = $this->setValues($courseData, $courseInput);
+            $courseData->save();
         }
     }
 }
