@@ -194,6 +194,17 @@ Api.GlobalReport = {
     },
 
     /*
+    Get the list of team members by center
+    Parameters:
+      globalReport: GlobalReport
+      region: Region
+      options: array
+    */
+    getClassListByCenter: function(params, callback, errback) {
+        return apiCall('GlobalReport.getClassListByCenter', params, (callback || null), (errback || null));
+    },
+
+    /*
     Get the list of courses
     Parameters:
       globalReport: GlobalReport
@@ -282,6 +293,48 @@ Api.LocalReport = {
     */
     getCourseList: function(params, callback, errback) {
         return apiCall('LocalReport.getCourseList', params, (callback || null), (errback || null));
+    }
+};
+Api.TeamMember = {
+
+    /*
+    Create new team member
+    Parameters:
+      data: array
+    */
+    create: function(params, callback, errback) {
+        return apiCall('TeamMember.create', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Update an team member
+    Parameters:
+      teamMember: TeamMember
+      data: array
+    */
+    update: function(params, callback, errback) {
+        return apiCall('TeamMember.update', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get the weekly data for an team member
+    Parameters:
+      teamMember: TeamMember
+      reportingDate: date
+    */
+    getWeekData: function(params, callback, errback) {
+        return apiCall('TeamMember.getWeekData', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Set the weekly data for an team member
+    Parameters:
+      teamMember: TeamMember
+      reportingDate: date
+      data: array
+    */
+    setWeekData: function(params, callback, errback) {
+        return apiCall('TeamMember.setWeekData', params, (callback || null), (errback || null));
     }
 };
 Api.UserProfile = {

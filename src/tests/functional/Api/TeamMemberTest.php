@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\WithoutMiddleware;
 use TmlpStats as Models;
 use TmlpStats\Tests\Functional\FunctionalTestAbstract;
 
-class ApplicationTest extends FunctionalTestAbstract
+class TeamMemberTest extends FunctionalTestAbstract
 {
     use DatabaseTransactions;
     use WithoutMiddleware;
@@ -25,13 +25,6 @@ class ApplicationTest extends FunctionalTestAbstract
         $this->lastQuarter = Models\Quarter::year(2015)->quarterNumber(4)->first();
         $this->nextQuarter = Models\Quarter::year(2016)->quarterNumber(2)->first();
 
-        $this->teamMember = factory(Models\TeamMember::class)->create([
-            'incoming_quarter_id' => $this->lastQuarter->id,
-        ]);
-        $this->application = factory(Models\TmlpRegistration::class)->create([
-            'reg_date' => Carbon::parse('2016-04-08'),
-        ]);
-
         $this->report = Models\StatsReport::firstOrCreate([
             'center_id'      => $this->center->id,
             'quarter_id'     => $this->quarter->id,
@@ -40,10 +33,13 @@ class ApplicationTest extends FunctionalTestAbstract
             'version'        => 'test',
         ]);
 
-        $this->applicationData = Models\TmlpRegistrationData::firstOrCreate([
-            'tmlp_registration_id' => $this->application->id,
-            'stats_report_id'      => $this->report->id,
-            'reg_date'             => $this->application->regDate,
+        $this->teamMember = factory(Models\TeamMember::class)->create([
+            'incoming_quarter_id' => $this->lastQuarter->id,
+        ]);
+
+        $this->teamMemberData = Models\TeamMemberData::firstOrCreate([
+            'team_member_id'  => $this->teamMember->id,
+            'stats_report_id' => $this->report->id,
         ]);
     }
 
@@ -53,25 +49,25 @@ class ApplicationTest extends FunctionalTestAbstract
     public function testCreate($parameterUpdates, $expectedResponseUpdates)
     {
         $parameters = [
-            'method' => 'Application.create',
+            'method' => 'TeamMember.create',
             'data'   => [
                 'firstName' => $this->faker->firstName(),
-                'lastName'  => $this->faker->lastName(),
-                'center'  => $this->center->id,
-                'teamYear'  => 2,
-                'regDate'   => '2016-04-15',
+                'lastName' => $this->faker->lastName(),
+                'center' => $this->center->id,
+                'teamYear' => 2,
+                'incomingQuarter' => $this->lastQuarter->id,
             ],
         ];
 
         $lastPersonId = Models\Person::count();
-        $lastApplicationId = Models\TmlpRegistration::count();
+        $lastTeamMemberId = Models\TeamMember::count();
 
         $expectedResponse = [
-            'id'         => $lastApplicationId + 1,
-            'regDate'    => "{$parameters['data']['regDate']} 00:00:00",
+            'id'         => $lastTeamMemberId + 1,
             'teamYear'   => $parameters['data']['teamYear'],
             'personId'   => $lastPersonId + 1,
             'isReviewer' => false,
+            'incomingQuarterId' => $parameters['data']['incomingQuarter'],
             'person'     => [
                 'id'           => $lastPersonId + 1,
                 'firstName'    => $parameters['data']['firstName'],
@@ -113,8 +109,8 @@ class ApplicationTest extends FunctionalTestAbstract
     public function testUpdate()
     {
         $parameters = [
-            'method'      => 'Application.update',
-            'application' => $this->application->id,
+            'method'      => 'TeamMember.update',
+            'teamMember' => $this->teamMember->id,
             'data'        => [
                 'phone'    => '555-555-5678',
                 'email'    => 'testers@tmlpstats.com',
@@ -122,7 +118,7 @@ class ApplicationTest extends FunctionalTestAbstract
             ],
         ];
 
-        $expectedResponse = $this->application->load('person')->toArray();
+        $expectedResponse = $this->teamMember->load('person')->toArray();
         $expectedResponse['person']['phone'] = $parameters['data']['phone'];
         $expectedResponse['person']['email'] = $parameters['data']['email'];
         $expectedResponse['person']['lastName'] = $parameters['data']['lastName'];
@@ -136,28 +132,27 @@ class ApplicationTest extends FunctionalTestAbstract
     public function testGetWeekData($reportingDate)
     {
         $parameters = [
-            'method'        => 'Application.getWeekData',
-            'application'   => $this->application->id,
+            'method'        => 'TeamMember.getWeekData',
+            'teamMember'    => $this->teamMember->id,
             'reportingDate' => $reportingDate,
         ];
 
         $report = $this->report->toArray();
-        $applicationDataId = $this->applicationData->id;
+        $teamMemberDataId = $this->teamMemberData->id;
         if ($reportingDate != $this->report->reportingDate->toDateString()) {
             $report['id'] += 1;
             $report['reportingDate'] = "{$reportingDate} 00:00:00";
             $report['version'] = 'api';
 
-            $applicationDataId = Models\TmlpRegistrationData::count() + 1;
+            $teamMemberDataId = Models\TeamMemberData::count() + 1;
         }
 
         $expectedResponse = [
-            'tmlpRegistrationId'  => $this->application->id,
-            'id'                  => $applicationDataId,
-            'registration'        => $this->application->toArray(),
+            'teamMemberId'        => $this->teamMember->id,
+            'id'                  => $teamMemberDataId,
+            'teamMember'          => $this->teamMember->toArray(),
             'incomingQuarter'     => null,
             'withdrawCode'        => null,
-            'committedTeamMember' => null,
             'statsReportId'       => $report['id'],
             'statsReport'         => $report,
         ];
@@ -185,38 +180,37 @@ class ApplicationTest extends FunctionalTestAbstract
     public function testSetWeekData($reportingDate)
     {
         $parameters = [
-            'method'        => 'Application.setWeekData',
-            'application'   => $this->application->id,
+            'method'        => 'TeamMember.setWeekData',
+            'teamMember'   => $this->teamMember->id,
             'reportingDate' => $reportingDate,
             'data'          => [
-                'appOutDate'            => '2016-04-17',
-                'apprDate'              => '2016-04-23',
-                'committedTeamMemberId' => 1,
+                'atWeekend' => true,
+                'travel'    => true,
+                'gitw'      => false,
             ],
         ];
 
         $report = $this->report->toArray();
-        $applicationDataId = $this->applicationData->id;
+        $teamMemberDataId = $this->teamMemberData->id;
         if ($reportingDate != $this->report->reportingDate->toDateString()) {
             $report['id'] += 1;
             $report['reportingDate'] = "{$reportingDate} 00:00:00";
             $report['version'] = 'api';
 
-            $applicationDataId = Models\TmlpRegistrationData::count() + 1;
+            $teamMemberDataId = Models\TeamMemberData::count() + 1;
         }
 
         $expectedResponse = [
-            'tmlpRegistrationId'  => $this->application->id,
-            'id'                  => $applicationDataId,
-            'appOutDate'          => "{$parameters['data']['appOutDate']} 00:00:00",
-            'apprDate'            => "{$parameters['data']['apprDate']} 00:00:00",
-            'regDate'             => $this->application->regDate,
-            'registration'        => $this->application->toArray(),
-            'incomingQuarter'     => null,
-            'withdrawCode'        => null,
-            'committedTeamMember' => null,
-            'statsReportId'       => $report['id'],
-            'statsReport'         => $report,
+            'teamMemberId' => $this->teamMember->id,
+            'id'                 => $teamMemberDataId,
+            'atWeekend'          => $parameters['data']['atWeekend'],
+            'travel'             => $parameters['data']['travel'],
+            'gitw'               => $parameters['data']['gitw'],
+            'teamMember'         => $this->teamMember->toArray(),
+            'incomingQuarter'    => null,
+            'withdrawCode'       => null,
+            'statsReportId'      => $report['id'],
+            'statsReport'        => $report,
         ];
 
         $this->post('/api', $parameters)->seeJsonHas($expectedResponse);

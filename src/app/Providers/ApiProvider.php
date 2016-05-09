@@ -31,6 +31,7 @@ class ApiProvider extends ServiceProvider
         $this->app->singleton(Api\GlobalReport::class);
         $this->app->singleton(Api\LiveScoreboard::class);
         $this->app->singleton(Api\LocalReport::class);
+        $this->app->singleton(Api\TeamMember::class);
         $this->app->singleton(Api\UserProfile::class);
     }
 
@@ -43,6 +44,7 @@ class ApiProvider extends ServiceProvider
             'TmlpStats\Api\GlobalReport',
             'TmlpStats\Api\LiveScoreboard',
             'TmlpStats\Api\LocalReport',
+            'TmlpStats\Api\TeamMember',
             'TmlpStats\Api\UserProfile',
         ];
     }

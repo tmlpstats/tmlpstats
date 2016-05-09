@@ -135,7 +135,7 @@ class LocalReport extends ApiBase
     // TODO decide if we want this to be a public API function. Right now it's not exactly API-valid
     public function getClassList(Models\StatsReport $statsReport)
     {
-        $teamMembers = App::make(Controllers\TeamMembersController::class)->getByStatsReport($statsReport);
+        $teamMembers = Models\TeamMemberData::byStatsReport($statsReport)->with('teamMember.person')->get();
         if (!$teamMembers) {
             return [];
         }

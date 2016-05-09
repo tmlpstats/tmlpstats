@@ -198,4 +198,76 @@ class LocalReportTest extends FunctionalTestAbstract
 
         $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
     }
+
+    public function testGetClassList()
+    {
+        $memberOne = factory(Models\TeamMember::class)->create();
+        $memberOneData = Models\TeamMemberData::create([
+            'team_member_id' => $memberOne->id,
+            'stats_report_id' => $this->report->id,
+        ]);
+
+        $memberTwo = factory(Models\TeamMember::class)->create();
+        $memberTwoData = Models\TeamMemberData::create([
+            'team_member_id' => $memberTwo->id,
+            'stats_report_id' => $this->report->id,
+            'at_weekend' => false,
+            'xfer_in' => true,
+            'ctw' => true,
+            'withdraw_code_id' => 1,
+            'rereg' => false,
+            'excep' => false,
+            'travel' => true,
+            'room' => true,
+            'comment' => 'some comment',
+            'gitw' => true,
+            'tdo' => true,
+        ]);
+
+        $parameters = [
+            'method' => 'LocalReport.getClassList',
+            'localReport' => $this->report->id,
+        ];
+
+        $expectedResponse = [
+            [
+                'id' => $memberOneData->id,
+                'teamMemberId' => $memberOne->id,
+                'statsReportId' => $this->report->id,
+                'teamMember' => $memberOne->toArray(),
+                'atWeekend' => true,
+                'xferOut' => false,
+                'xferIn' => false,
+                'ctw' => false,
+                'rereg' => false,
+                'excep' => false,
+                'travel' => false,
+                'room' => false,
+                'comment' => null,
+                'gitw' => false,
+                'tdo' => false,
+                'withdrawCodeId' => null,
+            ],
+            [
+                'id' => $memberTwoData->id,
+                'teamMemberId' => $memberTwo->id,
+                'statsReportId' => $this->report->id,
+                'teamMember' => $memberTwo->toArray(),
+                'atWeekend' => false,
+                'xferOut' => false,
+                'xferIn' => true,
+                'ctw' => true,
+                'withdrawCodeId' => 1,
+                'rereg' => false,
+                'excep' => false,
+                'travel' => true,
+                'room' => true,
+                'comment' => 'some comment',
+                'gitw' => true,
+                'tdo' => true,
+            ],
+        ];
+
+        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+    }
 }

@@ -11,83 +11,79 @@ use TmlpStats\Api\Exceptions as ApiExceptions;
 class Application extends ApiBase
 {
     protected $validProperties = [
-        'firstName'           => [
+        'firstName' => [
             'owner' => 'person',
             'type'  => 'string',
         ],
-        'lastName'            => [
+        'lastName' => [
             'owner' => 'person',
             'type'  => 'string',
         ],
-        'phone'               => [
+        'phone' => [
             'owner' => 'person',
             'type'  => 'string',
         ],
-        'email'               => [
+        'email' => [
             'owner' => 'person',
             'type'  => 'string',
         ],
-        'center'            => [
+        'center' => [
             'owner' => 'person',
             'type'  => 'Center',
         ],
-        'centerId'            => [
-            'owner' => 'person',
-            'type'  => 'Center',
-        ],
-        'unsubscribed'        => [
+        'unsubscribed' => [
             'owner' => 'person',
             'type'  => 'bool',
         ],
-        'teamYear'            => [
+        'teamYear' => [
             'owner' => 'application',
             'type'  => 'int',
         ],
-        'regDate'             => [
+        'regDate' => [
             'owner' => 'application',
             'type'  => 'date',
         ],
-        'isReviewer'          => [
+        'isReviewer' => [
             'owner' => 'application',
             'type'  => 'bool',
         ],
-        'appOutDate'          => [
+        'appOutDate' => [
             'owner' => 'applicationData',
             'type'  => 'date',
         ],
-        'appInDate'           => [
+        'appInDate' => [
             'owner' => 'applicationData',
             'type'  => 'date',
         ],
-        'apprDate'            => [
+        'apprDate' => [
             'owner' => 'applicationData',
             'type'  => 'date',
         ],
-        'wdDate'              => [
+        'wdDate' => [
             'owner' => 'applicationData',
             'type'  => 'date',
         ],
-        'withdrawCodeId'      => [
+        'withdrawCode' => [
             'owner' => 'applicationData',
-            'type'  => 'int',
+            'type'  => 'WithdrawCode',
         ],
         'committedTeamMember' => [
             'owner' => 'applicationData',
             'type'  => 'TeamMember',
         ],
-        'incomingQuarter'     => [
+        'incomingQuarter' => [
             'owner' => 'applicationData',
             'type'  => 'Quarter',
         ],
-        'comment'             => [
+        'comment' => [
             'owner' => 'applicationData',
             'type'  => 'string',
         ],
-        'travel'              => [
+        'travel' => [
             'owner' => 'applicationData',
             'type'  => 'bool',
         ],
-        'room'                => [
+        'room' => [
             'owner' => 'applicationData',
             'type'  => 'bool',
         ],
@@ -189,10 +185,11 @@ class Application extends ApiBase
                 } else if ($applicationData->$property !== $value) {
                     $applicationData->$property = $value;
                 }
-            }
-            if ($this->validProperties[$property]['owner'] == 'application') {
-                if ($application->$property !== $value) {
+            } else if ($property === 'regDate') {
+                if ($applicationData->$property !== $value || $application->$property !== $value) {
+                    $applicationData->$property = $value;
                     $application->$property = $value;
+                    $application->save();
                 }
             }
         }
@@ -207,9 +204,6 @@ class Application extends ApiBase
 
         if ($applicationData->isDirty()) {
             $applicationData->save();
-        }
-        if ($application->isDirty()) {
-            $application->save();
         }
 
         return $applicationData->load('registration.person', 'incomingQuarter', 'statsReport', 'withdrawCode', 'committedTeamMember.person');
