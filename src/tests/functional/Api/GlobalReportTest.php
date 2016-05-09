@@ -23,6 +23,9 @@ class GlobalReportTest extends FunctionalTestAbstract
         $this->courses = [];
         $this->courseData = [];
 
+        $this->teamMembers = [];
+        $this->teamMemberData = [];
+
         $this->center = Models\Center::abbreviation('VAN')->first();
         $this->quarter = Models\Quarter::year(2016)->quarterNumber(1)->first();
         $this->quarter->setRegion($this->center->region);
@@ -41,6 +44,84 @@ class GlobalReportTest extends FunctionalTestAbstract
         ]);
 
         $this->globalReport->addCenterReport($this->report);
+    }
+
+    public function generateMember($report)
+    {
+        $memberOne = factory(Models\TeamMember::class)->create();
+        $memberOneData = Models\TeamMemberData::create([
+            'team_member_id' => $memberOne->id,
+            'stats_report_id' => $report->id,
+        ]);
+        $memberOne->person->centerId = $report->center->id;
+        $memberOne->person->save();
+
+        $memberTwo = factory(Models\TeamMember::class)->create();
+        $memberTwoData = Models\TeamMemberData::create([
+            'team_member_id' => $memberTwo->id,
+            'stats_report_id' => $report->id,
+            'at_weekend' => false,
+            'xfer_in' => true,
+            'ctw' => true,
+            'withdraw_code_id' => 1,
+            'rereg' => false,
+            'excep' => false,
+            'travel' => true,
+            'room' => true,
+            'comment' => 'some comment',
+            'gitw' => true,
+            'tdo' => true,
+        ]);
+        $memberTwo->person->centerId = $report->center->id;
+        $memberTwo->person->save();
+
+        $this->teamMembers[$report->center->name] = [
+            $memberOne,
+            $memberTwo,
+        ];
+
+        $this->teamMemberData[$report->center->name] = [
+            $memberOneData,
+            $memberTwoData,
+        ];
+    }
+
+    public function testGetClassListByCenter()
+    {
+        $parameters = [
+            'method' => 'GlobalReport.getClassListByCenter',
+            'globalReport' => $this->globalReport->id,
+            'region' => $this->center->region->parentId,
+        ];
+
+        $boston = Models\Center::abbreviation('BOS')->first();
+        $bostonReport = Models\StatsReport::firstOrCreate([
+            'center_id'      => $boston->id,
+            'quarter_id'     => $this->quarter->id,
+            'reporting_date' => '2016-04-15',
+            'submitted_at'   => '2016-04-15 18:57:00',
+            'validated'      => 1,
+            'version'        => 'test',
+        ]);
+        $this->globalReport->addCenterReport($bostonReport);
+
+        $this->generateMember($this->report);
+        $this->generateMember($bostonReport);
+
+        $expectedResponse = [];
+        foreach ([$this->center, $boston] as $center) {
+            foreach ([0,1] as $i) {
+                $teamMember = $this->teamMembers[$center->name][$i];
+                $teamMemberData = $this->teamMemberData[$center->name][$i];
+
+                $entry = $teamMemberData->toArray();
+                $entry['teamMember'] = $teamMember->toArray();
+
+                $expectedResponse[] = $entry;
+            }
+        }
+
+        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
     }
 
     public function generateCourses($report)

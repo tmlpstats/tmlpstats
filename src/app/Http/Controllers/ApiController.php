@@ -34,6 +34,7 @@ class ApiController extends ApiControllerBase
         "GlobalReport.getWeekScoreboard" => "GlobalReport__getWeekScoreboard",
         "GlobalReport.getWeekScoreboardByCenter" => "GlobalReport__getWeekScoreboardByCenter",
         "GlobalReport.getApplicationsListByCenter" => "GlobalReport__getApplicationsListByCenter",
+        "GlobalReport.getClassListByCenter" => "GlobalReport__getClassListByCenter",
         "GlobalReport.getCourseList" => "GlobalReport__getCourseList",
         "LiveScoreboard.getCurrentScores" => "LiveScoreboard__getCurrentScores",
         "LiveScoreboard.setScore" => "LiveScoreboard__setScore",
@@ -43,6 +44,10 @@ class ApiController extends ApiControllerBase
         "LocalReport.getClassList" => "LocalReport__getClassList",
         "LocalReport.getClassListByQuarter" => "LocalReport__getClassListByQuarter",
         "LocalReport.getCourseList" => "LocalReport__getCourseList",
+        "TeamMember.create" => "TeamMember__create",
+        "TeamMember.update" => "TeamMember__update",
+        "TeamMember.getWeekData" => "TeamMember__getWeekData",
+        "TeamMember.setWeekData" => "TeamMember__setWeekData",
         "UserProfile.setLocale" => "UserProfile__setLocale",
     ];
 
@@ -163,6 +168,14 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'options', 'array', false)
         );
     }
+    protected function GlobalReport__getClassListByCenter($input)
+    {
+        return App::make(Api\GlobalReport::class)->getClassListByCenter(
+            $this->parse($input, 'globalReport', 'GlobalReport'),
+            $this->parse($input, 'region', 'Region'),
+            $this->parse($input, 'options', 'array', false)
+        );
+    }
     protected function GlobalReport__getCourseList($input)
     {
         return App::make(Api\GlobalReport::class)->getCourseList(
@@ -221,6 +234,34 @@ class ApiController extends ApiControllerBase
     {
         return App::make(Api\LocalReport::class)->getCourseList(
             $this->parse($input, 'localReport', 'LocalReport')
+        );
+    }
+    protected function TeamMember__create($input)
+    {
+        return App::make(Api\TeamMember::class)->create(
+            $this->parse($input, 'data', 'array')
+        );
+    }
+    protected function TeamMember__update($input)
+    {
+        return App::make(Api\TeamMember::class)->update(
+            $this->parse($input, 'teamMember', 'TeamMember'),
+            $this->parse($input, 'data', 'array')
+        );
+    }
+    protected function TeamMember__getWeekData($input)
+    {
+        return App::make(Api\TeamMember::class)->getWeekData(
+            $this->parse($input, 'teamMember', 'TeamMember'),
+            $this->parse($input, 'reportingDate', 'date')
+        );
+    }
+    protected function TeamMember__setWeekData($input)
+    {
+        return App::make(Api\TeamMember::class)->setWeekData(
+            $this->parse($input, 'teamMember', 'TeamMember'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'data', 'array')
         );
     }
     protected function UserProfile__setLocale($input)

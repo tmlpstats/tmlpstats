@@ -170,6 +170,17 @@ api:
             type: array
             required: false
 
+      getClassListByCenter:
+        desc: Get the list of team members by center
+        params:
+          - name: globalReport
+            type: GlobalReport
+          - name: region
+            type: Region
+          - name: options
+            type: array
+            required: false
+
       getCourseList:
         desc: Get the list of courses
         params:
@@ -245,6 +256,38 @@ api:
         params:
           - name: localReport
             type: LocalReport
+
+  TeamMember:
+    type: namespace
+    children:
+      create:
+        desc: Create new team member
+        params:
+          - name: data
+            type: array
+      update:
+        desc: Update an team member
+        params:
+          - name: teamMember
+            type: TeamMember
+          - name: data
+            type: array
+      getWeekData:
+        desc: Get the weekly data for an team member
+        params:
+          - name: teamMember
+            type: TeamMember
+          - name: reportingDate
+            type: date
+      setWeekData:
+        desc: Set the weekly data for an team member
+        params:
+          - name: teamMember
+            type: TeamMember
+          - name: reportingDate
+            type: date
+          - name: data
+            type: array
 
   UserProfile:
     type: namespace

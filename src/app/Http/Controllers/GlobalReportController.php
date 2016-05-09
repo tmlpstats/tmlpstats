@@ -525,7 +525,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             return null;
         }
 
-        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport, $region);
+        $teamMembers = App::make(Api\GlobalReport::class)->getClassListByCenter($globalReport, $region);
         if (!$teamMembers) {
             return null;
         }
@@ -616,7 +616,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             'returnUnprocessed' => true,
         ]);
 
-        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport, $region);
+        $teamMembers = App::make(Api\GlobalReport::class)->getClassListByCenter($globalReport, $region);
         if (!$teamMembers) {
             return null;
         }
@@ -650,7 +650,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getTdoSummary(GlobalReport $globalReport, Region $region)
     {
-        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport, $region);
+        $teamMembers = App::make(Api\GlobalReport::class)->getClassListByCenter($globalReport, $region);
         if (!$teamMembers) {
             return null;
         }
@@ -994,7 +994,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
     protected function getTeamMemberStatusData(GlobalReport $globalReport, Region $region)
     {
-        $teamMembers = App::make(TeamMembersController::class)->getByGlobalReport($globalReport, $region);
+        $teamMembers = App::make(Api\GlobalReport::class)->getClassListByCenter($globalReport, $region);
         if (!$teamMembers) {
             return null;
         }

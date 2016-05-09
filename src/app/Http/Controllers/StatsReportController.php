@@ -495,7 +495,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
     public function getTeamMembersSummary(StatsReport $statsReport)
     {
-        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
+        $teamMembers = App::make(Api\LocalReport::class)->getClassList($statsReport);
 
         $tdo = [];
         $gitw = [];
@@ -695,7 +695,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
             $weeksData[$date->toDateString()] = null;
             if ($report) {
-                $weeksData[$date->toDateString()] = App::make(TeamMembersController::class)->getByStatsReport($report);
+                $weeksData[$date->toDateString()] = App::make(Api\LocalReport::class)->getClassList($report);
             }
 
             $date->addWeek();
@@ -767,7 +767,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
     protected function getTeamWeekendSummary(StatsReport $statsReport)
     {
-        $teamMembers = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
+        $teamMembers = App::make(Api\LocalReport::class)->getClassList($statsReport);
         if (!$teamMembers) {
             return null;
         }
@@ -863,7 +863,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
     protected function getTeamTravelSummary(StatsReport $statsReport)
     {
-        $teamMembersData = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
+        $teamMembersData = App::make(Api\LocalReport::class)->getClassList($statsReport);
         if (!$teamMembersData) {
             return null;
         }
@@ -944,8 +944,8 @@ class StatsReportController extends ReportDispatchAbstractController
         }
 
         // Get this week and last weeks data organized by team year and quarter
-        $teamMemberDataThisWeek = App::make(TeamMembersController::class)->getByStatsReport($statsReport);
-        $teamMemberDataLastWeek = App::make(TeamMembersController::class)->getByStatsReport($lastStatsReport);
+        $teamMemberDataThisWeek = App::make(Api\LocalReport::class)->getClassList($statsReport);
+        $teamMemberDataLastWeek = App::make(Api\LocalReport::class)->getClassList($lastStatsReport);
 
         $a = new Arrangements\TeamMembersByQuarter(['teamMembersData' => $teamMemberDataThisWeek]);
         $teamThisWeekByQuarter = $a->compose();

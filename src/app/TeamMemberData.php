@@ -34,7 +34,11 @@ class TeamMemberData extends Model
         'xfer_in'    => 'boolean',
         'ctw'        => 'boolean',
         'rereg'      => 'boolean',
+        'excep'      => 'boolean',
+        'travel'     => 'boolean',
         'room'       => 'boolean',
+        'gitw'       => 'boolean',
+        'tdo'        => 'boolean',
     ];
 
     public function __get($name)
