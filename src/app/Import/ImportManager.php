@@ -124,13 +124,13 @@ class ImportManager
                         throw new Exception("The file you uploaded, '{$fileName}', looks like a special Excel temporary file. Please look for a file that does not start with '~$'");
                     }
 
-                    throw new Exception("There was an error processing '$fileName': " . $e->getMessage());
+                    throw new Exception("There was an error processing '{$fileName}': " . $e->getMessage());
                 }
 
                 $user         = Auth::user()->email;
                 $errorCount   = count($sheet['errors']);
                 $warningCount = count($sheet['warnings']);
-                Log::info("{$user} submitted sheet for {$sheet['center']} with {$errorCount} errors and {$warningCount} warnings.");
+                Log::info("{$user} validated sheet for {$sheet['center']} with {$errorCount} errors and {$warningCount} warnings.");
 
                 if (isset($sheet['statsReportId'])) {
 
@@ -140,6 +140,8 @@ class ImportManager
                     if (!$saveReport) {
                         $cacheKey = "statsReport{$sheet['statsReportId']}:importdata";
                         Cache::put($cacheKey, $importer, 10);
+                    } else {
+                        Log::info("User {$user} submitted statsReport {$sheet['statsReportId']}");
                     }
 
                     if ($sheet['submittedAt']) {
