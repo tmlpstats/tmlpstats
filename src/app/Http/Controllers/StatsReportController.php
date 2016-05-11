@@ -289,15 +289,15 @@ class StatsReportController extends ReportDispatchAbstractController
                 }
                 $importer->saveReport();
                 $sheet = $importer->getResults();
+
+                $statsReport->submittedAt = Carbon::now();
+                $statsReport->submitComment = Input::get('comment', null);
+                $statsReport->locked = true;
             } catch (Exception $e) {
                 Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             }
 
-            $statsReport->submittedAt = Carbon::now();
-            $statsReport->submitComment = Input::get('comment', null);
-            $statsReport->locked = true;
-
-            if ($statsReport->save()) {
+            if ($statsReport->isDirty() && $statsReport->save()) {
                 // Cache the validation results so we don't have to regenerate
                 $cacheKey = "statsReport{$id}:results";
                 Cache::tags(["statsReport{$id}"])->put($cacheKey, $sheet, static::CACHE_TTL);
