@@ -280,9 +280,7 @@ class ImportManager
             'statisticianApprentice' => static::getEmail($statisticianApprentice),
         ];
 
-        $emailMap['to'] = $emailMap['center']
-            ? $emailMap['center']
-            : $emailMap['statistician'];
+        $emailMap['to'] = $emailMap['center'] ?: $emailMap['statistician'];
 
         // If this is the first week and the report didn't validate, we also didn't import any of the
         // new accountables. Don't send the email to last quarters accountables, and instead just send it to the
@@ -331,6 +329,8 @@ class ImportManager
         $reportToken = ReportToken::get($globalReport, $center);
         $reportUrl   = url("/report/{$reportToken->token}");
 
+        $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($center->abbreviation);
+
         $submittedCount = StatsReport::byCenter($center)
                                      ->reportingDate($statsReport->reportingDate)
                                      ->submitted()
@@ -344,7 +344,7 @@ class ImportManager
         $reportingDate = $statsReport->reportingDate;
         try {
             Mail::send('emails.statssubmitted',
-                compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'isResubmitted', 'due', 'comment', 'respondByDateTime', 'reportUrl', 'reportingDate', 'accountablesCopied'),
+                compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'isResubmitted', 'due', 'comment', 'respondByDateTime', 'reportUrl', 'mobileDashUrl', 'reportingDate', 'accountablesCopied'),
                 function ($message) use ($emails, $emailMap, $centerName, $sheetPath, $sheetName) {
                     // Only send email to centers in production
                     if (env('APP_ENV') === 'prod') {

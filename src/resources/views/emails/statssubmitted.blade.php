@@ -25,8 +25,13 @@ You are not complete yet. Your regional statistician will review your sheet and 
 <br/>
 
 @if ($reportUrl)
-<a href="{{ $reportUrl }}">View your report online: {{ $centerName }} - {{ $reportingDate->format('M j, Y') }}</a><br/>
-<br/>
+    <a href="{{ $reportUrl }}">View your report online: {{ $centerName }} - {{ $reportingDate->format('M j, Y') }}</a><br/>
+    <br/>
+@endif
+@if ($mobileDashUrl)
+    Share the team's scoreboard via email or text with this mobile friendly link: 
+    <a href="{{ $mobileDashUrl }}">{{ $mobileDashUrl }}</a><br/>
+    <br/>
 @endif
 @if ($comment)
     You provided the following comment:<br/>
