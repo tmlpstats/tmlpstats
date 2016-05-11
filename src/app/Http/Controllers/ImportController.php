@@ -66,7 +66,7 @@ class ImportController extends Controller
         $request->flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
         return view('import.index')->with([
-            'submitReport' => isset($results['statsReportId']),
+            'submitReport' => isset($results['sheets'][0]['statsReportId']),
             'showUploadForm' => true,
             'showReportCheckSettings' => true,
             'expectedDate' => ImportManager::getExpectedReportDate()->toDateString(),
