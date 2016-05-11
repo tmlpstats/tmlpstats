@@ -677,6 +677,13 @@ class Message
                 '%%reportingDate%%',
             ],
         ],
+        'IMPORTDOC_DATE_NOT_FRIDAY'               => [
+            'type'      => Message::ERROR,
+            'format'    => "The date provided '%%reportingDate%%' is not on a Friday. Reports are dated on the Friday the statistics closed even if they are not submitted on Friday. Please correct the date and retry.",
+            'arguments' => [
+                '%%reportingDate%%',
+            ],
+        ],
         'IMPORTDOC_VERSION_FORMAT_INCORRECT'      => [
             'type'      => Message::ERROR,
             'format'    => "Version '%%version%%' is in an incorrect format. Sheet may be invalid/corrupt.",

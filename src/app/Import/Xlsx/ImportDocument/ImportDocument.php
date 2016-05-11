@@ -113,6 +113,10 @@ class ImportDocument extends ImportDocumentAbstract
             $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_DATE_NOT_FOUND', $reportingDate);
         }
 
+        if ($this->reportingDate &&  $this->reportingDate->dayOfWeek != Carbon::FRIDAY) {
+            $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_DATE_NOT_FRIDAY', $this->reportingDate->toDateString());
+        }
+
         if ($this->reportingDate) {
             Util::setReportDate($this->reportingDate);
         }

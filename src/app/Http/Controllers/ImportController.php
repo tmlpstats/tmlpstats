@@ -58,9 +58,7 @@ class ImportController extends Controller
             $submitReport = ($request->get('submitReport') == 1);
         }
 
-        $manager = new ImportManager($request->file('statsFiles'),
-            $request->get('expectedReportDate'),
-            $enforceVersion);
+        $manager = new ImportManager($request->file('statsFiles'), $request->get('expectedReportDate'), $enforceVersion);
         $manager->import($submitReport);
 
         $results = $manager->getResults();
@@ -68,7 +66,7 @@ class ImportController extends Controller
         $request->flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
 
         return view('import.index')->with([
-            'submitReport' => true,
+            'submitReport' => isset($results['sheets'][0]['statsReportId']),
             'showUploadForm' => true,
             'showReportCheckSettings' => true,
             'expectedDate' => ImportManager::getExpectedReportDate()->toDateString(),
