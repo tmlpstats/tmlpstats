@@ -2,7 +2,7 @@ Hi {{ $user }},<br/>
 <br/>
 Thank you for submitting stats for team {{ $centerName }}.
 
-@if ($isLate)
+@if ($isLate && !$isResubmitted)
 Your stats are late. They were due on {{ $due->format('l, F jS \a\t g:ia') }}.
 @endif
 
@@ -19,7 +19,9 @@ We received them on {{ $submittedAt->format('l, F jS \a\t g:ia') }} your local t
     <br/>
 @endif
 
+@if (!$isResubmitted)
 You are not complete yet. Your regional statistician will review your sheet and declare you complete by {{ $respondByDateTime->format('l \a\t g:ia') }} your local time.<br/>
+@endif
 <br/>
 
 @if ($reportUrl)

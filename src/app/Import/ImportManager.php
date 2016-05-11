@@ -13,6 +13,7 @@ use TmlpStats\Person;
 use TmlpStats\Quarter;
 use TmlpStats\ReportToken;
 use TmlpStats\Settings\Setting;
+use TmlpStats\StatsReport;
 
 // Required for importing multiple sheets
 if (ini_get('max_execution_time') < 240) {
@@ -330,6 +331,12 @@ class ImportManager
         $reportToken = ReportToken::get($globalReport, $center);
         $reportUrl   = url("/report/{$reportToken->token}");
 
+        $submittedCount = StatsReport::byCenter($center)
+                                     ->reportingDate($statsReport->reportingDate)
+                                     ->submitted()
+                                     ->count();
+        $isResubmitted = ($submittedCount > 1);
+
         $sheetPath     = XlsxArchiver::getInstance()->getSheetPath($statsReport);
         $sheetName     = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
         $centerName    = $center->name;
@@ -337,7 +344,7 @@ class ImportManager
         $reportingDate = $statsReport->reportingDate;
         try {
             Mail::send('emails.statssubmitted',
-                compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'due', 'comment', 'respondByDateTime', 'reportUrl', 'reportingDate', 'accountablesCopied'),
+                compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'isResubmitted', 'due', 'comment', 'respondByDateTime', 'reportUrl', 'reportingDate', 'accountablesCopied'),
                 function ($message) use ($emails, $emailMap, $centerName, $sheetPath, $sheetName) {
                     // Only send email to centers in production
                     if (env('APP_ENV') === 'prod') {
