@@ -4,9 +4,8 @@ namespace TmlpStats\Http\Controllers;
 
 use App;
 use Illuminate\Http\Request;
-use TmlpStats\Center;
-use TmlpStats\Http\Requests;
 use TmlpStats\Api;
+use TmlpStats\Center;
 use TmlpStats\StatsReport;
 
 class CenterController extends Controller
@@ -59,13 +58,13 @@ class CenterController extends Controller
         $roster = $center->getTeamRoster();
 
         $latestReport = StatsReport::byCenter($center)
-                                   ->orderBy('reporting_date', 'desc')
-                                   ->first();
+            ->orderBy('reporting_date', 'desc')
+            ->first();
 
         $statsReportsThisWeek = StatsReport::byCenter($center)
-                                           ->reportingDate($latestReport->reportingDate)
-                                           ->get();
-        $reportsThisWeek      = [];
+            ->reportingDate($latestReport->reportingDate)
+            ->get();
+        $reportsThisWeek = [];
         foreach ($statsReportsThisWeek as $report) {
             $reportsThisWeek[$report->id] = $report->reportingDate->format('M d, Y');
         }
@@ -121,20 +120,20 @@ class CenterController extends Controller
         $this->setCenter($center);
 
         $statsReport = StatsReport::byCenter($center)
-                                  ->official()
-                                  ->orderBy('reporting_date', 'desc')
-                                  ->first();
+            ->official()
+            ->orderBy('reporting_date', 'desc')
+            ->first();
 
         $weekData = [];
         $reportUrl = '';
         try {
             $weekData = $statsReport
-                ? App::make(StatsReportController::class)->getSummaryPageData($statsReport)
-                : [];
+            ? App::make(StatsReportController::class)->getSummaryPageData($statsReport)
+            : [];
 
             $reportUrl = $statsReport
-                ? StatsReportController::getUrl($statsReport)
-                : '';
+            ? StatsReportController::getUrl($statsReport)
+            : '';
         } catch (\Exception $e) {
             // An exception may be thrown if a stats report is from a previous quarter and there is incomplete promise data.
             $statsReport = null;
@@ -154,5 +153,11 @@ class CenterController extends Controller
         );
 
         return view('centers.dashboard')->with(array_merge($data, $weekData));
+    }
+
+    public function submission($abbr)
+    {
+        $center = Center::abbreviation($abbr)->firstorFail();
+        return view('centers.submission', compact('center'));
     }
 }
