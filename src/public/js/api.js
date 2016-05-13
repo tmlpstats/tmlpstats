@@ -46,6 +46,16 @@ Api.Application = {
     },
 
     /*
+    List applications by center
+    Parameters:
+      center: Center
+      reportingDate: date
+    */
+    allForCenter: function(params, callback, errback) {
+        return apiCall('Application.allForCenter', params, (callback || null), (errback || null));
+    },
+
+    /*
     Get the weekly data for an application
     Parameters:
       application: Application

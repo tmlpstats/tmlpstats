@@ -146,27 +146,89 @@ class Application extends ApiBase
         return $application->load('person');
     }
 
-    public function getWeekData(Models\TmlpRegistration $application, Carbon $reportingDate)
+    public function allForCenter(Models\Center $center, Carbon $reportingDate = null)
     {
-        $cached = $this->checkCache(compact('application', 'reportingDate'));
-        if ($cached) {
-            return $cached;
+        if ($reportingDate === null) {
+            $reportingDate = LocalReport::getReportingDate($center);
+        } else if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
+            $dateStr = $reportingDate->toDateString();
+            throw new ApiExceptions\BadRequest("Reporting date must be a Friday.");
         }
 
-        $report = LocalReport::getStatsReport($application->center, $reportingDate);
+        $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
 
-        $response = Models\TmlpRegistrationData::firstOrCreate([
+        $reports = Models\StatsReport::byCenter($center)
+                                     ->byQuarter($quarter)
+                                     ->official()
+                                     ->orderBy('reporting_date', 'asc')
+                                     ->with('tmlpRegistrationData')
+                                     ->get();
+
+        $allApplications = [];
+        foreach ($reports as $report) {
+            if ($report->reportingDate->gt($reportingDate)) {
+                continue;
+            }
+
+            $apps = $report->tmlpRegistrationData;
+            foreach ($apps as $app) {
+                // Store indexed here so we end up with only the most recent one for each application
+                $allApplications[$app->registration->id] = $this->getWeekData($app->registration, $reportingDate);
+            }
+        }
+
+        return array_values($allApplications);
+    }
+
+    public function getWeekData(Models\TmlpRegistration $application, Carbon $reportingDate = null)
+    {
+        if ($reportingDate === null) {
+            $reportingDate = LocalReport::getReportingDate($application->center);
+        } else if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
+            $dateStr = $reportingDate->toDateString();
+            throw new ApiExceptions\BadRequest("Reporting date must be a Friday.");
+        }
+
+        $report = LocalReport::getStatsReport($application->center, $reportingDate, false);
+
+        $response = Models\TmlpRegistrationData::firstOrNew([
             'tmlp_registration_id' => $application->id,
             'stats_report_id'      => $report->id,
-        ])->load('registration.person', 'incomingQuarter', 'statsReport', 'withdrawCode', 'committedTeamMember.person');
+        ]);
 
-        $this->putCache($response);
+        // If we're creating a new data object now, pre-populate it with data from last week
+        if (!$response->exists) {
 
-        return $response;
+            $lastWeeksReport = Models\StatsReport::byCenter($application->center)
+                                                 ->reportingDate($reportingDate->copy()->subWeek())
+                                                 ->official()
+                                                 ->first();
+
+            // It's the center's first official report or they didn't submit last week
+            $lastWeeksData = null;
+            if ($lastWeeksReport) {
+                $lastWeeksData = Models\TmlpRegistrationData::byStatsReport($lastWeeksReport)
+                                                            ->ByRegistration($application)
+                                                            ->first();
+            }
+
+            if ($lastWeeksData) {
+                $response->mirror($lastWeeksData);
+            }
+
+            $response->save();
+        }
+
+        return $response->load('registration.person', 'incomingQuarter', 'statsReport', 'withdrawCode', 'committedTeamMember.person');
     }
 
     public function setWeekData(Models\TmlpRegistration $application, Carbon $reportingDate, array $data)
     {
+        if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
+            $dateStr = $reportingDate->toDateString();
+            throw new ApiExceptions\BadRequest("Reporting date must be a Friday.");
+        }
+
         $data = $this->parseInputs($data);
 
         $report = LocalReport::getStatsReport($application->center, $reportingDate);

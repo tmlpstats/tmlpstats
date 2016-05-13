@@ -203,6 +203,11 @@ class StatsReport extends Model
         });
     }
 
+    public function scopeByQuarter($query, Quarter $quarter)
+    {
+        return $query->whereQuarterId($quarter->id);
+    }
+
     public function scopeByCenter($query, Center $center)
     {
         return $query->whereCenterId($center->id);
@@ -263,18 +268,13 @@ class StatsReport extends Model
         return $this->hasMany('TmlpStats\TeamMemberData');
     }
 
-    public function teamRegistrationData()
+    public function tmlpRegistrationData()
     {
-        return $this->hasMany('TmlpStats\TeamRegistrationData');
+        return $this->hasMany('TmlpStats\TmlpRegistrationData');
     }
 
     public function centerStatsData()
     {
         return $this->hasMany('TmlpStats\CenterStatsData');
-    }
-
-    public function tmlpGamesData()
-    {
-        return $this->hasMany('TmlpStats\TmlpGamesData');
     }
 }

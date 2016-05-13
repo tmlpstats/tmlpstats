@@ -162,24 +162,36 @@ class LocalReport extends ApiBase
         return $courses;
     }
 
-    public static function getStatsReport(Models\Center $center, Carbon $reportingDate)
+    public static function getStatsReport(Models\Center $center, Carbon $reportingDate, $requireNew = true)
     {
         $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
         if (!$quarter) {
             throw new ApiExceptions\BadRequestException('Unable to find quarter which is required for fetching this data');
         }
 
-        $report = Models\StatsReport::firstOrNew([
-            'center_id'      => $center->id,
-            'quarter_id'     => $quarter->id,
-            'reporting_date' => $reportingDate->toDateTimeString(),
-            'submitted_at'   => null,
-        ]);
-        if (!$report->exists) {
-            $report->version = 'api';
-            $report->save();
+        $query = Models\StatsReport::byCenter($center)
+                                    ->byQuarter($quarter)
+                                    ->reportingDate($reportingDate)
+                                    ->orderBy('id', 'desc');
+        if ($requireNew) {
+            $query->submitted(false);
+        }
+        $report = $query->first();
+
+        if (!$report) {
+            $report = Models\StatsReport::create([
+                'center_id'      => $center->id,
+                'quarter_id'     => $quarter->id,
+                'reporting_date' => $reportingDate->toDateTimeString(),
+                'version'        => 'api',
+            ]);
         }
 
         return $report;
+    }
+
+    public static function getReportingDate(Models\Center $center)
+    {
+        return $reportingDate = Carbon::parse('this friday', $center->timezone)->startOfDay();
     }
 }
