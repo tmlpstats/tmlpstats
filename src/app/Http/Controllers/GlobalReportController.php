@@ -270,7 +270,7 @@ class GlobalReportController extends ReportDispatchAbstractController
     {
         $data = App::make(Api\GlobalReport::class)->getRating($globalReport, $region);
 
-        return view('globalreports.details.ratingsummary', $data ?: []);
+        return $data ? view('globalreports.details.ratingsummary', $data) : [];
     }
 
     protected function getRegionSummary(Models\GlobalReport $globalReport, Models\Region $region)
@@ -304,7 +304,9 @@ class GlobalReportController extends ReportDispatchAbstractController
 
             $dateStr = $globalReport->reportingDate->toDateString();
             foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
-                $rpp[$abbr][$game] = $regionsData[$abbr][$dateStr]['actual'][$game] / $participantCount;
+                $actual = array_get($regionsData, "{$abbr}.{$dateStr}.actual.{$game}", 0);
+
+                $rpp[$abbr][$game] = ($participantCount > 0) ? ($actual / $participantCount) : 0;
                 $rpp[$abbr]['participantCount'] = $participantCount;
             }
         }
@@ -339,8 +341,11 @@ class GlobalReportController extends ReportDispatchAbstractController
                 $scoreboard = Scoreboard::blank();
 
                 foreach ($scoreboard->games() as $game) {
-                    $scoreboard->setValue($game->key, 'promise', $promises['promise'][$game->key]);
-                    $scoreboard->setValue($game->key, 'actual', $regionsData[$childRegion->abbreviation]['actual'][$game->key]);
+                    $promise = array_get($promises, "promise.{$game->key}", 0);
+                    $actual = array_get($regionsData, "{$childRegion->abbreviation}.actual.{$game->key}", 0);
+
+                    $scoreboard->setValue($game->key, 'promise', $promise);
+                    $scoreboard->setValue($game->key, 'actual', $actual);
                 }
 
                 $regionsData[$childRegion->abbreviation] = $scoreboard->toArray();

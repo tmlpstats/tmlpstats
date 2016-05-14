@@ -104,7 +104,7 @@ class GlobalReport extends ApiBase
 
     public function getWeekScoreboard(Models\GlobalReport $report, Models\Region $region, Carbon $futureDate = null)
     {
-        $cached = $this->checkCache(compact('report', 'region'));
+        $cached = $this->checkCache(compact('report', 'region', 'futureDate'));
         if ($cached) {
             return $cached;
         }

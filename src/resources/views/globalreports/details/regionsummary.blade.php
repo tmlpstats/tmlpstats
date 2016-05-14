@@ -23,6 +23,13 @@
                 <tr>
                     <th class="border-left border-right">{{ strtoupper($game) }}</th>
                     @foreach ($regionsData as $name => $data)
+                    @if (!isset([$name][$globalReport->reportingDate->toDateString()]))
+                        <td class="data-point"></td>
+                        <td class="data-point"></td>
+                        <td class="data-point"></td>
+                        <td class="data-point"></td>
+                        <td class="data-point border-right"></td>
+                    @else
                         <?php
                         $data = $regionsData[$name][$globalReport->reportingDate->toDateString()];
                         if ($data['percent'][$game] < 50) {
@@ -47,18 +54,25 @@
                         <td class="data-point {{ $effectivenessClass }}">{{ $data['percent'][$game] }}%</td>
                         <td class="data-point">{{ $data['points'][$game] }}</td>
                         <td class="data-point border-right {{ $rppClass }}">{{ $game === 'gitw' ? "--" : number_format($rpp[$name][$game], 2) }}</td>
+                    @endif
                     @endforeach
                 </tr>
             @endforeach
             <tr class="border-top">
                 <th class="border-right">&nbsp;</th>
                 @foreach ($regionsData as $name => $data)
+                @if (isset($regionsData[$name][$globalReport->reportingDate->toDateString()]))
+                    <th colspan="3" class="data-point"></th>
+                    <th class="data-point"></th>
+                @else
                     <?php
                     $data = $regionsData[$name][$globalReport->reportingDate->toDateString()];
                     ?>
                     <th colspan="3" class="data-point"><span style="text-transform: uppercase">{{ $data['rating'] }}</span></th>
                     <th class="data-point">{{ $data['points']['total'] }}</th>
-                    <th class="border-right">&nbsp;</th>
+                @endif
+
+                <th class="border-right">&nbsp;</th>
                 @endforeach
             </tr>
             <tr>
