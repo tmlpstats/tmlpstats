@@ -133,13 +133,20 @@ class ApplicationTest extends FunctionalTestAbstract
     /**
      * @dataProvider providerGetWeekData
      */
-    public function testGetWeekData($reportingDate)
+    public function testGetWeekData($reportingDate = null)
     {
         $parameters = [
             'method'        => 'Application.getWeekData',
             'application'   => $this->application->id,
             'reportingDate' => $reportingDate,
         ];
+
+        if (!$reportingDate) {
+            // Passed into api as null, but will resolve to this
+            $reportingDate = Carbon::parse('this friday', $this->center->timezone)
+                                   ->startOfDay()
+                                   ->toDateString();
+        }
 
         $report = $this->report->toArray();
         $applicationDataId = $this->applicationData->id;
@@ -170,6 +177,7 @@ class ApplicationTest extends FunctionalTestAbstract
         return [
             ['2016-04-08'], // Non-existent report
             ['2016-04-15'], // Existing report
+            [], // No date provided
         ];
     }
 
