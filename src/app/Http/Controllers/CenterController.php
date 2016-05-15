@@ -27,19 +27,17 @@ class CenterController extends Controller
 
         $weekData = [];
         $reportUrl = '';
-        try {
-            if ($statsReport) {
+        if ($statsReport) {
+            try {
                 $weekData = App::make(StatsReportController::class)->getSummaryPageData($statsReport);
                 $reportUrl = StatsReportController::getUrl($statsReport);
+            } catch (\Exception $e) {
+                // An exception may be thrown if a stats report is from a previous quarter and there is incomplete promise data.
+                $statsReport = null;
             }
-        } catch (\Exception $e) {
-            // An exception may be thrown if a stats report is from a previous quarter and there is incomplete promise data.
-            $statsReport = null;
         }
 
-        if ($weekData === null) {
-            $weekData = [];
-        }
+        $weekData = $weekData ?: [];
 
         $liveScoreboard = true;
 
