@@ -54,8 +54,8 @@ Route::post('reports/dates/setActive', 'ReportsController@setActiveReportingDate
 Route::get('m/{abbr}', 'ReportsController@mobileDash');
 
 // Center Info
-Route::resource('centers', 'CenterController');
 Route::get('center/{abbr}', 'CenterController@dashboard');
+Route::get('center/{abbr}/submission/{page?}', 'CenterController@submission');
 
 // Regions
 Route::resource('regions', 'RegionController');
