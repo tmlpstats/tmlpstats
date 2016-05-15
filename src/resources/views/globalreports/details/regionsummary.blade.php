@@ -23,7 +23,7 @@
                 <tr>
                     <th class="border-left border-right">{{ strtoupper($game) }}</th>
                     @foreach ($regionsData as $name => $data)
-                    @if (!isset([$name][$globalReport->reportingDate->toDateString()]))
+                    @if (!isset($regionsData[$name][$globalReport->reportingDate->toDateString()]))
                         <td class="data-point"></td>
                         <td class="data-point"></td>
                         <td class="data-point"></td>

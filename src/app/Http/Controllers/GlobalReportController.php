@@ -303,8 +303,9 @@ class GlobalReportController extends ReportDispatchAbstractController
             }
 
             $dateStr = $globalReport->reportingDate->toDateString();
+            $data = isset($regionsData[$abbr][$dateStr]['actual']) ? $regionsData[$abbr][$dateStr]['actual'] : [];
             foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
-                $actual = array_get($regionsData, "{$abbr}.{$dateStr}.actual.{$game}", 0);
+                $actual = isset($data[$game]) ? $data[$game] : 0;
 
                 $rpp[$abbr][$game] = ($participantCount > 0) ? ($actual / $participantCount) : 0;
                 $rpp[$abbr]['participantCount'] = $participantCount;
@@ -335,14 +336,16 @@ class GlobalReportController extends ReportDispatchAbstractController
                                                           ->getWeekScoreboard($globalReport, $childRegion);
 
             if ($nextMilestone->ne($globalReport->reportingDate)) {
-                $promises = App::make(Api\GlobalReport::class)
-                               ->getWeekScoreboard($globalReport, $childRegion, $nextMilestone);
+                $promiseData = App::make(Api\GlobalReport::class)
+                                  ->getWeekScoreboard($globalReport, $childRegion, $nextMilestone);
 
                 $scoreboard = Scoreboard::blank();
 
+                $promises = $promiseData['promise'];
+                $actuals = $regionsData[$childRegion->abbreviation]['actual'];
                 foreach ($scoreboard->games() as $game) {
-                    $promise = array_get($promises, "promise.{$game->key}", 0);
-                    $actual = array_get($regionsData, "{$childRegion->abbreviation}.actual.{$game->key}", 0);
+                    $promise = isset($promises[$game->key]) ? $promises[$game->key] : 0;
+                    $actual = isset($actuals[$game->key]) ? $actuals[$game->key] : 0;
 
                     $scoreboard->setValue($game->key, 'promise', $promise);
                     $scoreboard->setValue($game->key, 'actual', $actual);
