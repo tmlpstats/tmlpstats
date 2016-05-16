@@ -20,6 +20,7 @@ class ApiController extends ApiControllerBase
     protected $methods = [
         "Application.create" => "Application__create",
         "Application.update" => "Application__update",
+        "Application.allForCenter" => "Application__allForCenter",
         "Application.getWeekData" => "Application__getWeekData",
         "Application.setWeekData" => "Application__setWeekData",
         "Context.getCenter" => "Context__getCenter",
@@ -68,11 +69,18 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'data', 'array')
         );
     }
+    protected function Application__allForCenter($input)
+    {
+        return App::make(Api\Application::class)->allForCenter(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date', false)
+        );
+    }
     protected function Application__getWeekData($input)
     {
         return App::make(Api\Application::class)->getWeekData(
             $this->parse($input, 'application', 'Application'),
-            $this->parse($input, 'reportingDate', 'date')
+            $this->parse($input, 'reportingDate', 'date', false)
         );
     }
     protected function Application__setWeekData($input)

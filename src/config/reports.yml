@@ -50,6 +50,14 @@ api:
             type: Application
           - name: data
             type: array
+      allForCenter:
+        desc: List applications by center
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+            required: false
       getWeekData:
         desc: Get the weekly data for an application
         params:
@@ -57,6 +65,7 @@ api:
             type: Application
           - name: reportingDate
             type: date
+            required: false
       setWeekData:
         desc: Set the weekly data for an application
         params:

@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use TmlpStats as Models;
+use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Tests\Functional\FunctionalTestAbstract;
 
 class ApplicationTest extends FunctionalTestAbstract
@@ -133,13 +134,20 @@ class ApplicationTest extends FunctionalTestAbstract
     /**
      * @dataProvider providerGetWeekData
      */
-    public function testGetWeekData($reportingDate)
+    public function testGetWeekData($reportingDate = null)
     {
         $parameters = [
             'method'        => 'Application.getWeekData',
             'application'   => $this->application->id,
             'reportingDate' => $reportingDate,
         ];
+
+        if (!$reportingDate) {
+            // Passed into api as null, but will resolve to this
+            $reportingDate = Carbon::parse('this friday', $this->center->timezone)
+                                   ->startOfDay()
+                                   ->toDateString();
+        }
 
         $report = $this->report->toArray();
         $applicationDataId = $this->applicationData->id;
@@ -170,13 +178,8 @@ class ApplicationTest extends FunctionalTestAbstract
         return [
             ['2016-04-08'], // Non-existent report
             ['2016-04-15'], // Existing report
+            [], // No date provided
         ];
-    }
-
-    public function testGetWeekDataReturns400WhenQuarterNotFound()
-    {
-        // Test that the exceptions is thrown properly
-        $this->markTestIncomplete('Not yet implemented');
     }
 
     /**
@@ -230,9 +233,134 @@ class ApplicationTest extends FunctionalTestAbstract
         ];
     }
 
-    public function testSetWeekDataReturns400WhenQuarterNotFound()
+    /**
+     * @dataProvider providerAllForCenter
+     */
+    public function testAllForCenter($reportingDate = null)
     {
-        // Test that the exceptions is thrown properly
-        $this->markTestIncomplete('Not yet implemented');
+        $parameters = [
+            'method' => 'Application.allForCenter',
+            'center' => $this->center->id,
+        ];
+        if ($reportingDate) {
+            $parameters['reportingDate'] = $reportingDate;
+        }
+
+        //
+        // Last Week's Report
+        //
+        $lastWeeksReport = Models\StatsReport::create([
+            'center_id'      => $this->center->id,
+            'quarter_id'     => $this->quarter->id,
+            'reporting_date' => '2016-04-08',
+            'submitted_at'   => '2016-04-08 18:55:00',
+            'version'        => 'test',
+        ]);
+
+        // Existing application's data for last week
+        $app1LastWeekData = Models\TmlpRegistrationData::create([
+            'tmlp_registration_id' => $this->application->id,
+            'stats_report_id'      => $lastWeeksReport->id,
+            'reg_date'             => $this->application->regDate,
+            'comment'              => 'Last week',
+        ]);
+
+        // New person. Only has data last week
+        $app2 = factory(Models\TmlpRegistration::class)->create([
+            'reg_date' => Carbon::parse('2016-04-01'),
+        ]);
+        $app2LastWeekData = Models\TmlpRegistrationData::create([
+            'tmlp_registration_id' => $app2->id,
+            'stats_report_id'      => $lastWeeksReport->id,
+            'reg_date'             => $app2->regDate,
+            'comment'              => 'Last week',
+        ]);
+
+        // Setup the global reports
+        $lastWeeksGlobalReport = Models\GlobalReport::firstOrCreate([
+            'reporting_date' => '2016-04-08',
+        ]);
+        $lastWeeksGlobalReport->addCenterReport($lastWeeksReport);
+
+
+        //
+        // This Week's Report
+        //
+        $this->report->submittedAt = '2016-04-15 18:55:00';
+
+        $thisWeeksGlobalReport = Models\GlobalReport::firstOrCreate([
+            'reporting_date' => '2016-04-15',
+        ]);
+
+        $thisWeeksGlobalReport->addCenterReport($this->report);
+
+        //
+        // Next Week's Report
+        //
+        $nextWeeksReport = Models\StatsReport::create([
+            'center_id'      => $this->center->id,
+            'quarter_id'     => $this->quarter->id,
+            'reporting_date' => '2016-04-22',
+            'submitted_at'   => '2016-04-22 18:55:00',
+            'version'        => 'test',
+        ]);
+
+        // Existing application's data for last week
+        $app1NextWeekData = Models\TmlpRegistrationData::create([
+            'tmlp_registration_id' => $this->application->id,
+            'stats_report_id'      => $nextWeeksReport->id,
+            'reg_date'             => $this->application->regDate,
+            'comment'              => 'Next week',
+        ]);
+
+        $app3 = factory(Models\TmlpRegistration::class)->create([
+            'reg_date' => Carbon::parse('2016-04-15'),
+        ]);
+        $app3NextWeekData = Models\TmlpRegistrationData::create([
+            'tmlp_registration_id' => $app3->id,
+            'stats_report_id'      => $lastWeeksReport->id,
+            'reg_date'             => $app3->regDate,
+            'comment'              => 'Next week',
+        ]);
+
+        // Setup the global reports
+        $nextWeeksGlobalReport = Models\GlobalReport::firstOrCreate([
+            'reporting_date' => '2016-04-22',
+        ]);
+
+        $nextWeeksGlobalReport->addCenterReport($nextWeeksReport);
+
+        // When a reporting date is provided, we get
+        //      app1 with this week's data
+        //      app2 with last week's data
+        //
+        // When no reporting date is provided, we get
+        //      app1 with 'next' week's data
+        //      app2 with last week's data
+        //      app3 with 'next' week's data
+        if ($reportingDate) {
+            // Reporting Date provided
+            $expectedResponse = [
+                $this->applicationData->load('registration.person', 'statsReport')->toArray(),
+                $app2LastWeekData->load('registration.person', 'statsReport')->toArray(),
+            ];
+        } else {
+            // Reporting Date not provided
+            $expectedResponse = [
+                $app1NextWeekData->load('registration.person', 'statsReport')->toArray(),
+                $app2LastWeekData->load('registration.person', 'statsReport')->toArray(),
+                $app3NextWeekData->load('registration.person', 'statsReport')->toArray(),
+            ];
+        }
+
+        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+    }
+
+    public function providerAllForCenter()
+    {
+        return [
+            ['2016-04-15'], // Existing report
+            [],// No report
+        ];
     }
 }

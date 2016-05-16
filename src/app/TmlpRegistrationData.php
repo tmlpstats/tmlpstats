@@ -73,6 +73,22 @@ class TmlpRegistrationData extends Model
         }
     }
 
+    public function mirror(TmlpRegistrationData $data)
+    {
+        $excludedFields = [
+            'stats_report_id' => true,
+            'tmlp_registration_id' => true
+        ];
+
+        foreach ($this->fillable as $field) {
+            if (isset($excludedFields[$field])) {
+                continue;
+            }
+
+            $this->$field = $data->$field;
+        }
+    }
+
     public function isWithdrawn()
     {
         return ($this->withdrawCodeId !== null);
@@ -96,6 +112,11 @@ class TmlpRegistrationData extends Model
     public function scopeByStatsReport($query, StatsReport $statsReport)
     {
         return $query->whereStatsReportId($statsReport->id);
+    }
+
+    public function scopeByRegistration($query, TmlpRegistration $registration)
+    {
+        return $query->whereTmlpRegistrationId($registration->id);
     }
 
     public function statsReport()
