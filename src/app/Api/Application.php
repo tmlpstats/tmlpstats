@@ -152,7 +152,7 @@ class Application extends ApiBase
             $reportingDate = LocalReport::getReportingDate($center);
         } else if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
             $dateStr = $reportingDate->toDateString();
-            throw new ApiExceptions\BadRequest("Reporting date must be a Friday.");
+            throw new ApiExceptions\BadRequestException("Reporting date must be a Friday.");
         }
 
         $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
@@ -170,10 +170,9 @@ class Application extends ApiBase
                 continue;
             }
 
-            $apps = $report->tmlpRegistrationData;
-            foreach ($apps as $app) {
+            foreach ($report->tmlpRegistrationData as $app) {
                 // Store indexed here so we end up with only the most recent one for each application
-                $allApplications[$app->registration->id] = $this->getWeekData($app->registration, $reportingDate);
+                $allApplications[$app->registration->id] = $this->getWeekData($app->registration, $report->reportingDate);
             }
         }
 
@@ -186,7 +185,7 @@ class Application extends ApiBase
             $reportingDate = LocalReport::getReportingDate($application->center);
         } else if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
             $dateStr = $reportingDate->toDateString();
-            throw new ApiExceptions\BadRequest("Reporting date must be a Friday.");
+            throw new ApiExceptions\BadRequestException("Reporting date must be a Friday.");
         }
 
         $report = LocalReport::getStatsReport($application->center, $reportingDate, false);
@@ -226,7 +225,7 @@ class Application extends ApiBase
     {
         if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
             $dateStr = $reportingDate->toDateString();
-            throw new ApiExceptions\BadRequest("Reporting date must be a Friday.");
+            throw new ApiExceptions\BadRequestException("Reporting date must be a Friday.");
         }
 
         $data = $this->parseInputs($data);
