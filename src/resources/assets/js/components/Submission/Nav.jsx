@@ -1,21 +1,26 @@
-import React from 'react';
 import { Link } from 'react-router'
 
-export default class SubmissionNav extends React.Component {
+import { React, SubmissionBase } from './Base'
+
+export default class SubmissionNav extends SubmissionBase {
     render() {
         var steps = [];
         var s = this.props.steps;
         if (s) {
-            var centerId = this.props.params.centerId;
+            var baseUri = this.baseUri()
             s.forEach((v, k) => {
-                var cb = () => this.props.setPage(k)
-                steps.push(<li key={k}><b><Link to={`/center/${centerId}/submission/${k}`}>{v.name}</Link></b></li>);
+                var destPath = `${baseUri}/${k}`
+                var cls="list-group-item"
+                if (this.props.location.pathname.startsWith(destPath)) {
+                    cls += " active"
+                }
+                steps.push(<Link key={k} className={cls} to={destPath}>{v.name}</Link>);
             });
         }
         return (
-            <ul>
+            <div className="list-group">
                 {steps}
-            </ul>
+            </div>
         );
     }
 }

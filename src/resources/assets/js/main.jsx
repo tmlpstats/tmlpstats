@@ -4,9 +4,10 @@ import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import { Provider } from 'react-redux'
 import { Router, Route, browserHistory } from 'react-router'
 import { syncHistoryWithStore, routerReducer } from 'react-router-redux'
+import thunk from 'redux-thunk'
 
-import LiveScoreboard from './components/LiveScoreboard';
-import SubmissionFlow from './components/SubmissionFlow';
+import LiveScoreboard from './components/LiveScoreboard'
+import SubmissionFlow from './components/SubmissionFlow'
 import { submissionReducer } from './states/SubmissionStates'
 
 const reducer = combineReducers({
@@ -15,7 +16,7 @@ const reducer = combineReducers({
 })
 
 
-const store = createStore(reducer, undefined, compose(applyMiddleware(), window.devToolsExtension ? window.devToolsExtension() : f => f))
+const store = createStore(reducer, undefined, compose(applyMiddleware(thunk), window.devToolsExtension ? window.devToolsExtension() : f => f))
 
 const history = syncHistoryWithStore(browserHistory, store)
 
@@ -30,7 +31,7 @@ function _wrapProvider(v) {
 }
 
 var _components = [
-	['#live-scoreboard', function(elem) { ReactDOM.render(<LiveScoreboard/>, elem); }],
+	['#live-scoreboard', function(elem) { ReactDOM.render(<LiveScoreboard/>, elem) }],
 	['#submission-flow', function(elem) { ReactDOM.render(_wrapProvider(SubmissionFlow()), elem); }]
 ]
 
