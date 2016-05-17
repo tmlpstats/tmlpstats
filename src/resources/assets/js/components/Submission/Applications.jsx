@@ -4,7 +4,7 @@ import { bindActionCreators } from 'redux'
 import { Form, Field, actions as formActions } from 'react-redux-form'
 
 import { SubmissionBase, React} from './Base'
-import { SimpleField } from '../reusable/FormUtils'
+import { Form, SimpleField } from '../../reusable/form_utils'
 import { initializeApplications, APPLICATIONS_FORM_KEY } from '../../states/SubmissionStates'
 
 class ApplicationsBase extends SubmissionBase {
