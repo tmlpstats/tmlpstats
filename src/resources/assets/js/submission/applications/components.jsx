@@ -1,11 +1,11 @@
 import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { Form, Field, actions as formActions } from 'react-redux-form'
 
-import { SubmissionBase, React} from './Base'
+import { SubmissionBase, React } from '../base_components'
 import { Form, SimpleField } from '../../reusable/form_utils'
-import { initializeApplications, APPLICATIONS_FORM_KEY } from '../../states/SubmissionStates'
+import { APPLICATIONS_FORM_KEY } from './reducers'
+import { initializeApplications } from './actions'
 
 class ApplicationsBase extends SubmissionBase {
     componentDidMount() {
@@ -39,7 +39,7 @@ class ApplicationsBase extends SubmissionBase {
     }
 }
 
-class BareApplicationsIndex extends ApplicationsBase {
+class ApplicationsIndexView extends ApplicationsBase {
     render() {
         var apps = []
         if (this.props.loaded) {
@@ -78,7 +78,7 @@ class BareApplicationsIndex extends ApplicationsBase {
 }
 
 
-class BareApplicationsEdit extends ApplicationsBase {
+class ApplicationsEditView extends ApplicationsBase {
     saveApp(data) {
         console.log("Saved with data", data)
         // TODO an AJAX call for the save event
@@ -121,5 +121,5 @@ const mapDispatchToProps = (dispatch) => bindActionCreators({ initializeApplicat
 
 const connector = connect(mapStateToProps, mapDispatchToProps)
 
-export const ApplicationsIndex = connector(BareApplicationsIndex)
-export const ApplicationsEdit = connector(withRouter(BareApplicationsEdit))
+export const ApplicationsIndex = connector(ApplicationsIndexView)
+export const ApplicationsEdit = connector(withRouter(ApplicationsEditView))
