@@ -28,6 +28,7 @@ class ApiController extends ApiControllerBase
         "Context.getSetting" => "Context__getSetting",
         "Course.create" => "Course__create",
         "Course.update" => "Course__update",
+        "Course.allForCenter" => "Course__allForCenter",
         "Course.getWeekData" => "Course__getWeekData",
         "Course.setWeekData" => "Course__setWeekData",
         "GlobalReport.getRating" => "GlobalReport__getRating",
@@ -123,11 +124,18 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'data', 'array')
         );
     }
+    protected function Course__allForCenter($input)
+    {
+        return App::make(Api\Course::class)->allForCenter(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date', false)
+        );
+    }
     protected function Course__getWeekData($input)
     {
         return App::make(Api\Course::class)->getWeekData(
             $this->parse($input, 'course', 'Course'),
-            $this->parse($input, 'reportingDate', 'date')
+            $this->parse($input, 'reportingDate', 'date', false)
         );
     }
     protected function Course__setWeekData($input)

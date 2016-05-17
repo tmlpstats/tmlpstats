@@ -26,19 +26,19 @@ class ApplicationTest extends FunctionalTestAbstract
         $this->lastQuarter = Models\Quarter::year(2015)->quarterNumber(4)->first();
         $this->nextQuarter = Models\Quarter::year(2016)->quarterNumber(2)->first();
 
-        $this->teamMember = factory(Models\TeamMember::class)->create([
-            'incoming_quarter_id' => $this->lastQuarter->id,
-        ]);
-        $this->application = factory(Models\TmlpRegistration::class)->create([
-            'reg_date' => Carbon::parse('2016-04-08'),
-        ]);
-
         $this->report = Models\StatsReport::firstOrCreate([
             'center_id'      => $this->center->id,
             'quarter_id'     => $this->quarter->id,
             'reporting_date' => '2016-04-15',
             'submitted_at'   => null,
             'version'        => 'test',
+        ]);
+
+        $this->teamMember = factory(Models\TeamMember::class)->create([
+            'incoming_quarter_id' => $this->lastQuarter->id,
+        ]);
+        $this->application = factory(Models\TmlpRegistration::class)->create([
+            'reg_date' => Carbon::parse('2016-04-08'),
         ]);
 
         $this->applicationData = Models\TmlpRegistrationData::firstOrCreate([
@@ -58,7 +58,7 @@ class ApplicationTest extends FunctionalTestAbstract
             'data'   => [
                 'firstName' => $this->faker->firstName(),
                 'lastName'  => $this->faker->lastName(),
-                'center'  => $this->center->id,
+                'center'    => $this->center->id,
                 'teamYear'  => 2,
                 'regDate'   => '2016-04-15',
             ],
@@ -116,7 +116,7 @@ class ApplicationTest extends FunctionalTestAbstract
         $parameters = [
             'method'      => 'Application.update',
             'application' => $this->application->id,
-            'data'        => [
+            'data' => [
                 'phone'    => '555-555-5678',
                 'email'    => 'testers@tmlpstats.com',
                 'lastName' => 'McTester',

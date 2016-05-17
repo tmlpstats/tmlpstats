@@ -128,6 +128,16 @@ Api.Course = {
     },
 
     /*
+    List courses by center
+    Parameters:
+      center: Center
+      reportingDate: date
+    */
+    allForCenter: function(params, callback, errback) {
+        return apiCall('Course.allForCenter', params, (callback || null), (errback || null));
+    },
+
+    /*
     Get the weekly data for an course
     Parameters:
       course: Course

@@ -24,16 +24,6 @@ class CourseTest extends FunctionalTestAbstract
         $this->center = Models\Center::abbreviation('VAN')->first();
         $this->quarter = Models\Quarter::year(2016)->quarterNumber(1)->first();
 
-        $this->course = factory(Models\Course::class)->create([
-            'center_id'  => $this->center->id,
-            'start_date' => Carbon::parse('2016-04-23'),
-        ]);
-
-        $this->pastCourse = factory(Models\Course::class)->create([
-            'center_id'  => $this->center->id,
-            'start_date' => Carbon::parse('2016-04-09'),
-        ]);
-
         $this->report = Models\StatsReport::firstOrCreate([
             'center_id'      => $this->center->id,
             'quarter_id'     => $this->quarter->id,
@@ -42,9 +32,25 @@ class CourseTest extends FunctionalTestAbstract
             'version'        => 'test',
         ]);
 
+        $this->pastCourse = factory(Models\Course::class)->create([
+            'center_id'  => $this->center->id,
+            'start_date' => Carbon::parse('2016-04-09'),
+        ]);
+
+        $this->course = factory(Models\Course::class)->create([
+            'center_id'  => $this->center->id,
+            'start_date' => Carbon::parse('2016-04-23'),
+        ]);
+
         $this->courseData = Models\CourseData::firstOrCreate([
-            'course_id'       => $this->course->id,
-            'stats_report_id' => $this->report->id,
+            'course_id'         => $this->course->id,
+            'stats_report_id'   => $this->report->id,
+            'quarter_start_ter' => 0,
+            'quarter_start_standardStarts' => 0,
+            'quarter_start_xfer'      => 0,
+            'current_ter'             => 21,
+            'current_standard_starts' => 18,
+            'current_xfer'            => 2,
         ]);
     }
 
@@ -116,13 +122,20 @@ class CourseTest extends FunctionalTestAbstract
     /**
      * @dataProvider providerGetWeekData
      */
-    public function testGetWeekData($reportingDate)
+    public function testGetWeekData($reportingDate = null)
     {
         $parameters = [
             'method'        => 'Course.getWeekData',
             'course'        => $this->course->id,
             'reportingDate' => $reportingDate,
         ];
+
+        if (!$reportingDate) {
+            // Passed into api as null, but will resolve to this
+            $reportingDate = Carbon::parse('this friday', $this->center->timezone)
+                                   ->startOfDay()
+                                   ->toDateString();
+        }
 
         $report = $this->report->toArray();
         $courseDataId = $this->courseData->id;
@@ -150,13 +163,8 @@ class CourseTest extends FunctionalTestAbstract
         return [
             ['2016-04-08'], // Non-existent report
             ['2016-04-15'], // Existing report
+            [], // No date provided
         ];
-    }
-
-    public function testGetWeekDataReturns400WhenQuarterNotFound()
-    {
-        // Test that the exceptions is thrown properly
-        $this->markTestIncomplete('Not yet implemented');
     }
 
     /**
@@ -215,8 +223,7 @@ class CourseTest extends FunctionalTestAbstract
     public function providerSetWeekData()
     {
         return [
-            ['2016-04-15', [], []], // Non-existent report
-            [ // Existing report
+            [ // Non-existent report
                 '2016-04-08',
                 [
                     'course' => 'update-me',
@@ -230,12 +237,150 @@ class CourseTest extends FunctionalTestAbstract
                 ],
                 [],
             ],
+            ['2016-04-15', [], []], // Existing report
         ];
     }
 
-    public function testSetWeekDataReturns400WhenQuarterNotFound()
+    /**
+     * @dataProvider providerAllForCenter
+     */
+    public function testAllForCenter($reportingDate = null)
     {
-        // Test that the exceptions is thrown properly
-        $this->markTestIncomplete('Not yet implemented');
+        $parameters = [
+            'method' => 'Course.allForCenter',
+            'center' => $this->center->id,
+        ];
+        if ($reportingDate) {
+            $parameters['reportingDate'] = $reportingDate;
+        }
+
+        //
+        // Last Week's Report
+        //
+        $lastWeeksReport = Models\StatsReport::create([
+            'center_id'      => $this->center->id,
+            'quarter_id'     => $this->quarter->id,
+            'reporting_date' => '2016-04-08',
+            'submitted_at'   => '2016-04-08 18:55:00',
+            'version'        => 'test',
+        ]);
+
+        // Existing course's data for last week
+        $course1LastWeekData = Models\CourseData::create([
+            'course_id'       => $this->course->id,
+            'stats_report_id' => $lastWeeksReport->id,
+            'quarter_start_ter'       => 0,
+            'quarter_start_standardStarts' => 0,
+            'quarter_start_xfer'      => 0,
+            'current_ter'             => 18,
+            'current_standard_starts' => 15,
+            'current_xfer'            => 2,
+        ]);
+
+        // New person. Only has data last week
+        $course2 = factory(Models\Course::class)->create([
+            'center_id'  => $this->center->id,
+            'start_date' => Carbon::parse('2016-04-30'),
+        ]);
+        $course2LastWeekData = Models\CourseData::create([
+            'course_id'       => $course2->id,
+            'stats_report_id' => $lastWeeksReport->id,
+            'quarter_start_ter'       => 15,
+            'quarter_start_standardStarts' => 12,
+            'quarter_start_xfer'      => 0,
+            'current_ter'             => 28,
+            'current_standard_starts' => 25,
+            'current_xfer'            => 2,
+        ]);
+
+        // Setup the global reports
+        $lastWeeksGlobalReport = Models\GlobalReport::firstOrCreate([
+            'reporting_date' => '2016-04-08',
+        ]);
+        $lastWeeksGlobalReport->addCenterReport($lastWeeksReport);
+
+
+        //
+        // This Week's Report
+        //
+        $this->report->submittedAt = '2016-04-15 18:55:00';
+
+        $thisWeeksGlobalReport = Models\GlobalReport::firstOrCreate([
+            'reporting_date' => '2016-04-15',
+        ]);
+
+        $thisWeeksGlobalReport->addCenterReport($this->report);
+
+        //
+        // Next Week's Report
+        //
+        $nextWeeksReport = Models\StatsReport::create([
+            'center_id'      => $this->center->id,
+            'quarter_id'     => $this->quarter->id,
+            'reporting_date' => '2016-04-22',
+            'submitted_at'   => '2016-04-22 18:55:00',
+            'version'        => 'test',
+        ]);
+
+        // Existing course's data for last week
+        $course1NextWeekData = Models\CourseData::create([
+            'course_id'       => $this->course->id,
+            'stats_report_id' => $nextWeeksReport->id,
+            'quarter_start_ter'       => 0,
+            'quarter_start_standardStarts' => 0,
+            'quarter_start_xfer'      => 0,
+            'current_ter'             => 25,
+            'current_standard_starts' => 22,
+            'current_xfer'            => 2,
+        ]);
+
+        $course3 = factory(Models\Course::class)->create([
+            'center_id'  => $this->center->id,
+            'start_date' => Carbon::parse('2016-05-21'),
+        ]);
+        $course3NextWeekData = Models\CourseData::create([
+            'course_id'       => $course3->id,
+            'stats_report_id' => $lastWeeksReport->id,
+        ]);
+
+        // Setup the global reports
+        $nextWeeksGlobalReport = Models\GlobalReport::firstOrCreate([
+            'reporting_date' => '2016-04-22',
+        ]);
+
+        $nextWeeksGlobalReport->addCenterReport($nextWeeksReport);
+
+        // When a reporting date is provided, we get
+        //      course1 with this week's data
+        //      course2 with last week's data
+        //
+        // When no reporting date is provided, we get
+        //      course1 with 'next' week's data
+        //      course2 with last week's data
+        //      course3 with 'next' week's data
+        if ($reportingDate) {
+            // Reporting Date provided
+            $expectedResponse = [
+                $this->courseData->load('course', 'course.center', 'statsReport')->toArray(),
+                $course2LastWeekData->load('course', 'course.center', 'statsReport')->toArray(),
+            ];
+        } else {
+            // Reporting Date not provided
+            $expectedResponse = [
+                $course1NextWeekData->load('course', 'course.center', 'statsReport')->toArray(),
+                $course2LastWeekData->load('course', 'course.center', 'statsReport')->toArray(),
+                $course3NextWeekData->load('course', 'course.center', 'statsReport')->toArray(),
+            ];
+        }
+
+        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+    }
+
+    public function providerAllForCenter()
+    {
+        return [
+            ['2016-04-15'], // Existing report
+            [],// No report
+        ];
     }
 }

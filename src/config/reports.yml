@@ -110,6 +110,14 @@ api:
             type: Course
           - name: data
             type: array
+      allForCenter:
+        desc: List courses by center
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+            required: false
       getWeekData:
         desc: Get the weekly data for an course
         params:
@@ -117,6 +125,7 @@ api:
             type: Course
           - name: reportingDate
             type: date
+            required: false
       setWeekData:
         desc: Set the weekly data for an course
         params:

@@ -149,35 +149,86 @@ class Course extends ApiBase
         return $course->load('center');
     }
 
-    public function getWeekData(Models\Course $course, Carbon $reportingDate)
+    public function allForCenter(Models\Center $center, Carbon $reportingDate = null)
     {
-        $cached = $this->checkCache(compact('course', 'reportingDate'));
-        if ($cached) {
-            return $cached;
+        if ($reportingDate === null) {
+            $reportingDate = LocalReport::getReportingDate($center);
+        } else if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
+            $dateStr = $reportingDate->toDateString();
+            throw new ApiExceptions\BadRequestException("Reporting date must be a Friday.");
         }
 
-        $report = LocalReport::getStatsReport($course->center, $reportingDate);
+        $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
 
-        $response = Models\CourseData::firstOrCreate([
+        $reports = Models\StatsReport::byCenter($center)
+                                     ->byQuarter($quarter)
+                                     ->official()
+                                     ->orderBy('reporting_date', 'asc')
+                                     ->with('courseData')
+                                     ->get();
+
+        $allCourses = [];
+        foreach ($reports as $report) {
+            if ($report->reportingDate->gt($reportingDate)) {
+                continue;
+            }
+
+            foreach ($report->courseData as $courseData) {
+                // Store indexed here so we end up with only the most recent one for each course
+                $allCourses[$courseData->course->id] = $this->getWeekData($courseData->course, $report->reportingDate);
+            }
+        }
+
+        return array_values($allCourses);
+    }
+
+    public function getWeekData(Models\Course $course, Carbon $reportingDate = null)
+    {
+        if ($reportingDate === null) {
+            $reportingDate = LocalReport::getReportingDate($course->center);
+        } else if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
+            $dateStr = $reportingDate->toDateString();
+            throw new ApiExceptions\BadRequestException("Reporting date must be a Friday.");
+        }
+
+        $report = LocalReport::getStatsReport($course->center, $reportingDate, false);
+
+        $response = Models\CourseData::firstOrNew([
             'course_id' => $course->id,
             'stats_report_id' => $report->id,
-        ])->load('course', 'course.center', 'statsReport');
+        ]);
 
-        $this->putCache($response);
+        // If we're creating a new data object now, pre-populate it with data from last week
+        if (!$response->exists) {
 
-        return $response;
+            $lastWeeksReport = Models\StatsReport::byCenter($course->center)
+                                                 ->reportingDate($reportingDate->copy()->subWeek())
+                                                 ->official()
+                                                 ->first();
+
+            // It's the center's first official report or they didn't submit last week
+            $lastWeeksData = null;
+            if ($lastWeeksReport) {
+                $lastWeeksData = Models\CourseData::byStatsReport($lastWeeksReport)
+                                                  ->ByCourse($course)
+                                                  ->first();
+            }
+
+            if ($lastWeeksData) {
+                $response->mirror($lastWeeksData);
+            }
+
+            $response->save();
+        }
+
+        return $response->load('course', 'course.center', 'statsReport');
     }
 
     public function setWeekData(Models\Course $course, Carbon $reportingDate, array $data)
     {
         $data = $this->parseInputs($data);
 
-        $report = LocalReport::getStatsReport($course->center, $reportingDate);
-
-        $courseData = Models\CourseData::firstOrCreate([
-            'course_id' => $course->id,
-            'stats_report_id' => $report->id,
-        ]);
+        $courseData = $this->getWeekData($course, $reportingDate);
 
         foreach ($data as $property => $value) {
             if ($this->validProperties[$property]['owner'] === 'courseData' && $courseData->$property !== $value) {
