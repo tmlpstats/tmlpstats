@@ -1,5 +1,5 @@
 import React from 'react'
-import { Field } from 'react-redux-form'
+export { Form, Field, actions as formActions } from 'react-redux-form'
 
 
 export class SimpleField extends React.Component {

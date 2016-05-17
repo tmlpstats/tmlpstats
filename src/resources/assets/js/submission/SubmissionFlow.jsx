@@ -3,8 +3,8 @@ import { Route, IndexRedirect } from 'react-router'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
-import SubmissionNav from './Submission/Nav'
-import * as Pages from './Submission/Pages'
+import SubmissionNav from './Nav'
+import * as Pages from './pages'
 
 
 const steps = new Map([

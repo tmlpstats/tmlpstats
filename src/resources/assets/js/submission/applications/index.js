@@ -1,0 +1,1 @@
+export { ApplicationsIndex, ApplicationsEdit } from './components'
