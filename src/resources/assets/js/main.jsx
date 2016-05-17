@@ -6,7 +6,7 @@ import { Router, Route, browserHistory } from 'react-router'
 import { syncHistoryWithStore, routerReducer } from 'react-router-redux'
 import thunk from 'redux-thunk'
 
-import LiveScoreboard from './components/LiveScoreboard'
+import { LiveScoreboard } from './live_scoreboard'
 import SubmissionFlow from './components/SubmissionFlow'
 import { submissionReducer } from './states/SubmissionStates'
 
