@@ -1,11 +1,11 @@
 import React from 'react'
-export { Form, Field, actions as formActions } from 'react-redux-form'
+import { Form, Field, actions as formActions } from 'react-redux-form'
 
+export { Form, Field, formActions }
 
 export class SimpleField extends React.Component {
     render() {
-        var id='blah-' + this.props.id
-        var field;
+        var field
         if (this.props.customField) {
             field = this.props.children
         } else {
