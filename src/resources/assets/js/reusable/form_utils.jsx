@@ -1,5 +1,6 @@
 import React from 'react'
 import { Form, Field, actions as formActions } from 'react-redux-form'
+import { Link } from 'react-router'
 
 export { Form, Field, formActions }
 
@@ -18,6 +19,20 @@ export class SimpleField extends React.Component {
                     <div className="col-md-8">{field}</div>
                 </div>
             </Field>
+        )
+    }
+}
+
+export class AddOneLink extends React.Component {
+    render() {
+
+        var label = this.props.label
+        if (!label) {
+            label = '+ Add One'
+        }
+
+        return (
+            <Link to={this.props.link}>{label}</Link>
         )
     }
 }

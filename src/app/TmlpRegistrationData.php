@@ -77,7 +77,6 @@ class TmlpRegistrationData extends Model
     {
         $excludedFields = [
             'stats_report_id' => true,
-            'tmlp_registration_id' => true
         ];
 
         foreach ($this->fillable as $field) {

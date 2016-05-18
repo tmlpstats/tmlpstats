@@ -39,6 +39,26 @@ class CourseData extends Model
         }
     }
 
+    public function mirror(CourseData $data)
+    {
+        $excludedFields = [
+            'stats_report_id' => true,
+        ];
+
+        foreach ($this->fillable as $field) {
+            if (isset($excludedFields[$field])) {
+                continue;
+            }
+
+            $this->$field = $data->$field;
+        }
+    }
+
+    public function scopeByCourse($query, Course $course)
+    {
+        return $query->whereCourseId($course->id);
+    }
+
     public function scopeByStatsReport($query, $statsReport)
     {
         return $query->whereStatsReportId($statsReport->id);
