@@ -53,12 +53,18 @@ class CoursesIndexView extends CoursesBase {
                 }
 
                 var date = moment(courseData.course.startDate)
+                var ter = courseData.currentTer || '-'
+                var ss = courseData.currentStandardStarts || '-'
+                var xfer = courseData.currentXfer || '-'
 
                 courses.push(
                     <tr key={courseData.id}>
                         <td><Link to={`${baseUri}/courses/edit/${courseData.id}`}>{date.format("MMM D, YYYY")}</Link></td>
-                        <td>{courseData.course.type}</td>
+                        <td className="data-point">{courseData.course.type}</td>
                         <td>{location}</td>
+                        <td className="data-point">{ter}</td>
+                        <td className="data-point">{ss}</td>
+                        <td className="data-point">{xfer}</td>
                     </tr>
                 )
             })
@@ -76,8 +82,11 @@ class CoursesIndexView extends CoursesBase {
                     <thead>
                         <tr>
                             <th>Date</th>
-                            <th>Type</th>
+                            <th className="data-point">Type</th>
                             <th>Location</th>
+                            <th className="data-point">Total Ever Registered</th>
+                            <th className="data-point">Standard Starts</th>
+                            <th className="data-point">Transfered In</th>
                         </tr>
                     </thead>
                     <tbody>{courses}</tbody>
@@ -162,68 +171,78 @@ class CoursesEditView extends CoursesBase {
                 </Form>
 
                 <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourseData.bind(this)}>
+
+                <div className="row">
+                <div className="col-md-6">
                     <div className="panel panel-default">
                         <div className="panel-heading">Quarter Starting</div>
                         <div className="panel-body">
-                            <SimpleField label="Total Ever Registered" model={modelKey+'.quarterStartTer'} />
-                            <SimpleField label="Standard Starts" model={modelKey+'.quarterStartStandardStarts'} />
-                            <SimpleField label="Transfer In" model={modelKey+'.quarterStartXfer'} />
+                            <SimpleField label="Total Ever Registered" model={modelKey+'.quarterStartTer'} labelSize="col-md-4" divSize="col-md-6" />
+                            <SimpleField label="Standard Starts" model={modelKey+'.quarterStartStandardStarts'} labelSize="col-md-4" divSize="col-md-6" />
+                            <SimpleField label="Transfer In" model={modelKey+'.quarterStartXfer'} labelSize="col-md-4" divSize="col-md-6" />
 
                             <div className="form-group">
-                                <div className="col-sm-offset-2 col-sm-8">
+                                <div className="col-sm-offset-5 col-sm-5">
                                     <button className="btn btn-primary" type="submit">Save</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-
+                </div>
+                <div className="col-md-6">
                     <div className="panel panel-default">
                         <div className="panel-heading">Current</div>
                         <div className="panel-body">
-                            <SimpleField label="Total Ever Registered" model={modelKey+'.currentTer'} />
-                            <SimpleField label="Standard Starts" model={modelKey+'.currentStandardStarts'} />
-                            <SimpleField label="Transfer In" model={modelKey+'.currentXfer'} />
+                            <SimpleField label="Total Ever Registered" model={modelKey+'.currentTer'} labelSize="col-md-4" divSize="col-md-6" />
+                            <SimpleField label="Standard Starts" model={modelKey+'.currentStandardStarts'} labelSize="col-md-4" divSize="col-md-6" />
+                            <SimpleField label="Transfer In" model={modelKey+'.currentXfer'} labelSize="col-md-4" divSize="col-md-6" />
 
                             <div className="form-group">
-                                <div className="col-sm-offset-2 col-sm-8">
+                                <div className="col-sm-offset-5 col-sm-5">
                                     <button className="btn btn-primary" type="submit">Save</button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+                </div>
 
 
+                <div className="row">
+                <div className="col-md-6">
                     <div className="panel panel-default">
                         <div className="panel-heading">Completion</div>
                         <div className="panel-body">
-                            <SimpleField label="Standard Starts" model={modelKey+'.completedStandardStarts'} />
-                            <SimpleField label="Potentials" model={modelKey+'.potentials'} />
-                            <SimpleField label="Registrations" model={modelKey+'.registrations'} />
+                            <SimpleField label="Standard Starts" model={modelKey+'.completedStandardStarts'} labelSize="col-md-4" divSize="col-md-6" />
+                            <SimpleField label="Potentials" model={modelKey+'.potentials'} labelSize="col-md-4" divSize="col-md-6" />
+                            <SimpleField label="Registrations" model={modelKey+'.registrations'} labelSize="col-md-4" divSize="col-md-6" />
 
                             <div className="form-group">
-                                <div className="col-sm-offset-2 col-sm-8">
+                                <div className="col-sm-offset-5 col-sm-5">
                                     <button className="btn btn-primary" type="submit">Save</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-
+                </div>
+                <div className="col-md-6">
                     <div className="panel panel-default">
                         <div className="panel-heading">Guest Game</div>
                         <div className="panel-body">
-                            <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} />
-                            <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} />
-                            <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} />
-                            <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} />
+                            <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelSize="col-md-4" divSize="col-md-6" />
+                            <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelSize="col-md-4" divSize="col-md-6" />
+                            <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelSize="col-md-4" divSize="col-md-6" />
+                            <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} labelSize="col-md-4" divSize="col-md-6" />
 
                             <div className="form-group">
-                                <div className="col-sm-offset-2 col-sm-8">
+                                <div className="col-sm-offset-5 col-sm-5">
                                     <button className="btn btn-primary" type="submit">Save</button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+                </div>
                 </Form>
             </div>
         )

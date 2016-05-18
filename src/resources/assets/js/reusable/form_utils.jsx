@@ -12,11 +12,15 @@ export class SimpleField extends React.Component {
         } else {
             field = <input type="text" className="form-control" />
         }
+
+        var labelSize = this.props.labelSize || 'col-md-2'
+        var divSize = this.props.labelSize || 'col-md-8'
+
         return (
             <Field model={this.props.model}>
                 <div className="form-group">
-                    <label className="col-md-2 control-label">{this.props.label}</label>
-                    <div className="col-md-8">{field}</div>
+                    <label className={labelSize + " control-label"}>{this.props.label}</label>
+                    <div className={divSize}>{field}</div>
                 </div>
             </Field>
         )
