@@ -64,7 +64,7 @@ class CoursesIndexView extends CoursesBase {
             })
         } else {
             courses.push(
-                <tr key="loading"><td colSpan="3">Loading....</td></tr>
+                <tr key="courses-loading"><td colSpan="3">Loading....</td></tr>
             )
         }
 
@@ -89,9 +89,43 @@ class CoursesIndexView extends CoursesBase {
 
 class CoursesEditView extends CoursesBase {
     saveCourse(data) {
-        console.log("Saved with data", data)
-        // TODO an AJAX call for the save event
-        this.props.router.push(this.baseUri() + '/courses')
+        console.log("Saved course with data", data)
+
+        Api.Course.update({
+            course: data.course.id,
+            data: {
+                location: data.course.location,
+                startDate: data.course.startDate,
+                type: data.course.type
+            }
+        }).done((data) => {
+            this.props.router.push(this.baseUri() + '/courses')
+        })
+    }
+    saveCourseData(data) {
+        console.log("Saved course data with data", data)
+
+        Api.Course.setWeekData({
+            course: data.course.id,
+            reportingDate: data.statsReport.reportingDate,
+            data: {
+                quarterStartTer: data.quarterStartTer,
+                quarterStartStandardStarts: data.quarterStartStandardStarts,
+                quarterStartXfer: data.quarterStartXfer,
+                currentTer: data.currentTer,
+                currentStandardStarts: data.currentStandardStarts,
+                currentXfer: data.currentXfer,
+                completedStandardStarts: data.completedStandardStarts,
+                potentials: data.potentials,
+                registrations: data.registrations,
+                guestsPromised: data.guestsPromised,
+                guestsInvited: data.guestsInvited,
+                guestsConfirmed: data.guestsConfirmed,
+                guestsAttended: data.guestsAttended
+            }
+        }).done((data) => {
+            this.props.router.push(this.baseUri() + '/courses')
+        })
     }
     render() {
         if (!this.props.loaded) {
@@ -117,15 +151,29 @@ class CoursesEditView extends CoursesBase {
                                 </select>
                             </SimpleField>
                             <SimpleField label="Location" model={modelKey+'.course.location'} />
+
+                            <div className="form-group">
+                                <div className="col-sm-offset-2 col-sm-8">
+                                    <button className="btn btn-primary" type="submit">Save</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </Form>
 
+                <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourseData.bind(this)}>
                     <div className="panel panel-default">
                         <div className="panel-heading">Quarter Starting</div>
                         <div className="panel-body">
                             <SimpleField label="Total Ever Registered" model={modelKey+'.quarterStartTer'} />
                             <SimpleField label="Standard Starts" model={modelKey+'.quarterStartStandardStarts'} />
                             <SimpleField label="Transfer In" model={modelKey+'.quarterStartXfer'} />
+
+                            <div className="form-group">
+                                <div className="col-sm-offset-2 col-sm-8">
+                                    <button className="btn btn-primary" type="submit">Save</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -135,6 +183,12 @@ class CoursesEditView extends CoursesBase {
                             <SimpleField label="Total Ever Registered" model={modelKey+'.currentTer'} />
                             <SimpleField label="Standard Starts" model={modelKey+'.currentStandardStarts'} />
                             <SimpleField label="Transfer In" model={modelKey+'.currentXfer'} />
+
+                            <div className="form-group">
+                                <div className="col-sm-offset-2 col-sm-8">
+                                    <button className="btn btn-primary" type="submit">Save</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -145,6 +199,12 @@ class CoursesEditView extends CoursesBase {
                             <SimpleField label="Standard Starts" model={modelKey+'.completedStandardStarts'} />
                             <SimpleField label="Potentials" model={modelKey+'.potentials'} />
                             <SimpleField label="Registrations" model={modelKey+'.registrations'} />
+
+                            <div className="form-group">
+                                <div className="col-sm-offset-2 col-sm-8">
+                                    <button className="btn btn-primary" type="submit">Save</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -156,12 +216,12 @@ class CoursesEditView extends CoursesBase {
                             <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} />
                             <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} />
                             <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} />
-                        </div>
-                    </div>
 
-                    <div className="form-group">
-                        <div className="col-sm-offset-2 col-sm-8">
-                            <button className="btn btn-primary" type="submit">Save</button>
+                            <div className="form-group">
+                                <div className="col-sm-offset-2 col-sm-8">
+                                    <button className="btn btn-primary" type="submit">Save</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </Form>
@@ -172,9 +232,19 @@ class CoursesEditView extends CoursesBase {
 
 class CoursesAddView extends CoursesBase {
     saveCourse(data) {
-        console.log("Saved with data", data)
-        // TODO an AJAX call for the save event
-        this.props.router.push(this.baseUri() + '/courses')
+        console.log("Created course with data", data)
+
+        Api.Course.create({
+            data: {
+                center: this.props.params.centerId,
+                location: data.course.location,
+                startDate: data.course.startDate,
+                type: data.course.type
+            }
+        }).done((data) => {
+            this.loadCourses();
+            this.props.router.push(this.baseUri() + '/courses')
+        })
     }
     render() {
         if (!this.props.loaded) {
@@ -187,48 +257,14 @@ class CoursesAddView extends CoursesBase {
             <div>
                 <h3>Add Course</h3>
                 <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourse.bind(this)}>
-                    <div className="panel panel-default">
-                        <div className="panel-heading">Course Details</div>
-                        <div className="panel-body">
-                            <SimpleField label="Start Date" model={modelKey+'.course.startDate'} />
-                            <SimpleField label="Type" model={modelKey+'.course.type'} customField={true}>
-                                <select className="form-control">
-                                    <option value="CAP">Access to Power</option>
-                                    <option value="CPC">Power to Create</option>
-                                </select>
-                            </SimpleField>
-                            <SimpleField label="Location" model={modelKey+'.course.location'} />
-                        </div>
-                    </div>
-
-                    <div className="panel panel-default">
-                        <div className="panel-heading">Quarter Starting</div>
-                        <div className="panel-body">
-                            <SimpleField label="Total Ever Registered" model={modelKey+'.quarterStartTer'} />
-                            <SimpleField label="Standard Starts" model={modelKey+'.quarterStartStandardStarts'} />
-                            <SimpleField label="Transfer In" model={modelKey+'.quarterStartXfer'} />
-                        </div>
-                    </div>
-
-                    <div className="panel panel-default">
-                        <div className="panel-heading">Current</div>
-                        <div className="panel-body">
-                            <SimpleField label="Total Ever Registered" model={modelKey+'.currentTer'} />
-                            <SimpleField label="Standard Starts" model={modelKey+'.currentStandardStarts'} />
-                            <SimpleField label="Transfer In" model={modelKey+'.currentXfer'} />
-                        </div>
-                    </div>
-
-
-                    <div className="panel panel-default">
-                        <div className="panel-heading">Guest Game</div>
-                        <div className="panel-body">
-                            <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} />
-                            <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} />
-                            <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} />
-                            <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} />
-                        </div>
-                    </div>
+                    <SimpleField label="Start Date" model={modelKey+'.course.startDate'} />
+                    <SimpleField label="Type" model={modelKey+'.course.type'} customField={true}>
+                        <select className="form-control">
+                            <option value="CAP">Access to Power</option>
+                            <option value="CPC">Power to Create</option>
+                        </select>
+                    </SimpleField>
+                    <SimpleField label="Location" model={modelKey+'.course.location'} />
 
                     <div className="form-group">
                         <div className="col-sm-offset-2 col-sm-8">

@@ -56,7 +56,7 @@ class ApplicationsIndexView extends ApplicationsBase {
             })
         } else {
             apps.push(
-                <tr><td colspan="3">Loading....</td></tr>
+                <tr key="applications-loading"><td colSpan="3">Loading....</td></tr>
             )
         }
 
