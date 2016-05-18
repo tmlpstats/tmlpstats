@@ -176,6 +176,10 @@ class Application extends ApiBase
             }
         }
 
+        usort($allApplications, function ($a, $b) {
+            return strcmp($a->registration->person->firstName, $b->registration->person->firstName);
+        });
+
         return array_values($allApplications);
     }
 
@@ -188,7 +192,9 @@ class Application extends ApiBase
             throw new ApiExceptions\BadRequestException("Reporting date must be a Friday.");
         }
 
-        $report = LocalReport::getStatsReport($application->center, $reportingDate, false);
+        $getUnsubmitted = $reportingDate->gte(Carbon::now($application->center->timezone)->startOfDay());
+
+        $report = LocalReport::getStatsReport($application->center, $reportingDate, $getUnsubmitted);
 
         $response = Models\TmlpRegistrationData::firstOrNew([
             'tmlp_registration_id' => $application->id,

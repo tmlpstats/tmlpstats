@@ -179,6 +179,13 @@ class Course extends ApiBase
             }
         }
 
+        usort($allCourses, function ($a, $b) {
+            if ($a->course->startDate->eq($b->course->startDate)) {
+                return 0;
+            }
+            return $a->course->startDate->lt($b->course->startDate) ? -1 : 1;
+        });
+
         return array_values($allCourses);
     }
 
@@ -191,7 +198,9 @@ class Course extends ApiBase
             throw new ApiExceptions\BadRequestException("Reporting date must be a Friday.");
         }
 
-        $report = LocalReport::getStatsReport($course->center, $reportingDate, false);
+        $getUnsubmitted = $reportingDate->gte(Carbon::now($course->center->timezone)->startOfDay());
+
+        $report = LocalReport::getStatsReport($course->center, $reportingDate, $getUnsubmitted);
 
         $response = Models\CourseData::firstOrNew([
             'course_id' => $course->id,

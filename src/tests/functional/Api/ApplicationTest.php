@@ -318,7 +318,7 @@ class ApplicationTest extends FunctionalTestAbstract
         ]);
         $app3NextWeekData = Models\TmlpRegistrationData::create([
             'tmlp_registration_id' => $app3->id,
-            'stats_report_id'      => $lastWeeksReport->id,
+            'stats_report_id'      => $nextWeeksReport->id,
             'reg_date'             => $app3->regDate,
             'comment'              => 'Next week',
         ]);
@@ -352,6 +352,13 @@ class ApplicationTest extends FunctionalTestAbstract
                 $app3NextWeekData->load('registration.person', 'statsReport')->toArray(),
             ];
         }
+
+        usort($expectedResponse, function ($a, $b) {
+            return strcmp(
+                $a['registration']['person']['firstName'],
+                $b['registration']['person']['firstName']
+            );
+        });
 
         $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
     }

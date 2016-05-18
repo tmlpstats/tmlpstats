@@ -340,7 +340,7 @@ class CourseTest extends FunctionalTestAbstract
         ]);
         $course3NextWeekData = Models\CourseData::create([
             'course_id'       => $course3->id,
-            'stats_report_id' => $lastWeeksReport->id,
+            'stats_report_id' => $nextWeeksReport->id,
         ]);
 
         // Setup the global reports
@@ -372,6 +372,13 @@ class CourseTest extends FunctionalTestAbstract
                 $course3NextWeekData->load('course', 'course.center', 'statsReport')->toArray(),
             ];
         }
+
+        usort($expectedResponse, function ($a, $b) {
+            return strcmp(
+                $a['course']['startDate'],
+                $b['course']['startDate']
+            );
+        });
 
         $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
     }

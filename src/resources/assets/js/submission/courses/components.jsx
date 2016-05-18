@@ -52,11 +52,13 @@ class CoursesIndexView extends CoursesBase {
                     location = courseData.course.center.name
                 }
 
+                var date = moment(courseData.course.startDate)
+
                 courses.push(
                     <tr key={courseData.id}>
-                        <td><Link to={`${baseUri}/courses/edit/${courseData.id}`}>{courseData.course.startDate}</Link></td>
-                        <td>{location}</td>
+                        <td><Link to={`${baseUri}/courses/edit/${courseData.id}`}>{date.format("MMM D, YYYY")}</Link></td>
                         <td>{courseData.course.type}</td>
+                        <td>{location}</td>
                     </tr>
                 )
             })
@@ -74,8 +76,8 @@ class CoursesIndexView extends CoursesBase {
                     <thead>
                         <tr>
                             <th>Date</th>
-                            <th>Location</th>
                             <th>Type</th>
+                            <th>Location</th>
                         </tr>
                     </thead>
                     <tbody>{courses}</tbody>
@@ -108,7 +110,12 @@ class CoursesEditView extends CoursesBase {
                         <div className="panel-heading">Course Details</div>
                         <div className="panel-body">
                             <SimpleField label="Start Date" model={modelKey+'.course.startDate'} />
-                            <SimpleField label="Type" model={modelKey+'.course.type'} />
+                            <SimpleField label="Type" model={modelKey+'.course.type'} customField={true}>
+                                <select className="form-control">
+                                    <option value="CAP">Access to Power</option>
+                                    <option value="CPC">Power to Create</option>
+                                </select>
+                            </SimpleField>
                             <SimpleField label="Location" model={modelKey+'.course.location'} />
                         </div>
                     </div>
@@ -116,9 +123,9 @@ class CoursesEditView extends CoursesBase {
                     <div className="panel panel-default">
                         <div className="panel-heading">Quarter Starting</div>
                         <div className="panel-body">
-                            <SimpleField label="Total Ever Registered" model={modelKey+'.quarterStartingTer'} />
-                            <SimpleField label="Standard Starts" model={modelKey+'.quarterStartingStandardStarts'} />
-                            <SimpleField label="Transfer In" model={modelKey+'.quarterStartingXfer'} />
+                            <SimpleField label="Total Ever Registered" model={modelKey+'.quarterStartTer'} />
+                            <SimpleField label="Standard Starts" model={modelKey+'.quarterStartStandardStarts'} />
+                            <SimpleField label="Transfer In" model={modelKey+'.quarterStartXfer'} />
                         </div>
                     </div>
 
@@ -135,7 +142,7 @@ class CoursesEditView extends CoursesBase {
                     <div className="panel panel-default">
                         <div className="panel-heading">Completion</div>
                         <div className="panel-body">
-                            <SimpleField label="Standard Starts" model={modelKey+'.completeStandardStarts'} />
+                            <SimpleField label="Standard Starts" model={modelKey+'.completedStandardStarts'} />
                             <SimpleField label="Potentials" model={modelKey+'.potentials'} />
                             <SimpleField label="Registrations" model={modelKey+'.registrations'} />
                         </div>
@@ -184,7 +191,12 @@ class CoursesAddView extends CoursesBase {
                         <div className="panel-heading">Course Details</div>
                         <div className="panel-body">
                             <SimpleField label="Start Date" model={modelKey+'.course.startDate'} />
-                            <SimpleField label="Type" model={modelKey+'.course.type'} />
+                            <SimpleField label="Type" model={modelKey+'.course.type'} customField={true}>
+                                <select className="form-control">
+                                    <option value="CAP">Access to Power</option>
+                                    <option value="CPC">Power to Create</option>
+                                </select>
+                            </SimpleField>
                             <SimpleField label="Location" model={modelKey+'.course.location'} />
                         </div>
                     </div>
@@ -192,9 +204,9 @@ class CoursesAddView extends CoursesBase {
                     <div className="panel panel-default">
                         <div className="panel-heading">Quarter Starting</div>
                         <div className="panel-body">
-                            <SimpleField label="Total Ever Registered" model={modelKey+'.quarterStartingTer'} />
-                            <SimpleField label="Standard Starts" model={modelKey+'.quarterStartingStandardStarts'} />
-                            <SimpleField label="Transfer In" model={modelKey+'.quarterStartingXfer'} />
+                            <SimpleField label="Total Ever Registered" model={modelKey+'.quarterStartTer'} />
+                            <SimpleField label="Standard Starts" model={modelKey+'.quarterStartStandardStarts'} />
+                            <SimpleField label="Transfer In" model={modelKey+'.quarterStartXfer'} />
                         </div>
                     </div>
 
