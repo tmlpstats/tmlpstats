@@ -43,7 +43,7 @@ composer install --no-dev --optimize-autoloader
 
 echo ""
 echo "Running npm"
-npm install --production
+npm install
 
 echo ""
 echo "Running bower"
