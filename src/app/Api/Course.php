@@ -115,6 +115,9 @@ class Course extends ApiBase
 
         $course->save();
 
+        // Hacky. Make sure we have a data object for the new course so we can get it's data later
+        $this->getWeekData($course);
+
         return $course->load('center');
     }
 
@@ -175,8 +178,18 @@ class Course extends ApiBase
 
             foreach ($report->courseData as $courseData) {
                 // Store indexed here so we end up with only the most recent one for each course
-                $allCourses[$courseData->course->id] = $this->getWeekData($courseData->course, $report->reportingDate);
+                $allCourses[$courseData->courseId] = $this->getWeekData($courseData->course, $report->reportingDate);
             }
+        }
+
+        // Pick up any courses that are new this week
+        $thisReport = LocalReport::getStatsReport($center, $reportingDate, true);
+        foreach ($thisReport->courseData() as $courseData) {
+            if (isset($allCourses[$courseData->courseId])) {
+                continue;
+            }
+
+            $allCourses[$courseData->courseId] = $this->getWeekData($courseData->course, $report->reportingDate);
         }
 
         usort($allCourses, function ($a, $b) {
