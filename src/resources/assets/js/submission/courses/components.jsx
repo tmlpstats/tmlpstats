@@ -81,7 +81,7 @@ class CoursesIndexView extends CoursesBase {
                 <table className="table">
                     <thead>
                         <tr>
-                            <th>Date</th>
+                            <th style={{width: '8em'}}>Date</th>
                             <th className="data-point">Type</th>
                             <th>Location</th>
                             <th className="data-point">Total Ever Registered</th>
@@ -114,9 +114,16 @@ class CoursesEditView extends CoursesBase {
     saveCourseData(data) {
         console.log("Saved course data with data", data)
 
+        // Get the date for the week this data is for, not the week the original data was from
+        var now = new Date()
+        var reportingDate = new Date(data.statsReport.reportingDate)
+        if (reportingDate < now) {
+            reportingDate.setDate(reportingDate.getDate()+7);
+        }
+
         Api.Course.setWeekData({
             course: data.course.id,
-            reportingDate: data.statsReport.reportingDate,
+            reportingDate: reportingDate,
             data: {
                 quarterStartTer: data.quarterStartTer,
                 quarterStartStandardStarts: data.quarterStartStandardStarts,
@@ -140,11 +147,13 @@ class CoursesEditView extends CoursesBase {
         if (!this.props.loaded) {
             return <div>loading...</div>
         }
+
         var courseIndex = this.getCourseIndex(this.props.params.courseId)
         if (courseIndex === null){
             return <div>Course {this.props.params.courseId} not found????</div>
         }
         var modelKey = COURSES_FORM_KEY + `[${courseIndex}]`
+
         return (
             <div>
                 <h3>Edit Course</h3>

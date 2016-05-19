@@ -184,7 +184,7 @@ class Course extends ApiBase
 
         // Pick up any courses that are new this week
         $thisReport = LocalReport::getStatsReport($center, $reportingDate, true);
-        foreach ($thisReport->courseData as $courseData) {
+        foreach ($thisReport->courseData() as $courseData) {
             if (isset($allCourses[$courseData->courseId])) {
                 continue;
             }
