@@ -38,6 +38,7 @@
                 <li><a href="#teammemberstatus" data-toggle="tab">Team Members</a></li>
                 <li><a href="#tdosummary" data-toggle="tab"><span class="long">Training &amp; Development</span><span class="brief">TDO</span></a></li>
                 <li><a href="#potentials" data-toggle="tab">Potentials</a></li>
+                <li><a href="#withdrawreport" data-toggle="tab">Withdraws</a></li>
             </ul>
         </div>
         <div>
@@ -141,6 +142,11 @@
                     <div id="potentialsoverview-container"></div>
                     <div id="potentialsdetails-container"></div>
                 </div>
+                <div class="tab-pane" id="withdrawreport">
+                    <h3>Withdraw Report</h3>
+
+                    <div id="withdrawreport-container"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -155,6 +161,7 @@
             'regionsummary',
             'regionalstats',
             'statsreports',
+            'withdrawreport',
             'applicationsbystatus',
             'applicationsbycenter',
             'applicationsoverdue',
