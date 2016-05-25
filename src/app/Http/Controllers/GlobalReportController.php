@@ -261,6 +261,9 @@ class GlobalReportController extends ReportDispatchAbstractController
             case 'gaps':
                 $response = $this->getGaps($globalReport, $region);
                 break;
+            case 'withdrawreport':
+                $response = $this->getWithdrawReport($globalReport, $region);
+                break;
         }
 
         return $response;
@@ -1304,6 +1307,79 @@ class GlobalReportController extends ReportDispatchAbstractController
         }
 
         return view('globalreports.details.courses', compact('reportData', 'type', 'statsReports'));
+    }
+
+    public function getWithdrawReport(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        $teamMembers = App::make(Api\GlobalReport::class)->getClassListByCenter($globalReport, $region);
+
+        $reportData = [];
+        foreach ($teamMembers as $memberData) {
+
+            if ($memberData->xferOut) {
+                continue;
+            }
+
+            $center = $memberData->teamMember->center;
+            $centerName = $center->name;
+
+            $team = "team{$memberData->teamMember->teamYear}";
+
+            if (!isset($reportData[$centerName])) {
+                $reportData[$centerName] = [
+                    'programManager' => $center->getProgramManager(),
+                    'team1' => [
+                        'totalCount' => 0,
+                        'withdrawCount' => 0,
+                        'percent' => 0,
+                    ],
+                    'team2' => [
+                        'totalCount' => 0,
+                        'withdrawCount' => 0,
+                        'percent' => 0,
+                    ],
+                ];
+            }
+
+            $reportData[$centerName][$team]['totalCount']++;
+            if ($memberData->withdrawCodeId !== null && $memberData->withdrawCode->code !== 'WB') {
+                $reportData[$centerName][$team]['withdrawCount']++;
+            }
+        }
+        ksort($reportData);
+
+        $almostOutOfCompliance = [];
+
+        foreach ($reportData as $centerName => $data) {
+            $outOfCompliance = false;
+
+            foreach (['team1', 'team2'] as $team) {
+                $percent = ($data[$team]['withdrawCount'] / $data[$team]['totalCount']) * 100;
+                $reportData[$centerName][$team]['percent'] = $percent;
+
+                if (($data[$team]['totalCount'] >= 20 && $percent >= 5)
+                    || ($data[$team]['totalCount'] < 20 && $data[$team]['withdrawCount'] > 1)
+                ) {
+                    $outOfCompliance = true;
+                } else {
+                    $percent = (($data[$team]['withdrawCount'] + 1) / $data[$team]['totalCount']) * 100;
+
+                    if (($data[$team]['totalCount'] >= 20 && $percent >= 5)
+                        || ($data[$team]['totalCount'] < 20 && $data[$team]['withdrawCount'] > 1)
+                    ) {
+                        $almostOutOfCompliance[$centerName][$team] = $reportData[$centerName][$team];
+                        $almostOutOfCompliance[$centerName]['programManager'] = $reportData[$centerName]['programManager'];
+                    }
+                    unset($reportData[$centerName][$team]);
+                }
+            }
+
+            if (!$outOfCompliance) {
+                unset($reportData[$centerName]);
+            }
+        }
+
+        return view('globalreports.details.withdrawreport', compact('reportData', 'almostOutOfCompliance'));
     }
 
     public static function getUrl(Models\GlobalReport $globalReport, Models\Region $region)
