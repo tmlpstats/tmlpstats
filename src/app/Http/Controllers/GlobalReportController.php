@@ -1327,7 +1327,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
             if (!isset($reportData[$centerName])) {
                 $reportData[$centerName] = [
-                    'programManager' => $center->getProgramManager(),
+                    'classroomLeader' => $center->getClassroomLeader(),
                     'team1' => [
                         'totalCount' => 0,
                         'withdrawCount' => 0,
@@ -1368,7 +1368,7 @@ class GlobalReportController extends ReportDispatchAbstractController
                         || ($data[$team]['totalCount'] < 20 && $data[$team]['withdrawCount'] > 1)
                     ) {
                         $almostOutOfCompliance[$centerName][$team] = $reportData[$centerName][$team];
-                        $almostOutOfCompliance[$centerName]['programManager'] = $reportData[$centerName]['programManager'];
+                        $almostOutOfCompliance[$centerName]['classroomLeader'] = $reportData[$centerName]['classroomLeader'];
                     }
                     unset($reportData[$centerName][$team]);
                 }

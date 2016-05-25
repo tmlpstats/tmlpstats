@@ -23,7 +23,7 @@ $sections = [
     <th>Total Team</th>
     <th>Withdraws</th>
     <th>%</th>
-    <th>Program Manager</th>
+    <th>Classroom Leader</th>
 </tr>
 </thead>
 
@@ -35,7 +35,7 @@ $sections = [
     <td>{{ $data[$team]['totalCount'] }}</td>
     <td>{{ $data[$team]['withdrawCount'] }}</td>
     <td>{{ round($data[$team]['percent'], 1) }}%</td>
-    <td>{{ $data['programManager']->firstName }} {{ $data['programManager']->lastName[0] }}</td>
+    <td>{{ $data['classroomLeader']->firstName }} {{ $data['classroomLeader']->lastName[0] }}</td>
 </tr>
 @endif
 @endforeach
