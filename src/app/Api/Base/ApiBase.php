@@ -5,8 +5,6 @@ use Cache;
 use Illuminate\Auth\Guard;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\ParameterBag;
-use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Api\Parsers;
 
@@ -60,23 +58,7 @@ class ApiBase
      */
     public function parseInputs($data, $requiredParams = [])
     {
-        $output = [];
-        foreach ($data as $key => $value) {
-            if (!isset($this->validProperties[$key])) {
-                continue;
-            }
-
-            // The parsers expect data as ParameterBag objects
-            if (is_array($data)) {
-                $data = new ParameterBag($data);
-            }
-
-            $required = in_array($key, $requiredParams);
-
-            $parser = Parsers\Factory::build($this->validProperties[$key]['type']);
-            $output[$key] = $parser->run($data, $key, $required);
-        }
-        return $output;
+        return Parsers\DictInput::parse($this->validProperties, $data, $requiredParams);
     }
 
     /**
@@ -89,8 +71,8 @@ class ApiBase
     public function useCache($report)
     {
         return $this->cacheEnabled
-            && env('API_USE_CACHE', $this->cacheEnabled)
-            && !in_array($report, $this->dontCache);
+        && env('API_USE_CACHE', $this->cacheEnabled)
+        && !in_array($report, $this->dontCache);
     }
 
     /**
@@ -104,7 +86,7 @@ class ApiBase
      */
     public function getCacheTags($objects = [])
     {
-        $tags = ["api"];
+        $tags = ['api'];
         foreach ($objects as $name => $object) {
             if (!($object instanceof Model)) {
                 continue;
@@ -113,6 +95,7 @@ class ApiBase
             $basename = lcfirst(class_basename($object));
             $tags[] = "{$basename}{$object->id}";
         }
+
         return $tags;
     }
 
@@ -141,6 +124,7 @@ class ApiBase
             }
             $keyBase .= ":{$name}{$value}";
         }
+
         return md5($keyBase);
     }
 
@@ -162,6 +146,7 @@ class ApiBase
 
         $tags = $this->getCacheTags($objects);
         $cacheKey = $this->getCacheKey($objects);
+
         return Cache::tags($tags)->get($cacheKey);
     }
 
