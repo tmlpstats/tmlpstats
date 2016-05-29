@@ -7,7 +7,8 @@
     db_pass: SuperSecretCode!
     db_main: vagrant_dev_tmlpstats
     hostname: vagrant.tmlpstats.com
-  sudo: true
+  become: true
+  become_user: root
   tasks:
 
   - name: set hostname
@@ -28,6 +29,7 @@
       - sendmail
       - nodejs
       - npm
+      - libffi-dev
 
   # Puppet & Chef - Not Installed
 
