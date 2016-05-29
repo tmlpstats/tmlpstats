@@ -7,6 +7,11 @@ import { Form, SimpleField, AddOneLink } from '../../reusable/form_utils'
 import { COURSES_FORM_KEY } from './reducers'
 import { initializeCourses } from './actions'
 
+const courseTypeMap = {
+    'CAP': 'Access to Power',
+    'CPC': 'Power to Create'
+}
+
 class CoursesBase extends SubmissionBase {
     componentDidMount() {
         if (!this.props.loaded) {
@@ -24,18 +29,114 @@ class CoursesBase extends SubmissionBase {
 
     getCourseById(courseId) {
         return this.props.courses.find(
-            (course) => courseId == course.id
+            (course) => courseId == course.courseId
         )
     }
 
     getCourseIndex(courseId) {
         var courses = this.props.courses
         for (var i = 0; i < courses.length; i++) {
-            if (courses[i].id == courseId) {
+            if (courses[i].courseId == courseId) {
                 return i
             }
         }
         return null
+    }
+}
+
+class SaveButton extends React.Component {
+    render() {
+        if (this.props.hide) {
+            return <div />
+        }
+
+        return (
+            <div className="form-group">
+                <div className={this.props.className}>
+                    <button className="btn btn-primary" type="submit">Save</button>
+                </div>
+            </div>
+        )
+    }
+}
+
+class CoursesEditCourseView extends React.Component {
+    saveCourse(data) {
+        console.log("Saved course with data", data)
+
+        Api.Course.update({
+            course: data.courseId,
+            data: {
+                location: data.location,
+                startDate: data.startDate,
+                type: data.type
+            }
+        }).done((data) => {
+            this.props.router.push(this.baseUri() + '/courses')
+        })
+    }
+    render() {
+
+        return (
+            <div>
+                <Form className="form-horizontal" model={this.props.model} onSubmit={this.saveCourse.bind(this)}>
+                    <div className="panel panel-default">
+                        <div className="panel-heading">Course Details</div>
+                        <div className="panel-body">
+                            <SimpleField label="Start Date" model={this.props.model+'.startDate'} />
+                            <SimpleField label="Type" model={this.props.model+'.type'} customField={true}>
+                                <select className="form-control">
+                                    <option value="CAP">{courseTypeMap['CAP']}</option>
+                                    <option value="CPC">{courseTypeMap['CPC']}</option>
+                                </select>
+                            </SimpleField>
+                            <SimpleField label="Location" model={this.props.model+'.location'} />
+
+                            <SaveButton className="col-sm-offset-2 col-sm-8" />
+                        </div>
+                    </div>
+                </Form>
+            </div>
+        )
+    }
+}
+
+class CoursesShowCourseView extends React.Component {
+    render() {
+        var course = this.props.course
+
+        var location = course.location
+        if (!location) {
+            location = course.center.name
+        }
+
+        var type = courseTypeMap[course.type]
+        var startDate = moment(course.startDate)
+
+        return (
+            <table className="table table-condensed no-border">
+            <tbody>
+                <tr>
+                    <th style={{width: "8em"}}>Start Date</th>
+                    <td>{startDate.format("MMM D, YYYY")}</td></tr>
+                <tr>
+                    <th>Type</th>
+                    <td>{type}</td></tr>
+                <tr>
+                    <th>Location</th>
+                    <td>{location}</td>
+                </tr>
+            </tbody>
+            </table>
+        )
+    }
+}
+
+class CoursesCourseView extends React.Component {
+    render() {
+        return (
+            <CoursesEditCourseView model={this.props.model} course={this.props.course} />
+        )
     }
 }
 
@@ -47,20 +148,21 @@ class CoursesIndexView extends CoursesBase {
 
             this.props.courses.forEach((courseData) => {
 
-                var location = courseData.course.location
+                var location = courseData.location
                 if (!location) {
-                    location = courseData.course.center.name
+                    location = courseData.center.name
                 }
+                var type = courseTypeMap[courseData.type]
 
-                var date = moment(courseData.course.startDate)
+                var startDate = moment(courseData.startDate)
                 var ter = courseData.currentTer || '-'
                 var ss = courseData.currentStandardStarts || '-'
                 var xfer = courseData.currentXfer || '-'
 
                 courses.push(
-                    <tr key={courseData.id}>
-                        <td><Link to={`${baseUri}/courses/edit/${courseData.id}`}>{date.format("MMM D, YYYY")}</Link></td>
-                        <td className="data-point">{courseData.course.type}</td>
+                    <tr key={courseData.courseId}>
+                        <td><Link to={`${baseUri}/courses/edit/${courseData.courseId}`}>{startDate.format("MMM D, YYYY")}</Link></td>
+                        <td className="data-point">{type}</td>
                         <td>{location}</td>
                         <td className="data-point">{ter}</td>
                         <td className="data-point">{ss}</td>
@@ -97,20 +199,6 @@ class CoursesIndexView extends CoursesBase {
 }
 
 class CoursesEditView extends CoursesBase {
-    saveCourse(data) {
-        console.log("Saved course with data", data)
-
-        Api.Course.update({
-            course: data.course.id,
-            data: {
-                location: data.course.location,
-                startDate: data.course.startDate,
-                type: data.course.type
-            }
-        }).done((data) => {
-            this.props.router.push(this.baseUri() + '/courses')
-        })
-    }
     saveCourseData(data) {
         console.log("Saved course data with data", data)
 
@@ -121,24 +209,32 @@ class CoursesEditView extends CoursesBase {
             reportingDate.setDate(reportingDate.getDate()+7);
         }
 
+        var fields = [
+            'quarterStartTer',
+            'quarterStartStandardStarts',
+            'quarterStartXfer',
+            'currentTer',
+            'currentStandardStarts',
+            'currentXfer',
+            'completedStandardStarts',
+            'potentials',
+            'registrations',
+            'guestsPromised',
+            'guestsInvited',
+            'guestsConfirmed',
+            'guestsAttended',
+        ]
+
+        var weekData = {}
+
+        fields.forEach((field) => {
+            weekData[field] = data[field]
+        })
+
         Api.Course.setWeekData({
-            course: data.course.id,
+            course: data.courseId,
             reportingDate: reportingDate,
-            data: {
-                quarterStartTer: data.quarterStartTer,
-                quarterStartStandardStarts: data.quarterStartStandardStarts,
-                quarterStartXfer: data.quarterStartXfer,
-                currentTer: data.currentTer,
-                currentStandardStarts: data.currentStandardStarts,
-                currentXfer: data.currentXfer,
-                completedStandardStarts: data.completedStandardStarts,
-                potentials: data.potentials,
-                registrations: data.registrations,
-                guestsPromised: data.guestsPromised,
-                guestsInvited: data.guestsInvited,
-                guestsConfirmed: data.guestsConfirmed,
-                guestsAttended: data.guestsAttended
-            }
+            data: weekData
         }).done((data) => {
             this.props.router.push(this.baseUri() + '/courses')
         })
@@ -154,63 +250,57 @@ class CoursesEditView extends CoursesBase {
         }
         var modelKey = COURSES_FORM_KEY + `[${courseIndex}]`
 
+        var course = this.props.courses[courseIndex]
+        var now = moment.utc()
+        var startDate = moment.utc(course.startDate)
+        var courseReportDate = moment.utc(startDate).add(6, 'days')
+
+        var dayDiff = now.diff(courseReportDate, 'days')
+
+        var currentDisabled = false
+        var guestsDisabled = false
+        var qstartDisabled = true
+        var completionDisabled = true
+
+        if (dayDiff === 0) {
+            // We're on the week after the course
+            completionDisabled = false
+        } else if (dayDiff > 0) {
+            // The course happened more than 7 days ago
+            currentDisabled = true
+            guestsDisabled = true
+        }
+
         return (
             <div>
                 <h3>Edit Course</h3>
-                <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourse.bind(this)}>
-                    <div className="panel panel-default">
-                        <div className="panel-heading">Course Details</div>
-                        <div className="panel-body">
-                            <SimpleField label="Start Date" model={modelKey+'.course.startDate'} />
-                            <SimpleField label="Type" model={modelKey+'.course.type'} customField={true}>
-                                <select className="form-control">
-                                    <option value="CAP">Access to Power</option>
-                                    <option value="CPC">Power to Create</option>
-                                </select>
-                            </SimpleField>
-                            <SimpleField label="Location" model={modelKey+'.course.location'} />
-
-                            <div className="form-group">
-                                <div className="col-sm-offset-2 col-sm-8">
-                                    <button className="btn btn-primary" type="submit">Save</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </Form>
+                <CoursesCourseView model={modelKey} course={course} />
 
                 <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourseData.bind(this)}>
 
                 <div className="row">
                 <div className="col-md-6">
                     <div className="panel panel-default">
-                        <div className="panel-heading">Quarter Starting</div>
+                        <div className="panel-heading">Current</div>
                         <div className="panel-body">
-                            <SimpleField label="Total Ever Registered" model={modelKey+'.quarterStartTer'} labelSize="col-md-4" divSize="col-md-6" />
-                            <SimpleField label="Standard Starts" model={modelKey+'.quarterStartStandardStarts'} labelSize="col-md-4" divSize="col-md-6" />
-                            <SimpleField label="Transfer In" model={modelKey+'.quarterStartXfer'} labelSize="col-md-4" divSize="col-md-6" />
+                            <SimpleField label="Total Ever Registered" model={modelKey+'.currentTer'} labelClass="col-md-4" divClass="col-md-6" disabled={currentDisabled} />
+                            <SimpleField label="Standard Starts" model={modelKey+'.currentStandardStarts'} labelClass="col-md-4" divClass="col-md-6" disabled={currentDisabled} />
+                            <SimpleField label="Transfer In" model={modelKey+'.currentXfer'} labelClass="col-md-4" divClass="col-md-6" disabled={currentDisabled} />
 
-                            <div className="form-group">
-                                <div className="col-sm-offset-5 col-sm-5">
-                                    <button className="btn btn-primary" type="submit">Save</button>
-                                </div>
-                            </div>
+                            <SaveButton hide={currentDisabled} className="col-sm-offset-4 col-sm-6" />
                         </div>
                     </div>
                 </div>
                 <div className="col-md-6">
                     <div className="panel panel-default">
-                        <div className="panel-heading">Current</div>
+                        <div className="panel-heading">Guest Game</div>
                         <div className="panel-body">
-                            <SimpleField label="Total Ever Registered" model={modelKey+'.currentTer'} labelSize="col-md-4" divSize="col-md-6" />
-                            <SimpleField label="Standard Starts" model={modelKey+'.currentStandardStarts'} labelSize="col-md-4" divSize="col-md-6" />
-                            <SimpleField label="Transfer In" model={modelKey+'.currentXfer'} labelSize="col-md-4" divSize="col-md-6" />
+                            <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-4" divClass="col-md-6" disabled={guestsDisabled} />
+                            <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-4" divClass="col-md-6" disabled={guestsDisabled} />
+                            <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-4" divClass="col-md-6" disabled={guestsDisabled} />
+                            <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} labelClass="col-md-4" divClass="col-md-6" disabled={guestsDisabled} />
 
-                            <div className="form-group">
-                                <div className="col-sm-offset-5 col-sm-5">
-                                    <button className="btn btn-primary" type="submit">Save</button>
-                                </div>
-                            </div>
+                            <SaveButton hide={guestsDisabled} className="col-sm-offset-4 col-sm-6" />
                         </div>
                     </div>
                 </div>
@@ -222,32 +312,23 @@ class CoursesEditView extends CoursesBase {
                     <div className="panel panel-default">
                         <div className="panel-heading">Completion</div>
                         <div className="panel-body">
-                            <SimpleField label="Standard Starts" model={modelKey+'.completedStandardStarts'} labelSize="col-md-4" divSize="col-md-6" />
-                            <SimpleField label="Potentials" model={modelKey+'.potentials'} labelSize="col-md-4" divSize="col-md-6" />
-                            <SimpleField label="Registrations" model={modelKey+'.registrations'} labelSize="col-md-4" divSize="col-md-6" />
+                            <SimpleField label="Standard Starts" model={modelKey+'.completedStandardStarts'} labelClass="col-md-4" divClass="col-md-6" disabled={completionDisabled} />
+                            <SimpleField label="Potentials" model={modelKey+'.potentials'} labelClass="col-md-4" divClass="col-md-6" disabled={completionDisabled} />
+                            <SimpleField label="Registrations" model={modelKey+'.registrations'} labelClass="col-md-4" divClass="col-md-6" disabled={completionDisabled} />
 
-                            <div className="form-group">
-                                <div className="col-sm-offset-5 col-sm-5">
-                                    <button className="btn btn-primary" type="submit">Save</button>
-                                </div>
-                            </div>
+                            <SaveButton hide={completionDisabled} className="col-sm-offset-4 col-sm-6" />
                         </div>
                     </div>
                 </div>
                 <div className="col-md-6">
                     <div className="panel panel-default">
-                        <div className="panel-heading">Guest Game</div>
+                        <div className="panel-heading">Quarter Starting</div>
                         <div className="panel-body">
-                            <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelSize="col-md-4" divSize="col-md-6" />
-                            <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelSize="col-md-4" divSize="col-md-6" />
-                            <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelSize="col-md-4" divSize="col-md-6" />
-                            <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} labelSize="col-md-4" divSize="col-md-6" />
+                            <SimpleField label="Total Ever Registered" model={modelKey+'.quarterStartTer'} labelClass="col-md-4" divClass="col-md-6" disabled={qstartDisabled} />
+                            <SimpleField label="Standard Starts" model={modelKey+'.quarterStartStandardStarts'} labelClass="col-md-4" divClass="col-md-6" disabled={qstartDisabled} />
+                            <SimpleField label="Transfer In" model={modelKey+'.quarterStartXfer'} labelClass="col-md-4" divClass="col-md-6" disabled={qstartDisabled} />
 
-                            <div className="form-group">
-                                <div className="col-sm-offset-5 col-sm-5">
-                                    <button className="btn btn-primary" type="submit">Save</button>
-                                </div>
-                            </div>
+                            <SaveButton hide={qstartDisabled} className="col-sm-offset-4 col-sm-6" />
                         </div>
                     </div>
                 </div>
@@ -265,9 +346,9 @@ class CoursesAddView extends CoursesBase {
         Api.Course.create({
             data: {
                 center: this.props.params.centerId,
-                location: data.course.location,
-                startDate: data.course.startDate,
-                type: data.course.type
+                location: data.location,
+                startDate: data.startDate,
+                type: data.type
             }
         }).done((data) => {
             this.loadCourses();
@@ -285,14 +366,14 @@ class CoursesAddView extends CoursesBase {
             <div>
                 <h3>Add Course</h3>
                 <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourse.bind(this)}>
-                    <SimpleField label="Start Date" model={modelKey+'.course.startDate'} />
-                    <SimpleField label="Type" model={modelKey+'.course.type'} customField={true}>
+                    <SimpleField label="Start Date" model={modelKey+'.startDate'} />
+                    <SimpleField label="Type" model={modelKey+'.type'} customField={true}>
                         <select className="form-control">
                             <option value="CAP">Access to Power</option>
                             <option value="CPC">Power to Create</option>
                         </select>
                     </SimpleField>
-                    <SimpleField label="Location" model={modelKey+'.course.location'} />
+                    <SimpleField label="Location" model={modelKey+'.location'} />
 
                     <div className="form-group">
                         <div className="col-sm-offset-2 col-sm-8">
