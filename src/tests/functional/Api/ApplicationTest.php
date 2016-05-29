@@ -5,7 +5,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use TmlpStats as Models;
-use TmlpStats\Api\Exceptions as ApiExceptions;
+use TmlpStats\Domain;
 use TmlpStats\Tests\Functional\FunctionalTestAbstract;
 
 class ApplicationTest extends FunctionalTestAbstract
@@ -27,11 +27,11 @@ class ApplicationTest extends FunctionalTestAbstract
         $this->nextQuarter = Models\Quarter::year(2016)->quarterNumber(2)->first();
 
         $this->report = Models\StatsReport::firstOrCreate([
-            'center_id'      => $this->center->id,
-            'quarter_id'     => $this->quarter->id,
+            'center_id' => $this->center->id,
+            'quarter_id' => $this->quarter->id,
             'reporting_date' => '2016-04-15',
-            'submitted_at'   => null,
-            'version'        => 'test',
+            'submitted_at' => null,
+            'version' => 'test',
         ]);
 
         $this->teamMember = factory(Models\TeamMember::class)->create([
@@ -43,8 +43,8 @@ class ApplicationTest extends FunctionalTestAbstract
 
         $this->applicationData = Models\TmlpRegistrationData::firstOrCreate([
             'tmlp_registration_id' => $this->application->id,
-            'stats_report_id'      => $this->report->id,
-            'reg_date'             => $this->application->regDate,
+            'stats_report_id' => $this->report->id,
+            'reg_date' => $this->application->regDate,
         ]);
     }
 
@@ -55,12 +55,12 @@ class ApplicationTest extends FunctionalTestAbstract
     {
         $parameters = [
             'method' => 'Application.create',
-            'data'   => [
+            'data' => [
                 'firstName' => $this->faker->firstName(),
-                'lastName'  => $this->faker->lastName(),
-                'center'    => $this->center->id,
-                'teamYear'  => 2,
-                'regDate'   => '2016-04-15',
+                'lastName' => $this->faker->lastName(),
+                'center' => $this->center->id,
+                'teamYear' => 2,
+                'regDate' => '2016-04-15',
             ],
         ];
 
@@ -68,18 +68,18 @@ class ApplicationTest extends FunctionalTestAbstract
         $lastApplicationId = Models\TmlpRegistration::count();
 
         $expectedResponse = [
-            'id'         => $lastApplicationId + 1,
-            'regDate'    => "{$parameters['data']['regDate']} 00:00:00",
-            'teamYear'   => $parameters['data']['teamYear'],
-            'personId'   => $lastPersonId + 1,
+            'id' => $lastApplicationId + 1,
+            'regDate' => "{$parameters['data']['regDate']} 00:00:00",
+            'teamYear' => $parameters['data']['teamYear'],
+            'personId' => $lastPersonId + 1,
             'isReviewer' => false,
-            'person'     => [
-                'id'           => $lastPersonId + 1,
-                'firstName'    => $parameters['data']['firstName'],
-                'lastName'     => $parameters['data']['lastName'],
-                'phone'        => null,
-                'email'        => null,
-                'centerId'     => $this->center->id,
+            'person' => [
+                'id' => $lastPersonId + 1,
+                'firstName' => $parameters['data']['firstName'],
+                'lastName' => $parameters['data']['lastName'],
+                'phone' => null,
+                'email' => null,
+                'centerId' => $this->center->id,
                 'unsubscribed' => false,
             ],
         ];
@@ -99,11 +99,11 @@ class ApplicationTest extends FunctionalTestAbstract
             [
                 [ // Request
                     'data.isReviewer' => true,
-                    'data.phone'      => '555-555-1234',
-                    'data.email'      => 'peter.tests.a.lot@tmlpstats.com',
+                    'data.phone' => '555-555-1234',
+                    'data.email' => 'peter.tests.a.lot@tmlpstats.com',
                 ],
                 [ // Response
-                    'isReviewer'   => true,
+                    'isReviewer' => true,
                     'person.phone' => '555-555-1234',
                     'person.email' => 'peter.tests.a.lot@tmlpstats.com',
                 ],
@@ -114,11 +114,11 @@ class ApplicationTest extends FunctionalTestAbstract
     public function testUpdate()
     {
         $parameters = [
-            'method'      => 'Application.update',
+            'method' => 'Application.update',
             'application' => $this->application->id,
             'data' => [
-                'phone'    => '555-555-5678',
-                'email'    => 'testers@tmlpstats.com',
+                'phone' => '555-555-5678',
+                'email' => 'testers@tmlpstats.com',
                 'lastName' => 'McTester',
             ],
         ];
@@ -137,16 +137,16 @@ class ApplicationTest extends FunctionalTestAbstract
     public function testGetWeekData($reportingDate = null)
     {
         $parameters = [
-            'method'        => 'Application.getWeekData',
-            'application'   => $this->application->id,
+            'method' => 'Application.getWeekData',
+            'application' => $this->application->id,
             'reportingDate' => $reportingDate,
         ];
 
         if (!$reportingDate) {
             // Passed into api as null, but will resolve to this
             $reportingDate = Carbon::parse('this friday', $this->center->timezone)
-                                   ->startOfDay()
-                                   ->toDateString();
+                ->startOfDay()
+                ->toDateString();
         }
 
         $report = $this->report->toArray();
@@ -160,14 +160,14 @@ class ApplicationTest extends FunctionalTestAbstract
         }
 
         $expectedResponse = [
-            'tmlpRegistrationId'  => $this->application->id,
-            'id'                  => $applicationDataId,
-            'registration'        => $this->application->toArray(),
-            'incomingQuarter'     => null,
-            'withdrawCode'        => null,
+            'tmlpRegistrationId' => $this->application->id,
+            'id' => $applicationDataId,
+            'registration' => $this->application->toArray(),
+            'incomingQuarter' => null,
+            'withdrawCode' => null,
             'committedTeamMember' => null,
-            'statsReportId'       => $report['id'],
-            'statsReport'         => $report,
+            'statsReportId' => $report['id'],
+            'statsReport' => $report,
         ];
 
         $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
@@ -188,12 +188,12 @@ class ApplicationTest extends FunctionalTestAbstract
     public function testSetWeekData($reportingDate)
     {
         $parameters = [
-            'method'        => 'Application.setWeekData',
-            'application'   => $this->application->id,
+            'method' => 'Application.setWeekData',
+            'application' => $this->application->id,
             'reportingDate' => $reportingDate,
-            'data'          => [
-                'appOutDate'            => '2016-04-17',
-                'apprDate'              => '2016-04-23',
+            'data' => [
+                'appOutDate' => '2016-04-17',
+                'apprDate' => '2016-04-23',
                 'committedTeamMemberId' => 1,
             ],
         ];
@@ -209,17 +209,13 @@ class ApplicationTest extends FunctionalTestAbstract
         }
 
         $expectedResponse = [
-            'tmlpRegistrationId'  => $this->application->id,
-            'id'                  => $applicationDataId,
-            'appOutDate'          => "{$parameters['data']['appOutDate']} 00:00:00",
-            'apprDate'            => "{$parameters['data']['apprDate']} 00:00:00",
-            'regDate'             => $this->application->regDate,
-            'registration'        => $this->application->toArray(),
-            'incomingQuarter'     => null,
-            'withdrawCode'        => null,
+            'tmlpRegistrationId' => $this->application->id,
+            'appOutDate' => "{$parameters['data']['appOutDate']}",
+            'apprDate' => "{$parameters['data']['apprDate']}",
+            'regDate' => $this->application->regDate->toDateString(),
+            'incomingQuarter' => null,
+            'withdrawCode' => null,
             'committedTeamMember' => null,
-            'statsReportId'       => $report['id'],
-            'statsReport'         => $report,
         ];
 
         $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
@@ -238,6 +234,8 @@ class ApplicationTest extends FunctionalTestAbstract
      */
     public function testAllForCenter($reportingDate = null)
     {
+        $this->markTestIncomplete('Test needs to match real-world expectations and edge cases which may not yet be known');
+
         $parameters = [
             'method' => 'Application.allForCenter',
             'center' => $this->center->id,
@@ -250,19 +248,19 @@ class ApplicationTest extends FunctionalTestAbstract
         // Last Week's Report
         //
         $lastWeeksReport = Models\StatsReport::create([
-            'center_id'      => $this->center->id,
-            'quarter_id'     => $this->quarter->id,
+            'center_id' => $this->center->id,
+            'quarter_id' => $this->quarter->id,
             'reporting_date' => '2016-04-08',
-            'submitted_at'   => '2016-04-08 18:55:00',
-            'version'        => 'test',
+            'submitted_at' => '2016-04-08 18:55:00',
+            'version' => 'test',
         ]);
 
         // Existing application's data for last week
         $app1LastWeekData = Models\TmlpRegistrationData::create([
             'tmlp_registration_id' => $this->application->id,
-            'stats_report_id'      => $lastWeeksReport->id,
-            'reg_date'             => $this->application->regDate,
-            'comment'              => 'Last week',
+            'stats_report_id' => $lastWeeksReport->id,
+            'reg_date' => $this->application->regDate,
+            'comment' => 'Last week',
         ]);
 
         // New person. Only has data last week
@@ -271,9 +269,9 @@ class ApplicationTest extends FunctionalTestAbstract
         ]);
         $app2LastWeekData = Models\TmlpRegistrationData::create([
             'tmlp_registration_id' => $app2->id,
-            'stats_report_id'      => $lastWeeksReport->id,
-            'reg_date'             => $app2->regDate,
-            'comment'              => 'Last week',
+            'stats_report_id' => $lastWeeksReport->id,
+            'reg_date' => $app2->regDate,
+            'comment' => 'Last week',
         ]);
 
         // Setup the global reports
@@ -281,7 +279,6 @@ class ApplicationTest extends FunctionalTestAbstract
             'reporting_date' => '2016-04-08',
         ]);
         $lastWeeksGlobalReport->addCenterReport($lastWeeksReport);
-
 
         //
         // This Week's Report
@@ -298,19 +295,19 @@ class ApplicationTest extends FunctionalTestAbstract
         // Next Week's Report
         //
         $nextWeeksReport = Models\StatsReport::create([
-            'center_id'      => $this->center->id,
-            'quarter_id'     => $this->quarter->id,
+            'center_id' => $this->center->id,
+            'quarter_id' => $this->quarter->id,
             'reporting_date' => '2016-04-22',
-            'submitted_at'   => '2016-04-22 18:55:00',
-            'version'        => 'test',
+            'submitted_at' => '2016-04-22 18:55:00',
+            'version' => 'test',
         ]);
 
         // Existing application's data for last week
         $app1NextWeekData = Models\TmlpRegistrationData::create([
             'tmlp_registration_id' => $this->application->id,
-            'stats_report_id'      => $nextWeeksReport->id,
-            'reg_date'             => $this->application->regDate,
-            'comment'              => 'Next week',
+            'stats_report_id' => $nextWeeksReport->id,
+            'reg_date' => $this->application->regDate,
+            'comment' => 'Next week',
         ]);
 
         $app3 = factory(Models\TmlpRegistration::class)->create([
@@ -318,9 +315,9 @@ class ApplicationTest extends FunctionalTestAbstract
         ]);
         $app3NextWeekData = Models\TmlpRegistrationData::create([
             'tmlp_registration_id' => $app3->id,
-            'stats_report_id'      => $nextWeeksReport->id,
-            'reg_date'             => $app3->regDate,
-            'comment'              => 'Next week',
+            'stats_report_id' => $nextWeeksReport->id,
+            'reg_date' => $app3->regDate,
+            'comment' => 'Next week',
         ]);
 
         // Setup the global reports
@@ -341,22 +338,24 @@ class ApplicationTest extends FunctionalTestAbstract
         if ($reportingDate) {
             // Reporting Date provided
             $expectedResponse = [
-                $this->applicationData->load('registration.person', 'statsReport')->toArray(),
-                $app2LastWeekData->load('registration.person', 'statsReport')->toArray(),
+                Domain\TeamApplication::fromModel($this->applicationData),
+                Domain\TeamApplication::fromModel($app2LastWeekData),
             ];
         } else {
             // Reporting Date not provided
             $expectedResponse = [
-                $app1NextWeekData->load('registration.person', 'statsReport')->toArray(),
-                $app2LastWeekData->load('registration.person', 'statsReport')->toArray(),
-                $app3NextWeekData->load('registration.person', 'statsReport')->toArray(),
+                Domain\TeamApplication::fromModel($app1NextWeekData),
+                Domain\TeamApplication::fromModel($app2LastWeekData),
+                Domain\TeamApplication::fromModel($app3NextWeekData),
             ];
         }
 
+        $expectedResponse = json_decode(json_encode($expectedResponse), true);
+
         usort($expectedResponse, function ($a, $b) {
             return strcmp(
-                $a['registration']['person']['firstName'],
-                $b['registration']['person']['firstName']
+                $a['firstName'],
+                $b['firstName']
             );
         });
 
@@ -367,7 +366,7 @@ class ApplicationTest extends FunctionalTestAbstract
     {
         return [
             ['2016-04-15'], // Existing report
-            [],// No report
+            [], // No report
         ];
     }
 }

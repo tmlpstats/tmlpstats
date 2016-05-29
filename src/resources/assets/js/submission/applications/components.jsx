@@ -1,37 +1,28 @@
 import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
 
 import { SubmissionBase, React } from '../base_components'
 import { Form, SimpleField } from '../../reusable/form_utils'
 import { APPLICATIONS_FORM_KEY } from './reducers'
-import { initializeApplications } from './actions'
+import { loadApplications } from './actions'
 
 class ApplicationsBase extends SubmissionBase {
     componentDidMount() {
-        if (!this.props.loaded) {
-            this.loadApplications()
+        if (this.props.loading.state == 'new') {
+            this.props.dispatch(loadApplications(this.props.params.centerId))
         }
-    }
-
-    loadApplications() {
-        return Api.Application.allForCenter({
-            center: this.props.params.centerId
-        }).done((data) => {
-            this.props.initializeApplications(data)
-        })
     }
 
     getAppById(appId) {
         return this.props.applications.find(
-            (app) => appId == app.id
+            (app) => appId == app.tmlpRegistrationId
         )
     }
 
     getAppIndex(appId) {
         var apps = this.props.applications
         for (var i = 0; i < apps.length; i++) {
-            if (apps[i].id == appId) {
+            if (apps[i].tmlpRegistrationId == appId) {
                 return i
             }
         }
@@ -41,25 +32,20 @@ class ApplicationsBase extends SubmissionBase {
 
 class ApplicationsIndexView extends ApplicationsBase {
     render() {
-        var apps = []
-        if (this.props.loaded) {
-            var baseUri = this.baseUri()
-
-            this.props.applications.forEach((app) => {
-                var person = app.registration.person
-                apps.push(
-                    <tr key={app.id}>
-                        <td><Link to={`${baseUri}/applications/edit/${app.id}`}>{person.firstName} {person.lastName}</Link></td>
-                        <td>{app.registration.regDate}</td>
-                    </tr>
-                )
-            })
-        } else {
-            apps.push(
-                <tr key="applications-loading"><td colSpan="3">Loading....</td></tr>
-            )
+        if (!this.props.loading.loaded) {
+            return <div>Loading...</div>
         }
+        var apps = []
+        var baseUri = this.baseUri()
 
+        this.props.applications.forEach((app) => {
+            apps.push(
+                <tr key={app.tmlpRegistrationId}>
+                    <td><Link to={`${baseUri}/applications/edit/${app.tmlpRegistrationId}`}>{app.firstName} {app.lastName}</Link></td>
+                    <td>{app.regDate}</td>
+                </tr>
+            )
+        })
         return (
             <div>
                 <h3>Manage Registrations</h3>
@@ -73,20 +59,19 @@ class ApplicationsIndexView extends ApplicationsBase {
                     <tbody>{apps}</tbody>
                 </table>
             </div>
-        );
+        )
     }
 }
 
 
 class ApplicationsEditView extends ApplicationsBase {
     saveApp(data) {
-        console.log("Saved with data", data)
         // TODO an AJAX call for the save event
         this.props.router.push(this.baseUri() + '/applications')
     }
     render() {
-        if (!this.props.loaded) {
-            return <div>loading...</div>
+        if (!this.props.loading.loaded) {
+            return <div>{this.props.loading.state}...</div>
         }
         var appIndex = this.getAppIndex(this.props.params.appId)
         if (appIndex === null){
@@ -97,9 +82,9 @@ class ApplicationsEditView extends ApplicationsBase {
             <div>
                 <h3>Edit Application</h3>
                 <Form className="form-horizontal" model={modelKey} onSubmit={this.saveApp.bind(this)}>
-                    <SimpleField label="First Name" model={modelKey+'.registration.person.firstName'} />
-                    <SimpleField label="Last Name" model={modelKey+'.registration.person.lastName'} />
-                    <SimpleField label="Team Year" model={modelKey+'.registration.teamYear'} />
+                    <SimpleField label="First Name" model={modelKey+'.firstName'} />
+                    <SimpleField label="Last Name" model={modelKey+'.lastName'} />
+                    <SimpleField label="Team Year" model={modelKey+'.teamYear'} />
                     <SimpleField label="" model={modelKey+'.regDate'} />
                     <SimpleField label="Comment" model={modelKey+'.comment'} customField={true}>
                         <textarea className="form-control" rows="3"></textarea>
@@ -117,9 +102,7 @@ class ApplicationsEditView extends ApplicationsBase {
 
 const mapStateToProps = (state) => state.submission.application
 
-const mapDispatchToProps = (dispatch) => bindActionCreators({ initializeApplications }, dispatch)
-
-const connector = connect(mapStateToProps, mapDispatchToProps)
+const connector = connect(mapStateToProps)
 
 export const ApplicationsIndex = connector(ApplicationsIndexView)
 export const ApplicationsEdit = connector(withRouter(ApplicationsEditView))

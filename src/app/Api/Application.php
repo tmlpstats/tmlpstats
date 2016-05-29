@@ -4,101 +4,23 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\ApiBase;
 use TmlpStats\Api\Exceptions as ApiExceptions;
+use TmlpStats\Domain;
 
 /**
  * Applications
  */
 class Application extends ApiBase
 {
-    protected $validProperties = [
-        'firstName' => [
-            'owner' => 'person',
-            'type'  => 'string',
-        ],
-        'lastName' => [
-            'owner' => 'person',
-            'type'  => 'string',
-        ],
-        'phone' => [
-            'owner' => 'person',
-            'type'  => 'string',
-        ],
-        'email' => [
-            'owner' => 'person',
-            'type'  => 'string',
-        ],
-        'center' => [
-            'owner' => 'person',
-            'type'  => 'Center',
-        ],
-        'unsubscribed' => [
-            'owner' => 'person',
-            'type'  => 'bool',
-        ],
-        'teamYear' => [
-            'owner' => 'application',
-            'type'  => 'int',
-        ],
-        'regDate' => [
-            'owner' => 'application',
-            'type'  => 'date',
-        ],
-        'isReviewer' => [
-            'owner' => 'application',
-            'type'  => 'bool',
-        ],
-        'appOutDate' => [
-            'owner' => 'applicationData',
-            'type'  => 'date',
-        ],
-        'appInDate' => [
-            'owner' => 'applicationData',
-            'type'  => 'date',
-        ],
-        'apprDate' => [
-            'owner' => 'applicationData',
-            'type'  => 'date',
-        ],
-        'wdDate' => [
-            'owner' => 'applicationData',
-            'type'  => 'date',
-        ],
-        'withdrawCode' => [
-            'owner' => 'applicationData',
-            'type'  => 'WithdrawCode',
-        ],
-        'committedTeamMember' => [
-            'owner' => 'applicationData',
-            'type'  => 'TeamMember',
-        ],
-        'incomingQuarter' => [
-            'owner' => 'applicationData',
-            'type'  => 'Quarter',
-        ],
-        'comment' => [
-            'owner' => 'applicationData',
-            'type'  => 'string',
-        ],
-        'travel' => [
-            'owner' => 'applicationData',
-            'type'  => 'bool',
-        ],
-        'room' => [
-            'owner' => 'applicationData',
-            'type'  => 'bool',
-        ],
-    ];
-
     public function create(array $data)
     {
-        $data = $this->parseInputs($data, ['firstName', 'lastName', 'center', 'teamYear', 'regDate']);
+        $input = Domain\TeamApplication::fromArray($data, ['firstName', 'lastName', 'center', 'teamYear', 'regDate']);
 
         $application = Models\TmlpRegistration::firstOrNew([
-            'first_name' => $data['firstName'],
-            'last_name'  => $data['lastName'],
-            'center_id'  => $data['center']->id,
-            'team_year'  => $data['teamYear'],
-            'reg_date'   => $data['regDate'],
+            'first_name' => $input->firstName,
+            'last_name' => $input->lastName,
+            'center_id' => $input->center->id,
+            'team_year' => $input->teamYear,
+            'reg_date' => $input->regDate,
         ]);
 
         if (isset($data['email'])) {
@@ -121,20 +43,8 @@ class Application extends ApiBase
 
     public function update(Models\TmlpRegistration $application, array $data)
     {
-        $data = $this->parseInputs($data);
-
-        foreach ($data as $property => $value) {
-            if ($this->validProperties[$property]['owner'] == 'application') {
-                if ($application->$property !== $value) {
-                    $application->$property = $value;
-                }
-            }
-            if ($this->validProperties[$property]['owner'] == 'person') {
-                if ($application->person->$property !== $value) {
-                    $application->person->$property = $value;
-                }
-            }
-        }
+        $teamApp = Domain\TeamApplication::fromArray($data);
+        $teamApp->fillModel(null, $application);
 
         if ($application->person->isDirty()) {
             $application->person->save();
@@ -152,32 +62,31 @@ class Application extends ApiBase
             $reportingDate = LocalReport::getReportingDate($center);
         } else if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
             $dateStr = $reportingDate->toDateString();
-            throw new ApiExceptions\BadRequestException("Reporting date must be a Friday.");
+            throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
         }
 
         $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
 
         $reports = Models\StatsReport::byCenter($center)
-                                     ->byQuarter($quarter)
-                                     ->official()
-                                     ->orderBy('reporting_date', 'asc')
-                                     ->with('tmlpRegistrationData')
-                                     ->get();
+            ->byQuarter($quarter)
+            ->official()
+            ->where('reporting_date', '<=', $reportingDate)
+            ->orderBy('reporting_date', 'asc')
+            ->with('tmlpRegistrationData')
+            ->get();
 
         $allApplications = [];
-        foreach ($reports as $report) {
-            if ($report->reportingDate->gt($reportingDate)) {
-                continue;
-            }
 
+        foreach ($reports as $report) {
             foreach ($report->tmlpRegistrationData as $app) {
                 // Store indexed here so we end up with only the most recent one for each application
-                $allApplications[$app->registration->id] = $this->getWeekData($app->registration, $report->reportingDate);
+                //$data = $this->getWeekData($app->registration, $report->reportingDate);
+                $allApplications[$app->registration->id] = Domain\TeamApplication::fromModel($app);
             }
         }
 
         usort($allApplications, function ($a, $b) {
-            return strcmp($a->registration->person->firstName, $b->registration->person->firstName);
+            return strcmp($a->firstName, $b->firstName);
         });
 
         return array_values($allApplications);
@@ -189,7 +98,7 @@ class Application extends ApiBase
             $reportingDate = LocalReport::getReportingDate($application->center);
         } else if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
             $dateStr = $reportingDate->toDateString();
-            throw new ApiExceptions\BadRequestException("Reporting date must be a Friday.");
+            throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
         }
 
         $getUnsubmitted = $reportingDate->gte(Carbon::now($application->center->timezone)->startOfDay());
@@ -198,23 +107,23 @@ class Application extends ApiBase
 
         $response = Models\TmlpRegistrationData::firstOrNew([
             'tmlp_registration_id' => $application->id,
-            'stats_report_id'      => $report->id,
+            'stats_report_id' => $report->id,
         ]);
 
         // If we're creating a new data object now, pre-populate it with data from last week
         if (!$response->exists) {
 
             $lastWeeksReport = Models\StatsReport::byCenter($application->center)
-                                                 ->reportingDate($reportingDate->copy()->subWeek())
-                                                 ->official()
-                                                 ->first();
+                ->reportingDate($reportingDate->copy()->subWeek())
+                ->official()
+                ->first();
 
             // It's the center's first official report or they didn't submit last week
             $lastWeeksData = null;
             if ($lastWeeksReport) {
                 $lastWeeksData = Models\TmlpRegistrationData::byStatsReport($lastWeeksReport)
-                                                            ->ByRegistration($application)
-                                                            ->first();
+                    ->ByRegistration($application)
+                    ->first();
             }
 
             if ($lastWeeksData) {
@@ -231,49 +140,30 @@ class Application extends ApiBase
     {
         if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
             $dateStr = $reportingDate->toDateString();
-            throw new ApiExceptions\BadRequestException("Reporting date must be a Friday.");
+            throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
         }
-
-        $data = $this->parseInputs($data);
 
         $report = LocalReport::getStatsReport($application->center, $reportingDate);
 
         $applicationData = Models\TmlpRegistrationData::firstOrCreate([
             'tmlp_registration_id' => $application->id,
-            'stats_report_id'      => $report->id,
+            'stats_report_id' => $report->id,
         ]);
-
-        foreach ($data as $property => $value) {
-            if ($this->validProperties[$property]['owner'] == 'applicationData') {
-                if (($applicationData->$property instanceof Carbon) && Carbon::parse($value)
-                                                                             ->ne($applicationData->$property)
-                ) {
-                    $applicationData->$property = Carbon::parse($value)->startOfDay();
-                } else if ($applicationData->$property !== $value) {
-                    $applicationData->$property = $value;
-                }
-            } else if ($property === 'regDate') {
-                if ($applicationData->$property !== $value || $application->$property !== $value) {
-                    $applicationData->$property = $value;
-                    $application->$property = $value;
-                    $application->save();
-                }
-            }
-        }
 
         if (!$applicationData->statsReportId) {
             $applicationData->statsReportId = $report->id;
         }
+        $teamApp = Domain\TeamApplication::fromModel($applicationData, $application);
+        $teamApp->tmlpRegistrationId = $application->id;
+        $teamApp->clearSetValues();
 
-        if ($applicationData->regDate != $application->regDate) {
-            $applicationData->regDate = $application->regDate;
-        }
+        // Now insert our newly changed data, validating and coercing too
+        $teamApp->fillFromArray($data);
+        $teamApp->fillModel($applicationData, $application);
 
-        if ($applicationData->isDirty()) {
-            $applicationData->save();
-        }
+        $applicationData->save();
+        $application->save();
 
-        return $applicationData->load('registration.person', 'incomingQuarter', 'statsReport', 'withdrawCode', 'committedTeamMember.person');
+        return $teamApp;
     }
 }
-

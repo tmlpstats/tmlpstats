@@ -11,7 +11,7 @@ const reducer = combineReducers({
 })
 
 const _middlewares = compose(
-    applyMiddleware(thunk),
+    applyMiddleware(thunk.withExtraArgument({Api: window.Api})),
     window.devToolsExtension ? window.devToolsExtension() : f => f
 )
 
