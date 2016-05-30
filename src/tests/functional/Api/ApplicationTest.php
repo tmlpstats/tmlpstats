@@ -367,4 +367,41 @@ class ApplicationTest extends FunctionalTestAbstract
             [], // No report
         ];
     }
+
+    /**
+     * @dataProvider providerApiThrowsExceptionForInvalidDate
+     */
+    public function testApiThrowsExceptionForInvalidDate($method)
+    {
+        $reportingDate = Carbon::parse('this thursday', $this->center->timezone)
+            ->startOfDay()
+            ->toDateString();
+
+        $parameters = [
+            'method' => $method,
+            'application' => $this->application->id,
+            'reportingDate' => $reportingDate,
+            'center' => $this->center->id,
+            'data' => [],
+        ];
+
+        $expectedResponse = [
+            'success' => false,
+            'error' => [
+                'message' => 'Reporting date must be a Friday.',
+            ],
+        ];
+
+        $headers = ['Accept' => 'application/json'];
+        $this->post('/api', $parameters, $headers)->seeJsonHas($expectedResponse);
+    }
+
+    public function providerApiThrowsExceptionForInvalidDate()
+    {
+        return [
+            ['Application.allForCenter'],
+            ['Application.getWeekData'],
+            ['Application.setWeekData'],
+        ];
+    }
 }
