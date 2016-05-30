@@ -1,13 +1,12 @@
 <?php
 namespace TmlpStats\Domain;
 
-use Illuminate\Contracts\Support\Arrayable;
 use TmlpStats as Models;
 
 /**
  * Models a team application
  */
-class TeamApplication extends ParserDomain implements Arrayable, \JsonSerializable
+class TeamApplication extends ParserDomain
 {
     protected static $validProperties = [
         'firstName' => [
@@ -92,31 +91,6 @@ class TeamApplication extends ParserDomain implements Arrayable, \JsonSerializab
         ],
     ];
 
-    public function __construct()
-    {
-        // do nothing!
-    }
-
-    public function toArray()
-    {
-        $vprops = static::$validProperties;
-        foreach ($this->values as $k => $v) {
-            if ($v !== null) {
-                if ($vprops[$k]['type'] == 'date') {
-                    $v = $v->toDateString();
-                }
-            }
-            $a[$k] = $v;
-        }
-
-        return $a;
-    }
-
-    public function jsonSerialize()
-    {
-        return $this->toArray();
-    }
-
     public static function fromModel($appData, $application = null, $person = null)
     {
         if ($application === null) {
@@ -150,8 +124,8 @@ class TeamApplication extends ParserDomain implements Arrayable, \JsonSerializab
             $application = $appData->registration;
         }
 
-        foreach ($this->values as $k => $v) {
-            if ($only_set && (!isset($this->setValues[$k]) || !$this->setValues[$k])) {
+        foreach ($this->_values as $k => $v) {
+            if ($only_set && (!isset($this->_setValues[$k]) || !$this->_setValues[$k])) {
                 continue;
             }
             switch (self::$validProperties[$k]['owner']) {

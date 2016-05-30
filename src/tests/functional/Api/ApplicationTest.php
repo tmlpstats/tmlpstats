@@ -234,8 +234,6 @@ class ApplicationTest extends FunctionalTestAbstract
      */
     public function testAllForCenter($reportingDate = null)
     {
-        $this->markTestIncomplete('Test needs to match real-world expectations and edge cases which may not yet be known');
-
         $parameters = [
             'method' => 'Application.allForCenter',
             'center' => $this->center->id,

@@ -21,7 +21,7 @@ class Course extends Model
     ];
 
     /**
-     * Special handler for firstOrCreate
+     * Special handler for firstOrCreate and firstOrNew
      *
      * When set, is_international is used to differentiate between international and local registrations into a
      * given course. As of now (Feb 2016), INTL is only used by the London center.
@@ -30,18 +30,10 @@ class Course extends Model
      *
      * @return mixed
      */
-    public static function firstOrCreate(array $attributes)
+    public static function firstOr(array $attributes)
     {
         if (!isset($attributes['is_international'])) {
-            // TODO: FIXME
-            // No idea why I have to do this, but it was breaking because parent::firstOfNew
-            // was actually re-calling this method
-            if (! is_null($instance = (new static)->newQueryWithoutScopes()->where($attributes)->first())) {
-                return $instance;
-            }
-
-            return static::create($attributes);
-            //return parent::firstOrCreate($attributes);
+            return static::where($attributes)->first();
         }
 
         // Special handing for INTL vs local course stats
@@ -61,7 +53,29 @@ class Course extends Model
 
         $course = $query->first();
 
-        return $course ?: static::create(array_merge($attributes, ['center_id' => $centerId]));
+        return $course;
+    }
+
+    public static function firstOrNew(array $attributes)
+    {
+        $course = static::firstOr($attributes);
+
+        if ($course) {
+            return $course;
+        }
+
+        return new static($attributes);
+    }
+
+    public static function firstOrCreate(array $attributes)
+    {
+        $course = static::firstOr($attributes);
+
+        if ($course) {
+            return $course;
+        }
+
+        return static::create($attributes);
     }
 
     public function scopeType($query, $type)

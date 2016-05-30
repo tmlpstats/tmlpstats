@@ -1,8 +1,9 @@
 <?php
-
 namespace TmlpStats\Domain;
 
 use Carbon\Carbon;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Model;
 use TmlpStats\Api\Parsers;
 
 /**
@@ -15,35 +16,70 @@ use TmlpStats\Api\Parsers;
  * - Constructors from array and ways to fill it
  * - Track which values were set/changed for safer updates
  */
-class ParserDomain
+class ParserDomain implements Arrayable, \JsonSerializable
 {
-    protected $values = [];
-    protected $setValues = [];
+    protected $_values = [];
+    protected $_setValues = [];
+
+    public function __construct()
+    {
+        // do nothing! Avoids a weird bug in php when calling new static();
+    }
+
+    /**
+     * Implementation for Arrayable
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $output = [];
+        foreach ($this->_values as $k => $v) {
+            if ($v !== null && static::$validProperties[$k]['type'] == 'date') {
+                $v = $v->toDateString();
+            }
+            $output[$k] = $v;
+        }
+
+        return $output;
+    }
+
+    /**
+     * Implementation for JsonSerializable interface
+     *
+     * @return array  Array that is serializable with json_encode()
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
 
     /**
      * Create a new domain object from an array, parsing all values according to $validProperties.
-     * @param  array $input An array of values
-     * @return The constructed object of whatever domain type
+     *
+     * @param  array  $input           Flat array of input values
+     * @param  array  $requiredParams  An array of required keys in $input
+     * @return ParserDomain            The constructed object of whatever domain type
      */
     public static function fromArray($input, $requiredParams = [])
     {
         $obj = new static();
-        $obj->fillFromArray($input);
+        $obj->updateFromArray($input);
 
         return $obj;
     }
 
     /**
      * Fill/update values in this domain from an array.
-     * @param  array $input Flat array of input.
-     * @return [type]        [description]
+     *
+     * @param  array  $input           Flat array of input values
+     * @param  array  $requiredParams  An array of required keys in $input
      */
-    public function fillFromArray($input, $requiredParams = [])
+    public function updateFromArray($input, $requiredParams = [])
     {
         $parsed = static::parseInput($input, $requiredParams);
         foreach ($parsed as $k => $v) {
-            $this->values[$k] = $v;
-            $this->setValues[$k] = true;
+            $this->$k = $v;
         }
     }
 
@@ -52,8 +88,8 @@ class ParserDomain
      */
     public function clearSetValues()
     {
-        foreach ($this->setValues as $k => &$v) {
-            $this->setValues[$k] = false;
+        foreach ($this->_setValues as $k => $v) {
+            $this->_setValues[$k] = false;
         }
     }
 
@@ -62,13 +98,14 @@ class ParserDomain
         if (!isset(static::$validProperties[$key])) {
             $trace = debug_backtrace();
             trigger_error(
-                'Undefined property via __get(): ' . $name .
+                'Undefined property via __get(): ' . $key .
                 ' in ' . $trace[0]['file'] .
                 ' on line ' . $trace[0]['line'],
                 E_USER_NOTICE);
         }
-        if (array_key_exists($key, $this->values)) {
-            return $this->values[$key];
+
+        if (isset($this->_values[$key])) {
+            return $this->_values[$key];
         } else {
             return null;
         }
@@ -79,17 +116,27 @@ class ParserDomain
         if (!isset(static::$validProperties[$key])) {
             $trace = debug_backtrace();
             trigger_error(
-                'Undefined property via __set(): ' . $name .
+                'Undefined property via __set(): ' . $key .
                 ' in ' . $trace[0]['file'] .
                 ' on line ' . $trace[0]['line'],
                 E_USER_NOTICE);
         }
-        $this->values[$key] = $value;
-        $this->setValues[$key] = true;
+
+        $this->_values[$key] = $value;
+        $this->_setValues[$key] = true;
+    }
+
+    public function has($key)
+    {
+        return array_key_exists($key, $this->_values);
     }
 
     /**
-     * parseInput exists primarily to
+     * Parse input array with validation and proper casting
+     *
+     * @param  array  $input           Flat array of input values
+     * @param  array  $requiredParams  Array of required keys in $input
+     * @return array                   Array of parsed and validated inputs
      */
     public static function parseInput($input, $requiredParams = [])
     {
@@ -111,12 +158,14 @@ class ParserDomain
         if ($target == null) {
             return;
         }
+
         $existing = $target->$k;
-        if ($existing instanceof Carbon && $existing->ne($v)) {
-            $target->$k = $this->$k;
+        if ($existing instanceof Carbon) {
+            if ($existing->ne($v)) {
+                $target->$k = $this->$k;
+            }
         } else if ($existing !== $v) {
             $target->$k = $v;
         }
-
     }
 }
