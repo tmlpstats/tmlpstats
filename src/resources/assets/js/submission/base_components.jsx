@@ -4,7 +4,7 @@ export { React }
 
 export class SubmissionBase extends React.Component {
     baseUri() {
-        var centerId = this.props.params.centerId;
+        var centerId = this.props.params.centerId
         return `/center/${centerId}/submission`
     }
 }
