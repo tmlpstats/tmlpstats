@@ -5,6 +5,10 @@ import { Link } from 'react-router'
 export { Form, Field, formActions }
 
 export class SimpleField extends React.Component {
+    static defaultProps = {
+        labelSize: 'col-md-2',
+        divSize: 'col-md-8'
+    }
     render() {
         var field
         if (this.props.customField) {
@@ -13,14 +17,11 @@ export class SimpleField extends React.Component {
             field = <input type="text" className="form-control" />
         }
 
-        var labelSize = this.props.labelSize || 'col-md-2'
-        var divSize = this.props.labelSize || 'col-md-8'
-
         return (
             <Field model={this.props.model}>
                 <div className="form-group">
-                    <label className={labelSize + " control-label"}>{this.props.label}</label>
-                    <div className={divSize}>{field}</div>
+                    <label className={this.props.labelSize + ' control-label'}>{this.props.label}</label>
+                    <div className={this.props.divSize}>{field}</div>
                 </div>
             </Field>
         )
