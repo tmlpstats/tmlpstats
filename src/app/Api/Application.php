@@ -82,8 +82,18 @@ class Application extends ApiBase
         foreach ($reports as $report) {
             foreach ($report->tmlpRegistrationData as $app) {
                 // Store indexed here so we end up with only the most recent one for each application
-                $allApplications[$app->registration->id] = Domain\TeamApplication::fromModel($app);
+                $allApplications[$app->tmlpRegistrationId] = Domain\TeamApplication::fromModel($app);
             }
+        }
+
+        // Pick up any applications that are new this week
+        $thisReport = LocalReport::getStatsReport($center, $reportingDate, true);
+        foreach ($thisReport->tmlpRegistrationData() as $app) {
+            if (isset($allApplications[$app->tmlpRegistrationId])) {
+                continue;
+            }
+
+            $allApplications[$app->tmlpRegistrationId] = Domain\TeamApplication::fromModel($app);
         }
 
         usort($allApplications, function ($a, $b) {

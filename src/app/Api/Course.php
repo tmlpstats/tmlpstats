@@ -27,7 +27,7 @@ class Course extends ApiBase
         // are reported separately for courses. This means they may have 2 "courses"
         // for a single center/date
         // We only need to worry about this when creating a new course
-        if (isset($input->location) && $input->center->name === 'London') {
+        if ($input->has('location') && $input->center->name === 'London') {
             $courseData['is_international'] = (strtoupper($input->location) === 'INTL');
         }
 
