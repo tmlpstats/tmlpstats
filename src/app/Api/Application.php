@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Api;
+<?php
+namespace TmlpStats\Api;
 
 use Carbon\Carbon;
 use TmlpStats as Models;
@@ -23,20 +24,26 @@ class Application extends ApiBase
             'reg_date' => $input->regDate,
         ]);
 
-        if (isset($data['email'])) {
-            $application->person->email = $data['email'];
-        }
-        if (isset($data['phone'])) {
-            $application->person->phone = $data['phone'];
-        }
-        if (isset($data['isReviewer'])) {
-            $application->isReviewer = $data['isReviewer'];
+        // Create only creates
+        if ($application->exists) {
+            throw new ApiExceptions\BadRequestException('Application already exists');
         }
 
-        if ($application->person->isDirty()) {
-            $application->person->save();
+        if ($input->has('email')) {
+            $application->person->email = $input->email;
         }
+        if ($input->has('phone')) {
+            $application->person->phone = $input->phone;
+        }
+        if ($input->has('isReviewer')) {
+            $application->isReviewer = $input->isReviewer;
+        }
+
+        $application->person->save();
         $application->save();
+
+        // Make sure we have a data object for the new course so we can get it's data later
+        $this->getWeekData($application);
 
         return $application->load('person');
     }
@@ -46,12 +53,8 @@ class Application extends ApiBase
         $teamApp = Domain\TeamApplication::fromArray($data);
         $teamApp->fillModel(null, $application);
 
-        if ($application->person->isDirty()) {
-            $application->person->save();
-        }
-        if ($application->isDirty()) {
-            $application->save();
-        }
+        $application->person->save();
+        $application->save();
 
         return $application->load('person');
     }
@@ -61,7 +64,6 @@ class Application extends ApiBase
         if ($reportingDate === null) {
             $reportingDate = LocalReport::getReportingDate($center);
         } else if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
-            $dateStr = $reportingDate->toDateString();
             throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
         }
 
@@ -80,12 +82,25 @@ class Application extends ApiBase
         foreach ($reports as $report) {
             foreach ($report->tmlpRegistrationData as $app) {
                 // Store indexed here so we end up with only the most recent one for each application
-                //$data = $this->getWeekData($app->registration, $report->reportingDate);
-                $allApplications[$app->registration->id] = Domain\TeamApplication::fromModel($app);
+                $allApplications[$app->tmlpRegistrationId] = Domain\TeamApplication::fromModel($app);
             }
         }
 
+        // Pick up any applications that are new this week
+        $thisReport = LocalReport::getStatsReport($center, $reportingDate, true);
+        foreach ($thisReport->tmlpRegistrationData() as $app) {
+            if (isset($allApplications[$app->tmlpRegistrationId])) {
+                continue;
+            }
+
+            $allApplications[$app->tmlpRegistrationId] = Domain\TeamApplication::fromModel($app);
+        }
+
         usort($allApplications, function ($a, $b) {
+            if ($a->firstName === $b->firstName) {
+                return strcmp($a->lastName, $b->lastName);
+            }
+
             return strcmp($a->firstName, $b->firstName);
         });
 
@@ -97,7 +112,6 @@ class Application extends ApiBase
         if ($reportingDate === null) {
             $reportingDate = LocalReport::getReportingDate($application->center);
         } else if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
-            $dateStr = $reportingDate->toDateString();
             throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
         }
 
@@ -139,7 +153,6 @@ class Application extends ApiBase
     public function setWeekData(Models\TmlpRegistration $application, Carbon $reportingDate, array $data)
     {
         if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
-            $dateStr = $reportingDate->toDateString();
             throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
         }
 
@@ -150,15 +163,12 @@ class Application extends ApiBase
             'stats_report_id' => $report->id,
         ]);
 
-        if (!$applicationData->statsReportId) {
-            $applicationData->statsReportId = $report->id;
-        }
         $teamApp = Domain\TeamApplication::fromModel($applicationData, $application);
         $teamApp->tmlpRegistrationId = $application->id;
         $teamApp->clearSetValues();
 
         // Now insert our newly changed data, validating and coercing too
-        $teamApp->fillFromArray($data);
+        $teamApp->updateFromArray($data);
         $teamApp->fillModel($applicationData, $application);
 
         $applicationData->save();

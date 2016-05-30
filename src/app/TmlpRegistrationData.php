@@ -35,6 +35,11 @@ class TmlpRegistrationData extends Model
         'wd_date',
     ];
 
+    protected $casts = [
+        'travel' => 'boolean',
+        'room' => 'boolean',
+    ];
+
     public function __get($name)
     {
         switch ($name) {
@@ -47,11 +52,13 @@ class TmlpRegistrationData extends Model
                 return $this->registration->$name;
             case 'incomingQuarter':
                 $key = "incomingQuarter:region{$this->center->regionId}";
-                return static::getFromCache($key, $this->incomingQuarterId, function() {
+
+                return static::getFromCache($key, $this->incomingQuarterId, function () {
                     $quarter = Quarter::find($this->incomingQuarterId);
                     if ($quarter) {
                         $quarter->setRegion($this->center->region);
                     }
+
                     return $quarter;
                 });
             default:

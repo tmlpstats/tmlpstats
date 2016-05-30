@@ -6,6 +6,7 @@ use Faker\Factory;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use TmlpStats as Models;
+use TmlpStats\Domain;
 use TmlpStats\Tests\Functional\FunctionalTestAbstract;
 
 class CourseTest extends FunctionalTestAbstract
@@ -25,32 +26,32 @@ class CourseTest extends FunctionalTestAbstract
         $this->quarter = Models\Quarter::year(2016)->quarterNumber(1)->first();
 
         $this->report = Models\StatsReport::firstOrCreate([
-            'center_id'      => $this->center->id,
-            'quarter_id'     => $this->quarter->id,
+            'center_id' => $this->center->id,
+            'quarter_id' => $this->quarter->id,
             'reporting_date' => '2016-04-15',
-            'submitted_at'   => null,
-            'version'        => 'test',
+            'submitted_at' => null,
+            'version' => 'test',
         ]);
 
         $this->pastCourse = factory(Models\Course::class)->create([
-            'center_id'  => $this->center->id,
+            'center_id' => $this->center->id,
             'start_date' => Carbon::parse('2016-04-09'),
         ]);
 
         $this->course = factory(Models\Course::class)->create([
-            'center_id'  => $this->center->id,
+            'center_id' => $this->center->id,
             'start_date' => Carbon::parse('2016-04-23'),
         ]);
 
         $this->courseData = Models\CourseData::firstOrCreate([
-            'course_id'         => $this->course->id,
-            'stats_report_id'   => $this->report->id,
+            'course_id' => $this->course->id,
+            'stats_report_id' => $this->report->id,
             'quarter_start_ter' => 0,
             'quarter_start_standardStarts' => 0,
-            'quarter_start_xfer'      => 0,
-            'current_ter'             => 21,
+            'quarter_start_xfer' => 0,
+            'current_ter' => 21,
             'current_standard_starts' => 18,
-            'current_xfer'            => 2,
+            'current_xfer' => 2,
         ]);
     }
 
@@ -61,21 +62,21 @@ class CourseTest extends FunctionalTestAbstract
     {
         $parameters = [
             'method' => 'Course.create',
-            'data'   => [
-                'center'    => $this->center->id,
+            'data' => [
+                'center' => $this->center->id,
                 'startDate' => Carbon::parse('2016-04-22'),
-                'type'      => $this->faker->randomElement(['CAP', 'CPC']),
+                'type' => $this->faker->randomElement(['CAP', 'CPC']),
             ],
         ];
 
         $lastCourseId = Models\Course::count();
 
         $expectedResponse = [
-            'id'        => $lastCourseId + 1,
-            'centerId'  => $this->center->id,
+            'id' => $lastCourseId + 1,
+            'centerId' => $this->center->id,
             'startDate' => $parameters['data']['startDate']->toDateTimeString(),
-            'type'      => $parameters['data']['type'],
-            'center'    => $this->center->toArray(),
+            'type' => $parameters['data']['type'],
+            'center' => $this->center->toArray(),
         ];
 
         $parameters = $this->replaceInto($parameters, $parameterUpdates);
@@ -106,7 +107,7 @@ class CourseTest extends FunctionalTestAbstract
         $parameters = [
             'method' => 'Course.update',
             'course' => $this->course->id,
-            'data'   => [
+            'data' => [
                 'type' => 'CPC',
                 'location' => 'Another Place',
             ],
@@ -125,16 +126,16 @@ class CourseTest extends FunctionalTestAbstract
     public function testGetWeekData($reportingDate = null)
     {
         $parameters = [
-            'method'        => 'Course.getWeekData',
-            'course'        => $this->course->id,
+            'method' => 'Course.getWeekData',
+            'course' => $this->course->id,
             'reportingDate' => $reportingDate,
         ];
 
         if (!$reportingDate) {
             // Passed into api as null, but will resolve to this
             $reportingDate = Carbon::parse('this friday', $this->center->timezone)
-                                   ->startOfDay()
-                                   ->toDateString();
+                ->startOfDay()
+                ->toDateString();
         }
 
         $report = $this->report->toArray();
@@ -148,11 +149,11 @@ class CourseTest extends FunctionalTestAbstract
         }
 
         $expectedResponse = [
-            'id'            => $courseDataId,
-            'courseId'      => $this->course->id,
+            'id' => $courseDataId,
+            'courseId' => $this->course->id,
             'statsReportId' => $report['id'],
-            'course'        => $this->course->load('center')->toArray(),
-            'statsReport'   => $report,
+            'course' => $this->course->load('center')->toArray(),
+            'statsReport' => $report,
         ];
 
         $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
@@ -201,17 +202,17 @@ class CourseTest extends FunctionalTestAbstract
         }
 
         $expectedResponse = [
-            'id'                         => $courseDataId,
-            'courseId'                   => $course->id,
-            'statsReportId'              => $report['id'],
-            'quarterStartTer'            => $parameters['data']['quarterStartTer'],
+            'id' => $courseDataId,
+            'courseId' => $course->id,
+            'statsReportId' => $report['id'],
+            'quarterStartTer' => $parameters['data']['quarterStartTer'],
             'quarterStartStandardStarts' => $parameters['data']['quarterStartStandardStarts'],
-            'quarterStartXfer'           => $parameters['data']['quarterStartXfer'],
-            'currentTer'                 => $parameters['data']['currentTer'],
-            'currentStandardStarts'      => $parameters['data']['currentStandardStarts'],
-            'currentXfer'                => $parameters['data']['currentXfer'],
-            'course'                     => $course->toArray(),
-            'statsReport'                => $report,
+            'quarterStartXfer' => $parameters['data']['quarterStartXfer'],
+            'currentTer' => $parameters['data']['currentTer'],
+            'currentStandardStarts' => $parameters['data']['currentStandardStarts'],
+            'currentXfer' => $parameters['data']['currentXfer'],
+            'course' => $course->toArray(),
+            'statsReport' => $report,
         ];
 
         $parameters = $this->replaceInto($parameters, $parameterUpdates);
@@ -258,39 +259,39 @@ class CourseTest extends FunctionalTestAbstract
         // Last Week's Report
         //
         $lastWeeksReport = Models\StatsReport::create([
-            'center_id'      => $this->center->id,
-            'quarter_id'     => $this->quarter->id,
+            'center_id' => $this->center->id,
+            'quarter_id' => $this->quarter->id,
             'reporting_date' => '2016-04-08',
-            'submitted_at'   => '2016-04-08 18:55:00',
-            'version'        => 'test',
+            'submitted_at' => '2016-04-08 18:55:00',
+            'version' => 'test',
         ]);
 
         // Existing course's data for last week
         $course1LastWeekData = Models\CourseData::create([
-            'course_id'       => $this->course->id,
+            'course_id' => $this->course->id,
             'stats_report_id' => $lastWeeksReport->id,
-            'quarter_start_ter'       => 0,
+            'quarter_start_ter' => 0,
             'quarter_start_standardStarts' => 0,
-            'quarter_start_xfer'      => 0,
-            'current_ter'             => 18,
+            'quarter_start_xfer' => 0,
+            'current_ter' => 18,
             'current_standard_starts' => 15,
-            'current_xfer'            => 2,
+            'current_xfer' => 2,
         ]);
 
         // New person. Only has data last week
         $course2 = factory(Models\Course::class)->create([
-            'center_id'  => $this->center->id,
+            'center_id' => $this->center->id,
             'start_date' => Carbon::parse('2016-04-30'),
         ]);
         $course2LastWeekData = Models\CourseData::create([
-            'course_id'       => $course2->id,
+            'course_id' => $course2->id,
             'stats_report_id' => $lastWeeksReport->id,
-            'quarter_start_ter'       => 15,
+            'quarter_start_ter' => 15,
             'quarter_start_standardStarts' => 12,
-            'quarter_start_xfer'      => 0,
-            'current_ter'             => 28,
+            'quarter_start_xfer' => 0,
+            'current_ter' => 28,
             'current_standard_starts' => 25,
-            'current_xfer'            => 2,
+            'current_xfer' => 2,
         ]);
 
         // Setup the global reports
@@ -298,7 +299,6 @@ class CourseTest extends FunctionalTestAbstract
             'reporting_date' => '2016-04-08',
         ]);
         $lastWeeksGlobalReport->addCenterReport($lastWeeksReport);
-
 
         //
         // This Week's Report
@@ -315,31 +315,31 @@ class CourseTest extends FunctionalTestAbstract
         // Next Week's Report
         //
         $nextWeeksReport = Models\StatsReport::create([
-            'center_id'      => $this->center->id,
-            'quarter_id'     => $this->quarter->id,
+            'center_id' => $this->center->id,
+            'quarter_id' => $this->quarter->id,
             'reporting_date' => '2016-04-22',
-            'submitted_at'   => '2016-04-22 18:55:00',
-            'version'        => 'test',
+            'submitted_at' => '2016-04-22 18:55:00',
+            'version' => 'test',
         ]);
 
         // Existing course's data for last week
         $course1NextWeekData = Models\CourseData::create([
-            'course_id'       => $this->course->id,
+            'course_id' => $this->course->id,
             'stats_report_id' => $nextWeeksReport->id,
-            'quarter_start_ter'       => 0,
+            'quarter_start_ter' => 0,
             'quarter_start_standardStarts' => 0,
-            'quarter_start_xfer'      => 0,
-            'current_ter'             => 25,
+            'quarter_start_xfer' => 0,
+            'current_ter' => 25,
             'current_standard_starts' => 22,
-            'current_xfer'            => 2,
+            'current_xfer' => 2,
         ]);
 
         $course3 = factory(Models\Course::class)->create([
-            'center_id'  => $this->center->id,
+            'center_id' => $this->center->id,
             'start_date' => Carbon::parse('2016-05-21'),
         ]);
         $course3NextWeekData = Models\CourseData::create([
-            'course_id'       => $course3->id,
+            'course_id' => $course3->id,
             'stats_report_id' => $nextWeeksReport->id,
         ]);
 
@@ -361,22 +361,24 @@ class CourseTest extends FunctionalTestAbstract
         if ($reportingDate) {
             // Reporting Date provided
             $expectedResponse = [
-                $this->courseData->load('course', 'course.center', 'statsReport')->toArray(),
-                $course2LastWeekData->load('course', 'course.center', 'statsReport')->toArray(),
+                Domain\Course::fromModel($this->courseData),
+                Domain\Course::fromModel($course2LastWeekData),
             ];
         } else {
             // Reporting Date not provided
             $expectedResponse = [
-                $course1NextWeekData->load('course', 'course.center', 'statsReport')->toArray(),
-                $course2LastWeekData->load('course', 'course.center', 'statsReport')->toArray(),
-                $course3NextWeekData->load('course', 'course.center', 'statsReport')->toArray(),
+                Domain\Course::fromModel($course1NextWeekData),
+                Domain\Course::fromModel($course2LastWeekData),
+                Domain\Course::fromModel($course3NextWeekData),
             ];
         }
 
+        $expectedResponse = json_decode(json_encode($expectedResponse), true);
+
         usort($expectedResponse, function ($a, $b) {
             return strcmp(
-                $a['course']['startDate'],
-                $b['course']['startDate']
+                $a['startDate'],
+                $b['startDate']
             );
         });
 
@@ -387,7 +389,44 @@ class CourseTest extends FunctionalTestAbstract
     {
         return [
             ['2016-04-15'], // Existing report
-            [],// No report
+            [], // No report
+        ];
+    }
+
+    /**
+     * @dataProvider providerApiThrowsExceptionForInvalidDate
+     */
+    public function testApiThrowsExceptionForInvalidDate($method)
+    {
+        $reportingDate = Carbon::parse('this thursday', $this->center->timezone)
+            ->startOfDay()
+            ->toDateString();
+
+        $parameters = [
+            'method' => $method,
+            'course' => $this->course->id,
+            'reportingDate' => $reportingDate,
+            'center' => $this->center->id,
+            'data' => [],
+        ];
+
+        $expectedResponse = [
+            'success' => false,
+            'error' => [
+                'message' => 'Reporting date must be a Friday.',
+            ],
+        ];
+
+        $headers = ['Accept' => 'application/json'];
+        $this->post('/api', $parameters, $headers)->seeJsonHas($expectedResponse);
+    }
+
+    public function providerApiThrowsExceptionForInvalidDate()
+    {
+        return [
+            ['Course.allForCenter'],
+            ['Course.getWeekData'],
+            ['Course.setWeekData'],
         ];
     }
 }
