@@ -1,17 +1,10 @@
 ///// ACTION CREATORS
 import { actions as formActions } from 'react-redux-form'
-import { appsCollection } from './data'
+import { appsCollection, applicationsLoad, saveAppLoad } from './data'
 
-export const APPLICATIONS_LOAD_STATE = 'applications/initialLoadState'
-export const APPLICATIONS_SAVE_APP_STATE = 'applications/saveAppState'
 
-export function loadState(state) {
-    return {type: APPLICATIONS_LOAD_STATE, payload: state}
-}
-
-export function saveAppState(state) {
-    return {type: APPLICATIONS_SAVE_APP_STATE, payload: state}
-}
+export const loadState = applicationsLoad.actionCreator()
+export const saveAppState = saveAppLoad.actionCreator()
 
 export function loadApplications(centerId) {
     return (dispatch, _, { Api }) => {

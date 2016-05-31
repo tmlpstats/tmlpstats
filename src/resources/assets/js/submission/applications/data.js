@@ -1,4 +1,5 @@
 import SortableCollection, { compositeKey } from '../../reusable/sortable_collection'
+import { LoadingMultiState } from '../../reusable/reducers'
 
 const appsSortsRaw = [
     {
@@ -21,3 +22,6 @@ export const appsCollection = new SortableCollection({
     sort_by: 'teamYear_first_last',
     sorts: appsSorts
 })
+
+export const applicationsLoad = new LoadingMultiState('applications/initialLoadState')
+export const saveAppLoad = new LoadingMultiState('applications/saveAppState')

@@ -82,11 +82,8 @@ class ApplicationsEditView extends ApplicationsBase {
     render() {
         var appId = this.props.params.appId
 
-        if (!this.props.loading.loaded) {
+        if (!this.props.loading.loaded || !this.props.currentApp || this.props.currentApp.tmlpRegistrationId != appId) {
             return <div>{this.props.loading.state}...</div>
-        }
-        if (!this.props.currentApp || this.props.currentApp.tmlpRegistrationId != appId) {
-            return <div>Getting app</div>
         }
         var modelKey = APPLICATIONS_FORM_KEY
         return (

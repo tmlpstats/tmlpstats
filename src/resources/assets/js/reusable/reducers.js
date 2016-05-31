@@ -16,10 +16,29 @@ export function loadingMultiState(actionType) {
                 return LOADED
             case 'failed':
                 return FAILED
-            case NEW, LOADING, LOADED:
+            case 'new':
+                return NEW
+            case NEW, LOADING, LOADED, FAILED:
                 return action.payload
             }
         }
         return state
+    }
+}
+
+export class LoadingMultiState {
+    constructor(actionType) {
+        this.actionType = actionType
+    }
+
+    actionCreator() {
+        const actionType = this.actionType
+        return (newState) => {
+            return {type: actionType, payload: newState}
+        }
+    }
+
+    reducer() {
+        return loadingMultiState(this.actionType)
     }
 }
