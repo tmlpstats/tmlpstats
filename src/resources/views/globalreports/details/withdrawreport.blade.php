@@ -20,21 +20,21 @@ $sections = [
 <thead>
 <tr>
     <th>{{ ucfirst($team) }}</th>
-    <th>Total Team</th>
-    <th>Withdraws</th>
-    <th>%</th>
+    <th class="data-point">Total Team</th>
+    <th class="data-point">Withdraws</th>
+    <th class="data-point">%</th>
     <th>Classroom Leader</th>
 </tr>
 </thead>
 
 <tbody>
 @foreach ($sectionData as $centerName => $data)
-@if (isset($data[$team]) && ['withdrawCount'] > 0)
+@if (isset($data[$team]) && $data[$team]['withdrawCount'] > 0)
 <tr>
     <td>{{ $centerName }}</td>
-    <td>{{ $data[$team]['totalCount'] }}</td>
-    <td>{{ $data[$team]['withdrawCount'] }}</td>
-    <td>{{ round($data[$team]['percent'], 1) }}%</td>
+    <td class="data-point">{{ $data[$team]['totalCount'] }}</td>
+    <td class="data-point">{{ $data[$team]['withdrawCount'] }}</td>
+    <td class="data-point">{{ round($data[$team]['percent'], 1) }}%</td>
     <td>{{ $data['classroomLeader']->firstName }} {{ $data['classroomLeader']->lastName[0] }}</td>
 </tr>
 @endif
