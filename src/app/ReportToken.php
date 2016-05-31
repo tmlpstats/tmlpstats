@@ -1,5 +1,4 @@
 <?php
-
 namespace TmlpStats;
 
 use App;
@@ -11,7 +10,6 @@ use Request;
 use TmlpStats\Http\Controllers\Controller;
 use TmlpStats\Traits\CachedRelationships;
 
-
 class ReportToken extends Model
 {
     use CamelCaseModel, CachedRelationships;
@@ -20,7 +18,8 @@ class ReportToken extends Model
         'token',
         'report_id',
         'report_type',
-        'center_id',
+        'owner_id',
+        'owner_type',
         'expires_at',
     );
 
@@ -33,7 +32,7 @@ class ReportToken extends Model
      * @return static
      * @throws Exception
      */
-    public static function get(Model $report, Center $center = null, Carbon $expiresAt = null)
+    public static function get(Model $report, Model $owner = null, Carbon $expiresAt = null)
     {
         if (!($report instanceof GlobalReport)) {
             // Report tokens only support global reports right now. If you want to support other
@@ -41,15 +40,16 @@ class ReportToken extends Model
             throw new Exception('ReportToken only supports global reports.');
         }
 
-        $reportToken = ReportToken::byReport($report)->byCenter($center)->first();
+        $reportToken = ReportToken::byReport($report)->byOwner($owner)->first();
 
         if (!$reportToken) {
             $reportToken = ReportToken::create([
-                'report_id'   => $report->id,
+                'report_id' => $report->id,
                 'report_type' => get_class($report),
-                'center_id'   => $center ? $center->id : null,
-                'expires_at'  => $expiresAt ? $expiresAt->toDateString() : null,
-                'token'       => Util::getRandomString(),
+                'owner_id' => $owner ? $owner->id : null,
+                'owner_type' => $owner ? get_class($owner) : null,
+                'expires_at' => $expiresAt ? $expiresAt->toDateString() : null,
+                'token' => Util::getRandomString(),
             ]);
         }
 
@@ -67,16 +67,26 @@ class ReportToken extends Model
 
         $date = $globalReport->reportingDate->toDateString();
 
-        $reportUrl = null;
-        if ($this->center) {
-            $statsReport = $globalReport->getStatsReportByCenter($this->center);
-            if ($statsReport) {
-                $reportUrl = "reports/centers/{$this->center->abbreviation}/{$date}";
-            }
-        } else {
-            $region = App::make(Controller::class)->getRegion(Request::instance());
-            $reportUrl = "reports/regions/{$region->abbreviation}/{$date}";
+        switch ($this->ownerType) {
+            case Center::class:
+                $center = Center::find($this->ownerId);
+                $statsReport = $globalReport->getStatsReportByCenter($center);
+                if ($statsReport) {
+                    $reportUrl = "reports/centers/{$center->abbreviation}/{$date}";
+                }
+                break;
+            case Region::class:
+            default:
+                if ($this->ownerId) {
+                    $region = Region::find($this->ownerId);
+                } else {
+                    $region = App::make(Controller::class)->getRegion(Request::instance());
+                }
+
+                $reportUrl = "reports/regions/{$region->abbreviation}/{$date}";
+                break;
         }
+
         return strtolower($reportUrl);
     }
 
@@ -122,22 +132,31 @@ class ReportToken extends Model
         return $query->whereReportId($report->id)->whereReportType(get_class($report));
     }
 
-
-    public function scopeByCenter($query, Center $center = null)
+    public function scopeByOwner($query, Model $owner = null)
     {
-        if ($center) {
-            return $query->whereCenterId($center->id);
+        if ($owner) {
+            return $query->whereOwnerId($owner->id)->whereOwnerType(get_class($owner));
         } else {
-            return $query->whereNull('center_id');
+            return $query->whereNull('owner_id');
         }
     }
 
-    public function center()
+    public function scopeByCenter($query, Center $center)
     {
-        return $this->belongsTo('TmlpStats\Center');
+        return $query->whereOwnerId($center->id)->whereOwnerType(get_class($center));
+    }
+
+    public function scopeByRegion($query, Region $region)
+    {
+        return $query->whereOwnerId($region->id)->whereOwnerType(get_class($region));
     }
 
     public function report()
+    {
+        return $this->morphTo();
+    }
+
+    public function owner()
     {
         return $this->morphTo();
     }
