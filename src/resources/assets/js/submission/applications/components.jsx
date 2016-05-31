@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 
 import { SubmissionBase, React } from '../base_components'
 import { Form, SimpleField } from '../../reusable/form_utils'
-import { ModeSelectButtons } from '../../reusable/ui_basic'
+import { ModeSelectButtons, LoadStateFlip } from '../../reusable/ui_basic'
 import { APPLICATIONS_FORM_KEY } from './reducers'
 import { appsSorts, appsCollection } from './data'
 import { loadApplications, saveApplication, chooseApplication } from './actions'
@@ -99,7 +99,9 @@ class ApplicationsEditView extends ApplicationsBase {
                     </SimpleField>
                     <div className="form-group">
                         <div className="col-sm-offset-2 col-sm-8">
-                            <button className="btn btn-primary" type="submit">Save</button>
+                            <LoadStateFlip loadState={this.props.saveApp}>
+                                <button className="btn btn-primary" type="submit">Save</button>
+                            </LoadStateFlip>
                         </div>
                     </div>
                     <div className="form-group">

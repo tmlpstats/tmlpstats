@@ -51,3 +51,29 @@ export class ModeSelectButtons extends React.Component {
         )
     }
 }
+
+/**
+ * LoadStateFlip is a really simple experimental component for choosing what's shown based on load state.
+ *
+ * This should
+ */
+export class LoadStateFlip extends React.Component {
+    render() {
+        var loadState = this.props.loadState
+        if (loadState.state == 'loading') {
+            return <div><span className="glyphicon glyphicon-send"></span>TODO spinner here...</div>
+        } else if (loadState.state == 'failed') {
+            var error = 'FAILED '
+            if (loadState.error) {
+                if (loadState.error.message) {
+                    error += loadState.error.message
+                } else {
+                    error += loadState.error
+                }
+            }
+            return <div className="bg-danger">{error}</div>
+        } else {
+            return <div>{this.props.children}</div>
+        }
+    }
+}

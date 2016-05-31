@@ -18,7 +18,7 @@ export function loadingMultiState(actionType) {
                 return FAILED
             case 'new':
                 return NEW
-            case NEW, LOADING, LOADED, FAILED:
+            default:
                 return action.payload
             }
         }
@@ -34,6 +34,9 @@ export class LoadingMultiState {
     actionCreator() {
         const actionType = this.actionType
         return (newState) => {
+            if (newState.error) {
+                newState = Object.assign({}, FAILED, newState)
+            }
             return {type: actionType, payload: newState}
         }
     }

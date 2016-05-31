@@ -7,4 +7,5 @@ class QuarterParser extends IdParserBase
 {
     protected $type = 'quarter';
     protected $class = Quarter::class;
+    protected $allowObj = true;
 }

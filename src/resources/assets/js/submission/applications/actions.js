@@ -1,7 +1,7 @@
 ///// ACTION CREATORS
 import { actions as formActions } from 'react-redux-form'
+import { bestErrorValue } from '../../reusable/ajax_utils'
 import { appsCollection, applicationsLoad, saveAppLoad } from './data'
-
 
 export const loadState = applicationsLoad.actionCreator()
 export const saveAppState = saveAppLoad.actionCreator()
@@ -28,24 +28,21 @@ export function initializeApplications(data) {
 }
 
 export function chooseApplication(appId, app) {
-    // I really don't like this pattern. Must cogitate on a better one.
-    return (dispatch, getState) => {
-        if (!app) {
-            app = getState().submission.application.applications.collection[appId]
-        }
-        dispatch(formActions.change('submission.application.currentApp', app))
-    }
+    return formActions.change('submission.application.currentApp', app)
 }
 
 export function saveApplication(application, reportingDate, data) {
     return (dispatch, _, { Api }) => {
+        const reset = () => dispatch(saveAppState('new'))
+
         dispatch(saveAppState('loading'))
         return Api.Application.setWeekData({
             application, reportingDate, data
         }).done(() => {
-            dispatch(saveAppState('new'))
-        }).fail(() => {
-            dispatch(saveAppState('failed'))
+            reset()
+        }).fail((xhr, textStatus) => {
+            dispatch(saveAppState({state: 'failed', error: bestErrorValue(xhr, textStatus)}))
+            setTimeout(reset, 3000)
         })
     }
 }

@@ -153,7 +153,7 @@ class ParserDomain implements Arrayable, \JsonSerializable
      * @param  string $k      The key to write
      * @param  mixed $v       The value to write.
      */
-    protected function copyTarget($target, $k, $v)
+    protected function copyTarget($target, $k, $v, $conf = null)
     {
         if ($target == null) {
             return;
@@ -165,7 +165,13 @@ class ParserDomain implements Arrayable, \JsonSerializable
                 $target->$k = $this->$k;
             }
         } else if ($existing !== $v) {
-            $target->$k = $v;
+            if (!$conf !== null && array_get($conf, 'assignId')) {
+                $k_id = $k . 'Id';
+                $id_prop = array_get($conf, 'idProp', 'id');
+                $target->$k_id = $v->$id_prop;
+            } else {
+                $target->$k = $v;
+            }
         }
     }
 }

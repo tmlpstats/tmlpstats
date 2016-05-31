@@ -37,5 +37,9 @@ module.exports = {
             "error",
             "never"
         ]
+    },
+    "globals": {
+        "window": true,
+        "process": true
     }
 };

@@ -28,6 +28,7 @@ class TeamApplication extends ParserDomain
         'center' => [
             'owner' => 'person',
             'type' => 'Center',
+            'assignId' => true,
         ],
         'unsubscribed' => [
             'owner' => 'person',
@@ -64,18 +65,19 @@ class TeamApplication extends ParserDomain
         'wdDate' => [
             'owner' => 'applicationData',
             'type' => 'date',
-        ],
+        ], /*  TODO
         'withdrawCode' => [
             'owner' => 'applicationData',
             'type' => 'WithdrawCode',
-        ],
-        'committedTeamMember' => [
+        ], */
+        'committedTeamMemberId' => [
             'owner' => 'applicationData',
-            'type' => 'TeamMember',
+            'type' => 'int',
         ],
         'incomingQuarter' => [
             'owner' => 'applicationData',
             'type' => 'Quarter',
+            'assignId' => true,
         ],
         'comment' => [
             'owner' => 'applicationData',
@@ -128,7 +130,8 @@ class TeamApplication extends ParserDomain
             if ($only_set && (!isset($this->_setValues[$k]) || !$this->_setValues[$k])) {
                 continue;
             }
-            switch (self::$validProperties[$k]['owner']) {
+            $conf = self::$validProperties[$k];
+            switch ($conf['owner']) {
                 case 'person':
                     $target = $application->person;
                     break;
@@ -142,7 +145,7 @@ class TeamApplication extends ParserDomain
             if ($k == 'regDate') {
                 $appData->regDate = $v;
             }
-            $this->copyTarget($target, $k, $v);
+            $this->copyTarget($target, $k, $v, $conf);
         }
     }
 }
