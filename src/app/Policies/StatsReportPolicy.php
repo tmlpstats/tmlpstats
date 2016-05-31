@@ -135,7 +135,7 @@ class StatsReportPolicy extends Policy
     public function showReportButton(User $user)
     {
         if ($user->hasRole('readonly')) {
-            return ($user->reportToken && $user->reportToken->ownerId);
+            return ($user->reportToken && $user->reportToken->hasOwner());
         }
 
         return true;

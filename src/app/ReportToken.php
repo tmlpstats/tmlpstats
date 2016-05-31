@@ -125,6 +125,16 @@ class ReportToken extends Model
     }
 
     /**
+     * Does this report token have an owner?
+     *
+     * @return boolean
+     */
+    public function hasOwner()
+    {
+        return $this->ownerId !== null;
+    }
+
+    /**
      * Get the full URL for using this token
      *
      * @return string
