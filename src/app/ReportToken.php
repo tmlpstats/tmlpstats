@@ -109,6 +109,32 @@ class ReportToken extends Model
     }
 
     /**
+     * Get the owner object for this ReportToken
+     *
+     * @return Center|Region|null
+     */
+    public function getOwner()
+    {
+        if (!$this->ownerId) {
+            return null;
+        }
+
+        $ownerClass = $this->ownerType;
+
+        return $ownerClass::find($this->ownerId);
+    }
+
+    /**
+     * Does this report token have an owner?
+     *
+     * @return boolean
+     */
+    public function hasOwner()
+    {
+        return $this->ownerId !== null;
+    }
+
+    /**
      * Get the full URL for using this token
      *
      * @return string

@@ -80,8 +80,8 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
             case 'phone':
             case 'center':
                 return $this->person
-                ? $this->person->$name
-                : null;
+                    ? $this->person->$name
+                    : null;
             default:
                 return parent::__get($name);
         }
@@ -102,9 +102,11 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
             case 'reportToken':
                 return $this->reportToken;
             case 'center':
-                return $this->reportToken
-                ? $this->reportToken->center
-                : null;
+                if ($this->reportToken && $this->reportToken->ownerType == Center::class) {
+                    return $this->reportToken->getOwner();
+                }
+
+                return null;
             case 'lastName':
             case 'phone':
                 return null;
@@ -138,8 +140,8 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     public function hasAccountability($name)
     {
         return $this->person
-        ? $this->person->hasAccountability($name)
-        : false;
+            ? $this->person->hasAccountability($name)
+            : false;
     }
 
     /**
@@ -162,14 +164,22 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     public function homeRegion()
     {
         if ($this->reportToken) {
-            return $this->reportToken->center
-            ? $this->reportToken->center->region
-            : null;
+            $owner = $this->reportToken->getOwner();
+
+            if ($this->reportToken->ownerType == Region::class) {
+                return $owner;
+            }
+
+            if ($this->reportToken->ownerType == Center::class && $owner) {
+                return $owner->region;
+            }
+
+            return null;
         }
 
         return $this->person && $this->person->center
-        ? $this->person->center->region
-        : null;
+            ? $this->person->center->region
+            : null;
     }
 
     /**
