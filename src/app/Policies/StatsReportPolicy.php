@@ -1,5 +1,4 @@
 <?php
-
 namespace TmlpStats\Policies;
 
 use TmlpStats\StatsReport;
@@ -30,6 +29,7 @@ class StatsReportPolicy extends Policy
             return $user->center->id === $statsReport->center->id || $user->id === $statsReport->user->id;
         } else if ($user->hasRole('readonly')) {
             $result = $user->center && $user->center->id === $statsReport->center->id;
+
             return $result;
         }
 
@@ -135,7 +135,7 @@ class StatsReportPolicy extends Policy
     public function showReportButton(User $user)
     {
         if ($user->hasRole('readonly')) {
-            return ($user->reportToken && $user->reportToken->centerId);
+            return ($user->reportToken && $user->reportToken->ownerId);
         }
 
         return true;
