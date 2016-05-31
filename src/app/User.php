@@ -103,7 +103,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
                 return $this->reportToken;
             case 'center':
                 if ($this->reportToken && $this->reportToken->ownerType == Center::class) {
-                    return Center::find($this->reportToken->ownerId);
+                    return $this->reportToken->getOwner();
                 }
 
                 return null;
@@ -164,9 +164,17 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     public function homeRegion()
     {
         if ($this->reportToken) {
-            return $this->reportToken->center
-                ? $this->reportToken->center->region
-                : null;
+            $owner = $this->reportToken->getOwner();
+
+            if ($this->reportToken->ownerType == Region::class) {
+                return $owner;
+            }
+
+            if ($this->reportToken->ownerType == Center::class && $owner) {
+                return $owner->region;
+            }
+
+            return null;
         }
 
         return $this->person && $this->person->center
