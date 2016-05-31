@@ -90,6 +90,7 @@ class Center extends Model
             }
         }
         $members = TeamMember::whereIn('id', array_unique($memberIds))->get();
+
         return $members;
     }
 
@@ -114,6 +115,7 @@ class Center extends Model
     public function getLocalTime(Carbon $time)
     {
         $time->setTimezone($this->timezone);
+
         return $time;
     }
 
@@ -162,11 +164,17 @@ class Center extends Model
         return $this->belongsTo('TmlpStats\Region');
     }
 
+    public function reportTokens()
+    {
+        return $this->morphMany('TmlpStats\ReportToken', 'owner');
+    }
+
     public function getUriCenterReport($reportingDate = null)
     {
         if ($reportingDate instanceof Carbon) {
             $reportingDate = $reportingDate->toDateString();
         }
+
         return action('ReportsController@getCenterReport', [
             'abbr' => strtolower($this->abbreviation),
             'date' => $reportingDate,

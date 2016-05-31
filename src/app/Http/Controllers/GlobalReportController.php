@@ -81,7 +81,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         $this->context->setDateSelectAction('ReportsController@getRegionReport', ['abbr' => $region->abbrLower()]);
         $this->authorize('read', $globalReport);
 
-        $reportToken = Gate::allows('readLink', Models\ReportToken::class) ? Models\ReportToken::get($globalReport) : null;
+        $reportToken = Gate::allows('readLink', Models\ReportToken::class) ? Models\ReportToken::get($globalReport, $region) : null;
 
         $quarter = Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region);
 

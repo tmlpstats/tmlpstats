@@ -59,6 +59,7 @@ class Region extends Model
         if ($this->parentId) {
             return $this->parent;
         }
+
         return $this;
     }
 
@@ -107,6 +108,11 @@ class Region extends Model
         return $this->hasMany('TmlpStats\Center');
     }
 
+    public function reportTokens()
+    {
+        return $this->morphMany('TmlpStats\ReportToken', 'owner');
+    }
+
     public function abbrLower()
     {
         return strtolower($this->abbreviation);
@@ -117,6 +123,7 @@ class Region extends Model
         if ($reportingDate instanceof Carbon) {
             $reportingDate = $reportingDate->toDateString();
         }
+
         return action('ReportsController@getRegionReport', [
             'abbr' => $this->abbrLower(),
             'date' => $reportingDate,
