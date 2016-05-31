@@ -1,5 +1,4 @@
 <?php
-
 namespace TmlpStats\Http\Controllers;
 
 use App;
@@ -117,6 +116,7 @@ class ReportsController extends Controller
 
         if ($reportUrl) {
             Log::info("Token {$reportToken->id} user logged in from " . $request->ip());
+
             return redirect($reportUrl);
         } else {
             abort(404);
@@ -154,8 +154,8 @@ class ReportsController extends Controller
 
         if (!Session::has('viewCenterId')) {
             $center = $abbr
-            ? Center::abbreviation($abbr)->firstOrFail()
-            : $this->getCenter($request);
+                ? Center::abbreviation($abbr)->firstOrFail()
+                : $this->getCenter($request);
             Session::set('viewCenterId', $center->id);
         }
 
@@ -191,8 +191,8 @@ class ReportsController extends Controller
 
         if (!Session::has('viewRegionId')) {
             $region = $abbr
-            ? Region::abbreviation($abbr)->firstOrFail()
-            : $this->getRegion($request);
+                ? Region::abbreviation($abbr)->firstOrFail()
+                : $this->getRegion($request);
             Session::set('viewRegionId', $region->id);
         }
 
@@ -268,8 +268,8 @@ class ReportsController extends Controller
         }
 
         return $reportViewUpdate
-        ? redirect($redirectUrl)
-        : App::make($controllerClass)->show($request, $report->id);
+            ? redirect($redirectUrl)
+            : App::make($controllerClass)->show($request, $report->id);
     }
 
     /**

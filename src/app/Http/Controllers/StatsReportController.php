@@ -45,14 +45,14 @@ class StatsReportController extends ReportDispatchAbstractController
         $selectedRegion = $this->getRegion($request);
 
         $allReports = Models\StatsReport::currentQuarter($selectedRegion)
-                                        ->groupBy('reporting_date')
-                                        ->orderBy('reporting_date', 'desc')
-                                        ->get();
+            ->groupBy('reporting_date')
+            ->orderBy('reporting_date', 'desc')
+            ->get();
         if ($allReports->isEmpty()) {
             $allReports = Models\StatsReport::lastQuarter($selectedRegion)
-                                            ->groupBy('reporting_date')
-                                            ->orderBy('reporting_date', 'desc')
-                                            ->get();
+                ->groupBy('reporting_date')
+                ->orderBy('reporting_date', 'desc')
+                ->get();
         }
 
         $today = Carbon::now();
@@ -80,16 +80,16 @@ class StatsReportController extends ReportDispatchAbstractController
         }
 
         $centers = Models\Center::active()
-                                ->byRegion($selectedRegion)
-                                ->orderBy('name', 'asc')
-                                ->get();
+            ->byRegion($selectedRegion)
+            ->orderBy('name', 'asc')
+            ->get();
 
         $statsReportList = [];
         foreach ($centers as $center) {
             $report = Models\StatsReport::reportingDate($reportingDate)
-                                        ->byCenter($center)
-                                        ->orderBy('submitted_at', 'desc')
-                                        ->first();
+                ->byCenter($center)
+                ->orderBy('submitted_at', 'desc')
+                ->first();
             $statsReportList[$center->name] = [
                 'center' => $center,
                 'report' => $report,
@@ -236,7 +236,7 @@ class StatsReportController extends ReportDispatchAbstractController
                 $statsReport->submitComment = Input::get('comment', null);
                 $statsReport->locked = true;
             } catch (Exception $e) {
-                Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+                Log::error('Error validating sheet: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             }
 
             if ($statsReport->isDirty() && $statsReport->save()) {
@@ -691,7 +691,7 @@ class StatsReportController extends ReportDispatchAbstractController
                 $importer->import(false);
                 $sheet = $importer->getResults();
             } catch (Exception $e) {
-                Log::error("Error validating sheet: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+                Log::error('Error validating sheet: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             }
 
             $sheetUrl = $sheetPath ? url("/statsreports/{$statsReport->id}/download") : null;
