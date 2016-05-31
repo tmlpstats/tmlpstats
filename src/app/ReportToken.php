@@ -67,19 +67,25 @@ class ReportToken extends Model
 
         $date = $globalReport->reportingDate->toDateString();
 
+        $reportUrl = '';
         switch ($this->ownerType) {
             case Center::class:
                 $center = Center::find($this->ownerId);
+                if (!$center) {
+                    // Since we don't have a foriegn key constraint on this field, we have to be more careful
+                    break;
+                }
                 $statsReport = $globalReport->getStatsReportByCenter($center);
                 if ($statsReport) {
                     $reportUrl = "reports/centers/{$center->abbreviation}/{$date}";
                 }
                 break;
             case Region::class:
+                // Allowing this to fall through.
+                // Since we don't have a foriegn key constraint on this field, we have to be more careful
+                $region = Region::find($this->ownerId);
             default:
-                if ($this->ownerId) {
-                    $region = Region::find($this->ownerId);
-                } else {
+                if (!$region) {
                     $region = App::make(Controller::class)->getRegion(Request::instance());
                 }
 
