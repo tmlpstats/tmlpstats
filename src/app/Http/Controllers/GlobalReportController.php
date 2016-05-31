@@ -134,9 +134,9 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getStatsReportsNotOnList(Models\GlobalReport $globalReport)
     {
         $statsReports = Models\StatsReport::reportingDate($globalReport->reportingDate)
-                                          ->submitted()
-                                          ->validated(true)
-                                          ->get();
+            ->submitted()
+            ->validated(true)
+            ->get();
 
         $centers = [];
         foreach ($statsReports as $statsReport) {
@@ -286,12 +286,12 @@ class GlobalReportController extends ReportDispatchAbstractController
             foreach ($children as $childRegion) {
                 $regions[] = $childRegion;
                 $regionsData[$childRegion->abbreviation] = App::make(Api\GlobalReport::class)
-                                                              ->getQuarterScoreboard($globalReport, $childRegion);
+                    ->getQuarterScoreboard($globalReport, $childRegion);
             }
         }
         $regions[] = $region;
         $regionsData[$region->abbreviation] = App::make(Api\GlobalReport::class)
-                                                 ->getQuarterScoreboard($globalReport, $region);
+            ->getQuarterScoreboard($globalReport, $region);
 
         // This should get merged with the other reg per participant code and put in the api
         $rpp = [];
@@ -301,8 +301,8 @@ class GlobalReportController extends ReportDispatchAbstractController
             $participantCount = 0;
             foreach ($statsReports as $report) {
                 $participantCount += Models\TeamMemberData::byStatsReport($report)
-                                                          ->active()
-                                                          ->count();
+                    ->active()
+                    ->count();
             }
 
             $dateStr = $globalReport->reportingDate->toDateString();
@@ -336,11 +336,11 @@ class GlobalReportController extends ReportDispatchAbstractController
         $regionsData = [];
         foreach ($regions as $childRegion) {
             $regionsData[$childRegion->abbreviation] = App::make(Api\GlobalReport::class)
-                                                          ->getWeekScoreboard($globalReport, $childRegion);
+                ->getWeekScoreboard($globalReport, $childRegion);
 
             if ($nextMilestone->ne($globalReport->reportingDate)) {
                 $promiseData = App::make(Api\GlobalReport::class)
-                                  ->getWeekScoreboard($globalReport, $childRegion, $nextMilestone);
+                    ->getWeekScoreboard($globalReport, $childRegion, $nextMilestone);
 
                 $scoreboard = Scoreboard::blank();
 
@@ -876,7 +876,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         }
 
         $lastGlobalReport = Models\GlobalReport::reportingDate($globalReport->reportingDate->copy()->subWeek())
-                                               ->first();
+            ->first();
         if (!$lastGlobalReport) {
             return null;
         }
@@ -899,8 +899,8 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         foreach ($reportData as $centerName => $centerData) {
             $participantCount = Models\TeamMemberData::byStatsReport($statsReports[$centerName])
-                                                     ->active()
-                                                     ->count();
+                ->active()
+                ->count();
             $totalWeekly = 0;
             $totalQuarterly = 0;
             foreach ($games as $game) {
@@ -1014,8 +1014,8 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getCenterStatsReports(Models\GlobalReport $globalReport, Models\Region $region)
     {
         $statsReports = $globalReport->statsReports()
-                                     ->byRegion($region)
-                                     ->get();
+            ->byRegion($region)
+            ->get();
 
         if ($statsReports->isEmpty()) {
             return null;
@@ -1047,14 +1047,14 @@ class GlobalReportController extends ReportDispatchAbstractController
             if ($report->isOnTime()) {
                 $statsReportData['onTime'] = true;
                 $statsReportData['officialSubmitTime'] = $report->submittedAt->setTimezone($timezone)
-                                                                             ->format('M j @ g:ia T');
+                    ->format('M j @ g:ia T');
                 $ontime++;
             } else {
                 $otherReports = Models\StatsReport::reportingDate($globalReport->reportingDate)
-                                                  ->byCenter($report->center)
-                                                  ->whereNotNull('submitted_at')
-                                                  ->orderBy('submitted_at', 'asc')
-                                                  ->get();
+                    ->byCenter($report->center)
+                    ->whereNotNull('submitted_at')
+                    ->orderBy('submitted_at', 'asc')
+                    ->get();
 
                 if (!$otherReports->isEmpty()) {
 
@@ -1069,21 +1069,21 @@ class GlobalReportController extends ReportDispatchAbstractController
 
                     if ($officialReport && $statsReportData['onTime'] === true) {
                         $statsReportData['officialSubmitTime'] = $officialReport->submittedAt->setTimezone($timezone)
-                                                                                             ->format('M j @ g:ia T');
+                            ->format('M j @ g:ia T');
                         $statsReportData['officialReport'] = $officialReport;
 
                         $statsReportData['revisionSubmitTime'] = $report->submittedAt->setTimezone($timezone)
-                                                                                     ->format('M j @ g:ia T');
+                            ->format('M j @ g:ia T');
                         $statsReportData['revisedReport'] = $report;
                         $resubmitted++;
                     } else {
                         $first = $otherReports->first();
                         $statsReportData['officialSubmitTime'] = $first->submittedAt->setTimezone($timezone)
-                                                                                    ->format('M j @ g:ia T');
+                            ->format('M j @ g:ia T');
                         $statsReportData['officialReport'] = $first;
                         if ($first->id != $report->id) {
                             $statsReportData['revisionSubmitTime'] = $report->submittedAt->setTimezone($timezone)
-                                                                                         ->format('M j @ g:ia T');
+                                ->format('M j @ g:ia T');
                             $statsReportData['revisedReport'] = $report;
                             $resubmitted++;
                         }
@@ -1362,10 +1362,11 @@ class GlobalReportController extends ReportDispatchAbstractController
                 ) {
                     $outOfCompliance = true;
                 } else {
-                    $percent = (($data[$team]['withdrawCount'] + 1) / $data[$team]['totalCount']) * 100;
+                    $withdrawCount = $data[$team]['withdrawCount'] + 1;
+                    $percent = ($withdrawCount / $data[$team]['totalCount']) * 100;
 
                     if (($data[$team]['totalCount'] >= 20 && $percent >= 5)
-                        || ($data[$team]['totalCount'] < 20 && $data[$team]['withdrawCount'] > 1)
+                        || ($data[$team]['totalCount'] < 20 && $withdrawCount > 1)
                     ) {
                         $almostOutOfCompliance[$centerName][$team] = $reportData[$centerName][$team];
                         $almostOutOfCompliance[$centerName]['classroomLeader'] = $reportData[$centerName]['classroomLeader'];
@@ -1393,8 +1394,8 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getStatsReports(Models\GlobalReport $report, Models\Region $region)
     {
         return $report->statsReports()
-                      ->validated()
-                      ->byRegion($region)
-                      ->get();
+            ->validated()
+            ->byRegion($region)
+            ->get();
     }
 }
