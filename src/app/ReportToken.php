@@ -85,7 +85,7 @@ class ReportToken extends Model
                 // Since we don't have a foriegn key constraint on this field, we have to be more careful
                 $region = Region::find($this->ownerId);
             default:
-                if (!$region) {
+                if (!isset($region) || !$region) {
                     $region = App::make(Controller::class)->getRegion(Request::instance());
                 }
 
