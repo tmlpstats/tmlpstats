@@ -61,7 +61,7 @@
             <tr class="border-top">
                 <th class="border-right">&nbsp;</th>
                 @foreach ($regionsData as $name => $data)
-                @if (isset($regionsData[$name][$globalReport->reportingDate->toDateString()]))
+                @if (!isset($regionsData[$name][$globalReport->reportingDate->toDateString()]))
                     <th colspan="3" class="data-point"></th>
                     <th class="data-point"></th>
                 @else

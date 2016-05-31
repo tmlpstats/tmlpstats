@@ -344,8 +344,8 @@ class GlobalReportController extends ReportDispatchAbstractController
 
                 $scoreboard = Scoreboard::blank();
 
-                $promises = $promiseData['promise'];
-                $actuals = $regionsData[$childRegion->abbreviation]['actual'];
+                $promises = isset($promiseData['promise']) ? $promiseData['promise'] : 0;
+                $actuals = isset($regionsData[$childRegion->abbreviation]['actual']) ? $regionsData[$childRegion->abbreviation]['actual'] : 0;
                 foreach ($scoreboard->games() as $game) {
                     $promise = isset($promises[$game->key]) ? $promises[$game->key] : 0;
                     $actual = isset($actuals[$game->key]) ? $actuals[$game->key] : 0;
