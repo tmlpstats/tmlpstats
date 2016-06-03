@@ -1,10 +1,16 @@
-require('es6-promise').polyfill();
-var elixir = require('laravel-elixir');
+require('es6-promise').polyfill()
+var elixir = require('laravel-elixir')
 
 // Allow us to use the .jsx extension for React files
-elixir.config.js.browserify.options.extensions = ['.jsx', '.js'];
-elixir.config.js.browserify.transformers[0].options.plugins = ["transform-class-properties"];
-elixir.config.browserSync.reloadDelay = 2000 // wait 2 seconds after a reload for laravel to find new static files
+elixir.config.js.browserify.options.extensions = ['.jsx', '.js']
+elixir.config.js.browserify.transformers[0].options.plugins = ['transform-class-properties']
+elixir.config.js.browserify.transformers.push({
+    name: 'envify',
+    options: {
+        NODE_ENV: elixir.config.production ? 'production' : 'development'
+    }
+})
+elixir.config.browserSync.reloadDelay = 3000 // wait 2 seconds after a reload for laravel to find new static files
 
 elixir(function(mix) {
     // Compile, and package all css into a single file

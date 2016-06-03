@@ -10,11 +10,13 @@ const reducer = combineReducers({
     submission: submissionReducer
 })
 
-const _middlewares = compose(
-    applyMiddleware(thunk.withExtraArgument({Api: window.Api})),
-    window.devToolsExtension ? window.devToolsExtension() : f => f
-)
+var _enhancers = applyMiddleware(thunk.withExtraArgument({Api: window.Api}))
 
-export const store = createStore(reducer, undefined, _middlewares)
+// This trick will remove Redux devtools in production
+if (process.env.NODE_ENV != 'production') {
+    _enhancers = compose(_enhancers, window.devToolsExtension ? window.devToolsExtension() : f => f)
+}
+
+export const store = createStore(reducer, undefined, _enhancers)
 
 export const history = syncHistoryWithStore(browserHistory, store)

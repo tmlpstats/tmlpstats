@@ -7,4 +7,5 @@ class CenterParser extends IdOrAbbrParserBase
 {
     protected $type = 'center';
     protected $class = Center::class;
+    protected $allowObj = true;
 }
