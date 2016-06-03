@@ -1,5 +1,4 @@
 <?php
-
 namespace TmlpStats\Policies;
 
 use TmlpStats\User;
@@ -35,6 +34,6 @@ class ReportTokenPolicy extends Policy
      */
     public function readLink(User $user)
     {
-        return $user->hasRole('globalStatistician');
+        return ($user->hasRole('globalStatistician') || $user->hasRole('localStatistician'));
     }
 }
