@@ -1,8 +1,8 @@
 <?php
 namespace TmlpStats\Validate\Objects;
 
-use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use Respect\Validation\Validator as v;
+use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 
 class CommCourseInfoValidator extends ObjectsValidatorAbstract
 {
@@ -10,27 +10,27 @@ class CommCourseInfoValidator extends ObjectsValidatorAbstract
 
     protected function populateValidators($data)
     {
-        $positiveIntValidator       = v::intVal()->min(0, true);
+        $positiveIntValidator = v::intVal()->min(0, true);
         $positiveIntOrNullValidator = v::optional($positiveIntValidator);
 
         $types = ['CAP', 'CPC'];
 
-        $this->dataValidators['startDate']                  = v::date('Y-m-d');
-        $this->dataValidators['location']                   = v::optional(v::stringType());
-        $this->dataValidators['type']                       = v::in($types);
-        $this->dataValidators['quarterStartTer']            = $positiveIntValidator;
+        $this->dataValidators['startDate'] = v::date('Y-m-d');
+        $this->dataValidators['location'] = v::optional(v::stringType());
+        $this->dataValidators['type'] = v::in($types);
+        $this->dataValidators['quarterStartTer'] = $positiveIntValidator;
         $this->dataValidators['quarterStartStandardStarts'] = $positiveIntValidator;
-        $this->dataValidators['quarterStartXfer']           = $positiveIntValidator;
-        $this->dataValidators['currentTer']                 = $positiveIntValidator;
-        $this->dataValidators['currentStandardStarts']      = $positiveIntValidator;
-        $this->dataValidators['currentXfer']                = $positiveIntValidator;
-        $this->dataValidators['completedStandardStarts']    = $positiveIntOrNullValidator;
-        $this->dataValidators['potentials']                 = $positiveIntOrNullValidator;
-        $this->dataValidators['registrations']              = $positiveIntOrNullValidator;
-        $this->dataValidators['guestsPromised']             = $positiveIntOrNullValidator;
-        $this->dataValidators['guestsInvited']              = $positiveIntOrNullValidator;
-        $this->dataValidators['guestsConfirmed']            = $positiveIntOrNullValidator;
-        $this->dataValidators['guestsAttended']             = $positiveIntOrNullValidator;
+        $this->dataValidators['quarterStartXfer'] = $positiveIntValidator;
+        $this->dataValidators['currentTer'] = $positiveIntValidator;
+        $this->dataValidators['currentStandardStarts'] = $positiveIntValidator;
+        $this->dataValidators['currentXfer'] = $positiveIntValidator;
+        $this->dataValidators['completedStandardStarts'] = $positiveIntOrNullValidator;
+        $this->dataValidators['potentials'] = $positiveIntOrNullValidator;
+        $this->dataValidators['registrations'] = $positiveIntOrNullValidator;
+        $this->dataValidators['guestsPromised'] = $positiveIntOrNullValidator;
+        $this->dataValidators['guestsInvited'] = $positiveIntOrNullValidator;
+        $this->dataValidators['guestsConfirmed'] = $positiveIntOrNullValidator;
+        $this->dataValidators['guestsAttended'] = $positiveIntOrNullValidator;
     }
 
     protected function validate($data)
@@ -85,6 +85,13 @@ class CommCourseInfoValidator extends ObjectsValidatorAbstract
 
                     $withdrew = $data->currentStandardStarts - $data->completedStandardStarts;
                     $this->addMessage('COMMCOURSE_COMPLETED_SS_LESS_THAN_CURRENT_SS', $withdrew);
+                }
+            }
+
+            if (!is_null($data->potentials) && !is_null($data->registrations)) {
+                if ($data->potentials < $data->registrations) {
+                    $this->addMessage('COMMCOURSE_COMPLETED_REGISTRATIONS_GREATER_THAN_POTENTIALS', $data->potentials, $data->registrations);
+                    $isValid = false;
                 }
             }
         } else {
@@ -144,11 +151,11 @@ class CommCourseInfoValidator extends ObjectsValidatorAbstract
                 $isValid = false;
             }
 
-            if ($data->currentTer < (int)$data->quarterStartTer) {
+            if ($data->currentTer < (int) $data->quarterStartTer) {
 
                 $this->addMessage('COMMCOURSE_CURRENT_TER_LESS_THAN_QSTART_TER', $data->currentTer, $data->quarterStartTer);
             }
-            if ($data->currentXfer < (int)$data->quarterStartXfer) {
+            if ($data->currentXfer < (int) $data->quarterStartXfer) {
 
                 $this->addMessage('COMMCOURSE_CURRENT_XFER_LESS_THAN_QSTART_XFER', $data->currentXfer, $data->quarterStartXfer);
             }

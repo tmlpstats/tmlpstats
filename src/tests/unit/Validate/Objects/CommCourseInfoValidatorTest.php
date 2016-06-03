@@ -198,7 +198,7 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
         $atlanta = new stdClass();
         $atlanta->name = 'Atlanta';
 
-        $statsReport = new stdClass;
+        $statsReport = new stdClass();
         $statsReport->reportingDate = Carbon::createFromDate(2015, 5, 8);
         $statsReport->center = $atlanta;
 
@@ -455,6 +455,22 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
                 ],
                 false,
             ],
+            // Course in past with more registrations than potentials
+            [
+                Util::arrayToObject([
+                    'startDate' => '2015-05-02',
+                    'location' => 'Atlanta',
+                    'completedStandardStarts' => 35,
+                    'potentials' => 25,
+                    'registrations' => 30,
+                    'currentStandardStarts' => 35,
+                ]),
+                $statsReport,
+                [
+                    ['COMMCOURSE_COMPLETED_REGISTRATIONS_GREATER_THAN_POTENTIALS'],
+                ],
+                false,
+            ],
         ];
     }
 
@@ -476,7 +492,7 @@ class CommCourseInfoValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateCourseStartDate()
     {
-        $statsReport = new stdClass;
+        $statsReport = new stdClass();
         $statsReport->center = new Center();
         $statsReport->quarter = $this->getQuarterMock([], [
             'startWeekendDate' => Carbon::createFromDate(2015, 2, 20)->startOfDay(),
