@@ -22,7 +22,7 @@ class ApiController extends ApiControllerBase
         "Application.update" => "Application__update",
         "Application.allForCenter" => "Application__allForCenter",
         "Application.getWeekData" => "Application__getWeekData",
-        "Application.setWeekData" => "Application__setWeekData",
+        "Application.stash" => "Application__stash",
         "Context.getCenter" => "Context__getCenter",
         "Context.setCenter" => "Context__setCenter",
         "Context.getSetting" => "Context__getSetting",
@@ -51,6 +51,7 @@ class ApiController extends ApiControllerBase
         "TeamMember.getWeekData" => "TeamMember__getWeekData",
         "TeamMember.setWeekData" => "TeamMember__setWeekData",
         "UserProfile.setLocale" => "UserProfile__setLocale",
+        "SubmissionData.ignoreMe" => "SubmissionData__ignoreMe",
     ];
 
     protected $unauthenticatedMethods = [
@@ -74,6 +75,7 @@ class ApiController extends ApiControllerBase
     {
         return App::make(Api\Application::class)->allForCenter(
             $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'includeInProgress', 'bool', false),
             $this->parse($input, 'reportingDate', 'date', false)
         );
     }
@@ -84,10 +86,10 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'reportingDate', 'date', false)
         );
     }
-    protected function Application__setWeekData($input)
+    protected function Application__stash($input)
     {
-        return App::make(Api\Application::class)->setWeekData(
-            $this->parse($input, 'application', 'Application'),
+        return App::make(Api\Application::class)->stash(
+            $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'data', 'array')
         );
@@ -284,6 +286,13 @@ class ApiController extends ApiControllerBase
     {
         return App::make(Api\UserProfile::class)->setLocale(
             $this->parse($input, 'locale', 'string'),
+            $this->parse($input, 'timezone', 'string')
+        );
+    }
+    protected function SubmissionData__ignoreMe($input)
+    {
+        return App::make(Api\SubmissionData::class)->ignoreMe(
+            $this->parse($input, 'center', 'string'),
             $this->parse($input, 'timezone', 'string')
         );
     }

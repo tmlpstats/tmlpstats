@@ -55,6 +55,9 @@ api:
         params:
           - name: center
             type: Center
+          - name: includeInProgress
+            type: bool
+            required: false
           - name: reportingDate
             type: date
             required: false
@@ -66,16 +69,15 @@ api:
           - name: reportingDate
             type: date
             required: false
-      setWeekData:
-        desc: Set the weekly data for an application
+      stash:
+        desc: Stash combined data for an application
         params:
-          - name: application
-            type: Application
+          - name: center
+            type: Center
           - name: reportingDate
             type: date
           - name: data
             type: array
-
   Context:
     type: namespace
     children:
@@ -314,6 +316,17 @@ api:
         desc: Set locale information
         params:
           - name: locale
+            type: string
+          - name: timezone
+            type: string
+
+  SubmissionData:
+    type: namespace
+    children:
+      ignoreMe:
+        desc: Ignore Me. Maybe I'll have public methods in the future.
+        params:
+          - name: center
             type: string
           - name: timezone
             type: string

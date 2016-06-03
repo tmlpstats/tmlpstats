@@ -49,6 +49,7 @@ Api.Application = {
     List applications by center
     Parameters:
       center: Center
+      includeInProgress: bool
       reportingDate: date
     */
     allForCenter: function(params, callback, errback) {
@@ -66,14 +67,14 @@ Api.Application = {
     },
 
     /*
-    Set the weekly data for an application
+    Stash combined data for an application
     Parameters:
-      application: Application
+      center: Center
       reportingDate: date
       data: array
     */
-    setWeekData: function(params, callback, errback) {
-        return apiCall('Application.setWeekData', params, (callback || null), (errback || null));
+    stash: function(params, callback, errback) {
+        return apiCall('Application.stash', params, (callback || null), (errback || null));
     }
 };
 Api.Context = {
@@ -367,5 +368,17 @@ Api.UserProfile = {
     */
     setLocale: function(params, callback, errback) {
         return apiCall('UserProfile.setLocale', params, (callback || null), (errback || null));
+    }
+};
+Api.SubmissionData = {
+
+    /*
+    Ignore Me. Maybe I&#039;ll have public methods in the future.
+    Parameters:
+      center: string
+      timezone: string
+    */
+    ignoreMe: function(params, callback, errback) {
+        return apiCall('SubmissionData.ignoreMe', params, (callback || null), (errback || null));
     }
 };

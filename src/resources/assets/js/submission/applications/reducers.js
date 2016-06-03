@@ -3,7 +3,7 @@ import { modelReducer, formReducer } from 'react-redux-form'
 
 import { appsCollection, applicationsLoad, saveAppLoad } from './data'
 
-export const APPLICATIONS_FORM_KEY = 'submission.application.currentApp'
+export const APPLICATIONS_FORM_KEY = 'submission.applications.currentApp'
 
 
 export const applicationReducer = combineReducers({
