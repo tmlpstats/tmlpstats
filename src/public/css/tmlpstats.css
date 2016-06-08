@@ -57,6 +57,12 @@ body.no-navbar{
     margin: 50px 50px;
 }
 
+table.no-border, table.no-border>tbody>tr,
+table.no-border>tbody>tr>th, table.no-border>tbody>tr>td {
+    border-width: 0px;
+    border-collapse: collapse;
+}
+
 .centerStatsTable th, .centerStatsTable td {
     text-align: center;
 }
