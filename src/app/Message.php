@@ -360,7 +360,7 @@ class Message
         ],
         'COMMCOURSE_COMPLETED_REGISTRATIONS_GREATER_THAN_POTENTIALS' => [
             'type' => Message::ERROR,
-            'format' => 'Registrations (%%potentials%%) cannot be greater than the number of potentials for the course (%%registrations%%). Please confirm what the correct values are with the course supervisor and/or your program manager.',
+            'format' => 'Registrations (%%registrations%%) cannot be greater than the number of potentials for the course (%%potentials%%). Please confirm what the correct values are with the course supervisor and/or your program manager.',
             'arguments' => [
                 '%%potentials%%',
                 '%%registrations%%',
