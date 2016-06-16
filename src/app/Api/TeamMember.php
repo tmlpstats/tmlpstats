@@ -186,8 +186,8 @@ class TeamMember extends ApiBase
 
         foreach ($data as $property => $value) {
             if ($this->validProperties[$property]['owner'] == 'teamMemberData') {
-                if (($teamMemberData->$property instanceof Carbon) && Carbon::parse($value)
-                                                                            ->ne($teamMemberData->$property)
+                if (($teamMemberData->$property instanceof Carbon)
+                    && Carbon::parse($value)->ne($teamMemberData->$property)
                 ) {
                     $teamMemberData->$property = Carbon::parse($value)->startOfDay();
                 } else if ($teamMemberData->$property !== $value) {

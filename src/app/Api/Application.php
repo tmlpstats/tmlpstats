@@ -186,7 +186,16 @@ class Application extends ApiBase
         }
         $submissionData->store($center, $reportingDate, $teamApp);
 
-        return ['success' => true, 'storedId' => $appId];
+        // TODO: pass a real stats report?
+        // $report = new Models\StatsReport(['reportingDate' => $reportingDate]);
+        // $validationResults = $this->validateObject($report, $teamApp, $appId);
+
+        return [
+            'success' => true,
+            'storedId' => $appId,
+            // 'valid' => $validationResults['valid'],
+            // 'messages' => $validationResults['messages'],
+        ];
     }
 
     /**
@@ -197,7 +206,6 @@ class Application extends ApiBase
      */
     public function commitStashedApp(Models\TmlpRegistration $application, Carbon $reportingDate, Domain\TeamApplication $data)
     {
-
         $report = LocalReport::getStatsReport($application->center, $reportingDate);
 
         $applicationData = Models\TmlpRegistrationData::firstOrCreate([

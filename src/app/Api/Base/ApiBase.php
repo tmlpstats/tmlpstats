@@ -5,8 +5,11 @@ use Cache;
 use Illuminate\Auth\Guard;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Api\Parsers;
+use TmlpStats\Domain\ParserDomain;
+use TmlpStats\Validate\ApiValidationManager;
 
 class ApiBase
 {
@@ -204,5 +207,17 @@ class ApiBase
         }
 
         return array_merge($arr1, $arr2);
+    }
+
+    public function validateObject(Models\StatsReport $statsReport, ParserDomain $object, $id = null)
+    {
+        $validator = new ApiValidationManager($statsReport);
+
+        $success = $validator->runOne($object, $id);
+
+        return [
+            'valid' => $success,
+            'messages' => $validator->getMessages(),
+        ];
     }
 }

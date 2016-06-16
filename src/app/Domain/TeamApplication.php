@@ -38,9 +38,10 @@ class TeamApplication extends ParserDomain
             'owner' => 'application',
             'type' => 'bool',
         ],
-        'tmlpRegistrationId' => [
+        'tmlpRegistration' => [
             'owner' => 'applicationData',
-            'type' => 'int',
+            'type' => 'Application',
+            'assignId' => true,
         ],
         'appOutDate' => [
             'owner' => 'applicationData',
@@ -58,13 +59,15 @@ class TeamApplication extends ParserDomain
             'owner' => 'applicationData',
             'type' => 'date',
         ],
-        'withdrawCodeId' => [
+        'withdrawCode' => [
             'owner' => 'applicationData',
-            'type' => 'int', // TODO: validate withdrawCode from the ID
+            'type' => 'WithdrawCode',
+            'assignId' => true,
         ],
-        'committedTeamMemberId' => [
+        'committedTeamMember' => [
             'owner' => 'applicationData',
-            'type' => 'int',
+            'type' => 'TeamMember',
+            'assignId' => true,
         ],
         'incomingQuarter' => [
             'owner' => 'applicationData',
@@ -120,7 +123,7 @@ class TeamApplication extends ParserDomain
                     }
             }
         }
-        $obj->tmlpRegistrationId = $application->id;
+        $obj->tmlpRegistration = $application->id;
 
         return $obj;
     }

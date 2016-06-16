@@ -5,6 +5,8 @@ use TmlpStats\Quarter;
 
 trait MocksQuarters
 {
+    protected static $idOffset = 0;
+
     /**
      * Get a Quarter object mock
      *
@@ -25,12 +27,16 @@ trait MocksQuarters
             'getClassroom2Date',
             'getClassroom3Date',
             'getQuarterDate',
+            'getNextQuarter',
         ];
         $methods = $this->mergeMockMethods($defaultMethods, $methods);
 
         $quarter = $this->getMockBuilder(Quarter::class)
                         ->setMethods($methods)
                         ->getMock();
+
+        static::$idOffset++;
+        $quarter->id = static::$idOffset;
 
         if (!$data) {
             return $quarter;
@@ -58,6 +64,10 @@ trait MocksQuarters
 
         $firstWeekDate = isset($data['firstWeekDate'])
             ? $data['firstWeekDate']
+            : null;
+
+        $nextQuarter = isset($data['nextQuarter'])
+            ? $data['nextQuarter']
             : null;
 
         if (!$firstWeekDate && $startWeekendDate) {
@@ -89,6 +99,9 @@ trait MocksQuarters
                         ? $data[$field]
                         : null;
                 }));
+
+        $quarter->method('getNextQuarter')
+                ->willReturn($nextQuarter);
 
         return $quarter;
     }

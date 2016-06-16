@@ -75,7 +75,7 @@ class Course extends ApiBase
             ->official()
             ->where('reporting_date', '<=', $reportingDate)
             ->orderBy('reporting_date', 'asc')
-            ->with('tmlpRegistrationData')
+            ->with('courseData')
             ->get();
 
         $allCourses = [];
