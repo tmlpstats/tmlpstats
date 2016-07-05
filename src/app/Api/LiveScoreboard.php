@@ -94,7 +94,7 @@ class LiveScoreboard extends AuthenticatedApiBase
         $quarterEndDate = $report->quarter->getQuarterEndDate($report->center);
         $actualDate = $report->reportingDate;
         $promiseDate = $actualDate->copy();
-        while ($promiseDate->lt(Carbon::now())
+        while ($promiseDate->lt(Carbon::now($report->center->timezone))
             && $promiseDate->lt($quarterEndDate)
             && $promiseDate->gt($quarterFirstWeekDate)
         ) {
