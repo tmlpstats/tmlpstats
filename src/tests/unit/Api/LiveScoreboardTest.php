@@ -3,11 +3,11 @@ namespace TmlpStats\Tests\Unit\Api;
 
 use App;
 use Carbon\Carbon;
-use Mockery;
+use Illuminate\Auth\Guard;
+use Illuminate\Http\Request;
 use TmlpStats as Models;
-use TmlpStats\Domain;
 use TmlpStats\Api;
-use TmlpStats\Reports\Arrangements;
+use TmlpStats\Domain;
 use TmlpStats\Tests\TestAbstract;
 
 class LiveScoreboardTest extends TestAbstract
@@ -26,7 +26,7 @@ class LiveScoreboardTest extends TestAbstract
         $type = 'actual';
         $value = 1234;
 
-        $center     = new Models\Center();
+        $center = new Models\Center();
         $center->id = 1;
 
         $currentScoresArray = ['games' => ['so', 'many']];
@@ -53,24 +53,24 @@ class LiveScoreboardTest extends TestAbstract
             'logChanges',
             'getTempScoreboardGame',
             'getCurrentScores',
-        ], [App::make(Api\Context::class)]);
+        ], $this->constructorArgs());
 
         $api->expects($this->once())
             ->method('logChanges')
             ->with($this->equalTo([
-                'center_id' => $center->id,
-                'game' => $game,
-                'type' => $type,
-                'value' => $value,
-            ]));
+                      'center_id' => $center->id,
+                      'game' => $game,
+                      'type' => $type,
+                      'value' => $value,
+                  ]));
 
         $api->expects($this->once())
             ->method('getTempScoreboardGame')
             ->with($this->equalTo([
-                'center_id' => $center->id,
-                'routing_key' => "live.{$game}.{$type}",
-            ]))
-            ->willReturn($item);
+                                      'center_id' => $center->id,
+                                      'routing_key' => "live.{$game}.{$type}",
+                                  ]))
+                        ->willReturn($item);
 
         $api->expects($this->once())
             ->method('getCurrentScores')
@@ -90,12 +90,12 @@ class LiveScoreboardTest extends TestAbstract
         $type = 'promise';
         $value = 1234;
 
-        $center     = new Models\Center();
+        $center = new Models\Center();
         $center->id = 1;
 
         $api = $this->getObjectMock([
             'getCurrentScores',
-        ], [App::make(Api\Context::class)]);
+        ], $this->constructorArgs());
 
         $api->setScore($center, $game, $type, $value);
     }
@@ -105,7 +105,7 @@ class LiveScoreboardTest extends TestAbstract
      */
     public function testGetCurrentScores($reportData, $tempScores, $expectedResult)
     {
-        $center     = new Models\Center();
+        $center = new Models\Center();
         $center->id = 1;
 
         $report = new Models\StatsReport();
@@ -116,7 +116,7 @@ class LiveScoreboardTest extends TestAbstract
             'getLatestReport',
             'getOfficialScores',
             'getTempScoreboardForCenter',
-        ], [App::make(Api\Context::class)]);
+        ], $this->constructorArgs());
 
         $api->expects($this->once())
             ->method('getLatestReport')
@@ -148,77 +148,77 @@ class LiveScoreboardTest extends TestAbstract
     public function providerGetCurrentScores()
     {
         $blankScoreboard = [
-            'cap'  => [
+            'cap' => [
                 'promise' => 0,
-                'actual'  => null,
+                'actual' => null,
             ],
-            'cpc'  => [
+            'cpc' => [
                 'promise' => 0,
-                'actual'  => null,
+                'actual' => null,
             ],
-            't1x'  => [
+            't1x' => [
                 'promise' => 0,
-                'actual'  => null,
+                'actual' => null,
             ],
-            't2x'  => [
+            't2x' => [
                 'promise' => 0,
-                'actual'  => null,
+                'actual' => null,
             ],
             'gitw' => [
                 'promise' => 0,
-                'actual'  => null,
+                'actual' => null,
             ],
-            'lf'   => [
+            'lf' => [
                 'promise' => 0,
-                'actual'  => null,
+                'actual' => null,
             ],
         ];
 
         $seedData = [
-            'cap'  => [
+            'cap' => [
                 'promise' => 10,
-                'actual'  => 1,
+                'actual' => 1,
             ],
-            'cpc'  => [
+            'cpc' => [
                 'promise' => 20,
-                'actual'  => 2,
+                'actual' => 2,
             ],
-            't1x'  => [
+            't1x' => [
                 'promise' => 30,
-                'actual'  => 3,
+                'actual' => 3,
             ],
-            't2x'  => [
+            't2x' => [
                 'promise' => 40,
-                'actual'  => 4,
+                'actual' => 4,
             ],
             'gitw' => [
                 'promise' => 50,
-                'actual'  => 5,
+                'actual' => 5,
             ],
-            'lf'   => [
+            'lf' => [
                 'promise' => 60,
-                'actual'  => 6,
+                'actual' => 6,
             ],
         ];
 
         $tempData = [
-            'cap'  => [
-                'actual'  => 2,
+            'cap' => [
+                'actual' => 2,
             ],
-            'cpc'  => [
-                'actual'  => 4,
+            'cpc' => [
+                'actual' => 4,
             ],
-            't1x'  => [
-                'actual'  => 6,
+            't1x' => [
+                'actual' => 6,
             ],
-            't2x'  => [
-                'actual'  => 8,
+            't2x' => [
+                'actual' => 8,
             ],
             'gitw' => [
-                'actual'  => 10,
+                'actual' => 10,
             ],
-            'lf'   => [
-                'actual'  => 12,
+            'lf' => [
+                'actual' => 12,
             ],
         ];
 
@@ -248,7 +248,7 @@ class LiveScoreboardTest extends TestAbstract
         // Verify updated promises are NOT returned
         $tempDataWithPromises = $tempData;
         foreach ($seedData as $game => $gameData) {
-            $tempDataWithPromises[$game]['promise'] =  $gameData['promise'] + 1;
+            $tempDataWithPromises[$game]['promise'] = $gameData['promise'] + 1;
         }
 
         $data[] = [
@@ -352,4 +352,14 @@ class LiveScoreboardTest extends TestAbstract
 
         return $result;
     }
+
+    protected function constructorArgs()
+    {
+        return [
+            App::make(Api\Context::class),
+            App::make(Guard::class),
+            App::make(Request::class),
+        ];
+    }
+
 }

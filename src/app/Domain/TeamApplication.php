@@ -17,10 +17,6 @@ class TeamApplication extends ParserDomain
             'owner' => 'person',
             'type' => 'string',
         ],
-        'phone' => [
-            'owner' => 'person',
-            'type' => 'string',
-        ],
         'email' => [
             'owner' => 'person',
             'type' => 'string',
@@ -29,10 +25,6 @@ class TeamApplication extends ParserDomain
             'owner' => 'person',
             'type' => 'Center',
             'assignId' => true,
-        ],
-        'unsubscribed' => [
-            'owner' => 'person',
-            'type' => 'bool',
         ],
         'teamYear' => [
             'owner' => 'application',
@@ -91,6 +83,17 @@ class TeamApplication extends ParserDomain
             'owner' => 'applicationData',
             'type' => 'bool',
         ],
+        'phone' => [
+            'owner' => 'person',
+            'type' => 'string',
+        ],
+        /*
+        FIELDS WE CURRENTLY DO NOT CARE ABOUT
+
+        'unsubscribed' => [
+            'owner' => 'person',
+            'type' => 'bool',
+        ],*/
     ];
 
     public static function fromModel($appData, $application = null, $person = null)
@@ -112,7 +115,9 @@ class TeamApplication extends ParserDomain
                     $obj->$k = $application->$k;
                     break;
                 case 'applicationData':
-                    $obj->$k = $appData->$k;
+                    if ($appData != null) {
+                        $obj->$k = $appData->$k;
+                    }
             }
         }
         $obj->tmlpRegistrationId = $application->id;

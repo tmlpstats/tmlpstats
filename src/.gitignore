@@ -10,4 +10,5 @@ public/css/app.css
 public/css/main.css
 public/js/bundle.js
 public/js/main.js
+public/js/vendor.js
 public/components

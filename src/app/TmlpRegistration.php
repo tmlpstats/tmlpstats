@@ -77,9 +77,9 @@ class TmlpRegistration extends Model
         // If we couldnt find anyone with that name, create a new person
         if (!$person) {
             $person = Person::create([
-                'center_id'  => $attributes['center_id'],
+                'center_id' => $attributes['center_id'],
                 'first_name' => $attributes['first_name'],
-                'last_name'  => $attributes['last_name'],
+                'last_name' => $attributes['last_name'],
                 'identifier' => $identifier,
             ]);
         } else if ($person->identifier != $identifier) {
@@ -110,12 +110,12 @@ class TmlpRegistration extends Model
         // No idea why I have to do this, but it was breaking because parent::firstOfNew
         // was actually re-calling this method
         $attributes = [
-            'reg_date'  => $attributes['reg_date'],
+            'reg_date' => $attributes['reg_date'],
             'team_year' => $attributes['team_year'],
             'person_id' => $person->id,
         ];
 
-        if (! is_null($instance = (new static)->newQueryWithoutScopes()->where($attributes)->first())) {
+        if (!is_null($instance = (new static())->newQueryWithoutScopes()->where($attributes)->first())) {
             return $instance;
         }
 

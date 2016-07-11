@@ -55,6 +55,11 @@ class CourseTest extends FunctionalTestAbstract
         ]);
     }
 
+    public function tearDown()
+    {
+        Carbon::setTestNow();
+    }
+
     /**
      * @dataProvider providerCreate
      */
@@ -125,6 +130,9 @@ class CourseTest extends FunctionalTestAbstract
      */
     public function testGetWeekData($reportingDate = null)
     {
+        if (!$reportingDate) {
+            Carbon::setTestNow(Carbon::create(2016, 05, 20));
+        }
         $parameters = [
             'method' => 'Course.getWeekData',
             'course' => $this->course->id,
@@ -147,6 +155,7 @@ class CourseTest extends FunctionalTestAbstract
 
             $courseDataId = Models\CourseData::count() + 1;
         }
+        unset($report['updatedAt'], $report['createdAt']);
 
         $expectedResponse = [
             'id' => $courseDataId,
@@ -164,7 +173,7 @@ class CourseTest extends FunctionalTestAbstract
         return [
             ['2016-04-08'], // Non-existent report
             ['2016-04-15'], // Existing report
-            [], // No date provided
+            [null], // No date provided
         ];
     }
 
@@ -247,6 +256,9 @@ class CourseTest extends FunctionalTestAbstract
      */
     public function testAllForCenter($reportingDate = null)
     {
+        if (!$reportingDate) {
+            Carbon::setTestNow(Carbon::create(2016, 05, 20));
+        }
         $parameters = [
             'method' => 'Course.allForCenter',
             'center' => $this->center->id,
@@ -389,7 +401,7 @@ class CourseTest extends FunctionalTestAbstract
     {
         return [
             ['2016-04-15'], // Existing report
-            [], // No report
+            [null], // No report
         ];
     }
 

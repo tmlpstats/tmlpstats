@@ -1,8 +1,8 @@
-import React from 'react';
+import React from 'react'
 import { Route, IndexRedirect } from 'react-router'
-import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
+import { SubmissionBase } from './base_components'
 import SubmissionNav from './Nav'
 import * as Pages from './pages'
 
@@ -13,11 +13,14 @@ const steps = new Map([
     ['applications', {name: 'Team Expansion'}],
     ['classlist', {name: 'Class List'}],
     ['courses', {name: 'Courses'}],
-    ['review', {name: 'Review'}],
-]);
+    ['review', {name: 'Review'}]
+])
 
-class SubmissionFlowComponent extends React.Component {
+class SubmissionFlowComponent extends SubmissionBase {
     render() {
+        if (!this.checkReportingDate()) {
+            return this.renderBasicLoading()
+        }
         return (
             <div className="row">
                 <div className="col-md-2"><SubmissionNav params={this.props.params} steps={steps} location={this.props.location} /></div>
@@ -29,30 +32,38 @@ class SubmissionFlowComponent extends React.Component {
                     </div>
                 </div>
             </div>
-        );
+        )
+    }
+
+    checkReportingDate() {
+        if (this.props.params.reportingDate != this.props.reportingDate) {
+            this.props.dispatch({
+                type: 'submission.setReportingDate',
+                payload: this.props.params.reportingDate
+            })
+            return false
+        }
+        return true
     }
 }
 
-function mapStateToProps(state) {
-    return {}
-}
+const mapStateToProps = (state) => state.submission.core
 
-const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch)
-
-const SubmissionFlowRoot = connect(mapStateToProps, mapDispatchToProps)(SubmissionFlowComponent)
+const SubmissionFlowRoot = connect(mapStateToProps)(SubmissionFlowComponent)
 
 export default function SubmissionFlow() {
     return (
-        <Route path="/center/:centerId/submission" component={SubmissionFlowRoot}>
+        <Route path="/center/:centerId/submission/:reportingDate" component={SubmissionFlowRoot}>
             <IndexRedirect to="scoreboard" />
             <Route path="scoreboard" component={Pages.Scoreboard} />
             <Route path="applications" component={Pages.ApplicationsIndex} />
             <Route path="applications/edit/:appId" component={Pages.ApplicationsEdit} />
+            <Route path="applications/add" component={Pages.ApplicationsAdd} />
             <Route path="classlist" component={Pages.ClassList} />
             <Route path="courses" component={Pages.CoursesIndex} />
             <Route path="courses/add" component={Pages.CoursesAdd} />
             <Route path="courses/edit/:courseId" component={Pages.CoursesEdit} />
             <Route path="review" component={Pages.Review} />
         </Route>
-    );
+    )
 }

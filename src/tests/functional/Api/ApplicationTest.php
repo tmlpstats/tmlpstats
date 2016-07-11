@@ -1,10 +1,12 @@
 <?php
 namespace TmlpStats\Tests\Functional\Api;
 
+use App;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use TmlpStats as Models;
+use TmlpStats\Api;
 use TmlpStats\Domain;
 use TmlpStats\Tests\Functional\FunctionalTestAbstract;
 
@@ -48,6 +50,11 @@ class ApplicationTest extends FunctionalTestAbstract
         ]);
     }
 
+    public function tearDown()
+    {
+        Carbon::setTestNow(); // Clear test now
+    }
+
     /**
      * @dataProvider providerCreate
      */
@@ -80,7 +87,6 @@ class ApplicationTest extends FunctionalTestAbstract
                 'phone' => null,
                 'email' => null,
                 'centerId' => $this->center->id,
-                'unsubscribed' => false,
             ],
         ];
 
@@ -167,7 +173,7 @@ class ApplicationTest extends FunctionalTestAbstract
             'withdrawCode' => null,
             'committedTeamMember' => null,
             'statsReportId' => $report['id'],
-            'statsReport' => $report,
+            //'statsReport' => $report,
         ];
 
         $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
@@ -183,15 +189,16 @@ class ApplicationTest extends FunctionalTestAbstract
     }
 
     /**
-     * @dataProvider providerSetWeekData
+     * @dataProvider providerStash
      */
-    public function testSetWeekData($reportingDate)
+    public function testStash($reportingDate)
     {
         $parameters = [
-            'method' => 'Application.setWeekData',
-            'application' => $this->application->id,
+            'method' => 'Application.stash',
+            'center' => $this->center->abbreviation,
             'reportingDate' => $reportingDate,
             'data' => [
+                'tmlpRegistrationId' => $this->application->id,
                 'appOutDate' => '2016-04-17',
                 'apprDate' => '2016-04-23',
                 'committedTeamMemberId' => 1,
@@ -209,19 +216,19 @@ class ApplicationTest extends FunctionalTestAbstract
         }
 
         $expectedResponse = [
-            'tmlpRegistrationId' => $this->application->id,
-            'appOutDate' => "{$parameters['data']['appOutDate']}",
-            'apprDate' => "{$parameters['data']['apprDate']}",
-            'regDate' => $this->application->regDate->toDateString(),
-            'incomingQuarter' => null,
-            'withdrawCode' => null,
-            'committedTeamMember' => null,
+            'success' => true,
         ];
 
         $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+        $result1 = App::make(Api\SubmissionData::class)->allForType($this->center, new Carbon($reportingDate), Domain\TeamApplication::class);
+
+        $this->assertEquals(1, count($result1));
+        $result = $result1[0];
+        $this->assertEquals('2016-04-17', $result->appOutDate->toDateString());
+        $this->assertEquals('2016-04-23', $result->apprDate->toDateString());
     }
 
-    public function providerSetWeekData()
+    public function providerStash()
     {
         return [
             ['2016-04-08'], // Non-existent report
@@ -234,9 +241,13 @@ class ApplicationTest extends FunctionalTestAbstract
      */
     public function testAllForCenter($reportingDate = null)
     {
+        if (!$reportingDate) {
+            Carbon::setTestNow(Carbon::create(2016, 05, 20));
+        }
         $parameters = [
             'method' => 'Application.allForCenter',
             'center' => $this->center->id,
+            'includeInProgress' => false,
         ];
         if ($reportingDate) {
             $parameters['reportingDate'] = $reportingDate;
@@ -364,7 +375,7 @@ class ApplicationTest extends FunctionalTestAbstract
     {
         return [
             ['2016-04-15'], // Existing report
-            [], // No report
+            [null], // No report
         ];
     }
 
@@ -401,7 +412,7 @@ class ApplicationTest extends FunctionalTestAbstract
         return [
             ['Application.allForCenter'],
             ['Application.getWeekData'],
-            ['Application.setWeekData'],
+            ['Application.stash'],
         ];
     }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Api;
 
+use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\ApiBase;
@@ -59,7 +60,7 @@ class Application extends ApiBase
         return $application->load('person');
     }
 
-    public function allForCenter(Models\Center $center, Carbon $reportingDate = null)
+    public function allForCenter(Models\Center $center, $includeInProgress = false, Carbon $reportingDate = null)
     {
         if ($reportingDate === null) {
             $reportingDate = LocalReport::getReportingDate($center);
@@ -94,6 +95,14 @@ class Application extends ApiBase
             }
 
             $allApplications[$app->tmlpRegistrationId] = Domain\TeamApplication::fromModel($app);
+        }
+
+        if ($includeInProgress) {
+            $submissionData = App::make(SubmissionData::class);
+            $found = $submissionData->allForType($center, $reportingDate, Domain\TeamApplication::class);
+            foreach ($found as $app) {
+                $allApplications[$app->tmlpRegistrationId] = $app;
+            }
         }
 
         usort($allApplications, function ($a, $b) {
@@ -150,11 +159,44 @@ class Application extends ApiBase
         return $response->load('registration.person', 'incomingQuarter', 'statsReport', 'withdrawCode', 'committedTeamMember.person');
     }
 
-    public function setWeekData(Models\TmlpRegistration $application, Carbon $reportingDate, array $data)
+    /**
+     * Stash information about a registration (combined name data and application progress data) to be used for later validation.
+     * @param  TmlpRegistration $application   The application we're stashing data about.
+     * @param  Carbon           $reportingDate Reporting date
+     * @param  array            $data          Information to use to construct a TeamApplication.
+     */
+    public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
-        if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
-            throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
+        $submissionData = App::make(SubmissionData::class);
+        $appId = array_get($data, 'tmlpRegistrationId', null);
+        if (is_numeric($appId)) {
+            $appId = intval($appId);
         }
+
+        if ($appId !== null && $appId > 0) {
+            $application = Models\TmlpRegistration::findOrFail($appId);
+            $teamApp = Domain\TeamApplication::fromModel(null, $application);
+            $teamApp->updateFromArray($data);
+        } else {
+            if (!$appId) {
+                $appId = $submissionData->generateId();
+                $data['tmlpRegistrationId'] = $appId;
+            }
+            $teamApp = Domain\TeamApplication::fromArray($data);
+        }
+        $submissionData->store($center, $reportingDate, $teamApp);
+
+        return ['success' => true, 'storedId' => $appId];
+    }
+
+    /**
+     * Commit week data to the database. Will be performed during validation to write the domain object into the DB
+     * @param  Models\TmlpRegistration $application   The application we are working with.
+     * @param  Carbon                  $reportingDate [description]
+     * @param  Domain\TeamApplication  $data          [description]
+     */
+    public function commitStashedApp(Models\TmlpRegistration $application, Carbon $reportingDate, Domain\TeamApplication $data)
+    {
 
         $report = LocalReport::getStatsReport($application->center, $reportingDate);
 
@@ -163,12 +205,8 @@ class Application extends ApiBase
             'stats_report_id' => $report->id,
         ]);
 
-        $teamApp = Domain\TeamApplication::fromModel($applicationData, $application);
-        $teamApp->tmlpRegistrationId = $application->id;
-        $teamApp->clearSetValues();
+        // TODO any domain specific validation?
 
-        // Now insert our newly changed data, validating and coercing too
-        $teamApp->updateFromArray($data);
         $teamApp->fillModel($applicationData, $application);
 
         $applicationData->save();

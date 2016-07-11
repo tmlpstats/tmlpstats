@@ -1,1 +1,1 @@
-export { ApplicationsIndex, ApplicationsEdit } from './components'
+export { ApplicationsIndex, ApplicationsEdit, ApplicationsAdd } from './components'

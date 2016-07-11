@@ -30,6 +30,8 @@ class ApiBase
      */
     private $targetObjCache = [];
 
+    protected $user = null;
+
     /**
      * Array of valid properties and their config.
      *  example:
@@ -46,6 +48,7 @@ class ApiBase
     {
         $this->user = $auth->user();
         $this->request = $request;
+
     }
 
     /**

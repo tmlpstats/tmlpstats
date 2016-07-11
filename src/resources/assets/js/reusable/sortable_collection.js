@@ -41,16 +41,18 @@ export default class SortableCollection {
     reducer() {
         return (state=this.default_state, action) => {
             if (action.payload && action.payload.collection_name == this.name) {
+                var { sortedKeys, collection } = state
                 switch (action.type) {
                 case REPLACE_ITEM:
                     var item = action.payload.item
-                    var to_set = Object.assign({}, state.collection)
-                    to_set[item[this.key_prop]] = item
-                    state = Object.assign({}, state, {collection: to_set})
+                    collection = Object.assign({}, state.collection)
+                    collection[item[this.key_prop]] = item
+                    sortedKeys = this.rebuildSort(state.meta.sort_by, collection)
+                    state = Object.assign({}, state, {collection, sortedKeys})
                     break
                 case REPLACE_COLLECTION:
-                    var collection = this.ensureCollection(action.payload.collection)
-                    var sortedKeys = this.rebuildSort(state.meta.sort_by, collection)
+                    collection = this.ensureCollection(action.payload.collection)
+                    sortedKeys = this.rebuildSort(state.meta.sort_by, collection)
                     state = Object.assign({}, state, {collection, sortedKeys})
                     break
                 case CHANGE_SORT_CRITERIA:
@@ -63,6 +65,22 @@ export default class SortableCollection {
             return state
         }
     }
+
+    // Utilities / Helpers for working with collection
+
+    // iterItems is a handy way to iterate this collection.
+    // the function callback is called with parameters (item, key, index)
+    //
+    // The state must be passed in, because this reducer doesn't hold on to the state.
+    iterItems(state, callback) {
+        for (var i = 0; i < state.sortedKeys.length; i++) {
+            var key = state.sortedKeys[i]
+            callback(state.collection[key], key, i)
+        }
+    }
+
+
+    // Internal functionality
 
     rebuildSort(sortBy, collection) {
         var tmp = []
