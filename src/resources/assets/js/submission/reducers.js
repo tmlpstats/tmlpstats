@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux'
 import { applicationReducer } from './applications/reducers'
 import { courseReducer } from './courses/reducers'
+import { coreReducer } from './core/reducers'
 
 function scoreboardReducer(state, action) {
     if (!state) {
@@ -8,17 +9,6 @@ function scoreboardReducer(state, action) {
     }
     return state
 }
-
-function coreReducer(state={}, action) {
-    if (action) {
-        switch (action.type) {
-        case 'submission.setReportingDate':
-            return Object.assign({}, state, {reportingDate: action.payload})
-        }
-    }
-    return state
-}
-
 
 const submissionReducerInternal = combineReducers({
     core: coreReducer,

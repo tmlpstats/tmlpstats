@@ -1,7 +1,8 @@
-import Scoreboard from './Scoreboard'
-import Review from './Review'
+import Scoreboard from './scoreboard/components'
+import Review from './review/components'
+import SubmissionFlowRoot from './core/SubmissionFlowRoot'
 
-export { Scoreboard, Review }
+export { Scoreboard, Review, SubmissionFlowRoot }
 
 export { ApplicationsIndex, ApplicationsEdit, ApplicationsAdd } from './applications'
 export { CoursesIndex, CoursesEdit, CoursesAdd } from './courses'

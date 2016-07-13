@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-import { React, SubmissionBase } from './base_components'
+import { React, SubmissionBase } from '../base_components'
 
 export default class SubmissionNav extends SubmissionBase {
     render() {

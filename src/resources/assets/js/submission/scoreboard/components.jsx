@@ -5,7 +5,7 @@ class SubmissionScoreboard extends React.Component {
     render() {
         return (
             <div>SCOREBOARD TAB {this.props.scoreboard.games}</div>
-        );
+        )
     }
 }
 
