@@ -51,6 +51,7 @@ class ApiController extends ApiControllerBase
         "TeamMember.getWeekData" => "TeamMember__getWeekData",
         "TeamMember.setWeekData" => "TeamMember__setWeekData",
         "UserProfile.setLocale" => "UserProfile__setLocale",
+        "SubmissionCore.initSubmission" => "SubmissionCore__initSubmission",
         "SubmissionData.ignoreMe" => "SubmissionData__ignoreMe",
     ];
 
@@ -287,6 +288,13 @@ class ApiController extends ApiControllerBase
         return App::make(Api\UserProfile::class)->setLocale(
             $this->parse($input, 'locale', 'string'),
             $this->parse($input, 'timezone', 'string')
+        );
+    }
+    protected function SubmissionCore__initSubmission($input)
+    {
+        return App::make(Api\SubmissionCore::class)->initSubmission(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date')
         );
     }
     protected function SubmissionData__ignoreMe($input)

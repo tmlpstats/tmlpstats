@@ -46,3 +46,37 @@ export class AddOneLink extends React.Component {
         )
     }
 }
+
+export class SimpleSelect extends React.Component {
+    static propTypes = {
+        items: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+        keyProp: React.PropTypes.string,
+        getKey: React.PropTypes.func,
+        labelProp: React.PropTypes.string,
+        getLabel: React.PropTypes.func
+    }
+    render() {
+        var { getKey, getLabel, emptyChoice } = this.props
+        if (!getKey) {
+            getKey = (obj) => obj[this.props.keyProp]
+        }
+        if (!getLabel) {
+            getLabel = (obj) => obj[this.props.labelProp]
+        }
+
+        var options = []
+        if (emptyChoice) {
+            options.push(<option key={-1} value="">{emptyChoice}</option>)
+        }
+        this.props.items.forEach((item, i) => {
+            options.push(
+                <option key={i} value={getKey(item)}>{getLabel(item)}</option>
+            )
+        })
+        return (
+            <Field model={this.props.model}>
+                <select className="form-control">{options}</select>
+            </Field>
+        )
+    }
+}

@@ -370,6 +370,18 @@ Api.UserProfile = {
         return apiCall('UserProfile.setLocale', params, (callback || null), (errback || null));
     }
 };
+Api.SubmissionCore = {
+
+    /*
+    Initialize Submission, checking date extents and center and providing some useful starting data
+    Parameters:
+      center: Center
+      reportingDate: date
+    */
+    initSubmission: function(params, callback, errback) {
+        return apiCall('SubmissionCore.initSubmission', params, (callback || null), (errback || null));
+    }
+};
 Api.SubmissionData = {
 
     /*
