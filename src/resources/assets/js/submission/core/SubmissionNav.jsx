@@ -4,23 +4,23 @@ import { React, SubmissionBase } from '../base_components'
 
 export default class SubmissionNav extends SubmissionBase {
     render() {
-        var steps = [];
-        var s = this.props.steps;
+        var steps = []
+        const s = this.props.steps
         if (s) {
             var baseUri = this.baseUri()
-            s.forEach((v, k) => {
-                var destPath = `${baseUri}/${k}`
-                var cls="list-group-item"
-                if (this.props.location.pathname.startsWith(destPath)) {
-                    cls += " active"
+            s.forEach((v) => {
+                var destPath = `${baseUri}/${v.key}`
+                var cls = 'list-group-item'
+                if (this.props.location.pathname.substr(0, destPath.length) == destPath) {
+                    cls += ' active'
                 }
-                steps.push(<Link key={k} className={cls} to={destPath}>{v.name}</Link>);
-            });
+                steps.push(<Link key={v.key} className={cls} to={destPath}>{v.name}</Link>)
+            })
         }
         return (
             <div className="list-group">
                 {steps}
             </div>
-        );
+        )
     }
 }

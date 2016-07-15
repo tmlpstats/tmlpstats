@@ -1,3 +1,7 @@
+// POLYFILL
+import { Promise } from 'es6-promise'
+
+// NORMAL CODE
 import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
 
@@ -47,7 +51,7 @@ class ApplicationsIndexView extends ApplicationsBase {
         return (
             <div>
                 <h3>Manage Registrations</h3>
-                <ModeSelectButtons items={Array.from(appsSorts.values())} current={this.props.applications.meta.sort_by}
+                <ModeSelectButtons items={appsSorts} current={this.props.applications.meta.sort_by}
                                    onClick={changeSort} ariaGroupDesc="Sort Preferences" />
                 <table className="table">
                     <thead>

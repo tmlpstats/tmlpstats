@@ -36,6 +36,6 @@ elixir(function(mix) {
         .copy('bower_components/html5shiv/dist/html5shiv.min.js', 'public/vendor/js/html5shiv.min.js')
         .copy('bower_components/respond/dest/respond.min.js', 'public/vendor/js/respond.min.js')
         .copy('bower_components/jquery/dist/jquery.min.js', 'public/vendor/js/jquery.min.js')
-        .version(['css/main.css', 'js/main.js', 'js/api.js', 'js/tmlpstats.js'])
+        .version(['css/main.css', 'js/main.js', 'js/api.js', 'js/tmlpstats.js', 'js/tmlp-polyfill.js'])
         .browserSync({proxy: 'vagrant.tmlpstats.com'})
 });
