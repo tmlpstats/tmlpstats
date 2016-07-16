@@ -17,6 +17,29 @@ if [ "$1" == "rollback" ]; then
     rsync -av --delete --filter='protect storage/framework/down' $ROLLBACK/ $DEST
     php artisan up
     exit 0;
+elif [[ "$1" != "" ]]; then
+    # Convenience, assume the user wanted to do a fast-deploy of an old version.
+    # So we stage the version and follow up with a deploy of the version.
+    echo "Going to stage the revision $1 before deploying..."
+    $SOURCE/../bin/stage.sh "$1"
+    read -p "Stage complete. Are you sure you want to fast-deploy this revision? [y/N]" ANSWER
+    if [[ "$ANSWER" != "y" && "$ANSWER" != "Y" ]]; then
+        echo "aborting."
+        exit 1
+    fi
+fi
+
+
+# Do not mark releases when we're fast deploying a different release.
+# This helps avoid creating tons of tags pointing to the same thing
+if [[ "$1" != release* ]]; then
+    # Mark release with a tag for easy swapping between releases.
+    cd "$SOURCE"
+    # We don't expect to do multiple deploys a minute, unlike staging, so we can do one tag per minute
+    RELEASE_TAG="release-$(date +"%Y%m%d-%H%M")"
+    git tag "$RELEASE_TAG"
+    # We push to a remote named 'release' - this allows us a separated config or even repo if needed
+    git push release "$RELEASE_TAG"
 fi
 
 # Setup rollback copy
