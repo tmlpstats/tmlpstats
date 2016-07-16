@@ -339,8 +339,7 @@ class GlobalReportController extends ReportDispatchAbstractController
                 ->getWeekScoreboard($globalReport, $childRegion);
 
             if ($nextMilestone->ne($globalReport->reportingDate)) {
-                $promiseData = App::make(Api\GlobalReport::class)
-                    ->getWeekScoreboard($globalReport, $childRegion, $nextMilestone);
+                $promiseData = App::make(Api\GlobalReport::class)->getWeekScoreboard($globalReport, $childRegion, $nextMilestone);
 
                 $scoreboard = Scoreboard::blank();
 

@@ -18,13 +18,23 @@
         </thead>
         <tbody>
             @foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game)
-                <?php $suffix = ($game === 'gitw') ? '%' : ''; ?>
                 <tr>
                     <th class="border-left border-right">{{ strtoupper($game) }}</th>
                     @foreach ($regionsData as $name => $data)
-                        <td class="data-point">{{ $data['promise'][$game] }}{{ $suffix }}</td>
-                        <td class="data-point">{{ $data['actual'][$game] }}{{ $suffix }}</td>
-                        <td class="data-point success">{{ $data['promise'][$game] - $data['actual'][$game] }}{{ $suffix }}</td>
+                        <?php
+                            $promise = isset($data['promise'][$game]) ? $data['promise'][$game] : '-';
+                            $actual = isset($data['actual'][$game]) ? $data['actual'][$game] : '-';
+                            if ($promise == '-' || $actual == '-') {
+                                $gap = '-';
+                                $suffix = '';
+                            } else {
+                                $gap = $promise - $actual;
+                                $suffix = ($game === 'gitw') ? '%' : '';
+                            }
+                        ?>
+                        <td class="data-point">{{ $promise }}{{ $suffix }}</td>
+                        <td class="data-point">{{ $actual }}{{ $suffix }}</td>
+                        <td class="data-point success">{{ $gap }}{{ $suffix }}</td>
                     @endforeach
                 </tr>
             @endforeach
