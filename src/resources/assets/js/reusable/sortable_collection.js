@@ -9,10 +9,15 @@ export default class SortableCollection {
         if (!sort_by) {
             sort_by = key_prop
         }
-        if (!sorts.entries) {
-            throw 'SortableCollection: sorts must be a map'
+        if (!sorts.forEach) {
+            throw 'SortableCollection: sorts must be an iterable'
         }
+        var sortsLookup = {}
+        sorts.forEach((v) => {
+            sortsLookup[v.key] = v
+        })
         this.sorts = sorts
+        this.sortsLookup = sortsLookup
         this.name = name
         this.key_prop = key_prop
         this.default_state = {
@@ -87,7 +92,7 @@ export default class SortableCollection {
         for (var key in collection) {
             tmp.push(collection[key])
         }
-        tmp.sort(this.sorts.get(sortBy).comparator)
+        tmp.sort(this.sortsLookup[sortBy].comparator)
 
         // Phase 2: replace the value with the sort key... unknown if this is a good idea.
         for (var i = 0; i < tmp.length; i++) {

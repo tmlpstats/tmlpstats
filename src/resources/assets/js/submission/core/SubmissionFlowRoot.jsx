@@ -4,15 +4,14 @@ import { connect } from 'react-redux'
 import { SubmissionBase } from '../base_components'
 import SubmissionNav from './SubmissionNav'
 
-
-const steps = new Map([
+const steps = [
     // The steps key is some metadata about the steps, maybe redundant but we'll leave it for now.
-    ['scoreboard', {name: 'Scoreboard'}],
-    ['applications', {name: 'Team Expansion'}],
-    ['classlist', {name: 'Class List'}],
-    ['courses', {name: 'Courses'}],
-    ['review', {name: 'Review'}]
-])
+    {key: 'scoreboard', name: 'Scoreboard'},
+    {key: 'applications', name: 'Team Expansion'},
+    {key: 'classlist', name: 'Class List'},
+    {key: 'courses', name: 'Courses'},
+    {key: 'review', name: 'Review'}
+]
 
 class SubmissionFlowComponent extends SubmissionBase {
     render() {

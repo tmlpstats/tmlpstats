@@ -1,7 +1,7 @@
 import SortableCollection, { compositeKey } from '../../reusable/sortable_collection'
 import { LoadingMultiState } from '../../reusable/reducers'
 
-const appsSortsRaw = [
+export const appsSorts = [
     {
         key: 'teamYear_first_last',
         label: 'Default',
@@ -13,8 +13,6 @@ const appsSortsRaw = [
         comparator: compositeKey([['firstName', 'string'], ['lastName', 'string']])
     }
 ]
-
-export const appsSorts = new Map(appsSortsRaw.map((v) => [v.key, v]))
 
 export const appsCollection = new SortableCollection({
     name: 'submission.applications',
