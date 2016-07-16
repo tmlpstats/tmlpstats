@@ -16,7 +16,7 @@ class ApiBase
      * Is cache enabled by default?
      * @var bool
      */
-    protected $cacheEnabled = true;
+    protected $cacheEnabled = false;
 
     /**
      * Methods to not cache.
