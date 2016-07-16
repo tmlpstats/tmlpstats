@@ -26,7 +26,7 @@
     "gulp-util": "^3.0.7",
     "history": "^2.0.1",
     "install": "^0.6.0",
-    "laravel-elixir": "^5.0.0",
+    "laravel-elixir": "^5.0.0"
   },
   "dependencies": {
     "bower": "^1.7",
