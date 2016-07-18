@@ -40,7 +40,7 @@ class ParserDomain implements Arrayable, \JsonSerializable
             if ($v !== null) {
                 if ($conf['type'] == 'date') {
                     $v = $v->toDateString();
-                } else if (isset($conf['assignId']) && $conf['assignId']) {
+                } else if (array_get($conf, 'assignId', false)) {
                     $id_prop = array_get($conf, 'idProp', 'id');
                     $v = $v->$id_prop;
                 }
@@ -103,9 +103,9 @@ class ParserDomain implements Arrayable, \JsonSerializable
     public function __get($key)
     {
         if (!isset(static::$validProperties[$key])) {
-            $idKey = $this->findReferenceKey($key);
-            if ($idKey !== $key) {
-                $key = $idKey;
+            $refKey = $this->findReferenceKey($key);
+            if ($refKey !== $key) {
+                $key = $refKey;
             } else {
                 $trace = debug_backtrace();
                 trigger_error(
@@ -127,9 +127,9 @@ class ParserDomain implements Arrayable, \JsonSerializable
     public function __set($key, $value)
     {
         if (!isset(static::$validProperties[$key])) {
-            $idKey = $this->findReferenceKey($key);
-            if ($idKey !== $key) {
-                $key = $idKey;
+            $refKey = $this->findReferenceKey($key);
+            if ($refKey !== $key) {
+                $key = $refKey;
             } else {
                 $trace = debug_backtrace();
                 trigger_error(
@@ -207,11 +207,9 @@ class ParserDomain implements Arrayable, \JsonSerializable
         if (!isset(static::$validProperties[$key])
             && strrpos($key, 'Id', -2) !== false
         ) {
-            $idKey = substr($key, 0, -2);
-            if (isset(static::$validProperties[$idKey]['assignId'])
-                && static::$validProperties[$idKey]['assignId']
-            ) {
-                $key = $idKey;
+            $refKey = substr($key, 0, -2);
+            if (array_get(static::$validProperties[$refKey], 'assignId', false)) {
+                $key = $refKey;
             }
         }
 
