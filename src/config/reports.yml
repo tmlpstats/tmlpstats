@@ -322,6 +322,28 @@ api:
             type: string
           - name: timezone
             type: string
+  Scoreboard:
+    type: namespace
+    children:
+      allForCenter:
+        desc: Get scoreboard data for center
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+          - name: includeInProgress
+            type: bool
+            required: false
+      stash:
+        desc: Save scoreboard data for week
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+          - name: data
+            type: array
 
   SubmissionCore:
     type: namespace

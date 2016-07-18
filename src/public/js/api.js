@@ -371,6 +371,30 @@ Api.UserProfile = {
         return apiCall('UserProfile.setLocale', params, (callback || null), (errback || null));
     }
 };
+Api.Scoreboard = {
+
+    /*
+    Get scoreboard data for center
+    Parameters:
+      center: Center
+      reportingDate: date
+      includeInProgress: bool
+    */
+    allForCenter: function(params, callback, errback) {
+        return apiCall('Scoreboard.allForCenter', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Save scoreboard data for week
+    Parameters:
+      center: Center
+      reportingDate: date
+      data: array
+    */
+    stash: function(params, callback, errback) {
+        return apiCall('Scoreboard.stash', params, (callback || null), (errback || null));
+    }
+};
 Api.SubmissionCore = {
 
     /*

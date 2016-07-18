@@ -51,6 +51,8 @@ class ApiController extends ApiControllerBase
         "TeamMember.getWeekData" => "TeamMember__getWeekData",
         "TeamMember.setWeekData" => "TeamMember__setWeekData",
         "UserProfile.setLocale" => "UserProfile__setLocale",
+        "Scoreboard.allForCenter" => "Scoreboard__allForCenter",
+        "Scoreboard.stash" => "Scoreboard__stash",
         "SubmissionCore.initSubmission" => "SubmissionCore__initSubmission",
         "SubmissionData.ignoreMe" => "SubmissionData__ignoreMe",
     ];
@@ -289,6 +291,22 @@ class ApiController extends ApiControllerBase
         return App::make(Api\UserProfile::class)->setLocale(
             $this->parse($input, 'locale', 'string'),
             $this->parse($input, 'timezone', 'string')
+        );
+    }
+    protected function Scoreboard__allForCenter($input)
+    {
+        return App::make(Api\Scoreboard::class)->allForCenter(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'includeInProgress', 'bool', false)
+        );
+    }
+    protected function Scoreboard__stash($input)
+    {
+        return App::make(Api\Scoreboard::class)->stash(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'data', 'array')
         );
     }
     protected function SubmissionCore__initSubmission($input)

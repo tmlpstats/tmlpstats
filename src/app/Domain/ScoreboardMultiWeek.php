@@ -29,10 +29,17 @@ class ScoreboardMultiWeek
     {
         $key = $day->toDateString();
         if (!isset($this->weeks[$key])) {
-            $this->weeks[$key] = Scoreboard::blank();
+            $this->weeks[$key] = Scoreboard::blank($day);
         }
 
         return $this->weeks[$key];
+    }
+
+    public function sortedValues()
+    {
+        ksort($this->weeks);
+
+        return array_values($this->weeks);
     }
 
     /**

@@ -27,6 +27,12 @@ class SubmissionData extends AuthenticatedApiBase
             'class' => Domain\Course::class,
             'idAttr' => 'id',
         ],
+        [
+            'key' => 'scoreboard_week',
+            'class' => Domain\Scoreboard::class,
+            'idAttr' => 'week',
+            'toArray' => 'toNewArray',
+        ],
     ];
 
     protected $keyTypeMapping = [];
@@ -81,6 +87,7 @@ class SubmissionData extends AuthenticatedApiBase
 
         $conf = $this->combinedTypeMapping[get_class($obj)];
         $idAttr = $conf['idAttr'];
+        $toArrayFunc = array_get($conf, 'toArray', 'toArray');
 
         $params = [
             'center_id' => $center->id,
@@ -89,7 +96,7 @@ class SubmissionData extends AuthenticatedApiBase
             'stored_id' => $obj->$idAttr,
         ];
         $current = Models\SubmissionData::firstOrNew($params);
-        $objArray = $obj->toArray();
+        $objArray = $obj->$toArrayFunc();
         $current->data = $objArray;
         $current->userId = $userId;
         $current->save();

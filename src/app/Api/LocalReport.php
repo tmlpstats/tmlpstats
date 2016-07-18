@@ -20,6 +20,7 @@ class LocalReport extends ApiBase
 
         $returnUnprocessed = isset($options['returnUnprocessed']) ? (bool) $options['returnUnprocessed'] : false;
         $returnUnflattened = isset($options['returnUnflattened']) ? (bool) $options['returnUnflattened'] : false;
+        $returnObject = array_get($options, 'returnObject', false);
         $includeOriginalPromise = isset($options['includeOriginalPromise']) ? (bool) $options['includeOriginalPromise'] : false;
 
         $scoreboardData = [];
@@ -71,12 +72,16 @@ class LocalReport extends ApiBase
             return $response;
         }
 
-        $a = new Arrangements\GamesByWeek(array_flatten($scoreboardData));
-        $centerStatsData = $a->compose();
+        $a = new Arrangements\GamesByWeek();
+        $weeks = $a->buildObject(array_flatten($scoreboardData));
+        if ($returnObject) {
+            return $weeks;
+        } else {
+            $weeksArray = $weeks->toArray();
+            $this->putCache($weeksArray);
 
-        $this->putCache($centerStatsData['reportData']);
-
-        return $centerStatsData['reportData'];
+            return $weeksArray;
+        }
     }
 
     public function getWeekScoreboard(Models\StatsReport $statsReport)

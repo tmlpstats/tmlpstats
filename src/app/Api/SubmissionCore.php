@@ -40,10 +40,10 @@ class SubmissionCore extends AuthenticatedApiBase
         ];
     }
 
-    protected function checkCenterDate(Models\Center $center, Carbon $reportingDate)
+    public function checkCenterDate(Models\Center $center, Carbon $reportingDate)
     {
-        // TODO check center access
-        if (false) {
+        $user = $this->context->getUser();
+        if ($user->cannot('submitStats', $center)) {
             return ['success' => false, 'error' => 'User not allowed access to submit this report'];
         }
 

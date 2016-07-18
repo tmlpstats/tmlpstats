@@ -1,4 +1,4 @@
-
+import { objectAssign } from './ponyfill'
 
 const
     NEW = {state: 'new', loaded: false},
@@ -35,7 +35,7 @@ export class LoadingMultiState {
         const actionType = this.actionType
         return (newState) => {
             if (newState.error) {
-                newState = Object.assign({}, FAILED, newState)
+                newState = objectAssign({}, FAILED, newState)
             }
             return {type: actionType, payload: newState}
         }
