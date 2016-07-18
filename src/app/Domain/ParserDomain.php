@@ -120,7 +120,7 @@ class ParserDomain implements Arrayable, \JsonSerializable
         if (!isset(static::$validProperties[$key])) {
             $trace = debug_backtrace();
             trigger_error(
-                'Undefined property via __get(): ' . $key .
+                'Undefined property via __set(): ' . $key .
                 ' in ' . $trace[0]['file'] .
                 ' on line ' . $trace[0]['line'],
                 E_USER_NOTICE
