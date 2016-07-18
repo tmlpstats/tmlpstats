@@ -5,6 +5,6 @@ use TmlpStats\WithdrawCode;
 
 class WithdrawCodeParser extends IdParserBase
 {
-    protected $type = 'witdraw code';
+    protected $type = 'WithdrawCode';
     protected $class = WithdrawCode::class;
 }

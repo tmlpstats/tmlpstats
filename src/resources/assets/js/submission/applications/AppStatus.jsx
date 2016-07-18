@@ -1,5 +1,5 @@
 import { React } from '../base_components'
-import { Field } from '../../reusable/form_utils'
+import { Field, SimpleSelect } from '../../reusable/form_utils'
 import { setAppStatus } from './actions'
 
 const STATUS_UNKNOWN=0,
@@ -98,10 +98,7 @@ export default class AppStatus extends React.Component {
                         <input type="text" className="form-control" />
                     </Field>
                     <br />
-                    <Field model={model+'.withdrawCode'}>
-                        <label>Withdraw Reason</label>
-                        <input type="text" className="form-control" />
-                    </Field>
+                    <SimpleSelect model={model+'.withdrawCodeId'} keyProp="id" labelProp="display" items={this.props.lookups.withdraw_codes} />
                 </div>
             </div>
         )

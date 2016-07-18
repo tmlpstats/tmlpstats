@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 
 import { SubmissionBase } from '../base_components'
 import SubmissionNav from './SubmissionNav'
+import * as actions from './actions'
 
 const steps = [
     // The steps key is some metadata about the steps, maybe redundant but we'll leave it for now.
@@ -33,10 +34,13 @@ class SubmissionFlowComponent extends SubmissionBase {
     }
 
     checkReportingDate() {
-        if (this.props.params.reportingDate != this.props.reportingDate) {
-            this.props.dispatch({
-                type: 'submission.setReportingDate',
-                payload: this.props.params.reportingDate
+        const { params, reportingDate, dispatch, coreInit } = this.props
+        if (params.reportingDate != reportingDate) {
+            dispatch(actions.setReportingDate(params.reportingDate))
+            return false
+        } else if (coreInit.state == 'new') {
+            setTimeout(() => {
+                dispatch(actions.initSubmission(params.centerId, params.reportingDate))
             })
             return false
         }

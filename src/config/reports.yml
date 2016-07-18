@@ -320,6 +320,17 @@ api:
           - name: timezone
             type: string
 
+  SubmissionCore:
+    type: namespace
+    children:
+      initSubmission:
+        desc: Initialize Submission, checking date extents and center and providing some useful starting data
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+
   SubmissionData:
     type: namespace
     children:

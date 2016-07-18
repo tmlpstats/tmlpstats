@@ -3,12 +3,10 @@ namespace TmlpStats\Api;
 
 // This is an API servicer. All API methods are simple static methods
 // that take typed input and return array responses.
-use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\ApiBase;
 use TmlpStats\Api\Exceptions as ApiExceptions;
-use TmlpStats\Http\Controllers;
 use TmlpStats\Reports\Arrangements;
 
 class LocalReport extends ApiBase
@@ -35,9 +33,9 @@ class LocalReport extends ApiBase
             // from each official report as we find them
             // Take the newest version of each
             $report = Models\StatsReport::byCenter($statsReport->center)
-                                        ->reportingDate($week)
-                                        ->official()
-                                        ->first();
+                ->reportingDate($week)
+                ->official()
+                ->first();
             if ($report) {
                 $weekData = $report->centerStatsData()->get();
                 foreach ($weekData as $data) {
@@ -112,12 +110,13 @@ class LocalReport extends ApiBase
         $returnUnprocessed = isset($options['returnUnprocessed']) ? (bool) $options['returnUnprocessed'] : false;
 
         $registrations = Models\TmlpRegistrationData::byStatsReport($statsReport)
-                                                    ->with('registration.person', 'committedTeamMember.person')
-                                                    ->get();
+            ->with('registration.person', 'committedTeamMember.person')
+            ->get();
         if (!$registrations) {
             return [];
         } else if ($returnUnprocessed) {
             $this->putCache($registrations);
+
             return $registrations;
         }
 
@@ -139,6 +138,7 @@ class LocalReport extends ApiBase
         if (!$teamMembers) {
             return [];
         }
+
         return $teamMembers;
     }
 
@@ -148,6 +148,7 @@ class LocalReport extends ApiBase
 
         $a = new Arrangements\TeamMembersByQuarter(['teamMembersData' => $teamMembers]);
         $data = $a->compose();
+
         return $data['reportData'];
     }
 
@@ -162,17 +163,26 @@ class LocalReport extends ApiBase
         return $courses;
     }
 
-    public static function getStatsReport(Models\Center $center, Carbon $reportingDate, $requireNew = true)
+    public function getLastStatsReportSince(Models\Center $center, Carbon $reportingDate)
     {
-        $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
-        if (!$quarter) {
-            throw new ApiExceptions\BadRequestException('Unable to find quarter which is required for fetching this data');
-        }
+        $quarter = static::quarterForCenterDate($center, $reportingDate);
 
         $query = Models\StatsReport::byCenter($center)
-                                    ->byQuarter($quarter)
-                                    ->reportingDate($reportingDate)
-                                    ->orderBy('id', 'desc');
+            ->byQuarter($quarter)
+            ->where('reporting_date', '<', $reportingDate)
+            ->orderBy('reporting_date', 'desc');
+
+        return $query->first();
+    }
+
+    public static function getStatsReport(Models\Center $center, Carbon $reportingDate, $requireNew = true)
+    {
+        $quarter = static::quarterForCenterDate($center, $reportingDate);
+
+        $query = Models\StatsReport::byCenter($center)
+            ->byQuarter($quarter)
+            ->reportingDate($reportingDate)
+            ->orderBy('id', 'desc');
         if ($requireNew) {
             $query->submitted(false);
         }
@@ -180,14 +190,24 @@ class LocalReport extends ApiBase
 
         if (!$report) {
             $report = Models\StatsReport::create([
-                'center_id'      => $center->id,
-                'quarter_id'     => $quarter->id,
+                'center_id' => $center->id,
+                'quarter_id' => $quarter->id,
                 'reporting_date' => $reportingDate->toDateTimeString(),
-                'version'        => 'api',
+                'version' => 'api',
             ]);
         }
 
         return $report;
+    }
+
+    public static function quarterForCenterDate(Models\Center $center, Carbon $reportingDate)
+    {
+        $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
+        if (!$quarter) {
+            throw new ApiExceptions\BadRequestException('Unable to find quarter which is required for fetching this data');
+        }
+
+        return $quarter;
     }
 
     public static function getReportingDate(Models\Center $center)

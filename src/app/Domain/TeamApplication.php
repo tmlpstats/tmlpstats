@@ -57,11 +57,11 @@ class TeamApplication extends ParserDomain
         'wdDate' => [
             'owner' => 'applicationData',
             'type' => 'date',
-        ], /*  TODO
-        'withdrawCode' => [
+        ],
+        'withdrawCodeId' => [
             'owner' => 'applicationData',
-            'type' => 'WithdrawCode',
-        ], */
+            'type' => 'int', // TODO: validate withdrawCode from the ID
+        ],
         'committedTeamMemberId' => [
             'owner' => 'applicationData',
             'type' => 'int',

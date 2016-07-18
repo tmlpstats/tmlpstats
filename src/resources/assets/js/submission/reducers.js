@@ -1,7 +1,8 @@
 import { combineReducers } from 'redux'
 import { applicationReducer } from './applications/reducers'
 import { courseReducer } from './courses/reducers'
-import { coreReducer } from './core/reducers'
+import coreReducer from './core/reducers'
+import clearWrapper from './core/clearWrapper'
 
 function scoreboardReducer(state, action) {
     if (!state) {
@@ -17,14 +18,6 @@ const submissionReducerInternal = combineReducers({
     scoreboard: scoreboardReducer
 })
 
-// This is a diabolically simple reducer wrapper to help clear submission data
-//
-// The actual work is handled by the combineReducers reducer, but when the specific
-// action 'submission.setReportingDate' comes through, we revert all submission state
-// to default except for the "core" state
-export function submissionReducer(state, action) {
-    if (action.type == 'submission.setReportingDate') {
-        return submissionReducerInternal({core: state.core}, action)
-    }
-    return submissionReducerInternal(state, action)
-}
+export const submissionReducer = clearWrapper(submissionReducerInternal, (state, action) => {
+    return submissionReducerInternal({core: state.core}, action)
+})

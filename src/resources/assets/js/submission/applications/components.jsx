@@ -6,7 +6,7 @@ import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
 
 import { SubmissionBase, React } from '../base_components'
-import { Form, Field, SimpleField, AddOneLink } from '../../reusable/form_utils'
+import { Form, SimpleField, SimpleSelect, AddOneLink } from '../../reusable/form_utils'
 import { ModeSelectButtons, LoadStateFlip } from '../../reusable/ui_basic'
 
 import { APPLICATIONS_FORM_KEY } from './reducers'
@@ -69,6 +69,11 @@ class ApplicationsIndexView extends ApplicationsBase {
     }
 }
 
+const getLabelTeamMember = (item) => {
+    const p = item.teamMember.person
+    return p.firstName + " " + p.lastName
+}
+
 class _EditCreate extends ApplicationsBase {
     render() {
         const modelKey = APPLICATIONS_FORM_KEY
@@ -89,9 +94,17 @@ class _EditCreate extends ApplicationsBase {
                         <textarea className="form-control" rows="3"></textarea>
                     </SimpleField>
                     <div className="form-group">
+                        <label className="col-sm-2">Committed Team Member</label>
+                        <div className="col-sm-10">
+                            <SimpleSelect
+                                    model={modelKey+'.committedTeamMemberId'} items={this.props.lookups.team_members}
+                                    keyProp="teamMemberId" getLabel={getLabelTeamMember} emptyChoice="Choose One" />
+                        </div>
+                    </div>
+                    <div className="form-group">
                         <label className="col-sm-2">Application Status</label>
                         <div className="col-sm-10">
-                            <AppStatus model={modelKey} currentApp={this.props.currentApp} dispatch={this.props.dispatch} />
+                            <AppStatus model={modelKey} currentApp={this.props.currentApp} lookups={this.props.lookups} dispatch={this.props.dispatch} />
                         </div>
                     </div>
                     <div className="form-group">
@@ -160,8 +173,9 @@ class ApplicationsAddView extends _EditCreate {
     }
 }
 
-const mapStateToProps = (state) => state.submission.applications
-
+const mapStateToProps = (state) => {
+    return Object.assign({lookups: state.submission.core.lookups}, state.submission.applications)
+}
 const connector = connect(mapStateToProps)
 
 export const ApplicationsIndex = connector(ApplicationsIndexView)
