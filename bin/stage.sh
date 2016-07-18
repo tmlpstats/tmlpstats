@@ -18,24 +18,40 @@ ROLLBACK="$HOME/tmlpstats.rollback"
 
 $SOURCE/../bin/stage-lock.sh || exit 1
 
-if [ "$1" == "rollback" ]; then
+cd $SOURCE/
+
+
+if [[ "$1" == "" ]]; then
+    echo "Run this script with a rev spec to stage"
+    echo ""
+    echo "Examples:"
+    echo "   stage master    (most common)"
+    echo "   stage feature-branch-name"
+    echo "   stage 3c0436b"
+    exit 1
+elif [[ "$1" == "rollback" ]]; then
     rsync -av --delete --filter='protect storage/framework/down' $ROLLBACK/ $DEST
+    $SOURCE/../bin/stage-lock.sh release
+    exit 0;
+elif [ "$1" == "refresh" ]; then
+    git pull
+    echo ""
+    echo "Stage script refreshed. Run stage again without refresh option to stage latest changes"
     $SOURCE/../bin/stage-lock.sh release
     exit 0;
 fi
 
 # Leave rollback as is. It should contain whatever was last deployed to production
 
-cd $SOURCE/
-echo "Pulling latest sources"
-git pull
+TARGET_BRANCH=$1
 
-if [ "$1" == "refresh" ]; then
-    echo ""
-    echo "Stage script refreshed. Run stage again without refresh option to stage latest changes"
-    $SOURCE/../bin/stage-lock.sh release
-    exit 0;
-fi
+echo "Fetching latest sources"
+git fetch
+
+echo "Switching to desired branch"
+git checkout "$TARGET_BRANCH"
+
+git tag stage-$(date +"%Y%m%d-%H%M%S")
 
 echo ""
 echo "Running composer"
