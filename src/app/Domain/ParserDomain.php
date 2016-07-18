@@ -107,7 +107,7 @@ class ParserDomain implements Arrayable, \JsonSerializable
 
     public function __get($key)
     {
-        if (!isset(static::$validProperties[$key])) {
+        if (!array_key_exists($key, static::$validProperties) && !array_key_exists($key, $this->_values)) {
             $trace = debug_backtrace();
             trigger_error(
                 'Undefined property via __get(): ' . $key .
@@ -126,7 +126,7 @@ class ParserDomain implements Arrayable, \JsonSerializable
 
     public function __set($key, $value)
     {
-        if (!isset(static::$validProperties[$key])) {
+        if (!array_key_exists($key, static::$validProperties)) {
             $trace = debug_backtrace();
             trigger_error(
                 'Undefined property via __set(): ' . $key .
@@ -139,8 +139,8 @@ class ParserDomain implements Arrayable, \JsonSerializable
         }
 
         if (array_get(static::$validProperties[$key], 'assignId', false)) {
-            $idProp = array_get($conf, 'idProp', 'id');
-            $this->_values["{$key}Id"] = $value->$idProp;
+            $idProp = array_get(static::$validProperties[$key], 'idProp', 'id');
+            $this->_values["{$key}Id"] = $value ? $value->$idProp : null;
         }
 
         $this->_values[$key] = $value;

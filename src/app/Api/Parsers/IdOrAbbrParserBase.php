@@ -46,13 +46,7 @@ abstract class IdOrAbbrParserBase extends ParserBase
             $id = $id[$this->keyAttr];
         }
 
-        $class = $this->class;
-
-        if (is_numeric($id)) {
-            return $class::find(intval($id));
-        } else {
-            return $class::abbreviation($id)->first();
-        }
+        return $this->fetch($this->class, $id);
     }
 
     public function exists($id)
@@ -60,5 +54,14 @@ abstract class IdOrAbbrParserBase extends ParserBase
         $this->parsed = $this->parse($id);
 
         return ($this->parsed !== null);
+    }
+
+    public function fetch($class, $id)
+    {
+        if (is_numeric($id)) {
+            return $class::find(intval($id));
+        } else {
+            return $class::abbreviation($id)->first();
+        }
     }
 }
