@@ -8,7 +8,8 @@ use TmlpStats\CenterStatsData;
 use TmlpStats\GlobalReport;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use TmlpStats\Quarter;
-use TmlpStats\Scoreboard;
+use TmlpStats\Domain\Scoreboard;
+use TmlpStats\Domain\ScoreboardGame;
 use TmlpStats\StatsReport;
 
 class CenterStatsImporter extends DataImporterAbstract
@@ -193,7 +194,7 @@ class CenterStatsImporter extends DataImporterAbstract
                 unset($week['type']);
 
                 $actualData         = $this->setValues($actualData, $week);
-                $actualData->points = Scoreboard::calculatePoints($promiseData, $actualData);
+                $actualData->points = static::legacyCalculatePoints($promiseData, $actualData);
                 $actualData->save();
             }
         }
@@ -297,5 +298,32 @@ class CenterStatsImporter extends DataImporterAbstract
                               ->reportingDate($date)
                               ->byStatsReport($statsReport)
                               ->first();
+    }
+
+    /**
+     * Calculate the number of points for the give performance
+     *
+     * @param $promises object with game properties
+     * @param $actuals  object with game properties
+     *
+     * @return int
+     * @throws \Exception
+     */
+    public static function legacyCalculatePoints($promises, $actuals)
+    {
+        if (!$promises || !$actuals) {
+            throw new \Exception('Invalid argument passed to ' . __FUNCTION__);
+        }
+
+        $points = 0;
+        foreach (Scoreboard::GAME_KEYS as $game) {
+            $promise = $promises->$game;
+            $actual = $actuals->$game;
+
+            $percent = ScoreboardGame::calculatePercent($promise, $actual);
+            $points += ScoreboardGame::getPoints($game, $percent);
+        }
+
+        return $points;
     }
 }
