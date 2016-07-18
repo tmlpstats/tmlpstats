@@ -36,10 +36,19 @@ class ParserDomain implements Arrayable, \JsonSerializable
         $output = [];
         foreach ($this->_values as $k => $v) {
             if (!isset(static::$validProperties[$k])) {
+                // Skip any Id properties that were added
                 continue;
             }
-            if ($v !== null && static::$validProperties[$k]['type'] == 'date') {
-                $v = $v->toDateString();
+
+            $conf = static::$validProperties[$k];
+
+            if ($v !== null) {
+                if($conf['type'] == 'date') {
+                    $v = $v->toDateString();
+                } else if (array_get($conf, 'assignId', false)) {
+                    $idProp = array_get($conf, 'idProp', 'id');
+                    $v = $v->$idProp;
+                }
             }
             $output[$k] = $v;
         }
