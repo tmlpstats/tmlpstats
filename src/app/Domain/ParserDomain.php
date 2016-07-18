@@ -35,15 +35,11 @@ class ParserDomain implements Arrayable, \JsonSerializable
     {
         $output = [];
         foreach ($this->_values as $k => $v) {
-            $conf = static::$validProperties[$k];
-
-            if ($v !== null) {
-                if ($conf['type'] == 'date') {
-                    $v = $v->toDateString();
-                } else if (array_get($conf, 'assignId', false)) {
-                    $id_prop = array_get($conf, 'idProp', 'id');
-                    $v = $v->$id_prop;
-                }
+            if (!isset(static::$validProperties[$k])) {
+                continue;
+            }
+            if ($v !== null && static::$validProperties[$k]['type'] == 'date') {
+                $v = $v->toDateString();
             }
             $output[$k] = $v;
         }
@@ -103,18 +99,13 @@ class ParserDomain implements Arrayable, \JsonSerializable
     public function __get($key)
     {
         if (!isset(static::$validProperties[$key])) {
-            $refKey = $this->findReferenceKey($key);
-            if ($refKey !== $key) {
-                $key = $refKey;
-            } else {
-                $trace = debug_backtrace();
-                trigger_error(
-                    'Undefined property via __get(): ' . $key .
-                    ' in ' . $trace[0]['file'] .
-                    ' on line ' . $trace[0]['line'],
-                    E_USER_NOTICE
-                );
-            }
+            $trace = debug_backtrace();
+            trigger_error(
+                'Undefined property via __get(): ' . $key .
+                ' in ' . $trace[0]['file'] .
+                ' on line ' . $trace[0]['line'],
+                E_USER_NOTICE
+            );
         }
 
         if (isset($this->_values[$key])) {
@@ -127,18 +118,20 @@ class ParserDomain implements Arrayable, \JsonSerializable
     public function __set($key, $value)
     {
         if (!isset(static::$validProperties[$key])) {
-            $refKey = $this->findReferenceKey($key);
-            if ($refKey !== $key) {
-                $key = $refKey;
-            } else {
-                $trace = debug_backtrace();
-                trigger_error(
-                    'Undefined property via __get(): ' . $key .
-                    ' in ' . $trace[0]['file'] .
-                    ' on line ' . $trace[0]['line'],
-                    E_USER_NOTICE
-                );
-            }
+            $trace = debug_backtrace();
+            trigger_error(
+                'Undefined property via __get(): ' . $key .
+                ' in ' . $trace[0]['file'] .
+                ' on line ' . $trace[0]['line'],
+                E_USER_NOTICE
+            );
+
+            return;
+        }
+
+        if (array_get(static::$validProperties[$key], 'assignId', false)) {
+            $idProp = array_get($conf, 'idProp', 'id');
+            $this->_values["{$key}Id"] = $value->$idProp;
         }
 
         $this->_values[$key] = $value;
@@ -192,25 +185,5 @@ class ParserDomain implements Arrayable, \JsonSerializable
                 $target->$k = $v;
             }
         }
-    }
-
-    /**
-     * Find alternative key for object
-     *
-     * Objects can be reference directly or by Id. Check if $key is an Id version.
-     *
-     * @param  string $key
-     * @return string
-     */
-    protected function findReferenceKey($key)
-    {
-        if (strrpos($key, 'Id', -2) !== false) {
-            $refKey = substr($key, 0, -2);
-            if (array_get(static::$validProperties[$refKey], 'assignId', false)) {
-                $key = $refKey;
-            }
-        }
-
-        return $key;
     }
 }
