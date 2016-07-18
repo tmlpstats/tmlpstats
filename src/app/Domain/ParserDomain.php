@@ -204,9 +204,7 @@ class ParserDomain implements Arrayable, \JsonSerializable
      */
     protected function findReferenceKey($key)
     {
-        if (!isset(static::$validProperties[$key])
-            && strrpos($key, 'Id', -2) !== false
-        ) {
+        if (strrpos($key, 'Id', -2) !== false) {
             $refKey = substr($key, 0, -2);
             if (array_get(static::$validProperties[$refKey], 'assignId', false)) {
                 $key = $refKey;
