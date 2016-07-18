@@ -13,12 +13,25 @@ class ScoreboardMultiWeek
 {
     protected $weeks = [];
 
+    public static function fromArray($data)
+    {
+        $result = new static();
+        foreach ($data as $weekKey => $weekData) {
+            $d = Carbon::createFromFormat('Y-m-d', $weekKey);
+            $week = $result->ensureWeek($weekKey);
+            $week->parseArray($weekData);
+        }
+
+        return $result;
+    }
+
     public function ensureWeek(Carbon $day)
     {
         $key = $day->toDateString();
         if (!isset($this->weeks[$key])) {
             $this->weeks[$key] = Scoreboard::blank();
         }
+
         return $this->weeks[$key];
     }
 
@@ -34,6 +47,7 @@ class ScoreboardMultiWeek
         foreach ($weeks as $key => $scoreboard) {
             $output[$key] = $scoreboard->toArray();
         }
+
         return $output;
     }
 }

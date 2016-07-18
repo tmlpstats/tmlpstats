@@ -4,6 +4,7 @@ namespace TmlpStats;
 use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Domain\ScoreboardGame;
 use TmlpStats\Settings\ReportDeadlines;
 use TmlpStats\Traits\CachedRelationships;
 
@@ -32,7 +33,7 @@ class StatsReport extends Model
 
     protected $casts = [
         'validated' => 'boolean',
-        'locked'    => 'boolean',
+        'locked' => 'boolean',
     ];
 
     public function __get($name)
@@ -135,9 +136,9 @@ class StatsReport extends Model
     public function getPoints()
     {
         $data = CenterStatsData::byStatsReport($this)
-                               ->reportingDate($this->reportingDate)
-                               ->actual()
-                               ->first();
+            ->reportingDate($this->reportingDate)
+            ->actual()
+            ->first();
 
         return $data ? $data->points : null;
     }
@@ -155,12 +156,12 @@ class StatsReport extends Model
             return null;
         }
 
-        return Scoreboard::getRating($points);
+        return ScoreboardGame::getRating($points);
     }
 
     public function scopeByRegion($query, Region $region)
     {
-        $childRegions    = $region->getChildRegions();
+        $childRegions = $region->getChildRegions();
         $searchRegionIds = [];
         if ($childRegions) {
             foreach ($childRegions as $child) {

@@ -1,7 +1,7 @@
 <?php namespace TmlpStats\Reports\Arrangements;
 
+use TmlpStats\Domain\Scoreboard;
 use TmlpStats\Domain\ScoreboardMultiWeek;
-use TmlpStats\Scoreboard;
 
 class GamesByWeek extends BaseArrangement
 {

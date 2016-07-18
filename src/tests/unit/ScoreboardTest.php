@@ -2,7 +2,9 @@
 namespace TmlpStats\Tests\Unit;
 
 use stdClass;
-use TmlpStats\Scoreboard;
+use TmlpStats\Domain\Scoreboard;
+use TmlpStats\Domain\ScoreboardGame;
+use TmlpStats\Import\Xlsx\DataImporter\CenterStatsImporter;
 use TmlpStats\Tests\TestAbstract;
 use TmlpStats\Util;
 
@@ -15,7 +17,7 @@ class ScoreboardTest extends TestAbstract
      */
     public function testCalculatePoints($promises, $actuals, $expectedResult)
     {
-        $points = Scoreboard::calculatePoints($promises, $actuals);
+        $points = CenterStatsImporter::legacyCalculatePoints($promises, $actuals);
 
         $this->assertEquals($expectedResult, $points);
     }
@@ -26,60 +28,60 @@ class ScoreboardTest extends TestAbstract
             // 0% => 0 points
             [
                 Util::arrayToObject([
-                    'cap'  => '100',
-                    'cpc'  => '100',
-                    't1x'  => '100',
-                    't2x'  => '100',
+                    'cap' => '100',
+                    'cpc' => '100',
+                    't1x' => '100',
+                    't2x' => '100',
                     'gitw' => '100',
-                    'lf'   => '100',
+                    'lf' => '100',
                 ]),
                 Util::arrayToObject([
-                    'cap'  => '0',
-                    'cpc'  => '0',
-                    't1x'  => '0',
-                    't2x'  => '0',
+                    'cap' => '0',
+                    'cpc' => '0',
+                    't1x' => '0',
+                    't2x' => '0',
                     'gitw' => '0',
-                    'lf'   => '0',
+                    'lf' => '0',
                 ]),
                 0,
             ],
             // 100% => 28 points
             [
                 Util::arrayToObject([
-                    'cap'  => '100',
-                    'cpc'  => '100',
-                    't1x'  => '100',
-                    't2x'  => '100',
+                    'cap' => '100',
+                    'cpc' => '100',
+                    't1x' => '100',
+                    't2x' => '100',
                     'gitw' => '100',
-                    'lf'   => '100',
+                    'lf' => '100',
                 ]),
                 Util::arrayToObject([
-                    'cap'  => '100',
-                    'cpc'  => '100',
-                    't1x'  => '100',
-                    't2x'  => '100',
+                    'cap' => '100',
+                    'cpc' => '100',
+                    't1x' => '100',
+                    't2x' => '100',
                     'gitw' => '100',
-                    'lf'   => '100',
+                    'lf' => '100',
                 ]),
                 28,
             ],
             // Calculates total based on all games
             [
                 Util::arrayToObject([
-                    'cap'  => '100',
-                    'cpc'  => '100',
-                    't1x'  => '100',
-                    't2x'  => '100',
+                    'cap' => '100',
+                    'cpc' => '100',
+                    't1x' => '100',
+                    't2x' => '100',
                     'gitw' => '100',
-                    'lf'   => '100',
+                    'lf' => '100',
                 ]),
                 Util::arrayToObject([
-                    'cap'  => '75', // 2 points
-                    'cpc'  => '80', // 2 points
-                    't1x'  => '90', // 3 points
-                    't2x'  => '100',// 4 points
+                    'cap' => '75', // 2 points
+                    'cpc' => '80', // 2 points
+                    't1x' => '90', // 3 points
+                    't2x' => '100', // 4 points
                     'gitw' => '75', // 1 points
-                    'lf'   => '70', // 0 points
+                    'lf' => '70', // 0 points
                 ]),
                 12,
             ],
@@ -92,15 +94,15 @@ class ScoreboardTest extends TestAbstract
     public function testCalculatePointsThrowsExceptionForInvalidInputs($promises, $actuals)
     {
         $this->setExpectedException('\Exception');
-        Scoreboard::calculatePoints($promises, $actuals);
+        CenterStatsImporter::legacyCalculatePoints($promises, $actuals);
     }
 
     public function providerCalculatePointsThrowsExceptionForInvalidInputs()
     {
         return [
             [null, null],
-            [null, new stdClass],
-            [new stdClass, null],
+            [null, new stdClass()],
+            [new stdClass(), null],
         ];
     }
 
@@ -109,7 +111,7 @@ class ScoreboardTest extends TestAbstract
      */
     public function testCalculatePercent($promise, $actual, $expectedResult)
     {
-        $percent = Scoreboard::calculatePercent($promise, $actual);
+        $percent = ScoreboardGame::calculatePercent($promise, $actual);
 
         $this->assertEquals($expectedResult, $percent);
     }
@@ -157,13 +159,13 @@ class ScoreboardTest extends TestAbstract
             [
                 3,
                 2,
-                (float) ((2/3) * 100),
+                (float) ((2 / 3) * 100),
             ],
             // returns float
             [
                 3,
                 1,
-                (float) ((1/3) * 100),
+                (float) ((1 / 3) * 100),
             ],
             // returns float
             [
@@ -191,7 +193,7 @@ class ScoreboardTest extends TestAbstract
      */
     public function testGetPoints($percent, $game, $expectedResult)
     {
-        $points = Scoreboard::getPoints($percent, $game);
+        $points = ScoreboardGame::getPoints($game, $percent);
 
         $this->assertEquals($expectedResult, $points);
     }
@@ -483,19 +485,19 @@ class ScoreboardTest extends TestAbstract
             ],
             // Float percent rounds down correctly (74.33333 => 74)
             [
-                (float) ((1/3) + 74),
+                (float) ((1 / 3) + 74),
                 'cap',
                 0,
             ],
             // Float percent rounds up correctly (79.66666 => 80)
             [
-                (float) ((2/3) + 79),
+                (float) ((2 / 3) + 79),
                 'cap',
                 4,
             ],
             // Float percent rounds up correctly (89.5000 => 90)
             [
-                (float) ((1/2) + 89),
+                (float) ((1 / 2) + 89),
                 'cap',
                 6,
             ],
@@ -512,7 +514,7 @@ class ScoreboardTest extends TestAbstract
     {
         $this->setExpectedException('\Exception');
 
-        Scoreboard::getPoints(100, 'asdf');
+        ScoreboardGame::getPoints('asdf', 100);
     }
 
     /**
@@ -520,7 +522,7 @@ class ScoreboardTest extends TestAbstract
      */
     public function testGetRating($points, $expectedResult)
     {
-        $rating = Scoreboard::getRating($points);
+        $rating = ScoreboardGame::getRating($points);
 
         $this->assertEquals($expectedResult, $rating);
     }
@@ -530,119 +532,119 @@ class ScoreboardTest extends TestAbstract
         return [
             [
                 28,
-                'Powerful'
+                'Powerful',
             ],
             [
                 27,
-                'High Performing'
+                'High Performing',
             ],
             [
                 26,
-                'High Performing'
+                'High Performing',
             ],
             [
                 25,
-                'High Performing'
+                'High Performing',
             ],
             [
                 24,
-                'High Performing'
+                'High Performing',
             ],
             [
                 23,
-                'High Performing'
+                'High Performing',
             ],
             [
                 22,
-                'High Performing'
+                'High Performing',
             ],
             [
                 21,
-                'Effective'
+                'Effective',
             ],
             [
                 20,
-                'Effective'
+                'Effective',
             ],
             [
                 19,
-                'Effective'
+                'Effective',
             ],
             [
                 18,
-                'Effective'
+                'Effective',
             ],
             [
                 17,
-                'Effective'
+                'Effective',
             ],
             [
                 16,
-                'Effective'
+                'Effective',
             ],
             [
                 15,
-                'Marginally Effective'
+                'Marginally Effective',
             ],
             [
                 14,
-                'Marginally Effective'
+                'Marginally Effective',
             ],
             [
                 13,
-                'Marginally Effective'
+                'Marginally Effective',
             ],
             [
                 12,
-                'Marginally Effective'
+                'Marginally Effective',
             ],
             [
                 11,
-                'Marginally Effective'
+                'Marginally Effective',
             ],
             [
                 10,
-                'Marginally Effective'
+                'Marginally Effective',
             ],
             [
                 9,
-                'Marginally Effective'
+                'Marginally Effective',
             ],
             [
                 8,
-                'Ineffective'
+                'Ineffective',
             ],
             [
                 7,
-                'Ineffective'
+                'Ineffective',
             ],
             [
                 6,
-                'Ineffective'
+                'Ineffective',
             ],
             [
                 5,
-                'Ineffective'
+                'Ineffective',
             ],
             [
                 4,
-                'Ineffective'
+                'Ineffective',
             ],
             [
                 3,
-                'Ineffective'
+                'Ineffective',
             ],
             [
                 2,
-                'Ineffective'
+                'Ineffective',
             ],
             [
                 1,
-                'Ineffective'
+                'Ineffective',
             ],
             [
                 0,
-                'Ineffective'
+                'Ineffective',
             ],
         ];
     }
@@ -654,14 +656,14 @@ class ScoreboardTest extends TestAbstract
     {
         $this->setExpectedException('\Exception');
 
-        Scoreboard::getRating($points);
+        ScoreboardGame::getRating($points);
     }
 
     public function providerGetRatingThrowsExceptionForPointsOutOfRange()
     {
         return [
-            [Scoreboard::MAX_POINTS + 1],
-            [Scoreboard::MIN_POINTS - 1],
+            [ScoreboardGame::MAX_POINTS + 1],
+            [ScoreboardGame::MIN_POINTS - 1],
         ];
     }
 }

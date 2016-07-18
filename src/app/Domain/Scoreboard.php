@@ -2,7 +2,6 @@
 namespace TmlpStats\Domain;
 
 use Illuminate\Contracts\Support\Arrayable;
-use TmlpStats as Models;
 
 /**
  * Represents a six-game scoreboard (cap, cpc, t1x etc.)
@@ -12,13 +11,14 @@ use TmlpStats as Models;
  */
 class Scoreboard implements Arrayable
 {
+    const GAME_KEYS = ['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'];
     protected $games = [];
     public $meta = null;
 
     protected function __construct()
     {
         $this->meta = [];
-        foreach (Models\Scoreboard::GAME_KEYS as $gameKey) {
+        foreach (static::GAME_KEYS as $gameKey) {
             $this->games[$gameKey] = new ScoreboardGame($gameKey);
         }
     }
@@ -37,6 +37,7 @@ class Scoreboard implements Arrayable
     {
         $scoreboard = static::blank();
         $scoreboard->parseArray($data);
+
         return $scoreboard;
     }
 
@@ -53,6 +54,7 @@ class Scoreboard implements Arrayable
         foreach ($this->games as $game) {
             $total += $game->points();
         }
+
         return $total;
     }
 
@@ -62,7 +64,7 @@ class Scoreboard implements Arrayable
      */
     public function rating()
     {
-        return Models\Scoreboard::getRating($this->points());
+        return ScoreboardGame::getRating($this->points());
     }
 
     public function game($gameKey)
@@ -113,7 +115,7 @@ class Scoreboard implements Arrayable
                 $this->games[$gameKey]->setActual($actual);
             }
             if (($original = array_get($data, "original.{$gameKey}", null)) !== null) {
-                $this->games[$gameKey]->setActual($original);
+                $this->games[$gameKey]->setOriginalPromise($original);
             }
         }
     }
@@ -126,6 +128,7 @@ class Scoreboard implements Arrayable
     {
         $v = $this->toArray();
         unset($v['games']);
+
         return $v;
     }
 
@@ -142,6 +145,8 @@ class Scoreboard implements Arrayable
             'games' => [],
         ];
 
+        $original = [];
+
         foreach ($this->games as $gameKey => $game) {
             $g = [];
             $v['promise'][$gameKey] = $g['promise'] = $game->promise();
@@ -150,12 +155,18 @@ class Scoreboard implements Arrayable
             $v['points'][$gameKey] = $g['points'] = $game->points();
 
             if ($game->originalPromise()) {
-                $v['original'][$gameKey] = $g['original'] = $game->originalPromise();
+                $original[$gameKey] = $g['original'] = $game->originalPromise();
             }
 
             // set the additional key for great format switch
             $v['games'][$gameKey] = $g;
         }
+
+        // Only add the 'original' key if it was set by any of the games
+        if (count($original) > 0) {
+            $v['original'] = $original;
+        }
+
         return $v;
     }
 }
