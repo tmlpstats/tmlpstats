@@ -35,20 +35,8 @@ class ParserDomain implements Arrayable, \JsonSerializable
     {
         $output = [];
         foreach ($this->_values as $k => $v) {
-            if (!isset(static::$validProperties[$k])) {
-                // Skip any Id properties that were added
-                continue;
-            }
-
-            $conf = static::$validProperties[$k];
-
-            if ($v !== null) {
-                if($conf['type'] == 'date') {
-                    $v = $v->toDateString();
-                } else if (array_get($conf, 'assignId', false)) {
-                    $idProp = array_get($conf, 'idProp', 'id');
-                    $v = $v->$idProp;
-                }
+            if ($v !== null && static::$validProperties[$k]['type'] == 'date') {
+                $v = $v->toDateString();
             }
             $output[$k] = $v;
         }
@@ -113,8 +101,7 @@ class ParserDomain implements Arrayable, \JsonSerializable
                 'Undefined property via __get(): ' . $key .
                 ' in ' . $trace[0]['file'] .
                 ' on line ' . $trace[0]['line'],
-                E_USER_NOTICE
-            );
+                E_USER_NOTICE);
         }
 
         if (isset($this->_values[$key])) {
@@ -132,15 +119,7 @@ class ParserDomain implements Arrayable, \JsonSerializable
                 'Undefined property via __set(): ' . $key .
                 ' in ' . $trace[0]['file'] .
                 ' on line ' . $trace[0]['line'],
-                E_USER_NOTICE
-            );
-
-            return;
-        }
-
-        if (array_get(static::$validProperties[$key], 'assignId', false)) {
-            $idProp = array_get($conf, 'idProp', 'id');
-            $this->_values["{$key}Id"] = $value->$idProp;
+                E_USER_NOTICE);
         }
 
         $this->_values[$key] = $value;
