@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Api\Parsers;
 
+use App;
 use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Api\Parsers;
 
@@ -10,33 +11,33 @@ class Factory
     {
         switch ($type) {
             case 'array':
-                return Parsers\ArrayParser::create();
+                return App::make(Parsers\ArrayParser::class);
             case 'bool':
-                return Parsers\BoolParser::create();
+                return App::make(Parsers\BoolParser::class);
             case 'date':
-                return Parsers\DateParser::create();
+                return App::make(Parsers\DateParser::class);
             case 'int':
-                return Parsers\IntParser::create();
+                return App::make(Parsers\IntParser::class);
             case 'string':
-                return Parsers\StringParser::create();
+                return App::make(Parsers\StringParser::class);
             case 'Application':
-                return Parsers\ApplicationParser::create();
+                return App::make(Parsers\ApplicationParser::class);
             case 'Center':
-                return Parsers\CenterParser::create();
+                return App::make(Parsers\CenterParser::class);
             case 'Course':
-                return Parsers\CourseParser::create();
+                return App::make(Parsers\CourseParser::class);
             case 'GlobalReport':
-                return Parsers\GlobalReportParser::create();
+                return App::make(Parsers\GlobalReportParser::class);
             case 'LocalReport':
-                return Parsers\LocalReportParser::create();
+                return App::make(Parsers\LocalReportParser::class);
             case 'Quarter':
-                return Parsers\QuarterParser::create();
+                return App::make(Parsers\QuarterParser::class);
             case 'Region':
-                return Parsers\RegionParser::create();
+                return App::make(Parsers\RegionParser::class);
             case 'TeamMember':
-                return Parsers\TeamMemberParser::create();
+                return App::make(Parsers\TeamMemberParser::class);
             case 'WithdrawCode':
-                return Parsers\WithdrawCodeParser::create();
+                return App::make(Parsers\WithdrawCodeParser::class);
             default:
                 throw new ApiExceptions\ServerErrorException("Unknown parameter type {$type}");
         }
