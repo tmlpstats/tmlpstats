@@ -186,15 +186,14 @@ class Application extends ApiBase
         }
         $submissionData->store($center, $reportingDate, $teamApp);
 
-        // TODO: pass a real stats report?
-        // $report = new Models\StatsReport(['reportingDate' => $reportingDate]);
-        // $validationResults = $this->validateObject($report, $teamApp, $appId);
+        $report = LocalReport::getStatsReport($center, $reportingDate);
+        $validationResults = $this->validateObject($report, $teamApp, $appId);
 
         return [
             'success' => true,
             'storedId' => $appId,
-            // 'valid' => $validationResults['valid'],
-            // 'messages' => $validationResults['messages'],
+            'valid' => $validationResults['valid'],
+            'messages' => $validationResults['messages'],
         ];
     }
 
