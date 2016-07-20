@@ -59,6 +59,20 @@ class Scoreboard implements Arrayable
     }
 
     /**
+     * Calculate percent for this entire row
+     * @return int Percent average; 0-100
+     */
+    public function percent()
+    {
+        $total = 0;
+        foreach ($this->games as $game) {
+            $total += $game->percent();
+        }
+
+        return round($total / count($this->games));
+    }
+
+    /**
      * Rating for this row.
      * @return string Rating, e.g. "Ineffective", "Effective"
      */
@@ -137,7 +151,9 @@ class Scoreboard implements Arrayable
         $v = [
             'promise' => [],
             'actual' => [],
-            'percent' => [],
+            'percent' => [
+                'total' => $this->percent(),
+            ],
             'points' => [
                 'total' => $this->points(),
             ],
