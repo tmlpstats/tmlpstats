@@ -168,7 +168,7 @@ class Application extends ApiBase
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
         $submissionData = App::make(SubmissionData::class);
-        $appId = array_get($data, 'tmlpRegistrationId', null);
+        $appId = array_get($data, 'tmlpRegistration', null);
         if (is_numeric($appId)) {
             $appId = intval($appId);
         }
@@ -180,7 +180,7 @@ class Application extends ApiBase
         } else {
             if (!$appId) {
                 $appId = $submissionData->generateId();
-                $data['tmlpRegistrationId'] = $appId;
+                $data['tmlpRegistration'] = $appId;
             }
             $teamApp = Domain\TeamApplication::fromArray($data);
         }

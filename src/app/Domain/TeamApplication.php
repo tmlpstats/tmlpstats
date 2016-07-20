@@ -123,7 +123,7 @@ class TeamApplication extends ParserDomain
                     }
             }
         }
-        $obj->tmlpRegistration = $application->id;
+        $obj->tmlpRegistration = $application;
 
         return $obj;
     }
