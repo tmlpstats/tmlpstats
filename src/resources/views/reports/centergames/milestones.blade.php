@@ -68,8 +68,9 @@
                         @endforeach
                         <tr>
                             @if (isset($lastWeek['rating']))
-                                <th colspan="{{ $maxCount * 2 + 1 }}">{{ $lastWeek['rating'] }}</th>
+                                <th colspan="{{ $maxCount * 2 }}">{{ $lastWeek['rating'] }}</th>
                                 <th style="text-align: right">Total:</th>
+                                <th>{{ $lastWeek['percent']['total'] }}%</th>
                                 <th>{{ $lastWeek['points']['total'] }}</th>
                             @else
                                 <th colspan="{{ $maxCount * 2 + 3 }}">&nbsp;</th>
