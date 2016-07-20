@@ -122,7 +122,7 @@ class _EditCreate extends ApplicationsBase {
     saveApp(data) {
         this.props.dispatch(saveApplication(this.props.params.centerId, this.reportingDateString(), data)).done((result) => {
             if (result.success && result.storedId) {
-                data = Object.assign({}, data, {tmlpRegistration: result.storedId})
+                data = Object.assign({}, data, {id: result.storedId})
                 this.props.dispatch(appsCollection.replaceItem(data))
             }
             this.props.router.push(this.baseUri() + '/applications')
@@ -134,7 +134,7 @@ class ApplicationsEditView extends _EditCreate {
     componentDidMount() {
         super.setupApplications().then(() => {
             var appId = this.props.params.appId
-            if (!this.props.currentApp || this.props.currentApp.tmlpRegistration != appId) {
+            if (!this.props.currentApp || this.props.currentApp.id != appId) {
                 this.props.dispatch(chooseApplication(appId, this.getAppById(appId)))
             }
         })
@@ -147,7 +147,7 @@ class ApplicationsEditView extends _EditCreate {
     render() {
         const appId = this.props.params.appId
 
-        if (!this.props.loading.loaded || !this.props.currentApp || this.props.currentApp.tmlpRegistration != appId) {
+        if (!this.props.loading.loaded || !this.props.currentApp || this.props.currentApp.id != appId) {
             return <div>{this.props.loading.state}...</div>
         }
         return super.render()

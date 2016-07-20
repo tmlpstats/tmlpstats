@@ -38,10 +38,9 @@ class TeamApplication extends ParserDomain
             'owner' => 'application',
             'type' => 'bool',
         ],
-        'tmlpRegistration' => [
+        'id' => [
             'owner' => 'applicationData',
-            'type' => 'Application',
-            'assignId' => true,
+            'type' => 'int',
         ],
         'appOutDate' => [
             'owner' => 'applicationData',
@@ -123,7 +122,7 @@ class TeamApplication extends ParserDomain
                     }
             }
         }
-        $obj->tmlpRegistration = $application;
+        $obj->id = $application->id;
 
         return $obj;
     }

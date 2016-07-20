@@ -16,7 +16,7 @@ export const appsSorts = [
 
 export const appsCollection = new SortableCollection({
     name: 'submission.applications',
-    key_prop: 'tmlpRegistration',
+    key_prop: 'id',
     sort_by: 'teamYear_first_last',
     sorts: appsSorts
 })

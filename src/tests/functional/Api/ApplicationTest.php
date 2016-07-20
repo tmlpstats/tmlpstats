@@ -198,7 +198,7 @@ class ApplicationTest extends FunctionalTestAbstract
             'center' => $this->center->abbreviation,
             'reportingDate' => $reportingDate,
             'data' => [
-                'tmlpRegistration' => $this->application->id,
+                'id' => $this->application->id,
                 'appOutDate' => '2016-04-09',
                 'appInDate' => '2016-04-10',
                 'apprDate' => '2016-04-11',
@@ -241,7 +241,10 @@ class ApplicationTest extends FunctionalTestAbstract
         ];
     }
 
-    public function testStashFailsValidation()
+    /**
+     * @dataProvider providerStashFailsValidation
+     */
+    public function testStashFailsValidation($id)
     {
         $reportingDate = '2016-04-15';
 
@@ -250,7 +253,6 @@ class ApplicationTest extends FunctionalTestAbstract
             'center' => $this->center->abbreviation,
             'reportingDate' => $reportingDate,
             'data' => [
-                'tmlpRegistration' => $this->application->id,
                 'appOutDate' => '2016-04-09',
                 'appInDate' => '2016-04-10',
                 'apprDate' => '2016-04-08',
@@ -259,6 +261,10 @@ class ApplicationTest extends FunctionalTestAbstract
                 'incomingQuarter' => $this->quarter->id,
             ],
         ];
+
+        if ($id) {
+            $parameters['data']['id'] = $this->application->id;
+        }
 
         $report = $this->report->toArray();
         $applicationDataId = $this->applicationData->id;
@@ -276,6 +282,14 @@ class ApplicationTest extends FunctionalTestAbstract
         $this->assertEquals('2016-04-09', $result->appOutDate->toDateString());
         $this->assertEquals('2016-04-10', $result->appInDate->toDateString());
         $this->assertEquals('2016-04-08', $result->apprDate->toDateString());
+    }
+
+    public function providerStashFailsValidation()
+    {
+        return [
+            ['id'], // Include application id
+            [null], // Do not include application id
+        ];
     }
 
     /**
@@ -454,7 +468,7 @@ class ApplicationTest extends FunctionalTestAbstract
         return [
             ['Application.allForCenter'],
             ['Application.getWeekData'],
-            // ['Application.stash'],
+            ['Application.stash'],
         ];
     }
 
@@ -470,7 +484,7 @@ class ApplicationTest extends FunctionalTestAbstract
             'reportingDate' => $reportingDate,
             'center' => $this->center->id,
             'data' => [
-                'tmlpRegistration' => $this->application->id,
+                'id' => $this->application->id,
             ],
         ];
 
