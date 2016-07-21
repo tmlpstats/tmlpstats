@@ -117,7 +117,7 @@ class TeamApplication extends ParserDomain
                     $obj->$k = $application->$k;
                     break;
                 case 'applicationData':
-                    if ($appData != null) {
+                    if ($appData) {
                         $obj->$k = $appData->$k;
                     }
             }

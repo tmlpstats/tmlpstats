@@ -472,7 +472,6 @@ class ApplicationTest extends FunctionalTestAbstract
         ];
     }
 
-
     public function testApiThrowsExceptionForInvalidDateInStash()
     {
         $reportingDate = Carbon::parse('this thursday', $this->center->timezone)

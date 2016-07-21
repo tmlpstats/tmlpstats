@@ -22,6 +22,11 @@ class SubmissionData extends AuthenticatedApiBase
             'class' => Domain\TeamApplication::class,
             'idAttr' => 'id',
         ],
+        [
+            'key' => 'course',
+            'class' => Domain\Course::class,
+            'idAttr' => 'id',
+        ],
     ];
 
     protected $keyTypeMapping = [];

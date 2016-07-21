@@ -12,6 +12,7 @@ class Course extends ParserDomain
         'center' => [
             'owner' => 'course',
             'type' => 'Center',
+            'assignId' => true,
         ],
         'startDate' => [
             'owner' => 'course',
@@ -25,7 +26,7 @@ class Course extends ParserDomain
             'owner' => 'course',
             'type' => 'string',
         ],
-        'courseId' => [
+        'id' => [
             'owner' => 'courseData',
             'type' => 'int',
         ],
@@ -116,10 +117,12 @@ class Course extends ParserDomain
                     $obj->$k = $course->$k;
                     break;
                 case 'courseData':
-                    $obj->$k = $courseData->$k;
+                    if ($courseData) {
+                        $obj->$k = $courseData->$k;
+                    }
             }
         }
-        $obj->courseId = $course->id;
+        $obj->id = $course->id;
 
         return $obj;
     }

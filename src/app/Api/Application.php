@@ -161,9 +161,9 @@ class Application extends ApiBase
 
     /**
      * Stash information about a registration (combined name data and application progress data) to be used for later validation.
-     * @param  TmlpRegistration $application   The application we're stashing data about.
-     * @param  Carbon           $reportingDate Reporting date
-     * @param  array            $data          Information to use to construct a TeamApplication.
+     * @param  Center  $center         The courses's center
+     * @param  Carbon  $reportingDate  Reporting date
+     * @param  array   $data           Information to use to construct a TeamApplication.
      */
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
