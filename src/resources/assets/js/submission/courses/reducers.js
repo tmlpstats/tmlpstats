@@ -1,20 +1,15 @@
 import { combineReducers } from 'redux'
 import { modelReducer, formReducer } from 'react-redux-form'
 
-import { INITIALIZE_COURSES } from './actions'
+import { coursesCollection, coursesLoad, saveCourseLoad } from './data'
 
-function loadedReducer(state = false, action) {
-    switch (action.type) {
-    case INITIALIZE_COURSES:
-        return true
-    }
-    return state
-}
+export const COURSES_FORM_KEY = 'submission.courses.currentCourse'
 
-export const COURSES_FORM_KEY = 'submission.course.courses'
 
 export const courseReducer = combineReducers({
-    loaded: loadedReducer,
-    courses: modelReducer(COURSES_FORM_KEY, []),
-    coursesForm: formReducer(COURSES_FORM_KEY, [])
+    loading: coursesLoad.reducer(),
+    courses: coursesCollection.reducer(),
+    currentCourse: modelReducer(COURSES_FORM_KEY, []),
+    currentCourseForm: formReducer(COURSES_FORM_KEY, []),
+    saveCourse: saveCourseLoad.reducer()
 })

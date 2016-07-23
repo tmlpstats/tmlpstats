@@ -1,36 +1,33 @@
+// POLYFILL
+import { Promise } from 'es6-promise'
+
+// NORMAL CODE
 import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
 import { SubmissionBase, React } from '../base_components'
 import { Form, SimpleField, AddOneLink } from '../../reusable/form_utils'
-import { COURSES_FORM_KEY } from './reducers'
-import { initializeCourses } from './actions'
 
-const courseTypeMap = {
-    'CAP': 'Access to Power',
-    'CPC': 'Power to Create'
-}
+import { COURSES_FORM_KEY } from './reducers'
+import { coursesCollection, courseTypeMap } from './data'
+import { loadCourses, saveCourse, chooseCourse } from './actions'
 
 class CoursesBase extends SubmissionBase {
     componentDidMount() {
-        if (!this.props.loaded) {
-            this.loadCourses()
+        this.setupCourses()
+    }
+
+    setupCourses() {
+        console.log(this.props.loading)
+        if (this.props.loading.state == 'new') {
+            return this.props.dispatch(loadCourses(this.props.params.centerId, this.reportingDateString()))
         }
+        return Promise.resolve(null)
     }
 
-    loadCourses() {
-        return Api.Course.allForCenter({
-            center: this.props.params.centerId
-        }).done((data) => {
-            this.props.initializeCourses(data)
-        })
-    }
-
-    getCourseById(courseId) {
-        return this.props.courses.find(
-            (course) => courseId == course.courseId
-        )
+    getCourseById(appId) {
+        return this.props.courses.collection[appId]
     }
 
     getCourseIndex(courseId) {
@@ -142,44 +139,41 @@ class CoursesCourseView extends React.Component {
 
 class CoursesIndexView extends CoursesBase {
     render() {
-        var courses = []
-        if (this.props.loaded) {
-            var baseUri = this.baseUri()
-
-            this.props.courses.forEach((courseData) => {
-
-                var location = courseData.location
-                if (!location) {
-                    location = courseData.center.name
-                }
-                var type = courseTypeMap[courseData.type]
-
-                var startDate = moment(courseData.startDate)
-                var ter = courseData.currentTer || '-'
-                var ss = courseData.currentStandardStarts || '-'
-                var xfer = courseData.currentXfer || '-'
-
-                courses.push(
-                    <tr key={courseData.courseId}>
-                        <td><Link to={`${baseUri}/courses/edit/${courseData.courseId}`}>{startDate.format("MMM D, YYYY")}</Link></td>
-                        <td className="data-point">{type}</td>
-                        <td>{location}</td>
-                        <td className="data-point">{ter}</td>
-                        <td className="data-point">{ss}</td>
-                        <td className="data-point">{xfer}</td>
-                    </tr>
-                )
-            })
-        } else {
-            courses.push(
-                <tr key="courses-loading"><td colSpan="3">Loading....</td></tr>
-            )
+        if (!this.props.loading.loaded) {
+            return this.renderBasicLoading()
         }
+
+        var courses = []
+        var baseUri = this.baseUri()
+
+        this.props.courses.forEach((courseData) => {
+
+            var location = courseData.location
+            if (!location) {
+                location = courseData.center.name
+            }
+            var type = courseTypeMap[courseData.type]
+
+            var startDate = moment(courseData.startDate)
+            var ter = courseData.currentTer || '-'
+            var ss = courseData.currentStandardStarts || '-'
+            var xfer = courseData.currentXfer || '-'
+
+            courses.push(
+                <tr key={courseData.courseId}>
+                    <td><Link to={`${baseUri}/courses/edit/${courseData.courseId}`}>{startDate.format("MMM D, YYYY")}</Link></td>
+                    <td className="data-point">{type}</td>
+                    <td>{location}</td>
+                    <td className="data-point">{ter}</td>
+                    <td className="data-point">{ss}</td>
+                    <td className="data-point">{xfer}</td>
+                </tr>
+            )
+        })
 
         return (
             <div>
                 <h3>Manage Courses</h3>
-                <AddOneLink link={`${baseUri}/courses/add`} />
                 <table className="table">
                     <thead>
                         <tr>
@@ -193,6 +187,7 @@ class CoursesIndexView extends CoursesBase {
                     </thead>
                     <tbody>{courses}</tbody>
                 </table>
+                <AddOneLink link={`${baseUri}/courses/add`} />
             </div>
         );
     }
@@ -386,11 +381,10 @@ class CoursesAddView extends CoursesBase {
     }
 }
 
-const mapStateToProps = (state) => state.submission.course
-
-const mapDispatchToProps = (dispatch) => bindActionCreators({ initializeCourses }, dispatch)
-
-const connector = connect(mapStateToProps, mapDispatchToProps)
+const mapStateToProps = (state) => {
+    return Object.assign({lookups: state.submission.core.lookups}, state.submission.courses)
+}
+const connector = connect(mapStateToProps)
 
 export const CoursesIndex = connector(CoursesIndexView)
 export const CoursesEdit = connector(withRouter(CoursesEditView))
