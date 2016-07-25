@@ -4,7 +4,9 @@ namespace TmlpStats\Tests;
 use Artisan;
 use Carbon\Carbon;
 
-set_time_limit(600);
+if (ini_get('max_execution_time') < 600) {
+    ini_set('max_execution_time', 600);
+}
 
 class TestAbstract extends \Illuminate\Foundation\Testing\TestCase
 {

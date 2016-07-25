@@ -14,7 +14,7 @@ function scoreboardReducer(state, action) {
 const submissionReducerInternal = combineReducers({
     core: coreReducer,
     applications: applicationReducer,
-    course: courseReducer,
+    courses: courseReducer,
     scoreboard: scoreboardReducer
 })
 

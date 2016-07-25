@@ -1,6 +1,6 @@
 import { React } from '../base_components'
 import { Field, SimpleSelect } from '../../reusable/form_utils'
-import { setAppStatus } from './actions'
+import { setCourseStatus } from './actions'
 
 const STATUS_UNKNOWN=0,
     STATUS_REG=1,
@@ -10,23 +10,23 @@ const STATUS_UNKNOWN=0,
     STATUS_WD=5
 
 // Since the status is not stored currently inside the model, we will just infer it from the existing properties
-export function inferStatus(app) {
-    if (app.appStatus) {
-        return app.appStatus
+export function inferStatus(course) {
+    if (course.courseStatus) {
+        return course.courseStatus
     }
-    if (app.wdDate) {
+    if (course.wdDate) {
         return STATUS_WD
     }
-    if (app.apprDate) {
+    if (course.courserDate) {
         return STATUS_APPR
     }
-    if (app.appInDate) {
+    if (course.courseInDate) {
         return STATUS_IN
     }
-    if (app.appOutDate) {
+    if (course.courseOutDate) {
         return STATUS_OUT
     }
-    if (app.regDate) {
+    if (course.regDate) {
         return STATUS_REG
     }
     return STATUS_UNKNOWN
@@ -34,16 +34,16 @@ export function inferStatus(app) {
 
 var STATUS_BEHAVIOUR = [
     {status: STATUS_REG, key: 'regDate', title: 'Registered'},
-    {status: STATUS_OUT, key: 'appOutDate', title: 'App Out'},
-    {status: STATUS_IN, key: 'appInDate', title: 'App In'},
-    {status: STATUS_APPR, key: 'apprDate', title: 'Approved', dateTitle: 'Date Approved'},
+    {status: STATUS_OUT, key: 'courseOutDate', title: 'Course Out'},
+    {status: STATUS_IN, key: 'courseInDate', title: 'Course In'},
+    {status: STATUS_APPR, key: 'courserDate', title: 'Courseroved', dateTitle: 'Date Courseroved'},
     {status: STATUS_WD, key: 'wdDate', title: 'Withdrawn', dateTitle: 'Withdraw Date', renderGroup: 'renderWithdrawn'}
 ]
 
-export default class AppStatus extends React.Component {
+export default class CourseStatus extends React.Component {
     render() {
-        const { model, currentApp, dispatch } = this.props
-        var currentStatus = inferStatus(currentApp)
+        const { model, currentCourse, dispatch } = this.props
+        var currentStatus = inferStatus(currentCourse)
 
         var buttons = []
         var statuses = []
@@ -58,7 +58,7 @@ export default class AppStatus extends React.Component {
             if (item.status == currentStatus) {
                 classes += ' active'
             }
-            let clickHandler = () => dispatch(setAppStatus(item.status))
+            let clickHandler = () => dispatch(setCourseStatus(item.status))
             buttons.push(
                 <button key={item.key} type="button" className={classes} onClick={clickHandler}>{item.title}</button>
             )
@@ -114,7 +114,7 @@ export default class AppStatus extends React.Component {
                 <Field model={model+'.'+item.key}>
                     <label className="control-label col-sm-3">{dateTitle}</label>
                     <div className="col-sm-6">
-                        <input type="text" className="form-control" disabled={disabled} aria-describedby={'addon-apps'+item.key} />
+                        <input type="text" className="form-control" disabled={disabled} aria-describedby={'addon-courses'+item.key} />
                     </div>
                 </Field>
             </div>

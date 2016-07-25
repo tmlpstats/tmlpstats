@@ -1,11 +1,12 @@
 <?php
 namespace TmlpStats\Tests\Functional\Api;
 
+use App;
 use Carbon\Carbon;
-use Faker\Factory;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use TmlpStats as Models;
+use TmlpStats\Api;
 use TmlpStats\Domain;
 use TmlpStats\Tests\Functional\FunctionalTestAbstract;
 
@@ -178,76 +179,113 @@ class CourseTest extends FunctionalTestAbstract
     }
 
     /**
-     * @dataProvider providerSetWeekData
+     * @dataProvider providerStash
      */
-    public function testSetWeekData($reportingDate, $parameterUpdates, $expectedResponseUpdates)
+    public function testStash($reportingDate)
     {
         $parameters = [
-            'method' => 'Course.setWeekData',
-            'course' => $this->course->id,
+            'method' => 'Course.stash',
+            'center' => $this->center->abbreviation,
             'reportingDate' => $reportingDate,
             'data' => [
-                'quarterStartTer' => 10,
-                'quarterStartStandardStarts' => 10,
+                'id' => $this->course->id,
+                'quarterStartTer' => 12,
+                'quarterStartStandardStarts' => 12,
                 'quarterStartXfer' => 0,
-                'currentTer' => 35,
-                'currentStandardStarts' => 33,
-                'currentXfer' => 2,
+                'currentTer' => 24,
+                'currentStandardStarts' => 22,
+                'currentXfer' => 1,
             ],
         ];
 
         $report = $this->report->toArray();
-        $course = $this->course;
         $courseDataId = $this->courseData->id;
         if ($reportingDate != $this->report->reportingDate->toDateString()) {
             $report['id'] += 1;
             $report['reportingDate'] = "{$reportingDate} 00:00:00";
             $report['version'] = 'api';
 
-            $course = $this->pastCourse;
             $courseDataId = Models\CourseData::count() + 1;
-
-            $parameterUpdates['course'] = $this->pastCourse->id;
         }
 
         $expectedResponse = [
-            'id' => $courseDataId,
-            'courseId' => $course->id,
-            'statsReportId' => $report['id'],
-            'quarterStartTer' => $parameters['data']['quarterStartTer'],
-            'quarterStartStandardStarts' => $parameters['data']['quarterStartStandardStarts'],
-            'quarterStartXfer' => $parameters['data']['quarterStartXfer'],
-            'currentTer' => $parameters['data']['currentTer'],
-            'currentStandardStarts' => $parameters['data']['currentStandardStarts'],
-            'currentXfer' => $parameters['data']['currentXfer'],
-            'course' => $course->toArray(),
-            'statsReport' => $report,
+            'success' => true,
+            'valid' => true,
         ];
 
-        $parameters = $this->replaceInto($parameters, $parameterUpdates);
-        $expectedResponse = $this->replaceInto($expectedResponse, $expectedResponseUpdates);
-
         $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+        $result1 = App::make(Api\SubmissionData::class)->allForType($this->center, new Carbon($reportingDate), Domain\Course::class);
+
+        $this->assertEquals(1, count($result1));
+        $result = $result1[0];
+        $this->assertEquals(12, $result->quarterStartTer);
+        $this->assertEquals(12, $result->quarterStartStandardStarts);
+        $this->assertEquals(0, $result->quarterStartXfer);
+        $this->assertEquals(24, $result->currentTer);
+        $this->assertEquals(22, $result->currentStandardStarts);
+        $this->assertEquals(1, $result->currentXfer);
     }
 
-    public function providerSetWeekData()
+    public function providerStash()
     {
         return [
-            [ // Non-existent report
-                '2016-04-08',
-                [
-                    'course' => 'update-me',
-                    'data.completedStandardStarts' => 32,
-                    'data.potentials' => 25,
-                    'data.registrations' => 23,
-                    'data.guestsPromised' => 50,
-                    'data.guestsInvited' => 45,
-                    'data.guestsConfirmed' => 25,
-                    'data.guestsAttended' => 15,
-                ],
-                [],
+            ['2016-04-22'], // Non-existent report
+            ['2016-04-15'], // Existing report
+        ];
+    }
+
+    /**
+     * @dataProvider providerStashFailsValidation
+     */
+    public function testStashFailsValidation($id)
+    {
+        $reportingDate = '2016-04-15';
+
+        $parameters = [
+            'method' => 'Course.stash',
+            'center' => $this->center->abbreviation,
+            'reportingDate' => $reportingDate,
+            'data' => [
+                'id' => $this->course->id,
+                'quarterStartTer' => 12,
+                'quarterStartStandardStarts' => 15,
+                'quarterStartXfer' => 2,
+                'currentTer' => 24,
+                'currentStandardStarts' => 22,
+                'currentXfer' => 1,
             ],
-            ['2016-04-15', [], []], // Existing report
+        ];
+
+        if ($id) {
+            $parameters['data']['id'] = $this->course->id;
+        }
+
+        $report = $this->report->toArray();
+        $courseDataId = $this->courseData->id;
+
+        $expectedResponse = [
+            'success' => true,
+            'valid' => false,
+        ];
+
+        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+        $result1 = App::make(Api\SubmissionData::class)->allForType($this->center, new Carbon($reportingDate), Domain\Course::class);
+
+        $this->assertEquals(1, count($result1));
+        $result = $result1[0];
+        $this->assertEquals(12, $result->quarterStartTer);
+        $this->assertEquals(15, $result->quarterStartStandardStarts);
+        $this->assertEquals(2, $result->quarterStartXfer);
+        $this->assertEquals(24, $result->currentTer);
+        $this->assertEquals(22, $result->currentStandardStarts);
+        $this->assertEquals(1, $result->currentXfer);
+    }
+
+    public function providerStashFailsValidation()
+    {
+        return [
+            ['id'], // Include application id
+            [null], // Do not include application id
         ];
     }
 
@@ -438,7 +476,33 @@ class CourseTest extends FunctionalTestAbstract
         return [
             ['Course.allForCenter'],
             ['Course.getWeekData'],
-            ['Course.setWeekData'],
+            ['Course.stash'],
         ];
+    }
+
+    public function testApiThrowsExceptionForInvalidDateInStash()
+    {
+        $reportingDate = Carbon::parse('this thursday', $this->center->timezone)
+            ->startOfDay()
+            ->toDateString();
+
+        $parameters = [
+            'method' => 'Course.stash',
+            'reportingDate' => $reportingDate,
+            'center' => $this->center->id,
+            'data' => [
+                'id' => $this->course->id,
+            ],
+        ];
+
+        $expectedResponse = [
+            'success' => false,
+            'error' => [
+                'message' => 'Reporting date must be a Friday.',
+            ],
+        ];
+
+        $headers = ['Accept' => 'application/json'];
+        $this->post('/api', $parameters, $headers)->seeJsonHas($expectedResponse);
     }
 }

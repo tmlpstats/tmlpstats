@@ -132,6 +132,7 @@ Api.Course = {
     List courses by center
     Parameters:
       center: Center
+      includeInProgress: bool
       reportingDate: date
     */
     allForCenter: function(params, callback, errback) {
@@ -149,14 +150,14 @@ Api.Course = {
     },
 
     /*
-    Set the weekly data for an course
+    Stash combined data for an course
     Parameters:
-      course: Course
+      center: Center
       reportingDate: date
       data: array
     */
-    setWeekData: function(params, callback, errback) {
-        return apiCall('Course.setWeekData', params, (callback || null), (errback || null));
+    stash: function(params, callback, errback) {
+        return apiCall('Course.stash', params, (callback || null), (errback || null));
     }
 };
 Api.GlobalReport = {

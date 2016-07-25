@@ -107,16 +107,6 @@ class ParserDomain implements Arrayable, \JsonSerializable
 
     public function __get($key)
     {
-        if (!array_key_exists($key, static::$validProperties) && !array_key_exists($key, $this->_values)) {
-            $trace = debug_backtrace();
-            trigger_error(
-                'Undefined property via __get(): ' . $key .
-                ' in ' . $trace[0]['file'] .
-                ' on line ' . $trace[0]['line'],
-                E_USER_NOTICE
-            );
-        }
-
         if (isset($this->_values[$key])) {
             return $this->_values[$key];
         } else {

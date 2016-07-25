@@ -161,14 +161,14 @@ class Application extends ApiBase
 
     /**
      * Stash information about a registration (combined name data and application progress data) to be used for later validation.
-     * @param  TmlpRegistration $application   The application we're stashing data about.
-     * @param  Carbon           $reportingDate Reporting date
-     * @param  array            $data          Information to use to construct a TeamApplication.
+     * @param  Center  $center         The courses's center
+     * @param  Carbon  $reportingDate  Reporting date
+     * @param  array   $data           Information to use to construct a TeamApplication.
      */
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
         $submissionData = App::make(SubmissionData::class);
-        $appId = array_get($data, 'tmlpRegistrationId', null);
+        $appId = array_get($data, 'id', null);
         if (is_numeric($appId)) {
             $appId = intval($appId);
         }
@@ -180,13 +180,21 @@ class Application extends ApiBase
         } else {
             if (!$appId) {
                 $appId = $submissionData->generateId();
-                $data['tmlpRegistrationId'] = $appId;
+                $data['id'] = $appId;
             }
             $teamApp = Domain\TeamApplication::fromArray($data);
         }
         $submissionData->store($center, $reportingDate, $teamApp);
 
-        return ['success' => true, 'storedId' => $appId];
+        $report = LocalReport::getStatsReport($center, $reportingDate);
+        $validationResults = $this->validateObject($report, $teamApp, $appId);
+
+        return [
+            'success' => true,
+            'storedId' => $appId,
+            'valid' => $validationResults['valid'],
+            'messages' => $validationResults['messages'],
+        ];
     }
 
     /**
@@ -197,7 +205,6 @@ class Application extends ApiBase
      */
     public function commitStashedApp(Models\TmlpRegistration $application, Carbon $reportingDate, Domain\TeamApplication $data)
     {
-
         $report = LocalReport::getStatsReport($application->center, $reportingDate);
 
         $applicationData = Models\TmlpRegistrationData::firstOrCreate([

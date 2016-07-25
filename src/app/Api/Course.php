@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Api;
 
+use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\ApiBase;
@@ -15,7 +16,6 @@ class Course extends ApiBase
     public function create(array $data)
     {
         $input = Domain\Course::fromArray($data, ['center', 'startDate', 'type']);
-        $input->type = strtoupper($input->type);
 
         $courseData = [
             'center_id' => $input->center->id,
@@ -60,7 +60,7 @@ class Course extends ApiBase
         return $course->load('center');
     }
 
-    public function allForCenter(Models\Center $center, Carbon $reportingDate = null)
+    public function allForCenter(Models\Center $center, $includeInProgress = false, Carbon $reportingDate = null)
     {
         if ($reportingDate === null) {
             $reportingDate = LocalReport::getReportingDate($center);
@@ -75,10 +75,11 @@ class Course extends ApiBase
             ->official()
             ->where('reporting_date', '<=', $reportingDate)
             ->orderBy('reporting_date', 'asc')
-            ->with('tmlpRegistrationData')
+            ->with('courseData')
             ->get();
 
         $allCourses = [];
+
         foreach ($reports as $report) {
             foreach ($report->courseData as $courseData) {
                 // Store indexed here so we end up with only the most recent one for each course
@@ -94,6 +95,14 @@ class Course extends ApiBase
             }
 
             $allCourses[$courseData->courseId] = Domain\Course::fromModel($courseData);
+        }
+
+        if ($includeInProgress) {
+            $submissionData = App::make(SubmissionData::class);
+            $found = $submissionData->allForType($center, $reportingDate, Domain\Course::class);
+            foreach ($found as $courseData) {
+                $allCourses[$courseData->courseId] = $courseData;
+            }
         }
 
         usort($allCourses, function ($a, $b) {
@@ -150,7 +159,51 @@ class Course extends ApiBase
         return $response->load('course', 'course.center', 'statsReport');
     }
 
-    public function setWeekData(Models\Course $course, Carbon $reportingDate, array $data)
+    /**
+     * Stash information about a registration (combined name data and course progress data) to be used for later validation.
+     * @param  Center $center   The courses's center
+     * @param  Carbon           $reportingDate Reporting date
+     * @param  array            $data          Information to use to construct a Course.
+     */
+    public function stash(Models\Center $center, Carbon $reportingDate, array $data)
+    {
+        $submissionData = App::make(SubmissionData::class);
+        $courseId = array_get($data, 'id', null);
+        if (is_numeric($courseId)) {
+            $courseId = intval($courseId);
+        }
+
+        if ($courseId !== null && $courseId > 0) {
+            $courseModel = Models\Course::findOrFail($courseId);
+            $course = Domain\Course::fromModel(null, $courseModel);
+            $course->updateFromArray($data);
+        } else {
+            if (!$courseId) {
+                $courseId = $submissionData->generateId();
+                $data['id'] = $courseId;
+            }
+            $course = Domain\Course::fromArray($data);
+        }
+        $submissionData->store($center, $reportingDate, $course);
+
+        $report = LocalReport::getStatsReport($center, $reportingDate);
+        $validationResults = $this->validateObject($report, $course, $courseId);
+
+        return [
+            'success' => true,
+            'storedId' => $courseId,
+            'valid' => $validationResults['valid'],
+            'messages' => $validationResults['messages'],
+        ];
+    }
+
+    /**
+     * Commit week data to the database. Will be performed during validation to write the domain object into the DB
+     * @param  Models\Course  $application   The application we are working with.
+     * @param  Carbon         $reportingDate [description]
+     * @param  Domain\Course  $data          [description]
+     */
+    public function commitStashedApp(Models\Course $course, Carbon $reportingDate, array $data)
     {
         if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
             throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');

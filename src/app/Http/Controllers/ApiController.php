@@ -30,7 +30,7 @@ class ApiController extends ApiControllerBase
         "Course.update" => "Course__update",
         "Course.allForCenter" => "Course__allForCenter",
         "Course.getWeekData" => "Course__getWeekData",
-        "Course.setWeekData" => "Course__setWeekData",
+        "Course.stash" => "Course__stash",
         "GlobalReport.getRating" => "GlobalReport__getRating",
         "GlobalReport.getQuarterScoreboard" => "GlobalReport__getQuarterScoreboard",
         "GlobalReport.getWeekScoreboard" => "GlobalReport__getWeekScoreboard",
@@ -131,6 +131,7 @@ class ApiController extends ApiControllerBase
     {
         return App::make(Api\Course::class)->allForCenter(
             $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'includeInProgress', 'bool', false),
             $this->parse($input, 'reportingDate', 'date', false)
         );
     }
@@ -141,10 +142,10 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'reportingDate', 'date', false)
         );
     }
-    protected function Course__setWeekData($input)
+    protected function Course__stash($input)
     {
-        return App::make(Api\Course::class)->setWeekData(
-            $this->parse($input, 'course', 'Course'),
+        return App::make(Api\Course::class)->stash(
+            $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'data', 'array')
         );

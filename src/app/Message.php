@@ -770,12 +770,61 @@ class Message
             ],
         ],
 
-        // '' => array(
-        //     'type' => Message::ERROR,
-        //     'format' => "",
-        //     'arguments' => array(
-        //     ),
-        // ),
+        // Team Application
+        'TEAMAPP_WD_CODE_MISSING' => [
+            'type' => Message::ERROR,
+            'format' => "Withdraw date was provided, but no reason was provided.",
+            'arguments' => [],
+        ],
+        'TEAMAPP_WD_DATE_MISSING' => [
+            'type' => Message::ERROR,
+            'format' => "Withdraw reason was provided, but no withdraw date.",
+            'arguments' => [],
+        ],
+        'TEAMAPP_APPR_MISSING_APPIN_DATE' => [
+            'type' => Message::ERROR,
+            'format' => 'Approval date provided, but App In date is missing.',
+            'arguments' => [],
+        ],
+        'TEAMAPP_APPR_MISSING_APPOUT_DATE' => [
+            'type' => Message::ERROR,
+            'format' => 'Approval date provided, but App Out date is missing.',
+            'arguments' => [],
+        ],
+        'TEAMAPP_APPIN_MISSING_APPOUT_DATE' => [
+            'type' => Message::ERROR,
+            'format' => 'App In date provided, but App Out date is missing.',
+            'arguments' => [],
+        ],
+        // TODO: rewrite the message text with a more accurate error
+        'TEAMAPP_TRAVEL_COMMENT_MISSING' => [
+            'type' => Message::ERROR,
+            'format' => 'Either travel must be complete and marked with a Y in the Travel column, or a comment with a specific promise must be provided',
+            'arguments' => [],
+        ],
+        // TODO: rewrite the message text with a more accurate error
+        'TEAMAPP_ROOM_COMMENT_MISSING' => [
+            'type' => Message::ERROR,
+            'format' => 'Either rooming must be complete and marked with a Y in the Room column, or a comment with a specific promise must be provided',
+            'arguments' => [],
+        ],
+        // TODO: rewrite the message text with a more accurate error
+        'TEAMAPP_TRAVEL_COMMENT_REVIEW' => [
+            'type' => Message::WARNING,
+            'format' => 'Travel is not booked. Make sure the comment provides a specific promise for when travel will be complete.',
+            'arguments' => [],
+        ],
+        // TODO: rewrite the message text with a more accurate error
+        'TEAMAPP_ROOM_COMMENT_REVIEW' => [
+            'type' => Message::WARNING,
+            'format' => 'Rooming is not booked. Make sure the comment provides a specific promise for when rooming will be complete.',
+            'arguments' => [],
+        ],
+        'TEAMAPP_REVIEWER_TEAM1' => [
+            'type' => Message::ERROR,
+            'format' => 'Only Team 2 can be reviewers. Please check that the team year and reviewer statuses are correct.',
+            'arguments' => [],
+        ],
     ];
 
     protected $section = '';

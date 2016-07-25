@@ -20,7 +20,12 @@ class SubmissionData extends AuthenticatedApiBase
         [
             'key' => 'application',
             'class' => Domain\TeamApplication::class,
-            'idAttr' => 'tmlpRegistrationId',
+            'idAttr' => 'id',
+        ],
+        [
+            'key' => 'course',
+            'class' => Domain\Course::class,
+            'idAttr' => 'id',
         ],
     ];
 

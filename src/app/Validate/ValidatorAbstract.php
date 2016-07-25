@@ -11,6 +11,7 @@ abstract class ValidatorAbstract
     protected $data = null;
     protected $supplementalData = null;
     protected $statsReport = null;
+    protected $offset = null;
 
     protected $messages = [];
 
@@ -73,7 +74,16 @@ abstract class ValidatorAbstract
 
     protected function getOffset($data)
     {
+        if ($this->offset !== null) {
+            return $this->offset;
+        }
+
         return isset($data->offset) ? $data->offset : null;
+    }
+
+    public function setOffset($offset)
+    {
+        $this->offset = $offset;
     }
 
     protected function addMessage($messageId)

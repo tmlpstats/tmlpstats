@@ -198,10 +198,13 @@ class ApplicationTest extends FunctionalTestAbstract
             'center' => $this->center->abbreviation,
             'reportingDate' => $reportingDate,
             'data' => [
-                'tmlpRegistrationId' => $this->application->id,
-                'appOutDate' => '2016-04-17',
-                'apprDate' => '2016-04-23',
-                'committedTeamMemberId' => 1,
+                'id' => $this->application->id,
+                'appOutDate' => '2016-04-09',
+                'appInDate' => '2016-04-10',
+                'apprDate' => '2016-04-11',
+                'committedTeamMember' => 1,
+                'teamYear' => 1,
+                'incomingQuarter' => $this->quarter->id,
             ],
         ];
 
@@ -217,6 +220,7 @@ class ApplicationTest extends FunctionalTestAbstract
 
         $expectedResponse = [
             'success' => true,
+            'valid' => true,
         ];
 
         $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
@@ -224,15 +228,67 @@ class ApplicationTest extends FunctionalTestAbstract
 
         $this->assertEquals(1, count($result1));
         $result = $result1[0];
-        $this->assertEquals('2016-04-17', $result->appOutDate->toDateString());
-        $this->assertEquals('2016-04-23', $result->apprDate->toDateString());
+        $this->assertEquals('2016-04-09', $result->appOutDate->toDateString());
+        $this->assertEquals('2016-04-10', $result->appInDate->toDateString());
+        $this->assertEquals('2016-04-11', $result->apprDate->toDateString());
     }
 
     public function providerStash()
     {
         return [
-            ['2016-04-08'], // Non-existent report
+            ['2016-04-22'], // Non-existent report
             ['2016-04-15'], // Existing report
+        ];
+    }
+
+    /**
+     * @dataProvider providerStashFailsValidation
+     */
+    public function testStashFailsValidation($id)
+    {
+        $reportingDate = '2016-04-15';
+
+        $parameters = [
+            'method' => 'Application.stash',
+            'center' => $this->center->abbreviation,
+            'reportingDate' => $reportingDate,
+            'data' => [
+                'appOutDate' => '2016-04-09',
+                'appInDate' => '2016-04-10',
+                'apprDate' => '2016-04-08',
+                'committedTeamMember' => 1,
+                'teamYear' => 1,
+                'incomingQuarter' => $this->quarter->id,
+            ],
+        ];
+
+        if ($id) {
+            $parameters['data']['id'] = $this->application->id;
+        }
+
+        $report = $this->report->toArray();
+        $applicationDataId = $this->applicationData->id;
+
+        $expectedResponse = [
+            'success' => true,
+            'valid' => false,
+        ];
+
+        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+        $result1 = App::make(Api\SubmissionData::class)->allForType($this->center, new Carbon($reportingDate), Domain\TeamApplication::class);
+
+        $this->assertEquals(1, count($result1));
+        $result = $result1[0];
+        $this->assertEquals('2016-04-09', $result->appOutDate->toDateString());
+        $this->assertEquals('2016-04-10', $result->appInDate->toDateString());
+        $this->assertEquals('2016-04-08', $result->apprDate->toDateString());
+    }
+
+    public function providerStashFailsValidation()
+    {
+        return [
+            ['id'], // Include application id
+            [null], // Do not include application id
         ];
     }
 
@@ -414,5 +470,31 @@ class ApplicationTest extends FunctionalTestAbstract
             ['Application.getWeekData'],
             ['Application.stash'],
         ];
+    }
+
+    public function testApiThrowsExceptionForInvalidDateInStash()
+    {
+        $reportingDate = Carbon::parse('this thursday', $this->center->timezone)
+            ->startOfDay()
+            ->toDateString();
+
+        $parameters = [
+            'method' => 'Application.stash',
+            'reportingDate' => $reportingDate,
+            'center' => $this->center->id,
+            'data' => [
+                'id' => $this->application->id,
+            ],
+        ];
+
+        $expectedResponse = [
+            'success' => false,
+            'error' => [
+                'message' => 'Reporting date must be a Friday.',
+            ],
+        ];
+
+        $headers = ['Accept' => 'application/json'];
+        $this->post('/api', $parameters, $headers)->seeJsonHas($expectedResponse);
     }
 }
