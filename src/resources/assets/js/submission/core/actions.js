@@ -11,6 +11,8 @@ export function initSubmission(centerId, reportingDate) {
         }).done((data) => {
             if (data.success) {
                 dispatch(setSubmissionLookups(data.lookups))
+            } else {
+                dispatch(initState({error: data.error}))
             }
         }).fail(() => {
             dispatch(initState('failed'))
@@ -20,7 +22,7 @@ export function initSubmission(centerId, reportingDate) {
 
 export function setSubmissionLookups(lookups) {
     return (dispatch) => {
-        dispatch(initState('success'))
+        dispatch(initState('loaded'))
         dispatch({
             type: 'core/setSubmissionLookups',
             payload: lookups

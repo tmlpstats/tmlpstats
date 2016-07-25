@@ -17,7 +17,12 @@ const steps = [
 class SubmissionFlowComponent extends SubmissionBase {
     render() {
         if (!this.checkReportingDate()) {
-            return this.renderBasicLoading()
+            const { coreInit } = this.props
+            if (coreInit.state == 'failed') {
+                return <div className="bg-danger">{coreInit.error}</div>
+            } else {
+                return this.renderBasicLoading()
+            }
         }
         return (
             <div className="row">
@@ -42,6 +47,8 @@ class SubmissionFlowComponent extends SubmissionBase {
             setTimeout(() => {
                 dispatch(actions.initSubmission(params.centerId, params.reportingDate))
             })
+            return false
+        } else if (coreInit.state != 'loaded') {
             return false
         }
         return true
