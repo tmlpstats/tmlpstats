@@ -4,14 +4,15 @@ import { Promise } from 'es6-promise'
 // NORMAL CODE
 import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
 
 import { SubmissionBase, React } from '../base_components'
-import { Form, SimpleField, AddOneLink } from '../../reusable/form_utils'
+import { Form, SimpleField, SimpleSelect, AddOneLink } from '../../reusable/form_utils'
+import { ModeSelectButtons, LoadStateFlip } from '../../reusable/ui_basic'
 
 import { COURSES_FORM_KEY } from './reducers'
-import { coursesCollection, courseTypeMap } from './data'
+import { coursesSorts, coursesCollection, courseTypeMap } from './data'
 import { loadCourses, saveCourse, chooseCourse } from './actions'
+import CourseStatus from './CourseStatus'
 
 class CoursesBase extends SubmissionBase {
     componentDidMount() {
@@ -19,121 +20,14 @@ class CoursesBase extends SubmissionBase {
     }
 
     setupCourses() {
-        console.log(this.props.loading)
         if (this.props.loading.state == 'new') {
             return this.props.dispatch(loadCourses(this.props.params.centerId, this.reportingDateString()))
         }
         return Promise.resolve(null)
     }
 
-    getCourseById(appId) {
-        return this.props.courses.collection[appId]
-    }
-
-    getCourseIndex(courseId) {
-        var courses = this.props.courses
-        for (var i = 0; i < courses.length; i++) {
-            if (courses[i].courseId == courseId) {
-                return i
-            }
-        }
-        return null
-    }
-}
-
-class SaveButton extends React.Component {
-    render() {
-        if (this.props.hide) {
-            return <div />
-        }
-
-        return (
-            <div className="form-group">
-                <div className={this.props.className}>
-                    <button className="btn btn-primary" type="submit">Save</button>
-                </div>
-            </div>
-        )
-    }
-}
-
-class CoursesEditCourseView extends React.Component {
-    saveCourse(data) {
-        console.log("Saved course with data", data)
-
-        Api.Course.update({
-            course: data.courseId,
-            data: {
-                location: data.location,
-                startDate: data.startDate,
-                type: data.type
-            }
-        }).done((data) => {
-            this.props.router.push(this.baseUri() + '/courses')
-        })
-    }
-    render() {
-
-        return (
-            <div>
-                <Form className="form-horizontal" model={this.props.model} onSubmit={this.saveCourse.bind(this)}>
-                    <div className="panel panel-default">
-                        <div className="panel-heading">Course Details</div>
-                        <div className="panel-body">
-                            <SimpleField label="Start Date" model={this.props.model+'.startDate'} />
-                            <SimpleField label="Type" model={this.props.model+'.type'} customField={true}>
-                                <select className="form-control">
-                                    <option value="CAP">{courseTypeMap['CAP']}</option>
-                                    <option value="CPC">{courseTypeMap['CPC']}</option>
-                                </select>
-                            </SimpleField>
-                            <SimpleField label="Location" model={this.props.model+'.location'} />
-
-                            <SaveButton className="col-sm-offset-2 col-sm-8" />
-                        </div>
-                    </div>
-                </Form>
-            </div>
-        )
-    }
-}
-
-class CoursesShowCourseView extends React.Component {
-    render() {
-        var course = this.props.course
-
-        var location = course.location
-        if (!location) {
-            location = course.center.name
-        }
-
-        var type = courseTypeMap[course.type]
-        var startDate = moment(course.startDate)
-
-        return (
-            <table className="table table-condensed no-border">
-            <tbody>
-                <tr>
-                    <th style={{width: "8em"}}>Start Date</th>
-                    <td>{startDate.format("MMM D, YYYY")}</td></tr>
-                <tr>
-                    <th>Type</th>
-                    <td>{type}</td></tr>
-                <tr>
-                    <th>Location</th>
-                    <td>{location}</td>
-                </tr>
-            </tbody>
-            </table>
-        )
-    }
-}
-
-class CoursesCourseView extends React.Component {
-    render() {
-        return (
-            <CoursesEditCourseView model={this.props.model} course={this.props.course} />
-        )
+    getCourseById(courseId) {
+        return this.props.courses.collection[courseId]
     }
 }
 
@@ -142,26 +36,25 @@ class CoursesIndexView extends CoursesBase {
         if (!this.props.loading.loaded) {
             return this.renderBasicLoading()
         }
-
+        var changeSort = (newSort) => this.props.dispatch(coursesCollection.changeSortCriteria(newSort))
         var courses = []
         var baseUri = this.baseUri()
 
-        this.props.courses.forEach((courseData) => {
-
-            var location = courseData.location
+        coursesCollection.iterItems(this.props.courses, (course, key) => {
+            var location = course.location
             if (!location) {
-                location = courseData.center.name
+                location = course.center.name
             }
-            var type = courseTypeMap[courseData.type]
+            var type = courseTypeMap[course.type]
 
-            var startDate = moment(courseData.startDate)
-            var ter = courseData.currentTer || '-'
-            var ss = courseData.currentStandardStarts || '-'
-            var xfer = courseData.currentXfer || '-'
+            var startDate = moment(course.startDate)
+            var ter = course.currentTer || '-'
+            var ss = course.currentStandardStarts || '-'
+            var xfer = course.currentXfer || '-'
 
             courses.push(
-                <tr key={courseData.courseId}>
-                    <td><Link to={`${baseUri}/courses/edit/${courseData.courseId}`}>{startDate.format("MMM D, YYYY")}</Link></td>
+                <tr key={key}>
+                    <td><Link to={`${baseUri}/courses/edit/${key}`}>{startDate.format("MMM D, YYYY")}</Link></td>
                     <td className="data-point">{type}</td>
                     <td>{location}</td>
                     <td className="data-point">{ter}</td>
@@ -170,10 +63,11 @@ class CoursesIndexView extends CoursesBase {
                 </tr>
             )
         })
-
         return (
             <div>
                 <h3>Manage Courses</h3>
+                <ModeSelectButtons items={coursesSorts} current={this.props.courses.meta.sort_by}
+                                   onClick={changeSort} ariaGroupDesc="Sort Preferences" />
                 <table className="table">
                     <thead>
                         <tr>
@@ -189,89 +83,62 @@ class CoursesIndexView extends CoursesBase {
                 </table>
                 <AddOneLink link={`${baseUri}/courses/add`} />
             </div>
-        );
+        )
     }
 }
 
-class CoursesEditView extends CoursesBase {
-    saveCourseData(data) {
-        console.log("Saved course data with data", data)
-
-        // Get the date for the week this data is for, not the week the original data was from
-        var now = new Date()
-        var reportingDate = new Date(data.statsReport.reportingDate)
-        if (reportingDate < now) {
-            reportingDate.setDate(reportingDate.getDate()+7);
-        }
-
-        var fields = [
-            'quarterStartTer',
-            'quarterStartStandardStarts',
-            'quarterStartXfer',
-            'currentTer',
-            'currentStandardStarts',
-            'currentXfer',
-            'completedStandardStarts',
-            'potentials',
-            'registrations',
-            'guestsPromised',
-            'guestsInvited',
-            'guestsConfirmed',
-            'guestsAttended',
-        ]
-
-        var weekData = {}
-
-        fields.forEach((field) => {
-            weekData[field] = data[field]
-        })
-
-        Api.Course.setWeekData({
-            course: data.courseId,
-            reportingDate: reportingDate,
-            data: weekData
-        }).done((data) => {
-            this.props.router.push(this.baseUri() + '/courses')
-        })
-    }
+class SaveButton extends React.Component {
     render() {
-        if (!this.props.loaded) {
-            return <div>loading...</div>
+        if (this.props.hide) {
+            return <div />
         }
 
-        var courseIndex = this.getCourseIndex(this.props.params.courseId)
-        if (courseIndex === null){
-            return <div>Course {this.props.params.courseId} not found????</div>
-        }
-        var modelKey = COURSES_FORM_KEY + `[${courseIndex}]`
+        return (
+            <div className="form-group">
+                <div className={this.props.className}>
+                    <LoadStateFlip loadState={this.props.saveCourse}>
+                        <button className="btn btn-primary" type="submit">Save</button>
+                    </LoadStateFlip>
+                </div>
+            </div>
+        )
+    }
+}
 
-        var course = this.props.courses[courseIndex]
-        var now = moment.utc()
-        var startDate = moment.utc(course.startDate)
-        var courseReportDate = moment.utc(startDate).add(6, 'days')
-
-        var dayDiff = now.diff(courseReportDate, 'days')
+class _EditCreate extends CoursesBase {
+    render() {
+        const modelKey = COURSES_FORM_KEY
 
         var currentDisabled = false
         var guestsDisabled = false
         var qstartDisabled = true
         var completionDisabled = true
 
-        if (dayDiff === 0) {
-            // We're on the week after the course
-            completionDisabled = false
-        } else if (dayDiff > 0) {
-            // The course happened more than 7 days ago
-            currentDisabled = true
-            guestsDisabled = true
+        if (this.props.currentCourse) {
+            var course = this.props.currentCourse
+
+            var now = moment.utc()
+            var startDate = moment.utc(course.startDate)
+            var courseReportDate = moment.utc(startDate).add(6, 'days')
+
+            var dayDiff = now.diff(courseReportDate, 'days')
+
+            if (dayDiff === 0) {
+                // We're on the week after the course
+                completionDisabled = false
+            } else if (dayDiff > 0) {
+                // The course happened more than 7 days ago
+                currentDisabled = true
+                guestsDisabled = true
+            }
         }
 
+                // <CoursesCourseView model={modelKey} course={course} />
         return (
             <div>
-                <h3>Edit Course</h3>
-                <CoursesCourseView model={modelKey} course={course} />
+                <h3>{this.title()}</h3>
 
-                <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourseData.bind(this)}>
+                <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourse.bind(this)}>
 
                 <div className="row">
                 <div className="col-md-6">
@@ -300,7 +167,6 @@ class CoursesEditView extends CoursesBase {
                     </div>
                 </div>
                 </div>
-
 
                 <div className="row">
                 <div className="col-md-6">
@@ -332,54 +198,143 @@ class CoursesEditView extends CoursesBase {
             </div>
         )
     }
-}
-
-class CoursesAddView extends CoursesBase {
+    // saveCourse for now is the same between edit and create flows
     saveCourse(data) {
-        console.log("Created course with data", data)
-
-        Api.Course.create({
-            data: {
-                center: this.props.params.centerId,
-                location: data.location,
-                startDate: data.startDate,
-                type: data.type
+        this.props.dispatch(saveCourse(this.props.params.centerId, this.reportingDateString(), data)).done((result) => {
+            if (result.success && result.storedId) {
+                data = Object.assign({}, data, {id: result.storedId})
+                this.props.dispatch(coursesCollection.replaceItem(data))
             }
-        }).done((data) => {
-            this.loadCourses();
             this.props.router.push(this.baseUri() + '/courses')
         })
     }
+}
+
+class CoursesEditView extends _EditCreate {
+    componentDidMount() {
+        super.setupCourses().then(() => {
+            var courseId = this.props.params.courseId
+            if (!this.props.currentCourse || this.props.currentCourse.id != courseId) {
+                this.props.dispatch(chooseCourse(courseId, this.getCourseById(courseId)))
+            }
+        })
+    }
+
+    title() {
+        return 'Edit Course'
+    }
+
     render() {
-        if (!this.props.loaded) {
-            return <div>loading...</div>
+        const courseId = this.props.params.courseId
+
+        if (!this.props.loading.loaded || !this.props.currentCourse || this.props.currentCourse.id != courseId) {
+            return <div>{this.props.loading.state}...</div>
         }
+        return super.render()
+    }
 
-        var modelKey = COURSES_FORM_KEY + '.add'
+}
 
-        return (
-            <div>
-                <h3>Add Course</h3>
-                <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourse.bind(this)}>
-                    <SimpleField label="Start Date" model={modelKey+'.startDate'} />
-                    <SimpleField label="Type" model={modelKey+'.type'} customField={true}>
-                        <select className="form-control">
-                            <option value="CAP">Access to Power</option>
-                            <option value="CPC">Power to Create</option>
-                        </select>
-                    </SimpleField>
-                    <SimpleField label="Location" model={modelKey+'.location'} />
+class CoursesAddView extends _EditCreate {
+    componentDidMount() {
+        super.setupCourses().then(() => {
+            if (this.props.currentCourse) {
+                this.props.dispatch(chooseCourse('', {startDate: '', type: ''}))
+            }
+        })
+    }
 
-                    <div className="form-group">
-                        <div className="col-sm-offset-2 col-sm-8">
-                            <button className="btn btn-primary" type="submit">Save</button>
-                        </div>
-                    </div>
-                </Form>
-            </div>
-        )
+    title() {
+        return 'Create Course'
+    }
+
+    render() {
+        return super.render()
     }
 }
+
+
+
+
+// class CoursesEditCourseView extends React.Component {
+//     saveCourse(data) {
+//         console.log("Saved course with data", data)
+
+//         Api.Course.update({
+//             course: data.courseId,
+//             data: {
+//                 location: data.location,
+//                 startDate: data.startDate,
+//                 type: data.type
+//             }
+//         }).done((data) => {
+//             this.props.router.push(this.baseUri() + '/courses')
+//         })
+//     }
+//     render() {
+
+//         return (
+//             <div>
+//                 <Form className="form-horizontal" model={this.props.model} onSubmit={this.saveCourse.bind(this)}>
+//                     <div className="panel panel-default">
+//                         <div className="panel-heading">Course Details</div>
+//                         <div className="panel-body">
+//                             <SimpleField label="Start Date" model={this.props.model+'.startDate'} />
+//                             <SimpleField label="Type" model={this.props.model+'.type'} customField={true}>
+//                                 <select className="form-control">
+//                                     <option value="CAP">{courseTypeMap['CAP']}</option>
+//                                     <option value="CPC">{courseTypeMap['CPC']}</option>
+//                                 </select>
+//                             </SimpleField>
+//                             <SimpleField label="Location" model={this.props.model+'.location'} />
+
+//                             <SaveButton className="col-sm-offset-2 col-sm-8" />
+//                         </div>
+//                     </div>
+//                 </Form>
+//             </div>
+//         )
+//     }
+// }
+
+// class CoursesShowCourseView extends React.Component {
+//     render() {
+//         var course = this.props.course
+
+//         var location = course.location
+//         if (!location) {
+//             location = course.center.name
+//         }
+
+//         var type = courseTypeMap[course.type]
+//         var startDate = moment(course.startDate)
+
+//         return (
+//             <table className="table table-condensed no-border">
+//             <tbody>
+//                 <tr>
+//                     <th style={{width: "8em"}}>Start Date</th>
+//                     <td>{startDate.format("MMM D, YYYY")}</td></tr>
+//                 <tr>
+//                     <th>Type</th>
+//                     <td>{type}</td></tr>
+//                 <tr>
+//                     <th>Location</th>
+//                     <td>{location}</td>
+//                 </tr>
+//             </tbody>
+//             </table>
+//         )
+//     }
+// }
+
+// class CoursesCourseView extends React.Component {
+//     render() {
+//         return (
+//             <CoursesEditCourseView model={this.props.model} course={this.props.course} />
+//         )
+//     }
+// }
 
 const mapStateToProps = (state) => {
     return Object.assign({lookups: state.submission.core.lookups}, state.submission.courses)

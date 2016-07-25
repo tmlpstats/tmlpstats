@@ -33,6 +33,7 @@ class ApplicationsBase extends SubmissionBase {
 
 class ApplicationsIndexView extends ApplicationsBase {
     render() {
+        console.log(this.props.loading)
         if (!this.props.loading.loaded) {
             return this.renderBasicLoading()
         }

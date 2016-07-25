@@ -5,12 +5,12 @@ export const coursesSorts = [
     {
         key: 'type_startDate',
         label: 'Default',
-        comparator: compositeKey([['type', 'string'], ['startDate', 'date']])
+        comparator: compositeKey([['type', 'string'], ['startDate', 'string']])
     },
     {
         key: 'startDate_type',
         label: 'Date, Type',
-        comparator: compositeKey([['startDate', 'date'], ['type', 'string']])
+        comparator: compositeKey([['startDate', 'string'], ['type', 'string']])
     }
 ]
 
