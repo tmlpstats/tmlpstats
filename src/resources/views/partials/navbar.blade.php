@@ -54,6 +54,16 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                         </li>
                         @endcan
 
+                        @can ('showNewSubmissionUi', $currentCenter)
+                        <li {!! Request::is('submission') ? 'class="active"' : '' !!}>
+                            <?php
+                                $abbr = strtolower($currentCenter->abbreviation);
+                                $date = $reportingDate->toDateString();
+                            ?>
+                            <a href="{{ url("/center/{$abbr}/submission/{$date}") }}">Submit Report (beta)</a>
+                        </li>
+                        @endcan
+
                         {{-- Admin --}}
                         @if (Auth::user()->hasRole('administrator'))
                             <li class="dropdown {{ Request::is('admin') || Request::is('admin/*') ? 'active' : '' }}">
