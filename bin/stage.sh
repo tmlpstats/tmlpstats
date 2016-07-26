@@ -28,6 +28,7 @@ if [[ "$1" == "" ]]; then
     echo "   stage master    (most common)"
     echo "   stage feature-branch-name"
     echo "   stage 3c0436b"
+    $SOURCE/../bin/stage-lock.sh release
     exit 1
 elif [[ "$1" == "rollback" ]]; then
     rsync -av --delete --filter='protect storage/framework/down' $ROLLBACK/ $DEST
