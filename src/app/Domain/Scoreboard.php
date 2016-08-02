@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Domain;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 
 /**
@@ -14,9 +15,11 @@ class Scoreboard implements Arrayable
     const GAME_KEYS = ['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'];
     protected $games = [];
     public $meta = null;
+    public $week = null;
 
-    protected function __construct()
+    protected function __construct($week = null)
     {
+        $this->week = $week;
         $this->meta = [];
         foreach (static::GAME_KEYS as $gameKey) {
             $this->games[$gameKey] = new ScoreboardGame($gameKey);
@@ -24,9 +27,9 @@ class Scoreboard implements Arrayable
     }
 
     /** Create a scoreboard that's blank */
-    public static function blank()
+    public static function blank($week = null)
     {
-        return new static();
+        return new static($week);
     }
 
     /**
@@ -121,15 +124,27 @@ class Scoreboard implements Arrayable
 
     public function parseArray($data)
     {
+        if ($weekInput = array_get($data, 'week', null)) {
+            $this->week = Carbon::parse($weekInput);
+        }
+        $games = array_get($data, 'games', null);
+
         foreach ($this->games as $gameKey => $game) {
-            if (($promise = array_get($data, "promise.{$gameKey}", null)) !== null) {
-                $this->games[$gameKey]->setPromise($promise);
-            }
-            if (($actual = array_get($data, "actual.{$gameKey}", null)) !== null) {
-                $this->games[$gameKey]->setActual($actual);
-            }
-            if (($original = array_get($data, "original.{$gameKey}", null)) !== null) {
-                $this->games[$gameKey]->setOriginalPromise($original);
+            if ($games !== null && array_key_exists($gameKey, $games)) {
+                $gameData = $games[$gameKey];
+                $game->setPromise(array_get($gameData, 'promise', null));
+                $game->setActual(array_get($gameData, 'actual', null));
+                $game->setOriginalPromise(array_get($gameData, 'original', null));
+            } else {
+                if (($promise = array_get($data, "promise.{$gameKey}", null)) !== null) {
+                    $game->setPromise($promise);
+                }
+                if (($actual = array_get($data, "actual.{$gameKey}", null)) !== null) {
+                    $game->setActual($actual);
+                }
+                if (($original = array_get($data, "original.{$gameKey}", null)) !== null) {
+                    $game->setOriginalPromise($original);
+                }
             }
         }
     }
@@ -159,7 +174,12 @@ class Scoreboard implements Arrayable
             ],
             'rating' => $this->rating(),
             'games' => [],
+            'meta' => $this->meta,
         ];
+
+        if ($this->week) {
+            $v['week'] = $this->week->toDateString();
+        }
 
         $original = [];
 
@@ -182,6 +202,18 @@ class Scoreboard implements Arrayable
         if (count($original) > 0) {
             $v['original'] = $original;
         }
+
+        return $v;
+    }
+
+    /**
+     * Return as an array in the new format, with none of the legacy stuff.
+     * @return array [description]
+     */
+    public function toNewArray()
+    {
+        $v = $this->toArray();
+        unset($v['promise'], $v['actual'], $v['percent'], $v['points']);
 
         return $v;
     }

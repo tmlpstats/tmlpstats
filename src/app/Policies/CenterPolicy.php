@@ -19,4 +19,23 @@ class CenterPolicy extends Policy
 
         return false;
     }
+
+    /**
+     * Can $user make a submission?
+     *
+     * @param User $user
+     * @param Center $center
+     * @return bool
+     */
+    public function submitStats(User $user, Center $center)
+    {
+        if ($user->hasRole('globalStatistician')) {
+            return true;
+        }
+        if ($user->hasRole('localStatistician')) {
+            return ($user->person->centerId == $center->id);
+        }
+
+        return false;
+    }
 }

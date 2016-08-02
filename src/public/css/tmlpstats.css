@@ -280,3 +280,45 @@ div.box {
     text-align: center;
     min-width: 3.5em;
 }
+
+/** SUBMISSION - SCOREBOARD */
+
+table.submissionCenterStats {
+    max-width: 70em;
+}
+
+.submissionCenterStats th, .submissionCenterStats td {
+    text-align: center;
+}
+
+.submissionCenterStats th.dayHead {
+    min-width: 12em;
+}
+
+.submissionCenterStats th.currentWeek {
+    background-color: #66ff66; /* TODO choose a more appropriate color */
+}
+
+.submissionCenterStats input[type="text"] {
+    max-width: 4em;
+    text-align: center;
+}
+
+.submissionCenterStats input[type="text"]:disabled {
+    border: 0;
+    /*background: #ccc;*/
+}
+
+.submissionCenterStats .info input[type="text"]:disabled {
+    background-color: #d9edf7;
+}
+
+.submissionCenterStats .actual input[type="text"]:disabled {
+    background-color: white;
+}
+
+
+.submissionCenterStats td.pct {
+    text-align: right;
+    min-width: 3.2em;
+}

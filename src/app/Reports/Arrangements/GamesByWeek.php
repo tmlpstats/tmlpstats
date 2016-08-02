@@ -22,6 +22,15 @@ class GamesByWeek extends BaseArrangement
      */
     public function build($centerStatsData)
     {
+        $weeks = $this->buildObject($centerStatsData);
+
+        $reportData = $weeks->toArray();
+
+        return compact('reportData');
+    }
+
+    public function buildObject($centerStatsData)
+    {
         $weeks = new ScoreboardMultiWeek();
 
         foreach ($centerStatsData as $data) {
@@ -39,8 +48,6 @@ class GamesByWeek extends BaseArrangement
 
         }
 
-        $reportData = $weeks->toArray();
-
-        return compact('reportData');
+        return $weeks;
     }
 }
