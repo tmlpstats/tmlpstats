@@ -38,10 +38,10 @@ class Setting extends Model
         }
 
         if ($center) {
-            $setting = Setting::byCenter($center)
+            $setting = self::byCenter($center)
                 ->name($name)
                 ->active()
-                ->where(function($query) use ($quarter) {
+                ->where(function ($query) use ($quarter) {
                     if ($quarter) {
                         $query->whereNull('quarter_id')
                               ->orWhere('quarter_id', $quarter->id);
@@ -52,10 +52,10 @@ class Setting extends Model
         }
 
         if (!$setting) {
-            $setting = Setting::whereNull('center_id')
+            $setting = self::whereNull('center_id')
                 ->name($name)
                 ->active()
-                ->where(function($query) use ($quarter) {
+                ->where(function ($query) use ($quarter) {
                     if ($quarter) {
                         $query->whereNull('quarter_id')
                               ->orWhere('quarter_id', $quarter->id);
@@ -66,6 +66,34 @@ class Setting extends Model
         }
 
         return $setting;
+    }
+
+    public static function upsert($data)
+    {
+        $name = $data['name'];
+        if (($center = array_pull($data, 'center')) != null) {
+            $data['center_id'] = $center->id;
+        }
+        if (($quarter = array_pull($data, 'quarter')) != null) {
+            $data['quarter_id'] = $quarter->id;
+        }
+
+        $query = static::byCenter($center)->name($name);
+
+        if ($quarter != null) {
+            $query = $query->byQuarter($quarter);
+        } else {
+            $query = $query->whereNull('quarter_id');
+        }
+        $existing = $query->first();
+        if ($existing != null) {
+            $existing->active = true;
+            $existing->value = $data['value'];
+            $existing->save();
+        } else {
+            $data['active'] = true;
+            static::create($data);
+        }
     }
 
     public function scopeName($query, $name)

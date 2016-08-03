@@ -1,7 +1,7 @@
 <?php
 namespace TmlpStats\Api\Exceptions;
 
-class NotAuthorizedException extends Exception
+class UnauthorizedException extends Exception
 {
     protected $statusCode = 403;
     protected $statusMessage = 'unauthorized';

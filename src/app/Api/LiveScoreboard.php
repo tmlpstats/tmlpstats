@@ -5,8 +5,7 @@ use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
-use TmlpStats\Domain\Scoreboard;
-use TmlpStats\Domain\ScoreboardGame;
+use TmlpStats\Domain;
 use TmlpStats\Reports\Arrangements;
 
 class LiveScoreboard extends AuthenticatedApiBase
@@ -22,9 +21,9 @@ class LiveScoreboard extends AuthenticatedApiBase
         $report = $this->getLatestReport($center);
         $reportData = $this->getOfficialScores($report);
         if (!$reportData) {
-            $scoreboard = Scoreboard::blank();
+            $scoreboard = Domain\Scoreboard::blank();
         } else {
-            $scoreboard = Scoreboard::fromArray($reportData);
+            $scoreboard = Domain\Scoreboard::fromArray($reportData);
         }
 
         $tempScores = $this->getTempScoreboardForCenter($center->id, $report->reportingDate);
@@ -42,6 +41,7 @@ class LiveScoreboard extends AuthenticatedApiBase
             }
         }
         $scoreboard->meta['updatedAt'] = $updatedAt;
+
         return $scoreboard;
     }
 
@@ -58,7 +58,7 @@ class LiveScoreboard extends AuthenticatedApiBase
     public function setScore(Models\Center $center, $game, $type, $value)
     {
         if ($type != 'actual') {
-            throw new \Exception("Currently, changing promises is not supported.");
+            throw new \Exception('Currently, changing promises is not supported.');
         }
 
         $this->logChanges([

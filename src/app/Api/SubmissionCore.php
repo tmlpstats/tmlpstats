@@ -5,6 +5,7 @@ use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
+use TmlpStats\Api\Exceptions;
 
 class SubmissionCore extends AuthenticatedApiBase
 {
@@ -16,10 +17,7 @@ class SubmissionCore extends AuthenticatedApiBase
      */
     public function initSubmission(Models\Center $center, Carbon $reportingDate)
     {
-        $r1 = $this->checkCenterDate($center, $reportingDate);
-        if (!$r1['success']) {
-            return $r1;
-        }
+        $this->checkCenterDate($center, $reportingDate);
 
         $localReport = App::make(LocalReport::class);
         $lastValidReport = $localReport->getLastStatsReportSince($center, $reportingDate);
@@ -36,11 +34,11 @@ class SubmissionCore extends AuthenticatedApiBase
     {
         $user = $this->context->getUser();
         if ($user->cannot('submitStats', $center)) {
-            return ['success' => false, 'error' => 'User not allowed access to submit this report'];
+            throw new Exceptions\UnauthorizedException('User not allowed access to submit this report');
         }
 
         if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
-            return ['success' => false, 'error' => 'Reporting date must be a Friday.'];
+            throw new Exceptions\BadRequestException('Reporting date must be a Friday.');
         }
 
         // TODO check reporting date is in this center's quarter and so on.
