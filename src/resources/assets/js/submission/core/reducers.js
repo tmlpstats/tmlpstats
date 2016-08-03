@@ -1,4 +1,7 @@
 import { combineReducers } from 'redux'
+
+import { objectAssign } from '../../reusable/ponyfill'
+
 import { coreInit } from './data'
 import clearWrapper from './clearWrapper'
 
@@ -13,7 +16,7 @@ function reportingDate(state='', action) {
 export function lookups(state={}, action) {
     switch (action.type) {
     case 'core/setSubmissionLookups':
-        return Object.assign({}, state, action.payload)
+        return objectAssign({}, state, action.payload)
     }
     return state
 }

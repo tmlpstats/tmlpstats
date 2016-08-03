@@ -1,3 +1,4 @@
+import { objectAssign } from './ponyfill'
 
 const REPLACE_ITEM = 'sortable_collection/replace_item'
 const REPLACE_COLLECTION = 'sortable_collection/replace_collection'
@@ -50,20 +51,20 @@ export default class SortableCollection {
                 switch (action.type) {
                 case REPLACE_ITEM:
                     var item = action.payload.item
-                    collection = Object.assign({}, state.collection)
+                    collection = objectAssign({}, state.collection)
                     collection[item[this.key_prop]] = item
                     sortedKeys = this.rebuildSort(state.meta.sort_by, collection)
-                    state = Object.assign({}, state, {collection, sortedKeys})
+                    state = objectAssign({}, state, {collection, sortedKeys})
                     break
                 case REPLACE_COLLECTION:
                     collection = this.ensureCollection(action.payload.collection)
                     sortedKeys = this.rebuildSort(state.meta.sort_by, collection)
-                    state = Object.assign({}, state, {collection, sortedKeys})
+                    state = objectAssign({}, state, {collection, sortedKeys})
                     break
                 case CHANGE_SORT_CRITERIA:
-                    var meta = Object.assign({}, state.meta, {sort_by: action.payload.sort_by})
+                    var meta = objectAssign({}, state.meta, {sort_by: action.payload.sort_by})
                     sortedKeys = this.rebuildSort(action.payload.sort_by, state.collection)
-                    state = Object.assign({}, state, {meta, sortedKeys})
+                    state = objectAssign({}, state, {meta, sortedKeys})
                     break
                 }
             }

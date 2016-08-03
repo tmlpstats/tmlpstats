@@ -1,5 +1,5 @@
 // POLYFILL
-import { Promise } from 'es6-promise'
+import { Promise, objectAssign } from '../../reusable/ponyfill'
 
 // NORMAL CODE
 import { Link, withRouter } from 'react-router'
@@ -202,7 +202,7 @@ class _EditCreate extends CoursesBase {
     saveCourse(data) {
         this.props.dispatch(saveCourse(this.props.params.centerId, this.reportingDateString(), data)).done((result) => {
             if (result.success && result.storedId) {
-                data = Object.assign({}, data, {id: result.storedId})
+                data = objectAssign({}, data, {id: result.storedId})
                 this.props.dispatch(coursesCollection.replaceItem(data))
             }
             this.props.router.push(this.baseUri() + '/courses')
@@ -337,7 +337,7 @@ class CoursesAddView extends _EditCreate {
 // }
 
 const mapStateToProps = (state) => {
-    return Object.assign({lookups: state.submission.core.lookups}, state.submission.courses)
+    return objectAssign({lookups: state.submission.core.lookups}, state.submission.courses)
 }
 const connector = connect(mapStateToProps)
 
