@@ -1,14 +1,11 @@
-// POLYFILL
-import { Promise } from 'es6-promise'
-
-// NORMAL CODE
 import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
 
-import { SubmissionBase, React } from '../base_components'
 import { Form, SimpleField, SimpleSelect, AddOneLink } from '../../reusable/form_utils'
+import { Promise, objectAssign } from '../../reusable/ponyfill'
 import { ModeSelectButtons, LoadStateFlip } from '../../reusable/ui_basic'
 
+import { SubmissionBase, React } from '../base_components'
 import { APPLICATIONS_FORM_KEY } from './reducers'
 import { appsSorts, appsCollection } from './data'
 import { loadApplications, saveApplication, chooseApplication } from './actions'
@@ -71,7 +68,7 @@ class ApplicationsIndexView extends ApplicationsBase {
 
 const getLabelTeamMember = (item) => {
     const p = item.teamMember.person
-    return p.firstName + " " + p.lastName
+    return p.firstName + ' ' + p.lastName
 }
 
 class _EditCreate extends ApplicationsBase {
@@ -122,7 +119,7 @@ class _EditCreate extends ApplicationsBase {
     saveApp(data) {
         this.props.dispatch(saveApplication(this.props.params.centerId, this.reportingDateString(), data)).done((result) => {
             if (result.success && result.storedId) {
-                data = Object.assign({}, data, {id: result.storedId})
+                data = objectAssign({}, data, {id: result.storedId})
                 this.props.dispatch(appsCollection.replaceItem(data))
             }
             this.props.router.push(this.baseUri() + '/applications')
@@ -174,7 +171,7 @@ class ApplicationsAddView extends _EditCreate {
 }
 
 const mapStateToProps = (state) => {
-    return Object.assign({lookups: state.submission.core.lookups}, state.submission.applications)
+    return objectAssign({lookups: state.submission.core.lookups}, state.submission.applications)
 }
 const connector = connect(mapStateToProps)
 
