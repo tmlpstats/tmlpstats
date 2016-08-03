@@ -67,7 +67,7 @@
         </tr>
         <tr>
             <th>Submission Comment:</th>
-            <td>{{ $statsReport->submitComment }}</td>
+            <td>{!! nl2br(e($statsReport->submitComment)) !!}</td>
         </tr>
     </table>
 </div>
