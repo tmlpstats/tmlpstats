@@ -2,25 +2,42 @@ import { Link } from 'react-router'
 
 import { React, SubmissionBase } from '../base_components'
 
+
 export default class SubmissionNav extends SubmissionBase {
     render() {
+        const { tabbed } = this.props
+
         var steps = []
         const s = this.props.steps
         if (s) {
             var baseUri = this.baseUri()
             s.forEach((v) => {
                 var destPath = `${baseUri}/${v.key}`
-                var cls = 'list-group-item'
-                if (this.props.location.pathname.substr(0, destPath.length) == destPath) {
-                    cls += ' active'
+                var active = (this.props.location.pathname.substr(0, destPath.length) == destPath)
+                if (!tabbed) {
+                    var linkCls = 'list-group-item' + (active? ' active' : '')
+                    steps.push(<Link key={v.key} className={linkCls} to={destPath}>{v.name}</Link>)
+                } else {
+                    steps.push(
+                        <li key={v.key} role="presentation" className={active? 'active' : ''}>
+                            <Link to={destPath}>{v.name}</Link>
+                        </li>
+                    )
                 }
-                steps.push(<Link key={v.key} className={cls} to={destPath}>{v.name}</Link>)
             })
         }
-        return (
-            <div className="list-group">
-                {steps}
-            </div>
-        )
+        if (tabbed) {
+            return (
+                <ul className="nav nav-tabs">
+                    {steps}
+                </ul>
+            )
+        } else {
+            return (
+                <div className="list-group">
+                    {steps}
+                </div>
+            )
+        }
     }
 }

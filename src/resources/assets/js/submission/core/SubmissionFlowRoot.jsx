@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
+import { objectAssign } from '../../reusable/ponyfill'
 import { SubmissionBase } from '../base_components'
 import SubmissionNav from './SubmissionNav'
 import * as actions from './actions'
@@ -24,15 +25,13 @@ class SubmissionFlowComponent extends SubmissionBase {
                 return this.renderBasicLoading()
             }
         }
-        return (
-            <div>
+        const largeLayout = this.props.browserGreaterThan.large
+        const nav = <SubmissionNav params={this.props.params} steps={steps} location={this.props.location} tabbed={!largeLayout} />
+        var layout
+        if (largeLayout) {
+            layout = (
                 <div className="row">
-                    <div className="col-md-12">
-                        <h4>This page is a work in progress. Please don't submit anything, but feel free to look around. Currently, this is only visible for the Regional team and site administrators.</h4>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-2"><SubmissionNav params={this.props.params} steps={steps} location={this.props.location} /></div>
+                    <div className="col-md-2">{nav}</div>
                     <div className="col-md-10">
                         <div className="panel panel-default">
                             <div className="panel-body">
@@ -41,6 +40,27 @@ class SubmissionFlowComponent extends SubmissionBase {
                         </div>
                     </div>
                 </div>
+            )
+        } else {
+            layout = (
+                <div>
+                    {nav}
+                    <div className="tab-content">
+                        <div className="tab-pane active">
+                            {this.props.children}
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+        return (
+            <div>
+                <div className="row">
+                    <div className="col-md-12">
+                        <h4>This page is a work in progress. Please don't submit anything, but feel free to look around. Currently, this is only visible for the Regional team and site administrators.</h4>
+                    </div>
+                </div>
+                {layout}
             </div>
         )
     }
@@ -62,7 +82,9 @@ class SubmissionFlowComponent extends SubmissionBase {
     }
 }
 
-const mapStateToProps = (state) => state.submission.core
+const mapStateToProps = (state) => {
+    return objectAssign({browserGreaterThan: state.browser.greaterThan}, state.submission.core)
+}
 
 const SubmissionFlowRoot = connect(mapStateToProps)(SubmissionFlowComponent)
 export default SubmissionFlowRoot

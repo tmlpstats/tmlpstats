@@ -57,6 +57,7 @@ class SubmissionScoreboard extends SubmissionBase {
         })
         return (
             <Form model={SCOREBOARDS_FORM_KEY}>
+                <h3>Scoreboard</h3>
                 <div>{rows}</div>
             </Form>
         )
