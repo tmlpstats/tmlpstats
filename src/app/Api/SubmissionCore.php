@@ -3,19 +3,11 @@ namespace TmlpStats\Api;
 
 use App;
 use Carbon\Carbon;
-use Illuminate\Auth\Guard;
-use Illuminate\Http\Request;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 
 class SubmissionCore extends AuthenticatedApiBase
 {
-    // Make a new SubmissionCore API.
-    public function __construct(Context $context, Guard $auth, Request $request)
-    {
-        parent::__construct($context, $auth, $request);
-    }
-
     /**
      * Initialize a submission, checking if parameters are valid.
      * @param  Models\Center $center        [description]

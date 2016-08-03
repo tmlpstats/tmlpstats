@@ -3,8 +3,6 @@ namespace TmlpStats\Tests\Unit\Api;
 
 use App;
 use Carbon\Carbon;
-use Illuminate\Auth\Guard;
-use Illuminate\Http\Request;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Domain;
@@ -357,8 +355,6 @@ class LiveScoreboardTest extends TestAbstract
     {
         return [
             App::make(Api\Context::class),
-            App::make(Guard::class),
-            App::make(Request::class),
         ];
     }
 

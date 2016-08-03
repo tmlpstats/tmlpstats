@@ -2,9 +2,7 @@
 namespace TmlpStats\Api\Base;
 
 use Cache;
-use Illuminate\Auth\Guard;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Api\Parsers;
@@ -33,8 +31,6 @@ class ApiBase
      */
     private $targetObjCache = [];
 
-    protected $user = null;
-
     /**
      * Array of valid properties and their config.
      *  example:
@@ -47,11 +43,11 @@ class ApiBase
      */
     protected $validProperties = [];
 
-    public function __construct(Guard $auth, Request $request)
-    {
-        $this->user = $auth->user();
-        $this->request = $request;
+    protected $context = null;
 
+    public function __construct(Api\Context $context = null)
+    {
+        $this->context = $context;
     }
 
     /**
