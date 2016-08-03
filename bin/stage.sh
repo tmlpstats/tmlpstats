@@ -51,6 +51,7 @@ git fetch
 
 echo "Switching to desired branch"
 git checkout "$TARGET_BRANCH"
+git pull
 
 git tag stage-$(date +"%Y%m%d-%H%M%S")
 
