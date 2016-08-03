@@ -39,6 +39,7 @@ class Context
             // TODO do this right, don't make it reliant on controller state, invert the paradigm.
             return App::make(Controller::class)->getCenter($this->request);
         }
+
         return $center;
     }
 
@@ -55,6 +56,7 @@ class Context
         if ($region = $this->getRegion($fallback)) {
             $region = $region->getParentGlobalRegion();
         }
+
         return $region;
     }
 
@@ -65,6 +67,7 @@ class Context
             // TODO do this right, don't make it reliant on controller state, invert the paradigm.
             $region = App::make(Controller::class)->getRegion($this->request);
         }
+
         return $region;
     }
 
@@ -91,8 +94,9 @@ class Context
             return false;
         } else if ($value === 'true') {
             return true;
+        } else {
+            return json_decode($value, true);
         }
-        return $value;
     }
 
     public function setReportingDate($reportingDate)
@@ -106,6 +110,7 @@ class Context
         if (!$reportingDate) {
             $reportingDate = App::make(Controller::class)->getReportingDate($this->request);
         }
+
         return $reportingDate;
     }
 
@@ -122,8 +127,10 @@ class Context
         }
         if ($this->dateSelectAction) {
             $params = array_merge($this->dateSelectActionParams, ['date' => $date]);
+
             return action($this->dateSelectAction, $params);
         }
+
         return null;
     }
 }

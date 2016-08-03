@@ -2,20 +2,15 @@
 namespace TmlpStats\Api\Base;
 
 use Gate;
-use Illuminate\Auth\Guard;
-use Illuminate\Http\Request;
 use TmlpStats\Api;
 
 class AuthenticatedApiBase extends ApiBase
 {
     protected $gate = null;
-    protected $context = null;
 
-    public function __construct(Api\Context $context, Guard $auth, Request $request)
+    public function __construct(Api\Context $context)
     {
-        parent::__construct($auth, $request);
-        $this->user = $context->getUser();
-        $this->context = $context;
-        $this->gate = Gate::forUser($this->user);
+        parent::__construct($context);
+        $this->gate = Gate::forUser($context->getUser());
     }
 }
