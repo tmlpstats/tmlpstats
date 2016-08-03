@@ -133,12 +133,12 @@ class _EditCreate extends CoursesBase {
             }
         }
 
-                // <CoursesCourseView model={modelKey} course={course} />
         return (
             <div>
                 <h3>{this.title()}</h3>
 
-                <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourse.bind(this)}>
+                <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourseData.bind(this)}>
+                <CoursesCourseView model={modelKey} course={course} saveCourse={this.props.saveCourse} />
 
                 <div className="row">
                 <div className="col-md-6">
@@ -149,7 +149,7 @@ class _EditCreate extends CoursesBase {
                             <SimpleField label="Standard Starts" model={modelKey+'.currentStandardStarts'} labelClass="col-md-4" divClass="col-md-6" disabled={currentDisabled} />
                             <SimpleField label="Transfer In" model={modelKey+'.currentXfer'} labelClass="col-md-4" divClass="col-md-6" disabled={currentDisabled} />
 
-                            <SaveButton hide={currentDisabled} className="col-sm-offset-4 col-sm-6" />
+                            <SaveButton hide={currentDisabled} className="col-sm-offset-4 col-sm-6" saveCourse={this.props.saveCourse} />
                         </div>
                     </div>
                 </div>
@@ -162,7 +162,7 @@ class _EditCreate extends CoursesBase {
                             <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-4" divClass="col-md-6" disabled={guestsDisabled} />
                             <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} labelClass="col-md-4" divClass="col-md-6" disabled={guestsDisabled} />
 
-                            <SaveButton hide={guestsDisabled} className="col-sm-offset-4 col-sm-6" />
+                            <SaveButton hide={guestsDisabled} className="col-sm-offset-4 col-sm-6" saveCourse={this.props.saveCourse} />
                         </div>
                     </div>
                 </div>
@@ -177,7 +177,7 @@ class _EditCreate extends CoursesBase {
                             <SimpleField label="Potentials" model={modelKey+'.potentials'} labelClass="col-md-4" divClass="col-md-6" disabled={completionDisabled} />
                             <SimpleField label="Registrations" model={modelKey+'.registrations'} labelClass="col-md-4" divClass="col-md-6" disabled={completionDisabled} />
 
-                            <SaveButton hide={completionDisabled} className="col-sm-offset-4 col-sm-6" />
+                            <SaveButton hide={completionDisabled} className="col-sm-offset-4 col-sm-6" saveCourse={this.props.saveCourse} />
                         </div>
                     </div>
                 </div>
@@ -189,7 +189,7 @@ class _EditCreate extends CoursesBase {
                             <SimpleField label="Standard Starts" model={modelKey+'.quarterStartStandardStarts'} labelClass="col-md-4" divClass="col-md-6" disabled={qstartDisabled} />
                             <SimpleField label="Transfer In" model={modelKey+'.quarterStartXfer'} labelClass="col-md-4" divClass="col-md-6" disabled={qstartDisabled} />
 
-                            <SaveButton hide={qstartDisabled} className="col-sm-offset-4 col-sm-6" />
+                            <SaveButton hide={qstartDisabled} className="col-sm-offset-4 col-sm-6" saveCourse={this.props.saveCourse} />
                         </div>
                     </div>
                 </div>
@@ -198,8 +198,8 @@ class _EditCreate extends CoursesBase {
             </div>
         )
     }
-    // saveCourse for now is the same between edit and create flows
-    saveCourse(data) {
+    // saveCourseData for now is the same between edit and create flows
+    saveCourseData(data) {
         this.props.dispatch(saveCourse(this.props.params.centerId, this.reportingDateString(), data)).done((result) => {
             if (result.success && result.storedId) {
                 data = objectAssign({}, data, {id: result.storedId})
@@ -256,85 +256,95 @@ class CoursesAddView extends _EditCreate {
 
 
 
-// class CoursesEditCourseView extends React.Component {
-//     saveCourse(data) {
-//         console.log("Saved course with data", data)
+class CoursesEditCourseView extends React.Component {
+    saveCourse(data) {
+        console.log("Saved course with data", data)
 
-//         Api.Course.update({
-//             course: data.courseId,
-//             data: {
-//                 location: data.location,
-//                 startDate: data.startDate,
-//                 type: data.type
-//             }
-//         }).done((data) => {
-//             this.props.router.push(this.baseUri() + '/courses')
-//         })
-//     }
-//     render() {
+        Api.Course.update({
+            course: data.courseId,
+            data: {
+                location: data.location,
+                startDate: data.startDate,
+                type: data.type
+            }
+        }).done((data) => {
+            this.props.router.push(this.baseUri() + '/courses')
+        })
+    }
+    render() {
 
-//         return (
-//             <div>
-//                 <Form className="form-horizontal" model={this.props.model} onSubmit={this.saveCourse.bind(this)}>
-//                     <div className="panel panel-default">
-//                         <div className="panel-heading">Course Details</div>
-//                         <div className="panel-body">
-//                             <SimpleField label="Start Date" model={this.props.model+'.startDate'} />
-//                             <SimpleField label="Type" model={this.props.model+'.type'} customField={true}>
-//                                 <select className="form-control">
-//                                     <option value="CAP">{courseTypeMap['CAP']}</option>
-//                                     <option value="CPC">{courseTypeMap['CPC']}</option>
-//                                 </select>
-//                             </SimpleField>
-//                             <SimpleField label="Location" model={this.props.model+'.location'} />
+        return (
+            <div>
+                <Form className="form-horizontal" model={this.props.model} onSubmit={this.saveCourse.bind(this)}>
+                    <div className="panel panel-default">
+                        <div className="panel-heading">Course Details</div>
+                        <div className="panel-body">
+                            <SimpleField label="Start Date" model={this.props.model+'.startDate'} />
+                            <SimpleField label="Type" model={this.props.model+'.type'} customField={true}>
+                                <select className="form-control">
+                                    <option value="CAP">{courseTypeMap['CAP']}</option>
+                                    <option value="CPC">{courseTypeMap['CPC']}</option>
+                                </select>
+                            </SimpleField>
+                            <SimpleField label="Location" model={this.props.model+'.location'} />
 
-//                             <SaveButton className="col-sm-offset-2 col-sm-8" />
-//                         </div>
-//                     </div>
-//                 </Form>
-//             </div>
-//         )
-//     }
-// }
+                            <SaveButton className="col-sm-offset-2 col-sm-8" saveCourse={this.props.saveCourse} />
+                        </div>
+                    </div>
+                </Form>
+            </div>
+        )
+    }
+}
 
-// class CoursesShowCourseView extends React.Component {
-//     render() {
-//         var course = this.props.course
+class CoursesShowCourseView extends React.Component {
+    render() {
+        var course = this.props.course
 
-//         var location = course.location
-//         if (!location) {
-//             location = course.center.name
-//         }
+        var location = course.location
+        if (!location) {
+            location = course.center.name
+        }
 
-//         var type = courseTypeMap[course.type]
-//         var startDate = moment(course.startDate)
+        var type = courseTypeMap[course.type]
+        var startDate = moment(course.startDate)
 
-//         return (
-//             <table className="table table-condensed no-border">
-//             <tbody>
-//                 <tr>
-//                     <th style={{width: "8em"}}>Start Date</th>
-//                     <td>{startDate.format("MMM D, YYYY")}</td></tr>
-//                 <tr>
-//                     <th>Type</th>
-//                     <td>{type}</td></tr>
-//                 <tr>
-//                     <th>Location</th>
-//                     <td>{location}</td>
-//                 </tr>
-//             </tbody>
-//             </table>
-//         )
-//     }
-// }
+        return (
+            <table className="table table-condensed no-border">
+            <tbody>
+                <tr>
+                    <th style={{width: "8em"}}>Start Date</th>
+                    <td>{startDate.format("MMM D, YYYY")}</td>
+                </tr>
+                <tr>
+                    <th>Type</th>
+                    <td>{type}</td>
+                </tr>
+                <tr>
+                    <th>Location</th>
+                    <td>{location}</td>
+                </tr>
+                <tr>
+                    <th>&nbsp;</th>
+                    <td><Link onClick={this.makeEditable.bind(this)}>Edit</Link></td>
+                </tr>
+            </tbody>
+            </table>
+        )
+    }
 
-// class CoursesCourseView extends React.Component {
-//     render() {
-//         return (
-//             <CoursesEditCourseView model={this.props.model} course={this.props.course} />
-//         )
-//     }
-// }
+    makeEditable() {
+        this.props.editable = true
+    }
+}
+
+class CoursesCourseView extends React.Component {
+    render() {
+        return (
+            <CoursesShowCourseView model={this.props.model} course={this.props.course} saveCourse={this.props.saveCourse} />
+        )
+    }
+}
 
 const mapStateToProps = (state) => {
     return objectAssign({lookups: state.submission.core.lookups}, state.submission.courses)
