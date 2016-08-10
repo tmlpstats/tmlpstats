@@ -5,6 +5,8 @@ import { Promise, objectAssign } from '../../reusable/ponyfill'
 import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
 
+import { Field } from 'react-redux-form'
+
 import { SubmissionBase, React } from '../base_components'
 import { Form, SimpleField, SimpleSelect, AddOneLink } from '../../reusable/form_utils'
 import { ModeSelectButtons, LoadStateFlip } from '../../reusable/ui_basic'
@@ -43,7 +45,7 @@ class CoursesIndexView extends CoursesBase {
         coursesCollection.iterItems(this.props.courses, (course, key) => {
             var location = course.location
             if (!location) {
-                location = course.center.name
+                location = this.props.lookups.center.name
             }
             var type = courseTypeMap[course.type]
 
@@ -87,31 +89,13 @@ class CoursesIndexView extends CoursesBase {
     }
 }
 
-class SaveButton extends React.Component {
-    render() {
-        if (this.props.hide) {
-            return <div />
-        }
-
-        return (
-            <div className="form-group">
-                <div className={this.props.className}>
-                    <LoadStateFlip loadState={this.props.saveCourse}>
-                        <button className="btn btn-primary" type="submit">Save</button>
-                    </LoadStateFlip>
-                </div>
-            </div>
-        )
-    }
-}
-
 class _EditCreate extends CoursesBase {
     render() {
         const modelKey = COURSES_FORM_KEY
 
         var currentDisabled = false
         var guestsDisabled = false
-        var qstartDisabled = true
+        var qstartDisabled = this.defaultQStartDisabled()
         var completionDisabled = true
 
         if (this.props.currentCourse) {
@@ -133,63 +117,137 @@ class _EditCreate extends CoursesBase {
             }
         }
 
+        var guestGameFields = ""
+        if (!guestsDisabled) {
+            if (!completionDisabled) {
+                guestGameFields = (
+                    <div className="row">
+                    <div className="col-md-12">
+                        <h4>Guest Game</h4>
+                        <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-2" divClass="col-md-2" />
+                        <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" />
+                        <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-2" divClass="col-md-2" />
+                        <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} labelClass="col-md-2" divClass="col-md-2" />
+                    </div>
+                    </div>
+                )
+            } else {
+                guestGameFields = (
+                    <div className="row">
+                    <div className="col-md-12">
+                        <h4>Guest Game</h4>
+                        <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-2" divClass="col-md-2" />
+                        <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" />
+                    </div>
+                    </div>
+                )
+            }
+        }
+
+        var completionFields = ""
+        if (!completionDisabled) {
+            completionFields = (
+                <div className="row">
+                <div className="col-md-12">
+                    <h4>Completion</h4>
+                    <SimpleField label="Standard Starts" model={modelKey+'.completedStandardStarts'} labelClass="col-md-2" divClass="col-md-2" />
+                    <SimpleField label="Potentials" model={modelKey+'.potentials'} labelClass="col-md-2" divClass="col-md-2" />
+                    <SimpleField label="Registrations" model={modelKey+'.registrations'} labelClass="col-md-2" divClass="col-md-2" />
+                </div>
+                </div>
+            )
+        }
+
         return (
             <div>
                 <h3>{this.title()}</h3>
 
                 <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourseData.bind(this)}>
-                <CoursesCourseView model={modelKey} course={course} saveCourse={this.props.saveCourse} />
 
                 <div className="row">
-                <div className="col-md-6">
-                    <div className="panel panel-default">
-                        <div className="panel-heading">Current</div>
-                        <div className="panel-body">
-                            <SimpleField label="Total Ever Registered" model={modelKey+'.currentTer'} labelClass="col-md-4" divClass="col-md-6" disabled={currentDisabled} />
-                            <SimpleField label="Standard Starts" model={modelKey+'.currentStandardStarts'} labelClass="col-md-4" divClass="col-md-6" disabled={currentDisabled} />
-                            <SimpleField label="Transfer In" model={modelKey+'.currentXfer'} labelClass="col-md-4" divClass="col-md-6" disabled={currentDisabled} />
-
-                            <SaveButton hide={currentDisabled} className="col-sm-offset-4 col-sm-6" saveCourse={this.props.saveCourse} />
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-6">
-                    <div className="panel panel-default">
-                        <div className="panel-heading">Guest Game</div>
-                        <div className="panel-body">
-                            <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-4" divClass="col-md-6" disabled={guestsDisabled} />
-                            <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-4" divClass="col-md-6" disabled={guestsDisabled} />
-                            <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-4" divClass="col-md-6" disabled={guestsDisabled} />
-                            <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} labelClass="col-md-4" divClass="col-md-6" disabled={guestsDisabled} />
-
-                            <SaveButton hide={guestsDisabled} className="col-sm-offset-4 col-sm-6" saveCourse={this.props.saveCourse} />
-                        </div>
-                    </div>
+                <div className="col-md-12">
+                    <SimpleField label="Type" model={modelKey+'.type'} customField={true} labelClass="col-md-2" divClass="col-md-4">
+                        <select className="form-control">
+                            <option value="CAP">{courseTypeMap['CAP']}</option>
+                            <option value="CPC">{courseTypeMap['CPC']}</option>
+                        </select>
+                    </SimpleField>
+                    <SimpleField label="Start Date" model={modelKey+'.startDate'} labelClass="col-md-2" divClass="col-md-4"/>
+                    <SimpleField label="Location" model={modelKey+'.location'} labelClass="col-md-2" divClass="col-md-4"/>
                 </div>
                 </div>
 
                 <div className="row">
-                <div className="col-md-6">
-                    <div className="panel panel-default">
-                        <div className="panel-heading">Completion</div>
-                        <div className="panel-body">
-                            <SimpleField label="Standard Starts" model={modelKey+'.completedStandardStarts'} labelClass="col-md-4" divClass="col-md-6" disabled={completionDisabled} />
-                            <SimpleField label="Potentials" model={modelKey+'.potentials'} labelClass="col-md-4" divClass="col-md-6" disabled={completionDisabled} />
-                            <SimpleField label="Registrations" model={modelKey+'.registrations'} labelClass="col-md-4" divClass="col-md-6" disabled={completionDisabled} />
-
-                            <SaveButton hide={completionDisabled} className="col-sm-offset-4 col-sm-6" saveCourse={this.props.saveCourse} />
+                <div className="col-md-12">
+                    <h4>Course Balance</h4>
+                    <div className="row">
+                    <div className="col-md-12">
+                        <div className="form-group">
+                            <div className="col-md-2 col-md-offset-2">
+                                <label>Quarter Start</label>
+                            </div>
+                            <div className="col-md-2">
+                                <label>Current</label>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="col-md-6">
-                    <div className="panel panel-default">
-                        <div className="panel-heading">Quarter Starting</div>
-                        <div className="panel-body">
-                            <SimpleField label="Total Ever Registered" model={modelKey+'.quarterStartTer'} labelClass="col-md-4" divClass="col-md-6" disabled={qstartDisabled} />
-                            <SimpleField label="Standard Starts" model={modelKey+'.quarterStartStandardStarts'} labelClass="col-md-4" divClass="col-md-6" disabled={qstartDisabled} />
-                            <SimpleField label="Transfer In" model={modelKey+'.quarterStartXfer'} labelClass="col-md-4" divClass="col-md-6" disabled={qstartDisabled} />
+                    </div>
 
-                            <SaveButton hide={qstartDisabled} className="col-sm-offset-4 col-sm-6" saveCourse={this.props.saveCourse} />
+                    <div className="row">
+                    <div className="col-md-12">
+                        <div className="form-group">
+                            <label className="col-md-2 control-label">Total Ever Registered</label>
+                            <div className="col-md-2">
+                                <Field model={modelKey+'.quarterStartTer'}><input type="text" className="form-control" disabled={qstartDisabled} /></Field>
+                            </div>
+                            <div className="col-md-2">
+                                <Field model={modelKey+'.currentTer'}><input type="text" className="form-control" /></Field>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div className="row">
+                    <div className="col-md-12">
+                        <div className="form-group">
+                            <label className="col-md-2 control-label">Standard Starts</label>
+                            <div className="col-md-2">
+                                <Field model={modelKey+'.quarterStartStandardStarts'}><input type="text" className="form-control" disabled={qstartDisabled} /></Field>
+                            </div>
+                            <div className="col-md-2">
+                                <Field model={modelKey+'.currentStandardStarts'}><input type="text" className="form-control" /></Field>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div className="row">
+                    <div className="col-md-12">
+                        <div className="form-group">
+                            <label className="col-md-2 control-label">Transfer In</label>
+                            <div className="col-md-2">
+                                <Field model={modelKey+'.quarterStartXfer'}><input type="text" className="form-control" disabled={qstartDisabled} /></Field>
+                            </div>
+                            <div className="col-md-2">
+                                <Field model={modelKey+'.currentXfer'}><input type="text" className="form-control" /></Field>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
+
+                {guestGameFields}
+
+                {completionFields}
+
+                <div className="row">
+                <div className="col-md-12">
+                    <div className="form-group">
+                        <div className="col-md-offset-2 col-md-12">
+                            <LoadStateFlip loadState={this.props.saveCourse}>
+                                <button className="btn btn-primary" type="submit">Save</button>
+                            </LoadStateFlip>
                         </div>
                     </div>
                 </div>
@@ -207,6 +265,9 @@ class _EditCreate extends CoursesBase {
             }
             this.props.router.push(this.baseUri() + '/courses')
         })
+    }
+    defaultQStartDisabled() {
+        return true
     }
 }
 
@@ -239,7 +300,13 @@ class CoursesAddView extends _EditCreate {
     componentDidMount() {
         super.setupCourses().then(() => {
             if (this.props.currentCourse) {
-                this.props.dispatch(chooseCourse('', {startDate: '', type: ''}))
+                this.props.dispatch(chooseCourse('', {
+                    startDate: '',
+                    type: 'CAP',
+                    quarterStartTer: 0,
+                    quarterStartStandardStarts: 0,
+                    quarterStartXfer: 0
+                }))
             }
         })
     }
@@ -248,101 +315,12 @@ class CoursesAddView extends _EditCreate {
         return 'Create Course'
     }
 
+    defaultQStartDisabled() {
+        return false
+    }
+
     render() {
         return super.render()
-    }
-}
-
-
-
-
-class CoursesEditCourseView extends React.Component {
-    saveCourse(data) {
-        console.log("Saved course with data", data)
-
-        Api.Course.update({
-            course: data.courseId,
-            data: {
-                location: data.location,
-                startDate: data.startDate,
-                type: data.type
-            }
-        }).done((data) => {
-            this.props.router.push(this.baseUri() + '/courses')
-        })
-    }
-    render() {
-
-        return (
-            <div>
-                <Form className="form-horizontal" model={this.props.model} onSubmit={this.saveCourse.bind(this)}>
-                    <div className="panel panel-default">
-                        <div className="panel-heading">Course Details</div>
-                        <div className="panel-body">
-                            <SimpleField label="Start Date" model={this.props.model+'.startDate'} />
-                            <SimpleField label="Type" model={this.props.model+'.type'} customField={true}>
-                                <select className="form-control">
-                                    <option value="CAP">{courseTypeMap['CAP']}</option>
-                                    <option value="CPC">{courseTypeMap['CPC']}</option>
-                                </select>
-                            </SimpleField>
-                            <SimpleField label="Location" model={this.props.model+'.location'} />
-
-                            <SaveButton className="col-sm-offset-2 col-sm-8" saveCourse={this.props.saveCourse} />
-                        </div>
-                    </div>
-                </Form>
-            </div>
-        )
-    }
-}
-
-class CoursesShowCourseView extends React.Component {
-    render() {
-        var course = this.props.course
-
-        var location = course.location
-        if (!location) {
-            location = course.center.name
-        }
-
-        var type = courseTypeMap[course.type]
-        var startDate = moment(course.startDate)
-
-        return (
-            <table className="table table-condensed no-border">
-            <tbody>
-                <tr>
-                    <th style={{width: "8em"}}>Start Date</th>
-                    <td>{startDate.format("MMM D, YYYY")}</td>
-                </tr>
-                <tr>
-                    <th>Type</th>
-                    <td>{type}</td>
-                </tr>
-                <tr>
-                    <th>Location</th>
-                    <td>{location}</td>
-                </tr>
-                <tr>
-                    <th>&nbsp;</th>
-                    <td><Link onClick={this.makeEditable.bind(this)}>Edit</Link></td>
-                </tr>
-            </tbody>
-            </table>
-        )
-    }
-
-    makeEditable() {
-        this.props.editable = true
-    }
-}
-
-class CoursesCourseView extends React.Component {
-    render() {
-        return (
-            <CoursesShowCourseView model={this.props.model} course={this.props.course} saveCourse={this.props.saveCourse} />
-        )
     }
 }
 
