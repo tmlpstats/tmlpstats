@@ -21,12 +21,15 @@ class SubmissionCore extends AuthenticatedApiBase
 
         $localReport = App::make(LocalReport::class);
         $lastValidReport = $localReport->getLastStatsReportSince($center, $reportingDate);
+
+        // Get values for lookups
         $team_members = $localReport->getClassList($lastValidReport);
         $withdraw_codes = Models\WithdrawCode::get();
+        $center_quarters = App::make(Application::class)->validRegistrationQuarters($center, $reportingDate, $lastValidReport->quarter);
 
         return [
             'success' => true,
-            'lookups' => compact('withdraw_codes', 'team_members', 'center'),
+            'lookups' => compact('withdraw_codes', 'team_members', 'center', 'center_quarters'),
         ];
     }
 
@@ -45,5 +48,4 @@ class SubmissionCore extends AuthenticatedApiBase
 
         return ['success' => true];
     }
-
 }
