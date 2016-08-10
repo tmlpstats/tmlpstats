@@ -2,6 +2,9 @@
 
 namespace TmlpStats\Policies;
 
+use TmlpStats\Center;
+use TmlpStats\User;
+
 class CenterPolicy extends Policy
 {
     /**
@@ -13,11 +16,8 @@ class CenterPolicy extends Policy
      */
     public function viewSubmissionUi(User $user, Center $center)
     {
-        if ($user->hasRole('administrator')) {
-            return true;
-        }
-
-        return false;
+        // administrators are handled by "before" in the base policy
+        return ($user->hasRole('globalStatistician'));
     }
 
     /**
@@ -37,5 +37,10 @@ class CenterPolicy extends Policy
         }
 
         return false;
+    }
+
+    public function adminScoreboard(User $user, Center $center)
+    {
+        return ($user->hasRole('globalStatistician'));
     }
 }

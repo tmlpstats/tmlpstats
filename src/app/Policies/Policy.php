@@ -12,14 +12,6 @@ class Policy
     protected $defaultAllow = false;
 
     /**
-     * Create a new policy instance.
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * By default, admins are authorized for everything
      *
      * @param User $user

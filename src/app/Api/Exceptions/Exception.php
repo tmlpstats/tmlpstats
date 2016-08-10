@@ -18,9 +18,10 @@ class Exception extends HttpException
     public function __toString()
     {
         json_encode([
+            'success' => false,
             'status_code' => $this->statusCode,
             'status_message' => $this->statusMessage,
-            'message' => $this->message ?: $this->statusMessage,
+            'message' => $this->getMessage() ?: $this->statusMessage,
         ]);
     }
 }

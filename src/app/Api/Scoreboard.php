@@ -9,8 +9,12 @@ use TmlpStats\Domain;
 
 class Scoreboard extends AuthenticatedApiBase
 {
+    const LOCK_SETTING_KEY = 'scoreboardLock';
+
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
+        $this->assertAuthz($this->context->can('viewSubmissionUi', $center));
+
         $localReport = App::make(LocalReport::class);
         $statsReport = $localReport->getLastStatsReportSince($center, $reportingDate);
         $weeks = $localReport->getQuarterScoreboard($statsReport, ['returnObject' => true]);
@@ -28,6 +32,7 @@ class Scoreboard extends AuthenticatedApiBase
 
         // fill some additional metadata
         $quarter = $statsReport->quarter;
+        $locks = $this->getScoreboardLockQuarter($center, $quarter);
 
         $week = $quarter->getQuarterStartDate($center)->addWeek();
         $endDate = $quarter->getQuarterEndDate($center);
@@ -46,8 +51,9 @@ class Scoreboard extends AuthenticatedApiBase
                     $scoreboard->meta['isClassroom'] = true;
                 }
             }
-            $scoreboard->meta['canEditPromise'] = false;
-            $scoreboard->meta['canEditActual'] = ($week->toDateString() == $reportingDate->toDateString());
+            $weekLock = $locks->getWeekDefault($week);
+            $scoreboard->meta['canEditPromise'] = $weekLock->editPromise;
+            $scoreboard->meta['canEditActual'] = $weekLock->editActual || ($week->toDateString() == $reportingDate->toDateString());
 
             $week->addWeek();
         }
@@ -62,14 +68,34 @@ class Scoreboard extends AuthenticatedApiBase
 
     public function stash(Models\Center $center, Carbon $reportingDate, $data)
     {
-        $r1 = App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
-        if (!$r1['success']) {
-            return $r1;
-        }
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+
         $scoreboard = Domain\Scoreboard::fromArray($data);
         $submissionData = App::make(SubmissionData::class);
         $submissionData->store($center, $reportingDate, $scoreboard);
 
         return ['success' => true];
+    }
+
+    public function getScoreboardLockQuarter(Models\Center $center, Models\Quarter $quarter)
+    {
+        $v = $this->context->getSetting(static::LOCK_SETTING_KEY, $center, $quarter);
+        if ($v === null) {
+            return new Domain\ScoreboardLockQuarter();
+        } else {
+            return Domain\ScoreboardLockQuarter::fromArray($v);
+        }
+    }
+
+    public function setScoreboardLockQuarter(Models\Center $center, Models\Quarter $quarter, $data)
+    {
+        $this->assertAuthz($this->context->can('adminScoreboard', $center));
+        $locks = Domain\ScoreboardLockQuarter::fromArray($data);
+        Models\Setting::upsert([
+            'name' => static::LOCK_SETTING_KEY,
+            'center' => $center,
+            'quarter' => $quarter,
+            'value' => json_encode($locks->toArray()),
+        ]);
     }
 }

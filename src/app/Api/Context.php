@@ -76,21 +76,29 @@ class Context
         $this->region = $region;
     }
 
-    public function getRawSetting($name, $center = null)
+    public function getRawSetting($name, $center = null, $quarter = null)
     {
         if ($center == null) {
             $center = $this->getCenter();
         }
-        $setting = Models\Setting::get($name, $center);
+        if ($quarter == null) {
+            $setting = Models\Setting::get($name, $center);
+        } else {
+            $setting = Models\Setting::get($name, $center, $quarter);
+        }
         if ($setting != null) {
             return $setting->value;
         }
+
+        return null;
     }
 
-    public function getSetting($name, $center = null)
+    public function getSetting($name, $center = null, $quarter = null)
     {
-        $value = $this->getRawSetting($name, $center);
-        if ($value === 'false') {
+        $value = $this->getRawSetting($name, $center, $quarter);
+        if ($value === null) {
+            return null;
+        } else if ($value === 'false') {
             return false;
         } else if ($value === 'true') {
             return true;
@@ -132,5 +140,10 @@ class Context
         }
 
         return null;
+    }
+
+    public function can($priv, $target)
+    {
+        return $this->getUser()->can($priv, $target);
     }
 }
