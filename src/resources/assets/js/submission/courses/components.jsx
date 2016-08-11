@@ -168,11 +168,9 @@ class _EditCreate extends CoursesBase {
     saveCourseData(data) {
         this.props.dispatch(saveCourse(this.props.params.centerId, this.reportingDateString(), data)).done((result) => {
             if (result.success && result.storedId) {
-                const courseId = result.storedId
-                // We're replacing the local copy with the version returned during the save
-                // this makes sure any updates to the meta data is updated everywhere
-                this.props.dispatch(coursesCollection.replaceItem(result.course))
-                this.props.dispatch(chooseCourse(courseId, this.getCourseById(courseId)))
+                data = objectAssign({}, data, {id: result.storedId, meta: result.meta})
+                this.props.dispatch(coursesCollection.replaceItem(data))
+                this.props.dispatch(chooseCourse(data.id, this.getCourseById(data.id)))
             }
             this.props.router.push(this.baseUri() + '/courses')
         })

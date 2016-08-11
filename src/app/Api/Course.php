@@ -194,12 +194,10 @@ class Course extends ApiBase
         $report = LocalReport::getStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $course, $courseId);
 
-        $course->meta = $this->getCourseMeta($course, $center, $reportingDate);
-
         return [
             'success' => true,
             'storedId' => $courseId,
-            'course' => $course,
+            'meta' => $this->getCourseMeta($course, $center, $reportingDate),
             'valid' => $validationResults['valid'],
             'messages' => $validationResults['messages'],
         ];
