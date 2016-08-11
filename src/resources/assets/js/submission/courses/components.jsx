@@ -38,21 +38,21 @@ class CoursesIndexView extends CoursesBase {
         if (!this.props.loading.loaded) {
             return this.renderBasicLoading()
         }
-        var changeSort = (newSort) => this.props.dispatch(coursesCollection.changeSortCriteria(newSort))
-        var courses = []
-        var baseUri = this.baseUri()
+        const changeSort = (newSort) => this.props.dispatch(coursesCollection.changeSortCriteria(newSort))
+        const courses = []
+        const baseUri = this.baseUri()
 
         coursesCollection.iterItems(this.props.courses, (course, key) => {
-            var location = course.location
+            let location = course.location
             if (!location) {
                 location = this.props.lookups.center.name
             }
-            var type = courseTypeMap[course.type]
+            const type = courseTypeMap[course.type]
 
-            var startDate = moment(course.startDate)
-            var ter = course.currentTer || '-'
-            var ss = course.currentStandardStarts || '-'
-            var xfer = course.currentXfer || '-'
+            const startDate = moment(course.startDate)
+            const ter = course.currentTer || '-'
+            const ss = course.currentStandardStarts || '-'
+            const xfer = course.currentXfer || '-'
 
             courses.push(
                 <tr key={key}>
@@ -93,33 +93,36 @@ class _EditCreate extends CoursesBase {
     render() {
         const modelKey = COURSES_FORM_KEY
 
-        var currentDisabled = false
-        var guestsDisabled = false
-        var qstartDisabled = this.defaultQStartDisabled()
-        var completionDisabled = true
+        let currentState = 'visible'
+        let guestsState = 'visible'
+        let qstartState = 'visible'
+        let completionState = 'hidden'
 
         if (this.props.currentCourse) {
-            var course = this.props.currentCourse
+            const course = this.props.currentCourse
 
-            var now = moment.utc()
-            var startDate = moment.utc(course.startDate)
-            var courseReportDate = moment.utc(startDate).add(6, 'days')
+            if (course.meta.canEditCompletion) {
+                completionState = 'visible'
+            } else if (course.meta.isPastCourse) {
+                completionState = 'disabled'
+            }
 
-            var dayDiff = now.diff(courseReportDate, 'days')
+            if (!course.meta.canEditCurrent) {
+                currentState = 'disabled'
+            }
 
-            if (dayDiff === 0) {
-                // We're on the week after the course
-                completionDisabled = false
-            } else if (dayDiff > 0) {
-                // The course happened more than 7 days ago
-                currentDisabled = true
-                guestsDisabled = true
+            if (!course.meta.canEditGuestGame) {
+                guestsState = 'disabled'
+            }
+
+            if (!course.meta.canEditQuarterStart) {
+                qstartState = 'disabled'
             }
         }
 
-        var guestGameFields = this.getGuestGameFields(modelKey, guestsDisabled, completionDisabled)
-        var completionFields = this.getCompletionFields(modelKey, completionDisabled)
-        var currentBalanceFields = this.getCurrentBalanceFields(modelKey, qstartDisabled)
+        const guestGameFields = this.getGuestGameFields(modelKey, guestsState, completionState)
+        const completionFields = this.getCompletionFields(modelKey, completionState)
+        const currentBalanceFields = this.getCurrentBalanceFields(modelKey, qstartState, currentState)
 
         return (
             <div>
@@ -165,27 +168,27 @@ class _EditCreate extends CoursesBase {
     saveCourseData(data) {
         this.props.dispatch(saveCourse(this.props.params.centerId, this.reportingDateString(), data)).done((result) => {
             if (result.success && result.storedId) {
-                data = objectAssign({}, data, {id: result.storedId})
-                this.props.dispatch(coursesCollection.replaceItem(data))
+                const courseId = result.storedId
+                // We're replacing the local copy with the version returned during the save
+                // this makes sure any updates to the meta data is updated everywhere
+                this.props.dispatch(coursesCollection.replaceItem(result.course))
+                this.props.dispatch(chooseCourse(courseId, this.getCourseById(courseId)))
             }
             this.props.router.push(this.baseUri() + '/courses')
         })
     }
-    defaultQStartDisabled() {
-        return true
-    }
-    getGuestGameFields(modelKey, guestsDisabled, completionDisabled) {
-        var guestGameFields = ""
-        if (!guestsDisabled) {
-            if (!completionDisabled) {
+    getGuestGameFields(modelKey, guestsState, completionState) {
+        let guestGameFields = ''
+        if (guestsState != 'hidden') {
+            if (completionState != 'hidden') {
                 guestGameFields = (
                     <div className="row">
                     <div className="col-md-12">
                         <h4>Guest Game</h4>
-                        <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-2" divClass="col-md-2" />
-                        <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" />
-                        <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-2" divClass="col-md-2" />
-                        <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} labelClass="col-md-2" divClass="col-md-2" />
+                        <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
+                        <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
+                        <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
+                        <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
                     </div>
                     </div>
                 )
@@ -204,33 +207,33 @@ class _EditCreate extends CoursesBase {
         }
         return guestGameFields
     }
-    getCompletionFields(modelKey, completionDisabled) {
-        var completionFields = ""
-        if (!completionDisabled) {
+    getCompletionFields(modelKey, completionState) {
+        let completionFields = ''
+        if (completionState != 'hidden') {
             completionFields = (
                 <div className="row">
                 <div className="col-md-12">
                     <h4>Completion</h4>
-                    <SimpleField label="Standard Starts" model={modelKey+'.completedStandardStarts'} labelClass="col-md-2" divClass="col-md-2" />
-                    <SimpleField label="Potentials" model={modelKey+'.potentials'} labelClass="col-md-2" divClass="col-md-2" />
-                    <SimpleField label="Registrations" model={modelKey+'.registrations'} labelClass="col-md-2" divClass="col-md-2" />
+                    <SimpleField label="Standard Starts" model={modelKey+'.completedStandardStarts'} labelClass="col-md-2" divClass="col-md-2" disabled={completionState == 'disabled'} />
+                    <SimpleField label="Potentials" model={modelKey+'.potentials'} labelClass="col-md-2" divClass="col-md-2" disabled={completionState == 'disabled'} />
+                    <SimpleField label="Registrations" model={modelKey+'.registrations'} labelClass="col-md-2" divClass="col-md-2" disabled={completionState == 'disabled'} />
                 </div>
                 </div>
             )
         }
         return completionFields
     }
-    getCurrentBalanceFields(modelKey, qstartDisabled) {
+    getCurrentBalanceFields(modelKey, qstartState, currentState) {
 
-        var rows = []
-        var rowData = [
-            {name: "Total Ever Registered", fieldSuffix: "Ter"},
-            {name: "Standard Starts", fieldSuffix: "StandardStarts"},
-            {name: "Transfer In", fieldSuffix: "Xfer"},
+        const rows = []
+        const rowData = [
+            {name: 'Total Ever Registered', fieldSuffix: 'Ter'},
+            {name: 'Standard Starts', fieldSuffix: 'StandardStarts'},
+            {name: 'Transfer In', fieldSuffix: 'Xfer'},
         ]
         rowData.forEach((row) => {
-            var qstartModelStr = modelKey + '.quarterStart' + row.fieldSuffix
-            var currentModelStr = modelKey + '.current' + row.fieldSuffix
+            const qstartModelStr = modelKey + '.quarterStart' + row.fieldSuffix
+            const currentModelStr = modelKey + '.current' + row.fieldSuffix
 
             rows.push(
                 <div className="row" key={row.fieldSuffix}>
@@ -238,10 +241,10 @@ class _EditCreate extends CoursesBase {
                     <div className="form-group">
                         <label className="col-md-2 control-label">{row.name}</label>
                         <div className="col-md-2">
-                            <Field model={qstartModelStr}><input type="text" className="form-control" disabled={qstartDisabled} /></Field>
+                            <Field model={qstartModelStr}><input type="text" className="form-control" disabled={qstartState == 'disabled'} /></Field>
                         </div>
                         <div className="col-md-2">
-                            <Field model={currentModelStr}><input type="text" className="form-control" /></Field>
+                            <Field model={currentModelStr}><input type="text" className="form-control" disabled={currentState == 'disabled'} /></Field>
                         </div>
                     </div>
                 </div>
@@ -276,7 +279,7 @@ class _EditCreate extends CoursesBase {
 class CoursesEditView extends _EditCreate {
     componentDidMount() {
         super.setupCourses().then(() => {
-            var courseId = this.props.params.courseId
+            const courseId = this.props.params.courseId
             if (!this.props.currentCourse || this.props.currentCourse.id != courseId) {
                 this.props.dispatch(chooseCourse(courseId, this.getCourseById(courseId)))
             }
@@ -315,10 +318,6 @@ class CoursesAddView extends _EditCreate {
 
     title() {
         return 'Create Course'
-    }
-
-    defaultQStartDisabled() {
-        return false
     }
 
     render() {

@@ -101,7 +101,7 @@ class Application extends ApiBase
             $submissionData = App::make(SubmissionData::class);
             $found = $submissionData->allForType($center, $reportingDate, Domain\TeamApplication::class);
             foreach ($found as $app) {
-                $allApplications[$app->tmlpRegistrationId] = $app;
+                $allApplications[$app->id] = $app;
             }
         }
 

@@ -9,6 +9,8 @@ use TmlpStats\Api\Exceptions as ApiExceptions;
  */
 class Course extends ParserDomain
 {
+    public $meta = [];
+
     protected static $validProperties = [
         'center' => [
             'owner' => 'course',
@@ -167,5 +169,14 @@ class Course extends ParserDomain
 
             $this->copyTarget($target, $k, $v);
         }
+    }
+
+    public function toArray()
+    {
+        $output = parent::toArray();
+
+        $output['meta'] = $this->meta;
+
+        return $output;
     }
 }
