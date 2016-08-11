@@ -2,6 +2,7 @@
 namespace TmlpStats\Domain;
 
 use TmlpStats as Models;
+use TmlpStats\Api\Exceptions as ApiExceptions;
 
 /**
  * Models a course
@@ -114,12 +115,18 @@ class Course extends ParserDomain
         foreach (static::$validProperties as $k => $v) {
             switch ($v['owner']) {
                 case 'course':
-                    $obj->$k = $course->$k;
+                    if ($k == 'location' && $course->$k === null) {
+                        // If no location provided, auto-fill in the center name
+                        $obj->$k = $course->center->name;
+                    } else {
+                        $obj->$k = $course->$k;
+                    }
                     break;
                 case 'courseData':
                     if ($courseData) {
                         $obj->$k = $courseData->$k;
                     }
+                    break;
             }
         }
         $obj->id = $course->id;
@@ -151,6 +158,11 @@ class Course extends ParserDomain
                 case 'courseData':
                     $target = $courseData;
                     break;
+            }
+
+            if ($k == 'location' && $k == $course->center->name) {
+                // Don't save the location if it's the same as the center name since that's redundant
+                $v = null;
             }
 
             $this->copyTarget($target, $k, $v);

@@ -26,7 +26,7 @@ class SubmissionCore extends AuthenticatedApiBase
 
         return [
             'success' => true,
-            'lookups' => compact('withdraw_codes', 'team_members'),
+            'lookups' => compact('withdraw_codes', 'team_members', 'center'),
         ];
     }
 
