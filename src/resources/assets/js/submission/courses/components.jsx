@@ -117,47 +117,9 @@ class _EditCreate extends CoursesBase {
             }
         }
 
-        var guestGameFields = ""
-        if (!guestsDisabled) {
-            if (!completionDisabled) {
-                guestGameFields = (
-                    <div className="row">
-                    <div className="col-md-12">
-                        <h4>Guest Game</h4>
-                        <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-2" divClass="col-md-2" />
-                        <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" />
-                        <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-2" divClass="col-md-2" />
-                        <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} labelClass="col-md-2" divClass="col-md-2" />
-                    </div>
-                    </div>
-                )
-            } else {
-                guestGameFields = (
-                    <div className="row">
-                    <div className="col-md-12">
-                        <h4>Guest Game</h4>
-                        <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-2" divClass="col-md-2" />
-                        <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" />
-                        <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-2" divClass="col-md-2" />
-                    </div>
-                    </div>
-                )
-            }
-        }
-
-        var completionFields = ""
-        if (!completionDisabled) {
-            completionFields = (
-                <div className="row">
-                <div className="col-md-12">
-                    <h4>Completion</h4>
-                    <SimpleField label="Standard Starts" model={modelKey+'.completedStandardStarts'} labelClass="col-md-2" divClass="col-md-2" />
-                    <SimpleField label="Potentials" model={modelKey+'.potentials'} labelClass="col-md-2" divClass="col-md-2" />
-                    <SimpleField label="Registrations" model={modelKey+'.registrations'} labelClass="col-md-2" divClass="col-md-2" />
-                </div>
-                </div>
-            )
-        }
+        var guestGameFields = this.getGuestGameFields(modelKey, guestsDisabled, completionDisabled)
+        var completionFields = this.getCompletionFields(modelKey, completionDisabled)
+        var currentBalanceFields = this.getCurrentBalanceFields(modelKey, qstartDisabled)
 
         return (
             <div>
@@ -178,65 +140,7 @@ class _EditCreate extends CoursesBase {
                 </div>
                 </div>
 
-                <div className="row">
-                <div className="col-md-12">
-                    <h4>Course Balance</h4>
-                    <div className="row">
-                    <div className="col-md-12">
-                        <div className="form-group">
-                            <div className="col-md-2 col-md-offset-2">
-                                <label>Quarter Start</label>
-                            </div>
-                            <div className="col-md-2">
-                                <label>Current</label>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-
-                    <div className="row">
-                    <div className="col-md-12">
-                        <div className="form-group">
-                            <label className="col-md-2 control-label">Total Ever Registered</label>
-                            <div className="col-md-2">
-                                <Field model={modelKey+'.quarterStartTer'}><input type="text" className="form-control" disabled={qstartDisabled} /></Field>
-                            </div>
-                            <div className="col-md-2">
-                                <Field model={modelKey+'.currentTer'}><input type="text" className="form-control" /></Field>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-
-                    <div className="row">
-                    <div className="col-md-12">
-                        <div className="form-group">
-                            <label className="col-md-2 control-label">Standard Starts</label>
-                            <div className="col-md-2">
-                                <Field model={modelKey+'.quarterStartStandardStarts'}><input type="text" className="form-control" disabled={qstartDisabled} /></Field>
-                            </div>
-                            <div className="col-md-2">
-                                <Field model={modelKey+'.currentStandardStarts'}><input type="text" className="form-control" /></Field>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-
-                    <div className="row">
-                    <div className="col-md-12">
-                        <div className="form-group">
-                            <label className="col-md-2 control-label">Transfer In</label>
-                            <div className="col-md-2">
-                                <Field model={modelKey+'.quarterStartXfer'}><input type="text" className="form-control" disabled={qstartDisabled} /></Field>
-                            </div>
-                            <div className="col-md-2">
-                                <Field model={modelKey+'.currentXfer'}><input type="text" className="form-control" /></Field>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-                </div>
-                </div>
+                {currentBalanceFields}
 
                 {guestGameFields}
 
@@ -269,6 +173,103 @@ class _EditCreate extends CoursesBase {
     }
     defaultQStartDisabled() {
         return true
+    }
+    getGuestGameFields(modelKey, guestsDisabled, completionDisabled) {
+        var guestGameFields = ""
+        if (!guestsDisabled) {
+            if (!completionDisabled) {
+                guestGameFields = (
+                    <div className="row">
+                    <div className="col-md-12">
+                        <h4>Guest Game</h4>
+                        <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-2" divClass="col-md-2" />
+                        <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" />
+                        <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-2" divClass="col-md-2" />
+                        <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} labelClass="col-md-2" divClass="col-md-2" />
+                    </div>
+                    </div>
+                )
+            } else {
+                guestGameFields = (
+                    <div className="row">
+                    <div className="col-md-12">
+                        <h4>Guest Game</h4>
+                        <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-2" divClass="col-md-2" />
+                        <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" />
+                        <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-2" divClass="col-md-2" />
+                    </div>
+                    </div>
+                )
+            }
+        }
+        return guestGameFields
+    }
+    getCompletionFields(modelKey, completionDisabled) {
+        var completionFields = ""
+        if (!completionDisabled) {
+            completionFields = (
+                <div className="row">
+                <div className="col-md-12">
+                    <h4>Completion</h4>
+                    <SimpleField label="Standard Starts" model={modelKey+'.completedStandardStarts'} labelClass="col-md-2" divClass="col-md-2" />
+                    <SimpleField label="Potentials" model={modelKey+'.potentials'} labelClass="col-md-2" divClass="col-md-2" />
+                    <SimpleField label="Registrations" model={modelKey+'.registrations'} labelClass="col-md-2" divClass="col-md-2" />
+                </div>
+                </div>
+            )
+        }
+        return completionFields
+    }
+    getCurrentBalanceFields(modelKey, qstartDisabled) {
+
+        var rows = []
+        var rowData = [
+            {name: "Total Ever Registered", fieldSuffix: "Ter"},
+            {name: "Standard Starts", fieldSuffix: "StandardStarts"},
+            {name: "Transfer In", fieldSuffix: "Xfer"},
+        ]
+        rowData.forEach((row) => {
+            var qstartModelStr = modelKey + '.quarterStart' + row.fieldSuffix
+            var currentModelStr = modelKey + '.current' + row.fieldSuffix
+
+            rows.push(
+                <div className="row" key={row.fieldSuffix}>
+                <div className="col-md-12">
+                    <div className="form-group">
+                        <label className="col-md-2 control-label">{row.name}</label>
+                        <div className="col-md-2">
+                            <Field model={qstartModelStr}><input type="text" className="form-control" disabled={qstartDisabled} /></Field>
+                        </div>
+                        <div className="col-md-2">
+                            <Field model={currentModelStr}><input type="text" className="form-control" /></Field>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            )
+        })
+
+        return (
+            <div className="row">
+            <div className="col-md-12">
+                <h4>Course Balance</h4>
+                <div className="row">
+                <div className="col-md-12">
+                    <div className="form-group">
+                        <div className="col-md-2 col-md-offset-2">
+                            <label>Quarter Start</label>
+                        </div>
+                        <div className="col-md-2">
+                            <label>Current</label>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                {rows}
+            </div>
+            </div>
+        )
     }
 }
 
