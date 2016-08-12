@@ -230,7 +230,7 @@ class Course extends ApiBase
         return $courseData->load('course', 'course.center', 'statsReport');
     }
 
-    protected function getCourseMeta(Domain\Course $course, $center, $reportingDate)
+    protected function getCourseMeta(Domain\Course $course, Models\Center $center, Carbon $reportingDate)
     {
         $isFirstWeek = Models\Quarter::isFirstWeek($center->region);
 

@@ -205,7 +205,7 @@ class ApiBase
         return array_merge($arr1, $arr2);
     }
 
-    public function validateObject(Models\StatsReport $statsReport, ParserDomain $object, $id = null)
+    public function validateObject(Models\StatsReport $statsReport, $object, $id = null)
     {
         $validator = new ApiValidationManager($statsReport);
 

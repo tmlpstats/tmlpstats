@@ -13,6 +13,7 @@ class Scoreboard extends AuthenticatedApiBase
 
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
         $this->assertAuthz($this->context->can('viewSubmissionUi', $center));
 
         $localReport = App::make(LocalReport::class);
@@ -69,12 +70,20 @@ class Scoreboard extends AuthenticatedApiBase
     public function stash(Models\Center $center, Carbon $reportingDate, $data)
     {
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+        $this->assertAuthz($this->context->can('submitStats', $center), 'User not allowed access to submit this report');
 
         $scoreboard = Domain\Scoreboard::fromArray($data);
         $submissionData = App::make(SubmissionData::class);
         $submissionData->store($center, $reportingDate, $scoreboard);
 
-        return ['success' => true];
+        $report = LocalReport::getStatsReport($center, $reportingDate);
+        $validationResults = $this->validateObject($report, $scoreboard, $reportingDate->toDateString());
+
+        return [
+            'success' => true,
+            'valid' => $validationResults['valid'],
+            'messages' => $validationResults['messages'],
+        ];
     }
 
     public function getScoreboardLockQuarter(Models\Center $center, Models\Quarter $quarter)
