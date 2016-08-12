@@ -317,6 +317,54 @@ Api.LocalReport = {
         return apiCall('LocalReport.getCourseList', params, (callback || null), (errback || null));
     }
 };
+Api.Scoreboard = {
+
+    /*
+    Get scoreboard data for center
+    Parameters:
+      center: Center
+      reportingDate: date
+      includeInProgress: bool
+    */
+    allForCenter: function(params, callback, errback) {
+        return apiCall('Scoreboard.allForCenter', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Save scoreboard data for week
+    Parameters:
+      center: Center
+      reportingDate: date
+      data: array
+    */
+    stash: function(params, callback, errback) {
+        return apiCall('Scoreboard.stash', params, (callback || null), (errback || null));
+    }
+};
+Api.SubmissionCore = {
+
+    /*
+    Initialize Submission, checking date extents and center and providing some useful starting data
+    Parameters:
+      center: Center
+      reportingDate: date
+    */
+    initSubmission: function(params, callback, errback) {
+        return apiCall('SubmissionCore.initSubmission', params, (callback || null), (errback || null));
+    }
+};
+Api.SubmissionData = {
+
+    /*
+    Ignore Me. Maybe I&#039;ll have public methods in the future.
+    Parameters:
+      center: string
+      timezone: string
+    */
+    ignoreMe: function(params, callback, errback) {
+        return apiCall('SubmissionData.ignoreMe', params, (callback || null), (errback || null));
+    }
+};
 Api.TeamMember = {
 
     /*
@@ -371,51 +419,15 @@ Api.UserProfile = {
         return apiCall('UserProfile.setLocale', params, (callback || null), (errback || null));
     }
 };
-Api.Scoreboard = {
+Api.ValidationData = {
 
     /*
-    Get scoreboard data for center
-    Parameters:
-      center: Center
-      reportingDate: date
-      includeInProgress: bool
-    */
-    allForCenter: function(params, callback, errback) {
-        return apiCall('Scoreboard.allForCenter', params, (callback || null), (errback || null));
-    },
-
-    /*
-    Save scoreboard data for week
-    Parameters:
-      center: Center
-      reportingDate: date
-      data: array
-    */
-    stash: function(params, callback, errback) {
-        return apiCall('Scoreboard.stash', params, (callback || null), (errback || null));
-    }
-};
-Api.SubmissionCore = {
-
-    /*
-    Initialize Submission, checking date extents and center and providing some useful starting data
+    Validate report data and return results
     Parameters:
       center: Center
       reportingDate: date
     */
-    initSubmission: function(params, callback, errback) {
-        return apiCall('SubmissionCore.initSubmission', params, (callback || null), (errback || null));
-    }
-};
-Api.SubmissionData = {
-
-    /*
-    Ignore Me. Maybe I&#039;ll have public methods in the future.
-    Parameters:
-      center: string
-      timezone: string
-    */
-    ignoreMe: function(params, callback, errback) {
-        return apiCall('SubmissionData.ignoreMe', params, (callback || null), (errback || null));
+    validate: function(params, callback, errback) {
+        return apiCall('ValidationData.validate', params, (callback || null), (errback || null));
     }
 };
