@@ -2,7 +2,7 @@ import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
 
 import { Form, SimpleField, SimpleSelect, AddOneLink } from '../../reusable/form_utils'
-import { Promise, objectAssign } from '../../reusable/ponyfill'
+import { Promise, objectAssign, arrayFind } from '../../reusable/ponyfill'
 import { ModeSelectButtons, LoadStateFlip } from '../../reusable/ui_basic'
 
 import { SubmissionBase, React } from '../base_components'
@@ -78,6 +78,7 @@ class _EditCreate extends ApplicationsBase {
             <div>
                 <h3>{this.title()}</h3>
                 <Form className="form-horizontal" model={modelKey} onSubmit={this.saveApp.bind(this)}>
+                    {this.renderStartingQuarter(modelKey)}
                     <SimpleField label="First Name" model={modelKey+'.firstName'} divClass="col-md-6" />
                     <SimpleField label="Last Name" model={modelKey+'.lastName'} divClass="col-md-6" />
                     <SimpleField label="Team Year" model={modelKey+'.teamYear'} divClass="col-md-4" customField={true}>
@@ -115,6 +116,32 @@ class _EditCreate extends ApplicationsBase {
             </div>
         )
     }
+
+    // Return true if this is a new app
+    isNewApp() {
+        const { currentApp } = this.props
+        return (!currentApp.id || parseInt(currentApp.id) < 0)
+    }
+
+    renderStartingQuarter(modelKey) {
+        const { currentApp, lookups } = this.props
+        const centerQuarterLabel = (cq) => `${cq.quarter.t1Distinction} ${cq.quarter.year} (starting ${cq.startWeekendDate})`
+        var body
+        if (this.isNewApp()) {
+            body = <SimpleSelect model={modelKey+'.incomingQuarter'} items={lookups.center_quarters}
+                                 keyProp="quarterId" getLabel={centerQuarterLabel}  />
+        } else {
+            const cq = arrayFind(lookups.center_quarters, (cq) => cq.quarterId == currentApp.incomingQuarter)
+            body = (cq)? centerQuarterLabel(cq) : 'Unknown'
+        }
+        return (
+            <div className="form-group">
+                <label className="col-md-2 control-label">Starting Quarter</label>
+                <div className="col-md-6">{body}</div>
+            </div>
+        )
+    }
+
     // saveApp for now is the same between edit and create flows
     saveApp(data) {
         this.props.dispatch(saveApplication(this.props.params.centerId, this.reportingDateString(), data)).done((result) => {
@@ -125,6 +152,7 @@ class _EditCreate extends ApplicationsBase {
             this.props.router.push(this.baseUri() + '/applications')
         })
     }
+
 }
 
 class ApplicationsEditView extends _EditCreate {
@@ -132,7 +160,10 @@ class ApplicationsEditView extends _EditCreate {
         super.setupApplications().then(() => {
             var appId = this.props.params.appId
             if (!this.props.currentApp || this.props.currentApp.id != appId) {
-                this.props.dispatch(chooseApplication(appId, this.getAppById(appId)))
+                const app = this.getAppById(appId)
+                if (app){
+                    this.props.dispatch(chooseApplication(appId, app))
+                }
             }
         })
     }
@@ -149,14 +180,14 @@ class ApplicationsEditView extends _EditCreate {
         }
         return super.render()
     }
-
 }
 
 class ApplicationsAddView extends _EditCreate {
     componentDidMount() {
         super.setupApplications().then(() => {
             if (this.props.currentApp) {
-                this.props.dispatch(chooseApplication('', {firstName: '', lastName: '', teamYear: '', regDate: this.reportingDateString()}))
+                const blankApp = {firstName: '', lastName: '', teamYear: 1, regDate: this.reportingDateString()}
+                this.props.dispatch(chooseApplication('', blankApp))
             }
         })
     }
@@ -168,6 +199,7 @@ class ApplicationsAddView extends _EditCreate {
     render() {
         return super.render()
     }
+
 }
 
 const mapStateToProps = (state) => {

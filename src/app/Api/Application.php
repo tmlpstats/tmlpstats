@@ -221,4 +221,39 @@ class Application extends ApiBase
 
         return $teamApp;
     }
+
+    /**
+     * Return a list of valid CenterQuarters that someone can register into.
+     * @param  Models\Center  $center        The center we care about
+     * @param  Carbon         $reportingDate The current reporting date to use as reference.
+     * @param  Models\Quarter $startQuarter  If provided, a reference start quarter to help prevent lookups.
+     * @return array<Domain\CenterQuarter>
+     */
+    public function validRegistrationQuarters(Models\Center $center, Carbon $reportingDate, Models\Quarter $startQuarter = null)
+    {
+        if ($startQuarter == null) {
+            $startQuarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
+        }
+
+        // Probably not needed, but might as well, for looking at previous quarters.
+        while ($reportingDate->gt($startQuarter->getQuarterEndDate($center))) {
+            $startQuarter = $startQuarter->getNextQuarter();
+        }
+
+        $next1 = $startQuarter->getNextQuarter();
+        $next2 = $next1->getNextQuarter();
+
+        $quarters = [
+            Domain\CenterQuarter::fromModel($center, $next1),
+            Domain\CenterQuarter::fromModel($center, $next2),
+        ];
+
+        // In the last 2 weeks of the quarter, we can also register into the next-next quarter.
+        if ($startQuarter->getQuarterEndDate($center)->copy()->subWeeks(2)->lt($reportingDate)) {
+            $quarters[] = Domain\CenterQuarter::fromModel($center, $next2->getNextQuarter());
+        }
+
+        return $quarters;
+    }
+
 }

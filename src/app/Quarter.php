@@ -5,7 +5,6 @@ use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use TmlpStats\Settings\Parsers\DefaultParser;
 use TmlpStats\Settings\RegionQuarterOverride;
 use TmlpStats\Settings\Setting;
 use TmlpStats\Traits\CachedRelationships;
@@ -203,8 +202,8 @@ class Quarter extends Model
     public function getRepromiseDate(Center $center = null)
     {
         $setting = Setting::name('repromiseDate')
-                          ->with($center, $this)
-                          ->get();
+            ->with($center, $this)
+            ->get();
 
         return $setting ?: $this->getClassroom2Date($center);
     }
@@ -236,7 +235,7 @@ class Quarter extends Model
     public static function isFirstWeek(Region $region)
     {
         $reportingDate = Util::getReportDate();
-        $quarter       = Quarter::getQuarterByDate($reportingDate, $region);
+        $quarter = self::getQuarterByDate($reportingDate, $region);
 
         if ($quarter) {
             $firstWeek = $quarter->getFirstWeekDate();
@@ -294,12 +293,12 @@ class Quarter extends Model
     public static function getQuarterByDate(Carbon $date, Region $region)
     {
         $dateString = $date->toDateString();
-        $key        = "quarters:region{$region->id}:dates";
+        $key = "quarters:region{$region->id}:dates";
 
         return static::getFromCache($key, $dateString, function () use ($date, $region) {
             $quarter = Quarter::byRegion($region)
-                              ->date($date)
-                              ->first();
+                ->date($date)
+                ->first();
 
             if ($quarter) {
                 $quarter->setRegion($region);
@@ -323,7 +322,7 @@ class Quarter extends Model
             ? $this->year + 1
             : $this->year;
 
-        $quarter = Quarter::year($year)->quarterNumber($quarterNumber)->first();
+        $quarter = self::year($year)->quarterNumber($quarterNumber)->first();
 
         if ($this->region) {
             $quarter->setRegion($this->region);
@@ -350,8 +349,8 @@ class Quarter extends Model
         $this->region = $region;
 
         $this->regionQuarterDetails = RegionQuarterDetails::byQuarter($this)
-                                                          ->byRegion($this->region)
-                                                          ->first();
+            ->byRegion($this->region)
+            ->first();
     }
 
     public function scopeQuarterNumber($query, $number)
@@ -369,6 +368,7 @@ class Quarter extends Model
         $this->region = $region;
 
         // This may end up being redundant
+
         return $query->whereIn('id', function ($query) use ($region) {
             $query->select('quarter_id')
                   ->from('region_quarter_details')

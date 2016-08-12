@@ -28,6 +28,7 @@
     "laravel-elixir": "^5.0.0"
   },
   "dependencies": {
+    "array-find": "^1.0.0",
     "bower": "^1.7",
     "es6-promise": "^3.2.1",
     "object-assign": "^4.1.0",
