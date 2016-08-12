@@ -46,15 +46,16 @@ class ApiController extends ApiControllerBase
         "LocalReport.getClassList" => "LocalReport__getClassList",
         "LocalReport.getClassListByQuarter" => "LocalReport__getClassListByQuarter",
         "LocalReport.getCourseList" => "LocalReport__getCourseList",
+        "Scoreboard.allForCenter" => "Scoreboard__allForCenter",
+        "Scoreboard.stash" => "Scoreboard__stash",
+        "SubmissionCore.initSubmission" => "SubmissionCore__initSubmission",
+        "SubmissionData.ignoreMe" => "SubmissionData__ignoreMe",
         "TeamMember.create" => "TeamMember__create",
         "TeamMember.update" => "TeamMember__update",
         "TeamMember.getWeekData" => "TeamMember__getWeekData",
         "TeamMember.setWeekData" => "TeamMember__setWeekData",
         "UserProfile.setLocale" => "UserProfile__setLocale",
-        "Scoreboard.allForCenter" => "Scoreboard__allForCenter",
-        "Scoreboard.stash" => "Scoreboard__stash",
-        "SubmissionCore.initSubmission" => "SubmissionCore__initSubmission",
-        "SubmissionData.ignoreMe" => "SubmissionData__ignoreMe",
+        "ValidationData.validate" => "ValidationData__validate",
     ];
 
     protected $unauthenticatedMethods = [
@@ -258,6 +259,36 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'localReport', 'LocalReport')
         );
     }
+    protected function Scoreboard__allForCenter($input)
+    {
+        return App::make(Api\Scoreboard::class)->allForCenter(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'includeInProgress', 'bool', false)
+        );
+    }
+    protected function Scoreboard__stash($input)
+    {
+        return App::make(Api\Scoreboard::class)->stash(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'data', 'array')
+        );
+    }
+    protected function SubmissionCore__initSubmission($input)
+    {
+        return App::make(Api\SubmissionCore::class)->initSubmission(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date')
+        );
+    }
+    protected function SubmissionData__ignoreMe($input)
+    {
+        return App::make(Api\SubmissionData::class)->ignoreMe(
+            $this->parse($input, 'center', 'string'),
+            $this->parse($input, 'timezone', 'string')
+        );
+    }
     protected function TeamMember__create($input)
     {
         return App::make(Api\TeamMember::class)->create(
@@ -293,34 +324,11 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'timezone', 'string')
         );
     }
-    protected function Scoreboard__allForCenter($input)
+    protected function ValidationData__validate($input)
     {
-        return App::make(Api\Scoreboard::class)->allForCenter(
-            $this->parse($input, 'center', 'Center'),
-            $this->parse($input, 'reportingDate', 'date'),
-            $this->parse($input, 'includeInProgress', 'bool', false)
-        );
-    }
-    protected function Scoreboard__stash($input)
-    {
-        return App::make(Api\Scoreboard::class)->stash(
-            $this->parse($input, 'center', 'Center'),
-            $this->parse($input, 'reportingDate', 'date'),
-            $this->parse($input, 'data', 'array')
-        );
-    }
-    protected function SubmissionCore__initSubmission($input)
-    {
-        return App::make(Api\SubmissionCore::class)->initSubmission(
+        return App::make(Api\ValidationData::class)->validate(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date')
-        );
-    }
-    protected function SubmissionData__ignoreMe($input)
-    {
-        return App::make(Api\SubmissionData::class)->ignoreMe(
-            $this->parse($input, 'center', 'string'),
-            $this->parse($input, 'timezone', 'string')
         );
     }
 }

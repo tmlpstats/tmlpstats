@@ -31,11 +31,12 @@ class ApiProvider extends ServiceProvider
         $this->app->singleton(Api\GlobalReport::class);
         $this->app->singleton(Api\LiveScoreboard::class);
         $this->app->singleton(Api\LocalReport::class);
-        $this->app->singleton(Api\TeamMember::class);
-        $this->app->singleton(Api\UserProfile::class);
         $this->app->singleton(Api\Scoreboard::class);
         $this->app->singleton(Api\SubmissionCore::class);
         $this->app->singleton(Api\SubmissionData::class);
+        $this->app->singleton(Api\TeamMember::class);
+        $this->app->singleton(Api\UserProfile::class);
+        $this->app->singleton(Api\ValidationData::class);
     }
 
     public function provides()
@@ -47,11 +48,12 @@ class ApiProvider extends ServiceProvider
             'TmlpStats\Api\GlobalReport',
             'TmlpStats\Api\LiveScoreboard',
             'TmlpStats\Api\LocalReport',
-            'TmlpStats\Api\TeamMember',
-            'TmlpStats\Api\UserProfile',
             'TmlpStats\Api\Scoreboard',
             'TmlpStats\Api\SubmissionCore',
             'TmlpStats\Api\SubmissionData',
+            'TmlpStats\Api\TeamMember',
+            'TmlpStats\Api\UserProfile',
+            'TmlpStats\Api\ValidationData',
         ];
     }
 }
