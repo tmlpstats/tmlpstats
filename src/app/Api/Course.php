@@ -101,7 +101,8 @@ class Course extends ApiBase
             $submissionData = App::make(SubmissionData::class);
             $found = $submissionData->allForType($center, $reportingDate, Domain\Course::class);
             foreach ($found as $courseData) {
-                $allCourses[$courseData->courseId] = $courseData;
+                $courseData->meta['localChanges'] = true;
+                $allCourses[$courseData->id] = $courseData;
             }
         }
 
@@ -112,6 +113,10 @@ class Course extends ApiBase
 
             return $a->startDate->lt($b->startDate) ? -1 : 1;
         });
+
+        foreach ($allCourses as $course) {
+            $course->meta = $this->getCourseMeta($course, $center, $reportingDate);
+        }
 
         return array_values($allCourses);
     }
@@ -192,6 +197,7 @@ class Course extends ApiBase
         return [
             'success' => true,
             'storedId' => $courseId,
+            'meta' => $this->getCourseMeta($course, $center, $reportingDate),
             'valid' => $validationResults['valid'],
             'messages' => $validationResults['messages'],
         ];
@@ -222,5 +228,25 @@ class Course extends ApiBase
         $courseData->save();
 
         return $courseData->load('course', 'course.center', 'statsReport');
+    }
+
+    protected function getCourseMeta(Domain\Course $course, $center, $reportingDate)
+    {
+        $isFirstWeek = Models\Quarter::isFirstWeek($center->region);
+
+        // TODO: fix this so we don't assume the course starts on a Saturday
+        $courseReportDate = $course->startDate->copy()->addDays(6);
+        $isPastCourse = $reportingDate->gt($courseReportDate);
+        $isCompletionWeek = $reportingDate->eq($courseReportDate);
+
+        $meta = $course->meta;
+        $meta['canEditQuarterStart'] = ($course->id < 0 || $isFirstWeek);
+        $meta['canEditGuestGame'] = !$isPastCourse;
+        $meta['canEditCurrent'] = !$isPastCourse;
+        $meta['canEditCompletion'] = $isCompletionWeek;
+        $meta['isPastCourse'] = $isPastCourse;
+        $meta['isCompletionReportWeek'] = $isCompletionWeek;
+
+        return $meta;
     }
 }
