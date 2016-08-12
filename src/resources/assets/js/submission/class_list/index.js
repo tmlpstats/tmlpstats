@@ -1,3 +1,1 @@
-import ClassList from './ClassList'
-
-export { ClassList }
+export { ClassListIndex, ClassListEdit, ClassListAdd } from './components'

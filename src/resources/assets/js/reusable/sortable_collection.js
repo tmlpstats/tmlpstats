@@ -44,10 +44,22 @@ export default class SortableCollection {
     }
 
     // The reducer. Works as a factory to avoid having to bind `this` manually
-    reducer() {
+    reducer(collection_reducer = null) {
         return (state=this.default_state, action) => {
+            var { sortedKeys, collection } = state
+
+            // If we have a collection reducer it's probably for secondary management (like react-redux-form)
+            // Potentially both reducers could be messing with the collection putting it out of sync, so be careful.
+            if (collection_reducer) {
+                var new_collection = collection_reducer(collection, action)
+                if (new_collection !== collection) {
+                    collection = new_collection
+                    sortedKeys = this.rebuildSort(state.meta.sort_by, collection)
+                    state = objectAssign({}, state, {collection, sortedKeys})
+                }
+            }
+
             if (action.payload && action.payload.collection_name == this.name) {
-                var { sortedKeys, collection } = state
                 switch (action.type) {
                 case REPLACE_ITEM:
                     var item = action.payload.item

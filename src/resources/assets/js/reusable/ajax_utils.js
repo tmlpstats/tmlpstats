@@ -9,6 +9,9 @@ export function bestErrorValue(jqXHR, textStatus) {
             if (data.error) {
                 data = data.error
             }
+            if (data.message) {
+                data = data.message
+            }
         }
     } else {
         data = textStatus

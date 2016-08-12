@@ -4,7 +4,7 @@ export { React }
 
 export class SubmissionBase extends React.Component {
     baseUri() {
-        var params = this.props.params
+        const params = this.props.params
         return `/center/${params.centerId}/submission/${params.reportingDate}`
     }
 
@@ -12,7 +12,13 @@ export class SubmissionBase extends React.Component {
         return this.props.params.reportingDate
     }
 
-    renderBasicLoading() {
+    renderBasicLoading(loadState) {
+        if (!loadState) {
+            loadState = this.props.loading
+        }
+        if (loadState && loadState.state == 'failed') {
+            return <div className="bg-danger">{loadState.error || 'error'}</div>
+        }
         return <div>Loading....</div>
     }
 }

@@ -387,16 +387,6 @@ Api.TeamMember = {
     },
 
     /*
-    Get the weekly data for an team member
-    Parameters:
-      teamMember: TeamMember
-      reportingDate: date
-    */
-    getWeekData: function(params, callback, errback) {
-        return apiCall('TeamMember.getWeekData', params, (callback || null), (errback || null));
-    },
-
-    /*
     Set the weekly data for an team member
     Parameters:
       teamMember: TeamMember
@@ -405,6 +395,17 @@ Api.TeamMember = {
     */
     setWeekData: function(params, callback, errback) {
         return apiCall('TeamMember.setWeekData', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get team member data for a center-reportingDate, optionally including in-progress data
+    Parameters:
+      center: Center
+      reportingDate: date
+      includeInProgress: bool
+    */
+    allForCenter: function(params, callback, errback) {
+        return apiCall('TeamMember.allForCenter', params, (callback || null), (errback || null));
     }
 };
 Api.UserProfile = {

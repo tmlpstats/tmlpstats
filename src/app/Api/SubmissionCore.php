@@ -22,6 +22,12 @@ class SubmissionCore extends AuthenticatedApiBase
         $localReport = App::make(LocalReport::class);
         $lastValidReport = $localReport->getLastStatsReportSince($center, $reportingDate);
 
+        if ($lastValidReport === null) {
+            $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
+        } else {
+            $quarter = $lastValidReport->quarter;
+        }
+
         // Get values for lookups
         $team_members = $localReport->getClassList($lastValidReport);
         $withdraw_codes = Models\WithdrawCode::get();

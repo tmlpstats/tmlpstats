@@ -6,4 +6,4 @@ export { Scoreboard, Review, SubmissionFlowRoot }
 
 export { ApplicationsIndex, ApplicationsEdit, ApplicationsAdd } from './applications'
 export { CoursesIndex, CoursesEdit, CoursesAdd } from './courses'
-export { ClassList } from './class_list'
+export { ClassListIndex, ClassListEdit, ClassListAdd } from './class_list'

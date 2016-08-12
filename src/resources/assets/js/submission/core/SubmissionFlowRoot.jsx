@@ -10,7 +10,7 @@ const steps = [
     // The steps key is some metadata about the steps, maybe redundant but we'll leave it for now.
     {key: 'scoreboard', name: 'Scoreboard'},
     {key: 'applications', name: 'Team Expansion'},
-    {key: 'classlist', name: 'Class List'},
+    {key: 'class_list', name: 'Class List'},
     {key: 'courses', name: 'Courses'},
     {key: 'review', name: 'Review'}
 ]
@@ -18,12 +18,7 @@ const steps = [
 class SubmissionFlowComponent extends SubmissionBase {
     render() {
         if (!this.checkReportingDate()) {
-            const { coreInit } = this.props
-            if (coreInit.state == 'failed') {
-                return <div className="bg-danger">{coreInit.error}</div>
-            } else {
-                return this.renderBasicLoading()
-            }
+            return this.renderBasicLoading(this.props.coreInit)
         }
         const largeLayout = this.props.browserGreaterThan.large
         const nav = <SubmissionNav params={this.props.params} steps={steps} location={this.props.location} tabbed={!largeLayout} />

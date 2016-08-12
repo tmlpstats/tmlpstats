@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
 import { Form, Field, actions as formActions } from 'react-redux-form'
 import { Link } from 'react-router'
 
@@ -19,8 +19,7 @@ export class SimpleField extends React.Component {
             field = <input type="text" className="form-control" />
         }
 
-        const labelClass = this.props.labelClass
-        const divClass = this.props.divClass
+        const { labelClass, divClass } = this.props
 
         return (
             <Field model={this.props.model}>
@@ -48,12 +47,17 @@ export class AddOneLink extends React.Component {
 }
 
 export class SimpleSelect extends React.Component {
+    static defaultProps = {
+        keyProp: 'key',
+        labelProp: 'label'
+    }
     static propTypes = {
-        items: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-        keyProp: React.PropTypes.string,
-        getKey: React.PropTypes.func,
-        labelProp: React.PropTypes.string,
-        getLabel: React.PropTypes.func
+        items: PropTypes.arrayOf(PropTypes.object).isRequired,
+        keyProp: PropTypes.string,
+        getKey: PropTypes.func,
+        labelProp: PropTypes.string,
+        getLabel: PropTypes.func,
+        selectClasses: PropTypes.string
     }
     render() {
         var { getKey, getLabel, emptyChoice } = this.props
