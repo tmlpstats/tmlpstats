@@ -32,11 +32,6 @@ class SubmissionCore extends AuthenticatedApiBase
 
     public function checkCenterDate(Models\Center $center, Carbon $reportingDate)
     {
-        $user = $this->context->getUser();
-        if ($user->cannot('submitStats', $center)) {
-            throw new Exceptions\UnauthorizedException('User not allowed access to submit this report');
-        }
-
         if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
             throw new Exceptions\BadRequestException('Reporting date must be a Friday.');
         }
