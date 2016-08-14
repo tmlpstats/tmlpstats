@@ -205,6 +205,7 @@ class ApplicationTest extends FunctionalTestAbstract
                 'committedTeamMember' => 1,
                 'teamYear' => 1,
                 'incomingQuarter' => $this->quarter->id,
+                'committedTeamMember' => $this->teamMember->id,
             ],
         ];
 
@@ -259,6 +260,7 @@ class ApplicationTest extends FunctionalTestAbstract
                 'committedTeamMember' => 1,
                 'teamYear' => 1,
                 'incomingQuarter' => $this->quarter->id,
+                'committedTeamMember' => $this->teamMember->id,
             ],
         ];
 

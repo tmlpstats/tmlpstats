@@ -60,7 +60,7 @@ trait GeneratesApiMessages
         if (method_exists($this, 'getOffset') && isset($this->data)) {
             $offset = $this->getOffset($this->data);
         }
-        array_splice($arguments, 1, 0, $offset);
+        array_splice($arguments, 1, 0, [$offset]);
 
         $this->messages[] = $this->callMessageAdd($message, $arguments);
     }

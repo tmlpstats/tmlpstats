@@ -172,6 +172,10 @@ class Course extends ApiBase
      */
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
+        if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
+            throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
+        }
+
         $submissionData = App::make(SubmissionData::class);
         $courseId = array_get($data, 'id', null);
         if (is_numeric($courseId)) {
@@ -181,7 +185,17 @@ class Course extends ApiBase
         if ($courseId !== null && $courseId > 0) {
             $courseModel = Models\Course::findOrFail($courseId);
             $course = Domain\Course::fromModel(null, $courseModel);
-            $course->updateFromArray($data);
+
+            $course->updateFromArray($data, [
+                'startDate',
+                'type',
+                'quarterStartTer',
+                'quarterStartStandardStarts',
+                'quarterStartXfer',
+                'currentTer',
+                'currentStandardStarts',
+                'currentXfer',
+            ]);
         } else {
             if (!$courseId) {
                 $courseId = $submissionData->generateId();

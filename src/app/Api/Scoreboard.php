@@ -13,8 +13,8 @@ class Scoreboard extends AuthenticatedApiBase
 
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
-        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
         $this->assertAuthz($this->context->can('viewSubmissionUi', $center));
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $localReport = App::make(LocalReport::class);
         $statsReport = $localReport->getLastStatsReportSince($center, $reportingDate);
@@ -69,8 +69,8 @@ class Scoreboard extends AuthenticatedApiBase
 
     public function stash(Models\Center $center, Carbon $reportingDate, $data)
     {
-        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
         $this->assertAuthz($this->context->can('submitStats', $center), 'User not allowed access to submit this report');
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $scoreboard = Domain\Scoreboard::fromArray($data);
         $submissionData = App::make(SubmissionData::class);

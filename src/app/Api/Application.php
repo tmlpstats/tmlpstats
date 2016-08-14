@@ -167,6 +167,10 @@ class Application extends ApiBase
      */
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
+        if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
+            throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
+        }
+
         $submissionData = App::make(SubmissionData::class);
         $appId = array_get($data, 'id', null);
         if (is_numeric($appId)) {
@@ -176,7 +180,7 @@ class Application extends ApiBase
         if ($appId !== null && $appId > 0) {
             $application = Models\TmlpRegistration::findOrFail($appId);
             $teamApp = Domain\TeamApplication::fromModel(null, $application);
-            $teamApp->updateFromArray($data);
+            $teamApp->updateFromArray($data, ['incomingQuarter']);
         } else {
             if (!$appId) {
                 $appId = $submissionData->generateId();

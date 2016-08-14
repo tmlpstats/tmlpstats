@@ -8,6 +8,7 @@ class DictInput
     /**
      * Run parsers on demand.
      *
+     * @param       $shape           List of valid properties and config
      * @param       $data
      * @param array $requiredParams
      *
@@ -16,17 +17,18 @@ class DictInput
     public static function parse($shape, $data, $requiredParams = [])
     {
         $output = [];
-        foreach ($data as $key => $value) {
-            if (!isset($shape[$key])) {
+
+        // The parsers expect data as ParameterBag objects
+        if (is_array($data)) {
+            $data = new ParameterBag($data);
+        }
+
+        foreach ($shape as $key => $conf) {
+            $required = in_array($key, $requiredParams);
+
+            if (!$data->has($key) && !$required) {
                 continue;
             }
-
-            // The parsers expect data as ParameterBag objects
-            if (is_array($data)) {
-                $data = new ParameterBag($data);
-            }
-
-            $required = in_array($key, $requiredParams);
 
             $parser = Factory::build($shape[$key]['type']);
             $output[$key] = $parser->run($data, $key, $required);

@@ -17,7 +17,7 @@ $factory->define(TmlpStats\Person::class, function (Faker\Generator $faker) {
     return [
         'first_name' => $faker->unique()->firstName(),
         'last_name'  => $faker->unique()->lastName(),
-        'phone'      => $faker->unique()->phoneNumber(),
+        // 'phone'      => $faker->unique()->phoneNumber(),
         'email'      => $faker->unique()->safeEmail(),
         'center_id'  => 1,
         'identifier' => $faker->unique()->uuid(),
@@ -41,7 +41,7 @@ $factory->define(TmlpStats\TmlpRegistration::class, function (Faker\Generator $f
 
     return [
         'person_id'   => $person->id,
-        'team_year'   => $faker->randomKey([1, 2]),
+        'team_year'   => $faker->numberBetween(1,2),
         'reg_date'    => Carbon::parse('2016-04-08'),
         'is_reviewer' => false,
     ];
@@ -52,7 +52,7 @@ $factory->define(TmlpStats\TeamMember::class, function (Faker\Generator $faker) 
 
     return [
         'person_id'           => $person->id,
-        'team_year'           => $faker->randomKey([1, 2]),
+        'team_year'           => $faker->numberBetween(1,2),
         'incoming_quarter_id' => 1,
     ];
 });

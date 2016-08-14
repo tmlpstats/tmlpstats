@@ -26,13 +26,7 @@ class CourseTest extends FunctionalTestAbstract
         $this->center = Models\Center::abbreviation('VAN')->first();
         $this->quarter = Models\Quarter::year(2016)->quarterNumber(1)->first();
 
-        $this->report = Models\StatsReport::firstOrCreate([
-            'center_id' => $this->center->id,
-            'quarter_id' => $this->quarter->id,
-            'reporting_date' => '2016-04-15',
-            'submitted_at' => null,
-            'version' => 'test',
-        ]);
+        $this->report = $this->getReport('2016-04-15', ['submitted_at' => null]);
 
         $this->pastCourse = factory(Models\Course::class)->create([
             'center_id' => $this->center->id,
@@ -189,6 +183,8 @@ class CourseTest extends FunctionalTestAbstract
             'reportingDate' => $reportingDate,
             'data' => [
                 'id' => $this->course->id,
+                'startDate' => $this->course->startDate,
+                'type' => $this->course->type,
                 'quarterStartTer' => 12,
                 'quarterStartStandardStarts' => 12,
                 'quarterStartXfer' => 0,
@@ -247,6 +243,8 @@ class CourseTest extends FunctionalTestAbstract
             'reportingDate' => $reportingDate,
             'data' => [
                 'id' => $this->course->id,
+                'startDate' => $this->course->startDate,
+                'type' => $this->course->type,
                 'quarterStartTer' => 12,
                 'quarterStartStandardStarts' => 15,
                 'quarterStartXfer' => 2,
