@@ -248,6 +248,7 @@ class ValidationDataTest extends FunctionalTestAbstract
             'success' => false,
             'error' => [
                 'message' => 'Reporting date must be a Friday.',
+                'statusCode' => 400,
             ],
         ];
 

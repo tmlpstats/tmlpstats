@@ -311,6 +311,7 @@ class ApplicationTest extends FunctionalTestAbstract
 
         $expectedResponse = [
             'success' => false,
+            'error' => ['statusCode' => 400],
         ];
 
         $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
@@ -480,6 +481,7 @@ class ApplicationTest extends FunctionalTestAbstract
             'success' => false,
             'error' => [
                 'message' => 'Reporting date must be a Friday.',
+                'statusCode' => 400,
             ],
         ];
 
@@ -514,6 +516,7 @@ class ApplicationTest extends FunctionalTestAbstract
             'success' => false,
             'error' => [
                 'message' => 'Reporting date must be a Friday.',
+                'statusCode' => 400,
             ],
         ];
 

@@ -319,6 +319,7 @@ class CourseTest extends FunctionalTestAbstract
 
         $expectedResponse = [
             'success' => false,
+            'error' => ['statusCode' => 400],
         ];
 
         $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
@@ -513,6 +514,7 @@ class CourseTest extends FunctionalTestAbstract
             'success' => false,
             'error' => [
                 'message' => 'Reporting date must be a Friday.',
+                'statusCode' => 400,
             ],
         ];
 
@@ -547,6 +549,7 @@ class CourseTest extends FunctionalTestAbstract
             'success' => false,
             'error' => [
                 'message' => 'Reporting date must be a Friday.',
+                'statusCode' => 400,
             ],
         ];
 
