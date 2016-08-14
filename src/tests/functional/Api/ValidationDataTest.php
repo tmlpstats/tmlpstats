@@ -35,6 +35,10 @@ class ValidationDataTest extends FunctionalTestAbstract
             'center_id' => $this->center->id,
             'start_date' => Carbon::parse('2016-04-23'),
         ]);
+        $this->course2 = factory(Models\Course::class)->create([
+            'center_id' => $this->center->id,
+            'start_date' => Carbon::parse('2016-08-13'),
+        ]);
 
         // Setup application
         $this->teamMember = factory(Models\TeamMember::class)->create([
@@ -67,8 +71,16 @@ class ValidationDataTest extends FunctionalTestAbstract
         $expectedResponse = [
             'success' => true,
             'results' => [
-                'applications' => ['valid' => true],
-                'courses' => ['valid' => true],
+                'applications' => [
+                    ['valid' => true]
+                ],
+                'courses' => [
+                    ['valid' => true],
+                    ['valid' => true],
+                ],
+                'scoreboard' => [
+                    ['valid' => true]
+                ],
             ],
         ];
 
@@ -86,6 +98,18 @@ class ValidationDataTest extends FunctionalTestAbstract
             'id' => $this->course->id,
             'startDate' => $this->course->startDate,
             'type' => $this->course->type,
+            'quarterStartTer' => 8,
+            'quarterStartStandardStarts' => 6,
+            'quarterStartXfer' => 1,
+            'currentTer' => 28,
+            'currentStandardStarts' => 22,
+            'currentXfer' => 2,
+        ];
+
+        $courseData2 = [
+            'id' => $this->course2->id,
+            'startDate' => $this->course2->startDate,
+            'type' => $this->course2->type,
             'quarterStartTer' => 0,
             'quarterStartStandardStarts' => 0,
             'quarterStartXfer' => 0,
@@ -94,8 +118,30 @@ class ValidationDataTest extends FunctionalTestAbstract
             'currentXfer' => 2,
         ];
 
+        $scoreboardData = [
+            'week' => $reportingDate->toDateString(),
+            'promise' => [
+                'cap' => 0,
+                'cpc' => 1,
+                't1x' => 2,
+                't2x' => 3,
+                'gitw' => 4,
+                'lf' => 5,
+            ],
+            'actual' => [
+                'cap' => 0,
+                'cpc' => 0,
+                't1x' => 1,
+                't2x' => 2,
+                'gitw' => 3,
+                'lf' => 4,
+            ],
+        ];
+
         App::make(Api\Application::class)->stash($this->center, $reportingDate, $appData);
         App::make(Api\Course::class)->stash($this->center, $reportingDate, $courseData);
+        App::make(Api\Course::class)->stash($this->center, $reportingDate, $courseData2);
+        App::make(Api\Scoreboard::class)->stash($this->center, $reportingDate, $scoreboardData);
 
         $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
     }
@@ -112,8 +158,16 @@ class ValidationDataTest extends FunctionalTestAbstract
         $expectedResponse = [
             'success' => true,
             'results' => [
-                'applications' => ['valid' => true],
-                'courses' => ['valid' => false],
+                'applications' => [
+                    ['valid' => true]
+                ],
+                'courses' => [
+                    ['valid' => false],
+                    ['valid' => true],
+                ],
+                'scoreboard' => [
+                    ['valid' => false]
+                ],
             ],
         ];
 
@@ -131,16 +185,49 @@ class ValidationDataTest extends FunctionalTestAbstract
             'id' => $this->course->id,
             'startDate' => $this->course->startDate,
             'type' => $this->course->type,
+            'quarterStartTer' => 8,
+            'quarterStartStandardStarts' => 6,
+            'quarterStartXfer' => 1,
+            'currentTer' => 28,
+            'currentStandardStarts' => 30,
+            'currentXfer' => 2,
+        ];
+
+        $courseData2 = [
+            'id' => $this->course2->id,
+            'startDate' => $this->course2->startDate,
+            'type' => $this->course2->type,
             'quarterStartTer' => 0,
             'quarterStartStandardStarts' => 0,
             'quarterStartXfer' => 0,
             'currentTer' => 17,
-            'currentStandardStarts' => 20,
+            'currentStandardStarts' => 17,
             'currentXfer' => 2,
+        ];
+
+        $scoreboardData = [
+            'week' => $reportingDate->toDateString(),
+            'promise' => [
+                'cap' => 0,
+                'cpc' => 1,
+                't1x' => 2,
+                't2x' => 3,
+                'gitw' => 4,
+                'lf' => 5,
+            ],
+            'actual' => [
+                'cap' => 0,
+                'cpc' => 0,
+                't1x' => 1,
+                't2x' => 2,
+                'gitw' => 3,
+            ],
         ];
 
         App::make(Api\Application::class)->stash($this->center, $reportingDate, $appData);
         App::make(Api\Course::class)->stash($this->center, $reportingDate, $courseData);
+        App::make(Api\Course::class)->stash($this->center, $reportingDate, $courseData2);
+        App::make(Api\Scoreboard::class)->stash($this->center, $reportingDate, $scoreboardData);
 
         $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
     }

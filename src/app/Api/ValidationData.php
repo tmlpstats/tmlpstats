@@ -36,15 +36,14 @@ class ValidationData extends AuthenticatedApiBase
         $report = LocalReport::getStatsReport($center, $reportingDate);
 
         $results = [];
-
         foreach ($types as $group => $type) {
             $submissionData = App::make(SubmissionData::class)->allForType($center, $reportingDate, $type);
 
             foreach ($submissionData as $object) {
-                $id = $object->id;
+                $id = $object->getId();
                 $validationResults = $this->validateObject($report, $object, $id);
 
-                $results[$group] = [
+                $results[$group][] = [
                     'valid' => $validationResults['valid'],
                     'messages' => $validationResults['messages'],
                 ];
