@@ -19,8 +19,12 @@ use TmlpStats\Contracts\Referenceable;
  */
 class ParserDomain implements Arrayable, \JsonSerializable, Referenceable
 {
+    // Make sure you prefix all properties in this and derived classes or
+    // you're likely to have a bad time with the magic getter/setter methods
     protected $_values = [];
     protected $_setValues = [];
+
+    protected $_refProp = 'id';
 
     public function __construct()
     {
@@ -34,7 +38,8 @@ class ParserDomain implements Arrayable, \JsonSerializable, Referenceable
      */
     public function getId()
     {
-        return $this->id;
+        $prop = $this->_refProp;
+        return $this->$prop;
     }
 
     /**
