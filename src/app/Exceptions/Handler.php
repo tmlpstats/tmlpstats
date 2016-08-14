@@ -83,7 +83,6 @@ class Handler extends ExceptionHandler {
                 'error' => [
                     'code' => $e->getCode(),
                     'message' => $e->getMessage(),
-                    'statusCode' => $statusCode,
                 ],
             ];
 

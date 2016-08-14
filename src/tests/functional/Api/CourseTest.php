@@ -319,10 +319,11 @@ class CourseTest extends FunctionalTestAbstract
 
         $expectedResponse = [
             'success' => false,
-            'error' => ['statusCode' => 400],
         ];
 
-        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
+        $this->post('/api', $parameters, $this->headers)
+            ->seeJsonHas($expectedResponse)
+            ->seeStatusCode(400);
     }
 
     public function providerStashFailsValidationWithMissingRequiredParameter()
@@ -514,11 +515,12 @@ class CourseTest extends FunctionalTestAbstract
             'success' => false,
             'error' => [
                 'message' => 'Reporting date must be a Friday.',
-                'statusCode' => 400,
             ],
         ];
 
-        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
+        $this->post('/api', $parameters, $this->headers)
+            ->seeJsonHas($expectedResponse)
+            ->seeStatusCode(400);
     }
 
     public function providerApiThrowsExceptionForInvalidDate()
@@ -549,10 +551,11 @@ class CourseTest extends FunctionalTestAbstract
             'success' => false,
             'error' => [
                 'message' => 'Reporting date must be a Friday.',
-                'statusCode' => 400,
             ],
         ];
 
-        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
+        $this->post('/api', $parameters, $this->headers)
+            ->seeJsonHas($expectedResponse)
+            ->seeStatusCode(400);
     }
 }

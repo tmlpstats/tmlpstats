@@ -248,11 +248,12 @@ class ValidationDataTest extends FunctionalTestAbstract
             'success' => false,
             'error' => [
                 'message' => 'Reporting date must be a Friday.',
-                'statusCode' => 400,
             ],
         ];
 
         $headers = ['Accept' => 'application/json'];
-        $this->post('/api', $parameters, $headers)->seeJsonHas($expectedResponse);
+        $this->post('/api', $parameters, $headers)
+            ->seeJsonHas($expectedResponse)
+            ->seeStatusCode(400);
     }
 }
