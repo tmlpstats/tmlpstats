@@ -3,11 +3,11 @@ import { connect } from 'react-redux'
 
 import { Form, SimpleField, SimpleSelect, AddOneLink } from '../../reusable/form_utils'
 import { Promise, objectAssign, arrayFind } from '../../reusable/ponyfill'
-import { ModeSelectButtons, LoadStateFlip } from '../../reusable/ui_basic'
+import { ModeSelectButtons, LoadStateFlip, MessagesComponent } from '../../reusable/ui_basic'
 
 import { SubmissionBase, React } from '../base_components'
 import { APPLICATIONS_FORM_KEY } from './reducers'
-import { appsSorts, appsCollection } from './data'
+import { appsSorts, appsCollection, messages } from './data'
 import { loadApplications, saveApplication, chooseApplication } from './actions'
 import AppStatus from './AppStatus'
 
@@ -74,10 +74,16 @@ const getLabelTeamMember = (item) => {
 class _EditCreate extends ApplicationsBase {
     render() {
         const modelKey = APPLICATIONS_FORM_KEY
+        const app = this.props.currentApp
+        const messages = app ? this.props.messages[app.id] : []
+
         return (
             <div>
                 <h3>{this.title()}</h3>
-                <Form className="form-horizontal" model={modelKey} onSubmit={this.saveApp.bind(this)}>
+
+                <MessagesComponent messages={messages} />
+
+                <Form className="form-horizontal" model={modelKey} onSubmit={this.saveAppData.bind(this)}>
                     {this.renderStartingQuarter(modelKey)}
                     <SimpleField label="First Name" model={modelKey+'.firstName'} divClass="col-md-6" />
                     <SimpleField label="Last Name" model={modelKey+'.lastName'} divClass="col-md-6" />
@@ -129,7 +135,7 @@ class _EditCreate extends ApplicationsBase {
         var body
         if (this.isNewApp()) {
             body = <SimpleSelect model={modelKey+'.incomingQuarter'} items={lookups.center_quarters}
-                                 keyProp="quarterId" getLabel={centerQuarterLabel}  />
+                                 keyProp="quarterId" getLabel={centerQuarterLabel}  emptyChoice="Choose One" />
         } else {
             const cq = arrayFind(lookups.center_quarters, (cq) => cq.quarterId == currentApp.incomingQuarter)
             body = (cq)? centerQuarterLabel(cq) : 'Unknown'
@@ -142,14 +148,19 @@ class _EditCreate extends ApplicationsBase {
         )
     }
 
-    // saveApp for now is the same between edit and create flows
-    saveApp(data) {
+    // saveAppData for now is the same between edit and create flows
+    saveAppData(data) {
         this.props.dispatch(saveApplication(this.props.params.centerId, this.reportingDateString(), data)).done((result) => {
             if (result.success && result.storedId) {
                 data = objectAssign({}, data, {id: result.storedId})
                 this.props.dispatch(appsCollection.replaceItem(data))
             }
-            this.props.router.push(this.baseUri() + '/applications')
+
+            this.props.dispatch(messages.replace(data.id, result.messages))
+
+            if (result.valid) {
+                this.props.router.push(this.baseUri() + '/applications')
+            }
         })
     }
 
@@ -160,8 +171,9 @@ class ApplicationsEditView extends _EditCreate {
         super.setupApplications().then(() => {
             var appId = this.props.params.appId
             if (!this.props.currentApp || this.props.currentApp.id != appId) {
-                const app = this.getAppById(appId)
+                let app = this.getAppById(appId)
                 if (app){
+                    app = objectAssign({}, app, {committedTeamMember: app.commitedTeamMember || ''})
                     this.props.dispatch(chooseApplication(appId, app))
                 }
             }
@@ -186,7 +198,13 @@ class ApplicationsAddView extends _EditCreate {
     componentDidMount() {
         super.setupApplications().then(() => {
             if (this.props.currentApp) {
-                const blankApp = {firstName: '', lastName: '', teamYear: 1, regDate: this.reportingDateString()}
+                const blankApp = {
+                    firstName: '',
+                    lastName: '',
+                    teamYear: 1,
+                    regDate: this.reportingDateString(),
+                    committedTeamMember: ''
+                }
                 this.props.dispatch(chooseApplication('', blankApp))
             }
         })

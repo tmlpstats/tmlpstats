@@ -98,7 +98,7 @@ export default class AppStatus extends React.Component {
                         <input type="text" className="form-control" />
                     </Field>
                     <br />
-                    <SimpleSelect model={model+'.withdrawCode'} keyProp="id" labelProp="display" items={this.props.lookups.withdraw_codes} />
+                    <SimpleSelect model={model+'.withdrawCode'} keyProp="id" labelProp="display" items={this.props.lookups.withdraw_codes} emptyChoice="Choose One" />
                 </div>
             </div>
         )

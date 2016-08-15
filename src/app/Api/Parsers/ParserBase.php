@@ -2,6 +2,7 @@
 namespace TmlpStats\Api\Parsers;
 
 use TmlpStats\Api\Exceptions as ApiExceptions;
+use TmlpStats\Util;
 
 abstract class ParserBase
 {
@@ -16,7 +17,12 @@ abstract class ParserBase
     {
         if (!$input->has($key)) {
             if ($required) {
-                throw new ApiExceptions\MissingParameterException("{$key} is a required parameter and is missing.");
+                $display = ucwords(Util::toWords($key));
+                $e = new ApiExceptions\MissingParameterException("{$display} is a required parameter and is missing.");
+                $e->setField($key);
+                // TODO: don't assume the index key is id
+                $e->setRefernce($input->get('id'));
+                throw $e;
             } else {
                 return null;
             }
@@ -29,7 +35,12 @@ abstract class ParserBase
         }
 
         if (!$this->validate($value)) {
-            throw new ApiExceptions\BadRequestException("{$key} is not a valid {$this->type}.");
+            $display = ucwords(Util::toWords($key));
+            $e = new ApiExceptions\BadRequestException("{$display} is not a valid {$this->type}.");
+            $e->setField($key);
+            // TODO: don't assume the index key is id
+            $e->setRefernce($input->get('id'));
+            throw $e;
         }
 
         return $this->parse($value);

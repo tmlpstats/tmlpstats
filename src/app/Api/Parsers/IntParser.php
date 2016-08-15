@@ -3,7 +3,7 @@ namespace TmlpStats\Api\Parsers;
 
 class IntParser extends ParserBase
 {
-    protected $type = 'int';
+    protected $type = 'number';
 
     public function validate($value)
     {

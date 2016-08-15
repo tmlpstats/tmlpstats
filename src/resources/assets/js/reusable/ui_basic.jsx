@@ -95,7 +95,7 @@ export class MessagesComponent extends React.Component {
         const warnings = []
 
         messages.forEach((message) => {
-            let item = <li key={message.offset+message.id} className={message.type}>{message.message}</li>
+            let item = <li key={message.reference+message.id} className={message.type}>{message.message}</li>
 
             if (message.type == 'error') {
                 errors.push(item)
