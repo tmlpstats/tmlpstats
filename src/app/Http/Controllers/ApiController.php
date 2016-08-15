@@ -52,8 +52,8 @@ class ApiController extends ApiControllerBase
         "SubmissionData.ignoreMe" => "SubmissionData__ignoreMe",
         "TeamMember.create" => "TeamMember__create",
         "TeamMember.update" => "TeamMember__update",
-        "TeamMember.getWeekData" => "TeamMember__getWeekData",
         "TeamMember.setWeekData" => "TeamMember__setWeekData",
+        "TeamMember.allForCenter" => "TeamMember__allForCenter",
         "UserProfile.setLocale" => "UserProfile__setLocale",
         "ValidationData.validate" => "ValidationData__validate",
     ];
@@ -302,19 +302,20 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'data', 'array')
         );
     }
-    protected function TeamMember__getWeekData($input)
-    {
-        return App::make(Api\TeamMember::class)->getWeekData(
-            $this->parse($input, 'teamMember', 'TeamMember'),
-            $this->parse($input, 'reportingDate', 'date')
-        );
-    }
     protected function TeamMember__setWeekData($input)
     {
         return App::make(Api\TeamMember::class)->setWeekData(
             $this->parse($input, 'teamMember', 'TeamMember'),
             $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'data', 'array')
+        );
+    }
+    protected function TeamMember__allForCenter($input)
+    {
+        return App::make(Api\TeamMember::class)->allForCenter(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'includeInProgress', 'bool', false)
         );
     }
     protected function UserProfile__setLocale($input)

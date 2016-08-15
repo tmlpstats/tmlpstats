@@ -1,4 +1,5 @@
 import { coreInit } from './data'
+import { bestErrorValue } from '../../reusable/ajax_utils'
 
 export const initState = coreInit.actionCreator()
 
@@ -14,8 +15,8 @@ export function initSubmission(centerId, reportingDate) {
             } else {
                 dispatch(initState({error: data.error}))
             }
-        }).fail(() => {
-            dispatch(initState('failed'))
+        }).fail((jqXHR, textStatus) => {
+            dispatch(initState({error: bestErrorValue(jqXHR, textStatus)}))
         })
     }
 }

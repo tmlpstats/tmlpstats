@@ -33,6 +33,11 @@ class SubmissionData extends AuthenticatedApiBase
             'idAttr' => 'week',
             'toArray' => 'toNewArray',
         ],
+        [
+            'key' => 'team_member',
+            'class' => Domain\TeamMember::class,
+            'idAttr' => 'id',
+        ],
     ];
 
     protected $keyTypeMapping = [];

@@ -59,7 +59,7 @@ class ParserDomain implements Arrayable, \JsonSerializable, Referenceable
             $conf = static::$validProperties[$k];
 
             if ($v !== null) {
-                if($conf['type'] == 'date') {
+                if ($conf['type'] == 'date') {
                     $v = $v->toDateString();
                 } else if (array_get($conf, 'assignId', false)) {
                     $idProp = array_get($conf, 'idProp', 'id');

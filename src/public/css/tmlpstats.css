@@ -322,3 +322,13 @@ table.submissionCenterStats {
     text-align: right;
     min-width: 3.2em;
 }
+
+/** SUBMISSION - CLASS LIST */
+
+.submissionClassList tbody .gitw select {
+    max-width: 9em;
+}
+
+.submissionClassList tbody .tdo select {
+    max-width: 4em;
+}
