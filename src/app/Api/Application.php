@@ -64,8 +64,8 @@ class Application extends ApiBase
     {
         if ($reportingDate === null) {
             $reportingDate = LocalReport::getReportingDate($center);
-        } else if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
-            throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
+        } else {
+            App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
         }
 
         $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
@@ -120,8 +120,8 @@ class Application extends ApiBase
     {
         if ($reportingDate === null) {
             $reportingDate = LocalReport::getReportingDate($application->center);
-        } else if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
-            throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
+        } else {
+            App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
         }
 
         $getUnsubmitted = $reportingDate->gte(Carbon::now($application->center->timezone)->startOfDay());
@@ -167,9 +167,7 @@ class Application extends ApiBase
      */
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
-        if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
-            throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
-        }
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $submissionData = App::make(SubmissionData::class);
         $appId = array_get($data, 'id', null);
