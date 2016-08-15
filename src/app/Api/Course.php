@@ -126,7 +126,7 @@ class Course extends ApiBase
         if ($reportingDate === null) {
             $reportingDate = LocalReport::getReportingDate($course->center);
         } else {
-            App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+            App::make(SubmissionCore::class)->checkCenterDate($course->center, $reportingDate);
         }
 
         $getUnsubmitted = $reportingDate->gte(Carbon::now($course->center->timezone)->startOfDay());
