@@ -9,12 +9,11 @@ import { Field } from 'react-redux-form'
 
 import { SubmissionBase, React } from '../base_components'
 import { Form, SimpleField, SimpleSelect, AddOneLink } from '../../reusable/form_utils'
-import { ModeSelectButtons, LoadStateFlip } from '../../reusable/ui_basic'
+import { ModeSelectButtons, LoadStateFlip, MessagesComponent } from '../../reusable/ui_basic'
 
 import { COURSES_FORM_KEY } from './reducers'
-import { coursesSorts, coursesCollection, courseTypeMap } from './data'
+import { coursesSorts, coursesCollection, courseTypeMap, messages } from './data'
 import { loadCourses, saveCourse, chooseCourse } from './actions'
-import CourseStatus from './CourseStatus'
 
 class CoursesBase extends SubmissionBase {
     componentDidMount() {
@@ -98,8 +97,9 @@ class _EditCreate extends CoursesBase {
         let qstartState = 'visible'
         let completionState = 'hidden'
 
+        let course = undefined
         if (this.props.currentCourse) {
-            const course = this.props.currentCourse
+            course = this.props.currentCourse
 
             if (course.meta.canEditCompletion) {
                 completionState = 'visible'
@@ -124,9 +124,13 @@ class _EditCreate extends CoursesBase {
         const completionFields = this.getCompletionFields(modelKey, completionState)
         const currentBalanceFields = this.getCurrentBalanceFields(modelKey, qstartState, currentState)
 
+        const messages = course ? this.props.messages[course.id] : []
+
         return (
             <div>
                 <h3>{this.title()}</h3>
+
+                <MessagesComponent messages={messages} />
 
                 <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourseData.bind(this)}>
 
@@ -172,7 +176,12 @@ class _EditCreate extends CoursesBase {
                 this.props.dispatch(coursesCollection.replaceItem(data))
                 this.props.dispatch(chooseCourse(data.id, this.getCourseById(data.id)))
             }
-            this.props.router.push(this.baseUri() + '/courses')
+
+            this.props.dispatch(messages.replace(data.id, result.messages))
+
+            if (result.valid) {
+                this.props.router.push(this.baseUri() + '/courses')
+            }
         })
     }
     getGuestGameFields(modelKey, guestsState, completionState) {

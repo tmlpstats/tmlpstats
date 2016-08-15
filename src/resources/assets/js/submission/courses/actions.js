@@ -48,7 +48,3 @@ export function saveCourse(center, reportingDate, data) {
         })
     }
 }
-
-export function setCourseStatus(status) {
-    return formActions.change('submission.courses.currentCourse.courseStatus', status)
-}

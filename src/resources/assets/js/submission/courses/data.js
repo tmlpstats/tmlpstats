@@ -1,5 +1,5 @@
 import SortableCollection, { compositeKey } from '../../reusable/sortable_collection'
-import { LoadingMultiState } from '../../reusable/reducers'
+import { LoadingMultiState, MessageManager } from '../../reusable/reducers'
 
 export const coursesSorts = [
     {
@@ -28,3 +28,5 @@ export const courseTypeMap = {
 
 export const coursesLoad = new LoadingMultiState('courses/initialLoadState')
 export const saveCourseLoad = new LoadingMultiState('courses/saveCourseState')
+
+export const messages = new MessageManager('courses')
