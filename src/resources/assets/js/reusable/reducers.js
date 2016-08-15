@@ -45,3 +45,41 @@ export class LoadingMultiState {
         return loadingMultiState(this.actionType)
     }
 }
+
+const REPLACE_MESSAGES = 'messageManager/replace'
+const CLEAR_MESSAGES = 'messageManager/clear'
+const RESET_MESSAGES = 'messageManager/reset'
+
+export class MessageManager {
+    constructor(namespace) {
+         this.namespace = namespace
+    }
+
+    reducer() {
+        return (state={}, action) => {
+            if (action.payload && action.payload.namespace && action.payload.namespace == this.namespace) {
+                switch (action.type) {
+                case REPLACE_MESSAGES:
+                    return objectAssign({}, state, {[action.payload.pk]: action.payload.messages})
+                case CLEAR_MESSAGES:
+                    return objectAssign({}, state, {[action.payload.pk]: []})
+                case RESET_MESSAGES:
+                    return {}
+                }
+            }
+            return state
+        }
+    }
+
+    replace(pk, messages) {
+        return {type: REPLACE_MESSAGES, payload: {pk, messages, namespace: this.namespace}}
+    }
+
+    clear(pk) {
+        return {type: CLEAR_MESSAGES, payload: {pk, namespace: this.namespace}}
+    }
+
+    reset(pk) {
+        return {type: RESET_MESSAGES, payload: {namespace: this.namespace}}
+    }
+}

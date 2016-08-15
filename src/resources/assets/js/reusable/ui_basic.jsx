@@ -77,3 +77,62 @@ export class LoadStateFlip extends React.Component {
         }
     }
 }
+
+/**
+ * MessagesComponent formats an array of messages for display.
+ *
+ * Use with error/warning messages
+ */
+export class MessagesComponent extends React.Component {
+    render() {
+        const messages = this.props.messages
+
+        if (!messages) {
+            return <div></div>
+        }
+
+        const errors = []
+        const warnings = []
+
+        messages.forEach((message) => {
+            let item = <li key={message.offset+message.id} className={message.type}>{message.message}</li>
+
+            if (message.type == 'error') {
+                errors.push(item)
+            } else if (message.type == 'warning') {
+                warnings.push(item)
+            }
+        })
+
+        let errorString = ''
+        if (errors.length > 0) {
+            errorString = (
+                <div>
+                    <h5 className="error">Errors:</h5>
+                    <ul>
+                        {errors}
+                    </ul>
+                </div>
+            )
+        }
+
+        let warningString = ''
+        if (warnings.length > 0) {
+            warningString = (
+                <div>
+                    <h5 className="warning">Warnings:</h5>
+                    <ul>
+                        {warnings}
+                    </ul>
+                </div>
+            )
+        }
+
+        return (
+            <div>
+                {errorString}
+                {warningString}
+            </div>
+        )
+    }
+}
