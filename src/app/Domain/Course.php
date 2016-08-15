@@ -153,7 +153,8 @@ class Course extends ParserDomain
             if ($only_set && (!isset($this->_setValues[$k]) || !$this->_setValues[$k])) {
                 continue;
             }
-            switch (self::$validProperties[$k]['owner']) {
+            $conf = self::$validProperties[$k];
+            switch ($conf['owner']) {
                 case 'course':
                     $target = $course;
                     break;
@@ -167,7 +168,7 @@ class Course extends ParserDomain
                 $v = null;
             }
 
-            $this->copyTarget($target, $k, $v);
+            $this->copyTarget($target, $k, $v, $conf);
         }
     }
 

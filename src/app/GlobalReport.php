@@ -14,7 +14,6 @@ class GlobalReport extends Model
 
     protected $fillable = [
         'reporting_date',
-        'quarter_id',
         'user_id',
         'locked',
     ];

@@ -48,6 +48,8 @@ class ApplicationTest extends FunctionalTestAbstract
             'stats_report_id' => $this->report->id,
             'reg_date' => $this->application->regDate,
         ]);
+
+        $this->headers = ['Accept' => 'application/json'];
     }
 
     public function tearDown()
@@ -93,7 +95,7 @@ class ApplicationTest extends FunctionalTestAbstract
         $parameters = $this->replaceInto($parameters, $parameterUpdates);
         $expectedResponse = $this->replaceInto($expectedResponse, $expectedResponseUpdates);
 
-        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
     }
 
     public function providerCreate()
@@ -134,7 +136,7 @@ class ApplicationTest extends FunctionalTestAbstract
         $expectedResponse['person']['email'] = $parameters['data']['email'];
         $expectedResponse['person']['lastName'] = $parameters['data']['lastName'];
 
-        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
     }
 
     /**
@@ -176,7 +178,7 @@ class ApplicationTest extends FunctionalTestAbstract
             //'statsReport' => $report,
         ];
 
-        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
     }
 
     public function providerGetWeekData()
@@ -205,6 +207,7 @@ class ApplicationTest extends FunctionalTestAbstract
                 'committedTeamMember' => 1,
                 'teamYear' => 1,
                 'incomingQuarter' => $this->quarter->id,
+                'committedTeamMember' => $this->teamMember->id,
             ],
         ];
 
@@ -223,7 +226,7 @@ class ApplicationTest extends FunctionalTestAbstract
             'valid' => true,
         ];
 
-        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
         $result1 = App::make(Api\SubmissionData::class)->allForType($this->center, new Carbon($reportingDate), Domain\TeamApplication::class);
 
         $this->assertEquals(1, count($result1));
@@ -259,6 +262,7 @@ class ApplicationTest extends FunctionalTestAbstract
                 'committedTeamMember' => 1,
                 'teamYear' => 1,
                 'incomingQuarter' => $this->quarter->id,
+                'committedTeamMember' => $this->teamMember->id,
             ],
         ];
 
@@ -274,7 +278,7 @@ class ApplicationTest extends FunctionalTestAbstract
             'valid' => false,
         ];
 
-        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
         $result1 = App::make(Api\SubmissionData::class)->allForType($this->center, new Carbon($reportingDate), Domain\TeamApplication::class);
 
         $this->assertEquals(1, count($result1));
@@ -290,6 +294,28 @@ class ApplicationTest extends FunctionalTestAbstract
             ['id'], // Include application id
             [null], // Do not include application id
         ];
+    }
+
+    public function testStashFailsValidationWithMissingRequiredParameter()
+    {
+        $reportingDate = '2016-04-15';
+
+        $parameters = [
+            'method' => 'Application.stash',
+            'center' => $this->center->abbreviation,
+            'reportingDate' => $reportingDate,
+            'data' => [
+                'id' => $this->application->id,
+            ],
+        ];
+
+        $expectedResponse = [
+            'success' => false,
+        ];
+
+        $this->post('/api', $parameters, $this->headers)
+            ->seeJsonHas($expectedResponse)
+            ->seeStatusCode(400);
     }
 
     /**
@@ -424,7 +450,7 @@ class ApplicationTest extends FunctionalTestAbstract
             );
         });
 
-        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
     }
 
     public function providerAllForCenter()
@@ -459,8 +485,9 @@ class ApplicationTest extends FunctionalTestAbstract
             ],
         ];
 
-        $headers = ['Accept' => 'application/json'];
-        $this->post('/api', $parameters, $headers)->seeJsonHas($expectedResponse);
+        $this->post('/api', $parameters, $this->headers)
+            ->seeJsonHas($expectedResponse)
+            ->seeStatusCode(400);
     }
 
     public function providerApiThrowsExceptionForInvalidDate()
@@ -494,7 +521,8 @@ class ApplicationTest extends FunctionalTestAbstract
             ],
         ];
 
-        $headers = ['Accept' => 'application/json'];
-        $this->post('/api', $parameters, $headers)->seeJsonHas($expectedResponse);
+        $this->post('/api', $parameters, $this->headers)
+            ->seeJsonHas($expectedResponse)
+            ->seeStatusCode(400);
     }
 }

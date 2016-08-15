@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model;
 use TmlpStats\Api\Parsers;
+use TmlpStats\Contracts\Referenceable;
 
 /**
  * ParserDomain is a base class for implementing domain objects which are distinct enough
@@ -16,14 +17,29 @@ use TmlpStats\Api\Parsers;
  * - Constructors from array and ways to fill it
  * - Track which values were set/changed for safer updates
  */
-class ParserDomain implements Arrayable, \JsonSerializable
+class ParserDomain implements Arrayable, \JsonSerializable, Referenceable
 {
+    // Make sure you prefix all properties in this and derived classes or
+    // you're likely to have a bad time with the magic getter/setter methods
     protected $_values = [];
     protected $_setValues = [];
+
+    protected $_refProp = 'id';
 
     public function __construct()
     {
         // do nothing! Avoids a weird bug in php when calling new static();
+    }
+
+    /**
+     * Return the id that should be used as a reference for validation results
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        $prop = $this->_refProp;
+        return $this->$prop;
     }
 
     /**

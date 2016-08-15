@@ -3,6 +3,7 @@ namespace TmlpStats\Domain;
 
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
+use TmlpStats\Contracts\Referenceable;
 
 /**
  * Represents a six-game scoreboard (cap, cpc, t1x etc.)
@@ -10,7 +11,7 @@ use Illuminate\Contracts\Support\Arrayable;
  * This is a mutable structure which can marshal to/from arrays.
  * It will also do some bonus things.
  */
-class Scoreboard implements Arrayable
+class Scoreboard implements Arrayable, Referenceable
 {
     const GAME_KEYS = ['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'];
     protected $games = [];
@@ -24,6 +25,16 @@ class Scoreboard implements Arrayable
         foreach (static::GAME_KEYS as $gameKey) {
             $this->games[$gameKey] = new ScoreboardGame($gameKey);
         }
+    }
+
+    /**
+     * Return the id that should be used as a reference for validation results
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        return $this->week->toDateString();
     }
 
     /** Create a scoreboard that's blank */

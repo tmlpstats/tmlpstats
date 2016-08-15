@@ -72,4 +72,46 @@ class FunctionalTestAbstract extends TestAbstract
 
         return $this;
     }
+
+    public function getReport($reportingDate, $data = [])
+    {
+        if (!isset($this->center)) {
+            throw new Exception("\$this->center must be set.");
+        }
+        if (!isset($this->quarter)) {
+            throw new Exception("\$this->quarter must be set.");
+        }
+
+        $reportData = array_merge([
+            'center_id' => $this->center->id,
+            'quarter_id' => $this->quarter->id,
+            'reporting_date' => $reportingDate,
+            'submitted_at' => "{$reportingDate} 18:59:00",
+            'version' => 'test',
+        ], $data);
+
+        return Models\StatsReport::firstOrCreate($reportData);
+    }
+
+    public function getGlobalReport($reportingDate, $reports = [])
+    {
+        if (!isset($this->center)) {
+            throw new Exception("\$this->center must be set.");
+        }
+        if (!isset($this->user)) {
+            throw new Exception("\$this->user must be set.");
+        }
+
+        $globalReport = Models\GlobalReport::firstOrCreate([
+            'reporting_date' => $reportingDate,
+            'quarter_id' => $this->quarter->id,
+            'user_id' => $this->user->id,
+        ]);
+
+        foreach ($reports as $report) {
+            $globalReport->addCenterReport($report);
+        }
+
+        return $globalReport;
+    }
 }

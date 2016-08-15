@@ -73,6 +73,11 @@ class Handler extends ExceptionHandler {
     public function render($request, Exception $e)
     {
         if ($request->ajax() || $request->wantsJson()) {
+            $statusCode = 400;
+            if (method_exists($e, 'getStatusCode')) {
+                $statusCode = $e->getStatusCode();
+            }
+
             $json = [
                 'success' => false,
                 'error' => [
@@ -81,7 +86,7 @@ class Handler extends ExceptionHandler {
                 ],
             ];
 
-            return response()->json($json, 400);
+            return response()->json($json, $statusCode);
         }
 
         if ($e instanceof ModelNotFoundException) {
