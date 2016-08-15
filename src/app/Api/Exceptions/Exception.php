@@ -1,9 +1,10 @@
 <?php
 namespace TmlpStats\Api\Exceptions;
 
+use Illuminate\Contracts\Support\Arrayable;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-class Exception extends HttpException
+class Exception extends HttpException implements Arrayable, \JsonSerializable
 {
     protected $message = ''; // override to default empty message
 
@@ -17,11 +18,30 @@ class Exception extends HttpException
 
     public function __toString()
     {
-        json_encode([
-            'success' => false,
+        json_encode($this->toArray());
+    }
+
+    /**
+     * Implementation for Arrayable
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
             'status_code' => $this->statusCode,
             'status_message' => $this->statusMessage,
             'message' => $this->getMessage() ?: $this->statusMessage,
-        ]);
+        ];
+    }
+
+    /**
+     * Implementation for JsonSerializable interface
+     *
+     * @return array  Array that is serializable with json_encode()
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
     }
 }
