@@ -157,6 +157,7 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
             'offset' => $offset,
             'offsetType' => 'row',
             'id' => $messageId,
+            'reference' => $offset,
         ];
 
         $data = new stdClass;
@@ -187,6 +188,7 @@ class ValidatorAbstractTest extends ValidatorTestAbstract
             'offset' => $offset,
             'offsetType' => 'row',
             'id' => $messageId,
+            'reference' => $offset,
         ];
 
         $data = new stdClass;

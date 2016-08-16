@@ -73,6 +73,7 @@ class MessageTest extends TestAbstract
                 [],
                 [
                     'id'         => 'MESSAGE_ONE',
+                    'reference'  => '1',
                     'type'       => 'error',
                     'section'    => 'mySection',
                     'message'    => "Message One.",
@@ -86,6 +87,7 @@ class MessageTest extends TestAbstract
                 ['Two'],
                 [
                     'id'         => 'MESSAGE_TWO',
+                    'reference'  => 'C',
                     'type'       => 'warning',
                     'section'    => 'mySection',
                     'message'    => "Message Two.",
@@ -99,6 +101,7 @@ class MessageTest extends TestAbstract
                 ['Three', 'Sweet'],
                 [
                     'id'         => 'MESSAGE_THREE',
+                    'reference'  => 'C1',
                     'type'       => 'debug',
                     'section'    => 'mySection',
                     'message'    => "Sweet Message Three.",
