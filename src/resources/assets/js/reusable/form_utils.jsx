@@ -56,7 +56,8 @@ export class SimpleSelect extends React.Component {
         getLabel: React.PropTypes.func
     }
     render() {
-        var { getKey, getLabel, emptyChoice } = this.props
+        const items = this.props.items || []
+        let { getKey, getLabel, emptyChoice } = this.props
         if (!getKey) {
             getKey = (obj) => obj[this.props.keyProp]
         }
@@ -64,11 +65,11 @@ export class SimpleSelect extends React.Component {
             getLabel = (obj) => obj[this.props.labelProp]
         }
 
-        var options = []
+        const options = []
         if (emptyChoice) {
             options.push(<option key={-1} value="">{emptyChoice}</option>)
         }
-        this.props.items.forEach((item, i) => {
+        items.forEach((item, i) => {
             options.push(
                 <option key={i} value={getKey(item)}>{getLabel(item)}</option>
             )

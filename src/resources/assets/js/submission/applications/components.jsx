@@ -79,7 +79,6 @@ class _EditCreate extends ApplicationsBase {
         if (app && app.id) {
             messages = this.props.messages[app.id]
         }
-        let teamMembers = this.props.lookups.team_members || []
 
         return (
             <div>
@@ -105,7 +104,7 @@ class _EditCreate extends ApplicationsBase {
                         <label className="col-sm-2">Committed Team Member</label>
                         <div className="col-sm-10">
                             <SimpleSelect
-                                    model={modelKey+'.committedTeamMember'} items={teamMembers}
+                                    model={modelKey+'.committedTeamMember'} items={this.props.lookups.team_members}
                                     keyProp="teamMemberId" getLabel={getLabelTeamMember} emptyChoice="Choose One" />
                         </div>
                     </div>
@@ -136,14 +135,12 @@ class _EditCreate extends ApplicationsBase {
     renderStartingQuarter(modelKey) {
         const { currentApp, lookups } = this.props
         const centerQuarterLabel = (cq) => `${cq.quarter.t1Distinction} ${cq.quarter.year} (starting ${cq.startWeekendDate})`
-        let quarters = lookups.center_quarters || []
         let body = ''
         if (this.isNewApp()) {
-
-            body = <SimpleSelect model={modelKey+'.incomingQuarter'} items={quarters}
+            body = <SimpleSelect model={modelKey+'.incomingQuarter'} items={lookups.center_quarters}
                                  keyProp="quarterId" getLabel={centerQuarterLabel} />
         } else {
-            const cq = arrayFind(quarters, (cq) => cq.quarterId == currentApp.incomingQuarter)
+            const cq = arrayFind(lookups.center_quarters, (cq) => cq.quarterId == currentApp.incomingQuarter)
             body = (cq)? centerQuarterLabel(cq) : 'Unknown'
         }
         return (
@@ -193,7 +190,13 @@ class ApplicationsEditView extends _EditCreate {
     render() {
         const appId = this.props.params.appId
 
-        if (!this.props.loading.loaded || !this.props.currentApp || this.props.currentApp.id != appId) {
+        if (!this.props.loading.loaded
+            || !this.props.currentApp
+            || this.props.currentApp.id != appId
+            || !this.props.lookups
+            || !this.props.lookups.center_quarters
+            || !this.props.lookups.team_members
+        ) {
             return <div>{this.props.loading.state}...</div>
         }
         return super.render()
@@ -221,6 +224,13 @@ class ApplicationsAddView extends _EditCreate {
     }
 
     render() {
+        if (!this.props.loading.loaded
+            || !this.props.lookups
+            || !this.props.lookups.center_quarters
+            || !this.props.lookups.team_members
+        ) {
+            return <div>{this.props.loading.state}...</div>
+        }
         return super.render()
     }
 
