@@ -1,20 +1,19 @@
 <?php
 namespace TmlpStats\Exceptions;
 
-use Exception;
-use Illuminate\Session\TokenMismatchException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-
-
-use Carbon\Carbon;
-
 use App;
 use Auth;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Session\TokenMismatchException;
 use Log;
 use Mail;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use TmlpStats\Api\Exceptions as ApiExceptions;
 
 class Handler extends ExceptionHandler {
 
@@ -74,16 +73,22 @@ class Handler extends ExceptionHandler {
     {
         if ($request->ajax() || $request->wantsJson()) {
             $statusCode = 400;
-            if (method_exists($e, 'getStatusCode')) {
+            if ($e instanceof HttpException) {
                 $statusCode = $e->getStatusCode();
+            }
+
+            if ($e instanceof Arrayable) {
+                $error = $e->toArray();
+            } else {
+                $error = [
+                    'code' => $e->getCode(),
+                    'message' => $e->getMessage(),
+                ];
             }
 
             $json = [
                 'success' => false,
-                'error' => [
-                    'code' => $e->getCode(),
-                    'message' => $e->getMessage(),
-                ],
+                'error' => $error,
             ];
 
             return response()->json($json, $statusCode);

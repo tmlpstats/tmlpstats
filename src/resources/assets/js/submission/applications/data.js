@@ -1,5 +1,5 @@
 import SortableCollection, { compositeKey } from '../../reusable/sortable_collection'
-import { LoadingMultiState } from '../../reusable/reducers'
+import { LoadingMultiState, MessageManager } from '../../reusable/reducers'
 
 export const appsSorts = [
     {
@@ -23,3 +23,5 @@ export const appsCollection = new SortableCollection({
 
 export const applicationsLoad = new LoadingMultiState('applications/initialLoadState')
 export const saveAppLoad = new LoadingMultiState('applications/saveAppState')
+
+export const messages = new MessageManager('applications')

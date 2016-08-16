@@ -851,6 +851,7 @@ class Message
 
         if ($offset !== null) {
             $result['offset'] = $offset;
+            $result['reference'] = $offset;
             $result['offsetType'] = $this->getOffsetType($offset);
         }
 

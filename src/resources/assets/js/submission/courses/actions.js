@@ -1,7 +1,7 @@
 ///// ACTION CREATORS
 import { actions as formActions } from 'react-redux-form'
 import { bestErrorValue } from '../../reusable/ajax_utils'
-import { coursesCollection, coursesLoad, saveCourseLoad } from './data'
+import { coursesCollection, coursesLoad, saveCourseLoad, messages } from './data'
 
 export const loadState = coursesLoad.actionCreator()
 export const saveCourseState = saveCourseLoad.actionCreator()
@@ -43,8 +43,9 @@ export function saveCourse(center, reportingDate, data) {
         }).done(() => {
             reset()
         }).fail((xhr, textStatus) => {
-            dispatch(saveCourseState({state: 'failed', error: bestErrorValue(xhr, textStatus)}))
-            setTimeout(reset, 3000)
+            const message = bestErrorValue(xhr, textStatus)
+            dispatch(saveCourseState('new'))
+            dispatch(messages.replace(data.id, [message]))
         })
     }
 }

@@ -1,7 +1,7 @@
 ///// ACTION CREATORS
 import { actions as formActions } from 'react-redux-form'
 import { bestErrorValue } from '../../reusable/ajax_utils'
-import { appsCollection, applicationsLoad, saveAppLoad } from './data'
+import { appsCollection, applicationsLoad, saveAppLoad, messages } from './data'
 
 export const loadState = applicationsLoad.actionCreator()
 export const saveAppState = saveAppLoad.actionCreator()
@@ -43,8 +43,9 @@ export function saveApplication(center, reportingDate, data) {
         }).done(() => {
             reset()
         }).fail((xhr, textStatus) => {
-            dispatch(saveAppState({state: 'failed', error: bestErrorValue(xhr, textStatus)}))
-            setTimeout(reset, 3000)
+            const message = bestErrorValue(xhr, textStatus)
+            dispatch(saveAppState('new'))
+            dispatch(messages.replace(data.id, [message]))
         })
     }
 }
