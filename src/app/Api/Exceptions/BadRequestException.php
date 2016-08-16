@@ -13,7 +13,7 @@ class BadRequestException extends Exception
         $this->field = $field;
     }
 
-    public function setRefernce($reference)
+    public function setReference($reference)
     {
         $this->reference = $reference;
     }

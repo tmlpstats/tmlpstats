@@ -21,7 +21,7 @@ abstract class ParserBase
                 $e = new ApiExceptions\MissingParameterException("{$display} is a required parameter and is missing.");
                 $e->setField($key);
                 // TODO: don't assume the index key is id
-                $e->setRefernce($input->get('id'));
+                $e->setReference($input->get('id'));
                 throw $e;
             } else {
                 return null;
@@ -39,7 +39,7 @@ abstract class ParserBase
             $e = new ApiExceptions\BadRequestException("{$display} is not a valid {$this->type}.");
             $e->setField($key);
             // TODO: don't assume the index key is id
-            $e->setRefernce($input->get('id'));
+            $e->setReference($input->get('id'));
             throw $e;
         }
 

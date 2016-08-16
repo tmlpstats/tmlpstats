@@ -75,7 +75,11 @@ class _EditCreate extends ApplicationsBase {
     render() {
         const modelKey = APPLICATIONS_FORM_KEY
         const app = this.props.currentApp
-        const messages = app ? this.props.messages[app.id] : []
+        let messages = []
+        if (app && app.id) {
+            messages = this.props.messages[app.id]
+        }
+        let teamMembers = this.props.lookups.team_members || []
 
         return (
             <div>
@@ -101,7 +105,7 @@ class _EditCreate extends ApplicationsBase {
                         <label className="col-sm-2">Committed Team Member</label>
                         <div className="col-sm-10">
                             <SimpleSelect
-                                    model={modelKey+'.committedTeamMember'} items={this.props.lookups.team_members}
+                                    model={modelKey+'.committedTeamMember'} items={teamMembers}
                                     keyProp="teamMemberId" getLabel={getLabelTeamMember} emptyChoice="Choose One" />
                         </div>
                     </div>
@@ -132,12 +136,14 @@ class _EditCreate extends ApplicationsBase {
     renderStartingQuarter(modelKey) {
         const { currentApp, lookups } = this.props
         const centerQuarterLabel = (cq) => `${cq.quarter.t1Distinction} ${cq.quarter.year} (starting ${cq.startWeekendDate})`
-        var body
+        let quarters = lookups.center_quarters || []
+        let body = ''
         if (this.isNewApp()) {
-            body = <SimpleSelect model={modelKey+'.incomingQuarter'} items={lookups.center_quarters}
-                                 keyProp="quarterId" getLabel={centerQuarterLabel}  emptyChoice="Choose One" />
+
+            body = <SimpleSelect model={modelKey+'.incomingQuarter'} items={quarters}
+                                 keyProp="quarterId" getLabel={centerQuarterLabel} />
         } else {
-            const cq = arrayFind(lookups.center_quarters, (cq) => cq.quarterId == currentApp.incomingQuarter)
+            const cq = arrayFind(quarters, (cq) => cq.quarterId == currentApp.incomingQuarter)
             body = (cq)? centerQuarterLabel(cq) : 'Unknown'
         }
         return (
