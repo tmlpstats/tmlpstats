@@ -74,7 +74,7 @@ class ReportDeadlinesParser extends AbstractParser
     protected function mergeSettings($defaults, $settings)
     {
         foreach (['report', 'response'] as $type) {
-            if (!isset($settings[$type])) {
+            if (!isset($settings[$type]) || !$settings[$type]) {
                 unset($defaults[$type]);
                 continue;
             }
