@@ -54,6 +54,8 @@ class ReportDeadlinesParser extends AbstractParser
 
                 break;
             }
+        } else {
+            $deadlines = [];
         }
 
         return $this->prepareResults($deadlines);
@@ -73,6 +75,7 @@ class ReportDeadlinesParser extends AbstractParser
     {
         foreach (['report', 'response'] as $type) {
             if (!isset($settings[$type])) {
+                unset($defaults[$type]);
                 continue;
             }
 
@@ -158,6 +161,10 @@ class ReportDeadlinesParser extends AbstractParser
         ];
 
         foreach (['report', 'response'] as $type) {
+            if (!isset($results[$type]) || !$results[$type]) {
+                continue;
+            }
+
             $deadline = $results[$type];
 
             $dueDate  = $this->parseDueDate($deadline['dueDate']);

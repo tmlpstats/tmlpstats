@@ -58,10 +58,8 @@ class ReportDeadlinesTest extends TestAbstract
                 $quarterDates,
                 $center,
                 [
-                    'report'   => Carbon::parse($reportingDate->toDateString(), $center->timezone)->setTime(19, 0, 59),
-                    'response' => Carbon::parse($reportingDate->toDateString(), $center->timezone)
-                                        ->addDay()
-                                        ->setTime(10, 0, 0),
+                    'report'   => null,
+                    'response' => null,
                 ],
             ],
             // Partial Report - classroom override
@@ -80,9 +78,7 @@ class ReportDeadlinesTest extends TestAbstract
                 [
                     'report'   => Carbon::parse($reportingDate1->toDateString(), $center->timezone)
                                         ->setTime(23, 59, 59),
-                    'response' => Carbon::parse($reportingDate1->toDateString(), $center->timezone)
-                                        ->addDay()
-                                        ->setTime(10, 0, 0),
+                    'response' => null,
                 ],
             ],
             // Partial Report - week override
