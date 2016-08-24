@@ -95,6 +95,13 @@ class StatsReport extends Model
         }
 
         $due = $this->reportDeadlines['response'];
+
+        // No response required on last week
+        $quarterEndDate = $this->quarter->getQuarterEndDate($this->center);
+        if (!$due && $quarterEndDate && $this->reportingDate->eq($quarterEndDate)) {
+            return null;
+        }
+
         if (!$due) {
             $due = Carbon::create(
                 $this->reportingDate->year,
