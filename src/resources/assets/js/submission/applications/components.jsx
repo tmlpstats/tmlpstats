@@ -96,7 +96,7 @@ class _EditCreate extends ApplicationsBase {
                             <option value="2">Team 2</option>
                         </select>
                     </SimpleField>
-                    <SimpleField label="Email" model={modelKey+'.email'} divClass="col-md-8" />
+                    <SimpleField label="Email Address" model={modelKey+'.email'} divClass="col-md-8" />
                     <SimpleField label="Comment" model={modelKey+'.comment'} customField={true}>
                         <textarea className="form-control" rows="3"></textarea>
                     </SimpleField>
