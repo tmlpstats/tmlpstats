@@ -14,11 +14,24 @@ class Scoreboard extends AuthenticatedApiBase
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
         $this->assertAuthz($this->context->can('viewSubmissionUi', $center));
-        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+        $submissionCore = App::make(SubmissionCore::class);
+        $submissionCore->checkCenterDate($center, $reportingDate);
 
         $localReport = App::make(LocalReport::class);
-        $statsReport = $localReport->getLastStatsReportSince($center, $reportingDate);
-        $weeks = $localReport->getQuarterScoreboard($statsReport, ['returnObject' => true]);
+        $rq = $submissionCore->reportAndQuarter($center, $reportingDate);
+        $quarter = $rq['quarter'];
+        $statsReport = $rq['report'];
+
+        if ($statsReport !== null) {
+            $weeks = $localReport->getQuarterScoreboard($statsReport, ['returnObject' => true]);
+        } else {
+            // This should only happen on the first week of the quarter, but we want to initialize the weeks fully.
+            $weeks = new Domain\ScoreboardMultiWeek();
+            $reportingDates = $quarter->listReportingDates($center);
+            foreach ($reportingDates as $d) {
+                $weeks->ensureWeek($d);
+            }
+        }
 
         if ($includeInProgress) {
             $submissionData = App::make(SubmissionData::class);
@@ -32,7 +45,6 @@ class Scoreboard extends AuthenticatedApiBase
         }
 
         // fill some additional metadata
-        $quarter = $statsReport->quarter;
         $locks = $this->getScoreboardLockQuarter($center, $quarter);
 
         $week = $quarter->getQuarterStartDate($center)->addWeek();

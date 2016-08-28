@@ -18,7 +18,7 @@ class ScoreboardMultiWeek
         $result = new static();
         foreach ($data as $weekKey => $weekData) {
             $d = Carbon::createFromFormat('Y-m-d', $weekKey);
-            $week = $result->ensureWeek($weekKey);
+            $week = $result->ensureWeek($d);
             $week->parseArray($weekData);
         }
 
