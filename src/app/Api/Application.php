@@ -60,7 +60,7 @@ class Application extends ApiBase
         return $application->load('person');
     }
 
-    public function allForCenter(Models\Center $center, $includeInProgress = false, Carbon $reportingDate = null)
+    public function allForCenter(Models\Center $center, Carbon $reportingDate = null, $includeInProgress = false)
     {
         if ($reportingDate === null) {
             $reportingDate = LocalReport::getReportingDate($center);
@@ -101,6 +101,7 @@ class Application extends ApiBase
             $submissionData = App::make(SubmissionData::class);
             $found = $submissionData->allForType($center, $reportingDate, Domain\TeamApplication::class);
             foreach ($found as $app) {
+                $app->meta['localChanges'] = true;
                 $allApplications[$app->id] = $app;
             }
         }
@@ -256,6 +257,26 @@ class Application extends ApiBase
         }
 
         return $quarters;
+    }
+
+    public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
+    {
+        $results = [];
+
+        $allData = $this->allForCenter($center, $reportingDate, true);
+        foreach ($allData as $dataObject) {
+            if (!array_get($dataObject->meta, 'localChanges', false)) {
+                $results[] = $dataObject;
+            }
+        }
+
+        return $results;
+    }
+
+    public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
+    {
+        $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\TeamApplication::class);
+        return array_flatten($collection->getDictionary());
     }
 
 }

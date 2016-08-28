@@ -68,7 +68,8 @@ class Scoreboard extends AuthenticatedApiBase
             $scoreboard->meta['canEditPromise'] = $weekLock->editPromise;
             $scoreboard->meta['canEditActual'] = $weekLock->editActual || ($week->toDateString() == $reportingDate->toDateString());
 
-            $week->addWeek();
+            // Make a copy here, otherwise we may end up with an array of weeks with the same date
+            $week = $week->copy()->addWeek();
         }
 
         $output = [];
@@ -118,5 +119,29 @@ class Scoreboard extends AuthenticatedApiBase
             'quarter' => $quarter,
             'value' => json_encode($locks->toArray()),
         ]);
+    }
+
+    public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
+    {
+        $results = [];
+
+        $allData = $this->allForCenter($center, $reportingDate, true);
+        foreach ($allData as $dataObject) {
+            $meta = array_get($dataObject, 'meta', []);
+
+            if ((array_get($meta, 'canEditPromise', false) || array_get($meta, 'canEditActual', false))
+                && !array_get($meta, 'localChanges', false)
+            ) {
+                $results[] = $dataObject;
+            }
+        }
+
+        return $results;
+    }
+
+    public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
+    {
+        $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\Scoreboard::class);
+        return array_flatten($collection->getDictionary());
     }
 }

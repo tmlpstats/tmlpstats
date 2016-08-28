@@ -32,7 +32,7 @@ class Scoreboard implements Arrayable, Referenceable
      *
      * @return string
      */
-    public function getId()
+    public function getKey()
     {
         return $this->week->toDateString();
     }

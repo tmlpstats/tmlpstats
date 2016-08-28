@@ -11,8 +11,8 @@ export function loadCourses(centerId, reportingDate) {
         dispatch(loadState('loading'))
         return Api.Course.allForCenter({
             center: centerId,
+            reportingDate: reportingDate,
             includeInProgress: true,
-            reportingDate: reportingDate
         }).done((data) => {
             dispatch(initializeCourses(data))
         }).fail(() => {
