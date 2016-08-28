@@ -117,7 +117,8 @@ class ImportManager
                     }
                     $sheet = $importer->getResults();
                 } catch (Exception $e) {
-                    Log::error("Error processing '$fileName': " . $e->getMessage() . "\n" . $e->getTraceAsString());
+                    $eType = get_class($e);
+                    Log::error("Error processing '{$fileName}': [{$eType}] " . $e->getMessage() . "\n" . $e->getTraceAsString());
 
                     // Files starting with '~$' are usually special temp files created by Excel. Be nice and let the
                     // user know that's probably what went wrong.
@@ -125,7 +126,7 @@ class ImportManager
                         throw new Exception("The file you uploaded, '{$fileName}', looks like a special Excel temporary file. Please look for a file that does not start with '~$'");
                     }
 
-                    throw new Exception("There was an error processing '{$fileName}': " . $e->getMessage());
+                    throw new Exception("There was an error processing '{$fileName}': " . $e->getMessage(), $e->getCode(), $e);
                 }
 
                 $user         = Auth::user()->email;
@@ -163,11 +164,13 @@ class ImportManager
 
                 Log::error("Error processing file: " . $e->getMessage());
                 $unknownFiles[] = $e->getMessage();
-                $exception      = $e;
+                $exception = $e;
+                if ($e->getPrevious()) {
+                    $exception = $e->getPrevious();
+                }
             }
 
             if (!$sheetPath && $file) {
-
                 $sheetPath = XlsxArchiver::getInstance()->saveWorkingSheet($file);
             }
 
@@ -179,7 +182,8 @@ class ImportManager
                 $user = Auth::user()->email;
                 $time = Carbon::now()->format('Y-m-d H:i:s');
 
-                $body = "An exception was caught processing a sheet submitted by '{$user}' for {$center} center at {$time} UTC: '" . $exception->getMessage() . "'\n\n";
+                $body = "An exception was caught processing a sheet submitted by '{$user}' for {$center} center at {$time} UTC: ";
+                $body = "'" . $exception->getMessage() . "'\n\n";
                 $body .= $exception->getTraceAsString() . "\n";
                 try {
                     Mail::raw($body, function ($message) use ($center, $sheetPath) {

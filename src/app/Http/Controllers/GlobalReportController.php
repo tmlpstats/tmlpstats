@@ -683,6 +683,7 @@ class GlobalReportController extends ReportDispatchAbstractController
                 'percent' => 0,
             ],
         ];
+
         foreach ($teamMembersByCenter as $centerName => $centerData) {
             $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Models\Center::name($centerName)->first());
             foreach ($centerData as $memberData) {
@@ -713,18 +714,31 @@ class GlobalReportController extends ReportDispatchAbstractController
         foreach ($reportData as $centerName => $data) {
             $total = 0;
             $attended = 0;
-            foreach ($data as $team => $subData) {
+
+            foreach (['team1', 'team2'] as $team) {
+                if (!isset($reportData[$centerName][$team])) {
+                    $reportData[$centerName][$team]['total'] = 0;
+                    $reportData[$centerName][$team]['attended'] = 0;
+                    $reportData[$centerName][$team]['percent'] = 0;
+                    continue;
+                } else if ($reportData[$centerName][$team]['total'] == 0) {
+                    continue;
+                }
+
                 $reportData[$centerName][$team]['percent'] = round(($reportData[$centerName][$team]['attended'] / $reportData[$centerName][$team]['total']) * 100);
                 $total += $reportData[$centerName][$team]['total'];
                 $attended += $reportData[$centerName][$team]['attended'];
             }
             $reportData[$centerName]['total']['total'] = $total;
             $reportData[$centerName]['total']['attended'] = $attended;
-            $reportData[$centerName]['total']['percent'] = round(($attended / $total) * 100);
+            $reportData[$centerName]['total']['percent'] = $total ? round(($attended / $total) * 100) : 0;
         }
 
         foreach ($totals as $team => $data) {
-            $totals[$team]['percent'] = round(($totals[$team]['attended'] / $totals[$team]['total']) * 100);
+            $totals[$team]['percent'] = 0;
+            if ($totals[$team]['total']) {
+                $totals[$team]['percent'] = round(($totals[$team]['attended'] / $totals[$team]['total']) * 100);
+            }
         }
 
         return view('globalreports.details.tdosummary', compact('reportData', 'totals', 'statsReports'));
@@ -1353,6 +1367,11 @@ class GlobalReportController extends ReportDispatchAbstractController
             $outOfCompliance = false;
 
             foreach (['team1', 'team2'] as $team) {
+                if ($data[$team]['totalCount'] == 0) {
+                    unset($reportData[$centerName][$team]);
+                    continue;
+                }
+
                 $percent = ($data[$team]['withdrawCount'] / $data[$team]['totalCount']) * 100;
                 $reportData[$centerName][$team]['percent'] = $percent;
 
