@@ -20,18 +20,20 @@ class SubmissionCore extends AuthenticatedApiBase
         $this->checkCenterDate($center, $reportingDate);
 
         $localReport = App::make(LocalReport::class);
-        $lastValidReport = $localReport->getLastStatsReportSince($center, $reportingDate);
+        $rq = $this->reportAndQuarter($center, $reportingDate);
+
+        $lastValidReport = $rq['report'];
+        $quarter = $rq['quarter'];
 
         if ($lastValidReport === null) {
-            $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
+            $team_members = [];
         } else {
-            $quarter = $lastValidReport->quarter;
+            $team_members = $localReport->getClassList($lastValidReport);
         }
 
         // Get values for lookups
-        $team_members = $localReport->getClassList($lastValidReport);
         $withdraw_codes = Models\WithdrawCode::get();
-        $center_quarters = App::make(Application::class)->validRegistrationQuarters($center, $reportingDate, $lastValidReport->quarter);
+        $center_quarters = App::make(Application::class)->validRegistrationQuarters($center, $reportingDate, $quarter);
 
         return [
             'success' => true,
@@ -48,5 +50,28 @@ class SubmissionCore extends AuthenticatedApiBase
         // TODO check reporting date is in this center's quarter and so on.
 
         return ['success' => true];
+    }
+
+    /**
+     * Do the very common lookup of getting the last stats report and the quarter for a given
+     * center-reportingdate pair.
+     *
+     * In the case there is no official report on dates before the given reportingDate,
+     * (this happens on the first weekly submission) the report will be null.
+     *
+     * @param  Models\Center $center        The center we're getting the statsReport from
+     * @param  Carbon        $reportingDate The reporting date of a stats report.
+     * @return array[report, quarter]       An associative array with keys report and quarter
+     */
+    public function reportAndQuarter(Models\Center $center, Carbon $reportingDate)
+    {
+        $report = App::make(LocalReport::class)->getLastStatsReportSince($center, $reportingDate);
+        if ($report === null) {
+            $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
+        } else {
+            $quarter = $report->quarter;
+        }
+
+        return compact('report', 'quarter');
     }
 }

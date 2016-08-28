@@ -34,7 +34,7 @@ class ScoreboardGame
     ];
 
     public $key;
-    private $promise = 0;
+    private $promise = null;
     private $actual = null;
     private $originalPromise = null;
 

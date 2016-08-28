@@ -332,6 +332,24 @@ class Quarter extends Model
     }
 
     /**
+     * List all reporting dates in a center quarter
+     * @param  Center|null $center The center
+     * @return array               An array of Carbon objects being each reporting week in the quarter
+     */
+    public function listReportingDates(Center $center = null)
+    {
+        $output = [];
+        $d = $this->getFirstWeekDate($center)->copy();
+        $endDate = $this->getQuarterEndDate($center)->copy();
+        while ($d->lte($endDate)) {
+            $output[] = $d;
+            $d = $d->copy()->addWeek();
+        }
+
+        return $output;
+    }
+
+    /**
      * Set the region for this quarter instance
      *
      * Required before accessing regional quarter dates
