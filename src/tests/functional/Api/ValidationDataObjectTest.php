@@ -99,43 +99,9 @@ class ValidationDataObjectTest extends FunctionalTestAbstract
         $this->api = App::make(Api\ValidationData::class);
     }
 
-    public function tearDown()
-    {
-        parent::tearDown();
-    }
-
     public function testValidate_unauthorized()
     {
         $this->expectException(Api\Exceptions\UnauthorizedException::class);
         $this->api->validate($this->center, $this->now);
-    }
-
-    public function testGetSubmittedData()
-    {
-        $this->context->withFakedAdmin()->install();
-
-        $submitted = $this->api->getSubmittedData($this->center, $this->reportingDate);
-
-        $this->assertEquals(0, count($submitted['applications']));
-        $this->assertEquals(0, count($submitted['scoreboard']));
-
-        $this->assertEquals(1, count($submitted['courses']));
-        $this->assertEquals($this->course2->id, $submitted['courses'][0]->getKey());
-    }
-
-    public function testGetUnsubmittedData()
-    {
-        $this->context->withFakedAdmin()->install();
-
-        $unsubmitted = $this->api->getUnsubmittedData($this->center, $this->reportingDate);
-
-        $this->assertEquals(0, count($unsubmitted['applications']));
-
-        $this->assertEquals(2, count($unsubmitted['courses']));
-        $this->assertEquals($this->course->id, $unsubmitted['courses'][0]->getKey());
-        $this->assertEquals($this->course3->id, $unsubmitted['courses'][1]->getKey());
-
-        $this->assertEquals(1, count($unsubmitted['scoreboard']));
-        $this->assertEquals($this->reportingDate->toDateString(), $unsubmitted['scoreboard'][0]['week']);
     }
 }
