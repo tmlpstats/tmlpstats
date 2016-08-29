@@ -55,11 +55,11 @@ api:
         params:
           - name: center
             type: Center
-          - name: includeInProgress
-            type: bool
-            required: false
           - name: reportingDate
             type: date
+            required: false
+          - name: includeInProgress
+            type: bool
             required: false
       getWeekData:
         desc: Get the weekly data for an application
@@ -117,11 +117,11 @@ api:
         params:
           - name: center
             type: Center
-          - name: includeInProgress
-            type: bool
-            required: false
           - name: reportingDate
             type: date
+            required: false
+          - name: includeInProgress
+            type: bool
             required: false
       getWeekData:
         desc: Get the weekly data for an course

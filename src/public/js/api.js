@@ -49,8 +49,8 @@ Api.Application = {
     List applications by center
     Parameters:
       center: Center
-      includeInProgress: bool
       reportingDate: date
+      includeInProgress: bool
     */
     allForCenter: function(params, callback, errback) {
         return apiCall('Application.allForCenter', params, (callback || null), (errback || null));
@@ -132,8 +132,8 @@ Api.Course = {
     List courses by center
     Parameters:
       center: Center
-      includeInProgress: bool
       reportingDate: date
+      includeInProgress: bool
     */
     allForCenter: function(params, callback, errback) {
         return apiCall('Course.allForCenter', params, (callback || null), (errback || null));

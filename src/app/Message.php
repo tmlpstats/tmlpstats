@@ -825,6 +825,13 @@ class Message
             'format' => 'Only Team 2 can be reviewers. Please check that the team year and reviewer statuses are correct.',
             'arguments' => [],
         ],
+        'VALDATA_DATA_MISSING_UPDATE' => [
+            'type' => Message::ERROR,
+            'format' => '%%type%% has not been updated since last week. Please confirm that no changes are needed.',
+            'arguments' => [
+                '%%type%%'
+            ],
+        ],
     ];
 
     protected $section = '';

@@ -8,6 +8,8 @@ use TmlpStats as Models;
  */
 class TeamApplication extends ParserDomain
 {
+    public $meta = [];
+
     protected static $validProperties = [
         'firstName' => [
             'owner' => 'person',
@@ -154,5 +156,14 @@ class TeamApplication extends ParserDomain
             }
             $this->copyTarget($target, $k, $v, $conf);
         }
+    }
+
+    public function toArray()
+    {
+        $output = parent::toArray();
+
+        $output['meta'] = $this->meta;
+
+        return $output;
     }
 }

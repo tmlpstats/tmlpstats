@@ -79,8 +79,8 @@ class ApiController extends ApiControllerBase
     {
         return App::make(Api\Application::class)->allForCenter(
             $this->parse($input, 'center', 'Center'),
-            $this->parse($input, 'includeInProgress', 'bool', false),
-            $this->parse($input, 'reportingDate', 'date', false)
+            $this->parse($input, 'reportingDate', 'date', false),
+            $this->parse($input, 'includeInProgress', 'bool', false)
         );
     }
     protected function Application__getWeekData($input)
@@ -134,8 +134,8 @@ class ApiController extends ApiControllerBase
     {
         return App::make(Api\Course::class)->allForCenter(
             $this->parse($input, 'center', 'Center'),
-            $this->parse($input, 'includeInProgress', 'bool', false),
-            $this->parse($input, 'reportingDate', 'date', false)
+            $this->parse($input, 'reportingDate', 'date', false),
+            $this->parse($input, 'includeInProgress', 'bool', false)
         );
     }
     protected function Course__getWeekData($input)

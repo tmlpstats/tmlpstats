@@ -24,11 +24,16 @@ class ValidationDataTest extends FunctionalTestAbstract
     {
         parent::setUp();
 
+        $reportingDateStr = '2016-04-15';
+        $this->reportingDate = Carbon::parse($reportingDateStr);
+
         $this->center = Models\Center::abbreviation('VAN')->first();
         $this->quarter = Models\Quarter::year(2016)->quarterNumber(1)->first();
         $this->lastQuarter = Models\Quarter::year(2015)->quarterNumber(4)->first();
 
-        $this->report = $this->getReport('2016-04-15', ['submitted_at' => null]);
+        $this->report = $this->getReport($reportingDateStr, ['submitted_at' => null]);
+        $this->lastReport = $this->getReport('2016-04-08');
+        $this->lastGlobalReport = $this->getGlobalReport('2016-04-08', [$this->lastReport]);
 
         // Setup course
         $this->course = factory(Models\Course::class)->create([
@@ -36,6 +41,10 @@ class ValidationDataTest extends FunctionalTestAbstract
             'start_date' => Carbon::parse('2016-04-23'),
         ]);
         $this->course2 = factory(Models\Course::class)->create([
+            'center_id' => $this->center->id,
+            'start_date' => Carbon::parse('2016-08-13'),
+        ]);
+        $this->course3 = factory(Models\Course::class)->create([
             'center_id' => $this->center->id,
             'start_date' => Carbon::parse('2016-08-13'),
         ]);
@@ -48,15 +57,48 @@ class ValidationDataTest extends FunctionalTestAbstract
             'reg_date' => Carbon::parse('2016-04-01'),
         ]);
 
-        $this->now = Carbon::parse('2016-04-15 18:45:00');
+
+        $this->lastWeekApplicationData = Models\TmlpRegistrationData::firstOrCreate([
+            'tmlp_registration_id' => $this->application->id,
+            'stats_report_id' => $this->lastReport->id,
+            'reg_date' => $this->application->regDate,
+        ]);
+
+        $this->lastWeekCourseData = Models\CourseData::firstOrCreate([
+            'course_id' => $this->course->id,
+            'stats_report_id' => $this->lastReport->id,
+            'quarter_start_ter' => 8,
+            'quarter_start_standardStarts' => 6,
+            'quarter_start_xfer' => 0,
+            'current_ter' => 28,
+            'current_standard_starts' => 22,
+            'current_xfer' => 2,
+        ]);
+        $this->lastWeekCourse2Data = Models\CourseData::firstOrCreate([
+            'course_id' => $this->course2->id,
+            'stats_report_id' => $this->lastReport->id,
+            'quarter_start_ter' => 0,
+            'quarter_start_standard_starts' => 0,
+            'quarter_start_xfer' => 0,
+            'current_ter' => 17,
+            'current_standard_starts' => 17,
+            'current_xfer' => 2,
+        ]);
+        $this->lastWeekCourse3Data = Models\CourseData::firstOrCreate([
+            'course_id' => $this->course3->id,
+            'stats_report_id' => $this->lastReport->id,
+            'quarter_start_ter' => 0,
+            'quarter_start_standard_starts' => 0,
+            'quarter_start_xfer' => 0,
+            'current_ter' => 8,
+            'current_standard_starts' => 8,
+            'current_xfer' => 0,
+        ]);
+
+        $this->now = Carbon::parse("{$reportingDateStr} 18:45:00");
         Carbon::setTestNow($this->now);
 
         $this->headers = ['Accept' => 'application/json'];
-    }
-
-    public function tearDown()
-    {
-        parent::tearDown();
     }
 
     public function testValidateSucceeds()
@@ -70,18 +112,8 @@ class ValidationDataTest extends FunctionalTestAbstract
 
         $expectedResponse = [
             'success' => true,
-            'results' => [
-                'applications' => [
-                    ['valid' => true]
-                ],
-                'courses' => [
-                    ['valid' => true],
-                    ['valid' => true],
-                ],
-                'scoreboard' => [
-                    ['valid' => true]
-                ],
-            ],
+            'valid' => true,
+            'messages' => [],
         ];
 
         $appData = [
@@ -157,16 +189,19 @@ class ValidationDataTest extends FunctionalTestAbstract
 
         $expectedResponse = [
             'success' => true,
-            'results' => [
-                'applications' => [
-                    ['valid' => true]
-                ],
+            'valid' => false,
+            'messages' => [
                 'courses' => [
-                    ['valid' => false],
-                    ['valid' => true],
+                    [
+                        'id' => 'COMMCOURSE_CURRENT_SS_GREATER_THAN_CURRENT_TER',
+                        'offset' => $this->course->id,
+                    ],
                 ],
                 'scoreboard' => [
-                    ['valid' => false]
+                    [
+                        'id' => 'INVALID_VALUE',
+                        'offset' => $reportingDate->toDateString(),
+                    ],
                 ],
             ],
         ];
@@ -221,6 +256,7 @@ class ValidationDataTest extends FunctionalTestAbstract
                 't1x' => 1,
                 't2x' => 2,
                 'gitw' => 3,
+                // LF is missing
             ],
         ];
 

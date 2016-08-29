@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Api;
 
+use App;
 use Carbon\Carbon;
 use Illuminate\Auth\Guard;
 use Illuminate\Http\Request;
@@ -85,9 +86,7 @@ class SubmissionData extends AuthenticatedApiBase
      */
     public function store(Models\Center $center, Carbon $reportingDate, $obj)
     {
-        if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
-            throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
-        }
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
         $userId = $this->context->getUser()->id;
 
         $conf = $this->combinedTypeMapping[get_class($obj)];

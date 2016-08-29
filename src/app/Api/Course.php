@@ -60,7 +60,7 @@ class Course extends ApiBase
         return $course->load('center');
     }
 
-    public function allForCenter(Models\Center $center, $includeInProgress = false, Carbon $reportingDate = null)
+    public function allForCenter(Models\Center $center, Carbon $reportingDate = null, $includeInProgress = false)
     {
         if ($reportingDate === null) {
             $reportingDate = LocalReport::getReportingDate($center);
@@ -238,6 +238,26 @@ class Course extends ApiBase
         $courseData->save();
 
         return $courseData->load('course', 'course.center', 'statsReport');
+    }
+
+    public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
+    {
+        $results = [];
+
+        $allData = $this->allForCenter($center, $reportingDate, true);
+        foreach ($allData as $dataObject) {
+            if (!array_get($dataObject->meta, 'localChanges', false)) {
+                $results[] = $dataObject;
+            }
+        }
+
+        return $results;
+    }
+
+    public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
+    {
+        $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\Course::class);
+        return array_flatten($collection->getDictionary());
     }
 
     protected function getCourseMeta(Domain\Course $course, Models\Center $center, Carbon $reportingDate)

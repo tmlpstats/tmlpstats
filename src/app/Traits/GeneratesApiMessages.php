@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Traits;
 
+use TmlpStats\Contracts\Referenceable;
 use TmlpStats\Message;
 use TmlpStats\Settings\Setting;
 
@@ -57,12 +58,12 @@ trait GeneratesApiMessages
         $offset = null;
 
         $arguments = func_get_args();
-        if (method_exists($this, 'getOffset') && isset($this->data)) {
-            $offset = $this->getOffset($this->data);
+        if (isset($this->data) && $this->data instanceof Referenceable) {
+            $offset = $this->data->getKey();
         }
         array_splice($arguments, 1, 0, [$offset]);
 
-        $this->messages[] = $this->callMessageAdd($message, $arguments);
+        return $this->messages[] = $this->callMessageAdd($message, $arguments);
     }
 
     /**
