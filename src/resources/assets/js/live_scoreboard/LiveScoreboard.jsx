@@ -1,103 +1,29 @@
-import React from 'react';
-import GameRow from './GameRow';
+import React from 'react'
+import { connect } from 'react-redux'
+import { GAME_KEYS } from '../reusable/scoreboard'
 
-var LiveScoreboard = React.createClass({
-    getInitialState: function() {
-        var games = {};
+import GameRow from './GameRow'
+import * as actions from './actions'
 
-        ['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'].forEach(function(gameName) {
-            games[gameName] = {
-                promise: '',
-                actual: '',
-                percent: '',
-                points: '',
-            };
-        });
+const settings = window.settings
 
-        return {
-            editable: false,
-            rating: '',
-            points: 0,
-            games: games
-        };
-    },
-    refreshData: function () {
-        var self = this,
-            request = {center: settings.center.abbreviation};
-
-        Api.LiveScoreboard.getCurrentScores(request, function (data) {
-            self.updateScoreboard(data);
-        });
-    },
-    componentDidMount: function() {
+class LiveScoreboardView extends React.Component {
+    componentWillMount() {
         // Start data fetch request as soon as the component loads
-        this.refreshData();
-    },
-    updateScoreboard: function (data) {
-        var games = this.formatData(data);
+        this.props.dispatch(actions.getCurrentScores(settings.center.abbreviation))
+    }
 
-        this.setState({
-            games: games,
-            rating: data.rating,
-            points: data.points.total,
-            editable: settings.LiveScoreboard.editable,
-        });
-    },
-    updateGameData: function (game, field) {
-        var self = this,
-            request = {},
-            value = this.state.games[game][field];
-
-        if (value == '') {
-            value = 0;
-            this.state.games[game][field] = 0;
-            this.setState({games: this.state.games});
+    render() {
+        const { loading, scoreboard } = this.props
+        if (!loading.loaded) {
+            return <div>Loading</div>
         }
+        var date = moment().format('MMMM D')
+        const { rating, points } = scoreboard
 
-        request = {
-            center: settings.center.abbreviation,
-            game: game,
-            type: field,
-            value: value,
-        };
-
-        console.log("updating " + game);
-
-        return Api.LiveScoreboard.setScore(request, function (data) {
-            self.updateScoreboard(data);
-        });
-    },
-    handleGameOnChange: function (game, field, value) {
-        value = value.replace(/\D/g,'');
-
-        this.state.games[game][field] = value;
-        this.setState({games: this.state.games});
-    },
-    formatData: function (data) {
-        var output = {},
-            games = Object.keys(data.promise);
-
-        for (var i in games) {
-            var game = games[i];
-            output[game] = {
-                game: game,
-                promise: data.promise[game],
-                actual: data.actual[game],
-                percent: data.percent[game],
-                points: data.points[game],
-            };
-        }
-
-        return output;
-    },
-    renderGameRow: function (game) {
-        return <GameRow key={game} game={game} data={this.state.games[game]} editable={this.state.editable} updateGameData={this.updateGameData} handleGameOnChange={this.handleGameOnChange} />
-    },
-    render: function () {
-        var date = moment().format('MMMM D'),
-            games = this.state.games,
-            rating = this.state.rating,
-            points = this.state.points;
+        const games = GAME_KEYS.map((game) => {
+            return <GameRow key={game} game={game} data={scoreboard.games[game]} editable={settings.LiveScoreboard.editable} />
+        })
 
         return (
             <div className="table-responsive">
@@ -116,7 +42,7 @@ var LiveScoreboard = React.createClass({
                         </tr>
                     </thead>
                     <tbody>
-                        {Object.keys(games).map(this.renderGameRow)}
+                        {games}
                         <tr className="border-top">
                             <th colSpan="4">{rating}</th>
                             <th className="total">Total:</th>
@@ -127,6 +53,10 @@ var LiveScoreboard = React.createClass({
             </div>
         )
     }
-});
+}
 
-export default LiveScoreboard;
+const mapStateToProps = (state) => state.live_scoreboard
+
+const LiveScoreboard = connect(mapStateToProps)(LiveScoreboardView)
+
+export default LiveScoreboard
