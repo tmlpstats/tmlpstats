@@ -22,7 +22,7 @@ function _wrapProvider(v) {
 }
 
 var _components = [
-    ['#live-scoreboard', function(elem) { ReactDOM.render(<LiveScoreboard/>, elem) }],
+    ['#live-scoreboard', function(elem) { ReactDOM.render(<Provider store={store}><LiveScoreboard/></Provider>, elem) }],
     ['#submission-flow', function(elem) { ReactDOM.render(_wrapProvider(SubmissionFlow()), elem) }]
 ]
 

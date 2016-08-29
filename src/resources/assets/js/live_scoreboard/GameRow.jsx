@@ -1,62 +1,45 @@
-import React from 'react';
-import GameField from './GameField';
+import React from 'react'
+import GameField from './GameField'
 
-var GameRow = React.createClass({
-    updateGameValue: function(field) {
-        return this.props.updateGameData(this.props.game, field);
-    },
-    handleFieldOnChange: function (field, value) {
-        var game = this.props.game;
-
-        this.props.handleGameOnChange(game, field, value);
-    },
-    render: function () {
-        var game = this.props.game,
-            data = this.props.data,
-            promise = data.promise,
-            actual = null,
-            gap = null,
-            percent = null,
-            points = null,
-            suffix = (game == 'gitw') ? '%' : '';
+export default class GameRow extends React.PureComponent {
+    render() {
+        var gap = null
+        const { game, data } = this.props
+        const { promise, actual } = data
+        const suffix = (game == 'gitw') ? '%' : ''
 
         if (data.actual !== null) {
-            actual = data.actual;
-            percent = data.percent;
-            points = data.points;
-            gap = promise - actual;
+            gap = promise - actual
         }
-
-
 
         return (
             <tr>
                 <th className="border-left-thin">{game.toUpperCase()}</th>
                 <td className="promise">
-                    <GameField field="promise" gameValue={promise} suffix={suffix} />
+                    {promise}{suffix}
                 </td>
                 <td className="actual">
                     <GameField
+                        game={game}
                         field="actual"
                         gameValue={actual}
+                        gameData={data}
                         suffix={suffix}
-                        updateGameValue={this.updateGameValue}
                         editable={this.props.editable}
-                        handleFieldOnChange={this.handleFieldOnChange}
                         />
                 </td>
                 <td>
-                    <GameField field="gap" gameValue={gap} suffix={suffix} />
+                    {gap}{suffix}
                 </td>
                 <td>
-                    <GameField field="percent" gameValue={percent} suffix="%" />
+                    {data.percent}%
                 </td>
                 <td className="border-right-thin">
-                    <GameField field="points" gameValue={points} />
+                    {data.points}
                 </td>
             </tr>
         )
     }
-});
+}
 
-export default GameRow;
+export default GameRow
