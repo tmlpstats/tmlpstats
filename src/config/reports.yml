@@ -35,6 +35,18 @@ arrangements:
       rating level: "Ineffective", "Effective", etc.
 
 api:
+  Admin:
+    type: namespace
+    children:
+      Region:
+        type: namespace
+        children:
+          getRegion:
+            desc: get region and centers in region and some other info
+            params:
+              - name: region
+                type: Region
+
   Application:
     type: namespace
     children:
@@ -300,6 +312,22 @@ api:
             type: Center
           - name: reportingDate
             type: date
+          - name: data
+            type: array
+      getScoreboardLockQuarter:
+        desc: TBD
+        params:
+          - name: center
+            type: Center
+          - name: quarter
+            type: Quarter
+      setScoreboardLockQuarter:
+        desc: TBD
+        params:
+          - name: center
+            type: Center
+          - name: quarter
+            type: Quarter
           - name: data
             type: array
 

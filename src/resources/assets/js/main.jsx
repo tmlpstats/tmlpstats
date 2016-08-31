@@ -1,6 +1,3 @@
-// POLYFILLS FIRST - required before importing further modules
-
-// EVERYTHING ELSE
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
@@ -8,14 +5,15 @@ import { Router } from 'react-router'
 
 import { LiveScoreboard } from './live_scoreboard'
 import { SubmissionFlow } from './submission'
+import AdminFlow from './admin/flow'
 import { store, history } from './store'
 
-
-function _wrapProvider(v) {
+function _routedFlow() {
     return (
         <Provider store={store}>
             <Router history={history}>
-                {v}
+                {SubmissionFlow()}
+                {AdminFlow()}
             </Router>
         </Provider>
     )
@@ -23,7 +21,7 @@ function _wrapProvider(v) {
 
 var _components = [
     ['#live-scoreboard', function(elem) { ReactDOM.render(<Provider store={store}><LiveScoreboard/></Provider>, elem) }],
-    ['#submission-flow', function(elem) { ReactDOM.render(_wrapProvider(SubmissionFlow()), elem) }]
+    ['#submission-flow', function(elem) { ReactDOM.render(_routedFlow(), elem) }]
 ]
 
 

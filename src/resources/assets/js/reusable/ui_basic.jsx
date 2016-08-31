@@ -1,6 +1,4 @@
-import React from 'react'
-
-const { PropTypes } = React
+import React, { PropTypes } from 'react'
 
 /**
  * ModeSelectButtons renders side-by-side buttons used for mode selector, with appropriate active state.
@@ -57,7 +55,7 @@ export class ModeSelectButtons extends React.Component {
  *
  * This should
  */
-export class LoadStateFlip extends React.Component {
+export class LoadStateFlip extends React.PureComponent {
     render() {
         var loadState = this.props.loadState
         if (loadState.state == 'loading') {
@@ -74,6 +72,41 @@ export class LoadStateFlip extends React.Component {
             return <div className="bg-danger">{error}</div>
         } else {
             return <div>{this.props.children}</div>
+        }
+    }
+}
+
+export class SubmitFlip extends React.PureComponent {
+    static defaultProps = {
+        buttonClasses: 'btn btn-primary',
+        offset: 'col-md-offset-2 col-md-8',
+        wrapGroup: true
+    }
+    static propTypes = {
+        loadState: PropTypes.object.isRequired,
+        offset: PropTypes.string,
+        wrapGroup: PropTypes.bool
+    }
+
+    render() {
+        const { wrapGroup, offset, loadState, buttonClasses } = this.props
+
+        const body = (
+            <LoadStateFlip loadState={loadState}>
+                <button className={buttonClasses} type="submit">{this.props.children}</button>
+            </LoadStateFlip>
+        )
+
+        if (wrapGroup) {
+            return (
+                <div className="form-group">
+                    <div className={offset}>
+                        {body}
+                    </div>
+                </div>
+            )
+        } else {
+            return body
         }
     }
 }

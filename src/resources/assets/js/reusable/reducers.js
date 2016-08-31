@@ -1,10 +1,10 @@
 import { objectAssign } from './ponyfill'
 
 const
-    NEW = {state: 'new', loaded: false},
-    LOADING = {state: 'loading', loaded: false},
-    LOADED = {state: 'loaded', loaded: true},
-    FAILED = {state: 'failed', loaded: false, failed: true}
+    NEW = {state: 'new', loaded: false, available: true},
+    LOADING = {state: 'loading', loaded: false, available: false},
+    LOADED = {state: 'loaded', loaded: true, available: true},
+    FAILED = {state: 'failed', loaded: false, failed: true, available: false}
 
 export function loadingMultiState(actionType) {
     return function(state = NEW, action){

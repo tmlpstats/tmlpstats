@@ -26,14 +26,24 @@ class AuthenticatedApiBase extends ApiBase
      * IOW:
      *    $this->assertAuthz(expr1 && expr2);
      *
-     * @param  [type] $value   [description]
-     * @param  [type] $message [description]
-     * @return [type]          [description]
+     * @param  bool $value     A boolean value. Usually the result of an expression, not hard-coded.
+     * @param  string $message If provided, a message to use instead of the default.
      */
     protected function assertAuthz($value, $message = null)
     {
         if (!$value) {
             throw new Exceptions\UnauthorizedException($message);
         }
+    }
+
+    /**
+     * A shortcut of assertAuthz for checking a single permission.
+     * @param  string $permission The permission to check
+     * @param  Any    $target     What to check against. Usually an ORM model. (see laravel authz docs)
+     * @param  string $message    If provided, a message to override.
+     */
+    protected function assertCan($permission, $target, $message = null)
+    {
+        return $this->assertAuthz($this->context->can($permission, $target), $message);
     }
 }

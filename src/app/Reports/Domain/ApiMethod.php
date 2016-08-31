@@ -58,10 +58,11 @@ class ApiMethod
         $methodName = array_pop($parts);
         if (count($parts) > 0) {
             foreach ($parts as $part) {
-                $output .= '\\' . ucfirst($part) . '::';
+                $output .= '\\' . ucfirst($part);
             }
         }
-        $output .= $methodName;
+        $output .= '::' . $methodName;
+
         return substr($output, 1);
     }
 
@@ -69,6 +70,7 @@ class ApiMethod
     {
         $v = $this->absNameApiStyle();
         $parts = explode('::', $v);
+
         return $parts[0];
     }
 

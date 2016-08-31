@@ -49,7 +49,9 @@ export class AddOneLink extends React.Component {
 export class SimpleSelect extends React.Component {
     static defaultProps = {
         keyProp: 'key',
-        labelProp: 'label'
+        labelProp: 'label',
+        multiple: false,
+        rows: 1
     }
     static propTypes = {
         items: PropTypes.arrayOf(PropTypes.object).isRequired,
@@ -57,7 +59,9 @@ export class SimpleSelect extends React.Component {
         getKey: PropTypes.func,
         labelProp: PropTypes.string,
         getLabel: PropTypes.func,
-        selectClasses: PropTypes.string
+        selectClasses: PropTypes.string,
+        multiple: PropTypes.bool,
+        rows: PropTypes.number
     }
     render() {
         const items = this.props.items || []
@@ -79,7 +83,7 @@ export class SimpleSelect extends React.Component {
             )
         })
         return (
-            <Field model={this.props.model}>
+            <Field model={this.props.model} multiple={this.props.multiple} rows={this.props.rows}>
                 <select className="form-control">{options}</select>
             </Field>
         )

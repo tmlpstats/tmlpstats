@@ -18,6 +18,7 @@ use TmlpStats\Http\Controllers\ApiControllerBase;
 class ApiController extends ApiControllerBase
 {
     protected $methods = [
+        "Admin.Region.getRegion" => "Admin__Region__getRegion",
         "Application.create" => "Application__create",
         "Application.update" => "Application__update",
         "Application.allForCenter" => "Application__allForCenter",
@@ -48,6 +49,8 @@ class ApiController extends ApiControllerBase
         "LocalReport.getCourseList" => "LocalReport__getCourseList",
         "Scoreboard.allForCenter" => "Scoreboard__allForCenter",
         "Scoreboard.stash" => "Scoreboard__stash",
+        "Scoreboard.getScoreboardLockQuarter" => "Scoreboard__getScoreboardLockQuarter",
+        "Scoreboard.setScoreboardLockQuarter" => "Scoreboard__setScoreboardLockQuarter",
         "SubmissionCore.initSubmission" => "SubmissionCore__initSubmission",
         "SubmissionData.ignoreMe" => "SubmissionData__ignoreMe",
         "TeamMember.create" => "TeamMember__create",
@@ -62,6 +65,12 @@ class ApiController extends ApiControllerBase
         "LiveScoreboard__getCurrentScores",
     ];
 
+    protected function Admin__Region__getRegion($input)
+    {
+        return App::make(Api\Admin\Region::class)->getRegion(
+            $this->parse($input, 'region', 'Region')
+        );
+    }
     protected function Application__create($input)
     {
         return App::make(Api\Application::class)->create(
@@ -272,6 +281,21 @@ class ApiController extends ApiControllerBase
         return App::make(Api\Scoreboard::class)->stash(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'data', 'array')
+        );
+    }
+    protected function Scoreboard__getScoreboardLockQuarter($input)
+    {
+        return App::make(Api\Scoreboard::class)->getScoreboardLockQuarter(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'quarter', 'Quarter')
+        );
+    }
+    protected function Scoreboard__setScoreboardLockQuarter($input)
+    {
+        return App::make(Api\Scoreboard::class)->setScoreboardLockQuarter(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'quarter', 'Quarter'),
             $this->parse($input, 'data', 'array')
         );
     }
