@@ -90,15 +90,13 @@ class LiveScoreboard extends AuthenticatedApiBase
     protected function getOfficialScores(Models\StatsReport $report)
     {
         // Step 1: Determine the week for promises to use (may be same week)
-        $quarterFirstWeekDate = $report->quarter->getFirstWeekDate($report->center);
-        $quarterEndDate = $report->quarter->getQuarterEndDate($report->center);
         $actualDate = $report->reportingDate;
-        $promiseDate = $actualDate->copy();
-        while ($promiseDate->lt(Carbon::now($report->center->timezone))
-            && $promiseDate->lt($quarterEndDate)
-            && $promiseDate->gt($quarterFirstWeekDate)
-        ) {
-            $promiseDate->addWeek();
+        $reportingDates = $report->quarter->listReportingDates($report->center);
+        $now = Carbon::now($report->center->timezone);
+        foreach ($reportingDates as $promiseDate) {
+            if ($promiseDate->gt($now)) {
+                break;
+            }
         }
 
         // Step 2: Fill an input array with both values, faking them into the same week.
