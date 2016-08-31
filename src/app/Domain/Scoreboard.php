@@ -37,6 +37,20 @@ class Scoreboard implements Arrayable, Referenceable
         return $this->week->toDateString();
     }
 
+    /**
+     * Return an array of information used to identify the reference
+     *
+     * @param  array $supplemental  Optional additional fields
+     * @return array
+     */
+    public function getReference($supplemental = [])
+    {
+        return array_merge([
+            'id' => $this->getKey(),
+            'type' => 'scoreboard',
+        ], $supplemental);
+    }
+
     /** Create a scoreboard that's blank */
     public static function blank($week = null)
     {

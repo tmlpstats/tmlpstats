@@ -22,17 +22,8 @@ abstract class ObjectsValidatorAbstract extends ValidatorAbstract
             return $this->isValid;
         }
 
-        foreach ($this->dataValidators as $field => $validator) {
-            $value = $this->data->$field;
-            if (!$validator->validate($value)) {
-                $displayName = $this->getValueDisplayName($field);
-                if ($value === null || $value === '') {
-                    $value = '[empty]';
-                }
-
-                $this->addMessage('INVALID_VALUE', $displayName, $value);
-                $this->isValid = false;
-            }
+        if (!$this->validateFields($data)) {
+            $this->isValid = false;
         }
 
         $this->validate($data);
@@ -41,6 +32,26 @@ abstract class ObjectsValidatorAbstract extends ValidatorAbstract
     }
 
     abstract protected function populateValidators($data);
+
+    protected function validateFields($data)
+    {
+        $isValid = true;
+
+        foreach ($this->dataValidators as $field => $validator) {
+            $value = $data->$field;
+            if (!$validator->validate($value)) {
+                $displayName = $this->getValueDisplayName($field);
+                if ($value === null || $value === '') {
+                    $value = '[empty]';
+                }
+
+                $this->addMessage('INVALID_VALUE', $displayName, $value);
+                $isValid = false;
+            }
+        }
+
+        return $isValid;
+    }
 
     protected function getValueDisplayName($value)
     {

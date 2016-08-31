@@ -43,6 +43,20 @@ class ParserDomain implements Arrayable, \JsonSerializable, Referenceable
     }
 
     /**
+     * Return an array of information used to identify the reference
+     *
+     * @param  array $supplemental  Optional additional fields
+     * @return array
+     */
+    public function getReference($supplemental = [])
+    {
+        return array_merge([
+            'id' => $this->getKey(),
+            'type' => lcfirst(class_basename($this)),
+        ], $supplemental);
+    }
+
+    /**
      * Implementation for Arrayable
      *
      * @return array

@@ -2,6 +2,7 @@
 namespace TmlpStats\Traits;
 
 use TmlpStats\Contracts\Referenceable;
+use TmlpStats\Domain;
 use TmlpStats\Message;
 use TmlpStats\Settings\Setting;
 
@@ -54,7 +55,7 @@ trait GeneratesApiMessages
     protected function addMessage($messageId)
     {
         $class = $this->messageClass;
-        $message = $class::create($this->sheetId);
+        $message = $class::create($this->getSheetId());
         $offset = null;
 
         $arguments = func_get_args();
@@ -74,5 +75,36 @@ trait GeneratesApiMessages
     protected function callMessageAdd($message, $arguments)
     {
         return call_user_func_array([$message, 'addMessage'], $arguments);
+    }
+
+
+    /**
+     * New Interface
+     */
+
+    public function createMessage($messageId, $parameters = [], $reference = null, $level = 'error')
+    {
+        if (!is_array($reference) && $reference instanceof Referenceable) {
+            $reference = $reference->getReference();
+        }
+
+        return Domain\ValidationMessage::create($messageId, $parameters)
+            ->level($level)
+            ->ref($reference);
+    }
+
+    public function createError($messageId, $parameters = [], $reference = null)
+    {
+        return $this->createMessage($messageId, $parameters, $reference, 'error');
+    }
+
+    public function createWarning($messageId, $parameters = [], $reference = null)
+    {
+        return $this->createMessage($messageId, $parameters, $reference, 'warning');
+    }
+
+    public function createInfo($messageId, $parameters = [], $reference = null)
+    {
+        return $this->createMessage($messageId, $parameters, $reference, 'info');
     }
 }

@@ -2,14 +2,16 @@
 namespace TmlpStats\Validate\Objects;
 
 use Respect\Validation\Validator as v;
+use TmlpStats\Domain;
 use TmlpStats\Models;
 use TmlpStats\Traits;
 
-// TODO: Review messages to make sure they are as accurate as possible
-
-class ApiTeamApplicationValidator extends TmlpRegistrationValidator
+class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
 {
-    use Traits\GeneratesApiMessages, Traits\ValidatesTravelWithConfig;
+    use Traits\ValidatesApiObjects, Traits\ValidatesTravelWithConfig;
+
+    const MAX_DAYS_TO_SEND_APPLICATION_OUT = 2;
+    const MAX_DAYS_TO_APPROVE_APPLICATION  = 14;
 
     protected $startingNextQuarter = null;
 
@@ -62,35 +64,50 @@ class ApiTeamApplicationValidator extends TmlpRegistrationValidator
         $isValid = true;
 
         if (!is_null($data->withdrawCodeId) || !is_null($data->wdDate)) {
-            $col = 'wd';
             if (is_null($data->withdrawCodeId)) {
-                $this->addMessage('TEAMAPP_WD_CODE_MISSING');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_WD_CODE_MISSING',
+                    'ref' => $data->getReference(['field' => 'withdrawCodeId']),
+                ]);
                 $isValid = false;
             }
             if (is_null($data->wdDate)) {
-                $this->addMessage('TEAMAPP_WD_DATE_MISSING');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_WD_DATE_MISSING',
+                    'ref' => $data->getReference(['field' => 'wdDate']),
+                ]);
                 $isValid = false;
             }
         } else if (!is_null($data->apprDate)) {
-            $col = 'appr';
             if (is_null($data->appInDate)) {
-                $this->addMessage('TEAMAPP_APPR_MISSING_APPIN_DATE');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_APPIN_DATE_MISSING',
+                    'ref' => $data->getReference(['field' => 'appInDate']),
+                ]);
                 $isValid = false;
             }
             if (is_null($data->appOutDate)) {
-                $this->addMessage('TEAMAPP_APPR_MISSING_APPOUT_DATE');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_APPOUT_DATE_MISSING',
+                    'ref' => $data->getReference(['field' => 'appOutDate']),
+                ]);
                 $isValid = false;
             }
         } else if (!is_null($data->appInDate)) {
-            $col = 'in';
             if (is_null($data->appOutDate)) {
-                $this->addMessage('TEAMAPP_APPIN_MISSING_APPOUT_DATE');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_APPOUT_DATE_MISSING',
+                    'ref' => $data->getReference(['field' => 'appOutDate']),
+                ]);
                 $isValid = false;
             }
         }
 
         if (is_null($data->committedTeamMemberId) && is_null($data->withdrawCodeId)) {
-            $this->addMessage('TMLPREG_NO_COMMITTED_TEAM_MEMBER');
+            $this->messages[] = Domain\ValidationMessage::error([
+                'id' => 'TEAMAPP_NO_COMMITTED_TEAM_MEMBER',
+                'ref' => $data->getReference(['field' => 'committedTeamMemberId']),
+            ]);
             $isValid = false;
         }
 
@@ -104,49 +121,79 @@ class ApiTeamApplicationValidator extends TmlpRegistrationValidator
         // Make sure dates for each step make sense
         if ($data->wdDate) {
             if ($data->regDate && $data->wdDate->lt($data->regDate)) {
-                $this->addMessage('TMLPREG_WD_DATE_BEFORE_REG_DATE');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_WD_DATE_BEFORE_REG_DATE',
+                    'ref' => $data->getReference(['field' => 'wdDate']),
+                ]);
                 $isValid = false;
             }
             if ($data->apprDate && $data->wdDate->lt($data->apprDate)) {
-                $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPR_DATE');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_WD_DATE_BEFORE_APPR_DATE',
+                    'ref' => $data->getReference(['field' => 'wdDate']),
+                ]);
                 $isValid = false;
             }
             if ($data->appInDate && $data->wdDate->lt($data->appInDate)) {
-                $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPIN_DATE');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_WD_DATE_BEFORE_APPIN_DATE',
+                    'ref' => $data->getReference(['field' => 'wdDate']),
+                ]);
                 $isValid = false;
             }
             if ($data->appOutDate && $data->wdDate->lt($data->appOutDate)) {
-                $this->addMessage('TMLPREG_WD_DATE_BEFORE_APPOUT_DATE');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_WD_DATE_BEFORE_APPOUT_DATE',
+                    'ref' => $data->getReference(['field' => 'wdDate']),
+                ]);
                 $isValid = false;
             }
         }
         if ($data->apprDate) {
             if ($data->regDate && $data->apprDate->lt($data->regDate)) {
-                $this->addMessage('TMLPREG_APPR_DATE_BEFORE_REG_DATE');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_APPR_DATE_BEFORE_REG_DATE',
+                    'ref' => $data->getReference(['field' => 'apprDate']),
+                ]);
                 $isValid = false;
             }
             if ($data->appInDate && $data->apprDate->lt($data->appInDate)) {
-                $this->addMessage('TMLPREG_APPR_DATE_BEFORE_APPIN_DATE');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_APPR_DATE_BEFORE_APPIN_DATE',
+                    'ref' => $data->getReference(['field' => 'apprDate']),
+                ]);
                 $isValid = false;
             }
             if ($data->appOutDate && $data->apprDate->lt($data->appOutDate)) {
-                $this->addMessage('TMLPREG_APPR_DATE_BEFORE_APPOUT_DATE');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_APPR_DATE_BEFORE_APPOUT_DATE',
+                    'ref' => $data->getReference(['field' => 'apprDate']),
+                ]);
                 $isValid = false;
             }
         }
         if ($data->appInDate) {
             if ($data->regDate && $data->appInDate->lt($data->regDate)) {
-                $this->addMessage('TMLPREG_APPIN_DATE_BEFORE_REG_DATE');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_APPIN_DATE_BEFORE_REG_DATE',
+                    'ref' => $data->getReference(['field' => 'appInDate']),
+                ]);
                 $isValid = false;
             }
             if ($data->appOutDate && $data->appInDate->lt($data->appOutDate)) {
-                $this->addMessage('TMLPREG_APPIN_DATE_BEFORE_APPOUT_DATE');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_APPIN_DATE_BEFORE_APPOUT_DATE',
+                    'ref' => $data->getReference(['field' => 'appInDate']),
+                ]);
                 $isValid = false;
             }
         }
         if ($data->appOutDate) {
             if ($data->regDate && $data->appOutDate->lt($data->regDate)) {
-                $this->addMessage('TMLPREG_APPOUT_DATE_BEFORE_REG_DATE');
+                $this->messages[] = Domain\ValidationMessage::error([
+                    'id' => 'TEAMAPP_APPOUT_DATE_BEFORE_REG_DATE',
+                    'ref' => $data->getReference(['field' => 'appOutDate']),
+                ]);
                 $isValid = false;
             }
         }
@@ -162,44 +209,71 @@ class ApiTeamApplicationValidator extends TmlpRegistrationValidator
                     && $data->regDate->lt($reportingDate)
                     && $data->regDate->diffInDays($reportingDate) > $maxAppOutDays
                 ) {
-                    $this->addMessage('TMLPREG_APPOUT_LATE', $maxAppOutDays);
+                    $this->messages[] = Domain\ValidationMessage::warning([
+                        'id' => 'TEAMAPP_APPOUT_LATE',
+                        'ref' => $data->getReference(['field' => 'appOutDate']),
+                        'params' => ['daysSince' => $maxAppOutDays],
+                    ]);
                 }
             } else if (is_null($data->appInDate)) {
                 if ($data->appOutDate
                     && $data->appOutDate->lt($reportingDate)
-                    && $data->appOutDate->diffInDays($reportingDate) > $maxApplicationDays
+                    && $data->regDate->diffInDays($reportingDate) > $maxApplicationDays
                 ) {
-                    $this->addMessage('TMLPREG_APPIN_LATE', $maxApplicationDays);
+                    $this->messages[] = Domain\ValidationMessage::warning([
+                        'id' => 'TEAMAPP_APPIN_LATE',
+                        'ref' => $data->getReference(['field' => 'appInDate']),
+                        'params' => ['daysSince' => $maxApplicationDays],
+                    ]);
                 }
             } else if (is_null($data->apprDate)) {
                 if ($data->appInDate
                     && $data->appInDate->lt($reportingDate)
-                    && $data->appInDate->diffInDays($reportingDate) > $maxApplicationDays
+                    && $data->regDate->diffInDays($reportingDate) > $maxApplicationDays
                 ) {
-                    $this->addMessage('TMLPREG_APPR_LATE', $maxApplicationDays);
+                    $this->messages[] = Domain\ValidationMessage::warning([
+                        'id' => 'TEAMAPP_APPR_LATE',
+                        'ref' => $data->getReference(['field' => 'apprDate']),
+                        'params' => ['daysSince' => $maxApplicationDays],
+                    ]);
                 }
             }
         }
 
         // Make sure dates are in the past
         if (!is_null($data->regDate) && $reportingDate->lt($data->regDate)) {
-            $this->addMessage('TMLPREG_REG_DATE_IN_FUTURE');
+            $this->messages[] = Domain\ValidationMessage::error([
+                'id' => 'TEAMAPP_REG_DATE_IN_FUTURE',
+                'ref' => $data->getReference(['field' => 'regDate']),
+            ]);
             $isValid = false;
         }
         if (!is_null($data->wdDate) && $reportingDate->lt($data->wdDate)) {
-            $this->addMessage('TMLPREG_WD_DATE_IN_FUTURE');
+            $this->messages[] = Domain\ValidationMessage::error([
+                'id' => 'TEAMAPP_WD_DATE_IN_FUTURE',
+                'ref' => $data->getReference(['field' => 'wdDate']),
+            ]);
             $isValid = false;
         }
         if (!is_null($data->apprDate) && $reportingDate->lt($data->apprDate)) {
-            $this->addMessage('TMLPREG_APPR_DATE_IN_FUTURE');
+            $this->messages[] = Domain\ValidationMessage::error([
+                'id' => 'TEAMAPP_APPR_DATE_IN_FUTURE',
+                'ref' => $data->getReference(['field' => 'apprDate']),
+            ]);
             $isValid = false;
         }
         if (!is_null($data->appInDate) && $reportingDate->lt($data->appInDate)) {
-            $this->addMessage('TMLPREG_APPIN_DATE_IN_FUTURE');
+            $this->messages[] = Domain\ValidationMessage::error([
+                'id' => 'TEAMAPP_APPIN_DATE_IN_FUTURE',
+                'ref' => $data->getReference(['field' => 'appInDate']),
+            ]);
             $isValid = false;
         }
         if (!is_null($data->appOutDate) && $reportingDate->lt($data->appOutDate)) {
-            $this->addMessage('TMLPREG_APPOUT_DATE_IN_FUTURE');
+            $this->messages[] = Domain\ValidationMessage::error([
+                'id' => 'TEAMAPP_APPOUT_DATE_IN_FUTURE',
+                'ref' => $data->getReference(['field' => 'appOutDate']),
+            ]);
             $isValid = false;
         }
 
@@ -220,19 +294,31 @@ class ApiTeamApplicationValidator extends TmlpRegistrationValidator
             if (is_null($data->travel)) {
                 // Error if no comment provided, warning to look at it otherwise
                 if (is_null($data->comment)) {
-                    $this->addMessage('TEAMAPP_TRAVEL_COMMENT_MISSING');
+                    $this->messages[] = Domain\ValidationMessage::error([
+                        'id' => 'TEAMAPP_TRAVEL_COMMENT_MISSING',
+                        'ref' => $data->getReference(['field' => 'comment']),
+                    ]);
                     $isValid = false;
                 } else {
-                    $this->addMessage('TEAMAPP_TRAVEL_COMMENT_REVIEW');
+                    $this->messages[] = Domain\ValidationMessage::warning([
+                        'id' => 'TEAMAPP_TRAVEL_COMMENT_REVIEW',
+                        'ref' => $data->getReference(['field' => 'comment']),
+                    ]);
                 }
             }
             if (is_null($data->room)) {
                 // Error if no comment provided, warning to look at it otherwise
                 if (is_null($data->comment)) {
-                    $this->addMessage('TEAMAPP_ROOM_COMMENT_MISSING');
+                    $this->messages[] = Domain\ValidationMessage::error([
+                        'id' => 'TEAMAPP_ROOM_COMMENT_MISSING',
+                        'ref' => $data->getReference(['field' => 'comment']),
+                    ]);
                     $isValid = false;
                 } else {
-                    $this->addMessage('TEAMAPP_ROOM_COMMENT_REVIEW');
+                    $this->messages[] = Domain\ValidationMessage::warning([
+                        'id' => 'TEAMAPP_ROOM_COMMENT_REVIEW',
+                        'ref' => $data->getReference(['field' => 'comment']),
+                    ]);
                 }
             }
         }
@@ -245,7 +331,10 @@ class ApiTeamApplicationValidator extends TmlpRegistrationValidator
         $isValid = true;
 
         if ($data->isReviewer && $data->teamYear !== 2) {
-            $this->addMessage('TEAMAPP_REVIEWER_TEAM1');
+            $this->messages[] = Domain\ValidationMessage::error([
+                'id' => 'TEAMAPP_REVIEWER_TEAM1',
+                'ref' => $data->getReference(['field' => 'isReviewer']),
+            ]);
             $isValid = false;
         }
 
