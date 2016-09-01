@@ -15,7 +15,7 @@ Please read all of these instructions first.
 ### Clone Repo
 ```
 $ cd ~/dev
-$ git clone https://github.com/pdarg/tmlpstats
+$ git clone https://github.com/tmlpstats/tmlpstats
 ```
 
 ### Download and install Vagrant
