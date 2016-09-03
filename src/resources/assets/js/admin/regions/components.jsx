@@ -7,6 +7,7 @@ import { SubmitFlip } from '../../reusable/ui_basic'
 
 import * as actions from './actions'
 
+
 class RegionsBase extends React.Component {
     checkRegions() {
         const { regionAbbr } = this.props.params

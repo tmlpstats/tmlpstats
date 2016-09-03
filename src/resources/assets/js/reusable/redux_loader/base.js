@@ -49,22 +49,27 @@ export class ReduxLoader {
         return (dispatch, getState, extra) => {
             dispatch(this.loadState('loading'))
             const info = {dispatch, getState, extra, loader: this}
-            return this.opts.loader(params, info).done((data) => {
-                if (data.error) {
-                    dispatch(this.loadState({error: data.error || 'error'}))
-                } else {
-                    const tdata = opts.transformData(data, info)
-                    const result = opts.successHandler(tdata, info)
-                    if (result) {
-                        dispatch(result)
-                    }
-                    if (opts.setLoaded) {
-                        dispatch(this.loadState('loaded'))
-                    }
+
+            const success = (data) => {
+                const tdata = opts.transformData(data, info)
+                const result = opts.successHandler(tdata, info)
+                if (result) {
+                    dispatch(result)
                 }
-            }).fail((xhr, textStatus) => {
-                dispatch(this.loadState({error: bestErrorValue(xhr, textStatus)}))
-            })
+                if (opts.setLoaded) {
+                    dispatch(this.loadState('loaded'))
+                }
+                return tdata
+            }
+
+            const failHandler = (err) => {
+                if (!err.error) {
+                    err = {error: err.message || err}
+                }
+                dispatch(this.loadState(err))
+            }
+
+            return this.opts.loader(params, info).then(success, failHandler)
         }
     }
 

@@ -2,6 +2,7 @@ import { objectAssign } from '../../reusable/ponyfill'
 import SimpleReduxLoader from '../../reusable/redux_loader/simple'
 import FormReduxLoader from '../../reusable/redux_loader/rrf'
 import { LoadingMultiState } from '../../reusable/reducers'
+import Api from '../../api'
 import { Schema, arrayOf } from 'normalizr'
 
 
@@ -20,9 +21,7 @@ regionSchema.define({
 
 export const regionsData = new SimpleReduxLoader({
     prefix: 'admin/regions',
-    loader: ({region}, {extra: {Api}}) => {
-        return Api.Admin.Region.getRegion({region, lookups: ['centers']})
-    },
+    loader: Api.Admin.Region.getRegion,
     transformData: (data) => {
         if (data.region && data.centers) {
             data = objectAssign({}, data.region, data, {quarter: null})
@@ -44,10 +43,7 @@ export const centersData = new SimpleReduxLoader({
 export const scoreboardLockData = new FormReduxLoader({
     prefix: 'admin/scoreboardLock',
     model: 'admin.regions.scoreboardLock.data',
-    loader: (data, {extra: {Api}}) => {
-        const {center, quarter} = data
-        return Api.Scoreboard.getScoreboardLockQuarter({center, quarter})
-    },
+    loader: Api.Scoreboard.getScoreboardLockQuarter,
     extraLMS: ['saveState']
 })
 
