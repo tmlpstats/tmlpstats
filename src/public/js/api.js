@@ -24,6 +24,19 @@ function apiCall(name, params, callback, errback) {
 
 var Api = {};
 
+Api.Admin = {
+};
+Api.Admin.Region = {
+
+    /*
+    get region and centers in region and some other info
+    Parameters:
+      region: Region
+    */
+    getRegion: function(params, callback, errback) {
+        return apiCall('Admin.Region.getRegion', params, (callback || null), (errback || null));
+    }
+};
 Api.Application = {
 
     /*
@@ -339,6 +352,27 @@ Api.Scoreboard = {
     */
     stash: function(params, callback, errback) {
         return apiCall('Scoreboard.stash', params, (callback || null), (errback || null));
+    },
+
+    /*
+    TBD
+    Parameters:
+      center: Center
+      quarter: Quarter
+    */
+    getScoreboardLockQuarter: function(params, callback, errback) {
+        return apiCall('Scoreboard.getScoreboardLockQuarter', params, (callback || null), (errback || null));
+    },
+
+    /*
+    TBD
+    Parameters:
+      center: Center
+      quarter: Quarter
+      data: array
+    */
+    setScoreboardLockQuarter: function(params, callback, errback) {
+        return apiCall('Scoreboard.setScoreboardLockQuarter', params, (callback || null), (errback || null));
     }
 };
 Api.SubmissionCore = {

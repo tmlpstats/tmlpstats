@@ -5,11 +5,13 @@ import { responsiveStateReducer, responsiveStoreEnhancer } from 'redux-responsiv
 import thunk from 'redux-thunk'
 
 import { submissionReducer } from './submission/reducers'
+import adminReducer from './admin/reducers'
 import liveScoreboardReducer from './live_scoreboard/reducers'
 
 const reducer = combineReducers({
     browser: responsiveStateReducer,
     routing: routerReducer,
+    admin: adminReducer,
     live_scoreboard: liveScoreboardReducer,
     submission: submissionReducer
 })

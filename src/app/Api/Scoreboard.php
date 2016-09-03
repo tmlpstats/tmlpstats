@@ -21,13 +21,13 @@ class Scoreboard extends AuthenticatedApiBase
         $rq = $submissionCore->reportAndQuarter($center, $reportingDate);
         $quarter = $rq['quarter'];
         $statsReport = $rq['report'];
+        $reportingDates = $quarter->listReportingDates($center);
 
         if ($statsReport !== null) {
             $weeks = $localReport->getQuarterScoreboard($statsReport, ['returnObject' => true]);
         } else {
             // This should only happen on the first week of the quarter, but we want to initialize the weeks fully.
             $weeks = new Domain\ScoreboardMultiWeek();
-            $reportingDates = $quarter->listReportingDates($center);
             foreach ($reportingDates as $d) {
                 $weeks->ensureWeek($d);
             }
@@ -47,15 +47,13 @@ class Scoreboard extends AuthenticatedApiBase
         // fill some additional metadata
         $locks = $this->getScoreboardLockQuarter($center, $quarter);
 
-        $week = $quarter->getQuarterStartDate($center)->addWeek();
-        $endDate = $quarter->getQuarterEndDate($center);
         $classrooms = [
             $quarter->getClassroom1Date($center),
             $quarter->getClassroom2Date($center),
             $quarter->getClassroom3Date($center),
         ];
         $weekNumber = 0;
-        while ($week->lte($endDate)) {
+        foreach ($reportingDates as $week) {
             $scoreboard = $weeks->ensureWeek($week);
             $scoreboard->meta['weekNum'] = ++$weekNumber;
             foreach ($classrooms as $classroomDate) {
@@ -67,9 +65,6 @@ class Scoreboard extends AuthenticatedApiBase
             $weekLock = $locks->getWeekDefault($week);
             $scoreboard->meta['canEditPromise'] = $weekLock->editPromise;
             $scoreboard->meta['canEditActual'] = $weekLock->editActual || ($week->toDateString() == $reportingDate->toDateString());
-
-            // Make a copy here, otherwise we may end up with an array of weeks with the same date
-            $week = $week->copy()->addWeek();
         }
 
         $output = [];
@@ -103,7 +98,11 @@ class Scoreboard extends AuthenticatedApiBase
     {
         $v = $this->context->getSetting(static::LOCK_SETTING_KEY, $center, $quarter);
         if ($v === null) {
-            return new Domain\ScoreboardLockQuarter();
+            // Create a blank scoreboard lock with reporting dates filled
+            $quarter->setRegion($center->region);
+            $reportingDates = $quarter->listReportingDates($center);
+
+            return new Domain\ScoreboardLockQuarter($reportingDates);
         } else {
             return Domain\ScoreboardLockQuarter::fromArray($v);
         }
@@ -111,7 +110,7 @@ class Scoreboard extends AuthenticatedApiBase
 
     public function setScoreboardLockQuarter(Models\Center $center, Models\Quarter $quarter, $data)
     {
-        $this->assertAuthz($this->context->can('adminScoreboard', $center));
+        $this->assertCan('adminScoreboard', $center);
         $locks = Domain\ScoreboardLockQuarter::fromArray($data);
         Models\Setting::upsert([
             'name' => static::LOCK_SETTING_KEY,
@@ -142,6 +141,7 @@ class Scoreboard extends AuthenticatedApiBase
     public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
     {
         $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\Scoreboard::class);
+
         return array_flatten($collection->getDictionary());
     }
 }

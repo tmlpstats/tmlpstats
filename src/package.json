@@ -31,6 +31,7 @@
     "array-find": "^1.0.0",
     "bower": "^1.7",
     "es6-promise": "^3.2.1",
+    "normalizr": "^2.2.1",
     "object-assign": "^4.1.0",
     "react": "^15.3.0",
     "react-dom": "^15.3.0",

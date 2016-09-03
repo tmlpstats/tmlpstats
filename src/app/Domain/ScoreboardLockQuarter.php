@@ -12,9 +12,12 @@ class ScoreboardLockQuarter implements Arrayable
 {
     protected $weeks;
 
-    public function __construct()
+    public function __construct($initWeeks = [])
     {
         $this->weeks = [];
+        foreach ($initWeeks as $week) {
+            $this->weeks[$week->toDateString()] = new ScoreboardLock($week);
+        }
     }
 
     /**

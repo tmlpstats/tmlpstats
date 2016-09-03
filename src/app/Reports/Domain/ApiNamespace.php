@@ -5,7 +5,6 @@
  */
 class ApiNamespace
 {
-
     /**
      * The name of this namespace
      * @var string
@@ -44,7 +43,10 @@ class ApiNamespace
                 $methods[] = $child;
             }
         }
-        $methods[count($methods) - 1]->isLast = true;
+        if (count($methods)) {
+            $methods[count($methods) - 1]->isLast = true;
+        }
+
         return $methods;
     }
 }

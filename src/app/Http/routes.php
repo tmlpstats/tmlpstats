@@ -14,15 +14,18 @@
 // Admin Area
 
 Route::post('api', 'ApiController@apiCall');
+Route::group(['prefix' => 'admin'], function () {
+    Route::match(['get', 'post'], 'dashboard', 'AdminController@index');
+    Route::get('status', 'AdminController@status');
+    Route::get('peoplereport', 'AdminController@getPeopleReport');
 
-Route::match(['get', 'post'], 'admin/dashboard', 'AdminController@index');
-Route::get('admin/status', 'AdminController@status');
-Route::get('admin/peoplereport', 'AdminController@getPeopleReport');
+    Route::resource('centers', 'AdminCenterController');
+    Route::post('centers', 'AdminCenterController@batchUpdate');
 
-Route::resource('admin/centers', 'AdminCenterController');
-Route::post('admin/centers', 'AdminCenterController@batchUpdate');
+    Route::resource('users', 'UserController');
 
-Route::resource('admin/users', 'UserController');
+    Route::get('regions/{regionAbbr}/{page?}/{irrelevant?}/{irrelevant2?}', 'ManageController@region');
+});
 
 // Invites
 Route::resource('users/invites', 'InviteController');
