@@ -53,6 +53,9 @@ class ReportsCodegen extends Command
         // Write a javascript API. PROTOTYPE
         $script = view('api.codegen.js_output', compact('namespacesFlat'))->render();
         $this->writeFile('public/js/api.js', $this->stripLine($script));
+
+        $es6 = view('api.codegen.es6_output', compact('namespacesFlat'))->render();
+        $this->writeFile('resources/assets/js/api/api-generated.js', $this->stripLine($es6));
     }
 
     private function writeFile($name, $output)
@@ -72,6 +75,7 @@ class ReportsCodegen extends Command
                 $packages[] = $name;
             }
         }
+
         return $packages;
     }
 
@@ -80,6 +84,7 @@ class ReportsCodegen extends Command
     {
         $lines = explode("\n", $text);
         array_shift($lines);
+
         return implode("\n", $lines);
     }
 }

@@ -7,4 +7,8 @@ export const arrayFind = require('array-find')
 
 
 // Promise is an ES6 primitive not available in IE
-export { Promise } from 'es6-promise'
+import { Promise } from 'es6-promise'
+
+const { fetch, Request, Response, Headers } = require('fetch-ponyfill')({Promise})
+
+export { Promise, fetch, Request, Response, Headers }
