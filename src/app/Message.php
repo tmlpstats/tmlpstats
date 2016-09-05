@@ -714,6 +714,22 @@ class Message
                 '%%reportingDate%%',
             ],
         ],
+        'IMPORTDOC_CAP_REG_CPC_REG_MISMATCH' => [
+            'type' => Message::WARNING,
+            'format' => 'CAP course completion registrations (%%coursRegistrations%%) is greater than the number of CPC registrations this week (%%cpcRegistrations%%). If this is accurate, please provide details explaining to your regional statistician.',
+            'arguments' => [
+                '%%coursRegistrations%%',
+                '%%cpcRegistrations%%',
+            ],
+        ],
+        'IMPORTDOC_CPC_REG_T1_APP_MISMATCH' => [
+            'type' => Message::WARNING,
+            'format' => 'CPC course completion registrations (%%coursRegistrations%%) is greater than the number of T1 applications registered this week (%%appRegistrations%%). If this is accurate, please provide details explaining to your regional statistician.',
+            'arguments' => [
+                '%%coursRegistrations%%',
+                '%%appRegistrations%%',
+            ],
+        ],
 
         // CenterStats Importer Errors
         'CENTERSTATS_WEEK_DATE_FORMAT_INVALID' => [
