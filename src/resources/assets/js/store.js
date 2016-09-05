@@ -1,22 +1,32 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import { browserHistory } from 'react-router'
 import { syncHistoryWithStore, routerReducer } from 'react-router-redux'
-import { responsiveStateReducer, responsiveStoreEnhancer } from 'redux-responsive'
+import { createResponsiveStateReducer, createResponsiveStoreEnhancer } from 'redux-responsive'
 import thunk from 'redux-thunk'
 
 import { submissionReducer } from './submission/reducers'
 import adminReducer from './admin/reducers'
 import liveScoreboardReducer from './live_scoreboard/reducers'
 
+const responsiveBreakpoints = {
+    extraSmall: 480,
+    small: 768,
+    medium: 992,
+    large: 1200,
+    huge: 1600
+}
+
 const reducer = combineReducers({
-    browser: responsiveStateReducer,
+    browser: createResponsiveStateReducer(responsiveBreakpoints),
     routing: routerReducer,
     admin: adminReducer,
     live_scoreboard: liveScoreboardReducer,
     submission: submissionReducer
 })
 
-var _enhancers = compose(responsiveStoreEnhancer, applyMiddleware(thunk.withExtraArgument({Api: window.Api})))
+const responsive = createResponsiveStoreEnhancer({performanceMode: true})
+
+var _enhancers = compose(responsive, applyMiddleware(thunk.withExtraArgument({Api: window.Api})))
 
 // This trick will remove Redux devtools in production
 if (process.env.NODE_ENV != 'production') {
