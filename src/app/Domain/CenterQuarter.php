@@ -40,11 +40,12 @@ class CenterQuarter implements Arrayable, \JsonSerializable
     {
         $this->center = $center;
         $this->quarter = $quarter;
-
     }
 
     public static function fromModel(Models\Center $center, Models\Quarter $quarter)
     {
+        $quarter->setRegion($center->region);
+
         $cq = new static($center, $quarter);
         foreach (static::SIMPLE_DATE_FIELDS as $field) {
             $cq->$field = $quarter->getQuarterDate($field, $center);
