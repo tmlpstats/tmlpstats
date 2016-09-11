@@ -4,6 +4,7 @@ php:
   - 7.0
 
 matrix:
+  fast_finish: true
   allow_failures:
     - php: 7.0
 
@@ -11,15 +12,26 @@ cache:
   directories:
     - vendor
 
+before_install:
+  - phpenv config-rm xdebug.ini
+
 before_script:
- - cd src/
- - find . -name "*.php" ! -path '*/_ide_helper.php' -print0 | xargs -0 -n1 -P8 php -l
- - travis_retry composer install --no-interaction
+  - cd src/
+  - find . -name "*.php" ! -path '*/_ide_helper.php' -print0 | xargs -0 -n1 -P8 php -l
+  - travis_retry composer install --no-interaction
 
 script:
- - mkdir -p build/logs
- - php -d max_execution_time="1800" -d memory_limit="1G" vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+  - mkdir -p build/logs
+  - >
+    if [[ $TRAVIS_PHP_VERSION =~ ^7 ]]; then
+      phpdbg -qrr vendor/bin/phpunit --coverage-clover build/logs/clover.xml;
+    else
+      php -d max_execution_time="1800" -d memory_limit="1G" vendor/bin/phpunit;
+    fi
 
 after_script:
- - ls -l build/logs/
- - travis_retry php vendor/bin/coveralls -v
+  - ls -l build/logs/
+  - >
+    if [[ $TRAVIS_PHP_VERSION =~ ^7 ]]; then
+      travis_retry php vendor/bin/coveralls -v
+    fi
