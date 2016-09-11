@@ -9,40 +9,27 @@ class GameFieldView extends React.Component {
     setGameOp(op) {
         this.props.dispatch(actions.setGameOp(this.props.game, op))
     }
-    submitUpdates() {
-        // Tell LiveScoreboard it's time to update this value
-        this.setGameOp('updating')
-        var revert = () => {
-            const op = this.props.gameData.op
-            if (op == 'success' || op == 'failed') {
-                this.setGameOp('default')
-            }
+
+    submitUpdates(gameValue) {
+        if (this.props.gameData.op != 'updating') {
+            // Tell LiveScoreboard it's time to update this value
+            const center = settings.center.abbreviation
+            const { game, field } = this.props
+            this.props.dispatch(actions.submitUpdates(center, game, field, gameValue))
         }
-        const center = settings.center.abbreviation
-        const { game, field, gameValue } = this.props
-        this.props.dispatch(actions.postGameValue(center, game, field, gameValue)).done(() => {
-            this.setGameOp('success')
-            setTimeout(revert, 5000)
-        }).fail(() => {
-            this.setGameOp('failed')
-            setTimeout(revert, 8000)
-        })
     }
 
     handleChange(e) {
+        const center = settings.center.abbreviation
         const value = e.target.value
         const { game, field } = this.props
         // Pass the updated value to LiveScoreboard who owns the state object
-        this.props.dispatch(actions.changeGameField(game, field, value))
-    }
-
-    handleBlur(e) {
-        e.target.value = this.props.gameValue
+        this.props.dispatch(actions.changeGameFieldPotentialUpdate(center, game, field, value))
     }
 
     handleKeyPress(e) {
         if (e.key == 'Enter') {
-            this.submitUpdates()
+            this.submitUpdates(this.props.gameValue)
         }
     }
 
@@ -51,11 +38,9 @@ class GameFieldView extends React.Component {
         if (this.props.suffix) {
             after = this.props.suffix
         }
-        var disabled = false
         var container = ''
         switch (this.props.gameData.op) {
         case 'updating':
-            disabled = true
             after = <span className="glyphicon glyphicon-refresh"></span>
             break
         case 'success':
@@ -74,9 +59,7 @@ class GameFieldView extends React.Component {
                     type="text"
                     value={this.props.gameValue}
                     onChange={this.handleChange.bind(this)}
-                    onBlur={this.handleBlur.bind(this)}
                     onKeyPress={this.handleKeyPress.bind(this)}
-                    disabled={disabled}
                     className="form-control"
                 />
                 <span className="input-group-addon" aria-hidden="true">

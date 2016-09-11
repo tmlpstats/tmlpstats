@@ -35,6 +35,11 @@ class ScoreboardMultiWeek
         return $this->weeks[$key];
     }
 
+    public function getWeek(Carbon $day)
+    {
+        return $this->weeks[$day->toDateString()];
+    }
+
     public function sortedValues()
     {
         ksort($this->weeks);

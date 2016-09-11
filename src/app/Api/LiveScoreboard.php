@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Domain;
-use TmlpStats\Reports\Arrangements;
 
 class LiveScoreboard extends AuthenticatedApiBase
 {
@@ -89,43 +88,46 @@ class LiveScoreboard extends AuthenticatedApiBase
      */
     protected function getOfficialScores(Models\StatsReport $report)
     {
+        // Create a fake "now" using UTC so that date comparisons work
+        $localNow = Carbon::now($report->center->timezone);
+        $now = Carbon::parse($localNow->toDateString(), 'UTC')->startOfDay();
+
         // Step 1: Determine the week for promises to use (may be same week)
         $actualDate = $report->reportingDate;
-        $reportingDates = $report->quarter->listReportingDates($report->center);
-        $now = Carbon::now($report->center->timezone);
-        foreach ($reportingDates as $promiseDate) {
-            if ($promiseDate->gt($now)) {
-                break;
+        if ($actualDate->lt($now)) {
+            $reportingDates = $report->quarter->listReportingDates($report->center);
+            foreach ($reportingDates as $promiseDate) {
+                if ($promiseDate->gt($now)) {
+                    break;
+                }
             }
+        } else {
+            $promiseDate = $actualDate;
         }
 
         // Step 2: Fill an input array with both values, faking them into the same week.
         if ($actualDate->ne($promiseDate)) {
             $quarterData = App::make(LocalReport::class)->getQuarterScoreboard($report, [
-                'returnUnprocessed' => true,
-                'returnUnflattened' => true,
+                'returnObject' => true,
             ]);
 
-            $actualWeekData = $quarterData[$actualDate->toDateString()];
-            $promiseWeekData = $quarterData[$promiseDate->toDateString()];
+            $actualWeekData = $quarterData->getWeek($actualDate);
+            $promiseWeekData = $quarterData->getWeek($promiseDate);
 
-            if (!isset($promiseWeekData['promise'])) {
+            if (!isset($promiseWeekData)) {
                 throw new \Exception("Could not get promise for promise: {$promiseDate->toDateString()}, actual: {$actualDate->toDateString()}");
             }
-            if (!isset($actualWeekData['actual'])) {
+            if (!isset($actualWeekData)) {
                 throw new \Exception("Could not get actual for promise: {$promiseDate->toDateString()}, actual: {$actualDate->toDateString()}");
             }
 
-            // Temporarily fake the reporting date so arrangement works properly
-            $promiseWeekData['promise']->reportingDate = $actualDate;
+            $target = Domain\Scoreboard::blank($promiseDate);
+            foreach ($target->games() as $gameKey => $g) {
+                $g->setPromise($promiseWeekData->game($gameKey)->promise());
+                $g->setActual($actualWeekData->game($gameKey)->actual());
+            }
 
-            // Step 3: Use the arrangement to do the work
-            $a = new Arrangements\GamesByWeek([
-                $actualWeekData['actual'],
-                $promiseWeekData['promise'],
-            ]);
-            $weekData = $a->compose();
-            $reportData = $weekData['reportData'][$actualDate->toDateString()];
+            $reportData = $target->toArray();
         } else {
             // Step 3: LocalReport already did the work for us
             $reportData = App::make(LocalReport::class)->getWeekScoreboard($report);

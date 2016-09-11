@@ -1,14 +1,22 @@
+import objectPick from 'lodash/pick'
+
+import { objectAssign } from '../reusable/ponyfill'
+import Api from '../api'
+
 import { scoreboardLoad, redux_scoreboard } from './data'
+
 
 const loadState = scoreboardLoad.actionCreator()
 
+const DESIRED_SB_KEYS = ['games', 'meta', 'week']
+
 export function getCurrentScores(center) {
-    return (dispatch, _, { Api }) => {
+    return (dispatch) => {
         dispatch(loadState('loading'))
-        Api.LiveScoreboard.getCurrentScores({center}, function (data) {
-            const { games, meta } = data
-            dispatch(updateScoreboard({games, meta}))
+        return Api.LiveScoreboard.getCurrentScores({center}).then((data) =>{
+            dispatch(updateScoreboard(objectPick(data, DESIRED_SB_KEYS)))
             dispatch(loadState('loaded'))
+            return data
         })
     }
 }
@@ -32,13 +40,68 @@ export function setGameOp(game, op) {
 }
 
 export function postGameValue(center, game, type, value) {
-    return (dispatch, getState, { Api }) => {
+    return (dispatch, getState) => {
         const request = { center, game, type, value }
-        return Api.LiveScoreboard.setScore(request, function (data) {
+        return Api.LiveScoreboard.setScore(request).then((data) => {
             if (data.games) {
                 const existing = getState().live_scoreboard.scoreboard
-                dispatch(updateScoreboard(redux_scoreboard.mergeGameUpdates(existing, data.games)))
+                const newMeta = objectAssign({}, existing.meta, data.meta)
+                const newSb = redux_scoreboard.mergeGameUpdates(existing, data.games)
+                dispatch(updateScoreboard(objectAssign(newSb, {meta: newMeta})))
             }
+            return data
         })
     }
+}
+
+export function submitUpdates(center, game, field, gameValue) {
+    return (dispatch, getState) => {
+        dispatch(setGameOp(game, 'updating'))
+        const makeRevert = () => {
+            return ifGeneration(getState, game, () => {
+                dispatch(setGameOp(game, 'default'))
+            })
+        }
+        const successHandler = (data) => {
+            dispatch(setGameOp(game, 'success'))
+            setTimeout(makeRevert(), 5000)
+            return data
+        }
+        const failHandler = () => {
+            dispatch(setGameOp(game, 'failed'))
+            setTimeout(makeRevert(), 8000)
+        }
+        return dispatch(postGameValue(center, game, field, gameValue)).then(successHandler, failHandler)
+    }
+}
+
+export function changeGameFieldPotentialUpdate(center, game, field, gameValue) {
+    return (dispatch, getState) => {
+        dispatch(changeGameField(game, field, gameValue))
+
+        if (!isNaN(parseInt(gameValue))) {
+            const cb = ifGeneration(getState, game, () => {
+                dispatch(submitUpdates(center, game, field, gameValue))
+            })
+            setTimeout(cb, 700)
+        }
+    }
+
+}
+
+function ifGeneration(getState, game, handler) {
+    const generation = generationSelector(getState(), game)
+    return () => {
+        if (generationSelector(getState(), game) == generation) {
+            handler(...arguments)
+        }
+    }
+}
+
+function gameSelector(state, game) {
+    return state.live_scoreboard.scoreboard.games[game]
+}
+
+function generationSelector(state, game) {
+    return gameSelector(state, game)._gen
 }

@@ -133,7 +133,7 @@ export class ReduxFriendlyScoreboard {
      */
     updateGameField(sb, game, field, value) {
         var gameData = sb.games[game]
-        if (gameData[field] != value) {
+        if (gameData[field] !== value) {
             const newGameData = this._updateGameOnly(gameData, {[field]: value})
             const newGames = objectAssign({}, sb.games, {[game]: newGameData})
 
@@ -168,8 +168,9 @@ export class ReduxFriendlyScoreboard {
         }
         const percent = (data.actual)? Math.round(calculatePercent(data.promise, data.actual)) : 0
         if (percent != data.percent) {
+            const generation = (data._gen || 0) + 1
             const points = getPoints(data.key, percent)
-            return objectAssign({}, data, {percent, points})
+            return objectAssign({}, data, {percent, points, _gen: generation})
         } else {
             return data
         }

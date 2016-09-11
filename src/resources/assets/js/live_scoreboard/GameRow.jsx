@@ -8,8 +8,10 @@ export default class GameRow extends React.PureComponent {
         const { promise, actual } = data
         const suffix = (game == 'gitw') ? '%' : ''
 
-        if (data.actual !== null) {
+        if (actual !== null && !isNaN(parseInt(actual))) {
             gap = promise - actual
+        } else {
+            gap = ''
         }
 
         return (
@@ -32,7 +34,7 @@ export default class GameRow extends React.PureComponent {
                     {gap}{suffix}
                 </td>
                 <td>
-                    {data.percent}%
+                    {isNaN(data.percent)? '' : data.percent}%
                 </td>
                 <td className="border-right-thin">
                     {data.points}

@@ -6,6 +6,7 @@ import GameRow from './GameRow'
 import * as actions from './actions'
 
 const settings = window.settings
+const moment = window.moment // TODO consider ponyfill
 
 class LiveScoreboardView extends React.Component {
     componentWillMount() {
@@ -18,7 +19,13 @@ class LiveScoreboardView extends React.Component {
         if (!loading.loaded) {
             return <div>Loading</div>
         }
-        var date = moment().format('MMMM D')
+        var date = 'Date unknown'
+        if (scoreboard.week) {
+            const sw = moment(scoreboard.week).format('MMM D')
+            const m = scoreboard.meta.updatedAt
+            const updatedWeek = moment(m? m.date : undefined).format('MMM D h:mm a')
+            date = `Promises for ${sw}; data updated ${updatedWeek}`
+        }
         const { rating, points } = scoreboard
 
         const games = GAME_KEYS.map((game) => {
