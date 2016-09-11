@@ -13,6 +13,8 @@ import React, { PropTypes } from 'react'
  */
 export class ModeSelectButtons extends React.Component {
     static defaultProps = {
+        classes: 'btn btn-default',
+        activeClasses: 'btn btn-default active',
         keyProp: 'key',
         getLabel: (v) => v.label
     }
@@ -30,10 +32,7 @@ export class ModeSelectButtons extends React.Component {
         var buttons = []
         this.props.items.forEach((item) => {
             var key = item[this.props.keyProp]
-            var classes = 'btn btn-default'
-            if (key == this.props.current) {
-                classes += ' active'
-            }
+            const classes = (key == this.props.current) ? this.props.activeClasses : this.props.classes
             var cb = () => this.props.onClick(key, item)
             buttons.push(
                 <button key={key} type="button" className={classes} onClick={cb}>
@@ -165,6 +164,23 @@ export class MessagesComponent extends React.Component {
             <div>
                 {errorString}
                 {warningString}
+            </div>
+        )
+    }
+}
+
+export class Alert extends React.PureComponent {
+    static defaultProps = {
+        alert: 'info',
+        icon: 'info-sign'
+    }
+    render() {
+        const { alert, icon, children } = this.props
+
+        return (
+            <div className={'alert alert-' + alert}>
+                <span className={'glyphicon glyphicon-' + icon} aria-hidden="true"></span>
+                {children}
             </div>
         )
     }

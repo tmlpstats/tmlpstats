@@ -1,10 +1,10 @@
 import { combineReducers } from 'redux'
-import { modelReducer, formReducer } from 'react-redux-form'
+import { modelReducer } from 'react-redux-form'
 
 import { objectAssign } from '../../reusable/ponyfill'
-import { classListLoad, teamMembersCollection } from './data'
+import { weeklyReportingSave, weeklyReportingData, teamMembersData } from './data'
 
-export const TEAM_MEMBERS_COLLECTION_FORM_KEY = 'submission.class_list.teamMembers.collection'
+export const TEAM_MEMBERS_COLLECTION_FORM_KEY = 'submission.class_list.teamMembers.data.collection'
 export const TEAM_MEMBER_FORM_KEY = 'submission.class_list.currentMember'
 
 const DEFAULT_PREFS = {
@@ -20,11 +20,22 @@ function prefsReducer(state=DEFAULT_PREFS, action) {
     return state
 }
 
+function resortCheck(a, b, action) {
+    if (action.type == 'rrf/change') {
+        return action.silent || false // if this was a silent action, we want to rebuild sort
+    }
+    return false
+}
+
 const classListReducer = combineReducers({
-    loading: classListLoad.reducer(),
     currentMember: modelReducer(TEAM_MEMBER_FORM_KEY),
-    teamMembers: teamMembersCollection.reducer(modelReducer(TEAM_MEMBERS_COLLECTION_FORM_KEY)),
-    prefs: prefsReducer
+    teamMembers: teamMembersData.reducer({
+        collection_reducer: modelReducer(TEAM_MEMBERS_COLLECTION_FORM_KEY),
+        check_resort: resortCheck
+    }),
+    prefs: prefsReducer,
+    weeklyReporting: weeklyReportingData.reducer(),
+    weeklySave: weeklyReportingSave.reducer()
 })
 
 export default classListReducer

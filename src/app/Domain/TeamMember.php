@@ -8,6 +8,8 @@ use TmlpStats as Models;
  */
 class TeamMember extends ParserDomain
 {
+    public $meta = [];
+
     protected static $validProperties = [
         'id' => [
             'owner' => 'teamMember',
@@ -88,18 +90,23 @@ class TeamMember extends ParserDomain
             'type' => 'bool',
         ],
         'withdrawCode' => [
-            'owner' => 'applicationData',
+            'owner' => 'teamMemberData',
             'type' => 'WithdrawCode',
             'assignId' => true,
         ],
         'comment' => [
-            'owner' => 'applicationData',
+            'owner' => 'teamMemberData',
             'type' => 'string',
+        ],
+        'accountabilities' => [
+            'owner' => '__Accountability', // Marking a specialty object owner
+            'type' => 'array',
         ],
     ];
 
-    public static function fromModel($teamMemberData, $teamMember = null, $person = null)
+    public static function fromModel($teamMemberData, $teamMember = null, $person = null, $options = [])
     {
+        $ignore = array_get($options, 'ignore', false);
         if ($teamMember === null) {
             $teamMember = $teamMemberData->teamMember;
         }
@@ -109,6 +116,9 @@ class TeamMember extends ParserDomain
 
         $obj = new static();
         foreach (static::$validProperties as $k => $v) {
+            if ($ignore && array_get($ignore, $k, false)) {
+                continue;
+            }
             switch ($v['owner']) {
                 case 'person':
                     $obj->$k = $person->$k;
@@ -119,6 +129,11 @@ class TeamMember extends ParserDomain
                 case 'teamMemberData':
                     if ($teamMemberData) {
                         $obj->$k = $teamMemberData->$k;
+                    }
+                    break;
+                case '__Accountability':
+                    if (($reportingDate = array_get($options, 'accountabilitiesFor', null)) !== null) {
+                        $obj->$k = $person->getAccountabilityIds($reportingDate);
                     }
             }
         }
@@ -152,6 +167,14 @@ class TeamMember extends ParserDomain
                 $this->copyTarget($target, $k, $v, $conf);
             }
         }
+    }
+
+    public function toArray()
+    {
+        $output = parent::toArray();
+        $output['meta'] = $this->meta;
+
+        return $output;
     }
 
 }

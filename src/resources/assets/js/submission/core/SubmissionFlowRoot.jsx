@@ -25,15 +25,16 @@ class SubmissionFlowComponent extends SubmissionBase {
         var layout
         if (largeLayout) {
             layout = (
-                <div className="row">
-                    <div className="col-md-2">{nav}</div>
-                    <div className="col-md-10">
+                <div id="submissionWideLayout">
+                    <div id="swSidebar">{nav}</div>
+                    <div id="swContent">
                         <div className="panel panel-default">
                             <div className="panel-body">
                                 {this.props.children}
                             </div>
                         </div>
                     </div>
+                    <div className="clearfix"></div>
                 </div>
             )
         } else {

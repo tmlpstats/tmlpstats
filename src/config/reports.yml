@@ -292,6 +292,14 @@ api:
           - name: localReport
             type: LocalReport
 
+      getCenterQuarter:
+        desc: Center Quarter
+        params:
+          - name: center
+            type: Center
+          - name: quarter
+            type: Quarter
+
   Scoreboard:
     type: namespace
     children:
@@ -387,6 +395,25 @@ api:
           - name: includeInProgress
             type: bool
             required: false
+      stash:
+        desc: Stash data for in-progress Team Member weekly
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+          - name: data
+            type: array
+      bulkStashWeeklyReporting:
+        desc: Bulk update weekly reporting info (GITW/TDO)
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+          - name: updates
+            type: array
+
 
   UserProfile:
     type: namespace

@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\ApiBase;
 use TmlpStats\Api\Exceptions as ApiExceptions;
+use TmlpStats\Domain;
 use TmlpStats\Reports\Arrangements;
 
 class LocalReport extends ApiBase
@@ -203,6 +204,13 @@ class LocalReport extends ApiBase
         }
 
         return $report;
+    }
+
+    public function getCenterQuarter(Models\Center $center, Models\Quarter $quarter)
+    {
+        $quarter->setRegion($center->region);
+
+        return Domain\CenterQuarter::fromModel($center, $quarter);
     }
 
     public static function quarterForCenterDate(Models\Center $center, Carbon $reportingDate)
