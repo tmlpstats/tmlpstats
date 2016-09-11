@@ -57,7 +57,6 @@ export function exitChoiceMerges(exitChoice) {
         delete merges.withdrawCode
         break
     case EC_WBO:
-        console.log('about to do wellbeing code')
         merges.withdrawCode = wellBeingCode(store.getState())
         break
     case EC_XFER_OUT:

@@ -90,7 +90,7 @@ export function stashTeamMember(center, reportingDate, data) {
                 return data
             },
             (err) => {
-                dispatch(weeklySaveState({error: err.error || err}))
+                dispatch(teamMembersData.saveState({error: err.error || err}))
             }
         )
     }
