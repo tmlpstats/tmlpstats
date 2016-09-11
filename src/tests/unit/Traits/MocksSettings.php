@@ -42,7 +42,7 @@ trait MocksSettings
             $value = json_encode($value);
         }
 
-        $setting = $this->getSettingStub([
+        $setting = $this->getSettingMock([
             'id'    => mt_rand(10000, 99999),
             'name'  => $name,
             'value' => $value,
@@ -90,7 +90,7 @@ trait MocksSettings
      *
      * @return Setting
      */
-    public function getSettingStub($data = [])
+    public function getSettingMock($data = [])
     {
         $setting = new Setting();
 
