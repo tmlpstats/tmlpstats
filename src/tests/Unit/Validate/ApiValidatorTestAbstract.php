@@ -5,9 +5,14 @@ use Carbon\Carbon;
 use Illuminate\Support\Debug\Dumper;
 use TmlpStats as Models;
 use TmlpStats\Api\Parsers;
+use TmlpStats\Tests\Unit\Traits;
 
 class ApiValidatorTestAbstract extends ValidatorTestAbstract
 {
+    use Traits\MocksQuarters, Traits\MocksModel;
+
+    protected $defaultObjectMethods = [];
+
     protected $instantiateApp = true;
 
     protected $dataTemplate = [];
@@ -102,6 +107,12 @@ class ApiValidatorTestAbstract extends ValidatorTestAbstract
 
     public function getObjectMock($methods = [], $constructorArgs = [])
     {
+        // If there's nothing to mock, return a real object
+        if (!$methods && !$this->defaultObjectMethods) {
+            $report = $constructorArgs ? $constructorArgs[0] : $this->statsReport;
+            return new $this->testClass($report);
+        }
+
         if (!$constructorArgs) {
             $constructorArgs = [$this->statsReport];
         }

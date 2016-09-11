@@ -5,12 +5,11 @@ use stdClass;
 
 class ValidatorTestAbstract extends \TmlpStats\Tests\TestAbstract
 {
+    protected $defaultObjectMethods = ['addMessage'];
+
     protected function getObjectMock($methods = [], $constructorArgs = [])
     {
-        $defaultMethods = [
-            'addMessage',
-        ];
-        $methods = $this->mergeMockMethods($defaultMethods, $methods);
+        $methods = $this->mergeMockMethods($this->defaultObjectMethods, $methods);
 
         if (!$constructorArgs) {
             $constructorArgs[] = new stdClass;

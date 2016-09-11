@@ -2,15 +2,14 @@
 namespace TmlpStats\Tests\Unit\Validate\Objects;
 
 use Carbon\Carbon;
-use TmlpStats as Models;
-use TmlpStats\Domain;
+use TmlpStats\Domain\TeamMember;
 use TmlpStats\Tests\Unit\Traits;
 use TmlpStats\Tests\Unit\Validate\ApiValidatorTestAbstract;
 use TmlpStats\Validate\Objects\ApiTeamMemberValidator;
 
 class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
 {
-    use Traits\MocksSettings, Traits\MocksQuarters, Traits\MocksModel;
+    use Traits\MocksSettings;
 
     protected $testClass = ApiTeamMemberValidator::class;
 
@@ -50,6 +49,13 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             'withdrawCode' => null,
             'comment' => null,
         ];
+    }
+
+    public function tearDown()
+    {
+        parent::tearDown();
+
+        $this->clearSettings();
     }
 
     /**
@@ -783,6 +789,6 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
 
         $data = array_merge($this->dataTemplate, $data);
 
-        return Domain\TeamMember::fromArray($data);
+        return TeamMember::fromArray($data);
     }
 }

@@ -2,21 +2,12 @@
 namespace TmlpStats\Tests\Unit\Validate\Objects;
 
 use Carbon\Carbon;
-use TmlpStats as Models;
-use TmlpStats\Domain;
-use TmlpStats\Tests\Unit\Traits;
+use TmlpStats\Domain\Scoreboard;
 use TmlpStats\Tests\Unit\Validate\ApiValidatorTestAbstract;
 use TmlpStats\Validate\Objects\ApiScoreboardValidator;
 
-
-
-// TODO: update getScoreboard to create promises and actuals
-
-
 class ApiScoreboardValidatorTest extends ApiValidatorTestAbstract
 {
-    use Traits\MocksSettings, Traits\MocksQuarters, Traits\MocksModel;
-
     protected $testClass = ApiScoreboardValidator::class;
 
     protected $messageTemplate = [
@@ -355,7 +346,7 @@ class ApiScoreboardValidatorTest extends ApiValidatorTestAbstract
         if (!isset($data['promise'])) {
             $data['promise'] = [];
 
-            foreach (Domain\Scoreboard::GAME_KEYS as $game) {
+            foreach (Scoreboard::GAME_KEYS as $game) {
                 $data['promise'][$game] = $data[$game];
             }
         }
@@ -363,16 +354,16 @@ class ApiScoreboardValidatorTest extends ApiValidatorTestAbstract
         if (!isset($data['actual'])) {
             $data['actual'] = [];
 
-            foreach (Domain\Scoreboard::GAME_KEYS as $game) {
+            foreach (Scoreboard::GAME_KEYS as $game) {
                 $data['actual'][$game] = $data[$game];
             }
         }
 
         // Remove unneeded meta values
-        foreach (Domain\Scoreboard::GAME_KEYS as $game) {
+        foreach (Scoreboard::GAME_KEYS as $game) {
             unset($data[$game]);
         }
 
-        return Domain\Scoreboard::fromArray($data);
+        return Scoreboard::fromArray($data);
     }
 }

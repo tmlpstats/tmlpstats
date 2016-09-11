@@ -2,13 +2,11 @@
 namespace TmlpStats\Validate\Objects;
 
 use Respect\Validation\Validator as v;
-use TmlpStats\Domain;
-use TmlpStats\Models;
 use TmlpStats\Traits;
 
-class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
+class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
 {
-    use Traits\ValidatesApiObjects, Traits\ValidatesTravelWithConfig;
+    use Traits\ValidatesTravelWithConfig;
 
     const MAX_DAYS_TO_SEND_APPLICATION_OUT = 2;
     const MAX_DAYS_TO_APPROVE_APPLICATION  = 14;
@@ -65,14 +63,14 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
 
         if (!is_null($data->withdrawCodeId) || !is_null($data->wdDate)) {
             if (is_null($data->withdrawCodeId)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_WD_CODE_MISSING',
                     'ref' => $data->getReference(['field' => 'withdrawCodeId']),
                 ]);
                 $isValid = false;
             }
             if (is_null($data->wdDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_WD_DATE_MISSING',
                     'ref' => $data->getReference(['field' => 'wdDate']),
                 ]);
@@ -80,14 +78,14 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
             }
         } else if (!is_null($data->apprDate)) {
             if (is_null($data->appInDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_APPIN_DATE_MISSING',
                     'ref' => $data->getReference(['field' => 'appInDate']),
                 ]);
                 $isValid = false;
             }
             if (is_null($data->appOutDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_APPOUT_DATE_MISSING',
                     'ref' => $data->getReference(['field' => 'appOutDate']),
                 ]);
@@ -95,7 +93,7 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
             }
         } else if (!is_null($data->appInDate)) {
             if (is_null($data->appOutDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_APPOUT_DATE_MISSING',
                     'ref' => $data->getReference(['field' => 'appOutDate']),
                 ]);
@@ -104,7 +102,7 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
         }
 
         if (is_null($data->committedTeamMemberId) && is_null($data->withdrawCodeId)) {
-            $this->messages[] = Domain\ValidationMessage::error([
+            $this->addMessage('error', [
                 'id' => 'TEAMAPP_NO_COMMITTED_TEAM_MEMBER',
                 'ref' => $data->getReference(['field' => 'committedTeamMemberId']),
             ]);
@@ -121,28 +119,28 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
         // Make sure dates for each step make sense
         if ($data->wdDate) {
             if ($data->regDate && $data->wdDate->lt($data->regDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_WD_DATE_BEFORE_REG_DATE',
                     'ref' => $data->getReference(['field' => 'wdDate']),
                 ]);
                 $isValid = false;
             }
             if ($data->apprDate && $data->wdDate->lt($data->apprDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_WD_DATE_BEFORE_APPR_DATE',
                     'ref' => $data->getReference(['field' => 'wdDate']),
                 ]);
                 $isValid = false;
             }
             if ($data->appInDate && $data->wdDate->lt($data->appInDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_WD_DATE_BEFORE_APPIN_DATE',
                     'ref' => $data->getReference(['field' => 'wdDate']),
                 ]);
                 $isValid = false;
             }
             if ($data->appOutDate && $data->wdDate->lt($data->appOutDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_WD_DATE_BEFORE_APPOUT_DATE',
                     'ref' => $data->getReference(['field' => 'wdDate']),
                 ]);
@@ -151,21 +149,21 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
         }
         if ($data->apprDate) {
             if ($data->regDate && $data->apprDate->lt($data->regDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_APPR_DATE_BEFORE_REG_DATE',
                     'ref' => $data->getReference(['field' => 'apprDate']),
                 ]);
                 $isValid = false;
             }
             if ($data->appInDate && $data->apprDate->lt($data->appInDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_APPR_DATE_BEFORE_APPIN_DATE',
                     'ref' => $data->getReference(['field' => 'apprDate']),
                 ]);
                 $isValid = false;
             }
             if ($data->appOutDate && $data->apprDate->lt($data->appOutDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_APPR_DATE_BEFORE_APPOUT_DATE',
                     'ref' => $data->getReference(['field' => 'apprDate']),
                 ]);
@@ -174,14 +172,14 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
         }
         if ($data->appInDate) {
             if ($data->regDate && $data->appInDate->lt($data->regDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_APPIN_DATE_BEFORE_REG_DATE',
                     'ref' => $data->getReference(['field' => 'appInDate']),
                 ]);
                 $isValid = false;
             }
             if ($data->appOutDate && $data->appInDate->lt($data->appOutDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_APPIN_DATE_BEFORE_APPOUT_DATE',
                     'ref' => $data->getReference(['field' => 'appInDate']),
                 ]);
@@ -190,7 +188,7 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
         }
         if ($data->appOutDate) {
             if ($data->regDate && $data->appOutDate->lt($data->regDate)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'TEAMAPP_APPOUT_DATE_BEFORE_REG_DATE',
                     'ref' => $data->getReference(['field' => 'appOutDate']),
                 ]);
@@ -209,7 +207,7 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
                     && $data->regDate->lt($reportingDate)
                     && $data->regDate->diffInDays($reportingDate) > $maxAppOutDays
                 ) {
-                    $this->messages[] = Domain\ValidationMessage::warning([
+                    $this->addMessage('warning', [
                         'id' => 'TEAMAPP_APPOUT_LATE',
                         'ref' => $data->getReference(['field' => 'appOutDate']),
                         'params' => ['daysSince' => $maxAppOutDays],
@@ -220,7 +218,7 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
                     && $data->appOutDate->lt($reportingDate)
                     && $data->regDate->diffInDays($reportingDate) > $maxApplicationDays
                 ) {
-                    $this->messages[] = Domain\ValidationMessage::warning([
+                    $this->addMessage('warning', [
                         'id' => 'TEAMAPP_APPIN_LATE',
                         'ref' => $data->getReference(['field' => 'appInDate']),
                         'params' => ['daysSince' => $maxApplicationDays],
@@ -231,7 +229,7 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
                     && $data->appInDate->lt($reportingDate)
                     && $data->regDate->diffInDays($reportingDate) > $maxApplicationDays
                 ) {
-                    $this->messages[] = Domain\ValidationMessage::warning([
+                    $this->addMessage('warning', [
                         'id' => 'TEAMAPP_APPR_LATE',
                         'ref' => $data->getReference(['field' => 'apprDate']),
                         'params' => ['daysSince' => $maxApplicationDays],
@@ -242,35 +240,35 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
 
         // Make sure dates are in the past
         if (!is_null($data->regDate) && $reportingDate->lt($data->regDate)) {
-            $this->messages[] = Domain\ValidationMessage::error([
+            $this->addMessage('error', [
                 'id' => 'TEAMAPP_REG_DATE_IN_FUTURE',
                 'ref' => $data->getReference(['field' => 'regDate']),
             ]);
             $isValid = false;
         }
         if (!is_null($data->wdDate) && $reportingDate->lt($data->wdDate)) {
-            $this->messages[] = Domain\ValidationMessage::error([
+            $this->addMessage('error', [
                 'id' => 'TEAMAPP_WD_DATE_IN_FUTURE',
                 'ref' => $data->getReference(['field' => 'wdDate']),
             ]);
             $isValid = false;
         }
         if (!is_null($data->apprDate) && $reportingDate->lt($data->apprDate)) {
-            $this->messages[] = Domain\ValidationMessage::error([
+            $this->addMessage('error', [
                 'id' => 'TEAMAPP_APPR_DATE_IN_FUTURE',
                 'ref' => $data->getReference(['field' => 'apprDate']),
             ]);
             $isValid = false;
         }
         if (!is_null($data->appInDate) && $reportingDate->lt($data->appInDate)) {
-            $this->messages[] = Domain\ValidationMessage::error([
+            $this->addMessage('error', [
                 'id' => 'TEAMAPP_APPIN_DATE_IN_FUTURE',
                 'ref' => $data->getReference(['field' => 'appInDate']),
             ]);
             $isValid = false;
         }
         if (!is_null($data->appOutDate) && $reportingDate->lt($data->appOutDate)) {
-            $this->messages[] = Domain\ValidationMessage::error([
+            $this->addMessage('error', [
                 'id' => 'TEAMAPP_APPOUT_DATE_IN_FUTURE',
                 'ref' => $data->getReference(['field' => 'appOutDate']),
             ]);
@@ -294,13 +292,13 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
             if (is_null($data->travel)) {
                 // Error if no comment provided, warning to look at it otherwise
                 if (is_null($data->comment)) {
-                    $this->messages[] = Domain\ValidationMessage::error([
+                    $this->addMessage('error', [
                         'id' => 'TEAMAPP_TRAVEL_COMMENT_MISSING',
                         'ref' => $data->getReference(['field' => 'comment']),
                     ]);
                     $isValid = false;
                 } else {
-                    $this->messages[] = Domain\ValidationMessage::warning([
+                    $this->addMessage('warning', [
                         'id' => 'TEAMAPP_TRAVEL_COMMENT_REVIEW',
                         'ref' => $data->getReference(['field' => 'comment']),
                     ]);
@@ -309,13 +307,13 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
             if (is_null($data->room)) {
                 // Error if no comment provided, warning to look at it otherwise
                 if (is_null($data->comment)) {
-                    $this->messages[] = Domain\ValidationMessage::error([
+                    $this->addMessage('error', [
                         'id' => 'TEAMAPP_ROOM_COMMENT_MISSING',
                         'ref' => $data->getReference(['field' => 'comment']),
                     ]);
                     $isValid = false;
                 } else {
-                    $this->messages[] = Domain\ValidationMessage::warning([
+                    $this->addMessage('warning', [
                         'id' => 'TEAMAPP_ROOM_COMMENT_REVIEW',
                         'ref' => $data->getReference(['field' => 'comment']),
                     ]);
@@ -331,7 +329,7 @@ class ApiTeamApplicationValidator extends ObjectsValidatorAbstract
         $isValid = true;
 
         if ($data->isReviewer && $data->teamYear !== 2) {
-            $this->messages[] = Domain\ValidationMessage::error([
+            $this->addMessage('error', [
                 'id' => 'TEAMAPP_REVIEWER_TEAM1',
                 'ref' => $data->getReference(['field' => 'isReviewer']),
             ]);

@@ -3,12 +3,11 @@ namespace TmlpStats\Validate\Objects;
 
 use Carbon\Carbon;
 use Respect\Validation\Validator as v;
-use TmlpStats\Domain;
 use TmlpStats\Traits;
 
-class ApiCourseValidator extends ObjectsValidatorAbstract
+class ApiCourseValidator extends ApiObjectsValidatorAbstract
 {
-    use Traits\ValidatesApiObjects, Traits\ValidatesTravelWithConfig;
+    use Traits\ValidatesTravelWithConfig;
 
     protected function populateValidators($data)
     {
@@ -60,21 +59,21 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
         $startDate = $this->getDateObject($data->startDate);
         if ($startDate && $startDate->lt($this->statsReport->reportingDate)) {
             if (is_null($data->completedStandardStarts)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'COURSE_COMPLETED_SS_MISSING',
                     'ref' => $data->getReference(['field' => 'completedStandardStarts']),
                 ]);
                 $isValid = false;
             }
             if (is_null($data->potentials)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'COURSE_POTENTIALS_MISSING',
                     'ref' => $data->getReference(['field' => 'potentials']),
                 ]);
                 $isValid = false;
             }
             if (is_null($data->registrations)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'COURSE_REGISTRATIONS_MISSING',
                     'ref' => $data->getReference(['field' => 'registrations']),
                 ]);
@@ -89,7 +88,7 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
                     if ($this->statsReport->center->name == 'London' && ($location == 'germany' || $location == 'intl')) {
                         // Special case handling for courses in London where the standard starts count is different
                     } else {
-                        $this->messages[] = Domain\ValidationMessage::error([
+                        $this->addMessage('error', [
                             'id' => 'COURSE_COMPLETED_SS_GREATER_THAN_CURRENT_SS',
                             'ref' => $data->getReference(['field' => 'completedStandardStarts']),
                         ]);
@@ -98,7 +97,7 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
                 } else if ($data->completedStandardStarts < ($data->currentStandardStarts - 3) && $startDate->diffInDays($this->statsReport->reportingDate) < 7) {
 
                     $withdrew = $data->currentStandardStarts - $data->completedStandardStarts;
-                    $this->messages[] = Domain\ValidationMessage::warning([
+                    $this->addMessage('warning', [
                         'id' => 'COURSE_COMPLETED_SS_LESS_THAN_CURRENT_SS',
                         'ref' => $data->getReference(['field' => 'completedStandardStarts']),
                         'params' => ['delta' => $withdrew],
@@ -108,7 +107,7 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
 
             if (!is_null($data->potentials) && !is_null($data->registrations)) {
                 if ($data->potentials < $data->registrations) {
-                    $this->messages[] = Domain\ValidationMessage::error([
+                    $this->addMessage('error', [
                         'id' => 'COURSE_COMPLETED_REGISTRATIONS_GREATER_THAN_POTENTIALS',
                         'ref' => $data->getReference(['field' => 'registrations']),
                         'params' => [
@@ -131,7 +130,7 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
                 if (!is_null($data->registrations)) {
                     $field = 'registrations';
                 }
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'COURSE_COMPLETION_STATS_PROVIDED_BEFORE_COURSE',
                     'ref' => $data->getReference(['field' => $field]),
                 ]);
@@ -148,14 +147,14 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
 
         $startDate = $this->getDateObject($data->startDate);
         if ($startDate && $startDate->lt($this->statsReport->quarter->getQuarterStartDate($this->statsReport->center))) {
-            $this->messages[] = Domain\ValidationMessage::error([
+            $this->addMessage('error', [
                 'id' => 'COURSE_COURSE_DATE_BEFORE_QUARTER',
                 'ref' => $data->getReference(['field' => 'startDate']),
             ]);
             $isValid = false;
         }
         if ($startDate && $startDate->dayOfWeek !== Carbon::SATURDAY) {
-            $this->messages[] = Domain\ValidationMessage::warning([
+            $this->addMessage('warning', [
                 'id' => 'COURSE_START_DATE_NOT_SATURDAY',
                 'ref' => $data->getReference(['field' => 'startDate']),
             ]);
@@ -173,7 +172,7 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
             && !is_null($data->quarterStartXfer)
         ) {
             if ($data->quarterStartTer < $data->quarterStartStandardStarts) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'COURSE_QSTART_SS_GREATER_THAN_QSTART_TER',
                     'ref' => $data->getReference(['field' => 'quarterStartStandardStarts']),
                     'params' => [
@@ -184,7 +183,7 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
                 $isValid = false;
             }
             if ($data->quarterStartTer < $data->quarterStartXfer) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'COURSE_QSTART_XFER_GREATER_THAN_QSTART_TER',
                     'ref' => $data->getReference(['field' => 'quarterStartXfer']),
                     'params' => [
@@ -200,7 +199,7 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
             && !is_null($data->currentXfer)
         ) {
             if ($data->currentTer < $data->currentStandardStarts) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'COURSE_CURRENT_SS_GREATER_THAN_CURRENT_TER',
                     'ref' => $data->getReference(['field' => 'currentStandardStarts']),
                     'params' => [
@@ -211,7 +210,7 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
                 $isValid = false;
             }
             if ($data->currentTer < $data->currentXfer) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'COURSE_CURRENT_XFER_GREATER_THAN_CURRENT_TER',
                     'ref' => $data->getReference(['field' => 'currentXfer']),
                     'params' => [
@@ -223,7 +222,7 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
             }
 
             if ($data->currentTer < $data->quarterStartTer) {
-                $this->messages[] = Domain\ValidationMessage::warning([
+                $this->addMessage('warning', [
                     'id' => 'COURSE_CURRENT_TER_LESS_THAN_QSTART_TER',
                     'ref' => $data->getReference(['field' => 'currentTer']),
                     'params' => [
@@ -233,7 +232,7 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
                 ]);
             }
             if ($data->currentXfer < $data->quarterStartXfer) {
-                $this->messages[] = Domain\ValidationMessage::warning([
+                $this->addMessage('warning', [
                     'id' => 'COURSE_CURRENT_XFER_LESS_THAN_QSTART_XFER',
                     'ref' => $data->getReference(['field' => 'currentXfer']),
                     'params' => [
@@ -258,21 +257,21 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
         $startDate = $this->getDateObject($data->startDate);
         if ($startDate && $startDate->lt($this->statsReport->reportingDate)) {
             if (is_null($data->guestsInvited)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'COURSE_GUESTS_INVITED_MISSING',
                     'ref' => $data->getReference(['field' => 'guestsInvited']),
                 ]);
                 $isValid = false;
             }
             if (is_null($data->guestsConfirmed)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'COURSE_GUESTS_CONFIRMED_MISSING',
                     'ref' => $data->getReference(['field' => 'guestsConfirmed']),
                 ]);
                 $isValid = false;
             }
             if (is_null($data->guestsAttended)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'COURSE_GUESTS_ATTENDED_MISSING',
                     'ref' => $data->getReference(['field' => 'guestsAttended']),
                 ]);
@@ -280,7 +279,7 @@ class ApiCourseValidator extends ObjectsValidatorAbstract
             }
         } else {
             if (!is_null($data->guestsAttended)) {
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'COURSE_GUESTS_ATTENDED_PROVIDED_BEFORE_COURSE',
                     'ref' => $data->getReference(['field' => 'guestsAttended']),
                 ]);

@@ -2,16 +2,12 @@
 namespace TmlpStats\Tests\Unit\Validate\Objects;
 
 use Carbon\Carbon;
-use TmlpStats as Models;
-use TmlpStats\Domain;
-use TmlpStats\Tests\Unit\Traits;
+use TmlpStats\Domain\Course;
 use TmlpStats\Tests\Unit\Validate\ApiValidatorTestAbstract;
 use TmlpStats\Validate\Objects\ApiCourseValidator;
 
 class ApiCourseValidatorTest extends ApiValidatorTestAbstract
 {
-    use Traits\MocksSettings, Traits\MocksQuarters, Traits\MocksModel;
-
     protected $testClass = ApiCourseValidator::class;
 
     protected $messageTemplate = [
@@ -794,6 +790,6 @@ class ApiCourseValidatorTest extends ApiValidatorTestAbstract
 
         $data = array_merge($this->dataTemplate, $data);
 
-        return Domain\Course::fromArray($data);
+        return Course::fromArray($data);
     }
 }

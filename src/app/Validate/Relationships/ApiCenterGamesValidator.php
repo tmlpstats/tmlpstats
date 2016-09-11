@@ -1,13 +1,8 @@
 <?php
 namespace TmlpStats\Validate\Relationships;
 
-use TmlpStats\Domain;
-use TmlpStats\Traits;
-
-class ApiCenterGamesValidator extends CenterGamesValidator
+class ApiCenterGamesValidator extends ApiValidatorAbstract
 {
-    use Traits\GeneratesApiMessages, Traits\ValidatesApiObjects;
-
     protected function validate($data)
     {
         // GITW and TDO
@@ -98,7 +93,7 @@ class ApiCenterGamesValidator extends CenterGamesValidator
 
             if ($thisWeekActual->cap != $capGame) {
                 $ref['game'] = 'cap';
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'CENTERGAME_CAP_ACTUAL_INCORRECT',
                     'ref' => $ref,
                     'params' => [
@@ -111,7 +106,7 @@ class ApiCenterGamesValidator extends CenterGamesValidator
 
             if ($thisWeekActual->cpc != $cpcGame) {
                 $ref['game'] = 'cpc';
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'CENTERGAME_CPC_ACTUAL_INCORRECT',
                     'ref' => $ref,
                     'params' => [
@@ -124,7 +119,7 @@ class ApiCenterGamesValidator extends CenterGamesValidator
 
             if ($thisWeekActual->t1x != $t1xGame) {
                 $ref['game'] = 't1x';
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'CENTERGAME_T1X_ACTUAL_INCORRECT',
                     'ref' => $ref,
                     'params' => [
@@ -137,7 +132,7 @@ class ApiCenterGamesValidator extends CenterGamesValidator
 
             if ($thisWeekActual->t2x != $t2xGame) {
                 $ref['game'] = 't2x';
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'CENTERGAME_T2X_ACTUAL_INCORRECT',
                     'ref' => $ref,
                     'params' => [
@@ -150,7 +145,7 @@ class ApiCenterGamesValidator extends CenterGamesValidator
 
             if ($thisWeekActual->gitw != $gitwGame) {
                 $ref['game'] = 'gitw';
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => 'CENTERGAME_GITW_ACTUAL_INCORRECT',
                     'ref' => $ref,
                     'params' => [

@@ -2,13 +2,10 @@
 namespace TmlpStats\Validate\Objects;
 
 use Respect\Validation\Validator as v;
-use TmlpStats\Domain;
-use TmlpStats\Traits;
+use TmlpStats\Domain\Scoreboard;
 
-class ApiScoreboardValidator extends ObjectsValidatorAbstract
+class ApiScoreboardValidator extends ApiObjectsValidatorAbstract
 {
-    use Traits\ValidatesApiObjects;
-
     protected function populateValidators($data)
     {
         $intValidator           = v::intVal();
@@ -77,7 +74,7 @@ class ApiScoreboardValidator extends ObjectsValidatorAbstract
     {
         $isValid = true;
 
-        foreach (Domain\Scoreboard::GAME_KEYS as $game) {
+        foreach (Scoreboard::GAME_KEYS as $game) {
             $value = $data->game($game)->$type();
 
             $validator = $this->dataValidators[$game];
@@ -94,7 +91,7 @@ class ApiScoreboardValidator extends ObjectsValidatorAbstract
                     $params = ['name' => $displayName];
                 }
 
-                $this->messages[] = Domain\ValidationMessage::error([
+                $this->addMessage('error', [
                     'id' => $messageId,
                     'ref' => $data->getReference(['game' => $game, 'promiseType' => $type]),
                     'params' => $params,

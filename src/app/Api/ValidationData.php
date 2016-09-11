@@ -15,8 +15,6 @@ use TmlpStats\Traits;
  */
 class ValidationData extends AuthenticatedApiBase
 {
-    use Traits\GeneratesApiMessages;
-
     // updateRequired: Not all objects require updates every week, but some do. For those that do,
     //                 if no update is needed, they'll need to take some action to confirm the
     //                 data is the same. That "confirmation" will create a submissionData entry

@@ -2,15 +2,14 @@
 namespace TmlpStats\Tests\Unit\Validate\Objects;
 
 use Carbon\Carbon;
-use TmlpStats as Models;
-use TmlpStats\Domain;
+use TmlpStats\Domain\TeamApplication;
 use TmlpStats\Tests\Unit\Traits;
 use TmlpStats\Tests\Unit\Validate\ApiValidatorTestAbstract;
 use TmlpStats\Validate\Objects\ApiTeamApplicationValidator;
 
 class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
 {
-    use Traits\MocksSettings, Traits\MocksQuarters, Traits\MocksModel;
+    use Traits\MocksSettings;
 
     protected $instantiateApp = true;
     protected $testClass = ApiTeamApplicationValidator::class;
@@ -54,6 +53,13 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
             'travel' => true,
             'room' => true,
         ];
+    }
+
+    public function tearDown()
+    {
+        parent::tearDown();
+
+        $this->clearSettings();
     }
 
     /**
@@ -1101,6 +1107,6 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
 
         $data = array_merge($this->dataTemplate, $data);
 
-        return Domain\TeamApplication::fromArray($data);
+        return TeamApplication::fromArray($data);
     }
 }
