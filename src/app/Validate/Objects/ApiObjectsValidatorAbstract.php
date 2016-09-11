@@ -1,21 +1,19 @@
 <?php
 namespace TmlpStats\Validate\Objects;
 
+use Carbon\Carbon;
+use TmlpStats\Validate\ApiValidatorAbstract;
 use TmlpStats\Util;
 
-use Carbon\Carbon;
-use TmlpStats\Validate\ValidatorAbstract;
-
-abstract class ObjectsValidatorAbstract extends ValidatorAbstract
+abstract class ApiObjectsValidatorAbstract extends ApiValidatorAbstract
 {
     protected $dataValidators = [];
     protected $reader = null;
     protected $skipped = false;
 
-    public function run($data, $supplementalData = null)
+    public function run($data)
     {
-        $this->data             = $data;
-        $this->supplementalData = $supplementalData;
+        $this->data = $data;
         $this->populateValidators($data);
 
         if ($this->skipped) {
@@ -35,27 +33,35 @@ abstract class ObjectsValidatorAbstract extends ValidatorAbstract
 
     protected function validateFields($data)
     {
+        if (!isset($this->dataValidators) || !$this->dataValidators) {
+            return true;
+        }
+
         $isValid = true;
 
         foreach ($this->dataValidators as $field => $validator) {
             $value = $data->$field;
             if (!$validator->validate($value)) {
-                $displayName = $this->getValueDisplayName($field);
+                $displayName = ucwords(Util::toWords($field));
+                $messageId = 'GENERAL_INVALID_VALUE';
+                $params = ['name' => $displayName, 'value' => $value];
+
                 if ($value === null || $value === '') {
-                    $value = '[empty]';
+                    $messageId = 'GENERAL_MISSING_VALUE';
+                    $params = ['name' => $displayName];
                 }
 
-                $this->addMessage('INVALID_VALUE', $displayName, $value);
+                $this->addMessage('error', [
+                    'id' => $messageId,
+                    'ref' => $data->getReference(['field' => $field]),
+                    'params' => $params,
+                ]);
+
                 $isValid = false;
             }
         }
 
         return $isValid;
-    }
-
-    protected function getValueDisplayName($value)
-    {
-        return ucwords(Util::toWords($value));
     }
 
     protected function getDateObject($date)

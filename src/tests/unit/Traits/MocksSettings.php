@@ -1,7 +1,6 @@
 <?php
 namespace TmlpStats\Tests\Unit\Traits;
 
-use stdClass;
 use TmlpStats\ModelCache;
 use TmlpStats\Setting;
 
@@ -12,7 +11,7 @@ trait MocksSettings
      *
      * @var array
      */
-    protected $settings = [];
+    protected $mockedSettings = [];
 
     /**
      * Get the value of an already set setting
@@ -23,8 +22,8 @@ trait MocksSettings
      */
     public function getSetting($name)
     {
-        return isset($this->settings[$name])
-            ? $this->settings[$name]
+        return isset($this->mockedSettings[$name])
+            ? $this->mockedSettings[$name]
             : null;
     }
 
@@ -51,7 +50,7 @@ trait MocksSettings
 
         ModelCache::create()->set($name, $centerId, $setting);
 
-        return $this->settings[$name] = $setting;
+        return $this->mockedSettings[$name] = $setting;
     }
 
     /**
@@ -64,7 +63,7 @@ trait MocksSettings
     {
         ModelCache::create()->forget($name, $centerId);
 
-        unset($this->settings[$name]);
+        unset($this->mockedSettings[$name]);
     }
 
     /**
@@ -72,9 +71,16 @@ trait MocksSettings
      */
     public function clearSettings()
     {
-        foreach ($this->settings as $name => $value) {
-            $this->unsetSetting($name);
+        if (!$this->mockedSettings) {
+            $this->mockedSettings = [];
+            return;
         }
+
+        foreach ($this->mockedSettings as $name => $value) {
+            ModelCache::create()->forget($name);
+        }
+
+        $this->mockedSettings = [];
     }
 
     /**

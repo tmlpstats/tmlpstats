@@ -52,11 +52,6 @@ class ApplicationTest extends FunctionalTestAbstract
         $this->headers = ['Accept' => 'application/json'];
     }
 
-    public function tearDown()
-    {
-        Carbon::setTestNow(); // Clear test now
-    }
-
     /**
      * @dataProvider providerCreate
      */

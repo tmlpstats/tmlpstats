@@ -61,6 +61,9 @@ class TestAbstract extends \Illuminate\Foundation\Testing\TestCase
 
         // Reset testing datetime
         Carbon::setTestNow();
+
+        // forces phpunit to cleanup stray objects to reduce memory and test time
+        $this->flushTestObjects();
     }
 
     protected function getObjectMock($methods = [], $constructorArgs = [])
@@ -111,5 +114,16 @@ class TestAbstract extends \Illuminate\Foundation\Testing\TestCase
         $arguments = func_get_args();
 
         return $method->invokeArgs($object, array_slice($arguments, 2));
+    }
+
+    protected function flushTestObjects()
+    {
+        $refl = new \ReflectionObject($this);
+        foreach ($refl->getProperties() as $prop) {
+            if (!$prop->isStatic() && 0 !== strpos($prop->getDeclaringClass()->getName(), 'PHPUnit_')) {
+                $prop->setAccessible(true);
+                $prop->setValue($this, null);
+            }
+        }
     }
 }

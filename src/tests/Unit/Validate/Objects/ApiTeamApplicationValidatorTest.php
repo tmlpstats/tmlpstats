@@ -2,95 +2,86 @@
 namespace TmlpStats\Tests\Unit\Validate\Objects;
 
 use Carbon\Carbon;
-use stdClass;
-use TmlpStats as Models;
-use TmlpStats\Api\Parsers;
-use TmlpStats\Domain;
-use TmlpStats\Tests\Unit\Traits\MocksMessages;
-use TmlpStats\Tests\Unit\Traits\MocksModel;
-use TmlpStats\Tests\Unit\Traits\MocksQuarters;
-use TmlpStats\Tests\Unit\Traits\MocksSettings;
+use TmlpStats\Domain\TeamApplication;
+use TmlpStats\Tests\Unit\Traits;
+use TmlpStats\Tests\Unit\Validate\ApiValidatorTestAbstract;
 use TmlpStats\Validate\Objects\ApiTeamApplicationValidator;
 
-class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
+class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
 {
-    use MocksSettings, MocksMessages, MocksQuarters, MocksModel;
+    use Traits\MocksSettings;
 
     protected $instantiateApp = true;
     protected $testClass = ApiTeamApplicationValidator::class;
 
-    protected $dataFields = [
-        'firstName',
-        'lastName',
-        'teamYear',
-        'regDate',
-        'appOutDate',
-        'appInDate',
-        'apprDate',
-        'wdDate',
-        'travel',
-        'room',
-        'incomingQuarterId',
-        'withdrawCodeId',
-        'committedTeamMemberId',
+    protected $messageTemplate = [
+        'id' => 'placeholder',
+        'level' => 'error',
+        'reference' => [
+            'id' => null,
+            'type' => 'teamApplication',
+        ],
     ];
-
-    protected $validateMethods = [
-        'validateApprovalProcess',
-        'validateDates',
-        'validateTravel',
-        'validateReviewer',
-    ];
-
-    public function addModelParserMock($parserClass)
-    {
-        $mock = $this->getModelMock();
-
-        $parser = $this->getMockBuilder($parserClass)
-                ->setMethods(['fetch'])
-                ->getMock();
-
-        $parser->expects($this->any())
-            ->method('fetch')
-            ->will($this->returnCallback(function ($class, $id) use ($mock) {
-                $mock->id = $id;
-                return $mock;
-            }));
-
-        $this->app->bind($parserClass, function ($app) use ($parser) {
-            return $parser;
-        });
-    }
 
     public function setUp()
     {
         parent::setUp();
 
-        $this->addModelParserMock(Parsers\CenterParser::class);
-        $this->addModelParserMock(Parsers\QuarterParser::class);
-        $this->addModelParserMock(Parsers\WithdrawCodeParser::class);
-        $this->addModelParserMock(Parsers\TeamMemberParser::class);
-        $this->addModelParserMock(Parsers\ApplicationParser::class);
+        // When using Settings, we need center to be null to avoid db lookups
+        $this->statsReport->center = null;
+
+        $this->setSetting('travelDueByDate', 'classroom2Date');
+
+        $this->dataTemplate = [
+            'firstName' => 'Keith',
+            'lastName' => 'Stone',
+            'email' => 'unit_test@tmlpstats.com',
+            'center' => 1234,
+            'teamYear' => 1,
+            'regDate' => Carbon::parse('2016-08-22'),
+            'isReviewer' => false,
+            'phone' => '555-555-5555',
+            'tmlpRegistration' => 1234,
+            'appOutDate' => Carbon::parse('2016-08-23'),
+            'appInDate' => Carbon::parse('2016-08-24'),
+            'apprDate' => Carbon::parse('2016-08-25'),
+            'wdDate' => null,
+            'withdrawCode' => null,
+            'committedTeamMember' => 1234,
+            'incomingQuarter' => 1234,
+            'comment' => 'asdf qwerty',
+            'travel' => true,
+            'room' => true,
+        ];
+    }
+
+    public function tearDown()
+    {
+        parent::tearDown();
+
+        $this->clearSettings();
     }
 
     /**
      * @dataProvider providerRun
      */
-    public function testRun($data, $messages, $expectedResult)
+    public function testRun($data, $expectedMessages, $expectedResult)
     {
-        $data = Domain\TeamApplication::fromArray($data);
+        $data = $this->getTeamApplication($data);
 
-        $validator = $this->getObjectMock(['addMessage', 'validate']);
+        $validator = $this->getObjectMock(['isStartingNextQuarter', 'isTimeToCheckTravel']);
 
-        $i = 0;
-        $this->setupMessageMocks($validator, $messages, $i);
+        $validator->expects($this->any())
+            ->method('isStartingNextQuarter')
+            ->willReturn(true);
 
-        $validator->expects($this->at($i))
-            ->method('validate')
-            ->with($data);
+        $validator->expects($this->any())
+            ->method('isTimeToCheckTravel')
+            ->willReturn(false);
 
         $result = $validator->run($data);
 
+        $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
     }
 
@@ -121,60 +112,47 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
                     'room' => null,
                 ],
                 [
-                    ['INVALID_VALUE', 'First Name', '[empty]'],
-                    ['INVALID_VALUE', 'Last Name', '[empty]'],
-                    ['INVALID_VALUE', 'Team Year', '[empty]'],
-                    ['INVALID_VALUE', 'Reg Date', '[empty]'],
-                    ['INVALID_VALUE', 'Incoming Quarter Id', '[empty]'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'GENERAL_MISSING_VALUE',
+                        'reference.field' => 'firstName',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'GENERAL_MISSING_VALUE',
+                        'reference.field' => 'lastName',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'GENERAL_MISSING_VALUE',
+                        'reference.field' => 'teamYear',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'GENERAL_MISSING_VALUE',
+                        'reference.field' => 'regDate',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'GENERAL_MISSING_VALUE',
+                        'reference.field' => 'incomingQuarterId',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_NO_COMMITTED_TEAM_MEMBER',
+                        'reference.field' => 'committedTeamMemberId',
+                    ]),
                 ],
                 false,
             ],
-            // Test Valid (Variable 1)
+            // Test Valid (Variable set 1)
             [
                 [
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'teamYear' => 1,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'appOutDate' => Carbon::parse('2015-01-01'),
-                    'appInDate' => Carbon::parse('2015-01-01'),
-                    'apprDate' => Carbon::parse('2015-01-01'),
-                    'wdDate' => Carbon::parse('2015-01-01'),
-                    'committedTeamMember' => 1234,
-                    'withdrawCode' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
                 [],
                 true,
             ],
-            // Test Valid (Variable 2)
+            // Test Valid (Variable set 2)
             [
                 [
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'teamYear' => 2,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => true,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'appOutDate' => Carbon::parse('2015-01-01'),
-                    'appInDate' => Carbon::parse('2015-01-01'),
-                    'apprDate' => Carbon::parse('2015-01-01'),
-                    'wdDate' => Carbon::parse('2015-01-01'),
-                    'committedTeamMember' => 1234,
+                    'wdDate' => Carbon::parse('2016-08-26'),
                     'withdrawCode' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
+                    'teamYear' => 2,
+                    'isReviewer' => true,
                     'travel' => false,
                     'room' => false,
                 ],
@@ -186,106 +164,56 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             [
                 [
                     'firstName' => '',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'teamYear' => 1,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'appOutDate' => Carbon::parse('2015-01-01'),
-                    'appInDate' => Carbon::parse('2015-01-01'),
-                    'apprDate' => Carbon::parse('2015-01-01'),
-                    'wdDate' => Carbon::parse('2015-01-01'),
-                    'committedTeamMember' => 1234,
-                    'withdrawCode' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
                 [
-                    ['INVALID_VALUE', 'First Name', '[empty]'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'GENERAL_MISSING_VALUE',
+                        'reference.field' => 'firstName',
+                    ]),
                 ],
                 false,
             ],
             // Test Invalid Last Name
             [
                 [
-                    'firstName' => 'Keith',
                     'lastName' => '',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'teamYear' => 1,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'appOutDate' => Carbon::parse('2015-01-01'),
-                    'appInDate' => Carbon::parse('2015-01-01'),
-                    'apprDate' => Carbon::parse('2015-01-01'),
-                    'wdDate' => Carbon::parse('2015-01-01'),
-                    'committedTeamMember' => 1234,
-                    'withdrawCode' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
                 [
-                    ['INVALID_VALUE', 'Last Name', '[empty]'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'GENERAL_MISSING_VALUE',
+                        'reference.field' => 'lastName',
+                    ]),
                 ],
                 false,
             ],
             // Test invalid TeamYear
             [
                 [
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
                     'teamYear' => 3,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'appOutDate' => Carbon::parse('2015-01-01'),
-                    'appInDate' => Carbon::parse('2015-01-01'),
-                    'apprDate' => Carbon::parse('2015-01-01'),
-                    'wdDate' => Carbon::parse('2015-01-01'),
-                    'committedTeamMember' => 1234,
-                    'withdrawCode' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
                 [
-                    ['INVALID_VALUE', 'Team Year', 3],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'GENERAL_INVALID_VALUE',
+                        'reference.field' => 'teamYear',
+                    ]),
                 ],
                 false,
             ],
         ];
     }
 
-    //
-    // validateApprovalProcess()
-    //
 
     /**
      * @dataProvider providerValidateApprovalProcess
      */
-    public function testValidateApprovalProcess($data, $messages, $expectedResult)
+    public function testValidateApprovalProcess($data, $expectedMessages, $expectedResult)
     {
-        $data = Domain\TeamApplication::fromArray($data);
+        $data = $this->getTeamApplication($data);
 
         $validator = $this->getObjectMock();
+        $result = $validator->run($data);
 
-        $this->setupMessageMocks($validator, $messages);
-
-        $result = $validator->validateApprovalProcess($data);
-
+        $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
     }
 
@@ -298,23 +226,8 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
                     'appOutDate' => null,
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => Carbon::parse('2015-01-28'),
+                    'wdDate' => Carbon::parse('2016-08-22'),
                     'withdrawCode' => 1234,
-                    'teamYear' => 1,
-                    'committedTeamMember' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
                 [],
                 true,
@@ -322,26 +235,11 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and all steps complete
             [
                 [
-                    'appOutDate' => Carbon::parse('2015-01-13'),
-                    'appInDate' => Carbon::parse('2015-01-20'),
-                    'apprDate' => Carbon::parse('2015-01-27'),
-                    'wdDate' => Carbon::parse('2015-01-28'),
+                    'appOutDate' => Carbon::parse('2016-08-22'),
+                    'appInDate' => Carbon::parse('2016-08-23'),
+                    'apprDate' => Carbon::parse('2016-08-27'),
+                    'wdDate' => Carbon::parse('2016-08-28'),
                     'withdrawCode' => 1234,
-                    'teamYear' => 1,
-                    'committedTeamMember' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
                 [],
                 true,
@@ -349,58 +247,28 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             // Withdraw and missing wd
             [
                 [
-                    'appOutDate' => Carbon::parse('2015-01-13'),
-                    'appInDate' => Carbon::parse('2015-01-20'),
-                    'apprDate' => Carbon::parse('2015-01-27'),
-                    'wdDate' => Carbon::parse('2015-01-28'),
+                    'wdDate' => Carbon::parse('2016-08-28'),
                     'withdrawCode' => null,
-                    'teamYear' => 1,
-                    'committedTeamMember' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
                 [
-                    ['TEAMAPP_WD_CODE_MISSING'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_WD_CODE_MISSING',
+                        'reference.field' => 'withdrawCodeId',
+                    ]),
                 ],
                 false,
             ],
             // Withdraw and missing date
             [
                 [
-                    'appOutDate' => Carbon::parse('2015-01-13'),
-                    'appInDate' => Carbon::parse('2015-01-20'),
-                    'apprDate' => Carbon::parse('2015-01-27'),
                     'wdDate' => null,
                     'withdrawCode' => 1234,
-                    'teamYear' => 1,
-                    'committedTeamMember' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
                 [
-                    ['TEAMAPP_WD_DATE_MISSING'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_WD_DATE_MISSING',
+                        'reference.field' => 'wdDate',
+                    ]),
                 ],
                 false,
             ],
@@ -408,26 +276,9 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved
             [
                 [
-                    'appOutDate' => Carbon::parse('2015-01-14'),
-                    'appInDate' => Carbon::parse('2015-01-21'),
-                    'apprDate' => Carbon::parse('2015-01-28'),
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'teamYear' => 1,
-                    'committedTeamMember' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
+                    'appOutDate' => Carbon::parse('2016-08-22'),
+                    'appInDate' => Carbon::parse('2016-08-23'),
+                    'apprDate' => Carbon::parse('2016-08-27'),
                 ],
                 [],
                 true,
@@ -435,29 +286,15 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved and missing appInDate
             [
                 [
-                    'appOutDate' => Carbon::parse('2015-01-14'),
+                    'appOutDate' => Carbon::parse('2016-08-22'),
                     'appInDate' => null,
-                    'apprDate' => Carbon::parse('2015-01-28'),
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'teamYear' => 1,
-                    'committedTeamMember' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
+                    'apprDate' => Carbon::parse('2016-08-27'),
                 ],
                 [
-                    ['TEAMAPP_APPR_MISSING_APPIN_DATE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPIN_DATE_MISSING',
+                        'reference.field' => 'appInDate',
+                    ]),
                 ],
                 false,
             ],
@@ -465,28 +302,19 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             [
                 [
                     'appOutDate' => null,
-                    'appInDate' => Carbon::parse('2015-01-21'),
-                    'apprDate' => Carbon::parse('2015-01-28'),
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'teamYear' => 1,
-                    'committedTeamMember' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
+                    'appInDate' => Carbon::parse('2016-08-23'),
+                    'apprDate' => Carbon::parse('2016-08-27'),
                 ],
                 [
-                    ['TEAMAPP_APPR_MISSING_APPOUT_DATE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPOUT_DATE_MISSING',
+                        'reference.field' => 'appOutDate',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPOUT_LATE',
+                        'reference.field' => 'appOutDate',
+                        'level' => 'warning',
+                    ]),
                 ],
                 false,
             ],
@@ -494,26 +322,9 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             // App In
             [
                 [
-                    'appOutDate' => Carbon::parse('2015-01-14'),
-                    'appInDate' => Carbon::parse('2015-01-21'),
+                    'appOutDate' => Carbon::parse('2016-08-22'),
+                    'appInDate' => Carbon::parse('2016-08-23'),
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'teamYear' => 1,
-                    'committedTeamMember' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
                 [],
                 true,
@@ -522,28 +333,19 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             [
                 [
                     'appOutDate' => null,
-                    'appInDate' => Carbon::parse('2015-01-21'),
+                    'appInDate' => Carbon::parse('2016-08-23'),
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'teamYear' => 1,
-                    'committedTeamMember' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
                 [
-                    ['TEAMAPP_APPIN_MISSING_APPOUT_DATE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPOUT_DATE_MISSING',
+                        'reference.field' => 'appOutDate',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPOUT_LATE',
+                        'reference.field' => 'appOutDate',
+                        'level' => 'warning',
+                    ]),
                 ],
                 false,
             ],
@@ -551,26 +353,9 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             // App Out
             [
                 [
-                    'appOutDate' => Carbon::parse('2015-01-14'),
+                    'appOutDate' => Carbon::parse('2016-08-22'),
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'teamYear' => 1,
-                    'committedTeamMember' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
                 [],
                 true,
@@ -582,321 +367,170 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
                     'appOutDate' => null,
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'teamYear' => 1,
-                    'committedTeamMember' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                [],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPOUT_LATE',
+                        'reference.field' => 'appOutDate',
+                        'level' => 'warning',
+                    ]),
+                ],
                 true,
             ],
             // Missing committed team member
             [
                 [
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'teamYear' => 1,
                     'committedTeamMember' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
                 [
-                    ['TMLPREG_NO_COMMITTED_TEAM_MEMBER'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_NO_COMMITTED_TEAM_MEMBER',
+                        'reference.field' => 'committedTeamMemberId',
+                    ]),
                 ],
                 false,
             ],
         ];
     }
 
-    //
-    // validateDates()
-    //
-
     /**
      * @dataProvider providerValidateDates
      */
-    public function testValidateDates($data, $statsReport, $messages, $expectedResult)
+    public function testValidateDates($data, $expectedMessages, $expectedResult)
     {
-        $data = Domain\TeamApplication::fromArray($data);
+        $data = $this->getTeamApplication($data);
 
-        $validator = $this->getObjectMock([
-            'addMessage',
-        ], [$statsReport]);
+        $validator = $this->getObjectMock();
+        $result = $validator->run($data);
 
-        $this->setupMessageMocks($validator, $messages);
-
-        $result = $validator->validateDates($data);
-
+        $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
     }
 
     public function providerValidateDates()
     {
-        $statsReport = new stdClass;
-        $statsReport->center = new Models\Center();
-        $statsReport->quarter = $this->getQuarterMock([], [
-            'startWeekendDate' => Carbon::createFromDate(2014, 11, 14)->startOfDay(),
-        ]);
-
-        $statsReport->reportingDate = Carbon::createFromDate(2015, 1, 21);
-
         return [
             // Withdraw date OK
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
+                    'regDate' => Carbon::parse('2016-08-22'),
                     'appOutDate' => null,
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => Carbon::parse('2015-01-21'),
+                    'wdDate' => Carbon::parse('2016-08-25'),
                     'withdrawCode' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [],
                 true,
             ],
             // Withdraw and wdDate before regDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
+                    'regDate' => Carbon::parse('2016-08-22'),
                     'appOutDate' => null,
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => Carbon::parse('2015-01-01'),
+                    'wdDate' => Carbon::parse('2016-08-21'),
                     'withdrawCode' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_WD_DATE_BEFORE_REG_DATE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_WD_DATE_BEFORE_REG_DATE',
+                        'reference.field' => 'wdDate',
+                    ]),
                 ],
                 false,
             ],
             // Withdraw and approve dates OK
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
+                    'regDate' => Carbon::parse('2016-08-22'),
                     'appOutDate' => null,
                     'appInDate' => null,
-                    'apprDate' => Carbon::parse('2015-01-14'),
-                    'wdDate' => Carbon::parse('2015-01-21'),
+                    'apprDate' => Carbon::parse('2016-08-25'),
+                    'wdDate' => Carbon::parse('2016-08-26'),
                     'withdrawCode' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [],
                 true,
             ],
             // Withdraw and wdDate before apprDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
+                    'regDate' => Carbon::parse('2016-08-22'),
                     'appOutDate' => null,
                     'appInDate' => null,
-                    'apprDate' => Carbon::parse('2015-01-21'),
-                    'wdDate' => Carbon::parse('2015-01-14'),
+                    'apprDate' => Carbon::parse('2016-08-25'),
+                    'wdDate' => Carbon::parse('2016-08-24'),
                     'withdrawCode' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_WD_DATE_BEFORE_APPR_DATE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_WD_DATE_BEFORE_APPR_DATE',
+                        'reference.field' => 'wdDate',
+                    ]),
                 ],
                 false,
             ],
             // Withdraw and appIn dates OK
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
+                    'regDate' => Carbon::parse('2016-08-22'),
                     'appOutDate' => null,
-                    'appInDate' => Carbon::parse('2015-01-14'),
+                    'appInDate' => Carbon::parse('2016-08-24'),
                     'apprDate' => null,
-                    'wdDate' => Carbon::parse('2015-01-21'),
+                    'wdDate' => Carbon::parse('2016-08-26'),
                     'withdrawCode' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [],
                 true,
             ],
             // Withdraw and wdDate before appInDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
+                    'regDate' => Carbon::parse('2016-08-22'),
                     'appOutDate' => null,
-                    'appInDate' => Carbon::parse('2015-01-21'),
+                    'appInDate' => Carbon::parse('2016-08-24'),
                     'apprDate' => null,
-                    'wdDate' => Carbon::parse('2015-01-14'),
+                    'wdDate' => Carbon::parse('2016-08-23'),
                     'withdrawCode' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_WD_DATE_BEFORE_APPIN_DATE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_WD_DATE_BEFORE_APPIN_DATE',
+                        'reference.field' => 'wdDate',
+                    ]),
                 ],
                 false,
             ],
             // Withdraw and appOut dates OK
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => Carbon::parse('2015-01-09'),
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => Carbon::parse('2015-01-21'),
+                    'wdDate' => Carbon::parse('2016-08-26'),
                     'withdrawCode' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [],
                 true,
             ],
             // Withdraw and wdDate before appOutDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => Carbon::parse('2015-01-21'),
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => Carbon::parse('2015-01-14'),
+                    'wdDate' => Carbon::parse('2016-08-22'),
                     'withdrawCode' => 1234,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_WD_DATE_BEFORE_APPOUT_DATE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_WD_DATE_BEFORE_APPOUT_DATE',
+                        'reference.field' => 'wdDate',
+                    ]),
                 ],
                 false,
             ],
@@ -904,120 +538,71 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             // Approved date OK
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => Carbon::parse('2015-01-09'),
-                    'appInDate' => Carbon::parse('2015-01-14'),
-                    'apprDate' => Carbon::parse('2015-01-21'),
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-24'),
+                    'apprDate' => Carbon::parse('2016-08-25'),
                 ],
-                $statsReport,
                 [],
                 true,
             ],
             // Approved and apprDate before regDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => Carbon::parse('2015-01-09'),
-                    'appInDate' => Carbon::parse('2015-01-14'),
-                    'apprDate' => Carbon::parse('2015-01-01'),
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-24'),
+                    'apprDate' => Carbon::parse('2016-08-21'),
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_APPR_DATE_BEFORE_REG_DATE'],
-                    ['TMLPREG_APPR_DATE_BEFORE_APPIN_DATE'],
-                    ['TMLPREG_APPR_DATE_BEFORE_APPOUT_DATE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPR_DATE_BEFORE_REG_DATE',
+                        'reference.field' => 'apprDate',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPR_DATE_BEFORE_APPIN_DATE',
+                        'reference.field' => 'apprDate',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPR_DATE_BEFORE_APPOUT_DATE',
+                        'reference.field' => 'apprDate',
+                    ]),
                 ],
                 false,
             ],
             // Approved and apprDate before appInDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => Carbon::parse('2015-01-09'),
-                    'appInDate' => Carbon::parse('2015-01-14'),
-                    'apprDate' => Carbon::parse('2015-01-13'),
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-24'),
+                    'apprDate' => Carbon::parse('2016-08-23'),
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_APPR_DATE_BEFORE_APPIN_DATE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPR_DATE_BEFORE_APPIN_DATE',
+                        'reference.field' => 'apprDate',
+                    ]),
                 ],
                 false,
             ],
             // Approved and apprDate before appOutDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => Carbon::parse('2015-01-09'),
-                    'appInDate' => Carbon::parse('2015-01-08'),
-                    'apprDate' => Carbon::parse('2015-01-08'),
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-24'),
+                    'apprDate' => Carbon::parse('2016-08-22'),
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_APPR_DATE_BEFORE_APPOUT_DATE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPR_DATE_BEFORE_APPIN_DATE',
+                        'reference.field' => 'apprDate',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPR_DATE_BEFORE_APPOUT_DATE',
+                        'reference.field' => 'apprDate',
+                    ]),
                 ],
                 false,
             ],
@@ -1025,88 +610,47 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             // AppIn date OK
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => Carbon::parse('2015-01-09'),
-                    'appInDate' => Carbon::parse('2015-01-14'),
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-24'),
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [],
                 true,
             ],
             // AppIn and appInDate before regDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => Carbon::parse('2015-01-09'),
-                    'appInDate' => Carbon::parse('2015-01-01'),
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-21'),
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_APPIN_DATE_BEFORE_REG_DATE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPIN_DATE_BEFORE_REG_DATE',
+                        'reference.field' => 'appInDate',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPIN_DATE_BEFORE_APPOUT_DATE',
+                        'reference.field' => 'appInDate',
+                    ]),
                 ],
                 false,
             ],
             // AppIn and appInDate before appOutDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => Carbon::parse('2015-01-09'),
-                    'appInDate' => Carbon::parse('2015-01-08'),
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-22'),
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_APPIN_DATE_BEFORE_APPOUT_DATE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPIN_DATE_BEFORE_APPOUT_DATE',
+                        'reference.field' => 'appInDate',
+                    ]),
                 ],
                 false,
             ],
@@ -1114,58 +658,27 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             // AppOut date OK
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => Carbon::parse('2015-01-09'),
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [],
                 true,
             ],
             // AppOut and appOutDate before regDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => Carbon::parse('2015-01-01'),
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-21'),
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_APPOUT_DATE_BEFORE_REG_DATE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPOUT_DATE_BEFORE_REG_DATE',
+                        'reference.field' => 'appOutDate',
+                    ]),
                 ],
                 false,
             ],
@@ -1173,174 +686,84 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             // AppOut within 2 days of regDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-14'),
-                    'appOutDate' => Carbon::parse('2015-01-15'),
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [],
                 true,
             ],
             // AppOut not within 2 days of regDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-14'),
+                    'regDate' => Carbon::parse('2016-08-22'),
                     'appOutDate' => null,
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_APPOUT_LATE', ApiTeamApplicationValidator::MAX_DAYS_TO_SEND_APPLICATION_OUT],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPOUT_LATE',
+                        'reference.field' => 'appOutDate',
+                        'level' => 'warning',
+                    ]),
                 ],
                 true,
             ],
             // AppIn within 14 days of regDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-14'),
-                    'appOutDate' => Carbon::parse('2015-01-15'),
-                    'appInDate' => Carbon::parse('2015-01-21'),
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-24'),
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [],
                 true,
             ],
             // AppIn not within 14 days of regDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'appOutDate' => Carbon::parse('2015-01-02'),
+                    'regDate' => Carbon::parse('2016-08-17'),
+                    'appOutDate' => Carbon::parse('2016-08-18'),
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_APPIN_LATE', ApiTeamApplicationValidator::MAX_DAYS_TO_APPROVE_APPLICATION],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPIN_LATE',
+                        'reference.field' => 'appInDate',
+                        'level' => 'warning',
+                    ]),
                 ],
                 true,
             ],
             // Appr within 14 days of regDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-14'),
-                    'appOutDate' => Carbon::parse('2015-01-15'),
-                    'appInDate' => Carbon::parse('2015-01-18'),
-                    'apprDate' => Carbon::parse('2015-01-21'),
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-24'),
+                    'apprDate' => Carbon::parse('2016-09-02'),
                 ],
-                $statsReport,
                 [],
                 true,
             ],
             // Appr not within 14 days of regDate
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'appOutDate' => Carbon::parse('2015-01-02'),
-                    'appInDate' => Carbon::parse('2015-01-03'),
+                    'regDate' => Carbon::parse('2016-08-17'),
+                    'appOutDate' => Carbon::parse('2016-08-18'),
+                    'appInDate' => Carbon::parse('2016-08-19'),
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_APPR_LATE', ApiTeamApplicationValidator::MAX_DAYS_TO_APPROVE_APPLICATION],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPR_LATE',
+                        'reference.field' => 'apprDate',
+                        'level' => 'warning',
+                    ]),
                 ],
                 true,
             ],
@@ -1348,195 +771,104 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
             // RegDate in future
             [
                 [
-                    'regDate' => Carbon::parse('2015-02-01'),
+                    'regDate' => Carbon::parse('2016-09-09'),
                     'appOutDate' => null,
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_REG_DATE_IN_FUTURE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_REG_DATE_IN_FUTURE',
+                        'reference.field' => 'regDate',
+                    ]),
                 ],
                 false,
             ],
             // WdDate in future
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-14'),
-                    'appOutDate' => Carbon::parse('2015-01-14'),
-                    'appInDate' => Carbon::parse('2015-01-14'),
-                    'apprDate' => Carbon::parse('2015-01-14'),
-                    'wdDate' => Carbon::parse('2015-02-14'),
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-24'),
+                    'apprDate' => Carbon::parse('2016-08-25'),
+                    'wdDate' => Carbon::parse('2016-09-09'),
+                    'withdrawCode' => 1234,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_WD_DATE_IN_FUTURE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_WD_DATE_IN_FUTURE',
+                        'reference.field' => 'wdDate',
+                    ]),
                 ],
                 false,
             ],
             // ApprDate in future
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-14'),
-                    'appOutDate' => Carbon::parse('2015-01-14'),
-                    'appInDate' => Carbon::parse('2015-01-14'),
-                    'apprDate' => Carbon::parse('2015-02-14'),
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-24'),
+                    'apprDate' => Carbon::parse('2016-09-09'),
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_APPR_DATE_IN_FUTURE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPR_DATE_IN_FUTURE',
+                        'reference.field' => 'apprDate',
+                    ]),
                 ],
                 false,
             ],
             // AppInDate in future
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-14'),
-                    'appOutDate' => Carbon::parse('2015-01-14'),
-                    'appInDate' => Carbon::parse('2015-02-14'),
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-09-09'),
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_APPIN_DATE_IN_FUTURE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPIN_DATE_IN_FUTURE',
+                        'reference.field' => 'appInDate',
+                    ]),
                 ],
                 false,
             ],
             // AppOutDate in future
             [
                 [
-                    'regDate' => Carbon::parse('2015-01-14'),
-                    'appOutDate' => Carbon::parse('2015-02-14'),
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-09-09'),
                     'appInDate' => null,
                     'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'tmlpRegistration' => 1234,
-                    'incomingQuarter' => 1234,
-                    'committedTeamMember' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
                 ],
-                $statsReport,
                 [
-                    ['TMLPREG_APPOUT_DATE_IN_FUTURE'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPOUT_DATE_IN_FUTURE',
+                        'reference.field' => 'appOutDate',
+                    ]),
                 ],
                 false,
             ],
         ];
     }
 
-    //
-    // validateTravel()
-    //
-
     /**
-     * @dataProvider providerValidateTravelPasses
+     * @dataProvider providerValidateTravel
      */
-    public function testValidateTravelPasses($data, $statsReport)
+    public function testValidateTravel($data, $expectedMessages, $expectedResult)
     {
-        $data = Domain\TeamApplication::fromArray($data);
+        $data = $this->getTeamApplication($data);
 
-        $this->setSetting('travelDueByDate', 'classroom2Date');
+        $validator = $this->getObjectMock();
+        $result = $validator->run($data);
 
-        $validator = $this->getObjectMock([
-            'addMessage',
-        ], [$statsReport]);
-
-        $validator->expects($this->never())
-            ->method('addMessage');
-
-        $result = $validator->validateTravel($data);
-
-        $this->assertTrue($result);
+        $this->assertMessages($expectedMessages, $validator->getMessages());
+        $this->assertEquals($expectedResult, $result);
     }
 
-    public function providerValidateTravelPasses()
+    public function providerValidateTravel()
     {
-        $nextQuarter = $this->getModelMock();
-        $futureQuarter = $this->getModelMock();
-
-        $statsReport = new stdClass;
-        $statsReport->quarter = $this->getQuarterMock([], [
-            'classroom2Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
-            'nextQuarter' => $nextQuarter,
-        ]);
-        $statsReport->center = null;
-
-        $statsReport->reportingDate = Carbon::createFromDate(2015, 4, 10);
-
         return [
             // validateTravel Passes When Before Second Classroom
             [
@@ -1546,23 +878,11 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
                     'comment' => null,
                     'wdDate' => null,
                     'withdrawCode' => null,
-                    'incomingQuarter' => $nextQuarter->id,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'tmlpRegistration' => 1234,
-                    'committedTeamMember' => 1234,
+                    'incomingQuarter' => 'next',
+                    '__reportingDate' => Carbon::parse('2016-09-02'),
                 ],
-                $statsReport,
+                [],
+                true,
             ],
             // validateTravel Passes When Travel And Room Complete
             [
@@ -1572,23 +892,11 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
                     'comment' => null,
                     'wdDate' => null,
                     'withdrawCode' => null,
-                    'incomingQuarter' => $nextQuarter->id,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'tmlpRegistration' => 1234,
-                    'committedTeamMember' => 1234,
+                    'incomingQuarter' => 'next',
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
-                $statsReport,
+                [],
+                true,
             ],
             // validateTravel Passes When Comments Provided
             [
@@ -1598,88 +906,36 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
                     'comment' => 'Travel and rooming booked by May 4',
                     'wdDate' => null,
                     'withdrawCode' => null,
-                    'incomingQuarter' => $nextQuarter->id,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'tmlpRegistration' => 1234,
-                    'committedTeamMember' => 1234,
+                    'incomingQuarter' => 'next',
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
-                $statsReport,
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_TRAVEL_COMMENT_REVIEW',
+                        'reference.field' => 'comment',
+                        'level' => 'warning',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_ROOM_COMMENT_REVIEW',
+                        'reference.field' => 'comment',
+                        'level' => 'warning',
+                    ]),
+                ],
+                true,
             ],
-        ];
-    }
-
-    /**
-     * @dataProvider providerValidateTravelIgnored
-     */
-    public function testValidateTravelIgnoredWhenWdSet($data, $statsReport)
-    {
-        $data = Domain\TeamApplication::fromArray($data);
-
-        $this->setSetting('travelDueByDate', 'classroom2Date');
-
-        $validator = $this->getObjectMock([
-            'addMessage',
-        ], [$statsReport]);
-
-        $validator->expects($this->never())
-            ->method('addMessage');
-
-        $result = $validator->validateTravel($data);
-
-        $this->assertTrue($result);
-    }
-
-    public function providerValidateTravelIgnored()
-    {
-        $nextQuarter = $this->getModelMock();
-        $futureQuarter = $this->getModelMock();
-
-        $statsReport = new stdClass;
-        $statsReport->quarter = $this->getQuarterMock([], [
-            'classroom2Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
-            'nextQuarter' => $nextQuarter,
-        ]);
-        $statsReport->center = null;
-
-        $statsReport->reportingDate = Carbon::createFromDate(2015, 5, 8);
-
-        return [
             // validateTravel Ignored When Wd Set
             [
                 [
                     'travel' => null,
                     'room' => null,
                     'comment' => null,
-                    'wdDate' => Carbon::parse('2015-01-01'),
+                    'wdDate' => Carbon::parse('2016-08-26'),
                     'withdrawCode' => 1234,
-                    'incomingQuarter' => $nextQuarter->id,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'tmlpRegistration' => 1234,
-                    'committedTeamMember' => 1234,
+                    'incomingQuarter' => 'next',
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
-                $statsReport,
+                [],
+                true,
             ],
             // validateTravel Ignored When Incoming Weekend Equals Future
             [
@@ -1689,66 +945,12 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
                     'comment' => null,
                     'wdDate' => null,
                     'withdrawCode' => null,
-                    'incomingQuarter' => $futureQuarter->id,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'tmlpRegistration' => 1234,
-                    'committedTeamMember' => 1234,
+                    'incomingQuarter' => 'future',
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
-                $statsReport,
+                [],
+                true,
             ],
-        ];
-    }
-
-    /**
-     * @dataProvider providerValidateTravelFails
-     */
-    public function testValidateTravelFails($data, $statsReport, $messages, $expectedResult)
-    {
-        $data = Domain\TeamApplication::fromArray($data);
-
-        $this->setSetting('travelDueByDate', 'classroom2Date');
-
-        $validator = $this->getObjectMock([
-            'addMessage',
-        ], [$statsReport]);
-
-        $this->setupMessageMocks($validator, $messages);
-
-        $result = $validator->validateTravel($data);
-
-        $this->assertEquals($expectedResult, $result);
-    }
-
-    public function providerValidateTravelFails()
-    {
-        $nextQuarter = $this->getModelMock();
-        $futureQuarter = $this->getModelMock();
-
-        $statsReport = new stdClass;
-        $statsReport->quarter = $this->getQuarterMock([], [
-            'classroom2Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
-            'endWeekendDate' => Carbon::createFromDate(2015, 5, 29)->startOfDay(),
-            'nextQuarter' => $nextQuarter,
-        ]);
-        $statsReport->center = null;
-
-        $statsReport->reportingDate = Carbon::createFromDate(2015, 5, 8);
-
-        $statsReportLastTwoWeeks = clone $statsReport;
-        $statsReportLastTwoWeeks->reportingDate = Carbon::createFromDate(2015, 5, 15);
-
-        return [
             // ValidateTravel Fails When Missing Travel
             [
                 [
@@ -1757,25 +959,14 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
                     'comment' => null,
                     'wdDate' => null,
                     'withdrawCode' => null,
-                    'incomingQuarter' => $nextQuarter->id,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'tmlpRegistration' => 1234,
-                    'committedTeamMember' => 1234,
+                    'incomingQuarter' => 'next',
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
-                $statsReport,
                 [
-                    ['TEAMAPP_TRAVEL_COMMENT_MISSING'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_TRAVEL_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
                 ],
                 false,
             ],
@@ -1787,87 +978,16 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
                     'comment' => null,
                     'wdDate' => null,
                     'withdrawCode' => null,
-                    'incomingQuarter' => $nextQuarter->id,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'tmlpRegistration' => 1234,
-                    'committedTeamMember' => 1234,
+                    'incomingQuarter' => 'next',
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
-                $statsReport,
                 [
-                    ['TEAMAPP_ROOM_COMMENT_MISSING'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_ROOM_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
                 ],
                 false,
-            ],
-            // ValidateTravel Throws Warning When Missing Room In Last 2 Weeks
-            [
-                [
-                    'travel' => null,
-                    'room' => true,
-                    'comment' => 'By 5/15/2015',
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'incomingQuarter' => $nextQuarter->id,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'tmlpRegistration' => 1234,
-                    'committedTeamMember' => 1234,
-                ],
-                $statsReportLastTwoWeeks,
-                [
-                    ['TEAMAPP_TRAVEL_COMMENT_REVIEW'],
-                ],
-                true,
-            ],
-            // ValidateTravel Throws Warning When Missing Room In Last 2 Weeks
-            [
-                [
-                    'travel' => true,
-                    'room' => null,
-                    'comment' => 'By 5/15/2015',
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'incomingQuarter' => $nextQuarter->id,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'teamYear' => 1,
-                    'center' => 1234,
-                    'isReviewer' => false,
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'tmlpRegistration' => 1234,
-                    'committedTeamMember' => 1234,
-                ],
-                $statsReportLastTwoWeeks,
-                [
-                    ['TEAMAPP_ROOM_COMMENT_REVIEW'],
-                ],
-                true,
             ],
         ];
     }
@@ -1875,18 +995,14 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
     /**
      * @dataProvider providerValidateReviewer
      */
-    public function testValidateReviewer($data, $messages, $expectedResult)
+    public function testValidateReviewer($data, $expectedMessages, $expectedResult)
     {
-        $data = Domain\TeamApplication::fromArray($data);
+        $data = $this->getTeamApplication($data);
 
-        $validator = $this->getObjectMock([
-            'addMessage',
-        ]);
+        $validator = $this->getObjectMock();
+        $result = $validator->run($data);
 
-        $this->setupMessageMocks($validator, $messages);
-
-        $result = $validator->validateReviewer($data);
-
+        $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
     }
 
@@ -1898,24 +1014,6 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
                 [
                     'teamYear' => 1,
                     'isReviewer' => false,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'incomingQuarter' => 1234,
-                    'tmlpRegistration' => 1234,
-                    'committedTeamMember' => 1234,
-                    'travel' => null,
-                    'room' => true,
-                    'comment' => null,
                 ],
                 [],
                 true,
@@ -1925,24 +1023,6 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
                 [
                     'teamYear' => 2,
                     'isReviewer' => false,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'incomingQuarter' => 1234,
-                    'tmlpRegistration' => 1234,
-                    'committedTeamMember' => 1234,
-                    'travel' => null,
-                    'room' => true,
-                    'comment' => null,
                 ],
                 [],
                 true,
@@ -1952,27 +1032,12 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
                 [
                     'teamYear' => 1,
                     'isReviewer' => true,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'incomingQuarter' => 1234,
-                    'tmlpRegistration' => 1234,
-                    'committedTeamMember' => 1234,
-                    'travel' => null,
-                    'room' => true,
-                    'comment' => null,
                 ],
                 [
-                    ['TEAMAPP_REVIEWER_TEAM1'],
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_REVIEWER_TEAM1',
+                        'reference.field' => 'isReviewer',
+                    ]),
                 ],
                 false,
             ],
@@ -1981,24 +1046,6 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
                 [
                     'teamYear' => 2,
                     'isReviewer' => true,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'phone' => '555-555-5555',
-                    'center' => 1234,
-                    'regDate' => Carbon::parse('2015-01-07'),
-                    'appOutDate' => null,
-                    'appInDate' => null,
-                    'apprDate' => null,
-                    'wdDate' => null,
-                    'withdrawCode' => null,
-                    'incomingQuarter' => 1234,
-                    'tmlpRegistration' => 1234,
-                    'committedTeamMember' => 1234,
-                    'travel' => null,
-                    'room' => true,
-                    'comment' => null,
                 ],
                 [],
                 true,
@@ -2013,79 +1060,53 @@ class ApiTeamApplicationValidatorTest extends ObjectsValidatorTestAbstract
     /**
      * @dataProvider providerIsStartingNextQuarter
      */
-    public function testIsStartingNextQuarter($data, $statsReport, $expected)
+    public function testIsStartingNextQuarter($data, $expected)
     {
-        $data = Domain\TeamApplication::fromArray($data);
+        $data = $this->getTeamApplication($data);
 
-        $validator = $this->getObjectMock([], [$statsReport]);
+        $validator = $this->getObjectMock();
+        $result = $validator->isStartingNextQuarter($data);
 
-        $this->assertEquals($expected, $validator->isStartingNextQuarter($data));
+        $this->assertEquals($expected, $result);
     }
 
     public function providerIsStartingNextQuarter()
     {
-        $nextQuarter = $this->getModelMock();
-        $futureQuarter = $this->getModelMock();
-
-        $statsReport = new stdClass;
-        $statsReport->quarter = $this->getQuarterMock([], [
-            'nextQuarter' => $nextQuarter,
-        ]);
         return [
             // Is Starting Next Quarter
             [
                 [
-                    'incomingQuarter' => $nextQuarter->id,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'teamYear' => 1,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'appOutDate' => Carbon::parse('2015-01-01'),
-                    'appInDate' => Carbon::parse('2015-01-01'),
-                    'apprDate' => Carbon::parse('2015-01-01'),
-                    'wdDate' => Carbon::parse('2015-01-01'),
-                    'committedTeamMember' => 1234,
-                    'withdrawCode' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
+                    'incomingQuarter' => 'next',
                 ],
-                $statsReport,
                 true,
             ],
             // Not Starting Next Quarter
             [
                 [
-                    'incomingQuarter' => $futureQuarter->id,
-                    // the below values are not referenced and don't change
-                    'firstName' => 'Keith',
-                    'lastName' => 'Stone',
-                    'email' => 'unit_test@tmlpstats.com',
-                    'center' => 1234,
-                    'teamYear' => 1,
-                    'regDate' => Carbon::parse('2015-01-01'),
-                    'isReviewer' => false,
-                    'phone' => '555-555-5555',
-                    'tmlpRegistration' => 1234,
-                    'appOutDate' => Carbon::parse('2015-01-01'),
-                    'appInDate' => Carbon::parse('2015-01-01'),
-                    'apprDate' => Carbon::parse('2015-01-01'),
-                    'wdDate' => Carbon::parse('2015-01-01'),
-                    'committedTeamMember' => 1234,
-                    'withdrawCode' => 1234,
-                    'comment' => 'asdf qwerty',
-                    'travel' => true,
-                    'room' => true,
+                    'incomingQuarter' => 'future',
                 ],
-                $statsReport,
                 false,
             ],
         ];
+    }
+
+    public function getTeamApplication($data)
+    {
+        if (isset($data['__reportingDate'])) {
+            $this->statsReport->reportingDate = $data['__reportingDate'];
+            unset($data['__reportingDate']);
+        }
+
+        if (isset($data['incomingQuarter'])) {
+            if ($data['incomingQuarter'] == 'next') {
+                $data['incomingQuarter'] = $this->nextQuarter->id;
+            } else if ($data['incomingQuarter'] == 'future') {
+                $data['incomingQuarter'] = $this->futureQuarter->id;
+            }
+        }
+
+        $data = array_merge($this->dataTemplate, $data);
+
+        return TeamApplication::fromArray($data);
     }
 }

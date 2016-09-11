@@ -31,11 +31,6 @@ class ScoreboardObjectTest extends FunctionalTestAbstract
         $this->sbapi = App::make(Api\Scoreboard::class);
     }
 
-    public function tearDown()
-    {
-        parent::tearDown();
-    }
-
     public function testSetScoreboardLockQuarter_unauthorized()
     {
         $this->expectException(Api\Exceptions\UnauthorizedException::class);

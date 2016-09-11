@@ -39,11 +39,6 @@ class ScoreboardTest extends FunctionalTestAbstract
         Carbon::setTestNow($this->now);
     }
 
-    public function tearDown()
-    {
-        parent::tearDown();
-    }
-
     /**
      * @dataProvider providerStash
      */

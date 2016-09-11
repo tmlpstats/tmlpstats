@@ -53,7 +53,6 @@ class ApiValidationManager
         $apiType = 'api' . ucfirst($type);
 
         $validator = ValidatorFactory::build($this->statsReport, $apiType);
-        $validator->setOffset($id);
         if (!$validator->run($data)) {
             $isValid = false;
         }
@@ -67,11 +66,9 @@ class ApiValidationManager
         $isValid = true;
         foreach ($list as $id => $dataObj) {
             $validator = ValidatorFactory::build($this->statsReport, $type);
-            $validator->setOffset($id);
             if (!$validator->run($dataObj)) {
                 $isValid = false;
             }
-            // TODO pair messages with object so we can match them up later when displaying to user
             $this->mergeMessages($validator->getMessages());
         }
 

@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Api\Exceptions as ApiExceptions;
+use TmlpStats\Contracts\Referenceable;
 use TmlpStats\Domain;
 use TmlpStats\Traits;
 
@@ -14,15 +15,13 @@ use TmlpStats\Traits;
  */
 class ValidationData extends AuthenticatedApiBase
 {
-    use Traits\GeneratesApiMessages;
-
     // updateRequired: Not all objects require updates every week, but some do. For those that do,
     //                 if no update is needed, they'll need to take some action to confirm the
     //                 data is the same. That "confirmation" will create a submissionData entry
     protected $dataTypesConf = [
         'applications' => [
             'apiClass' => Application::class,
-            'typeName' => 'application',
+            'typeName' => 'teamApplication',
             'updateRequired' => false,
         ],
         'courses' => [
@@ -32,7 +31,7 @@ class ValidationData extends AuthenticatedApiBase
         ],
         'scoreboard' => [
             'apiClass' => Scoreboard::class,
-            'typeName' => 'center games',
+            'typeName' => 'scoreboard',
             'updateRequired' => true,
         ],
     ];
@@ -52,7 +51,7 @@ class ValidationData extends AuthenticatedApiBase
 
         foreach ($results as $group => $groupData) {
             foreach ($groupData as $message) {
-                if ($message['type'] == 'error') {
+                if ($message->level() == 'error') {
                     $isValid = false;
                     break;
                 }
@@ -108,17 +107,25 @@ class ValidationData extends AuthenticatedApiBase
         foreach ($data as $group => $groupData) {
             $conf = $this->dataTypesConf[$group];
             foreach ($groupData as $object) {
-                $id = $object->getKey();
+                $id = null;
+                if ($object instanceof Referenceable) {
+                    $id = $object->getKey();
+                }
                 $validationResults = $this->validateObject($report, $object, $id);
 
                 if ($conf['updateRequired']) {
-                    // Need to set $this->data so addMessage can get the object's id
-                    $this->data = $object;
                     $validationResults['valid'] = false;
-                    $validationResults['messages'][] = $this->addMessage('VALDATA_DATA_MISSING_UPDATE', $conf['typeName']);
+                    $validationResults['messages'][] = Domain\ValidationMessage::error([
+                        'id' => 'VALDATA_NOT_UPDATED',
+                        'ref' => $object,
+                        'params' => ['type' => $conf['typeName']],
+                    ]);
                 }
 
                 if ($validationResults['messages']) {
+                    if (!isset($results[$group])) {
+                        $results[$group] = [];
+                    }
                     $results[$group] = array_merge($results[$group], $validationResults['messages']);
                 }
             }

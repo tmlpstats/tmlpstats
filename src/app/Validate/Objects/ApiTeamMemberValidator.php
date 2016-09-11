@@ -4,9 +4,9 @@ namespace TmlpStats\Validate\Objects;
 use Respect\Validation\Validator as v;
 use TmlpStats\Traits;
 
-class ApiTeamMemberValidator extends ClassListValidator
+class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
 {
-    use Traits\GeneratesApiMessages, Traits\ValidatesTravelWithConfig;
+    use Traits\ValidatesTravelWithConfig;
 
     protected function populateValidators($data)
     {
@@ -61,16 +61,16 @@ class ApiTeamMemberValidator extends ClassListValidator
     {
         $isValid = true;
 
-        if (!is_null($data->xferOut) || !is_null($data->withdrawCodeId)) {
-            if (!is_null($data->gitw)) {
-                $this->addMessage('CLASSLIST_GITW_LEAVE_BLANK');
-                $isValid = false;
-            }
-        } else {
-            if (is_null($data->gitw)) {
-                $this->addMessage('CLASSLIST_GITW_MISSING');
-                $isValid = false;
-            }
+        if ($data->xferOut || !is_null($data->withdrawCodeId)) {
+            return $isValid; // Not required if withdrawn
+        }
+
+        if (is_null($data->gitw)) {
+            $this->addMessage('error', [
+                'id' => 'CLASSLIST_GITW_MISSING',
+                'ref' => $data->getReference(['field' => 'gitw']),
+            ]);
+            $isValid = false;
         }
 
         return $isValid;
@@ -80,16 +80,16 @@ class ApiTeamMemberValidator extends ClassListValidator
     {
         $isValid = true;
 
-        if (!is_null($data->xferOut) || !is_null($data->withdrawCodeId)) {
-            if (!is_null($data->tdo)) {
-                $this->addMessage('CLASSLIST_TDO_LEAVE_BLANK');
-                $isValid = false;
-            }
-        } else {
-            if (is_null($data->tdo)) {
-                $this->addMessage('CLASSLIST_TDO_MISSING');
-                $isValid = false;
-            }
+        if ($data->xferOut || !is_null($data->withdrawCodeId)) {
+            return $isValid; // Not required if withdrawn
+        }
+
+        if (is_null($data->tdo)) {
+            $this->addMessage('error', [
+                'id' => 'CLASSLIST_TDO_MISSING',
+                'ref' => $data->getReference(['field' => 'tdo']),
+            ]);
+            $isValid = false;
         }
 
         return $isValid;
@@ -99,23 +99,33 @@ class ApiTeamMemberValidator extends ClassListValidator
     {
         $isValid = true;
 
-        if (is_null($data->atWeekend) && is_null($data->xferIn) && is_null($data->rereg)) {
-            $this->addMessage('CLASSLIST_WKND_MISSING', $data->teamYear);
+        if (!$data->atWeekend && !$data->xferIn && !$data->rereg) {
+            $this->addMessage('error', [
+                'id' => 'CLASSLIST_WKND_MISSING',
+                'ref' => $data->getReference(['field' => 'atWeekend']),
+            ]);
             $isValid = false;
         } else {
-            $cellCount = 0;
-            if (!is_null($data->atWeekend)) {
-                $cellCount++;
+            $field = '';
+            $setCount = 0;
+            if ($data->atWeekend) {
+                $setCount++;
+                $field = 'atWeekend';
             }
-            if (!is_null($data->xferIn)) {
-                $cellCount++;
+            if ($data->xferIn) {
+                $setCount++;
+                $field = 'xferIn';
             }
-            if (!is_null($data->rereg)) {
-                $cellCount++;
+            if ($data->rereg) {
+                $setCount++;
+                $field = 'rereg';
             }
 
-            if ($cellCount !== 1) {
-                $this->addMessage('CLASSLIST_WKND_XIN_REREG_ONLY_ONE', $data->teamYear);
+            if ($setCount !== 1) {
+                $this->addMessage('error', [
+                    'id' => 'CLASSLIST_WKND_XIN_REREG_ONLY_ONE',
+                    'ref' => $data->getReference(['field' => $field]),
+                ]);
                 $isValid = false;
             }
         }
@@ -127,15 +137,29 @@ class ApiTeamMemberValidator extends ClassListValidator
     {
         $isValid = true;
 
-        if (!is_null($data->xferIn) || !is_null($data->xferOut)) {
+        if ($data->xferIn && $data->xferOut) {
+            $this->addMessage('error', [
+                'id' => 'CLASSLIST_XFER_ONLY_ONE',
+                'ref' => $data->getReference(['field' => 'xferIn']),
+            ]);
+            $isValid = false;
+        }
+
+        if ($data->xferIn || $data->xferOut) {
 
             // TODO: We probably don't need to show this every week. We need a better way to alert something for
             //       the first week.
             // Always display this message.
-            $this->addMessage('CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER');
+            $this->addMessage('warning', [
+                'id' => 'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER',
+                'ref' => $data->getReference(['field' => $data->xferIn ? 'xferIn' : 'xferOut']),
+            ]);
 
             if (is_null($data->comment)) {
-                $this->addMessage('CLASSLIST_XFER_COMMENT_MISSING');
+                $this->addMessage('error', [
+                    'id' => 'CLASSLIST_XFER_COMMENT_MISSING',
+                    'ref' => $data->getReference(['field' => 'comment']),
+                ]);
                 $isValid = false;
             }
         }
@@ -147,18 +171,28 @@ class ApiTeamMemberValidator extends ClassListValidator
     {
         $isValid = true;
 
+        if (!is_null($data->withdrawCodeId) && $data->ctw) {
+            $this->addMessage('error', [
+                'id' => 'CLASSLIST_WD_CTW_ONLY_ONE',
+                'ref' => $data->getReference(['field' => 'ctw']),
+            ]);
+            $isValid = false;
+        }
+
         if (!is_null($data->withdrawCodeId)) {
-            if (!is_null($data->ctw)) {
-                $this->addMessage('CLASSLIST_WD_CTW_ONLY_ONE');
+            if (is_null($data->comment)) {
+                $this->addMessage('error', [
+                    'id' => 'CLASSLIST_WD_COMMENT_MISSING',
+                    'ref' => $data->getReference(['field' => 'comment']),
+                ]);
                 $isValid = false;
             }
+        } else if ($data->ctw) {
             if (is_null($data->comment)) {
-                $this->addMessage('CLASSLIST_WD_COMMENT_MISSING');
-                $isValid = false;
-            }
-        } else if (!is_null($data->ctw)) {
-            if (is_null($data->comment)) {
-                $this->addMessage('CLASSLIST_CTW_COMMENT_MISSING');
+                $this->addMessage('error', [
+                    'id' => 'CLASSLIST_CTW_COMMENT_MISSING',
+                    'ref' => $data->getReference(['field' => 'comment']),
+                ]);
                 $isValid = false;
             }
         }
@@ -170,28 +204,40 @@ class ApiTeamMemberValidator extends ClassListValidator
     {
         $isValid = true;
 
-        if (!is_null($data->withdrawCodeId) || !is_null($data->xferOut)) {
+        if (!is_null($data->withdrawCodeId) || $data->xferOut) {
             return $isValid; // Not required if withdrawn
         }
 
         // Travel and Rooming must be reported starting after the configured date
         if ($this->isTimeToCheckTravel()) {
-            if (is_null($data->travel)) {
+            if (!$data->travel) {
                 // Error if no comment provided, warning to look at it otherwise
                 if (is_null($data->comment)) {
-                    $this->addMessage('CLASSLIST_TRAVEL_COMMENT_MISSING');
+                    $this->addMessage('error', [
+                        'id' => 'CLASSLIST_TRAVEL_COMMENT_MISSING',
+                        'ref' => $data->getReference(['field' => 'comment']),
+                    ]);
                     $isValid = false;
                 } else {
-                    $this->addMessage('CLASSLIST_TRAVEL_COMMENT_REVIEW');
+                    $this->addMessage('warning', [
+                        'id' => 'CLASSLIST_TRAVEL_COMMENT_REVIEW',
+                        'ref' => $data->getReference(['field' => 'comment']),
+                    ]);
                 }
             }
-            if (is_null($data->room)) {
+            if (!$data->room) {
                 // Error if no comment provided, warning to look at it otherwise
                 if (is_null($data->comment)) {
-                    $this->addMessage('CLASSLIST_ROOM_COMMENT_MISSING');
+                    $this->addMessage('error', [
+                        'id' => 'CLASSLIST_ROOM_COMMENT_MISSING',
+                        'ref' => $data->getReference(['field' => 'comment']),
+                    ]);
                     $isValid = false;
                 } else {
-                    $this->addMessage('CLASSLIST_ROOM_COMMENT_REVIEW');
+                    $this->addMessage('warning', [
+                        'id' => 'CLASSLIST_ROOM_COMMENT_REVIEW',
+                        'ref' => $data->getReference(['field' => 'comment']),
+                    ]);
                 }
             }
         }

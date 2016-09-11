@@ -1,12 +1,8 @@
 <?php
 namespace TmlpStats\Validate\Relationships;
 
-use TmlpStats\Traits;
-
-class ApiCenterGamesValidator extends CenterGamesValidator
+class ApiCenterGamesValidator extends ApiValidatorAbstract
 {
-    use Traits\GeneratesApiMessages;
-
     protected function validate($data)
     {
         // GITW and TDO
@@ -89,28 +85,74 @@ class ApiCenterGamesValidator extends CenterGamesValidator
 
         // Make sure they match
         if ($thisWeekActual) {
+            $ref = [
+                'reportingDate' => $this->reportingDate->toDateString(),
+                'type' => 'actual',
+                'game' => '',
+            ];
+
             if ($thisWeekActual->cap != $capGame) {
-                $this->addMessage('IMPORTDOC_CAP_ACTUAL_INCORRECT', $thisWeekActual->cap, $capGame);
+                $ref['game'] = 'cap';
+                $this->addMessage('error', [
+                    'id' => 'CENTERGAME_CAP_ACTUAL_INCORRECT',
+                    'ref' => $ref,
+                    'params' => [
+                        'reported' => $thisWeekActual->cap,
+                        'calculated' => $capGame,
+                    ],
+                ]);
                 $this->isValid = false;
             }
 
             if ($thisWeekActual->cpc != $cpcGame) {
-                $this->addMessage('IMPORTDOC_CPC_ACTUAL_INCORRECT', $thisWeekActual->cpc, $cpcGame);
+                $ref['game'] = 'cpc';
+                $this->addMessage('error', [
+                    'id' => 'CENTERGAME_CPC_ACTUAL_INCORRECT',
+                    'ref' => $ref,
+                    'params' => [
+                        'reported' => $thisWeekActual->cpc,
+                        'calculated' => $cpcGame,
+                    ],
+                ]);
                 $this->isValid = false;
             }
 
             if ($thisWeekActual->t1x != $t1xGame) {
-                $this->addMessage('IMPORTDOC_T1X_ACTUAL_INCORRECT', $thisWeekActual->t1x, $t1xGame);
+                $ref['game'] = 't1x';
+                $this->addMessage('error', [
+                    'id' => 'CENTERGAME_T1X_ACTUAL_INCORRECT',
+                    'ref' => $ref,
+                    'params' => [
+                        'reported' => $thisWeekActual->t1x,
+                        'calculated' => $t1xGame,
+                    ],
+                ]);
                 $this->isValid = false;
             }
 
             if ($thisWeekActual->t2x != $t2xGame) {
-                $this->addMessage('IMPORTDOC_T2X_ACTUAL_INCORRECT', $thisWeekActual->t2x, $t2xGame);
+                $ref['game'] = 't2x';
+                $this->addMessage('error', [
+                    'id' => 'CENTERGAME_T2X_ACTUAL_INCORRECT',
+                    'ref' => $ref,
+                    'params' => [
+                        'reported' => $thisWeekActual->t2x,
+                        'calculated' => $t2xGame,
+                    ],
+                ]);
                 $this->isValid = false;
             }
 
             if ($thisWeekActual->gitw != $gitwGame) {
-                $this->addMessage('IMPORTDOC_GITW_ACTUAL_INCORRECT', $thisWeekActual->gitw, $gitwGame);
+                $ref['game'] = 'gitw';
+                $this->addMessage('error', [
+                    'id' => 'CENTERGAME_GITW_ACTUAL_INCORRECT',
+                    'ref' => $ref,
+                    'params' => [
+                        'reported' => $thisWeekActual->gitw,
+                        'calculated' => $gitwGame,
+                    ],
+                ]);
                 $this->isValid = false;
             }
         }

@@ -125,8 +125,9 @@ class Scoreboard extends AuthenticatedApiBase
         $results = [];
 
         $allData = $this->allForCenter($center, $reportingDate, true);
-        foreach ($allData as $dataObject) {
-            $meta = array_get($dataObject, 'meta', []);
+        foreach ($allData as $dataArr) {
+            $meta = array_get($dataArr, 'meta', []);
+            $dataObject = Domain\Scoreboard::fromArray($dataArr);
 
             if ((array_get($meta, 'canEditPromise', false) || array_get($meta, 'canEditActual', false))
                 && !array_get($meta, 'localChanges', false)
