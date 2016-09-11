@@ -281,6 +281,20 @@ div.box {
     min-width: 3.5em;
 }
 
+/** SUBMISSION - Wide Layout */
+#submissionWideLayout {
+    overflow:hidden;
+    padding:10px;
+}
+
+#swSidebar {
+    float:left;
+    width:11em;
+}
+#swContent {
+    margin: 0 0 0 11.5em;
+}
+
 /** SUBMISSION - SCOREBOARD */
 
 table.submissionCenterStats {
@@ -325,10 +339,22 @@ table.submissionCenterStats {
 
 /** SUBMISSION - CLASS LIST */
 
-.submissionClassList tbody .gitw select {
+table.submissionClassList {
+    max-width: 700px;
+}
+
+.submissionClassList tbody .gitw select, select.gitw {
     max-width: 9em;
 }
 
 .submissionClassList tbody .tdo select {
     max-width: 4em;
+}
+
+.boolSelect select, select.boolSelect {
+    max-width: 4em;
+}
+
+.submissionClassListEdit .tmBox {
+    max-width: 1200px;
 }

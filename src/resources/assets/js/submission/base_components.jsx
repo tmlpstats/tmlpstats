@@ -1,8 +1,12 @@
 import React from 'react'
 
+import { routerShape } from 'react-router/lib/PropTypes'
+
 export { React }
 
 export class SubmissionBase extends React.Component {
+    static contextTypes = { router: routerShape }
+
     baseUri() {
         const params = this.props.params
         return `/center/${params.centerId}/submission/${params.reportingDate}`

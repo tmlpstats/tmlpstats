@@ -3,6 +3,7 @@
 
 import { buildApiCaller } from './callers'
 
+// Little shortcut to increase the capability of minifier
 const bac = buildApiCaller
 
 var Api = {}
@@ -260,7 +261,15 @@ Api.LocalReport = {
     Parameters:
       localReport: LocalReport
     */
-    getCourseList: bac('LocalReport.getCourseList')
+    getCourseList: bac('LocalReport.getCourseList'),
+
+    /*
+    Center Quarter
+    Parameters:
+      center: Center
+      quarter: Quarter
+    */
+    getCenterQuarter: bac('LocalReport.getCenterQuarter')
 }
 
 Api.Scoreboard = {
@@ -356,7 +365,25 @@ Api.TeamMember = {
       reportingDate: date
       includeInProgress: bool
     */
-    allForCenter: bac('TeamMember.allForCenter')
+    allForCenter: bac('TeamMember.allForCenter'),
+
+    /*
+    Stash data for in-progress Team Member weekly
+    Parameters:
+      center: Center
+      reportingDate: date
+      data: array
+    */
+    stash: bac('TeamMember.stash'),
+
+    /*
+    Bulk update weekly reporting info (GITW/TDO)
+    Parameters:
+      center: Center
+      reportingDate: date
+      updates: array
+    */
+    bulkStashWeeklyReporting: bac('TeamMember.bulkStashWeeklyReporting')
 }
 
 Api.UserProfile = {

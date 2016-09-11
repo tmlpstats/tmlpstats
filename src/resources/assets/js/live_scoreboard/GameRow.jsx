@@ -43,5 +43,3 @@ export default class GameRow extends React.PureComponent {
         )
     }
 }
-
-export default GameRow

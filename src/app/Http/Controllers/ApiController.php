@@ -47,6 +47,7 @@ class ApiController extends ApiControllerBase
         "LocalReport.getClassList" => "LocalReport__getClassList",
         "LocalReport.getClassListByQuarter" => "LocalReport__getClassListByQuarter",
         "LocalReport.getCourseList" => "LocalReport__getCourseList",
+        "LocalReport.getCenterQuarter" => "LocalReport__getCenterQuarter",
         "Scoreboard.allForCenter" => "Scoreboard__allForCenter",
         "Scoreboard.stash" => "Scoreboard__stash",
         "Scoreboard.getScoreboardLockQuarter" => "Scoreboard__getScoreboardLockQuarter",
@@ -57,6 +58,8 @@ class ApiController extends ApiControllerBase
         "TeamMember.update" => "TeamMember__update",
         "TeamMember.setWeekData" => "TeamMember__setWeekData",
         "TeamMember.allForCenter" => "TeamMember__allForCenter",
+        "TeamMember.stash" => "TeamMember__stash",
+        "TeamMember.bulkStashWeeklyReporting" => "TeamMember__bulkStashWeeklyReporting",
         "UserProfile.setLocale" => "UserProfile__setLocale",
         "ValidationData.validate" => "ValidationData__validate",
     ];
@@ -268,6 +271,13 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'localReport', 'LocalReport')
         );
     }
+    protected function LocalReport__getCenterQuarter($input)
+    {
+        return App::make(Api\LocalReport::class)->getCenterQuarter(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'quarter', 'Quarter')
+        );
+    }
     protected function Scoreboard__allForCenter($input)
     {
         return App::make(Api\Scoreboard::class)->allForCenter(
@@ -340,6 +350,22 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'includeInProgress', 'bool', false)
+        );
+    }
+    protected function TeamMember__stash($input)
+    {
+        return App::make(Api\TeamMember::class)->stash(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'data', 'array')
+        );
+    }
+    protected function TeamMember__bulkStashWeeklyReporting($input)
+    {
+        return App::make(Api\TeamMember::class)->bulkStashWeeklyReporting(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'updates', 'array')
         );
     }
     protected function UserProfile__setLocale($input)

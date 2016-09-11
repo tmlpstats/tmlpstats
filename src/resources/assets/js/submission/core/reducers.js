@@ -2,7 +2,7 @@ import { combineReducers } from 'redux'
 
 import { objectAssign } from '../../reusable/ponyfill'
 
-import { coreInit } from './data'
+import { coreInit, centerQuarterData } from './data'
 import clearWrapper from './clearWrapper'
 
 function reportingDate(state='', action) {
@@ -13,7 +13,7 @@ function reportingDate(state='', action) {
     return state
 }
 
-export function lookups(state={}, action) {
+function lookups(state={}, action) {
     switch (action.type) {
     case 'core/setSubmissionLookups':
         return objectAssign({}, state, action.payload)
@@ -22,6 +22,7 @@ export function lookups(state={}, action) {
 }
 
 const coreReducerReal = combineReducers({
+    centerQuarters: centerQuarterData.reducer(),
     coreInit: coreInit.reducer(),
     lookups: lookups,
     reportingDate: reportingDate

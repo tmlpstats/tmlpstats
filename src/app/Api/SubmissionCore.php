@@ -33,11 +33,15 @@ class SubmissionCore extends AuthenticatedApiBase
 
         // Get values for lookups
         $withdraw_codes = Models\WithdrawCode::get();
-        $center_quarters = App::make(Application::class)->validRegistrationQuarters($center, $reportingDate, $quarter);
+        $validRegQuarters = App::make(Application::class)->validRegistrationQuarters($center, $reportingDate, $quarter);
+        $accountabilities = Models\Accountability::orderBy('name')->get();
 
         return [
             'success' => true,
-            'lookups' => compact('withdraw_codes', 'team_members', 'center', 'center_quarters'),
+            'id' => $center->id,
+            'validRegQuarters' => $validRegQuarters,
+            'lookups' => compact('withdraw_codes', 'team_members', 'center'),
+            'accountabilities' => $accountabilities,
         ];
     }
 

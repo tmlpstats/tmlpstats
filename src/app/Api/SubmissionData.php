@@ -3,11 +3,8 @@ namespace TmlpStats\Api;
 
 use App;
 use Carbon\Carbon;
-use Illuminate\Auth\Guard;
-use Illuminate\Http\Request;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
-use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Domain;
 
 /**
@@ -46,9 +43,9 @@ class SubmissionData extends AuthenticatedApiBase
 
     // Make a new SubmissionData API. Since this class is a singleton in the App constructor,
     // we know that the two mappings will only get made once.
-    public function __construct(Context $context, Guard $auth, Request $request)
+    public function __construct(Context $context)
     {
-        parent::__construct($context, $auth, $request);
+        parent::__construct($context);
 
         foreach (static::$mappedTypes as $className => $v) {
             $this->keyTypeMapping[$v['key']] = $v;
@@ -74,6 +71,25 @@ class SubmissionData extends AuthenticatedApiBase
         return $result->map(function ($row) use ($className) {
             return $className::fromArray($row->data);
         });
+    }
+
+    /**
+     * Get a single SubmissionData from the store.
+     * @param  Models\Center $center        [description]
+     * @param  Carbon        $reportingDate [description]
+     * @param  string        $type          [description]
+     * @param  string        $id            [description]
+     * @return [type]                       [description]
+     */
+    public function get(Models\Center $center, Carbon $reportingDate, $type, $id)
+    {
+        $conf = $this->combinedTypeMapping[$type];
+        $className = $conf['class'];
+
+        $result = Models\SubmissionData::centerDate($center, $reportingDate)->type($conf['key'])->storedId($id)->get();
+        if ($result != null) {
+            return $className::fromArray($row->data);
+        }
     }
 
     /**
@@ -114,5 +130,25 @@ class SubmissionData extends AuthenticatedApiBase
     public function generateId()
     {
         return 0 - time();
+    }
+
+    /**
+     * Taken array input which may contain an ID, find the ID at property $key.
+     * If the property is nonexistent or null, we will generate a pseudo negative ID for it.
+     * @param  array  $arr [description]
+     * @param  string $key [description]
+     * @return int  The numberic storage ID found or generated.
+     */
+    public function numericStorageId(array &$arr, $key = 'id')
+    {
+        $id = array_get($arr, $key, null);
+        if ($id === null) {
+            $arr[$key] = $id = $this->generateId();
+            $arr['_idGenerated'] = true;
+        } else {
+            $id = intval($id);
+        }
+
+        return $id;
     }
 }

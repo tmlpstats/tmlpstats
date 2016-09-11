@@ -6,7 +6,7 @@ const CHANGE_SORT_CRITERIA = 'sortable_collection/change_sort_criteria'
 
 
 export default class SortableCollection {
-    constructor({name, key_prop='id', sort_by=null, sorts=new Map()}) {
+    constructor({name, key_prop='id', sort_by=null, sorts=[]}) {
         if (!sort_by) {
             sort_by = key_prop
         }
@@ -44,7 +44,7 @@ export default class SortableCollection {
     }
 
     // The reducer. Works as a factory to avoid having to bind `this` manually
-    reducer(collection_reducer = null) {
+    reducer(collection_reducer = null, check_resort = null) {
         return (state=this.default_state, action) => {
             var { sortedKeys, collection } = state
 
@@ -53,8 +53,10 @@ export default class SortableCollection {
             if (collection_reducer) {
                 var new_collection = collection_reducer(collection, action)
                 if (new_collection !== collection) {
+                    if (check_resort === null || check_resort(collection, new_collection, action)) {
+                        sortedKeys = this.rebuildSort(state.meta.sort_by, new_collection)
+                    }
                     collection = new_collection
-                    sortedKeys = this.rebuildSort(state.meta.sort_by, collection)
                     state = objectAssign({}, state, {collection, sortedKeys})
                 }
             }
@@ -63,8 +65,9 @@ export default class SortableCollection {
                 switch (action.type) {
                 case REPLACE_ITEM:
                     var item = action.payload.item
+                    var key = item[this.key_prop]
                     collection = objectAssign({}, state.collection)
-                    collection[item[this.key_prop]] = item
+                    collection[key] = item
                     sortedKeys = this.rebuildSort(state.meta.sort_by, collection)
                     state = objectAssign({}, state, {collection, sortedKeys})
                     break

@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux'
 import { LoadingMultiState } from '../reducers'
 import { bestErrorValue } from '../ajax_utils'
-
+import { delayDispatch } from '../dispatch'
 import { objectAssign } from '../ponyfill'
 
 const LOADER_DEFAULT_OPTS = {
@@ -76,9 +76,7 @@ export class ReduxLoader {
     conditionalLoad(dispatch, data, loadParams = null) {
         const { loading } = data
         if (loading.state == 'new') {
-            setTimeout(() => {
-                dispatch(this.load(loadParams))
-            })
+            delayDispatch(dispatch, this.load(loadParams))
             return false
         }
         return (loading.state == 'loaded')
@@ -94,8 +92,10 @@ export class ReduxLoader {
 
     reducer(opts=null) {
         opts = this._mergeOpts(opts)
-        var reducerMap = {
-            data: this.dataReducer(opts)
+        var reducerMap = {}
+
+        if (!opts.excludeDataReducer) {
+            reducerMap.data = this.dataReducer(opts)
         }
         // add in all the LoadingMultiState reducers
         for (var k in this._lms) {

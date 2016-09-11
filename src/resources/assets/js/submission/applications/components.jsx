@@ -8,6 +8,7 @@ import { ModeSelectButtons, LoadStateFlip, MessagesComponent } from '../../reusa
 import { SubmissionBase, React } from '../base_components'
 import { APPLICATIONS_FORM_KEY } from './reducers'
 import { appsSorts, appsCollection, messages } from './data'
+import { centerQuarterData } from '../core/data'
 import { loadApplications, saveApplication, chooseApplication } from './actions'
 import AppStatus from './AppStatus'
 
@@ -134,14 +135,15 @@ class _EditCreate extends ApplicationsBase {
 
     renderStartingQuarter(modelKey) {
         const { currentApp, lookups } = this.props
-        const centerQuarterLabel = (cq) => `${cq.quarter.t1Distinction} ${cq.quarter.year} (starting ${cq.startWeekendDate})`
+        const cqData = this.props.centerQuarters.data
+        const centerQuarters = lookups.validRegQuarters.map(id => cqData[id])
         let body = ''
         if (this.isNewApp()) {
-            body = <SimpleSelect model={modelKey+'.incomingQuarter'} items={lookups.center_quarters}
-                                 keyProp="quarterId" getLabel={centerQuarterLabel} />
+            body = <SimpleSelect model={modelKey+'.incomingQuarter'} items={centerQuarters}
+                                 keyProp="quarterId" getLabel={centerQuarterData.getLabel} />
         } else {
-            const cq = arrayFind(lookups.center_quarters, (cq) => cq.quarterId == currentApp.incomingQuarter)
-            body = (cq)? centerQuarterLabel(cq) : 'Unknown'
+            const cq = cqData[currentApp.incomingQuarter]
+            body = (cq)? centerQuarterData.getLabel(cq) : 'Unknown'
         }
         return (
             <div className="form-group">
@@ -194,7 +196,7 @@ class ApplicationsEditView extends _EditCreate {
             || !this.props.currentApp
             || this.props.currentApp.id != appId
             || !this.props.lookups
-            || !this.props.lookups.center_quarters
+            || !this.props.lookups.validRegQuarters
             || !this.props.lookups.team_members
         ) {
             return <div>{this.props.loading.state}...</div>
@@ -226,7 +228,7 @@ class ApplicationsAddView extends _EditCreate {
     render() {
         if (!this.props.loading.loaded
             || !this.props.lookups
-            || !this.props.lookups.center_quarters
+            || !this.props.lookups.validRegQuarters
             || !this.props.lookups.team_members
         ) {
             return <div>{this.props.loading.state}...</div>
@@ -237,7 +239,8 @@ class ApplicationsAddView extends _EditCreate {
 }
 
 const mapStateToProps = (state) => {
-    return objectAssign({lookups: state.submission.core.lookups}, state.submission.applications)
+    const s = state.submission
+    return objectAssign({lookups: s.core.lookups, centerQuarters: s.core.centerQuarters}, s.applications)
 }
 const connector = connect(mapStateToProps)
 

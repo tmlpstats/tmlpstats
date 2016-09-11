@@ -1,12 +1,11 @@
 <?php
 namespace TmlpStats;
 
+use Carbon\Carbon;
 use DB;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Model;
 use TmlpStats\Traits\CachedRelationships;
-
-use Carbon\Carbon;
 
 class Person extends Model
 {
@@ -50,18 +49,18 @@ class Person extends Model
      */
     protected static function findByName($first, $last, $center, $replaced = false)
     {
-        $possibleMembers = Person::firstName($first)
-                                 ->lastName($last)
-                                 ->byCenter($center)
-                                 ->get();
+        $possibleMembers = self::firstName($first)
+            ->lastName($last)
+            ->byCenter($center)
+            ->get();
 
         // If we didn't find anyone. Maybe they gave their first name here.
         // Try with just the first letter
         if ($possibleMembers->isEmpty() && strlen($last) > 1) {
-            $possibleMembers = Person::firstName($first)
-                                     ->lastName($last[0])// Just the first letter
-                                     ->byCenter($center)
-                                     ->get();
+            $possibleMembers = self::firstName($first)
+                ->lastName($last[0]) // Just the first letter
+                ->byCenter($center)
+                ->get();
         }
 
         // If we still haven't found one, try some common character replacements
@@ -93,10 +92,15 @@ class Person extends Model
     /**
      * Get a list of the accountabilities person currently holds
      *
+     * @param Carbon $when  Reference date/time for getting accountability.
      * @return array
      */
-    public function getAccountabilities()
+    public function getAccountabilities(Carbon $when = null)
     {
+        if ($when == null) {
+            $when = Util::now();
+        }
+
         $allAccountabilities = $this->accountabilities()->get();
 
         $accountabilities = [];
@@ -109,12 +113,34 @@ class Person extends Model
                 ? Carbon::createFromFormat('Y-m-d H:i:s', $myAccountability->pivot->ends_at)
                 : null;
 
-            if ($startsAt && $startsAt->lte(Util::now()) && ($endsAt === null || $endsAt->gt(Util::now()))) {
+            if ($startsAt && $startsAt->lte($when) && ($endsAt === null || $endsAt->gt($when))) {
                 $accountabilities[] = $myAccountability;
             }
         }
 
         return $accountabilities;
+    }
+
+    /**
+     * Get just the IDs of associated accountabilities. Many of the times we don't need ORM models anyway.
+     * @param  Carbon|null $when [description]
+     * @return [type]            [description]
+     */
+    public function getAccountabilityIds(Carbon $when = null)
+    {
+        if ($when == null) {
+            $when = Util::now();
+        }
+
+        $items = DB::table('accountability_person')
+            ->where('person_id', $this->id)
+            ->where('starts_at', '<=', $when)
+            ->where(function ($query) use ($when) {
+                $query->whereNull('ends_at')
+                      ->orWhere('ends_at', '>', $when);
+            })->lists('accountability_id');
+
+        return $items;
     }
 
     /**
@@ -160,9 +186,9 @@ class Person extends Model
     {
         if ($this->hasAccountability($accountability)) {
             DB::table('accountability_person')
-              ->where('person_id', $this->id)
-              ->where('accountability_id', $accountability->id)
-              ->update(['ends_at' => Util::now()->copy()->subSecond()]);
+                ->where('person_id', $this->id)
+                ->where('accountability_id', $accountability->id)
+                ->update(['ends_at' => Util::now()->copy()->subSecond()]);
         }
     }
 

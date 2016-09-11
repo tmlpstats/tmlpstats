@@ -15,6 +15,8 @@ class Accountability extends Model
         'display',
     );
 
+    protected $hidden = ['updated_at', 'created_at'];
+
     public function scopeName($query, $name)
     {
         return $query->whereName($name);
@@ -28,7 +30,7 @@ class Accountability extends Model
     public function people()
     {
         return $this->belongsToMany('TmlpStats\Person', 'accountability_person', 'accountability_id', 'person_id')
-            ->withPivot(['stats_at', 'ends_at'])
-            ->withTimestamps();
+                    ->withPivot(['stats_at', 'ends_at'])
+                    ->withTimestamps();
     }
 }
