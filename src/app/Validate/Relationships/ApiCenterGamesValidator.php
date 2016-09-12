@@ -1,15 +1,109 @@
 <?php
 namespace TmlpStats\Validate\Relationships;
 
+use TmlpStats\Domain;
+
 class ApiCenterGamesValidator extends ApiValidatorAbstract
 {
+    protected $reportedActuals = [];
+
     protected function validate($data)
     {
-        // GITW and TDO
-        $activeMemberCount = 0;
-        $effectiveCount    = 0;
+        $reportedActuals = [];
+        $ref = null;
 
-        foreach ($data['teamMember'] as $member) {
+        foreach ($data['scoreboard'] as $scoreboard) {
+            if ($scoreboard->week->eq($this->reportingDate)) {
+                $weekData = $scoreboard->toArray();
+
+                $reportedActuals = $weekData['actual'];
+                $ref = $scoreboard->getReference(['game' => '', 'promiseType' => 'actual']);
+                break;
+            }
+        }
+
+        if (!$reportedActuals) {
+            // if there's no scoreboard data to validate, skip
+            return $this->isValid;
+        }
+
+        if (!$this->validateCourses($data, $reportedActuals, $ref)) {
+            $this->isValid = false;
+        }
+
+        if (!$this->validateTeamExpansion($data, $reportedActuals, $ref)) {
+            $this->isValid = false;
+        }
+
+        if (!$this->validateGitw($data, $reportedActuals, $ref)) {
+            $this->isValid = false;
+        }
+
+        return $this->isValid;
+    }
+
+    public function validateGame($game, $reported, $calculated, $ref)
+    {
+        if ($reported != $calculated) {
+            $this->addMessage('error', [
+                'id' => strtoupper("CENTERGAME_{$game}_ACTUAL_INCORRECT"),
+                'ref' => array_merge($ref, ['game' => $game]),
+                'params' => [
+                    'reported' => $reported,
+                    'calculated' => $calculated,
+                ],
+            ]);
+            return false;
+        }
+
+        return true;
+    }
+
+    public function validateCourses($data, $reportedActuals, $ref)
+    {
+        $isValid = true;
+
+        $calculated = $this->calculateCourseRegistrations($data['course']);
+
+        foreach (['cap', 'cpc'] as $game) {
+            if (!$this->validateGame($game, $reportedActuals[$game], $calculated[$game], $ref)) {
+                $isValid = false;
+            }
+        }
+
+        return $isValid;
+    }
+
+    public function validateTeamExpansion($data, $reportedActuals, $ref)
+    {
+        $isValid = true;
+
+        $calculated = $this->calculateCourseRegistrations($data['teamApplication']);
+
+        foreach (['t1x', 't2x'] as $game) {
+            if (!$this->validateGame($game, $reportedActuals[$game], $calculated[$game], $ref)) {
+                $isValid = false;
+            }
+        }
+
+        return $isValid;
+    }
+
+    public function validateGitw($data, $reportedActuals, $ref)
+    {
+        $isValid = true;
+
+        $calculated = $this->calculateGitw($data['teamMember']);
+
+        return $this->validateGame('gitw', $reportedActuals['gitw'], $calculated, $ref);
+    }
+
+    protected function calculateGitw($teamMemberData)
+    {
+        $activeMemberCount = 0;
+        $effectiveCount = 0;
+
+        foreach ($teamMemberData as $member) {
             if ($member->withdrawCodeId || $member->xferOut) {
                 continue;
             }
@@ -20,15 +114,22 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
             }
         }
 
-        $gitwGame = $activeMemberCount ? round(($effectiveCount / $activeMemberCount) * 100) : 0;
+        $gitwGame = 0;
+        if ($activeMemberCount) {
+            $gitwGame = round(($effectiveCount / $activeMemberCount) * 100);
+        }
 
-        // CAP & CPC Game
+        return $gitwGame;
+    }
+
+    protected function calculateCourseRegistrations($courseData)
+    {
         $capCurrentStandardStarts = 0;
-        $capQStartStandardStarts  = 0;
+        $capQStartStandardStarts = 0;
         $cpcCurrentStandardStarts = 0;
-        $cpcQStartStandardStarts  = 0;
+        $cpcQStartStandardStarts = 0;
 
-        foreach ($data['course'] as $course) {
+        foreach ($courseData as $course) {
             if ($course->type == 'CAP') {
                 $capCurrentStandardStarts += $course->currentStandardStarts;
                 $capQStartStandardStarts += $course->quarterStartStandardStarts;
@@ -38,14 +139,20 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
             }
         }
 
-        $capGame = $capCurrentStandardStarts - $capQStartStandardStarts;
-        $cpcGame = $cpcCurrentStandardStarts - $cpcQStartStandardStarts;
+        return [
+            'cap' => $capCurrentStandardStarts - $capQStartStandardStarts,
+            'cpc' => $cpcCurrentStandardStarts - $cpcQStartStandardStarts,
+        ];
+    }
 
-        // T1x and T2x Games
+    protected function calculateTeamApplicationApprovals($teamApplicationData)
+    {
         $t1CurrentApproved = 0;
         $t2CurrentApproved = 0;
+        $t1QStartApproved = 0;
+        $t2QStartApproved = 0;
 
-        foreach ($data['teamApplication'] as $registration) {
+        foreach ($teamApplicationData as $registration) {
             if (!$registration->apprDate) {
                 continue;
             }
@@ -57,106 +164,36 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
             }
         }
 
-        $thisWeekActual = null;
+        $applicationData = $this->getQuarterStartingApplications();
+        foreach ($applicationData as $app) {
+            // TODO: How should withdrawn at the weekend be reported?
+            if (!$app->apprDate || $app->apprDate->gt($this->reportingDate)) {
+                continue;
+            }
 
-        // TODO: Fix this to work properly with the new Scoreboard
-        foreach ($data['scoreboard'] as $week) {
-            if ($week->type == 'actual' && $week->reportingDate->eq($this->reportingDate)) {
-                $thisWeekActual = $week;
-                break;
+            if ($app->registration->teamYear == 1) {
+                $t1QStartApproved++;
+            } else {
+                $t2QStartApproved++;
             }
         }
 
-        $t1QStartApproved = 0;
-        $t2QStartApproved = 0;
+        return [
+            't1x' => $t1CurrentApproved - $t1QStartApprovedd,
+            't2x' => $t2CurrentApproved - $t2QStartApproved,
+        ];
+    }
 
-        // TODO: Find a way to pull this info from database
+    protected function getQuarterStartingApplications()
+    {
+        $centerQuarter = Domain\CenterQuarter::fromModel($this->center, $this->quarter)
+            ->toArray();
 
-        // foreach ($data['tmlpCourseInfo'] as $game) {
-        //     if (strpos($game->type, 'T1') !== false) {
-        //         $t1QStartApproved += $game->quarterStartApproved;
-        //     } else {
-        //         $t2QStartApproved += $game->quarterStartApproved;
-        //     }
-        // }
+        $firstReport = StatsReport::byCenter($this->center)
+            ->reportingDate($centerQuarter['firstWeekDate'])
+            ->official()
+            ->first();
 
-        $t1xGame = $t1CurrentApproved - $t1QStartApproved;
-        $t2xGame = $t2CurrentApproved - $t2QStartApproved;
-
-        // Make sure they match
-        if ($thisWeekActual) {
-            $ref = [
-                'reportingDate' => $this->reportingDate->toDateString(),
-                'type' => 'actual',
-                'game' => '',
-            ];
-
-            if ($thisWeekActual->cap != $capGame) {
-                $ref['game'] = 'cap';
-                $this->addMessage('error', [
-                    'id' => 'CENTERGAME_CAP_ACTUAL_INCORRECT',
-                    'ref' => $ref,
-                    'params' => [
-                        'reported' => $thisWeekActual->cap,
-                        'calculated' => $capGame,
-                    ],
-                ]);
-                $this->isValid = false;
-            }
-
-            if ($thisWeekActual->cpc != $cpcGame) {
-                $ref['game'] = 'cpc';
-                $this->addMessage('error', [
-                    'id' => 'CENTERGAME_CPC_ACTUAL_INCORRECT',
-                    'ref' => $ref,
-                    'params' => [
-                        'reported' => $thisWeekActual->cpc,
-                        'calculated' => $cpcGame,
-                    ],
-                ]);
-                $this->isValid = false;
-            }
-
-            if ($thisWeekActual->t1x != $t1xGame) {
-                $ref['game'] = 't1x';
-                $this->addMessage('error', [
-                    'id' => 'CENTERGAME_T1X_ACTUAL_INCORRECT',
-                    'ref' => $ref,
-                    'params' => [
-                        'reported' => $thisWeekActual->t1x,
-                        'calculated' => $t1xGame,
-                    ],
-                ]);
-                $this->isValid = false;
-            }
-
-            if ($thisWeekActual->t2x != $t2xGame) {
-                $ref['game'] = 't2x';
-                $this->addMessage('error', [
-                    'id' => 'CENTERGAME_T2X_ACTUAL_INCORRECT',
-                    'ref' => $ref,
-                    'params' => [
-                        'reported' => $thisWeekActual->t2x,
-                        'calculated' => $t2xGame,
-                    ],
-                ]);
-                $this->isValid = false;
-            }
-
-            if ($thisWeekActual->gitw != $gitwGame) {
-                $ref['game'] = 'gitw';
-                $this->addMessage('error', [
-                    'id' => 'CENTERGAME_GITW_ACTUAL_INCORRECT',
-                    'ref' => $ref,
-                    'params' => [
-                        'reported' => $thisWeekActual->gitw,
-                        'calculated' => $gitwGame,
-                    ],
-                ]);
-                $this->isValid = false;
-            }
-        }
-
-        return $this->isValid;
+        return $firstReport->tmlpRegistrationData();
     }
 }
