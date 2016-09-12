@@ -39,6 +39,7 @@ class ApiController extends ApiControllerBase
         "GlobalReport.getApplicationsListByCenter" => "GlobalReport__getApplicationsListByCenter",
         "GlobalReport.getClassListByCenter" => "GlobalReport__getClassListByCenter",
         "GlobalReport.getCourseList" => "GlobalReport__getCourseList",
+        "GlobalReport.getReportPages" => "GlobalReport__getReportPages",
         "LiveScoreboard.getCurrentScores" => "LiveScoreboard__getCurrentScores",
         "LiveScoreboard.setScore" => "LiveScoreboard__setScore",
         "LocalReport.getQuarterScoreboard" => "LocalReport__getQuarterScoreboard",
@@ -216,6 +217,14 @@ class ApiController extends ApiControllerBase
         return App::make(Api\GlobalReport::class)->getCourseList(
             $this->parse($input, 'globalReport', 'GlobalReport'),
             $this->parse($input, 'region', 'Region')
+        );
+    }
+    protected function GlobalReport__getReportPages($input)
+    {
+        return App::make(Api\GlobalReport::class)->getReportPages(
+            $this->parse($input, 'globalReport', 'GlobalReport'),
+            $this->parse($input, 'region', 'Region'),
+            $this->parse($input, 'pages', 'array')
         );
     }
     protected function LiveScoreboard__getCurrentScores($input)

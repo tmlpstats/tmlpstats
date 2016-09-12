@@ -41,6 +41,7 @@ class ReportsCodegen extends Command
         $flat = $bucket->apiFlat();
         $apiMethodsFlat = $flat['methods'];
         $namespacesFlat = $flat['namespaces'];
+        $reportMeta = $bucket->reportMeta;
         $packageNames = $this->uniquePackageNames($apiMethodsFlat);
 
         // Write PHP
@@ -56,6 +57,13 @@ class ReportsCodegen extends Command
 
         $es6 = view('api.codegen.es6_output', compact('namespacesFlat'))->render();
         $this->writeFile('resources/assets/js/api/api-generated.js', $this->stripLine($es6));
+
+        $script = view('api.codegen.reportmeta_es6_output', compact('reportMeta'))->render();
+        $this->writeFile('resources/assets/js/classic/reports-generated.js', $this->stripLine($script));
+        foreach ($reportMeta as $k => $namespace) {
+            $source = view('api.codegen.reportmeta_dispatch_trait', compact('reportMeta', 'namespace'))->render();
+            $this->writeFile("app/Http/Controllers/Traits/{$k}ReportDispatch.php", $source);
+        }
     }
 
     private function writeFile($name, $output)
