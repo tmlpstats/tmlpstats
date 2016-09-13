@@ -2,6 +2,7 @@
 namespace TmlpStats\Validate\Relationships;
 
 use TmlpStats\Domain;
+use TmlpStats\Validate\ApiValidatorAbstract;
 
 class ApiCenterGamesValidator extends ApiValidatorAbstract
 {
@@ -42,7 +43,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         return $this->isValid;
     }
 
-    public function validateGame($game, $reported, $calculated, $ref)
+    protected function validateGame($game, $reported, $calculated, $ref)
     {
         if ($reported != $calculated) {
             $this->addMessage('error', [
@@ -59,7 +60,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         return true;
     }
 
-    public function validateCourses($data, $reportedActuals, $ref)
+    protected function validateCourses($data, $reportedActuals, $ref)
     {
         $isValid = true;
 
@@ -74,11 +75,11 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         return $isValid;
     }
 
-    public function validateTeamExpansion($data, $reportedActuals, $ref)
+    protected function validateTeamExpansion($data, $reportedActuals, $ref)
     {
         $isValid = true;
 
-        $calculated = $this->calculateCourseRegistrations($data['teamApplication']);
+        $calculated = $this->calculateTeamApplicationApprovals($data['teamApplication']);
 
         foreach (['t1x', 't2x'] as $game) {
             if (!$this->validateGame($game, $reportedActuals[$game], $calculated[$game], $ref)) {
@@ -89,7 +90,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         return $isValid;
     }
 
-    public function validateGitw($data, $reportedActuals, $ref)
+    protected function validateGitw($data, $reportedActuals, $ref)
     {
         $isValid = true;
 
@@ -152,25 +153,21 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         $t1QStartApproved = 0;
         $t2QStartApproved = 0;
 
-        foreach ($teamApplicationData as $registration) {
-            if (!$registration->apprDate) {
+        foreach ($teamApplicationData as $app) {
+            if (!$app->apprDate || $app->apprDate->gt($this->reportingDate)) {
                 continue;
             }
 
-            if ($registration->teamYear == 1) {
+            if ($app->teamYear == 1) {
                 $t1CurrentApproved++;
             } else {
                 $t2CurrentApproved++;
             }
         }
 
-        $applicationData = $this->getQuarterStartingApplications();
+        $applicationData = $this->getQuarterStartingApprovedApplications();
         foreach ($applicationData as $app) {
             // TODO: How should withdrawn at the weekend be reported?
-            if (!$app->apprDate || $app->apprDate->gt($this->reportingDate)) {
-                continue;
-            }
-
             if ($app->registration->teamYear == 1) {
                 $t1QStartApproved++;
             } else {
@@ -179,18 +176,21 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         }
 
         return [
-            't1x' => $t1CurrentApproved - $t1QStartApprovedd,
+            't1x' => $t1CurrentApproved - $t1QStartApproved,
             't2x' => $t2CurrentApproved - $t2QStartApproved,
         ];
     }
 
-    protected function getQuarterStartingApplications()
+    protected function getQuarterStartingApprovedApplications()
     {
         $centerQuarter = Domain\CenterQuarter::fromModel($this->center, $this->quarter)
             ->toArray();
 
+        $startWeekendDate = $centerQuarter['startWeekendDate'];
+
         $firstReport = StatsReport::byCenter($this->center)
-            ->reportingDate($centerQuarter['firstWeekDate'])
+            ->reportingDate($startWeekendDate)
+            ->where('apprDate', '<=', $startWeekendDate)
             ->official()
             ->first();
 
