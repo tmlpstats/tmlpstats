@@ -2,6 +2,7 @@
 namespace TmlpStats\Tests\Unit\Validate\Relationships;
 
 use Carbon\Carbon;
+use Faker\Factory;
 use TmlpStats as Models;
 use TmlpStats\Domain;
 use TmlpStats\Tests\Unit\Traits;
@@ -35,6 +36,8 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
     public function setUp()
     {
         parent::setUp();
+
+        $faker = Factory::create();
 
         // Individual item templates
         $courseTemplate = [
@@ -102,11 +105,12 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
             array_merge($courseTemplate, [
                 'startDate' => '2016-08-27',
                 'type' => 'CAP',
-                'quarterStartTer' => 35,
                 'quarterStartStandardStarts' => 34,
+                'currentStandardStarts' => 38,
+                // we don't care about the rest for this validator
+                'quarterStartTer' => 35,
                 'quarterStartXfer' => 0,
                 'currentTer' => 40,
-                'currentStandardStarts' => 38,
                 'currentXfer' => 1,
                 'completedStandardStarts' => 38,
                 'potentials' => 30,
@@ -115,21 +119,23 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
             array_merge($courseTemplate, [
                 'startDate' => '2016-09-17',
                 'type' => 'CAP',
-                'quarterStartTer' => 20,
                 'quarterStartStandardStarts' => 18,
+                'currentStandardStarts' => 22,
+                // we don't care about the rest for this validator
+                'quarterStartTer' => 20,
                 'quarterStartXfer' => 0,
                 'currentTer' => 24,
-                'currentStandardStarts' => 22,
                 'currentXfer' => 1,
             ]),
             array_merge($courseTemplate, [
                 'startDate' => '2016-11-12',
                 'type' => 'CPC',
-                'quarterStartTer' => 0,
                 'quarterStartStandardStarts' => 0,
+                'currentStandardStarts' => 3,
+                // we don't care about the rest for this validator
+                'quarterStartTer' => 0,
                 'quarterStartXfer' => 0,
                 'currentTer' => 3,
-                'currentStandardStarts' => 3,
                 'currentXfer' => 0,
             ]),
         ];
@@ -225,33 +231,71 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
         ];
 
         $this->teamApplicationData = [
+            // Approved last quarter
             array_merge($applicationTemplate, [
-                'firstName' => 'Keith',
-                'lastName' => 'Stone',
+                'firstName' => $faker->unique()->firstName(),
+                'lastName' => $faker->lastName(),
                 'teamYear' => 1,
                 'regDate' => Carbon::parse('2016-08-12'),
                 'appOutDate' => Carbon::parse('2016-08-13'),
                 'appInDate' => Carbon::parse('2016-08-14'),
                 'apprDate' => Carbon::parse('2016-08-15'),
             ]),
+            // Approved last quarter and withdrawn
             array_merge($applicationTemplate, [
-                'firstName' => 'Ann',
-                'lastName' => 'Stone',
+                'firstName' => $faker->unique()->firstName(),
+                'lastName' => $faker->lastName(),
+                'teamYear' => 1,
+                'regDate' => Carbon::parse('2016-08-12'),
+                'appOutDate' => Carbon::parse('2016-08-13'),
+                'appInDate' => Carbon::parse('2016-08-14'),
+                'apprDate' => Carbon::parse('2016-08-15'),
+                'wdDate' => Carbon::parse('2016-09-01'),
+                'withdrawCode' => 1,
+            ]),
+            // Approved this quarter
+            array_merge($applicationTemplate, [
+                'firstName' => $faker->unique()->firstName(),
+                'lastName' => $faker->lastName(),
                 'teamYear' => 1,
                 'regDate' => Carbon::parse('2016-08-22'),
                 'appOutDate' => Carbon::parse('2016-08-23'),
                 'appInDate' => Carbon::parse('2016-08-24'),
                 'apprDate' => Carbon::parse('2016-08-25'),
             ]),
+            // Approved this quarter
             array_merge($applicationTemplate, [
-                'firstName' => 'Bob',
-                'lastName' => 'Stone',
+                'firstName' => $faker->unique()->firstName(),
+                'lastName' => $faker->lastName(),
+                'teamYear' => 1,
+                'regDate' => Carbon::parse('2016-08-22'),
+                'appOutDate' => Carbon::parse('2016-08-23'),
+                'appInDate' => Carbon::parse('2016-08-24'),
+                'apprDate' => Carbon::parse('2016-08-25'),
+            ]),
+            // Approved this quarter and withdrawn
+            array_merge($applicationTemplate, [
+                'firstName' => $faker->unique()->firstName(),
+                'lastName' => $faker->lastName(),
+                'teamYear' => 2,
+                'regDate' => Carbon::parse('2016-08-22'),
+                'appOutDate' => Carbon::parse('2016-08-23'),
+                'appInDate' => Carbon::parse('2016-08-24'),
+                'apprDate' => Carbon::parse('2016-08-25'),
+                'wdDate' => Carbon::parse('2016-09-02'),
+                'withdrawCode' => 2,
+            ]),
+            // Not yet approved
+            array_merge($applicationTemplate, [
+                'firstName' => $faker->unique()->firstName(),
+                'lastName' => $faker->lastName(),
                 'teamYear' => 1,
                 'regDate' => Carbon::parse('2016-09-01'),
             ]),
+            // T2 approved
             array_merge($applicationTemplate, [
-                'firstName' => 'Jenn',
-                'lastName' => 'Stone',
+                'firstName' => $faker->unique()->firstName(),
+                'lastName' => $faker->lastName(),
                 'teamYear' => 2,
                 'regDate' => Carbon::parse('2016-08-21'),
                 'appOutDate' => Carbon::parse('2016-08-23'),
@@ -262,34 +306,34 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
 
         $this->teamMemberData = [
             array_merge($teamMemberTemplate, [
-                'firstName' => 'Keith',
-                'lastName' => 'Stone',
+                'firstName' => $faker->unique()->firstName(),
+                'lastName' => $faker->lastName(),
                 'gitw' => false,
             ]),
             array_merge($teamMemberTemplate, [
-                'firstName' => 'Ann',
-                'lastName' => 'Stone',
+                'firstName' => $faker->unique()->firstName(),
+                'lastName' => $faker->lastName(),
                 'gitw' => true,
             ]),
             array_merge($teamMemberTemplate, [
-                'firstName' => 'Bob',
-                'lastName' => 'Stone',
+                'firstName' => $faker->unique()->firstName(),
+                'lastName' => $faker->lastName(),
                 'gitw' => true,
             ]),
             array_merge($teamMemberTemplate, [
-                'firstName' => 'Jenn',
-                'lastName' => 'Stone',
+                'firstName' => $faker->unique()->firstName(),
+                'lastName' => $faker->lastName(),
                 'gitw' => true,
             ]),
             array_merge($teamMemberTemplate, [
-                'firstName' => 'Krista',
-                'lastName' => 'Stone',
+                'firstName' => $faker->unique()->firstName(),
+                'lastName' => $faker->lastName(),
                 'gitw' => false,
                 'xferOut' => true,
             ]),
             array_merge($teamMemberTemplate, [
-                'firstName' => 'Nick',
-                'lastName' => 'Stone',
+                'firstName' => $faker->unique()->firstName(),
+                'lastName' => $faker->lastName(),
                 'gitw' => false,
                 'withdrawCode' => 1,
             ]),
