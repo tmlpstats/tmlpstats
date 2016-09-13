@@ -1,6 +1,8 @@
 <?php
 namespace TmlpStats\Validate\Relationships;
 
+use Carbon\Carbon;
+use TmlpStats as Models;
 use TmlpStats\Domain;
 use TmlpStats\Validate\ApiValidatorAbstract;
 
@@ -152,7 +154,10 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         $t2QStartApproved = 0;
 
         foreach ($teamApplicationData as $app) {
-            if (!$app->apprDate || $app->apprDate->gt($this->reportingDate)) {
+            if ($app->withdrawCodeId !== null
+                || !$app->apprDate
+                || $app->apprDate->gt($this->reportingDate)
+            ) {
                 continue;
             }
 
@@ -184,14 +189,14 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         $centerQuarter = Domain\CenterQuarter::fromModel($this->center, $this->quarter)
             ->toArray();
 
-        $startWeekendDate = $centerQuarter['startWeekendDate'];
+        $startWeekendDate = Carbon::parse($centerQuarter['startWeekendDate']);
 
-        $firstReport = StatsReport::byCenter($this->center)
+        $firstReport = Models\StatsReport::byCenter($this->center)
             ->reportingDate($startWeekendDate)
             ->where('apprDate', '<=', $startWeekendDate)
             ->official()
             ->first();
 
-        return $firstReport->tmlpRegistrationData();
+        return $firstReport ? $firstReport->tmlpRegistrationData() : [];
     }
 }
