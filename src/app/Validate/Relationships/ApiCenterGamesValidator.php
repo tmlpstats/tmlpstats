@@ -6,11 +6,9 @@ use TmlpStats\Validate\ApiValidatorAbstract;
 
 class ApiCenterGamesValidator extends ApiValidatorAbstract
 {
-    protected $reportedActuals = [];
-
     protected function validate($data)
     {
-        $reportedActuals = [];
+        $reportedActuals = null;
         $ref = null;
 
         foreach ($data['scoreboard'] as $scoreboard) {
@@ -24,8 +22,8 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         }
 
         if (!$reportedActuals) {
-            // if there's no scoreboard data to validate, skip
-            return $this->isValid;
+            // if there's no scoreboard data to validate, fail
+            return false;
         }
 
         if (!$this->validateCourses($data, $reportedActuals, $ref)) {

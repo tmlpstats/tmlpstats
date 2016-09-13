@@ -460,4 +460,25 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
             ],
         ];
     }
+
+
+    public function testRunSkipsValidationIfCurrentWeekScoreboardIsMissing()
+    {
+        foreach ($this->scoreboardData as $scoreboard) {
+            if (Carbon::parse($scoreboard['week'])->eq($this->reportingDate)) {
+                continue;
+            }
+
+            $this->data['scoreboard'][] = Domain\Scoreboard::fromArray($scoreboard);
+        }
+
+        $validator = $this->getObjectMock();
+        $validator->expects($this->never())
+            ->method('getQuarterStartingApprovedApplications');
+
+        $result = $validator->run($this->data);
+
+        $this->assertMessages([], $validator->getMessages());
+        $this->assertFalse($result);
+    }
 }
