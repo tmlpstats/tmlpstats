@@ -3,13 +3,18 @@
 namespace TmlpStats\Http\Controllers;
 
 use App;
-use Illuminate\Http\Request;
+use Carbon\Carbon;
 use TmlpStats\Api;
 use TmlpStats\Center;
 use TmlpStats\StatsReport;
 
 class CenterController extends Controller
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->context = App::make(Api\Context::class);
+    }
     public function dashboard($abbr)
     {
         $center = Center::abbreviation($abbr)->first();
@@ -21,9 +26,9 @@ class CenterController extends Controller
         $this->setCenter($center);
 
         $statsReport = StatsReport::byCenter($center)
-                                  ->official()
-                                  ->orderBy('reporting_date', 'desc')
-                                  ->first();
+            ->official()
+            ->orderBy('reporting_date', 'desc')
+            ->first();
 
         $weekData = [];
         $reportUrl = '';
@@ -51,9 +56,13 @@ class CenterController extends Controller
         return view('centers.dashboard')->with(array_merge($data, $weekData));
     }
 
-    public function submission($abbr)
+    public function submission($abbr, $reportingDate)
     {
         $center = Center::abbreviation($abbr)->firstorFail();
+        $this->context->setDateSelectAction('CenterController@submission', ['abbr' => $abbr]);
+        $this->context->setReportingDate(Carbon::parse($reportingDate, 'UTC'));
+        $this->context->setRegion($center->region);
+
         return view('centers.submission', compact('center'));
     }
 }

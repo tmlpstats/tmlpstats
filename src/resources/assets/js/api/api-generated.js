@@ -194,7 +194,16 @@ Api.GlobalReport = {
       globalReport: GlobalReport
       region: Region
     */
-    getCourseList: bac('GlobalReport.getCourseList')
+    getCourseList: bac('GlobalReport.getCourseList'),
+
+    /*
+    Get the global report page(s) named
+    Parameters:
+      globalReport: GlobalReport
+      region: Region
+      pages: array
+    */
+    getReportPages: bac('GlobalReport.getReportPages')
 }
 
 Api.LiveScoreboard = {

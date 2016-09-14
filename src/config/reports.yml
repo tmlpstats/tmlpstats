@@ -224,6 +224,16 @@ api:
           - name: region
             type: Region
 
+      getReportPages:
+        desc: Get the global report page(s) named
+        params:
+          - name: globalReport
+            type: GlobalReport
+          - name: region
+            type: Region
+          - name: pages
+            type: array
+
   LiveScoreboard:
     type: namespace
     children:
@@ -436,6 +446,105 @@ api:
             type: Center
           - name: reportingDate
             type: date
+
+
+reportMeta:
+  Global:
+    controller: GlobalReportController
+    forwardParams: ['$globalReport', '$region']
+
+    children:
+      WeeklySummaryGroup:
+        type: grouping
+        name: Weekly Summary
+        children:
+          RatingSummary:
+            name: Ratings
+          RegionSummary:
+            name: At A Glance
+
+      RegionalStatsGroup:
+        type: grouping
+        name: Regional Games
+        children:
+          RegionalStats:
+            name: Scoreboard
+          GamesByCenter:
+            name: By Center
+          RepromisesByCenter: # TODO: find a way to hide this when not past CR#2
+            name: Repromises
+          RegPerParticipant:
+            name: Reg. Per Participant
+          Gaps:
+            name: Gaps
+
+      CenterStatsReports:
+        name: Center Reports
+        short: Centers
+
+      ApplicationsGroup:
+        type: grouping
+        name: Applications
+        children:
+          TmlpRegistrationsOverview:
+            name: Overview
+          TmlpRegistrationsByStatus:
+            name: By Status
+          TmlpRegistrationsByCenter:
+            name: By Center
+          Team2RegisteredAtWeekend:
+            name: T2 Reg. At Weekend
+            desc: Shows Team 2 that registered at the previous TMLP weekend and their current status
+          TmlpRegistrationsOverdue:
+            name: Overdue
+
+      TravelReport:
+        name: Travel Summary
+        shortName: Travel
+
+      CoursesGroup:
+        type: grouping
+        name: Courses
+        children:
+          CoursesThisWeek:
+            name: Completed This Week
+          CoursesNextMonth:
+            name: Next 5 Weeks
+          CoursesUpcoming:
+            name: Upcoming
+          CoursesCompleted:
+            name: Completed
+          CoursesGuestGames:
+            name: Guest Games
+
+      TeamMemberStatusGroup:
+        type: grouping
+        name: Team Members
+        children:
+          TeamMemberStatusCtw:
+            name: CTW
+          TeamMemberStatusTransfer:
+            name: Transfers
+          TeamMemberStatusWithdrawn:
+            name: Withdrawn
+
+      TdoSummary:
+        name: Training & Development
+        shortName: TDO
+
+      PotentialsGroup:
+        type: grouping
+        name: Potentials
+        children:
+          TeamMemberStatusPotentialsOverview:
+            name: Overview
+          TeamMemberStatusPotentials:
+            name: Details
+
+      WithdrawReport:
+        name: Withdraws
+
+
 
 reports:
   # --- Local Statistician

@@ -31,3 +31,5 @@ _components.forEach(function(c) {
         c[1](elem)
     }
 })
+
+require('./classic')

@@ -8,14 +8,13 @@ use Response;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Domain\Scoreboard;
+use TmlpStats\Http\Controllers\Encapsulate;
+use TmlpStats\Http\Controllers\Traits\GlobalReportDispatch;
 use TmlpStats\Reports\Arrangements;
 
 class GlobalReportController extends ReportDispatchAbstractController
 {
-    protected $dontCache = [
-        'ratingsummary',
-        'regionsummary',
-    ];
+    use GlobalReportDispatch;
 
     /**
      * Create a new controller instance.
@@ -87,7 +86,18 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         $showNavCenterSelect = true;
 
-        return view('globalreports.show', compact(
+        $vmode = $request->has('viewmode') ? $request->input('viewmode') : env('GLOBAL_REPORT_VIEW_MODE', 'html');
+
+        switch (strtolower($vmode)) {
+            case 'jq':
+                $template = 'show_jquery';
+                break;
+            case 'html':
+            default:
+                $template = 'show';
+        }
+
+        return view("globalreports.{$template}", compact(
             'globalReport',
             'region',
             'reportToken',
@@ -234,20 +244,20 @@ class GlobalReportController extends ReportDispatchAbstractController
             case 'coursesupcoming':
             case 'coursescompleted':
             case 'coursesguestgames':
-                $response = $this->getCoursesStatus($globalReport, $region, $report);
+                $response = $this->coursesData($globalReport, $region)->getOne($report);
                 break;
             case 'coursesall':
-                $response = $this->getCoursesAll($globalReport, $region);
+                $response = $this->coursesData($globalReport, $region)->getCoursesAllClassic($globalReport, $region);
                 break;
             case 'teammemberstatuswithdrawn':
             case 'teammemberstatusctw':
             case 'teammemberstatustransfer':
             case 'potentialsdetails':
             case 'potentialsoverview':
-                $response = $this->getTeamMemberStatus($globalReport, $region, $report);
+                $response = $this->teamMembersData($globalReport, $region)->getOne($report);
                 break;
             case 'teammemberstatusall':
-                $response = $this->getTeamMemberStatusAll($globalReport, $region);
+                $response = $this->teamMembersData($globalReport, $region)->getTeamMemberStatusAllClassic();
                 break;
             case 'applicationst2fromweekend':
                 $response = $this->getTeam2RegisteredAtWeekend($globalReport, $region);
@@ -744,113 +754,6 @@ class GlobalReportController extends ReportDispatchAbstractController
         return view('globalreports.details.tdosummary', compact('reportData', 'totals', 'statsReports'));
     }
 
-    protected function getTeamMemberStatusWithdrawn($data, Models\GlobalReport $globalReport, Models\Region $region)
-    {
-        return $data ? array_merge($data, ['types' => ['withdrawn']]) : null;
-    }
-
-    protected function getTeamMemberStatusCtw($data, Models\GlobalReport $globalReport, Models\Region $region)
-    {
-        return $data ? array_merge($data, ['types' => ['ctw']]) : null;
-    }
-
-    protected function getTeamMemberStatusTransfer($data, Models\GlobalReport $globalReport, Models\Region $region)
-    {
-        return $data ? array_merge($data, ['types' => ['xferIn', 'xferOut']]) : null;
-    }
-
-    protected function getTeamMemberStatusPotentials($data, Models\GlobalReport $globalReport, Models\Region $region)
-    {
-        if (!$data) {
-            return null;
-        } else if (!isset($data['registrations'])) {
-            $potentialsData = $this->getTeamMemberStatusPotentialsData($data, $globalReport, $region);
-        } else {
-            $potentialsData = [];
-        }
-
-        return array_merge($data, $potentialsData, ['types' => ['t2Potential']]);
-    }
-
-    protected function getTeamMemberStatusPotentialsOverview($data, Models\GlobalReport $globalReport, Models\Region $region)
-    {
-        if (!$data) {
-            return null;
-        } else if (!isset($data['registrations'])) {
-            $details = $this->getTeamMemberStatusPotentialsData($data, $globalReport, $region);
-        } else {
-            $details = $data;
-        }
-
-        $reportData = [];
-        $totals = [
-            'total' => 0,
-            'registered' => 0,
-            'approved' => 0,
-        ];
-
-        foreach ($details['reportData']['t2Potential'] as $member) {
-            $centerName = $member->center->name;
-
-            if (!isset($reportData[$centerName])) {
-                $reportData[$centerName] = [
-                    'total' => 0,
-                    'registered' => 0,
-                    'approved' => 0,
-                ];
-            }
-            $reportData[$centerName]['total']++;
-            $totals['total']++;
-
-            if (isset($details['registrations'][$member->teamMember->personId])) {
-                $reportData[$centerName]['registered']++;
-                $totals['registered']++;
-                if ($details['registrations'][$member->teamMember->personId]->apprDate) {
-                    $reportData[$centerName]['approved']++;
-                    $totals['approved']++;
-                }
-            }
-
-            if (!isset($statsReports[$centerName])) {
-                $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Models\Center::name($centerName)->first());
-            }
-        }
-
-        return view('globalreports.details.potentialsoverview', compact('reportData', 'totals', 'statsReports'));
-    }
-
-    protected function getTeamMemberStatusPotentialsData($data, Models\GlobalReport $globalReport, Models\Region $region)
-    {
-        if (!$data) {
-            return null;
-        }
-
-        $registrations = App::make(Api\GlobalReport::class)->getApplicationsListByCenter($globalReport, $region, [
-            'returnUnprocessed' => true,
-        ]);
-
-        $potentialsThatRegistered = [];
-        if ($registrations) {
-
-            $potentials = $data['reportData']['t2Potential'];
-            foreach ($potentials as $member) {
-                foreach ($registrations as $registration) {
-                    if ($registration->teamYear == 2
-                        && !$registration->isWithdrawn()
-                        && $registration->center->id == $member->center->id
-                    ) {
-                        if ($member->teamMember->personId == $registration->registration->personId) {
-                            $potentialsThatRegistered[$member->teamMember->personId] = $registration;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        return array_merge($data, ['registrations' => $potentialsThatRegistered]);
-    }
-
     protected function getTeam2RegisteredAtWeekend(Models\GlobalReport $globalReport, Models\Region $region)
     {
         $registrations = App::make(Api\GlobalReport::class)->getApplicationsListByCenter($globalReport, $region, [
@@ -942,93 +845,44 @@ class GlobalReportController extends ReportDispatchAbstractController
         return view('globalreports.details.regperparticipant', compact('reportData', 'games'));
     }
 
-    protected function getTeamMemberStatusAll(Models\GlobalReport $globalReport, Models\Region $region)
+    protected function teamMembersData(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        $statusTypes = [
-            'teammemberstatuswithdrawn',
-            'teammemberstatusctw',
-            'teammemberstatustransfer',
-        ];
-
-        $data = $this->getTeamMemberStatusData($globalReport, $region);
-        if (!$data) {
-            return null;
-        }
-
-        $responseData = [];
-        foreach ($statusTypes as $type) {
-            $response = $this->getTeamMemberStatus($globalReport, $region, $type, $data);
-            $responseData[$type] = $response ? $response->render() : '';
-        }
-
-        $potentialsData = $this->getTeamMemberStatusPotentialsData($data, $globalReport, $region);
-
-        // The potentials reports use the same specialty data, so reuse it instead of processing twice
-        $potentialTypes = [
-            'potentialsdetails',
-            'potentialsoverview',
-        ];
-
-        foreach ($potentialTypes as $type) {
-            $response = $this->getTeamMemberStatus($globalReport, $region, $type, $potentialsData);
-            $responseData[$type] = $response ? $response->render() : '';
-        }
-
-        return $responseData;
+        return $this->context->getEncapsulation(Encapsulate\GlobalReportTeamMembersData::class, compact('globalReport', 'region'));
     }
 
-    protected function getTeamMemberStatus(Models\GlobalReport $globalReport, Models\Region $region, $report, $data = null)
+    // Get report CTW
+    protected function getTeamMemberStatusCtw(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        if (!$data) {
-            $data = $this->getTeamMemberStatusData($globalReport, $region);
-            if (!$data) {
-                return null;
-            }
-        }
+        return $this->teamMembersData($globalReport, $region)->getOne('TeamMemberStatusCtw');
 
-        $viewData = null;
-        switch ($report) {
-            case 'teammemberstatuswithdrawn':
-                $viewData = $this->getTeamMemberStatusWithdrawn($data, $globalReport, $region);
-                break;
-            case 'teammemberstatusctw':
-                $viewData = $this->getTeamMemberStatusCtw($data, $globalReport, $region);
-                break;
-            case 'teammemberstatustransfer':
-                $viewData = $this->getTeamMemberStatusTransfer($data, $globalReport, $region);
-                break;
-            case 'potentialsdetails':
-                $viewData = $this->getTeamMemberStatusPotentials($data, $globalReport, $region);
-                break;
-            case 'potentialsoverview':
-                // Potentials Overview uses it's own view
-                return $this->getTeamMemberStatusPotentialsOverview($data, $globalReport, $region);
-        }
-
-        if ($viewData) {
-            return view('globalreports.details.teammemberstatus', $viewData);
-        }
-
-        return null;
     }
 
-    protected function getTeamMemberStatusData(Models\GlobalReport $globalReport, Models\Region $region)
+    // Get report Transfers
+    protected function getTeamMemberStatusTransfer(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        $teamMembers = App::make(Api\GlobalReport::class)->getClassListByCenter($globalReport, $region);
-        if (!$teamMembers) {
-            return null;
-        }
-
-        $a = new Arrangements\TeamMembersByStatus(['teamMembersData' => $teamMembers]);
-
-        return $a->compose();
+        return $this->teamMembersData($globalReport, $region)->getOne('TeamMemberStatusTransfer');
+    }
+    // Get report Withdrawn
+    protected function getTeamMemberStatusWithdrawn(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->teamMembersData($globalReport, $region)->getOne('TeamMemberStatusWithdrawn');
+    }
+    // Get report Overview
+    protected function getTeamMemberStatusPotentialsOverview(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->teamMembersData($globalReport, $region)->getOne('PotentialsOverview');
+    }
+    // Get report Details
+    protected function getTeamMemberStatusPotentials(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->teamMembersData($globalReport, $region)->getOne('Potentials');
     }
 
     protected function getCenterStatsReports(Models\GlobalReport $globalReport, Models\Region $region)
     {
         $statsReports = $globalReport->statsReports()
-            ->byRegion($region)
-            ->get();
+                                     ->byRegion($region)
+                                     ->get();
 
         if ($statsReports->isEmpty()) {
             return null;
@@ -1060,7 +914,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             if ($report->isOnTime()) {
                 $statsReportData['onTime'] = true;
                 $statsReportData['officialSubmitTime'] = $report->submittedAt->setTimezone($timezone)
-                    ->format('M j @ g:ia T');
+                                                                ->format('M j @ g:ia T');
                 $ontime++;
             } else {
                 $otherReports = Models\StatsReport::reportingDate($globalReport->reportingDate)
@@ -1082,21 +936,21 @@ class GlobalReportController extends ReportDispatchAbstractController
 
                     if ($officialReport && $statsReportData['onTime'] === true) {
                         $statsReportData['officialSubmitTime'] = $officialReport->submittedAt->setTimezone($timezone)
-                            ->format('M j @ g:ia T');
+                                                                                ->format('M j @ g:ia T');
                         $statsReportData['officialReport'] = $officialReport;
 
                         $statsReportData['revisionSubmitTime'] = $report->submittedAt->setTimezone($timezone)
-                            ->format('M j @ g:ia T');
+                                                                        ->format('M j @ g:ia T');
                         $statsReportData['revisedReport'] = $report;
                         $resubmitted++;
                     } else {
                         $first = $otherReports->first();
                         $statsReportData['officialSubmitTime'] = $first->submittedAt->setTimezone($timezone)
-                            ->format('M j @ g:ia T');
+                                                                       ->format('M j @ g:ia T');
                         $statsReportData['officialReport'] = $first;
                         if ($first->id != $report->id) {
                             $statsReportData['revisionSubmitTime'] = $report->submittedAt->setTimezone($timezone)
-                                ->format('M j @ g:ia T');
+                                                                            ->format('M j @ g:ia T');
                             $statsReportData['revisedReport'] = $report;
                             $resubmitted++;
                         }
@@ -1133,193 +987,38 @@ class GlobalReportController extends ReportDispatchAbstractController
         return view('globalreports.details.statsreports', compact('statsReportsList', 'boxes'));
     }
 
-    protected function getCoursesThisWeek($coursesData, Models\GlobalReport $globalReport, Models\Region $region)
+    protected function coursesData($globalReport, $region)
     {
-        $targetCourses = [];
-        foreach ($coursesData as $courseData) {
-            if ($courseData->course->startDate->lt($globalReport->reportingDate)
-                && $courseData->course->startDate->gt($globalReport->reportingDate->copy()->subWeek())
-            ) {
-                $targetCourses[] = $courseData;
-            }
-        }
-
-        return $targetCourses;
+        return $this->context->getEncapsulation(Encapsulate\GlobalReportCoursesData::class, compact('globalReport', 'region'));
     }
 
-    protected function getCoursesNextMonth($coursesData, Models\GlobalReport $globalReport, Models\Region $region)
+    protected function getCoursesThisWeek($globalReport, $region)
     {
-        $targetCourses = [];
-        foreach ($coursesData as $courseData) {
-            if ($courseData->course->startDate->gt($globalReport->reportingDate)
-                && $courseData->course->startDate->lt($globalReport->reportingDate->copy()->addWeeks(5))
-            ) {
-                $targetCourses[] = $courseData;
-            }
-        }
-
-        return $targetCourses;
+        return $this->coursesData($globalReport, $region)->getOne('CoursesThisWeek');
     }
 
-    protected function getCoursesUpcoming($coursesData, Models\GlobalReport $globalReport, Models\Region $region)
+    // Get report Next 5 Weeks
+    protected function getCoursesNextMonth($globalReport, $region)
     {
-        $targetCourses = [];
-        foreach ($coursesData as $courseData) {
-            if ($courseData->course->startDate->gt($globalReport->reportingDate)) {
-                $targetCourses[] = $courseData;
-            }
-        }
-
-        return $targetCourses;
+        return $this->coursesData($globalReport, $region)->getOne('CoursesNextMonth');
     }
 
-    protected function getCoursesCompleted($coursesData, Models\GlobalReport $globalReport, Models\Region $region)
+    // Get report Upcoming
+    protected function getCoursesUpcoming($globalReport, $region)
     {
-        $targetCourses = [];
-        foreach ($coursesData as $courseData) {
-            if ($courseData->course->startDate->lt($globalReport->reportingDate)) {
-                $targetCourses[] = $courseData;
-            }
-        }
-
-        return $targetCourses;
+        return $this->coursesData($globalReport, $region)->getOne('CoursesUpcoming');
     }
 
-    protected function getCoursesGuestGames($coursesData, Models\GlobalReport $globalReport, Models\Region $region)
+    // Get report Completed
+    protected function getCoursesCompleted($globalReport, $region)
     {
-        $targetCourses = [];
-        foreach ($coursesData as $courseData) {
-            if ($courseData->guestsPromised !== null) {
-                $targetCourses[] = $courseData;
-            }
-        }
-
-        return $targetCourses;
+        return $this->coursesData($globalReport, $region)->getOne('CoursesCompleted');
     }
 
-    protected function getCoursesAll(Models\GlobalReport $globalReport, Models\Region $region)
+    // Get report Guest Games
+    protected function getCoursesGuestGames($globalReport, $region)
     {
-        $statusTypes = [
-            'coursesthisweek',
-            'coursesnextmonth',
-            'coursesupcoming',
-            'coursescompleted',
-            'coursesguestgames',
-        ];
-
-        $coursesData = App::make(Api\GlobalReport::class)->getCourseList($globalReport, $region);
-        if (!$coursesData) {
-            return null;
-        }
-
-        $responseData = [];
-        foreach ($statusTypes as $type) {
-            $response = $this->getCoursesStatus($globalReport, $region, $type, $coursesData);
-            $responseData[$type] = $response ? $response->render() : '';
-        }
-
-        return $responseData;
-    }
-
-    protected function getCoursesStatus(Models\GlobalReport $globalReport, Models\Region $region, $status, $data = null)
-    {
-        if (!$data) {
-            $data = App::make(Api\GlobalReport::class)->getCourseList($globalReport, $region);
-            if (!$data) {
-                return null;
-            }
-        }
-
-        $targetData = null;
-        $type = null;
-        $byType = true;
-        $flatten = true;
-        switch ($status) {
-            case 'coursesthisweek':
-                $targetData = $this->getCoursesThisWeek($data, $globalReport, $region);
-                $type = 'completed';
-                break;
-            case 'coursesnextmonth':
-                $targetData = $this->getCoursesNextMonth($data, $globalReport, $region);
-                $type = 'next5weeks';
-                $flatten = false;
-                break;
-            case 'coursesupcoming':
-                $targetData = $this->getCoursesUpcoming($data, $globalReport, $region);
-                $type = 'upcoming';
-                $flatten = false;
-                break;
-            case 'coursescompleted':
-                $targetData = $this->getCoursesCompleted($data, $globalReport, $region);
-                $type = 'completed';
-                break;
-            case 'coursesguestgames':
-                $targetData = $this->getCoursesGuestGames($data, $globalReport, $region);
-                $type = 'guests';
-                break;
-        }
-
-        return $this->displayCoursesReport($targetData, $globalReport, $type, $byType, $flatten);
-    }
-
-    protected function displayCoursesReport($coursesData, Models\GlobalReport $globalReport, $type, $byType = false, $flatten = false)
-    {
-        $a = new Arrangements\CoursesByCenter(['coursesData' => $coursesData]);
-        $coursesByCenter = $a->compose();
-        $coursesByCenter = $coursesByCenter['reportData'];
-
-        $statsReports = [];
-        $centerReportData = [];
-        foreach ($coursesByCenter as $centerName => $coursesData) {
-            $a = new Arrangements\CoursesWithEffectiveness([
-                'courses' => $coursesData,
-                'reportingDate' => $globalReport->reportingDate,
-            ]);
-            $centerRow = $a->compose();
-
-            $centerReportData[$centerName] = $centerRow['reportData'];
-            $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Models\Center::name($centerName)->first());
-        }
-        ksort($centerReportData);
-
-        if ($byType) {
-            $typeReportData = [
-                'CAP' => [],
-                'CPC' => [],
-                'completed' => [],
-            ];
-
-            foreach ($centerReportData as $centerName => $coursesData) {
-                foreach ($coursesData as $courseType => $courseTypeData) {
-                    foreach ($courseTypeData as $courseData) {
-                        $typeReportData[$courseType][] = $courseData;
-                    }
-                }
-            }
-
-            if ($flatten) {
-                $reportData = [];
-                foreach (['CAP', 'CPC', 'completed'] as $courseType) {
-                    if (isset($typeReportData[$courseType])) {
-                        foreach ($typeReportData[$courseType] as $data) {
-                            $reportData[] = $data;
-                        }
-                    }
-                }
-            } else {
-                // Make sure they come out in the right order
-                foreach ($typeReportData as $courseType => $data) {
-                    if (!$data) {
-                        unset($typeReportData[$courseType]);
-                    }
-                }
-                $reportData = $typeReportData;
-            }
-        } else {
-            $reportData = $centerReportData;
-        }
-
-        return view('globalreports.details.courses', compact('reportData', 'type', 'statsReports'));
+        return $this->coursesData($globalReport, $region)->getOne('CoursesGuestGames');
     }
 
     public function getWithdrawReport(Models\GlobalReport $globalReport, Models\Region $region)
@@ -1412,8 +1111,8 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getStatsReports(Models\GlobalReport $report, Models\Region $region)
     {
         return $report->statsReports()
-            ->validated()
-            ->byRegion($region)
-            ->get();
+                      ->validated()
+                      ->byRegion($region)
+                      ->get();
     }
 }

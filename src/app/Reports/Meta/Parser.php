@@ -7,7 +7,7 @@ class Parser
 {
     public static function parse()
     {
-        $yaml = Yaml::parse(file_get_contents("config/reports.yml"));
+        $yaml = Yaml::parse(file_get_contents('config/reports.yml'));
 
         $r = new ParseResult();
 
@@ -35,6 +35,10 @@ class Parser
 
         // Parse API methods
         $r->api = self::parseApi($yaml['api'], '');
+
+        // Parse reportMeta
+        $r->reportMeta = self::parseReportMeta($yaml['reportMeta']);
+
         return $r;
     }
 
@@ -51,6 +55,35 @@ class Parser
                 $result[] = new Domain\ApiMethod($name, $item);
             }
         }
+
+        return $result;
+    }
+
+    private static function parseReportMeta($reportMeta)
+    {
+        $result = [];
+        foreach ($reportMeta as $id => $item) {
+            $childrenFlat = [];
+            $item['children'] = self::parseReportMetaItems($item['children'], $childrenFlat);
+            $item['childrenFlat'] = $childrenFlat;
+            $result[$id] = new Domain\ReportMetaNamespace($id, $item);
+        }
+
+        return $result;
+    }
+
+    private static function parseReportMetaItems($apiItems, &$flatItems)
+    {
+        $result = [];
+        foreach ($apiItems as $id => $item) {
+            if (array_get($item, 'children', null) !== null) {
+                $item['children'] = self::parseReportMetaItems($item['children'], $flatItems);
+            }
+            $v = new Domain\ReportMetaItem($id, $item);
+            $result[] = $v;
+            $flatItems[] = $v;
+        }
+
         return $result;
     }
 }
@@ -62,12 +95,14 @@ class ParseResult
     public $access_levels = [];
     public $access_level_aliases = [];
     public $api = [];
+    public $reportMeta = [];
 
     public function scope($id)
     {
         if (!isset($this->scopes[$id])) {
             throw new \Exception("Scope '{$id}' not found");
         }
+
         return $this->scopes[$id];
     }
 
@@ -79,6 +114,7 @@ class ParseResult
                 $result[] = $alias;
             }
         }
+
         return $result;
     }
 
@@ -88,6 +124,7 @@ class ParseResult
         $namespaces = [];
 
         $this->flattenedApi($this->api, $methods, $namespaces);
+
         return compact('methods', 'namespaces');
 
     }

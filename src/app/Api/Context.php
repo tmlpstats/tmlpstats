@@ -21,6 +21,12 @@ class Context
     protected $dateSelectAction = null;
     protected $dateSelectActionParams = [];
 
+    // Encapsulation parameters
+    protected $encapsulationParams = [];
+    protected $encapsulations = [];
+
+    // Encapsulation classes
+
     public function __construct(Guard $auth, Request $request)
     {
         $this->user = $auth->user();
@@ -74,6 +80,7 @@ class Context
     public function setRegion(Models\Region $region)
     {
         $this->region = $region;
+        $this->encapsulationParams['region'] = $region;
     }
 
     public function getRawSetting($name, $center = null, $quarter = null)
@@ -110,6 +117,7 @@ class Context
     public function setReportingDate($reportingDate)
     {
         $this->reportingDate = $reportingDate;
+        $this->encapsulationParams['reportingDate'] = $reportingDate;
     }
 
     public function getReportingDate()
@@ -130,6 +138,11 @@ class Context
 
     public function dateSelectAction($date)
     {
+        // Handy way to get the existing reporting date
+        if ($date == 'RD') {
+            $date = $this->getReportingDate();
+        }
+
         if ($date instanceof Carbon) {
             $date = $date->toDateString();
         }
@@ -145,5 +158,22 @@ class Context
     public function can($priv, $target)
     {
         return $this->getUser()->can($priv, $target);
+    }
+
+    /// Encapsulation is a potentially temporary fix for while we're reorganizing data.
+
+    public function getEncapsulation($className, $ctx)
+    {
+        $eKey = '';
+        ksort($ctx);
+        foreach ($ctx as $k => $v) {
+            $eKey .= "{$k}={$v->id}";
+        }
+        $eKey .= "::${className}";
+        if (($obj = array_get($this->encapsulations, $eKey, null)) == null) {
+            $obj = $this->encapsulations[$eKey] = App::make($className, $ctx);
+        }
+
+        return $obj;
     }
 }
