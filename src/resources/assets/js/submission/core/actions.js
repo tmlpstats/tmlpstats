@@ -1,6 +1,5 @@
 import { coreInit, centerQuarterData, cqResponse } from './data'
 import { objectAssign } from '../../reusable/ponyfill'
-import { bestErrorValue } from '../../reusable/ajax_utils'
 import Api from '../../api'
 import { normalize } from 'normalizr'
 
@@ -14,8 +13,8 @@ export function initSubmission(centerId, reportingDate) {
             reportingDate: reportingDate
         }).then((data) => {
             dispatch(setSubmissionLookups(data))
-        }).catch((jqXHR, textStatus) => {
-            dispatch(initState({error: bestErrorValue(jqXHR, textStatus)}))
+        }).catch((err) => {
+            dispatch(initState({error: err.error || err}))
         })
     }
 }

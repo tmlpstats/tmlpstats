@@ -1,4 +1,12 @@
-
+export function getErrMessage(err) {
+    if (err.error) {
+        err = err.error
+    }
+    if (err.message) {
+        err = err.message
+    }
+    return err
+}
 
 export function bestErrorValue(jqXHR, textStatus) {
     var data

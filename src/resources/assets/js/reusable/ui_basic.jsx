@@ -1,5 +1,7 @@
 import React, { PropTypes } from 'react'
 
+import { getErrMessage } from './ajax_utils'
+
 /**
  * ModeSelectButtons renders side-by-side buttons used for mode selector, with appropriate active state.
  *
@@ -62,11 +64,7 @@ export class LoadStateFlip extends React.PureComponent {
         } else if (loadState.state == 'failed') {
             var error = 'FAILED '
             if (loadState.error) {
-                if (loadState.error.message) {
-                    error += loadState.error.message
-                } else {
-                    error += loadState.error
-                }
+                error += getErrMessage(loadState.error)
             }
             return <div className="bg-danger">{error}</div>
         } else {

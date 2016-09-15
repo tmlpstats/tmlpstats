@@ -7,7 +7,10 @@ function jsonApiCall(methodName, params) {
 
     return fetch('/api', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
         credentials: 'same-origin',
         body: JSON.stringify(input)
     }).then(checkStatus).then(parseJSON)
