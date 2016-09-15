@@ -21,8 +21,8 @@ function getErrorMessage(code) {
  *      en-US: 12/2/15
  *      en-UK: 2/12/15
  */
-function updateDates() {
-    $('span.date').each(function (index, dateElem) {
+function updateDates(context) {
+    $('span.date', context).each(function (index, dateElem) {
         var formatted = moment($(dateElem).data('date')).format('l');
         formatted = formatted.replace(/\d\d(\d\d)/, "$1");
         $(dateElem).text(formatted);
@@ -33,8 +33,9 @@ function updateDates() {
  * Initialize all uninitialized datatables
  * @param options
  * @param tableClass
+ * @param context: If specified, must be a DOM context for jquery to work with.
  */
-function initDataTables(options, tableClass) {
+function initDataTables(options, tableClass, context) {
     if (!options) {
         tableClass = 'want-datatable';
         options = {
@@ -45,7 +46,7 @@ function initDataTables(options, tableClass) {
     // document.ready may fire immediately depending on the current state of the DOM
     // We use the want-datatable class as a flip to avoid continuously binding tables
     $(document).ready(function() {
-        $('table.' + tableClass).each(function() {
+        $('table.' + tableClass, context).each(function() {
             var table = $(this);
             table.removeClass(tableClass).dataTable(options);
         })

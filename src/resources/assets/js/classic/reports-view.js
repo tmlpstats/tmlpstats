@@ -73,7 +73,10 @@ window.showReportView = function(config) {
             pages.forEach((page) => {
                 debug('loaded page', page)
                 loaded[page] = true
-                $(`#${page}-content`).html(data.pages[page])
+                const container = target.find(`#${page}-content`)
+                container.html(data.pages[page])
+                window.updateDates(container)
+                window.initDataTables(undefined, undefined, container)
             })
 
             setTimeout(loadNext, 200)
