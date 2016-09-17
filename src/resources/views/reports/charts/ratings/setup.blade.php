@@ -55,7 +55,7 @@
                 text: 'Ratings by Week'
             },
             subtitle: {
-                text: 'From beginning of quarter starting {{ $quarter->startWeekendDate->format('M j, Y') }}'
+                text: 'From beginning of quarter starting {{ $quarter->getQuarterStartDate()->format('M j, Y') }}'
             },
             credits: {enabled: false},
             xAxis: {

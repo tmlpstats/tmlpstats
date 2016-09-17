@@ -28,8 +28,11 @@ class LocalReport extends ApiBase
 
         $originalPromise = null;
 
-        $week = $statsReport->quarter->getQuarterEndDate($statsReport->center);
-        while ($week->gt($statsReport->quarter->getQuarterStartDate($statsReport->center))) {
+        $quarterStartDate = $statsReport->quarter->getQuarterStartDate($statsReport->center);
+
+        // We are going to mutate this week value, so copy it.
+        $week = $statsReport->quarter->getQuarterEndDate($statsReport->center)->copy();
+        while ($week->gt($quarterStartDate)) {
 
             // Walk backwards through the quarter week by week and collect the promise/actual objects
             // from each official report as we find them
@@ -58,7 +61,7 @@ class LocalReport extends ApiBase
                 }
             }
 
-            $week->subWeek();
+            $week = $week->copy()->subWeek(); // Wasn't strictly necessary, but let's be safe with mutable dates
         }
 
         if ($returnUnprocessed) {

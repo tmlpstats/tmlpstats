@@ -152,7 +152,7 @@ class ClassListImporter extends DataImporterAbstract
                 $member->person->addAccountability(
                     $accountability,
                     $this->statsReport->reportingDate,
-                    $this->statsReport->quarter->endWeekendDate
+                    $this->statsReport->quarter->getQuarterEndDate()
                 );
             }
 
