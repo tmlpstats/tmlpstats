@@ -127,8 +127,9 @@ class CenterStatsImporter extends DataImporterAbstract
         $center        = $this->statsReport->center;
         $quarter       = $this->statsReport->quarter;
         $reportingDate = $this->statsReport->reportingDate;
+        $centerQuarter = $quarter->getCenterQuarter($center);
 
-        $isRepromiseWeek = $quarter->isRepromiseWeek($reportingDate, $center);
+        $isRepromiseWeek = $centerQuarter->isRepromiseWeek($reportingDate);
 
         foreach ($this->data as $week) {
 
@@ -212,13 +213,15 @@ class CenterStatsImporter extends DataImporterAbstract
         $globalReport = null;
         $statsReport  = null;
 
-        $firstWeek = $quarter->getFirstWeekDate($center);
+        $centerQuarter = $quarter->getCenterQuarter($center);
+
+        $firstWeek = $centerQuarter->firstWeekDate;
 
         // Don't reuse promises on the first week, as they may change between submits
         if ($reportingDate->ne($firstWeek)) {
 
             // Usually, promises will be saved in the global report for the expected week
-            $repromiseDate = $quarter->getRepromiseDate($center);
+            $repromiseDate = $centerQuarter->getRepromiseDate();
             if ($reportingDate->gt($repromiseDate) && $date->gt($repromiseDate)) {
                 $globalReport = GlobalReport::reportingDate($repromiseDate)->first();
             } else {

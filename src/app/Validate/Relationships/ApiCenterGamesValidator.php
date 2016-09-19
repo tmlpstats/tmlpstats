@@ -54,6 +54,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
                     'calculated' => $calculated,
                 ],
             ]);
+
             return false;
         }
 
@@ -186,8 +187,8 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
 
     protected function getQuarterStartingApprovedApplications()
     {
-        $centerQuarter = Domain\CenterQuarter::fromModel($this->center, $this->quarter)
-            ->toArray();
+        // toArray is done here to deal with an interesting issue with parsing dates before 1900
+        $centerQuarter = Domain\CenterQuarter::ensure($this->center, $this->quarter)->toArray();
 
         $startWeekendDate = Carbon::parse($centerQuarter['startWeekendDate']);
 

@@ -22,7 +22,7 @@
                         {{ $globalReport->reportingDate->format('F j, Y') }}
                     </a>
                 </td>
-                {{-- <td>{{ $globalReport->quarter->distinction }} - {{ $globalReport->quarter->startWeekendDate->format('F Y') }}</td>--}}
+                {{-- <td>{{ $globalReport->quarter->distinction }} - {{ $globalReport->quarter->getQuarterStartDate()->format('F Y') }}</td>--}}
                 <td><i class="fa {{ $globalReport->locked ? 'fa-lock' : 'fa-unlock' }}"></i></td>
             </tr>
         @endforeach

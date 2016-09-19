@@ -10,19 +10,18 @@ $dateSelectAction = $context->dateSelectAction('foo');
 $reportingDate = $context->getReportingDate();
 $regions = TmlpStats\Region::isGlobal()->get();
 $currentRegion = $context->getGlobalRegion(false);
+$currentCenter = $context->getCenter(true);
 $reports = null;
 $centers = [];
 if ($currentRegion != null) {
     $quarter = TmlpStats\Quarter::getQuarterByDate($reportingDate, $currentRegion);
 
-    $reports = TmlpStats\GlobalReport::between($quarter->startWeekendDate, $quarter->endWeekendDate)
+    $reports = TmlpStats\GlobalReport::between($quarter->getQuarterStartDate($currentCenter), $quarter->getQuarterEndDate($currentCenter))
                                  ->orderBy('reporting_date', 'desc')
                                  ->get();
     $centers = TmlpStats\Center::byRegion($currentRegion)->orderBy('name')->get();
 
 }
-
-$currentCenter = $context->getCenter(true);
 
 
 $reportingDateString = ($reportingDate != null) ? $reportingDate->toDateString() : null;
@@ -56,11 +55,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
 
                         @can ('showNewSubmissionUi', $currentCenter)
                         <li {!! Request::is('submission') ? 'class="active"' : '' !!}>
-                            <?php
-                                $abbr = strtolower($currentCenter->abbreviation);
-                                $date = $reportingDate->toDateString();
-                            ?>
-                            <a href="{{ url("/center/{$abbr}/submission/{$date}") }}">Submit Report (beta)</a>
+                            <a href="{{ action('CenterController@submission', ['abbr' => $currentCenter->abbrLower(), 'reportingDate' => $reportingDateString]) }}">Submit Report (beta)</a>
                         </li>
                         @endcan
 

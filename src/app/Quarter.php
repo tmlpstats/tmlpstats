@@ -5,13 +5,14 @@ use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use TmlpStats\Settings\RegionQuarterOverride;
+use TmlpStats\Domain;
 use TmlpStats\Settings\Setting;
 use TmlpStats\Traits\CachedRelationships;
+use TmlpStats\Traits\UsesContext;
 
 class Quarter extends Model
 {
-    use CamelCaseModel, CachedRelationships;
+    use CamelCaseModel, CachedRelationships, UsesContext;
 
     protected $fillable = [
         't1_distinction',
@@ -22,27 +23,6 @@ class Quarter extends Model
 
     protected $region = null;
     protected $regionQuarterDetails = null;
-
-    public function __get($name)
-    {
-        switch ($name) {
-            case 'startWeekendDate':
-            case 'endWeekendDate':
-            case 'classroom1Date':
-            case 'classroom2Date':
-            case 'classroom3Date':
-                if ($this->region && !$this->regionQuarterDetails) {
-                    $this->setRegion($this->region);
-                }
-                if (!$this->regionQuarterDetails) {
-                    throw new Exception("Cannot call __get({$name}) before setting region.");
-                }
-
-                return $this->getQuarterDate($name);
-            default:
-                return parent::__get($name);
-        }
-    }
 
     /**
      * Get the date of the first week of reporting
@@ -148,17 +128,26 @@ class Quarter extends Model
             throw new \Exception("{$field} is not a valid date field.");
         }
 
-        if (!$this->regionQuarterDetails) {
-            throw new \Exception("regionQuarterDetails not set. Cannot determine {$field}.");
+        if ($center === null) {
+            // Use the old school region quarter concept if we get a null center. Hope to log and eliminate these very quickly.
+            $data = $this->context()->getEncapsulation(Encapsulations\RegionQuarter::class, ['region' => $this->region, 'quarter' => $this]);
+        } else {
+            $data = $this->getCenterQuarter($center);
         }
 
-        $overridenDates = RegionQuarterOverride::get($center, $this);
-
-        $date = isset($overridenDates[$field])
-            ? $overridenDates[$field]
-            : $this->regionQuarterDetails->$field;
+        // To keep old behaviour, replace any missing dates with year 0001-01-01
+        $date = $data->$field ?: Carbon::parse('0001-01-01', 'UTC');
 
         return $date->startOfDay();
+    }
+
+    /**
+     * Get a CenterQuarter encapsulating dates for this center. Returns the same object from cache.
+     * @param  Center $center The center for which we want a centerquarter.
+     * @return Domain\CenterQuarter
+     */
+    public function getCenterQuarter(Center $center) {
+        return $this->context()->getEncapsulation(Domain\CenterQuarter::class, ['center' => $center, 'quarter' => $this]);
     }
 
     public function getNextMilestone(Carbon $now)
@@ -177,53 +166,19 @@ class Quarter extends Model
     }
 
     /**
-     * Get the default date
-     *
-     * @param $field
-     *
-     * @return Carbon
-     */
-    public function getDefaultDate($field)
-    {
-        return $this->regionQuarterDetails
-            ? $this->regionQuarterDetails->$field
-            : null;
-    }
-
-    /**
      * Get the date when repromises are accepted
      *
      * Will check for a setting override, otherwise uses the classroom2 date
      *
-     * @param Center|null $center
+     * @param Center $center
      *
      * @return Carbon
      */
-    public function getRepromiseDate(Center $center = null)
+    public function getRepromiseDate(Center $center)
     {
-        $setting = Setting::name('repromiseDate')
-            ->with($center, $this)
-            ->get();
-
-        return $setting ?: $this->getClassroom2Date($center);
+        return $this->getCenterQuarter($center)->getRepromiseDate();
     }
 
-    /**
-     * Is provided date the week to accept repromises?
-     *
-     * Will check for a setting override, otherwise uses the classroom2 date
-     *
-     * @param Carbon      $date
-     * @param Center|null $center
-     *
-     * @return bool
-     */
-    public function isRepromiseWeek(Carbon $date, Center $center = null)
-    {
-        $repromiseDate = $this->getRepromiseDate($center);
-
-        return $date->eq($repromiseDate);
-    }
 
     /**
      * Is the current reportingDate the first week of the quarter?
