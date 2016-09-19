@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default class AdminRoot extends React.Component {
+export default class AdminRoot extends React.PureComponent {
     render() {
         return (
             <div>

@@ -19,6 +19,7 @@ class ApiController extends ApiControllerBase
 {
     protected $methods = [
         "Admin.Region.getRegion" => "Admin__Region__getRegion",
+        "Admin.Quarter.filter" => "Admin__Quarter__filter",
         "Application.create" => "Application__create",
         "Application.allForCenter" => "Application__allForCenter",
         "Application.stash" => "Application__stash",
@@ -71,6 +72,11 @@ class ApiController extends ApiControllerBase
     {
         return App::make(Api\Admin\Region::class)->getRegion(
             $this->parse($input, 'region', 'Region')
+        );
+    }
+    protected function Admin__Quarter__filter($input)
+    {
+        return App::make(Api\Admin\Quarter::class)->filter(
         );
     }
     protected function Application__create($input)

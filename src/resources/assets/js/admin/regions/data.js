@@ -1,20 +1,21 @@
+import { Schema, arrayOf } from 'normalizr'
+
 import { objectAssign } from '../../reusable/ponyfill'
 import SimpleReduxLoader from '../../reusable/redux_loader/simple'
 import FormReduxLoader from '../../reusable/redux_loader/rrf'
 import { LoadingMultiState } from '../../reusable/reducers'
 import Api from '../../api'
-import { Schema, arrayOf } from 'normalizr'
 
 
 /* DATA RELATIONS SCHEMA (normalizr) */
 
-const quarterSchema = new Schema('quarters')
+const regionQuarterSchema = new Schema('regionQuarters')
 const centerSchema = new Schema('centers', {idAttribute: 'abbreviation'})
 export const regionSchema = new Schema('regions')
 regionSchema.define({
     centers: arrayOf(centerSchema),
-    currentQuarter: quarterSchema,
-    quarters: arrayOf(quarterSchema)
+    currentQuarter: regionQuarterSchema,
+    quarters: arrayOf(regionQuarterSchema)
 })
 
 /* DATA MANAGEMENT LOADERS */
@@ -24,7 +25,7 @@ export const regionsData = new SimpleReduxLoader({
     loader: Api.Admin.Region.getRegion,
     transformData: (data) => {
         if (data.region && data.centers) {
-            data = objectAssign({}, data.region, data, {quarter: null})
+            data = objectAssign({}, data.region, data, {quarter: null, region: undefined})
         }
         if (data.centers) {
             data.centers = data.centers.map((x) => {
@@ -38,7 +39,6 @@ export const regionsData = new SimpleReduxLoader({
 export const centersData = new SimpleReduxLoader({
     prefix: 'admin/centers'
 })
-
 
 export const scoreboardLockData = new FormReduxLoader({
     prefix: 'admin/scoreboardLock',
