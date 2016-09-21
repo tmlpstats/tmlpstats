@@ -66,6 +66,9 @@ class ReportMetaNamespace
                 'type' => $report->type,
                 'name' => $report->name,
             ];
+            if ($report->shortName) {
+                $r['shortName'] = $report->shortName;
+            }
             if ($childrenIds = $report->childrenIds()) {
                 $r['children'] = $childrenIds;
             }

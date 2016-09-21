@@ -7,18 +7,9 @@ class ReportMetaItem
 {
     public $id = '';
     public $uriSlug = '';
-
-    /**
-     * The name of this namespace
-     * @var string
-     */
     public $name = '';
+    public $shortName = null;
 
-    /**
-     * The full path of this namespace, including parent namespaces in dotted form e.g. Parent.Name
-     * @var string
-     */
-    //public $absName = '';
 
     /**
      * All the child methods and namespaces of this namespace.

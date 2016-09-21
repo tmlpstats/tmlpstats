@@ -95,7 +95,8 @@ window.showReportView = function(config) {
         const report = fullReport.children[id]
         const className = (report.id == window.location.hash.substr(1)) ? 'active': ''
         const rtype = (report.type == 'report')? report.id : ''
-        tabs += `<li class="${className}"><a href="#${id}" data-toggle="tab" data-rtype="${rtype}">${report.name}</a></li>`
+        const tabLabel = responsiveLabel(report)
+        tabs += `<li class="${className}"><a href="#${id}" data-toggle="tab" data-rtype="${rtype}">${tabLabel}</a></li>`
 
         content += `<div class="tab-pane ${className}" id="${id}"><h3>${report.name}</h3>`
         if (report.type == 'grouping') {
@@ -149,4 +150,9 @@ window.showReportView = function(config) {
 
     loadNext()
     setTimeout(loadNext, 100) // Run a parallel 'thread' slightly offset in time.
+}
+
+/** Generate tab label HTML for a report if shortName is set */
+function responsiveLabel(report) {
+    return (report.shortName)? `<span class="long">${report.name}</span><span class="brief">${report.shortName}</span>` : report.name
 }

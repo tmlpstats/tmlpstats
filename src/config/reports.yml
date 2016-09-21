@@ -457,6 +457,7 @@ reportMeta:
       WeeklySummaryGroup:
         type: grouping
         name: Weekly Summary
+        shortName: Summary
         children:
           RatingSummary:
             name: Ratings
@@ -466,6 +467,7 @@ reportMeta:
       RegionalStatsGroup:
         type: grouping
         name: Regional Games
+        shortName: Games
         children:
           RegionalStats:
             name: Scoreboard
@@ -480,7 +482,7 @@ reportMeta:
 
       CenterStatsReports:
         name: Center Reports
-        short: Centers
+        shortName: Centers
 
       ApplicationsGroup:
         type: grouping

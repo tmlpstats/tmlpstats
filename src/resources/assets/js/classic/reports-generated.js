@@ -32,6 +32,7 @@ const GlobalReport = {
             "n": 2,
             "type": "grouping",
             "name": "Weekly Summary",
+            "shortName": "Summary",
             "children": [
                 "RatingSummary",
                 "RegionSummary"
@@ -72,6 +73,7 @@ const GlobalReport = {
             "n": 8,
             "type": "grouping",
             "name": "Regional Games",
+            "shortName": "Games",
             "children": [
                 "RegionalStats",
                 "GamesByCenter",
@@ -84,7 +86,8 @@ const GlobalReport = {
             "id": "CenterStatsReports",
             "n": 9,
             "type": "report",
-            "name": "Center Reports"
+            "name": "Center Reports",
+            "shortName": "Centers"
         },
         "TmlpRegistrationsOverview": {
             "id": "TmlpRegistrationsOverview",
@@ -133,7 +136,8 @@ const GlobalReport = {
             "id": "TravelReport",
             "n": 16,
             "type": "report",
-            "name": "Travel Summary"
+            "name": "Travel Summary",
+            "shortName": "Travel"
         },
         "CoursesThisWeek": {
             "id": "CoursesThisWeek",
@@ -211,7 +215,8 @@ const GlobalReport = {
             "id": "TdoSummary",
             "n": 27,
             "type": "report",
-            "name": "Training & Development"
+            "name": "Training & Development",
+            "shortName": "TDO"
         },
         "TeamMemberStatusPotentialsOverview": {
             "id": "TeamMemberStatusPotentialsOverview",
