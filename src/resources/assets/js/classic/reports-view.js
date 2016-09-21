@@ -1,5 +1,6 @@
 import { objectAssign } from '../reusable/ponyfill'
 import Api from '../api'
+import _ from 'lodash'
 
 import Reports from './reports-generated'
 
@@ -15,9 +16,15 @@ window.showReportView = function(config) {
     const fullReport = Reports[config.report]
     const target = $(config.target)
     const reportApi = Api[config.report + 'Report']
+    const { pastClassroom2 } = config
 
     var loadQueue = []
     var loaded = {}
+
+    if (!pastClassroom2 && config.report == 'Global') {
+        delete fullReport.children.RepromisesByCenter
+        _.pull(fullReport.children.RegionalStatsGroup.children, 'RepromisesByCenter')
+    }
 
     /// SHOW REPORT OF CHOOSING. ACTUAL AJAX STUFF
     function showReport(cid) {
@@ -86,7 +93,6 @@ window.showReportView = function(config) {
             setTimeout(loadNext, 300)
         })
     }
-
 
 
     var tabs = '<div><ul id="tabs" class="nav nav-tabs tabs-top brief-tabs" data-tabs="tabs">'
