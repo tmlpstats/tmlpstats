@@ -35,7 +35,7 @@ class Quarter extends Model
     {
         $quarterStart = $this->getQuarterStartDate($center);
 
-        return $quarterStart->addWeek();
+        return $quarterStart->copy()->addWeek();
     }
 
     /**

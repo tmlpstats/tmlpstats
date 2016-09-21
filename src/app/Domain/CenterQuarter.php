@@ -98,8 +98,8 @@ class CenterQuarter implements Arrayable, \JsonSerializable
     public function listReportingDates()
     {
         $output = [];
-        $d = $this->$startWeekendDate->copy();
-        while ($d->lt($endDate)) {
+        $d = $this->firstWeekDate->copy();
+        while ($d->lte($this->endWeekendDate)) {
             $output[] = $d;
             $d = $d->copy()->addWeek();
         }
