@@ -473,7 +473,7 @@ reportMeta:
             name: Scoreboard
           GamesByCenter:
             name: By Center
-          RepromisesByCenter: # TODO: find a way to hide this when not past CR#2
+          RepromisesByCenter:
             name: Repromises
           RegPerParticipant:
             name: Reg. Per Participant
