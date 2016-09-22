@@ -6,7 +6,7 @@
     <p>Brought to you by the global statistician body. We're always looking to improve this tool. If you have any suggestions or issues, please communicate them to your regional statisitician.</p>
 
     @if ($showUploadForm)
-        @include('import.form', ['formAction' => '/validate', 'expectedDate' => $expectedDate, 'showReportCheckSettings' => $showReportCheckSettings, 'submitReport' => $submitReport])
+        @include('import.form', ['formAction' => '/validate', 'expectedDate' => $expectedDate, 'showReportCheckSettings' => $showReportCheckSettings, 'submitReport' => $submitReport, 'showAccountabilities' => $showAccountabilities])
     @endif
 
     @if (isset($results))

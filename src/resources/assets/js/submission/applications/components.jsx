@@ -2,13 +2,14 @@ import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
 
 import { Form, SimpleField, SimpleSelect, AddOneLink } from '../../reusable/form_utils'
-import { Promise, objectAssign, arrayFind } from '../../reusable/ponyfill'
+import { Promise, objectAssign } from '../../reusable/ponyfill'
 import { ModeSelectButtons, LoadStateFlip, MessagesComponent } from '../../reusable/ui_basic'
 
 import { SubmissionBase, React } from '../base_components'
 import { APPLICATIONS_FORM_KEY } from './reducers'
 import { appsSorts, appsCollection, messages } from './data'
 import { centerQuarterData } from '../core/data'
+import { getLabelTeamMember } from '../core/selectors'
 import { loadApplications, saveApplication, chooseApplication } from './actions'
 import AppStatus from './AppStatus'
 
@@ -67,11 +68,6 @@ class ApplicationsIndexView extends ApplicationsBase {
     }
 }
 
-const getLabelTeamMember = (item) => {
-    const p = item.teamMember.person
-    return p.firstName + ' ' + p.lastName
-}
-
 class _EditCreate extends ApplicationsBase {
     render() {
         const modelKey = APPLICATIONS_FORM_KEY
@@ -92,7 +88,7 @@ class _EditCreate extends ApplicationsBase {
                     <SimpleField label="First Name" model={modelKey+'.firstName'} divClass="col-md-6" />
                     <SimpleField label="Last Name" model={modelKey+'.lastName'} divClass="col-md-6" />
                     <SimpleField label="Team Year" model={modelKey+'.teamYear'} divClass="col-md-4" customField={true}>
-                        <select>
+                        <select className="form-control">
                             <option value="1">Team 1</option>
                             <option value="2">Team 2</option>
                         </select>

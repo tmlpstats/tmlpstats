@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
 
@@ -7,21 +8,26 @@ import SubmissionNav from './SubmissionNav'
 import * as actions from './actions'
 
 const steps = [
-    // The steps key is some metadata about the steps, maybe redundant but we'll leave it for now.
+    // The steps key lists the steps in the submission flow, used for building navigation
     {key: 'scoreboard', name: 'Scoreboard'},
     {key: 'applications', name: 'Team Expansion'},
     {key: 'class_list', name: 'Class List'},
     {key: 'courses', name: 'Courses'},
+    {key: 'qtr_accountabilities', name: 'Accountabilities'},
     {key: 'review', name: 'Review'}
 ]
+
+const stepsBeforeCr3 = _.reject(steps, {key: 'qtr_accountabilities'})
 
 class SubmissionFlowComponent extends SubmissionBase {
     render() {
         if (!this.checkReportingDate()) {
             return this.renderBasicLoading(this.props.coreInit)
         }
+        const navSteps = (this.props.lookups.pastClassroom[3]) ? steps : stepsBeforeCr3
         const largeLayout = this.props.browser.greaterThan.large
-        const nav = <SubmissionNav params={this.props.params} steps={steps} location={this.props.location} tabbed={!largeLayout} />
+
+        const nav = <SubmissionNav params={this.props.params} steps={navSteps} location={this.props.location} tabbed={!largeLayout} />
         var layout
         if (largeLayout) {
             layout = (
@@ -62,20 +68,24 @@ class SubmissionFlowComponent extends SubmissionBase {
     }
 
     checkReportingDate() {
-        const { params, reportingDate, dispatch, coreInit } = this.props
-        if (params.reportingDate != reportingDate) {
-            dispatch(actions.setReportingDate(params.reportingDate))
-            return false
-        } else if (coreInit.state == 'new') {
-            setTimeout(() => {
-                dispatch(actions.initSubmission(params.centerId, params.reportingDate))
-            })
-            return false
-        } else if (coreInit.state != 'loaded') {
-            return false
-        }
-        return true
+        const { centerId, reportingDate } = this.props.params
+        return checkCoreData(centerId, reportingDate, this.props, this.props.dispatch)
     }
+}
+
+export function checkCoreData(centerId, reportingDate, core, dispatch) {
+    if (reportingDate != core.reportingDate) {
+        dispatch(actions.setReportingDate(reportingDate))
+        return false
+    } else if (core.coreInit.state == 'new') {
+        setTimeout(() => {
+            dispatch(actions.initSubmission(centerId, reportingDate))
+        })
+        return false
+    } else if (core.coreInit.state != 'loaded') {
+        return false
+    }
+    return true
 }
 
 const mapStateToProps = (state) => {

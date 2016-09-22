@@ -183,3 +183,59 @@ export class Alert extends React.PureComponent {
         )
     }
 }
+
+export class Panel extends React.PureComponent {
+    static defaultProps = {
+        color: 'default',
+        headingLevel: 'h3'
+    }
+
+    render() {
+        const { color, heading, headingLevel, children } = this.props
+
+        // doing an <h3 is simply syntactic sugar for react.createElement('h3', {propName:propVal, ...}, ...children)
+        // So by directly using react.createElement we can create any heading from h1 to h6.
+        const panelHeading = React.createElement(headingLevel, {className: 'panel-title'}, heading)
+
+        return (
+            <div className={'panel panel-' + color}>
+                <div className="panel-heading">
+                    {panelHeading}
+                </div>
+                <div className="panel-body">
+                    {children}
+                </div>
+            </div>
+        )
+    }
+}
+
+export class Modal extends React.PureComponent {
+    static propTypes = {
+        title: PropTypes.string,
+        footer: PropTypes.oneOfType([PropTypes.string, PropTypes.element, PropTypes.arrayOf(PropTypes.element)]),
+        onClose: PropTypes.func
+    }
+    render() {
+        const { title, children, footer } = this.props
+        const footerContent = footer? <div className="modal-footer">{footer}</div> : null
+        return (
+            <div className="modal fade in" tabIndex="-1" role="dialog" style={{display: 'block'}}>
+                <div className="modal-dialog" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <button type="button" className="close" aria-label="Close">
+                                <span aria-hidden="true">x</span>
+                            </button>
+                            <h4 className="modal-title">{title}</h4>
+                        </div>
+                        <div className="modal-body">
+                            {children}
+                        </div>
+                        {footerContent}
+                    </div>
+                </div>
+            </div>
+        )
+    }
+}

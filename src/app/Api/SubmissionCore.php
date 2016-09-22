@@ -4,6 +4,7 @@ namespace TmlpStats\Api;
 use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
+use TmlpStats\Domain;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Api\Exceptions;
 
@@ -24,6 +25,7 @@ class SubmissionCore extends AuthenticatedApiBase
 
         $lastValidReport = $rq['report'];
         $quarter = $rq['quarter'];
+        $centerQuarter = Domain\CenterQuarter::ensure($center, $quarter);
 
         if ($lastValidReport === null) {
             $team_members = [];
@@ -42,6 +44,7 @@ class SubmissionCore extends AuthenticatedApiBase
             'validRegQuarters' => $validRegQuarters,
             'lookups' => compact('withdraw_codes', 'team_members', 'center'),
             'accountabilities' => $accountabilities,
+            'currentQuarter' => $centerQuarter,
         ];
     }
 
@@ -69,7 +72,7 @@ class SubmissionCore extends AuthenticatedApiBase
      */
     public function reportAndQuarter(Models\Center $center, Carbon $reportingDate)
     {
-        $report = App::make(LocalReport::class)->getLastStatsReportSince($center, $reportingDate);
+        $report = App::make(LocalReport::class)->getLastStatsReportSince($center, $reportingDate, ['official']);
         if ($report === null) {
             $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
         } else {

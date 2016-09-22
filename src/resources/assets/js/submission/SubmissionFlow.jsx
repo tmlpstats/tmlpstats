@@ -16,6 +16,7 @@ export default function SubmissionFlow() {
             <Route path="courses" component={Pages.CoursesIndex} />
             <Route path="courses/edit/:courseId" component={Pages.CoursesEdit} />
             <Route path="courses/add" component={Pages.CoursesAdd} />
+            <Route path="qtr_accountabilities" component={Pages.QuarterAccountabilities} />
             <Route path="review" component={Pages.Review} />
         </Route>
     )
