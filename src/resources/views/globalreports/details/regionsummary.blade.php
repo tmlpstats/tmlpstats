@@ -86,5 +86,9 @@
 <div class="row">
     @include('reports.charts.ratings.chart')
 </div>
+<div class="row">
+    @include('reports.charts.percentages.chart', ['divId' => 'percent-container'])
+</div>
 
 @include('reports.charts.ratings.setup')
+@include('reports.charts.percentages.setup', ['divId' => 'percent-container'])
