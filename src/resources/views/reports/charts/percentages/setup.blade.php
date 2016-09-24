@@ -74,31 +74,24 @@
                 min: 0,
                 plotBands: [{
                     from: 0,
-                    to: 74.99,
+                    to: 49.99,
                     color: 'rgba(255, 125, 125, 0.2)',
                     // label: {
                     //     text: 'Ineffective'
                     // }
                 },{
-                    from: 75,
-                    to: 79.99,
+                    from: 50,
+                    to: 74.99,
                     color: 'rgba(255, 207, 125, 0.2)',
                     // label: {
                     //     text: 'Marginally Effective'
                     // }
                 },{
-                    from: 80,
-                    to: 89.99,
+                    from: 75,
+                    to: 100,
                     color: 'rgba(106, 220, 0, 0.2)',
                     // label: {
-                    //     text: 'Errective'
-                    // }
-                },{
-                    from: 90,
-                    to: 100,
-                    color: 'rgba(10, 200, 0, 0.2)',
-                    // label: {
-                    //     text: 'High Performing'
+                    //     text: 'Effective'
                     // }
                 }]
             },
