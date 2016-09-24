@@ -119,11 +119,12 @@ class GlobalReportCoursesData
         $type = null;
         $byType = true;
         $flatten = true;
+        $combineCompleted = false;
         switch ($page) {
             case 'coursesthisweek':
             case 'CoursesThisWeek':
                 $targetData = $this->getCoursesThisWeek($data, $globalReport, $region);
-                $type = 'completed';
+                $type = 'completedThisWeek';
                 break;
             case 'coursesnextmonth':
             case 'CoursesNextMonth':
@@ -141,6 +142,8 @@ class GlobalReportCoursesData
             case 'CoursesCompleted':
                 $targetData = $this->getCoursesCompleted($data, $globalReport, $region);
                 $type = 'completed';
+                $flatten = false;
+                $combineCompleted = true;
                 break;
             case 'coursesguestgames':
             case 'CoursesGuestGames':
@@ -151,10 +154,10 @@ class GlobalReportCoursesData
                 throw new \Exception("Unkown page $page");
         }
 
-        return $this->displayCoursesReport($targetData, $globalReport, $type, $byType, $flatten);
+        return $this->displayCoursesReport($targetData, $globalReport, $type, $byType, $flatten, $combineCompleted);
     }
 
-    protected function displayCoursesReport($coursesData, Models\GlobalReport $globalReport, $type, $byType = false, $flatten = false)
+    protected function displayCoursesReport($coursesData, Models\GlobalReport $globalReport, $type, $byType = false, $flatten = false, $combineCompleted = false)
     {
         $a = new Arrangements\CoursesByCenter(['coursesData' => $coursesData]);
         $coursesByCenter = $a->compose();
@@ -184,6 +187,10 @@ class GlobalReportCoursesData
             foreach ($centerReportData as $centerName => $coursesData) {
                 foreach ($coursesData as $courseType => $courseTypeData) {
                     foreach ($courseTypeData as $courseData) {
+                        // Combine complete courses with their respective types
+                        if ($combineCompleted && $courseType == 'completed') {
+                            $courseType = $courseData['type'];
+                        }
                         $typeReportData[$courseType][] = $courseData;
                     }
                 }

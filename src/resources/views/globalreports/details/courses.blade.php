@@ -6,12 +6,20 @@
         @else
             <p>No courses currently have guest games.</p>
         @endif
-    @elseif ($type == 'completed')
+    @elseif ($type == 'completedThisWeek')
         @if (count($reportData) > 0)
             @include('reports.courses.completed', ['coursesData' => $reportData, 'excludeGuestGame' => true])
         @else
             <p>No completed courses.</p>
         @endif
+    @elseif ($type == 'completed')
+        @forelse ($reportData as $courseType => $coursesData)
+            <h4>{{ $courseType }}</h4>
+            @include('reports.courses.completed', ['coursesData' => $coursesData, 'excludeGuestGame' => true])
+            <br />
+        @empty
+            <p>No completed courses.</p>
+        @endforelse
     @else
         @forelse ($reportData as $courseType => $coursesData)
             <h4>{{ $courseType }}</h4>
