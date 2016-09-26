@@ -67,8 +67,16 @@
                 @else
                     <?php
                     $data = $regionsData[$name][$globalReport->reportingDate->toDateString()];
+                    if ($data['percent']['total'] < 50) {
+                        $effectivenessClass = 'danger';
+                    } else if ($data['percent']['total'] < 75) {
+                        $effectivenessClass = 'warning';
+                    } else {
+                        $effectivenessClass = 'success';
+                    }
                     ?>
-                    <th colspan="3" class="data-point"><span style="text-transform: uppercase">{{ $data['rating'] }}</span></th>
+                    <th colspan="2" class="data-point"><span style="text-transform: uppercase">{{ $data['rating'] }}</span></th>
+                    <th class="data-point {{ $effectivenessClass }}">{{ $data['percent']['total'] }}%</th>
                     <th class="data-point">{{ $data['points']['total'] }}</th>
                 @endif
 

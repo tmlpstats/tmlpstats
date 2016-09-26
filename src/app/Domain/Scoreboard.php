@@ -94,7 +94,7 @@ class Scoreboard implements Arrayable, Referenceable
     {
         $total = 0;
         foreach ($this->games as $game) {
-            $total += $game->percent();
+            $total += min($game->percent(), 100);
         }
 
         return round($total / count($this->games));
