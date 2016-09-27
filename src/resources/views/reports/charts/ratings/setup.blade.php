@@ -134,13 +134,13 @@
                 {{-- This should always use the api directly. Right now it's too slow with all of the other ajax requests --}}
                 @if (isset($regionsData[$region->abbreviation]))
                     var data = {!! json_encode($regionsData[$region->abbreviation]) !!};
-                    updateChart(data, "{!! $region->name !!}");
+                    updateChart(data, @json($region->name));
                 @else
                     <?php
                     $requestJson = "{globalReport: {$globalReport->id}, region: {$region->id}}";
                     ?>
                     Api.GlobalReport.getQuarterScoreboard({!! $requestJson !!}, function (reportData) {
-                        updateChart(reportData, "{!! $region->name !!}");
+                        updateChart(reportData, @json($region->name));
                     });
                 @endif
             @endforeach
