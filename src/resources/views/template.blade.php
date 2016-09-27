@@ -25,6 +25,7 @@ $reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getRep
     <script src="{{ asset('vendor/js/response/dist/respond.min.js') }}"></script>
     <![endif]-->
 
+    <link href="{{ elixir('css/app.css') }}" rel="stylesheet">
     <link href="{{ elixir('css/main.css') }}" rel="stylesheet">
 
     @yield('headers')

@@ -1,12 +1,11 @@
 import React, { PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { Form, Field, actions as formActions } from 'react-redux-form'
-import _get from 'lodash/get'
+import _ from 'lodash'
 import { Link } from 'react-router'
 
-var omit = require('lodash/omit')
-
 export { Form, Field, formActions }
+export { DateInput, SimpleDateInput } from './DateInput'
 
 export class SimpleField extends React.Component {
     static defaultProps = {
@@ -40,6 +39,11 @@ export class SimpleFormGroup extends React.PureComponent {
     static defaultProps = {
         labelClass: 'col-md-2',
         divClass: 'col-md-8'
+    }
+    static propTypes = {
+        labelClass: PropTypes.string.isRequired,
+        divClass: PropTypes.string,
+        label: PropTypes.any.isRequired
     }
     render() {
         const { label, labelClass, divClass } = this.props
@@ -111,7 +115,7 @@ export class SimpleSelect extends React.PureComponent {
 }
 
 const customFieldMSP = (state, props) => {
-    const modelValue = _get(state, props.model)
+    const modelValue = _.get(state, props.model)
     return {modelValue}
 }
 export const connectCustomField = connect(customFieldMSP)
@@ -138,7 +142,7 @@ export class BooleanSelectView extends React.Component {
 
     render() {
         const { modelValue, emptyChoice, labels } = this.props
-        const rest = omit(this.props, this._renderOmit)
+        const rest = _.omit(this.props, this._renderOmit)
         const sValue = this.selectValue(modelValue)
 
         var empty

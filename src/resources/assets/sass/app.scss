@@ -1,0 +1,22 @@
+//// DATE PICKER 
+
+@import 'node_modules/react-dates/css/variables.scss';
+@import 'node_modules/react-dates/css/styles.scss';
+
+
+@import 'bower_components/bootstrap-sass/assets/stylesheets/bootstrap';
+
+.DateInput {
+ 	font-size: $font-size-base;
+ 	padding: 0;
+ 	line-height: $line-height-base;
+}
+
+.DateInput__display-text {
+	@extend .form-control;
+ 	font-size: $font-size-base;
+}
+
+.SingleDatePickerInput {
+	border: 0
+}

@@ -1,5 +1,5 @@
 import { React } from '../base_components'
-import { Field, SimpleSelect } from '../../reusable/form_utils'
+import { Field, SimpleSelect, DateInput, SimpleDateInput } from '../../reusable/form_utils'
 import { setAppStatus } from './actions'
 
 const STATUS_UNKNOWN=0,
@@ -110,14 +110,7 @@ export default class AppStatus extends React.Component {
             style['visibility'] = 'hidden'
         }
         return (
-            <div className="form-group" key={item.key} style={style}>
-                <Field model={model+'.'+item.key}>
-                    <label className="control-label col-sm-3">{dateTitle}</label>
-                    <div className="col-sm-6">
-                        <input type="text" className="form-control" disabled={disabled} aria-describedby={'addon-apps'+item.key} />
-                    </div>
-                </Field>
-            </div>
+            <SimpleDateInput key={item.key}model={model+'.'+item.key} label={dateTitle} labelClass="col-sm-3" divClass="col-sm-6" />
         )
     }
 }

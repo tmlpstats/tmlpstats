@@ -283,16 +283,18 @@ div.box {
 
 /** SUBMISSION - Wide Layout */
 #submissionWideLayout {
-    overflow:hidden;
-    padding:10px;
+    padding-left: 11em;
+    padding-right: 1em;
 }
 
 #swSidebar {
-    float:left;
-    width:11em;
+    margin-left: -11em;
+    left: 12.2em;
+    width: 11em;
+    position: fixed;
 }
 #swContent {
-    margin: 0 0 0 11.5em;
+    width: 100%;
 }
 
 /** SUBMISSION - SCOREBOARD */

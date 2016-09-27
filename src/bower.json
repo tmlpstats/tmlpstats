@@ -45,5 +45,8 @@
   "description": "",
   "moduleType": [],
   "license": "MIT",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "bootstrap-sass": "^3.3.7"
+  }
 }
