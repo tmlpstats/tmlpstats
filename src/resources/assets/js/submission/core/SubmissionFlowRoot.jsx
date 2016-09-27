@@ -20,12 +20,12 @@ class SubmissionFlowComponent extends SubmissionBase {
         if (!this.checkReportingDate()) {
             return this.renderBasicLoading(this.props.coreInit)
         }
-        const largeLayout = this.props.browserGreaterThan.large
+        const largeLayout = this.props.browser.greaterThan.large
         const nav = <SubmissionNav params={this.props.params} steps={steps} location={this.props.location} tabbed={!largeLayout} />
         var layout
         if (largeLayout) {
             layout = (
-                <div id="submissionWideLayout">
+                <div id="submissionWideLayout" className="row">
                     <div id="swSidebar">{nav}</div>
                     <div id="swContent">
                         <div className="panel panel-default">
@@ -79,7 +79,7 @@ class SubmissionFlowComponent extends SubmissionBase {
 }
 
 const mapStateToProps = (state) => {
-    return objectAssign({browserGreaterThan: state.browser.greaterThan}, state.submission.core)
+    return objectAssign({browser: state.browser}, state.submission.core)
 }
 
 const SubmissionFlowRoot = connect(mapStateToProps)(SubmissionFlowComponent)
