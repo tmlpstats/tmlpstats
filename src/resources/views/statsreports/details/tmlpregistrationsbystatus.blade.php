@@ -16,7 +16,7 @@
                 @endif
                 <span style="font-weight: normal; font-size: smaller;">(Total: {{ count($reportData[$group]) }})</span>
             </h4>
-            <table class="table table-condensed table-striped table-hover">
+            <table class="table table-condensed table-striped table-hover want-datatable">
                 <thead>
                 <tr>
                     <th>First Name</th>

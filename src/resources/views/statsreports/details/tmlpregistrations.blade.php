@@ -4,7 +4,7 @@
             <br/>
             <h4>{{ ucwords($group) }}</h4>
             @foreach ($reportData[$group] as $quarterName => $quarterRegistrations)
-                <table class="table table-condensed table-striped table-hover">
+                <table class="table table-condensed table-striped table-hover want-datatable">
                     <thead>
                     @if ($group != 'withdrawn')
                         <tr>
@@ -66,10 +66,10 @@
                                     <td></td>
                                 @endif
                             @endif
-                            <?php 
-                                $comment = is_numeric($registrationData->comment) 
-                                    ? TmlpStats\Util::getExcelDate($registrationData->comment)->format('F') 
-                                    : $registrationData->comment 
+                            <?php
+                                $comment = is_numeric($registrationData->comment)
+                                    ? TmlpStats\Util::getExcelDate($registrationData->comment)->format('F')
+                                    : $registrationData->comment;
                             ?>
                             @if ($comment)
                                 <td class="data-point comments">
