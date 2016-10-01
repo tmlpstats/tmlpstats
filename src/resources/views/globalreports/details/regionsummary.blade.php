@@ -1,5 +1,5 @@
 <?php
-if (!function_exists('getPercentClass')) {\
+if (!function_exists('getPercentClass')) {
     function getPercentClass($percent) {
         if ($percent < 50) {
             return 'danger';
