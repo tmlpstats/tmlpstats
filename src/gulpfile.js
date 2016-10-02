@@ -22,7 +22,7 @@ elixir(function(mix) {
             'bower_components/font-awesome/css/font-awesome.min.css',
             'public/css/tmlpstats.css'
         ], 'public/css/main.css', './')
-        .copy('public/fonts', 'public/build/fonts')
+        .copy('public/fonts', 'public/build/fonts/bootstrap')
         .browserify(['main.jsx'], 'public/js/main.js')
         .scripts([
             'bower_components/bootstrap/dist/js/bootstrap.min.js',
