@@ -244,6 +244,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             case 'coursesupcoming':
             case 'coursescompleted':
             case 'coursesguestgames':
+            case 'coursessummary':
                 $response = $this->coursesData($globalReport, $region)->getOne($report);
                 break;
             case 'coursesall':
@@ -1019,6 +1020,12 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getCoursesGuestGames($globalReport, $region)
     {
         return $this->coursesData($globalReport, $region)->getOne('CoursesGuestGames');
+    }
+
+    // Get report Summary
+    protected function getCoursesSummary($globalReport, $region)
+    {
+        return $this->coursesData($globalReport, $region)->getOne('CoursesSummary');
     }
 
     public function getWithdrawReport(Models\GlobalReport $globalReport, Models\Region $region)

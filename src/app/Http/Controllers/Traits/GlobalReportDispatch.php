@@ -101,6 +101,10 @@ trait GlobalReportDispatch {
             case 'coursesguestgames':
                 return 'getCoursesGuestGames';
                 break;
+            case 'CoursesSummary':
+            case 'coursessummary':
+                return 'getCoursesSummary';
+                break;
             case 'TeamMemberStatusCtw':
             case 'teammemberstatusctw':
                 return 'getTeamMemberStatusCtw';
@@ -187,6 +191,9 @@ trait GlobalReportDispatch {
 
     // Get report Guest Games
     protected abstract function getCoursesGuestGames();
+
+    // Get report Summary
+    protected abstract function getCoursesSummary();
 
     // Get report CTW
     protected abstract function getTeamMemberStatusCtw();

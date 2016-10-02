@@ -518,6 +518,8 @@ reportMeta:
             name: Completed
           CoursesGuestGames:
             name: Guest Games
+          CoursesSummary:
+            name: Summary
 
       TeamMemberStatusGroup:
         type: grouping
