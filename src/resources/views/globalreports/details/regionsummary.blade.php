@@ -1,11 +1,13 @@
 <?php
-function getPercentClass($percent) {
-    if ($percent < 50) {
-        return 'danger';
-    } else if ($percent < 75) {
-        return 'warning';
+if (!function_exists('getPercentClass')) {
+    function getPercentClass($percent) {
+        if ($percent < 50) {
+            return 'danger';
+        } else if ($percent < 75) {
+            return 'warning';
+        }
+        return 'success';
     }
-    return 'success';
 }
 ?>
 <br>
