@@ -1,6 +1,14 @@
 <div class="table-responsive">
     <br />
-    @if ($type == 'guests')
+    @if ($type == 'summary')
+        @forelse ($reportData as $courseType => $coursesData)
+            <h4>{{ $courseType }}</h4>
+            @include('reports.courses.summary', compact('coursesData'))
+            <br />
+        @empty
+            <p>No courses available.</p>
+        @endforelse
+    @elseif ($type == 'guests')
         @if (count($reportData) > 0)
             @include('reports.courses.guests', ['coursesData' => $reportData])
         @else

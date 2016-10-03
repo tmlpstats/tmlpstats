@@ -82,6 +82,25 @@ class GlobalReportCoursesData
         return $targetCourses;
     }
 
+    protected function getCoursesSummary($coursesData, Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        $a = new Arrangements\CoursesWithEffectiveness([
+            'courses' => $coursesData,
+            'reportingDate' => $globalReport->reportingDate,
+            'includeTotals' => true,
+            'combineCompleted' => true,
+        ]);
+        $arrangedData = $a->compose();
+
+        $type = 'summary';
+        $reportData = [
+            'CAP' => $arrangedData['reportData']['CAP']['totals'],
+            'CPC' => $arrangedData['reportData']['CPC']['totals'],
+        ];
+
+        return view('globalreports.details.courses', compact('reportData', 'type'));
+    }
+
     /** CLASSIC METHOD - getCoursesAll */
     public function getCoursesAllClassic(Models\GlobalReport $globalReport, Models\Region $region)
     {
@@ -91,6 +110,7 @@ class GlobalReportCoursesData
             'coursesupcoming',
             'coursescompleted',
             'coursesguestgames',
+            'coursessummary',
         ];
 
         $responseData = [];
@@ -150,6 +170,9 @@ class GlobalReportCoursesData
                 $targetData = $this->getCoursesGuestGames($data, $globalReport, $region);
                 $type = 'guests';
                 break;
+            case 'coursessummary':
+            case 'CoursesSummary':
+                return $this->getCoursesSummary($data, $globalReport, $region);
             default:
                 throw new \Exception("Unkown page $page");
         }

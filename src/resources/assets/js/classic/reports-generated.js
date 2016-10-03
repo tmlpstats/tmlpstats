@@ -170,9 +170,15 @@ const GlobalReport = {
             "type": "report",
             "name": "Guest Games"
         },
+        "CoursesSummary": {
+            "id": "CoursesSummary",
+            "n": 22,
+            "type": "report",
+            "name": "Summary"
+        },
         "CoursesGroup": {
             "id": "CoursesGroup",
-            "n": 22,
+            "n": 23,
             "type": "grouping",
             "name": "Courses",
             "children": [
@@ -180,30 +186,31 @@ const GlobalReport = {
                 "CoursesNextMonth",
                 "CoursesUpcoming",
                 "CoursesCompleted",
-                "CoursesGuestGames"
+                "CoursesGuestGames",
+                "CoursesSummary"
             ]
         },
         "TeamMemberStatusCtw": {
             "id": "TeamMemberStatusCtw",
-            "n": 23,
+            "n": 24,
             "type": "report",
             "name": "CTW"
         },
         "TeamMemberStatusTransfer": {
             "id": "TeamMemberStatusTransfer",
-            "n": 24,
+            "n": 25,
             "type": "report",
             "name": "Transfers"
         },
         "TeamMemberStatusWithdrawn": {
             "id": "TeamMemberStatusWithdrawn",
-            "n": 25,
+            "n": 26,
             "type": "report",
             "name": "Withdrawn"
         },
         "TeamMemberStatusGroup": {
             "id": "TeamMemberStatusGroup",
-            "n": 26,
+            "n": 27,
             "type": "grouping",
             "name": "Team Members",
             "children": [
@@ -214,26 +221,26 @@ const GlobalReport = {
         },
         "TdoSummary": {
             "id": "TdoSummary",
-            "n": 27,
+            "n": 28,
             "type": "report",
             "name": "Training & Development",
             "shortName": "TDO"
         },
         "TeamMemberStatusPotentialsOverview": {
             "id": "TeamMemberStatusPotentialsOverview",
-            "n": 28,
+            "n": 29,
             "type": "report",
             "name": "Overview"
         },
         "TeamMemberStatusPotentials": {
             "id": "TeamMemberStatusPotentials",
-            "n": 29,
+            "n": 30,
             "type": "report",
             "name": "Details"
         },
         "PotentialsGroup": {
             "id": "PotentialsGroup",
-            "n": 30,
+            "n": 31,
             "type": "grouping",
             "name": "Potentials",
             "children": [
@@ -243,7 +250,7 @@ const GlobalReport = {
         },
         "WithdrawReport": {
             "id": "WithdrawReport",
-            "n": 31,
+            "n": 32,
             "type": "report",
             "name": "Withdraws"
         }
