@@ -17,10 +17,10 @@ class GlobalReportRegionGamesData
     {
         $this->globalReport = $globalReport;
         $this->region = $region;
-        $this->data = $this->getGameEffectiveness($globalReport->reportingDate, $region);
+        $this->data = $this->getGamesData($globalReport->reportingDate, $region);
     }
 
-    protected function getGameEffectiveness(Carbon $reportingDate, Models\Region $region)
+    protected function getGamesData(Carbon $reportingDate, Models\Region $region)
     {
         $regionQuarter = App::make(Api\Context::class)->getEncapsulation(Encapsulations\RegionQuarter::class, [
             'quarter' => Models\Quarter::getQuarterByDate($reportingDate, $region),
