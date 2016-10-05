@@ -20,11 +20,6 @@ class GlobalReportRegionGamesData
         $this->data = $this->getGameEffectiveness($globalReport->reportingDate, $region);
     }
 
-    protected function getRegionGamesData(Models\GlobalReport $globalReport, Models\Region $region)
-    {
-        return App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region);
-    }
-
     protected function getGameEffectiveness(Carbon $reportingDate, Models\Region $region)
     {
         $regionQuarter = App::make(Api\Context::class)->getEncapsulation(Encapsulations\RegionQuarter::class, [
@@ -37,7 +32,7 @@ class GlobalReportRegionGamesData
         $weeksData = [];
         foreach ($reports as $weekReport) {
             $dateStr = $weekReport->reportingDate->toDateString();
-            $weeksData[$dateStr] = $this->getRegionGamesData($weekReport, $region);
+            $weeksData[$dateStr] = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($weekReport, $region);
         }
 
         return $weeksData;
@@ -88,21 +83,15 @@ class GlobalReportRegionGamesData
                 throw new \Exception("Unknown page {$page}");
         }
 
-        $viewData = $this->filterGame($game, $data, $region);
-
         $regionQuarter = App::make(Api\Context::class)->getEncapsulation(Encapsulations\RegionQuarter::class, [
             'quarter' => Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region),
             'region' => $region,
         ]);
 
-        if ($viewData) {
-            return view('globalreports.details.centergameeffectiveness', [
-                'game' => $game,
-                'reportData' => $viewData,
-                'milestones' => $regionQuarter->datesAsArray(),
-            ]);
-        }
-
-        return null;
+        return view('globalreports.details.centergameeffectiveness', [
+            'game' => $game,
+            'reportData' => $this->filterGame($game, $data, $region),
+            'milestones' => $regionQuarter->datesAsArray(),
+        ]);
     }
 }
