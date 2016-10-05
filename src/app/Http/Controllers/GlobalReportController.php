@@ -260,6 +260,14 @@ class GlobalReportController extends ReportDispatchAbstractController
             case 'teammemberstatusall':
                 $response = $this->teamMembersData($globalReport, $region)->getTeamMemberStatusAllClassic();
                 break;
+            case 'accesstopowereffectiveness':
+            case 'powertocreateeffectiveness':
+            case 'gameintheworldeffectiveness':
+            case 'team1expansioneffectiveness':
+            case 'team2expansioneffectiveness':
+            case 'landmarkforumeffectiveness':
+                $response = $this->centersGamesData($globalReport, $region)->getOne($report);
+                break;
             case 'applicationst2fromweekend':
                 $response = $this->getTeam2RegisteredAtWeekend($globalReport, $region);
                 break;
@@ -431,6 +439,41 @@ class GlobalReportController extends ReportDispatchAbstractController
             'totals',
             'includeActual'
         ));
+    }
+
+    protected function centersGamesData(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->context->getEncapsulation(Encapsulate\GlobalReportRegionGamesData::class, compact('globalReport', 'region'));
+    }
+
+    protected function getAccessToPowerEffectiveness(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->centersGamesData($globalReport, $region)->getOne('accesstopowereffectiveness');
+    }
+
+    protected function getPowerToCreateEffectiveness(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->centersGamesData($globalReport, $region)->getOne('powertocreateeffectiveness');
+    }
+
+    protected function getTeam1ExpansionEffectiveness(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->centersGamesData($globalReport, $region)->getOne('team1expansioneffectiveness');
+    }
+
+    protected function getTeam2ExpansionEffectiveness(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->centersGamesData($globalReport, $region)->getOne('team2expansioneffectiveness');
+    }
+
+    protected function getGameInTheWorldEffectiveness(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->centersGamesData($globalReport, $region)->getOne('gameintheworldeffectiveness');
+    }
+
+    protected function getLandmarkForumEffectiveness(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->centersGamesData($globalReport, $region)->getOne('landmarkforumeffectiveness');
     }
 
     protected function getRepromisesByCenter(Models\GlobalReport $globalReport, Models\Region $region)

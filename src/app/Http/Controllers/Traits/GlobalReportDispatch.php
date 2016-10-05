@@ -53,6 +53,30 @@ trait GlobalReportDispatch {
             case 'gaps':
                 return 'getGaps';
                 break;
+            case 'AccessToPowerEffectiveness':
+            case 'accesstopowereffectiveness':
+                return 'getAccessToPowerEffectiveness';
+                break;
+            case 'PowerToCreateEffectiveness':
+            case 'powertocreateeffectiveness':
+                return 'getPowerToCreateEffectiveness';
+                break;
+            case 'Team1ExpansionEffectiveness':
+            case 'team1expansioneffectiveness':
+                return 'getTeam1ExpansionEffectiveness';
+                break;
+            case 'Team2ExpansionEffectiveness':
+            case 'team2expansioneffectiveness':
+                return 'getTeam2ExpansionEffectiveness';
+                break;
+            case 'GameInTheWorldEffectiveness':
+            case 'gameintheworldeffectiveness':
+                return 'getGameInTheWorldEffectiveness';
+                break;
+            case 'LandmarkForumEffectiveness':
+            case 'landmarkforumeffectiveness':
+                return 'getLandmarkForumEffectiveness';
+                break;
             case 'CenterStatsReports':
             case 'centerstatsreports':
                 return 'getCenterStatsReports';
@@ -155,6 +179,24 @@ trait GlobalReportDispatch {
 
     // Get report Gaps
     protected abstract function getGaps();
+
+    // Get report CAP
+    protected abstract function getAccessToPowerEffectiveness();
+
+    // Get report CPC
+    protected abstract function getPowerToCreateEffectiveness();
+
+    // Get report T1X
+    protected abstract function getTeam1ExpansionEffectiveness();
+
+    // Get report T2X
+    protected abstract function getTeam2ExpansionEffectiveness();
+
+    // Get report GITW
+    protected abstract function getGameInTheWorldEffectiveness();
+
+    // Get report LF
+    protected abstract function getLandmarkForumEffectiveness();
 
     // Get report Center Reports
     protected abstract function getCenterStatsReports();
