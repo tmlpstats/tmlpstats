@@ -136,6 +136,19 @@ td.border-bottom-thin, th.border-bottom-thin, tr.border-bottom-thin {
     border-bottom: 1px solid #DDD !important;
 }
 
+td.border-left-none, th.border-left-none {
+    border-left: 0px !important;
+}
+td.border-right-none, th.border-right-none {
+    border-right: 0px !important;
+}
+td.border-top-none, th.border-top-none, tr.border-top-none {
+    border-top: 0px !important;
+}
+td.border-bottom-none, th.border-bottom-none, tr.border-bottom-none {
+    border-bottom: 0px !important;
+}
+
 .table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
     background-color: #EEEEEE;
 }
