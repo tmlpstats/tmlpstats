@@ -4,6 +4,7 @@ import { Form, Field } from 'react-redux-form'
 
 import { shallowArrayElementsEqual } from '../../reusable/compare'
 import Scoreboard, { GAME_KEYS } from '../../reusable/scoreboard'
+import { SubmitFlip } from '../../reusable/ui_basic'
 import { objectAssign } from '../../reusable/ponyfill'
 
 import { SubmissionBase } from '../base_components'
@@ -56,9 +57,10 @@ class SubmissionScoreboard extends SubmissionBase {
             )
         })
         return (
-            <Form model={SCOREBOARDS_FORM_KEY}>
+            <Form model={SCOREBOARDS_FORM_KEY} onSubmit={this.checkToSave.bind(this)}>
                 <h3>Scoreboard</h3>
                 <div>{rows}</div>
+                <SubmitFlip loadState={this.props.saving} offset='col-sm-12'>Save</SubmitFlip>
             </Form>
         )
     }
@@ -78,7 +80,7 @@ class ScoreboardRow extends SubmissionBase {
     // regardless of whether data changed in that given week box. Since week boxes also include rather expensive calculations,
     // implementing this method causes a massive speedup in this particular scenario by doing a shallow equals on the week data.
     shouldComponentUpdate(nextProps) {
-        if (nextProps.currentWeek == this.propscurrentWeek && shallowArrayElementsEqual(this.props.weeks, nextProps.weeks)) {
+        if (nextProps.currentWeek == this.props.currentWeek && shallowArrayElementsEqual(this.props.weeks, nextProps.weeks)) {
             return false
         }
         return true
