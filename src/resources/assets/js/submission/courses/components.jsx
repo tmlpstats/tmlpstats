@@ -9,7 +9,7 @@ import { Field } from 'react-redux-form'
 
 import { SubmissionBase, React } from '../base_components'
 import { Form, SimpleField, SimpleSelect, AddOneLink } from '../../reusable/form_utils'
-import { ModeSelectButtons, LoadStateFlip, MessagesComponent } from '../../reusable/ui_basic'
+import { ModeSelectButtons, SubmitFlip, MessagesComponent } from '../../reusable/ui_basic'
 
 import { COURSES_FORM_KEY } from './reducers'
 import { coursesSorts, coursesCollection, courseTypeMap, messages } from './data'
@@ -98,7 +98,7 @@ class _EditCreate extends CoursesBase {
         let completionState = 'hidden'
 
         let course = undefined
-        if (this.props.currentCourse) {
+        if (this.props.currentCourse && this.props.currentCourse.meta) {
             course = this.props.currentCourse
 
             if (course.meta.canEditCompletion) {
@@ -153,17 +153,7 @@ class _EditCreate extends CoursesBase {
 
                 {completionFields}
 
-                <div className="row">
-                <div className="col-md-12">
-                    <div className="form-group">
-                        <div className="col-md-offset-2 col-md-12">
-                            <LoadStateFlip loadState={this.props.saveCourse}>
-                                <button className="btn btn-primary" type="submit">Save</button>
-                            </LoadStateFlip>
-                        </div>
-                    </div>
-                </div>
-                </div>
+                <SubmitFlip loadState={this.props.saveCourse} offset='col-sm-offset-2 col-sm-8'>Save</SubmitFlip>
                 </Form>
             </div>
         )
@@ -221,7 +211,7 @@ class _EditCreate extends CoursesBase {
                 <div className="row">
                 <div className="col-md-12">
                     <h4>Completion</h4>
-                    <SimpleField label="Standard Starts" model={modelKey+'.completedStandardStarts'} labelClass="col-md-2" divClass="col-md-2" disabled={completionState == 'disabled'} />
+                    <SimpleField label="Completed Standard Starts" model={modelKey+'.completedStandardStarts'} labelClass="col-md-2" divClass="col-md-2" disabled={completionState == 'disabled'} />
                     <SimpleField label="Potentials" model={modelKey+'.potentials'} labelClass="col-md-2" divClass="col-md-2" disabled={completionState == 'disabled'} />
                     <SimpleField label="Registrations" model={modelKey+'.registrations'} labelClass="col-md-2" divClass="col-md-2" disabled={completionState == 'disabled'} />
                 </div>
