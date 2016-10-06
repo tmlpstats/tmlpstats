@@ -253,7 +253,6 @@ class _EditCreate extends ClassListBase {
                 <SimpleFormGroup label="Settings">
                     {reviewerCheckbox}
                     <CheckBox model={modelKey+'.atWeekend'} label="On team at weekend" />
-                    <CheckBox model={modelKey+'.xferIn'} label="Transfer In" />
                 </SimpleFormGroup>
                 <SimpleFormGroup label="Team Status">
                     {this.renderWithdrawGroup(modelKey, options)}
@@ -298,6 +297,16 @@ class _EditCreate extends ClassListBase {
                             labelProp="display" keyProp="id" />
                 </div>
             )
+            break
+        default:
+            if (currentMember.xferIn) {
+                content = (
+                    <div>
+                        <br/>
+                        <p>{currentMember.firstName} transferred in from another team</p>
+                    </div>
+                )
+            }
             break
         }
         return (
