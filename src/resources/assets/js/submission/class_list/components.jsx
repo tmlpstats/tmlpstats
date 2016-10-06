@@ -196,11 +196,7 @@ class _EditCreate extends ClassListBase {
         return (
             <Form className="form-horizontal submissionClassListEdit" model={modelKey} onSubmit={this.saveTeamMember.bind(this)}>
                 {this.renderContent(modelKey, options)}
-                <div className="form-group">
-                    <div className="col-sm-offset-2 col-sm-8">
-                        <SubmitFlip loadState={this.props.teamMembers.saveState}>Save</SubmitFlip>
-                    </div>
-                </div>
+                <SubmitFlip loadState={this.props.teamMembers.saveState}>Save</SubmitFlip>
             </Form>
         )
     }
@@ -238,6 +234,11 @@ class _EditCreate extends ClassListBase {
             )
         }
 
+        let reviewerCheckbox
+        if (!this.props.currentMember || this.props.currentMember.teamYear != 1) {
+            reviewerCheckbox = <CheckBox model={modelKey+'.isReviewer'} label="Is Reviewer" />
+        }
+
         return (
             <div>
                 <SimpleField label="Team Year" model={modelKey+'.teamYear'} divClass="col-md-4" customField={true}>
@@ -250,7 +251,7 @@ class _EditCreate extends ClassListBase {
                     {yearQuarter}
                 </SimpleFormGroup>
                 <SimpleFormGroup label="Settings">
-                    <CheckBox model={modelKey+'.isReviewer'} label="Is Reviewer" />
+                    {reviewerCheckbox}
                     <CheckBox model={modelKey+'.atWeekend'} label="On team at weekend" />
                     <CheckBox model={modelKey+'.xferIn'} label="Transfer In" />
                 </SimpleFormGroup>
