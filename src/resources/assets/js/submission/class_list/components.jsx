@@ -271,7 +271,9 @@ class _EditCreate extends ClassListBase {
             content = (
                 <div>
                     <Alert alert="info">{EXIT_CHOICES_HELP.xferOut}</Alert>
-                    <SimpleSelect items={[{key: 'x', label: 'Denver'}]} />
+                    <SimpleSelect
+                            items={this.props.lookups.centers}
+                            labelProp="name" keyProp="id" />
                 </div>
             )
             break
