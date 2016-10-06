@@ -48,6 +48,10 @@
 </div>
 @endif
 
+@if ($showAccountabilities)
+    <div id="cr3-accountabilities" data-reportingDate="{{ $expectedDate }}" data-centerId="den"></div>
+@endif
+
 {!! Form::submit('Validate', ['id' => 'validate', 'class' => 'btn btn-primary']) !!}
 @if ($submitReport)
 &nbsp;&nbsp;

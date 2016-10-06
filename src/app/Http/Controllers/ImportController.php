@@ -30,12 +30,14 @@ class ImportController extends Controller
     public function indexValidateSheet(Request $request)
     {
         $this->context->setRegion(Auth::user()->homeRegion());
+        $this->context->setCenter(Auth::user()->center);
         $this->authorize('validate', StatsReport::class);
 
         return view('import.index')->with([
             'submitReport' => false, // Controls whether or not to show Submit button
             'showUploadForm' => true,
             'showReportCheckSettings' => true,
+            'showAccountabilities' => $request->get('showAccountabilities', false),
             'expectedDate' => ImportManager::getExpectedReportDate()->toDateString(),
         ]);
     }
@@ -70,6 +72,7 @@ class ImportController extends Controller
             'showUploadForm' => true,
             'showReportCheckSettings' => true,
             'expectedDate' => ImportManager::getExpectedReportDate()->toDateString(),
+            'showAccountabilities' => $request->get('showAccountabilities', false),
             'results' => $results,
         ]);
     }

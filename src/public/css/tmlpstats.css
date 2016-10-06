@@ -373,3 +373,32 @@ table.submissionClassList {
 .submissionClassListEdit .tmBox {
     max-width: 1200px;
 }
+
+.nextQuarterAccountabilities .nqEmail {
+    max-width: 65em;
+}
+
+.nextQuarterAccountabilities .nqPhone {
+    max-width: 25em;
+}
+
+.nextQuarterAccountabilities select {
+    max-width: 35em;
+}
+
+
+/* Override bootstrap print stylesheet */
+@media print {
+    /* Remove the stuff that goes after links */
+    a[href]:after {
+        content: none;
+    }
+
+    #submissionWideLayout #swSidebar {
+        display: none;
+    }
+
+    #submissionWideLayout #swContent {
+        margin: 0;
+    }
+}

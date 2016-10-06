@@ -39,4 +39,5 @@ export const cqResponse = new Schema('c')
 cqResponse.define({
     validRegQuarters: arrayOf(CenterQuarter),
     accountabilities: arrayOf(Accountability),
+    currentQuarter: CenterQuarter
 })

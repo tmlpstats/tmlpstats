@@ -1,3 +1,5 @@
+import { connect } from 'react-redux'
+
 /**
  * Do the common pattern of dispatching after zero delay.
  *
@@ -36,4 +38,22 @@ export function rebind(target, ...methods) {
             target[m.name] = m.bind(target)
         }
     })
+}
+
+/**
+ * An ES7 decorator to do a somewhat unconventional alternative to connect().
+ *
+ * The mapStateToProps can either be given as a parameter or can be defined
+ * as a static membe ron the wrapped react component, depending on desires.
+ */
+export function connectRedux(opener, ...rest) {
+    return function decorator(target) {
+        if (!opener) {
+            if (!target.mapStateToProps) {
+                throw new Error('Must provide mapStateToProps either statically or strongly')
+            }
+            opener = target.mapStateToProps
+        }
+        return connect(opener, ...rest)(target)
+    }
 }

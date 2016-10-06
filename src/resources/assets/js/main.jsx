@@ -5,6 +5,7 @@ import { Router } from 'react-router'
 
 import { LiveScoreboard } from './live_scoreboard'
 import { SubmissionFlow } from './submission'
+import QuarterAccountabilitiesEmbed from './submission/qtr_accountabilities/embed'
 import AdminFlow from './admin/flow'
 import { store, history } from './store'
 
@@ -21,7 +22,8 @@ function _routedFlow() {
 
 var _components = [
     ['#live-scoreboard', function(elem) { ReactDOM.render(<Provider store={store}><LiveScoreboard/></Provider>, elem) }],
-    ['#submission-flow', function(elem) { ReactDOM.render(_routedFlow(), elem) }]
+    ['#submission-flow', function(elem) { ReactDOM.render(_routedFlow(), elem) }],
+    ['#cr3-accountabilities', function(elem) { ReactDOM.render(<Provider store={store}><QuarterAccountabilitiesEmbed /></Provider>, elem)}]
 ]
 
 

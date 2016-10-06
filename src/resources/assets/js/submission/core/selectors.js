@@ -20,3 +20,9 @@ export function makeAccountabilitiesSelector(context) {
         }
     )
 }
+
+
+export const getLabelTeamMember = (item) => {
+    const p = item.teamMember.person
+    return p.firstName + ' ' + p.lastName
+}
