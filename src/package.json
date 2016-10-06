@@ -41,7 +41,7 @@
     "react-router-redux": "^4.0.4",
     "react-typeahead": "^2.0.0-alpha.5",
     "redux": "^3.5.2",
-    "redux-responsive": "3.0.0",
+    "redux-responsive": "3.1.4",
     "redux-thunk": "^2.1.0",
     "reselect": "^2.5.3"
   }
