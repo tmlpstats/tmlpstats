@@ -37,12 +37,13 @@ class SubmissionCore extends AuthenticatedApiBase
         $withdraw_codes = Models\WithdrawCode::get();
         $validRegQuarters = App::make(Application::class)->validRegistrationQuarters($center, $reportingDate, $quarter);
         $accountabilities = Models\Accountability::orderBy('name')->get();
+        $centers = Models\Center::byRegion($center->getGlobalRegion())->active()->orderBy('name')->get();
 
         return [
             'success' => true,
             'id' => $center->id,
             'validRegQuarters' => $validRegQuarters,
-            'lookups' => compact('withdraw_codes', 'team_members', 'center'),
+            'lookups' => compact('withdraw_codes', 'team_members', 'center', 'centers'),
             'accountabilities' => $accountabilities,
             'currentQuarter' => $centerQuarter,
         ];

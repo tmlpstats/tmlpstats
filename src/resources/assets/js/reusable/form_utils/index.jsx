@@ -107,8 +107,10 @@ export class SimpleSelect extends React.PureComponent {
             )
         })
         return (
-            <Field model={this.props.model} multiple={this.props.multiple} rows={this.props.rows} changeAction={this.props.changeAction}>
-                <select className="form-control">{options}</select>
+            <Field model={this.props.model} multiple={this.props.multiple} changeAction={this.props.changeAction}>
+                <select className="form-control" multiple={this.props.multiple} rows={this.props.rows}>
+                    {options}
+                </select>
             </Field>
         )
     }
