@@ -5,10 +5,8 @@ use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
-use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Contracts\Referenceable;
 use TmlpStats\Domain;
-use TmlpStats\Traits;
 
 /**
  * Validation data
@@ -41,7 +39,7 @@ class ValidationData extends AuthenticatedApiBase
         $this->assertAuthz($this->context->can('viewSubmissionUi', $center));
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
-        $report = LocalReport::getStatsReport($center, $reportingDate);
+        $report = LocalReport::ensureStatsReport($center, $reportingDate);
 
         $results = array_merge_recursive(
             $this->validateSubmissionData($report),

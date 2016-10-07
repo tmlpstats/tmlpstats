@@ -31,14 +31,6 @@ Api.Application = {
     create: bac('Application.create'),
 
     /*
-    Update an application
-    Parameters:
-      application: Application
-      data: array
-    */
-    update: bac('Application.update'),
-
-    /*
     List applications by center
     Parameters:
       center: Center
@@ -46,14 +38,6 @@ Api.Application = {
       includeInProgress: bool
     */
     allForCenter: bac('Application.allForCenter'),
-
-    /*
-    Get the weekly data for an application
-    Parameters:
-      application: Application
-      reportingDate: date
-    */
-    getWeekData: bac('Application.getWeekData'),
 
     /*
     Stash combined data for an application
@@ -100,14 +84,6 @@ Api.Course = {
     create: bac('Course.create'),
 
     /*
-    Update a course
-    Parameters:
-      course: Course
-      data: array
-    */
-    update: bac('Course.update'),
-
-    /*
     List courses by center
     Parameters:
       center: Center
@@ -115,14 +91,6 @@ Api.Course = {
       includeInProgress: bool
     */
     allForCenter: bac('Course.allForCenter'),
-
-    /*
-    Get the weekly data for an course
-    Parameters:
-      course: Course
-      reportingDate: date
-    */
-    getWeekData: bac('Course.getWeekData'),
 
     /*
     Stash combined data for an course

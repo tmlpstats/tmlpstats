@@ -99,76 +99,6 @@ class CourseTest extends FunctionalTestAbstract
         ];
     }
 
-    public function testUpdate()
-    {
-        $parameters = [
-            'method' => 'Course.update',
-            'course' => $this->course->id,
-            'data' => [
-                'type' => 'CPC',
-                'location' => 'Another Place',
-            ],
-        ];
-
-        $expectedResponse = $this->course->load('center')->toArray();
-        $expectedResponse['location'] = $parameters['data']['location'];
-        $expectedResponse['type'] = $parameters['data']['type'];
-
-        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
-    }
-
-    /**
-     * @dataProvider providerGetWeekData
-     */
-    public function testGetWeekData($reportingDate = null)
-    {
-        if (!$reportingDate) {
-            Carbon::setTestNow(Carbon::create(2016, 05, 20));
-        }
-        $parameters = [
-            'method' => 'Course.getWeekData',
-            'course' => $this->course->id,
-            'reportingDate' => $reportingDate,
-        ];
-
-        if (!$reportingDate) {
-            // Passed into api as null, but will resolve to this
-            $reportingDate = Carbon::parse('this friday', $this->center->timezone)
-                ->startOfDay()
-                ->toDateString();
-        }
-
-        $report = $this->report->toArray();
-        $courseDataId = $this->courseData->id;
-        if ($reportingDate != $this->report->reportingDate->toDateString()) {
-            $report['id'] += 1;
-            $report['reportingDate'] = "{$reportingDate} 00:00:00";
-            $report['version'] = 'api';
-
-            $courseDataId = Models\CourseData::count() + 1;
-        }
-        unset($report['updatedAt'], $report['createdAt']);
-
-        $expectedResponse = [
-            'id' => $courseDataId,
-            'courseId' => $this->course->id,
-            'statsReportId' => $report['id'],
-            'course' => $this->course->load('center')->toArray(),
-            'statsReport' => $report,
-        ];
-
-        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
-    }
-
-    public function providerGetWeekData()
-    {
-        return [
-            ['2016-04-08'], // Non-existent report
-            ['2016-04-15'], // Existing report
-            [null], // No date provided
-        ];
-    }
-
     /**
      * @dataProvider providerStash
      */
@@ -317,8 +247,8 @@ class CourseTest extends FunctionalTestAbstract
         ];
 
         $this->post('/api', $parameters, $this->headers)
-            ->seeJsonHas($expectedResponse)
-            ->seeStatusCode(400);
+             ->seeJsonHas($expectedResponse)
+             ->seeStatusCode(400);
     }
 
     public function providerStashFailsValidationWithMissingRequiredParameter()
@@ -514,15 +444,14 @@ class CourseTest extends FunctionalTestAbstract
         ];
 
         $this->post('/api', $parameters, $this->headers)
-            ->seeJsonHas($expectedResponse)
-            ->seeStatusCode(400);
+             ->seeJsonHas($expectedResponse)
+             ->seeStatusCode(400);
     }
 
     public function providerApiThrowsExceptionForInvalidDate()
     {
         return [
             ['Course.allForCenter'],
-            ['Course.getWeekData'],
             ['Course.stash'],
         ];
     }
@@ -550,7 +479,7 @@ class CourseTest extends FunctionalTestAbstract
         ];
 
         $this->post('/api', $parameters, $this->headers)
-            ->seeJsonHas($expectedResponse)
-            ->seeStatusCode(400);
+             ->seeJsonHas($expectedResponse)
+             ->seeStatusCode(400);
     }
 }
