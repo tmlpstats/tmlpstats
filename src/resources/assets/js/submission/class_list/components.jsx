@@ -255,6 +255,9 @@ class _EditCreate extends ClassListBase {
                     <CheckBox model={modelKey+'.atWeekend'} label="On team at weekend" />
                     <CheckBox model={modelKey+'.xferIn'} label="Transfer In" />
                 </SimpleFormGroup>
+                <SimpleField label="Comment" model={modelKey+'.comment'} divClass="col-md-8" customField={true}>
+                    <textarea className="form-control" />
+                </SimpleField>
                 <SimpleFormGroup label="Team Status">
                     {this.renderWithdrawGroup(modelKey, options)}
                 </SimpleFormGroup>
