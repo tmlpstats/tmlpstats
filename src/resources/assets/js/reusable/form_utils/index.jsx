@@ -96,10 +96,11 @@ export class SimpleSelect extends React.PureComponent {
         if (!getLabel) {
             getLabel = (obj) => obj[this.props.labelProp]
         }
-
+        let defaultValue = getKey(items[0])
         const options = []
         if (emptyChoice) {
-            options.push(<option key={-1} value="">{emptyChoice}</option>)
+            defaultValue = -1
+            options.push(<option key={-1} value="-1">{emptyChoice}</option>)
         }
         items.forEach((item, i) => {
             options.push(
@@ -108,7 +109,7 @@ export class SimpleSelect extends React.PureComponent {
         })
         return (
             <Field model={this.props.model} multiple={this.props.multiple} rows={this.props.rows} changeAction={this.props.changeAction}>
-                <select className="form-control">{options}</select>
+                <select className="form-control" value={defaultValue}>{options}</select>
             </Field>
         )
     }

@@ -17,7 +17,7 @@ export const EXIT_CHOICES = [
 ]
 
 export const EXIT_CHOICES_HELP = {
-    xferOut: 'Choose this option to mark that a team has transferred to another team this quarter. Select the team they are going to below.',
+    xferOut: 'Choose this option to mark that a team has transferred to another team this quarter. Provide the team they are transferring to in the comment field.',
     wbo: 'Choosing this option indicates that this participant (a current team member) has a well-being issue and is taking time away from the team. 4 to 6 week maximum. Time longer than this must be approved by Jerry Baden.',
     ctw: 'Choose this option to indicate this current team member is in the conversation to withdraw from the team.  To actually be withdrawn the person must be approved by the Program Manager.',
     wd:  'Choose this option to indicate that this team member has withdrawn. You must select a withdraw reason below.'
