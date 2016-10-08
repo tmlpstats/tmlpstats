@@ -151,7 +151,7 @@ class _EditCreate extends ApplicationsBase {
 
     // saveAppData for now is the same between edit and create flows
     saveAppData(data) {
-        this.props.dispatch(saveApplication(this.props.params.centerId, this.reportingDateString(), data)).done((result) => {
+        this.props.dispatch(saveApplication(this.props.params.centerId, this.reportingDateString(), data)).then((result) => {
             if (result.success && result.storedId) {
                 data = objectAssign({}, data, {id: result.storedId})
                 this.props.dispatch(appsCollection.replaceItem(data))

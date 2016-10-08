@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { Form, Field } from 'react-redux-form'
 
 import { shallowArrayElementsEqual } from '../../reusable/compare'
+import { delayDispatch } from '../../reusable/dispatch'
 import Scoreboard, { GAME_KEYS } from '../../reusable/scoreboard'
 import { SubmitFlip } from '../../reusable/ui_basic'
 import { objectAssign } from '../../reusable/ponyfill'
@@ -26,15 +27,13 @@ class SubmissionScoreboard extends SubmissionBase {
     }
 
     checkToSave() {
-        const { saving, toSave, dispatch, scoreboards } = this.props
+        const { saving, toSave, scoreboards } = this.props
         if (saving.state == 'failed') {
             return // TODO, have some status loop and reap failed weeks
         }
         if (saving.state != 'loading' && toSave.length > 0) {
             const { centerId, reportingDate } = this.props.params
-            setTimeout(() => {
-                dispatch(saveScoreboards(centerId, reportingDate, toSave, scoreboards))
-            })
+            delayDispatch(this, saveScoreboards(centerId, reportingDate, toSave, scoreboards))
         }
     }
 

@@ -1,21 +1,25 @@
 ///// ACTION CREATORS
 import { actions as formActions } from 'react-redux-form'
-import { bestErrorValue } from '../../reusable/ajax_utils'
+
+import { getErrMessage } from '../../reusable/ajax_utils'
+import Api from '../../api'
+
 import { appsCollection, applicationsLoad, saveAppLoad, messages } from './data'
 
 export const loadState = applicationsLoad.actionCreator()
 export const saveAppState = saveAppLoad.actionCreator()
 
 export function loadApplications(centerId, reportingDate) {
-    return (dispatch, _, { Api }) => {
+    return (dispatch) => {
         dispatch(loadState('loading'))
         return Api.Application.allForCenter({
             center: centerId,
             reportingDate: reportingDate,
             includeInProgress: true,
-        }).done((data) => {
+        }).then((data) => {
             dispatch(initializeApplications(data))
-        }).fail(() => {
+            return data
+        }).catch(() => {
             dispatch(loadState('failed'))
         })
     }
@@ -34,16 +38,17 @@ export function chooseApplication(appId, app) {
 }
 
 export function saveApplication(center, reportingDate, data) {
-    return (dispatch, _, { Api }) => {
+    return (dispatch) => {
         const reset = () => dispatch(saveAppState('new'))
 
         dispatch(saveAppState('loading'))
         return Api.Application.stash({
             center, reportingDate, data
-        }).done(() => {
+        }).then((result) => {
             reset()
-        }).fail((xhr, textStatus) => {
-            const message = bestErrorValue(xhr, textStatus)
+            return result // Because it's a Promise is you have to return results to continue the chain.
+        }).catch((err) => {
+            const message = getErrMessage(err)
             dispatch(saveAppState('new'))
             dispatch(messages.replace(data.id, [message]))
         })

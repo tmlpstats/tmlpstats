@@ -1,23 +1,30 @@
 ///// ACTION CREATORS
 import { actions as formActions } from 'react-redux-form'
-import { bestErrorValue } from '../../reusable/ajax_utils'
+
+import { getErrMessage, bestErrorValue } from '../../reusable/ajax_utils'
+import Api from '../../api'
 import { coursesCollection, coursesLoad, saveCourseLoad, messages } from './data'
 
 export const loadState = coursesLoad.actionCreator()
 export const saveCourseState = saveCourseLoad.actionCreator()
 
 export function loadCourses(centerId, reportingDate) {
-    return (dispatch, _, { Api }) => {
+    return (dispatch) => {
         dispatch(loadState('loading'))
+
+        const successHandler = (data) => {
+            dispatch(initializeCourses(data))
+            return data
+        }
+        const failHandler = (err) => {
+            dispatch(loadState({error: err.error || err}))
+        }
+
         return Api.Course.allForCenter({
             center: centerId,
             reportingDate: reportingDate,
             includeInProgress: true,
-        }).done((data) => {
-            dispatch(initializeCourses(data))
-        }).fail(() => {
-            dispatch(loadState('failed'))
-        })
+        }).then(successHandler, failHandler)
     }
 }
 
@@ -34,18 +41,19 @@ export function chooseCourse(courseId, course) {
 }
 
 export function saveCourse(center, reportingDate, data) {
-    return (dispatch, _, { Api }) => {
+    return (dispatch) => {
         const reset = () => dispatch(saveCourseState('new'))
 
         dispatch(saveCourseState('loading'))
         return Api.Course.stash({
             center, reportingDate, data
-        }).done(() => {
+        }).then((result) => {
             reset()
-        }).fail((xhr, textStatus) => {
-            const message = bestErrorValue(xhr, textStatus)
-            dispatch(saveCourseState('new'))
+            return result
+        }).catch((err) => {
+            const message = getErrMessage(err)
             dispatch(messages.replace(data.id, [message]))
+            reset()
         })
     }
 }

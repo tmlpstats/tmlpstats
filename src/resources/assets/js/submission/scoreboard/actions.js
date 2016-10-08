@@ -1,20 +1,22 @@
 import { actions as formActions } from 'react-redux-form'
 
+import Api from '../../api'
 import { SCOREBOARDS_FORM_KEY, SCOREBOARD_SAVED, scoreboardLoad, scoreboardSave, annotateScoreboards } from './data'
 
 export const loadState = scoreboardLoad.actionCreator()
 const saveState = scoreboardSave.actionCreator()
 
 export function loadScoreboard(centerId, reportingDate) {
-    return (dispatch, _, { Api }) => {
+    return (dispatch) => {
         dispatch(loadState('loading'))
         return Api.Scoreboard.allForCenter({
             center: centerId,
             reportingDate: reportingDate,
             includeInProgress: true
-        }).done((data) => {
+        }).then((data) => {
             dispatch(initializeScoreboard(data))
-        }).fail(() => {
+            return data
+        }).catch(() => {
             dispatch(loadState('failed'))
         })
     }
@@ -28,7 +30,7 @@ export function initializeScoreboard(data) {
 }
 
 export function saveScoreboards(centerId, reportingDate, toSave, scoreboards) {
-    return (dispatch, _, { Api }) => {
+    return (dispatch) => {
         const candidate = toSave[0]
 
         dispatch(saveState('loading'))
@@ -36,15 +38,17 @@ export function saveScoreboards(centerId, reportingDate, toSave, scoreboards) {
             center: centerId,
             reportingDate: reportingDate,
             data: scoreboards[candidate]
-        }).done((data) => {
+        }).then((data) => {
+            // Probably we don't need to check data.success anymore, as any errors should go into the 'catch' flow.
             if (data.success) {
                 dispatch(scoreboardSaved(toSave[0]))
                 dispatch(saveState('loaded'))
             } else {
-                dispatch(saveState({error: data.error || 'error'}))
+                throw data
             }
-        }).fail(() => {
-            dispatch(saveState('failed'))
+            return data
+        }).catch((err) => {
+            dispatch(saveState({error: err.error || 'error'}))
         })
     }
 }

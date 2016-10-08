@@ -160,7 +160,7 @@ class _EditCreate extends CoursesBase {
     }
     // saveCourseData for now is the same between edit and create flows
     saveCourseData(data) {
-        this.props.dispatch(saveCourse(this.props.params.centerId, this.reportingDateString(), data)).done((result) => {
+        this.props.dispatch(saveCourse(this.props.params.centerId, this.reportingDateString(), data)).then((result) => {
             if (result.success && result.storedId) {
                 data = objectAssign({}, data, {id: result.storedId, meta: result.meta})
                 this.props.dispatch(coursesCollection.replaceItem(data))
