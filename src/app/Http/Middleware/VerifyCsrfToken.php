@@ -4,11 +4,12 @@ namespace TmlpStats\Http\Middleware;
 use Closure;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as BaseVerifier;
 
-class VerifyCsrfToken extends BaseVerifier {
-
+class VerifyCsrfToken extends BaseVerifier
+{
     protected $except = [
         'auth/login',
         'api',
+        'api/*',
     ];
 
     /**

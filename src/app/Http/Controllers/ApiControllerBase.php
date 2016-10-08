@@ -6,7 +6,6 @@ use Auth;
 use Illuminate\Http\Request;
 use Response;
 use Symfony\Component\HttpFoundation\ParameterBag;
-use TmlpStats as Models;
 use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Api\Parsers;
 
@@ -31,10 +30,12 @@ class ApiControllerBase extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function apiCall(Request $request)
+    public function apiCall(Request $request, $method = '')
     {
         $input = new ParameterBag($request->all());
-        $method = $input->get('method');
+        if (!$method) {
+            $method = $input->get('method');
+        }
 
         if (!isset($this->methods[$method])) {
             throw new ApiExceptions\NotAllowedException('API method not allowed.');
@@ -63,6 +64,7 @@ class ApiControllerBase extends Controller
     protected function parse($input, $key, $type, $required = true)
     {
         $parser = Parsers\Factory::build($type);
+
         return $parser->run($input, $key, $required);
     }
 }

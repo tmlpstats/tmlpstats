@@ -1,18 +1,16 @@
 
-import { objectAssign, fetch } from '../reusable/ponyfill'
+import { fetch } from '../reusable/ponyfill'
 import { checkStatus, parseJSON } from './http-support'
 
 function jsonApiCall(methodName, params) {
-    const input = objectAssign({method: methodName}, params)
-
-    return fetch('/api', {
+    return fetch(`/api/${methodName}`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Content-Type': 'aplication/json',
+            'Accept': 'aplication/json'
         },
         credentials: 'same-origin',
-        body: JSON.stringify(input)
+        body: JSON.stringify(params)
     }).then(checkStatus).then(parseJSON)
 }
 

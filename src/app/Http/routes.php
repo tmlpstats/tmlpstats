@@ -14,6 +14,8 @@
 // Admin Area
 
 Route::post('api', 'ApiController@apiCall');
+Route::post('api/{method}', 'ApiController@apiCall');
+
 Route::group(['prefix' => 'admin'], function () {
     Route::match(['get', 'post'], 'dashboard', 'AdminController@index');
     Route::get('status', 'AdminController@status');
