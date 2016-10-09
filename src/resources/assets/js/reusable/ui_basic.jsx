@@ -124,12 +124,12 @@ export class MessagesComponent extends React.Component {
         const errors = []
         const warnings = []
 
-        messages.forEach((message) => {
-            let item = <li key={message.reference+message.id} className={message.type}>{message.message}</li>
+        messages.forEach((message, idx) => {
+            let item = <li key={idx} className={message.level}>{message.message}</li>
 
-            if (message.type == 'error') {
+            if (message.level == 'error') {
                 errors.push(item)
-            } else if (message.type == 'warning') {
+            } else if (message.level == 'warning') {
                 warnings.push(item)
             }
         })

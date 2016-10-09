@@ -30,8 +30,8 @@ class BadRequestException extends Exception
         return array_merge(parent::toArray(), [
             'reference' => $this->reference,
             'field' => $this->field,
-            'type' => 'error',
-            'id' => class_basename(get_class($this)) . ':' . $this->field,
+            'level' => 'error',
+            'id' => class_basename($this) . ':' . $this->field,
         ]);
     }
 }

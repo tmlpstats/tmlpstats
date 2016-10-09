@@ -1,7 +1,7 @@
 ///// ACTION CREATORS
 import { actions as formActions } from 'react-redux-form'
 
-import { getErrMessage } from '../../reusable/ajax_utils'
+import { getMessages } from '../../reusable/ajax_utils'
 import Api from '../../api'
 
 import { appsCollection, applicationsLoad, saveAppLoad, messages } from './data'
@@ -48,9 +48,8 @@ export function saveApplication(center, reportingDate, data) {
             reset()
             return result // Because it's a Promise is you have to return results to continue the chain.
         }).catch((err) => {
-            const message = getErrMessage(err)
-            dispatch(saveAppState('new'))
-            dispatch(messages.replace(data.id, [message]))
+            dispatch(messages.replace(data.id, getMessages(err)))
+            reset()
         })
     }
 }

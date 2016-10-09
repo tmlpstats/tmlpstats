@@ -2,10 +2,10 @@ import { combineReducers } from 'redux'
 import { modelReducer } from 'react-redux-form'
 
 import { objectAssign } from '../../reusable/ponyfill'
-import { weeklyReportingSave, weeklyReportingData, teamMembersData } from './data'
+import { weeklyReportingSave, weeklyReportingData, teamMembersData, messages } from './data'
 
-export const TEAM_MEMBERS_COLLECTION_FORM_KEY = 'submission.class_list.teamMembers.data.collection'
-export const TEAM_MEMBER_FORM_KEY = 'submission.class_list.currentMember'
+export const TEAM_MEMBERS_COLLECTION_FORM_KEY = 'submission.team_members.teamMembers.data.collection'
+export const TEAM_MEMBER_FORM_KEY = 'submission.team_members.currentMember'
 
 const DEFAULT_PREFS = {
     showTravelRooming: false,
@@ -14,7 +14,7 @@ const DEFAULT_PREFS = {
 
 function prefsReducer(state=DEFAULT_PREFS, action) {
     switch (action.type) {
-    case 'class_list/replace_prefs':
+    case 'team_members/replace_prefs':
         return objectAssign({}, DEFAULT_PREFS, action.payload)
     }
     return state
@@ -27,7 +27,7 @@ function resortCheck(a, b, action) {
     return false
 }
 
-const classListReducer = combineReducers({
+const teamMembersReducer = combineReducers({
     currentMember: modelReducer(TEAM_MEMBER_FORM_KEY),
     teamMembers: teamMembersData.reducer({
         collection_reducer: modelReducer(TEAM_MEMBERS_COLLECTION_FORM_KEY),
@@ -35,7 +35,8 @@ const classListReducer = combineReducers({
     }),
     prefs: prefsReducer,
     weeklyReporting: weeklyReportingData.reducer(),
-    weeklySave: weeklyReportingSave.reducer()
+    weeklySave: weeklyReportingSave.reducer(),
+    messages: messages.reducer()
 })
 
-export default classListReducer
+export default teamMembersReducer

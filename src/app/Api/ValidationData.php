@@ -19,19 +19,24 @@ class ValidationData extends AuthenticatedApiBase
     //                 if no update is needed, they'll need to take some action to confirm the
     //                 data is the same. That "confirmation" will create a submissionData entry
     protected $dataTypesConf = [
-        'applications' => [
+        'Application' => [
             'apiClass' => Application::class,
-            'typeName' => 'teamApplication',
+            'typeName' => 'TeamApplication',
             'updateRequired' => false,
         ],
-        'courses' => [
+        'TeamMember' => [
+            'apiClass' => TeamMember::class,
+            'typeName' => 'TeamMember',
+            'updateRequired' => true,
+        ],
+        'Course' => [
             'apiClass' => Course::class,
-            'typeName' => 'course',
+            'typeName' => 'Course',
             'updateRequired' => false,
         ],
-        'scoreboard' => [
+        'Scoreboard' => [
             'apiClass' => Scoreboard::class,
-            'typeName' => 'scoreboard',
+            'typeName' => 'Scoreboard',
             'updateRequired' => true,
         ],
     ];

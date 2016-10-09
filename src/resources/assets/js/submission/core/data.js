@@ -4,6 +4,17 @@ import { LoadingMultiState } from '../../reusable/reducers'
 import SimpleReduxLoader from '../../reusable/redux_loader/simple'
 import Api from '../../api'
 
+
+// The steps key lists the steps in the submission flow, used for building navigation
+export const PAGES_CONFIG = [
+    {key: 'scoreboard', name: 'Scoreboard', className: 'Scoreboard'},
+    {key: 'applications', name: 'Team Expansion', className: 'Application'},
+    {key: 'team_members', name: 'Class List', className: 'TeamMember'},
+    {key: 'courses', name: 'Courses', className: 'Course'},
+    {key: 'qtr_accountabilities', name: 'Accountabilities', className: 'Accountability'},
+    {key: 'review', name: 'Review'}
+]
+
 export const SET_REPORTING_DATE = 'submission.setReportingDate'
 
 export const coreInit = new LoadingMultiState('core/coreInit')

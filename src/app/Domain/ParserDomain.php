@@ -52,7 +52,7 @@ class ParserDomain implements Arrayable, \JsonSerializable, Referenceable
     {
         return array_merge([
             'id' => $this->getKey(),
-            'type' => lcfirst(class_basename($this)),
+            'type' => class_basename($this),
         ], $supplemental);
     }
 
