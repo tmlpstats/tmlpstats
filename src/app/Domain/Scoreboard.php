@@ -47,7 +47,7 @@ class Scoreboard implements Arrayable, Referenceable
     {
         return array_merge([
             'id' => $this->getKey(),
-            'type' => 'scoreboard',
+            'type' => 'Scoreboard',
         ], $supplemental);
     }
 

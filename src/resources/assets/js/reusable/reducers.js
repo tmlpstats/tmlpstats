@@ -48,7 +48,7 @@ export class LoadingMultiState {
 
 const REPLACE_MESSAGES = 'messageManager/replace'
 const CLEAR_MESSAGES = 'messageManager/clear'
-const RESET_MESSAGES = 'messageManager/reset'
+const REPLACE_ALL_MESSAGES = 'messageManager/reset'
 
 export class MessageManager {
     constructor(namespace) {
@@ -61,26 +61,24 @@ export class MessageManager {
                 switch (action.type) {
                 case REPLACE_MESSAGES:
                     return objectAssign({}, state, {[action.payload.pk]: action.payload.messages})
-                case CLEAR_MESSAGES:
-                    return objectAssign({}, state, {[action.payload.pk]: []})
-                case RESET_MESSAGES:
-                    return {}
+                case REPLACE_ALL_MESSAGES:
+                    return action.payload.messages
                 }
             }
             return state
         }
     }
 
+    replaceAll(messages, namespace) {
+        return {type: REPLACE_ALL_MESSAGES, payload: {messages, namespace: namespace || this.namespace}}
+    }
+
     replace(pk, messages) {
         return {type: REPLACE_MESSAGES, payload: {pk, messages, namespace: this.namespace}}
     }
 
-    clear(pk) {
-        return {type: CLEAR_MESSAGES, payload: {pk, namespace: this.namespace}}
-    }
-
-    reset(pk) {
-        return {type: RESET_MESSAGES, payload: {namespace: this.namespace}}
+    reset() {
+        return this.replaceAll({})
     }
 }
 

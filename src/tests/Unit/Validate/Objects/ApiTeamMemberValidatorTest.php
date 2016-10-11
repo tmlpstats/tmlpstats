@@ -18,7 +18,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
         'level' => 'error',
         'reference' => [
             'id' => null,
-            'type' => 'teamMember',
+            'type' => 'TeamMember',
         ],
     ];
 
@@ -449,7 +449,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             // Xfer In and Out null
             [
                 [
-                    'xferIn'  => null,
+                    'xferIn' => null,
                     'xferOut' => null,
                     'comment' => null,
                 ],
@@ -460,7 +460,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             [
                 [
                     'atWeekend' => false,
-                    'xferIn'  => true,
+                    'xferIn' => true,
                     'xferOut' => null,
                     'comment' => 'something about the transfer',
                 ],
@@ -477,7 +477,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             [
                 [
                     'atWeekend' => false,
-                    'xferIn'  => true,
+                    'xferIn' => true,
                     'xferOut' => null,
                     'comment' => null,
                 ],
@@ -497,7 +497,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             // Xfer Out not null with comment
             [
                 [
-                    'xferIn'  => null,
+                    'xferIn' => null,
                     'xferOut' => true,
                     'comment' => 'something about the transfer',
                 ],
@@ -513,7 +513,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             // Xfer Out not null without comment
             [
                 [
-                    'xferIn'  => null,
+                    'xferIn' => null,
                     'xferOut' => true,
                     'comment' => null,
                 ],
@@ -534,7 +534,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             [
                 [
                     'atWeekend' => false,
-                    'xferIn'  => true,
+                    'xferIn' => true,
                     'xferOut' => true,
                     'comment' => 'something about the transfer',
                 ],

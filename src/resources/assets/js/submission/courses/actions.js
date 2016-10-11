@@ -1,7 +1,7 @@
 ///// ACTION CREATORS
 import { actions as formActions } from 'react-redux-form'
 
-import { getErrMessage, bestErrorValue } from '../../reusable/ajax_utils'
+import { getMessages } from '../../reusable/ajax_utils'
 import Api from '../../api'
 import { coursesCollection, coursesLoad, saveCourseLoad, messages } from './data'
 
@@ -51,8 +51,7 @@ export function saveCourse(center, reportingDate, data) {
             reset()
             return result
         }).catch((err) => {
-            const message = getErrMessage(err)
-            dispatch(messages.replace(data.id, [message]))
+            dispatch(messages.replace(data.id, getMessages(err)))
             reset()
         })
     }

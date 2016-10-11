@@ -19,7 +19,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
         'level' => 'error',
         'reference' => [
             'id' => null,
-            'type' => 'teamApplication',
+            'type' => 'TeamApplication',
         ],
     ];
 
@@ -72,12 +72,12 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
         $validator = $this->getObjectMock(['isStartingNextQuarter', 'isTimeToCheckTravel']);
 
         $validator->expects($this->any())
-            ->method('isStartingNextQuarter')
-            ->willReturn(true);
+                  ->method('isStartingNextQuarter')
+                  ->willReturn(true);
 
         $validator->expects($this->any())
-            ->method('isTimeToCheckTravel')
-            ->willReturn(false);
+                  ->method('isTimeToCheckTravel')
+                  ->willReturn(false);
 
         $result = $validator->run($data);
 
@@ -201,7 +201,6 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
             ],
         ];
     }
-
 
     /**
      * @dataProvider providerValidateApprovalProcess

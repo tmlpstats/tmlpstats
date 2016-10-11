@@ -4,24 +4,24 @@ import { actions as formActions } from 'react-redux-form'
 import { objectAssign } from '../../reusable/ponyfill'
 import Api from '../../api'
 
-import { teamMembersData, weeklyReportingData, weeklyReportingSave } from './data'
+import { teamMembersData, weeklyReportingData, weeklyReportingSave, messages } from './data'
 import { TEAM_MEMBERS_COLLECTION_FORM_KEY, TEAM_MEMBER_FORM_KEY } from './reducers'
 import { determineExitChoice, exitChoiceMerges } from './exit_choice'
 
 const weeklySaveState = weeklyReportingSave.actionCreator()
 
-export function loadClassList(centerId, reportingDate) {
+export function loadTeamMembers(centerId, reportingDate) {
     const params = {
         center: centerId,
         reportingDate: reportingDate,
         includeInProgress: true
     }
     return teamMembersData.load(params, {
-        successHandler: initializeClassList
+        successHandler: initializeTeamMembers
     })
 }
 
-function initializeClassList(data) {
+function initializeTeamMembers(data) {
     return (dispatch, getState) => {
         const state = getState()
         _.forEach(data, (teamMember) => {
@@ -85,12 +85,14 @@ export function stashTeamMember(center, reportingDate, data) {
                     throw new Error('Expected storedId in result')
                 }
                 dispatch(teamMembersData.saveState('loaded'))
-                const newData = objectAssign({}, data, {id: result.storedId})
+                const newData = objectAssign({}, data, {id: result.storedId, meta: result.meta})
+                dispatch(messages.replace(newData.id, result.messages))
                 dispatch(teamMembersData.replaceItem(newData))
-                return data
+                return result
             },
             (err) => {
                 dispatch(teamMembersData.saveState({error: err.error || err}))
+                dispatch(messages.replace(data.id, getMessages(err)))
             }
         )
     }

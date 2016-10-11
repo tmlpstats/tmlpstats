@@ -1,7 +1,6 @@
 <?php
 namespace TmlpStats\Tests\Unit\Validate\Objects;
 
-use Carbon\Carbon;
 use TmlpStats\Domain\Scoreboard;
 use TmlpStats\Tests\Unit\Validate\ApiValidatorTestAbstract;
 use TmlpStats\Validate\Objects\ApiScoreboardValidator;
@@ -15,7 +14,7 @@ class ApiScoreboardValidatorTest extends ApiValidatorTestAbstract
         'level' => 'error',
         'reference' => [
             'id' => '2016-09-02',
-            'type' => 'scoreboard',
+            'type' => 'Scoreboard',
         ],
     ];
 

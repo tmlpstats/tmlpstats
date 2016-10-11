@@ -1,7 +1,6 @@
 <?php
 namespace TmlpStats\Tests\Unit\Validate\Objects;
 
-use Carbon\Carbon;
 use TmlpStats\Domain\Course;
 use TmlpStats\Tests\Unit\Validate\ApiValidatorTestAbstract;
 use TmlpStats\Validate\Objects\ApiCourseValidator;
@@ -15,7 +14,7 @@ class ApiCourseValidatorTest extends ApiValidatorTestAbstract
         'level' => 'error',
         'reference' => [
             'id' => null,
-            'type' => 'course',
+            'type' => 'Course',
         ],
     ];
 

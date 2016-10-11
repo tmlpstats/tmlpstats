@@ -4,31 +4,31 @@ import { connect } from 'react-redux'
 
 import { Form, CheckBox, SimpleField, BooleanSelect, BooleanSelectView, connectCustomField, SimpleSelect, SimpleFormGroup, AddOneLink } from '../../reusable/form_utils'
 import { objectAssign } from '../../reusable/ponyfill'
-import { ModeSelectButtons, SubmitFlip, Alert } from '../../reusable/ui_basic'
+import { ModeSelectButtons, SubmitFlip, Alert, MessagesComponent } from '../../reusable/ui_basic'
 import { delayDispatch, rebind } from '../../reusable/dispatch'
 
 import { SubmissionBase } from '../base_components'
 import { centerQuarterData } from '../core/data'
 import { makeAccountabilitiesSelector } from '../core/selectors'
 import { TEAM_MEMBERS_COLLECTION_FORM_KEY, TEAM_MEMBER_FORM_KEY } from './reducers'
-import { classListSorts, teamMembersData } from './data'
+import { teamMembersSorts, teamMembersData } from './data'
 import { EXIT_CHOICES, EXIT_CHOICES_HELP } from './exit_choice'
 import * as actions from './actions'
 
 const GITW_LABELS = ['Ineffective', 'Effective']
 const TDO_LABELS = ['N', 'Y']
 
-class ClassListBase extends SubmissionBase {
-    classListBaseUri() {
-        return this.baseUri() + '/class_list'
+class TeamMembersBase extends SubmissionBase {
+    teamMembersBaseUri() {
+        return this.baseUri() + '/team_members'
     }
 
-    // Check the loading state of our initial data, and dispatch a loadClassList if we never loaded
+    // Check the loading state of our initial data, and dispatch a loadTeamMembers if we never loaded
     checkLoading() {
         const { teamMembers: {loadState: loading}, dispatch } = this.props
         if (loading.state == 'new') {
             const { centerId, reportingDate } = this.props.params
-            dispatch(actions.loadClassList(centerId, reportingDate))
+            dispatch(actions.loadTeamMembers(centerId, reportingDate))
             return false
         }
         return (loading.state == 'loaded')
@@ -39,7 +39,7 @@ const STATE_UPDATING = 'Updating'
 const STATE_NOTHING = 'Nothing'
 const STATE_SAVED = 'Saved'
 
-class ClassListIndexView extends ClassListBase {
+class TeamMembersIndexView extends TeamMembersBase {
     componentWillMount() {
         rebind(this, 'saveWeeklyReporting', 'changeSort')
     }
@@ -48,7 +48,7 @@ class ClassListIndexView extends ClassListBase {
             return this.renderBasicLoading()
         }
 
-        const baseUri = this.classListBaseUri()
+        const baseUri = this.teamMembersBaseUri()
         const { weeklySave, weeklyReporting: wr, teamMembers } = this.props
         var teamMemberRows = []
         teamMembersData.iterItems(teamMembers, (teamMember, key) => {
@@ -66,14 +66,14 @@ class ClassListIndexView extends ClassListBase {
         return (
             <Form model={TEAM_MEMBERS_COLLECTION_FORM_KEY} onSubmit={this.saveWeeklyReporting}>
                 <h3>Class List</h3>
-                <ModeSelectButtons items={classListSorts} current={teamMembers.data.meta.sort_by}
+                <ModeSelectButtons items={teamMembersSorts} current={teamMembers.data.meta.sort_by}
                                    onClick={this.changeSort} ariaGroupDesc="Sort Preferences" />
                 <Alert alert="info">
                     Tip: you can use the "tab" key to quickly jump through the GITW/TDO.
                     <p>Set each one with the keyboard using "E" "I" for GITW and "Y" "N" for TDO.
                     You can quick-save theGITW/TDO by hitting the enter key.</p>
                 </Alert>
-                <table className="table submissionClassList">
+                <table className="table submissionTeamMembers">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -162,7 +162,7 @@ class TeamMemberIndexRow extends React.PureComponent {
     }
 }
 
-class _EditCreate extends ClassListBase {
+class _EditCreate extends TeamMembersBase {
     getCenterQuarter(quarterId) {
         const { currentMember, centerQuarters } = this.props
         if (!quarterId) {
@@ -194,7 +194,7 @@ class _EditCreate extends ClassListBase {
         const options = this.getRenderOptions()
 
         return (
-            <Form className="form-horizontal submissionClassListEdit" model={modelKey} onSubmit={this.saveTeamMember.bind(this)}>
+            <Form className="form-horizontal submissionTeamMembersEdit" model={modelKey} onSubmit={this.saveTeamMember.bind(this)}>
                 {this.renderContent(modelKey, options)}
                 <SubmitFlip loadState={this.props.teamMembers.saveState}>Save</SubmitFlip>
             </Form>
@@ -340,7 +340,7 @@ class _EditCreate extends ClassListBase {
 }
 
 // Detailed edit of class list
-class ClassListEditView extends _EditCreate {
+class TeamMembersEditView extends _EditCreate {
     checkLoading() {
         if (!super.checkLoading()) {
             return false
@@ -363,8 +363,10 @@ class ClassListEditView extends _EditCreate {
     saveTeamMember(data) {
         const { centerId, reportingDate } = this.props.params
 
-        this.props.dispatch(actions.stashTeamMember(centerId, reportingDate, data)).then(() =>{
-            this.context.router.push(this.classListBaseUri())
+        this.props.dispatch(actions.stashTeamMember(centerId, reportingDate, data)).then((result) => {
+            if (result.valid && !result.messages.length) {
+                this.context.router.push(this.teamMembersBaseUri())
+            }
         })
     }
 
@@ -373,9 +375,17 @@ class ClassListEditView extends _EditCreate {
             return this.renderBasicLoading()
         }
         const teamMember = this.props.currentMember
+        let messages = []
+        if (teamMember && teamMember.id) {
+            messages = this.props.messages[teamMember.id]
+            console.log(this.props, teamMember.id,messages)
+        }
         return (
             <div>
                 <h3>Edit Team Member {teamMember.firstName} {teamMember.lastName}</h3>
+
+                <MessagesComponent messages={messages} />
+
                 {super.render()}
             </div>
         )
@@ -408,7 +418,7 @@ class ClassListEditView extends _EditCreate {
     }
 }
 
-class ClassListAddView extends _EditCreate {
+class TeamMembersAddView extends _EditCreate {
     defaultTeamMember = {exitChoice: '', teamYear: 1, }
     checkLoading() {
         if (!super.checkLoading()) {
@@ -470,10 +480,10 @@ const mapStateToProps = (state) => {
     const { centerQuarters, lookups } = state.submission.core
     const teamAccountabilities = getTeamAccountabilities(state)
     const n = {centerQuarters, lookups, teamAccountabilities, browser:state.browser}
-    return objectAssign(n, state.submission.class_list)
+    return objectAssign(n, state.submission.team_members)
 }
 const connector = connect(mapStateToProps)
 
-export const ClassListIndex = connector(ClassListIndexView)
-export const ClassListEdit = connector(ClassListEditView)
-export const ClassListAdd = connector(ClassListAddView)
+export const TeamMembersIndex = connector(TeamMembersIndexView)
+export const TeamMembersEdit = connector(TeamMembersEditView)
+export const TeamMembersAdd = connector(TeamMembersAddView)

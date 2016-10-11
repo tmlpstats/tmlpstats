@@ -75,6 +75,7 @@ class _EditCreate extends ApplicationsBase {
         let messages = []
         if (app && app.id) {
             messages = this.props.messages[app.id]
+            console.log(this.props, app.id,messages)
         }
 
         return (

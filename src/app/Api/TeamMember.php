@@ -87,9 +87,14 @@ class TeamMember extends AuthenticatedApiBase
         }
         $submissionData->store($center, $reportingDate, $domain);
 
+        $report = LocalReport::getStatsReport($center, $reportingDate);
+        $validationResults = $this->validateObject($report, $domain, $teamMemberId);
+
         return [
             'success' => true,
             'storedId' => $teamMemberId,
+            'valid' => $validationResults['valid'],
+            'messages' => $validationResults['messages'],
         ];
     }
 
@@ -183,5 +188,25 @@ class TeamMember extends AuthenticatedApiBase
         }
 
         return $teamMemberData->load('teamMember.person', 'teamMember.incomingQuarter', 'statsReport', 'withdrawCode');
+    }
+
+    public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
+    {
+        $results = [];
+
+        $allData = $this->allForCenter($center, $reportingDate, true);
+        foreach ($allData as $dataObject) {
+            if (!array_get($dataObject->meta, 'localChanges', false)) {
+                $results[] = $dataObject;
+            }
+        }
+
+        return $results;
+    }
+
+    public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
+    {
+        $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\TeamMember::class);
+        return array_flatten($collection->getDictionary());
     }
 }

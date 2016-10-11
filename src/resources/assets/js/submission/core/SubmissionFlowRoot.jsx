@@ -4,19 +4,12 @@ import { connect } from 'react-redux'
 
 import { objectAssign } from '../../reusable/ponyfill'
 import { SubmissionBase } from '../base_components'
+import { getValidationMessages } from '../review/actions'
 import SubmissionNav from './SubmissionNav'
 import * as actions from './actions'
+import { PAGES_CONFIG } from './data'
 
-const steps = [
-    // The steps key lists the steps in the submission flow, used for building navigation
-    {key: 'scoreboard', name: 'Scoreboard'},
-    {key: 'applications', name: 'Team Expansion'},
-    {key: 'class_list', name: 'Class List'},
-    {key: 'courses', name: 'Courses'},
-    {key: 'qtr_accountabilities', name: 'Accountabilities'},
-    {key: 'review', name: 'Review'}
-]
-
+const steps = PAGES_CONFIG
 const stepsBeforeCr3 = _.reject(steps, {key: 'qtr_accountabilities'})
 
 class SubmissionFlowComponent extends SubmissionBase {
@@ -80,6 +73,7 @@ export function checkCoreData(centerId, reportingDate, core, dispatch) {
     } else if (core.coreInit.state == 'new') {
         setTimeout(() => {
             dispatch(actions.initSubmission(centerId, reportingDate))
+            dispatch(getValidationMessages(centerId, reportingDate))
         })
         return false
     } else if (core.coreInit.state != 'loaded') {

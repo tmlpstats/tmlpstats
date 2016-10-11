@@ -1,9 +1,9 @@
 import { compositeKey } from '../../reusable/sortable_collection'
 import SortableReduxLoader from '../../reusable/redux_loader/sortable'
-import { LoadingMultiState, InlineBulkWork } from '../../reusable/reducers'
+import { LoadingMultiState, InlineBulkWork, MessageManager } from '../../reusable/reducers'
 import Api from '../../api'
 
-export const classListSorts = [
+export const teamMembersSorts = [
     {
         key: 'teamYear_first_last',
         label: 'Default',
@@ -22,15 +22,17 @@ export const classListSorts = [
 ]
 
 export const teamMembersData = new SortableReduxLoader({
-    prefix: 'submission.class_list',
+    prefix: 'submission.team_members',
     extraLMS: ['saveState'],
     loader: Api.TeamMember.allForCenter,
     sortable: {
         key_prop: 'id',
         sort_by: 'teamYear_first_last',
-        sorts: classListSorts
+        sorts: teamMembersSorts
     }
 })
 
-export const weeklyReportingSave = new LoadingMultiState('class_list/saveWeeklyReporting')
-export const weeklyReportingData = new InlineBulkWork('class_list/weeklyReporting')
+export const weeklyReportingSave = new LoadingMultiState('team_members/saveWeeklyReporting')
+export const weeklyReportingData = new InlineBulkWork('team_members/weeklyReporting')
+
+export const messages = new MessageManager('team_members')
