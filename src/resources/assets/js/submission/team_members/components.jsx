@@ -378,7 +378,6 @@ class TeamMembersEditView extends _EditCreate {
         let messages = []
         if (teamMember && teamMember.id) {
             messages = this.props.messages[teamMember.id]
-            console.log(this.props, teamMember.id,messages)
         }
         return (
             <div>

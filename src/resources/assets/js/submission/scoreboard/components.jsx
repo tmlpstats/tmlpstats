@@ -6,7 +6,7 @@ import moment from 'moment'
 import { shallowArrayElementsEqual } from '../../reusable/compare'
 import { delayDispatch } from '../../reusable/dispatch'
 import Scoreboard, { GAME_KEYS } from '../../reusable/scoreboard'
-import { SubmitFlip } from '../../reusable/ui_basic'
+import { SubmitFlip, MessagesComponent } from '../../reusable/ui_basic'
 import { objectAssign } from '../../reusable/ponyfill'
 
 import { SubmissionBase } from '../base_components'
@@ -56,9 +56,19 @@ class SubmissionScoreboard extends SubmissionBase {
                 </div>
             )
         })
+
+        var allMessages = []
+        for (var week in this.props.messages) {
+            let messages = this.props.messages[week]
+            let referenceString = 'for ' + moment(week).format('MMM D, YYYY')
+            allMessages.push(<MessagesComponent key={week}
+                                                messages={messages}
+                                                referenceString={referenceString} />)
+        }
         return (
             <Form model={SCOREBOARDS_FORM_KEY} onSubmit={this.checkToSave.bind(this)}>
                 <h3>Scoreboard</h3>
+                <div>{allMessages}</div>
                 <div>{rows}</div>
                 <SubmitFlip loadState={this.props.saving} offset='col-sm-12'>Save</SubmitFlip>
             </Form>

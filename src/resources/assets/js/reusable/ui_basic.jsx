@@ -115,7 +115,7 @@ export class SubmitFlip extends React.PureComponent {
  */
 export class MessagesComponent extends React.Component {
     render() {
-        const messages = this.props.messages
+        const {messages, referenceString} = this.props
 
         if (!messages) {
             return <div></div>
@@ -136,9 +136,10 @@ export class MessagesComponent extends React.Component {
 
         let errorString = ''
         if (errors.length > 0) {
+            let title = referenceString ? `Errors ${referenceString}` : 'Errors'
             errorString = (
                 <div>
-                    <h5 className="error">Errors:</h5>
+                    <h5 className="error">{title}:</h5>
                     <ul>
                         {errors}
                     </ul>
@@ -148,9 +149,10 @@ export class MessagesComponent extends React.Component {
 
         let warningString = ''
         if (warnings.length > 0) {
+            let title = referenceString ? `Warnings ${referenceString}` : 'Warnings'
             warningString = (
                 <div>
-                    <h5 className="warning">Warnings:</h5>
+                    <h5 className="warning">{title}:</h5>
                     <ul>
                         {warnings}
                     </ul>
