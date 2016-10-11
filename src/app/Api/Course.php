@@ -44,9 +44,6 @@ class Course extends ApiBase
 
         $course->save();
 
-        // Make sure we have a data object for the new course so we can get it's data later
-        $this->getWeekData($course);
-
         return $course->load('center');
     }
 
@@ -88,7 +85,7 @@ class Course extends ApiBase
         }
 
         // Pick up any courses that are new this week
-        $thisReport = LocalReport::getStatsReport($center, $reportingDate, true);
+        $thisReport = LocalReport::ensureStatsReport($center, $reportingDate, true);
         foreach ($thisReport->courseData() as $courseData) {
             if (isset($allCourses[$courseData->courseId])) {
                 continue;
@@ -119,49 +116,6 @@ class Course extends ApiBase
         }
 
         return array_values($allCourses);
-    }
-
-    public function getWeekData(Models\Course $course, Carbon $reportingDate = null)
-    {
-        if ($reportingDate === null) {
-            $reportingDate = LocalReport::getReportingDate($course->center);
-        } else {
-            App::make(SubmissionCore::class)->checkCenterDate($course->center, $reportingDate);
-        }
-
-        $getUnsubmitted = $reportingDate->gte(Carbon::now($course->center->timezone)->startOfDay());
-
-        $report = LocalReport::getStatsReport($course->center, $reportingDate, $getUnsubmitted);
-
-        $response = Models\CourseData::firstOrNew([
-            'course_id' => $course->id,
-            'stats_report_id' => $report->id,
-        ]);
-
-        // If we're creating a new data object now, pre-populate it with data from last week
-        if (!$response->exists) {
-
-            $lastWeeksReport = Models\StatsReport::byCenter($course->center)
-                ->reportingDate($reportingDate->copy()->subWeek())
-                ->official()
-                ->first();
-
-            // It's the center's first official report or they didn't submit last week
-            $lastWeeksData = null;
-            if ($lastWeeksReport) {
-                $lastWeeksData = Models\CourseData::byStatsReport($lastWeeksReport)
-                    ->ByCourse($course)
-                    ->first();
-            }
-
-            if ($lastWeeksData) {
-                $response->mirror($lastWeeksData);
-            }
-
-            $response->save();
-        }
-
-        return $response->load('course', 'course.center', 'statsReport');
     }
 
     /**
@@ -203,7 +157,7 @@ class Course extends ApiBase
         }
         $submissionData->store($center, $reportingDate, $course);
 
-        $report = LocalReport::getStatsReport($center, $reportingDate);
+        $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $course, $courseId);
 
         return [
@@ -216,16 +170,17 @@ class Course extends ApiBase
     }
 
     /**
-     * Commit week data to the database. Will be performed during validation to write the domain object into the DB
-     * @param  Models\Course  $application   The application we are working with.
+     * TODO implement me. This is copypasta from application.
+     * @param  Models\Course  $course
      * @param  Carbon         $reportingDate [description]
      * @param  Domain\Course  $data          [description]
      */
-    public function commitStashedApp(Models\Course $course, Carbon $reportingDate, array $data)
+    public function commitStashedCourse(Models\Course $course, Carbon $reportingDate, array $data)
     {
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
-        $courseData = $this->getWeekData($course, $reportingDate);
+        //TODO get from submissionData
+        //$courseData = $this->getWeekData($course, $reportingDate);
 
         $courseDomain = Domain\Course::fromModel($courseData, $course);
         $courseDomain->courseId = $course->id;
@@ -257,6 +212,7 @@ class Course extends ApiBase
     public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
     {
         $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\Course::class);
+
         return array_flatten($collection->getDictionary());
     }
 

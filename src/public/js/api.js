@@ -49,16 +49,6 @@ Api.Application = {
     },
 
     /*
-    Update an application
-    Parameters:
-      application: Application
-      data: array
-    */
-    update: function(params, callback, errback) {
-        return apiCall('Application.update', params, (callback || null), (errback || null));
-    },
-
-    /*
     List applications by center
     Parameters:
       center: Center
@@ -67,16 +57,6 @@ Api.Application = {
     */
     allForCenter: function(params, callback, errback) {
         return apiCall('Application.allForCenter', params, (callback || null), (errback || null));
-    },
-
-    /*
-    Get the weekly data for an application
-    Parameters:
-      application: Application
-      reportingDate: date
-    */
-    getWeekData: function(params, callback, errback) {
-        return apiCall('Application.getWeekData', params, (callback || null), (errback || null));
     },
 
     /*
@@ -132,16 +112,6 @@ Api.Course = {
     },
 
     /*
-    Update a course
-    Parameters:
-      course: Course
-      data: array
-    */
-    update: function(params, callback, errback) {
-        return apiCall('Course.update', params, (callback || null), (errback || null));
-    },
-
-    /*
     List courses by center
     Parameters:
       center: Center
@@ -150,16 +120,6 @@ Api.Course = {
     */
     allForCenter: function(params, callback, errback) {
         return apiCall('Course.allForCenter', params, (callback || null), (errback || null));
-    },
-
-    /*
-    Get the weekly data for an course
-    Parameters:
-      course: Course
-      reportingDate: date
-    */
-    getWeekData: function(params, callback, errback) {
-        return apiCall('Course.getWeekData', params, (callback || null), (errback || null));
     },
 
     /*

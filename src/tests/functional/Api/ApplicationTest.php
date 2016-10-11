@@ -114,77 +114,6 @@ class ApplicationTest extends FunctionalTestAbstract
         ];
     }
 
-    public function testUpdate()
-    {
-        $parameters = [
-            'method' => 'Application.update',
-            'application' => $this->application->id,
-            'data' => [
-                'phone' => '555-555-5678',
-                'email' => 'testers@tmlpstats.com',
-                'lastName' => 'McTester',
-            ],
-        ];
-
-        $expectedResponse = $this->application->load('person')->toArray();
-        $expectedResponse['person']['phone'] = $parameters['data']['phone'];
-        $expectedResponse['person']['email'] = $parameters['data']['email'];
-        $expectedResponse['person']['lastName'] = $parameters['data']['lastName'];
-
-        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
-    }
-
-    /**
-     * @dataProvider providerGetWeekData
-     */
-    public function testGetWeekData($reportingDate = null)
-    {
-        $parameters = [
-            'method' => 'Application.getWeekData',
-            'application' => $this->application->id,
-            'reportingDate' => $reportingDate,
-        ];
-
-        if (!$reportingDate) {
-            // Passed into api as null, but will resolve to this
-            $reportingDate = Carbon::parse('this friday', $this->center->timezone)
-                ->startOfDay()
-                ->toDateString();
-        }
-
-        $report = $this->report->toArray();
-        $applicationDataId = $this->applicationData->id;
-        if ($reportingDate != $this->report->reportingDate->toDateString()) {
-            $report['id'] += 1;
-            $report['reportingDate'] = "{$reportingDate} 00:00:00";
-            $report['version'] = 'api';
-
-            $applicationDataId = Models\TmlpRegistrationData::count() + 1;
-        }
-
-        $expectedResponse = [
-            'tmlpRegistrationId' => $this->application->id,
-            'id' => $applicationDataId,
-            'registration' => $this->application->toArray(),
-            'incomingQuarter' => null,
-            'withdrawCode' => null,
-            'committedTeamMember' => null,
-            'statsReportId' => $report['id'],
-            //'statsReport' => $report,
-        ];
-
-        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
-    }
-
-    public function providerGetWeekData()
-    {
-        return [
-            ['2016-04-08'], // Non-existent report
-            ['2016-04-15'], // Existing report
-            [], // No date provided
-        ];
-    }
-
     /**
      * @dataProvider providerStash
      */
@@ -309,8 +238,8 @@ class ApplicationTest extends FunctionalTestAbstract
         ];
 
         $this->post('/api', $parameters, $this->headers)
-            ->seeJsonHas($expectedResponse)
-            ->seeStatusCode(400);
+             ->seeJsonHas($expectedResponse)
+             ->seeStatusCode(400);
     }
 
     /**
@@ -481,15 +410,14 @@ class ApplicationTest extends FunctionalTestAbstract
         ];
 
         $this->post('/api', $parameters, $this->headers)
-            ->seeJsonHas($expectedResponse)
-            ->seeStatusCode(400);
+             ->seeJsonHas($expectedResponse)
+             ->seeStatusCode(400);
     }
 
     public function providerApiThrowsExceptionForInvalidDate()
     {
         return [
             ['Application.allForCenter'],
-            ['Application.getWeekData'],
             ['Application.stash'],
         ];
     }
@@ -517,7 +445,7 @@ class ApplicationTest extends FunctionalTestAbstract
         ];
 
         $this->post('/api', $parameters, $this->headers)
-            ->seeJsonHas($expectedResponse)
-            ->seeStatusCode(400);
+             ->seeJsonHas($expectedResponse)
+             ->seeStatusCode(400);
     }
 }

@@ -55,13 +55,6 @@ api:
         params:
           - name: data
             type: array
-      update:
-        desc: Update an application
-        params:
-          - name: application
-            type: Application
-          - name: data
-            type: array
       allForCenter:
         desc: List applications by center
         params:
@@ -72,14 +65,6 @@ api:
             required: false
           - name: includeInProgress
             type: bool
-            required: false
-      getWeekData:
-        desc: Get the weekly data for an application
-        params:
-          - name: application
-            type: Application
-          - name: reportingDate
-            type: date
             required: false
       stash:
         desc: Stash combined data for an application
@@ -117,13 +102,6 @@ api:
         params:
           - name: data
             type: array
-      update:
-        desc: Update a course
-        params:
-          - name: course
-            type: Course
-          - name: data
-            type: array
       allForCenter:
         desc: List courses by center
         params:
@@ -134,14 +112,6 @@ api:
             required: false
           - name: includeInProgress
             type: bool
-            required: false
-      getWeekData:
-        desc: Get the weekly data for an course
-        params:
-          - name: course
-            type: Course
-          - name: reportingDate
-            type: date
             required: false
       stash:
         desc: Stash combined data for an course

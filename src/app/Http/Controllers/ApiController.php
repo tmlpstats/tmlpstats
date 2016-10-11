@@ -20,17 +20,13 @@ class ApiController extends ApiControllerBase
     protected $methods = [
         "Admin.Region.getRegion" => "Admin__Region__getRegion",
         "Application.create" => "Application__create",
-        "Application.update" => "Application__update",
         "Application.allForCenter" => "Application__allForCenter",
-        "Application.getWeekData" => "Application__getWeekData",
         "Application.stash" => "Application__stash",
         "Context.getCenter" => "Context__getCenter",
         "Context.setCenter" => "Context__setCenter",
         "Context.getSetting" => "Context__getSetting",
         "Course.create" => "Course__create",
-        "Course.update" => "Course__update",
         "Course.allForCenter" => "Course__allForCenter",
-        "Course.getWeekData" => "Course__getWeekData",
         "Course.stash" => "Course__stash",
         "GlobalReport.getRating" => "GlobalReport__getRating",
         "GlobalReport.getQuarterScoreboard" => "GlobalReport__getQuarterScoreboard",
@@ -81,26 +77,12 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'data', 'array')
         );
     }
-    protected function Application__update($input)
-    {
-        return App::make(Api\Application::class)->update(
-            $this->parse($input, 'application', 'Application'),
-            $this->parse($input, 'data', 'array')
-        );
-    }
     protected function Application__allForCenter($input)
     {
         return App::make(Api\Application::class)->allForCenter(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date', false),
             $this->parse($input, 'includeInProgress', 'bool', false)
-        );
-    }
-    protected function Application__getWeekData($input)
-    {
-        return App::make(Api\Application::class)->getWeekData(
-            $this->parse($input, 'application', 'Application'),
-            $this->parse($input, 'reportingDate', 'date', false)
         );
     }
     protected function Application__stash($input)
@@ -136,26 +118,12 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'data', 'array')
         );
     }
-    protected function Course__update($input)
-    {
-        return App::make(Api\Course::class)->update(
-            $this->parse($input, 'course', 'Course'),
-            $this->parse($input, 'data', 'array')
-        );
-    }
     protected function Course__allForCenter($input)
     {
         return App::make(Api\Course::class)->allForCenter(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date', false),
             $this->parse($input, 'includeInProgress', 'bool', false)
-        );
-    }
-    protected function Course__getWeekData($input)
-    {
-        return App::make(Api\Course::class)->getWeekData(
-            $this->parse($input, 'course', 'Course'),
-            $this->parse($input, 'reportingDate', 'date', false)
         );
     }
     protected function Course__stash($input)

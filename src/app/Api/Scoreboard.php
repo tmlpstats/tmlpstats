@@ -84,7 +84,7 @@ class Scoreboard extends AuthenticatedApiBase
         $submissionData = App::make(SubmissionData::class);
         $submissionData->store($center, $reportingDate, $scoreboard);
 
-        $report = LocalReport::getStatsReport($center, $reportingDate);
+        $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $scoreboard, $reportingDate->toDateString());
 
         return [

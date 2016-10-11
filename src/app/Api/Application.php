@@ -43,20 +43,6 @@ class Application extends ApiBase
         $application->person->save();
         $application->save();
 
-        // Make sure we have a data object for the new course so we can get it's data later
-        $this->getWeekData($application);
-
-        return $application->load('person');
-    }
-
-    public function update(Models\TmlpRegistration $application, array $data)
-    {
-        $teamApp = Domain\TeamApplication::fromArray($data);
-        $teamApp->fillModel(null, $application);
-
-        $application->person->save();
-        $application->save();
-
         return $application->load('person');
     }
 
@@ -88,7 +74,7 @@ class Application extends ApiBase
         }
 
         // Pick up any applications that are new this week
-        $thisReport = LocalReport::getStatsReport($center, $reportingDate, true);
+        $thisReport = LocalReport::ensureStatsReport($center, $reportingDate, true);
         foreach ($thisReport->tmlpRegistrationData() as $app) {
             if (isset($allApplications[$app->tmlpRegistrationId])) {
                 continue;
@@ -115,49 +101,6 @@ class Application extends ApiBase
         });
 
         return array_values($allApplications);
-    }
-
-    public function getWeekData(Models\TmlpRegistration $application, Carbon $reportingDate = null)
-    {
-        if ($reportingDate === null) {
-            $reportingDate = LocalReport::getReportingDate($application->center);
-        } else {
-            App::make(SubmissionCore::class)->checkCenterDate($application->center, $reportingDate);
-        }
-
-        $getUnsubmitted = $reportingDate->gte(Carbon::now($application->center->timezone)->startOfDay());
-
-        $report = LocalReport::getStatsReport($application->center, $reportingDate, $getUnsubmitted);
-
-        $response = Models\TmlpRegistrationData::firstOrNew([
-            'tmlp_registration_id' => $application->id,
-            'stats_report_id' => $report->id,
-        ]);
-
-        // If we're creating a new data object now, pre-populate it with data from last week
-        if (!$response->exists) {
-
-            $lastWeeksReport = Models\StatsReport::byCenter($application->center)
-                ->reportingDate($reportingDate->copy()->subWeek())
-                ->official()
-                ->first();
-
-            // It's the center's first official report or they didn't submit last week
-            $lastWeeksData = null;
-            if ($lastWeeksReport) {
-                $lastWeeksData = Models\TmlpRegistrationData::byStatsReport($lastWeeksReport)
-                    ->ByRegistration($application)
-                    ->first();
-            }
-
-            if ($lastWeeksData) {
-                $response->mirror($lastWeeksData);
-            }
-
-            $response->save();
-        }
-
-        return $response->load('registration.person', 'incomingQuarter', 'statsReport', 'withdrawCode', 'committedTeamMember.person');
     }
 
     /**
@@ -189,7 +132,7 @@ class Application extends ApiBase
         }
         $submissionData->store($center, $reportingDate, $teamApp);
 
-        $report = LocalReport::getStatsReport($center, $reportingDate);
+        $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $teamApp, $appId);
 
         return [
@@ -208,7 +151,7 @@ class Application extends ApiBase
      */
     public function commitStashedApp(Models\TmlpRegistration $application, Carbon $reportingDate, Domain\TeamApplication $data)
     {
-        $report = LocalReport::getStatsReport($application->center, $reportingDate);
+        $report = LocalReport::ensureStatsReport($application->center, $reportingDate);
 
         $applicationData = Models\TmlpRegistrationData::firstOrCreate([
             'tmlp_registration_id' => $application->id,
@@ -276,6 +219,7 @@ class Application extends ApiBase
     public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
     {
         $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\TeamApplication::class);
+
         return array_flatten($collection->getDictionary());
     }
 

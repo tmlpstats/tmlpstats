@@ -172,7 +172,7 @@ class LocalReport extends ApiBase
         return $courses;
     }
 
-    public function getLastStatsReportSince(Models\Center $center, Carbon $reportingDate, $flags=[])
+    public function getLastStatsReportSince(Models\Center $center, Carbon $reportingDate, $flags = [])
     {
         $quarter = static::quarterForCenterDate($center, $reportingDate);
 
@@ -188,7 +188,7 @@ class LocalReport extends ApiBase
         return $query->first();
     }
 
-    public static function getStatsReport(Models\Center $center, Carbon $reportingDate, $requireNew = true)
+    public static function ensureStatsReport(Models\Center $center, Carbon $reportingDate, $requireNew = true)
     {
         $quarter = static::quarterForCenterDate($center, $reportingDate);
 

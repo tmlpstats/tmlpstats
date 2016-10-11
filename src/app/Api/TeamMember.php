@@ -163,7 +163,7 @@ class TeamMember extends AuthenticatedApiBase
     {
         $this->assertAuthz($this->context->can('submitStats', $teamMember->person->center));
 
-        $report = LocalReport::getStatsReport($teamMember->center, $reportingDate);
+        $report = LocalReport::ensureStatsReport($teamMember->center, $reportingDate);
 
         $teamMemberData = Models\TeamMemberData::firstOrCreate([
             'team_member_id' => $teamMember->id,
