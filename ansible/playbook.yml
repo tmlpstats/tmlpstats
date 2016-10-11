@@ -18,7 +18,7 @@
     file: path=/var/www state=directory
 
   - name: install misc packages
-    apt: name={{ item }} state=latest
+    apt: name={{ item }} state=latest install_recommends=no
     with_items:
       - git
       - curl
@@ -42,12 +42,12 @@
   # Memcached
 
   - name: ensure memcached is installed
-    apt: name=memcached state=latest
+    apt: name=memcached state=latest install_recommends=no
 
   # Apache2
 
   - name: ensure apache is installed
-    apt: name=apache2 state=present
+    apt: name=apache2 state=present install_recommends=no
 
   # Apache2: Enable Modules
 
@@ -79,7 +79,7 @@
   # MySQL
 
   - name: install MySQL
-    apt: name={{ item }} state=latest
+    apt: name={{ item }} state=latest install_recommends=no
     with_items:
       - mysql-server-5.5
       - mysql-client-5.5
@@ -110,7 +110,7 @@
     apt_repository: repo='ppa:ondrej/php5-5.6'
 
   - name: install PHP5 packages
-    apt: name={{ item }} state=latest
+    apt: name={{ item }} state=latest install_recommends=no
     with_items:
       - php5
       - libapache2-mod-php5
@@ -149,33 +149,77 @@
 
   # Install dependencies
 
-  # This makes sure bower can access the nodejs executable
-  - file: src=/usr/bin/nodejs dest=/usr/bin/node state=link
+  # Install/upgrade versions of nodeJS and npm
+  - block:
+      - name: Install 'n'
+        command: /usr/bin/npm install -g n
+        args:
+          creates: /usr/local/bin/n
+
+      - name: Switch to n stable
+        command: n stable
+        args:
+          creates: /usr/local/bin/node
+
+      - name: Install the new npm
+        command: npm install -g npm
+        args:
+          creates: /usr/local/bin/npm
+
+      - name: Install bower package manager
+        command: /usr/local/bin/npm install -g bower
+        args:
+          creates: /usr/local/bin/gulp
+
+      - name: Install gulp
+        command: /usr/local/bin/npm install -g gulp-cli
+        args:
+          creates: /usr/local/bin/gulp
+
 
   # This helps maintain the cache and authtokens between box destroys
   - file: path=/vagrant/.composer state=directory
   - file: src=/vagrant/.composer dest=/home/vagrant/.composer state=link
 
-  - name: Download Composer
-    get_url:
-      url: https://getcomposer.org/installer
-      dest: /tmp/composer-installer.php
-      mode: 0755
+  - when: "not '/usr/local/bin/composer'|exists"
+    block:
+      - name: Download Composer
+        get_url:
+          url: https://getcomposer.org/installer
+          dest: /tmp/composer-installer.php
+          mode: 0755
 
-  - name: Install Composer
-    command: php composer-installer.php chdir=/tmp creates=/usr/local/bin/composer
+      - name: Install Downloaded Composer
+        command: php composer-installer.php chdir=/tmp creates=/usr/local/bin/composer
 
-  - name: Move Composer into globally-accessible location.
-    shell: mv /tmp/composer.phar /usr/local/bin/composer creates=/usr/local/bin/composer
+      - name: Move Composer into globally-accessible location.
+        shell: mv /tmp/composer.phar /usr/local/bin/composer creates=/usr/local/bin/composer
 
-  - name: Run composer install
-    shell: cd /var/www/tmlpstats.com && composer install
+  #- block:
 
-  - name: Install bower package manager
-    shell: cd /var/www/tmlpstats.com && npm install bower -g
+  - become: true
+    become_user: vagrant
+    block:
+      - name: Run composer install
+        command: composer install
+        args:
+          chdir: /var/www/tmlpstats.com
 
-  - name: Run bower install
-    shell: cd /var/www/tmlpstats.com && bower install --allow-root
+      - name: Run npm install
+        command: npm install
+        args:
+          chdir: /vagrant/src
+
+      - name: Run bower install
+        command: bower install
+        args:
+          chdir: /var/www/tmlpstats.com
+
+      - name: Run gulp if bundle.js is missing
+        command: gulp
+        args:
+          chdir: /var/www/tmlpstats.com
+          creates: /var/www/tmlpstats.com/public/js/bundle.js
 
   # Run Laravel Default Admin seeder
 
