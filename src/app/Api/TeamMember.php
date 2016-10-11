@@ -87,7 +87,7 @@ class TeamMember extends AuthenticatedApiBase
         }
         $submissionData->store($center, $reportingDate, $domain);
 
-        $report = LocalReport::getStatsReport($center, $reportingDate);
+        $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $domain, $teamMemberId);
 
         return [

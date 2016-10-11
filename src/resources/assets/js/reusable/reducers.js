@@ -47,12 +47,11 @@ export class LoadingMultiState {
 }
 
 const REPLACE_MESSAGES = 'messageManager/replace'
-const CLEAR_MESSAGES = 'messageManager/clear'
 const REPLACE_ALL_MESSAGES = 'messageManager/reset'
 
 export class MessageManager {
     constructor(namespace) {
-         this.namespace = namespace
+        this.namespace = namespace
     }
 
     reducer() {
@@ -87,6 +86,7 @@ const INLINE_BULK_DEFAULT = {ts: 0, changed: {}, working: null}
 const IB_MARK = 'mark'
 const IB_BEGIN_WORK = 'begin_work'
 const IB_END_WORK = 'end_work'
+const IB_CLEAR_WORK = 'clear_work'
 
 /** Tracks bulk update work to some resource with a primary key. The idea is that we'd be live updating something. */
 export class InlineBulkWork {

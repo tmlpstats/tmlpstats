@@ -1,5 +1,5 @@
 import { objectAssign } from '../../reusable/ponyfill'
-import { LoadingMultiState } from '../../reusable/reducers'
+import { LoadingMultiState, MessageManager } from '../../reusable/reducers'
 
 export const SCOREBOARDS_FORM_KEY = 'submission.scoreboard.scoreboards'
 export const SCOREBOARD_SAVED = 'scoreboard/saved'
@@ -19,3 +19,5 @@ export function annotateScoreboards(scoreboards) {
         return objectAssign({}, sb, {meta: meta})
     })
 }
+
+export const messages = new MessageManager('scoreboard')

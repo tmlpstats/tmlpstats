@@ -4,11 +4,11 @@ import { Promise, objectAssign } from '../../reusable/ponyfill'
 // NORMAL CODE
 import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
-
 import { Field } from 'react-redux-form'
+import moment from 'moment'
 
 import { SubmissionBase, React } from '../base_components'
-import { Form, SimpleField, SimpleSelect, AddOneLink } from '../../reusable/form_utils'
+import { Form, SimpleField, AddOneLink } from '../../reusable/form_utils'
 import { ModeSelectButtons, SubmitFlip, MessagesComponent } from '../../reusable/ui_basic'
 
 import { COURSES_FORM_KEY } from './reducers'
@@ -55,7 +55,7 @@ class CoursesIndexView extends CoursesBase {
 
             courses.push(
                 <tr key={key}>
-                    <td><Link to={`${baseUri}/courses/edit/${key}`}>{startDate.format("MMM D, YYYY")}</Link></td>
+                    <td><Link to={`${baseUri}/courses/edit/${key}`}>{startDate.format('MMM D, YYYY')}</Link></td>
                     <td className="data-point">{type}</td>
                     <td>{location}</td>
                     <td className="data-point">{ter}</td>

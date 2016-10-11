@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Form, Field } from 'react-redux-form'
+import moment from 'moment'
 
 import { shallowArrayElementsEqual } from '../../reusable/compare'
 import { delayDispatch } from '../../reusable/dispatch'
@@ -107,7 +108,7 @@ class ScoreboardRow extends SubmissionBase {
                 classes += ' currentWeek'
             }
 
-            headingsA.push(<th key={sb.week} colSpan="2" className={classes}>{sb.week}</th>)
+            headingsA.push(<th key={sb.week} colSpan="2" className={classes}>{moment(sb.week).format('MMM D, YYYY')}</th>)
             headingsB.push(<th key={scoreboard.key('P')} className="info">P</th>)
             headingsB.push(<th key={scoreboard.key('A')} className="">A</th>)
         })

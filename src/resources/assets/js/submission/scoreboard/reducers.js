@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux'
 import { modelReducer, formReducer } from 'react-redux-form'
 
-import { SCOREBOARDS_FORM_KEY, SCOREBOARD_SAVED, scoreboardLoad, scoreboardSave } from './data'
+import { SCOREBOARDS_FORM_KEY, SCOREBOARD_SAVED, scoreboardLoad, scoreboardSave, messages } from './data'
 
 const sfLength = SCOREBOARDS_FORM_KEY.length
 
@@ -33,5 +33,6 @@ export const scoreboardReducer = combineReducers({
     loading: scoreboardLoad.reducer(),
     saving: scoreboardSave.reducer(),
     scoreboards: modelReducer(SCOREBOARDS_FORM_KEY),
-    scoreboardsForm: formReducer(SCOREBOARDS_FORM_KEY)
+    scoreboardsForm: formReducer(SCOREBOARDS_FORM_KEY),
+    messages: messages.reducer(),
 })

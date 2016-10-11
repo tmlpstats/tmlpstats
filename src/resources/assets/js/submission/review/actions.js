@@ -8,7 +8,6 @@ const bogusManager = new MessageManager('bogus')
 export function getValidationMessages(center, reportingDate) {
     return (dispatch) => {
         return Api.ValidationData.validate({center, reportingDate}).then((data) => {
-            console.log(data)
             dispatch(setMessages(data.messages))
             PAGES_CONFIG.forEach((config) => {
                 // For each page, send the values to the downstream message reducers so that when we
@@ -26,10 +25,7 @@ export function getValidationMessages(center, reportingDate) {
                     dispatch(bogusManager.replaceAll(keyedMessages, config.key))
                 }
             })
-            console.log('finished setup')
             return data
-        }).catch((err) => {
-            console.log(err)
         })
     }
 }
