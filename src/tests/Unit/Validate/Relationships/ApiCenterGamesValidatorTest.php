@@ -3,12 +3,11 @@ namespace TmlpStats\Tests\Unit\Validate\Relationships;
 
 use Carbon\Carbon;
 use Faker\Factory;
-use TmlpStats as Models;
+use stdClass;
 use TmlpStats\Domain;
 use TmlpStats\Tests\Unit\Traits;
 use TmlpStats\Tests\Unit\Validate\ApiValidatorTestAbstract;
 use TmlpStats\Validate\Relationships\ApiCenterGamesValidator;
-use stdClass;
 
 class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
 {
@@ -28,7 +27,7 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
         'level' => 'error',
         'reference' => [
             'id' => '2016-09-02',
-            'type' => 'scoreboard',
+            'type' => 'Scoreboard',
             'promiseType' => 'actual',
         ],
     ];
@@ -363,7 +362,7 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
             // Create a list of quarter starting approved applications for function mock
             if ($appDomain->apprDate && $appDomain->apprDate->lte(Carbon::parse('2016-08-19'))) {
                 $appModel = new stdClass();
-                $registration = new stdClass;
+                $registration = new stdClass();
                 $registration->teamYear = $app['teamYear'];
 
                 $appModel->registration = $registration;
@@ -393,8 +392,8 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
 
         $validator = $this->getObjectMock();
         $validator->expects($this->once())
-            ->method('getQuarterStartingApprovedApplications')
-            ->willReturn($this->qStartApps);
+                  ->method('getQuarterStartingApprovedApplications')
+                  ->willReturn($this->qStartApps);
 
         $result = $validator->run($this->data);
 
@@ -505,7 +504,6 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
         ];
     }
 
-
     public function testRunSkipsValidationIfCurrentWeekScoreboardIsMissing()
     {
         foreach ($this->scoreboardData as $scoreboard) {
@@ -518,7 +516,7 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
 
         $validator = $this->getObjectMock();
         $validator->expects($this->never())
-            ->method('getQuarterStartingApprovedApplications');
+                  ->method('getQuarterStartingApprovedApplications');
 
         $result = $validator->run($this->data);
 

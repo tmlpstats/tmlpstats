@@ -7,9 +7,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use TmlpStats as Models;
 use TmlpStats\Api;
-use TmlpStats\Domain;
 use TmlpStats\Tests\Functional\FunctionalTestAbstract;
-use TmlpStats\Tests\Mocks\MockContext;
 
 class ValidationDataTest extends FunctionalTestAbstract
 {
@@ -56,7 +54,6 @@ class ValidationDataTest extends FunctionalTestAbstract
         $this->application = factory(Models\TmlpRegistration::class)->create([
             'reg_date' => Carbon::parse('2016-04-01'),
         ]);
-
 
         $this->lastWeekApplicationData = Models\TmlpRegistrationData::firstOrCreate([
             'tmlp_registration_id' => $this->application->id,
@@ -191,21 +188,21 @@ class ValidationDataTest extends FunctionalTestAbstract
             'success' => true,
             'valid' => false,
             'messages' => [
-                'courses' => [
+                'Course' => [
                     [
                         'id' => 'COURSE_CURRENT_SS_GREATER_THAN_CURRENT_TER',
                         'reference' => [
                             'id' => $this->course->id,
-                            'type' => 'course',
+                            'type' => 'Course',
                         ],
                     ],
                 ],
-                'scoreboard' => [
+                'Scoreboard' => [
                     [
                         'id' => 'GENERAL_MISSING_VALUE',
                         'reference' => [
                             'id' => $reportingDate->toDateString(),
-                            'type' => 'scoreboard',
+                            'type' => 'Scoreboard',
                             'promiseType' => 'actual',
                             'game' => 'lf',
                         ],
@@ -289,7 +286,7 @@ class ValidationDataTest extends FunctionalTestAbstract
             'success' => true,
             'valid' => false,
             'messages' => [
-                'scoreboard' => [
+                'Scoreboard' => [
                     ['id' => 'GENERAL_MISSING_VALUE'], // Missing Promises
                     ['id' => 'GENERAL_MISSING_VALUE'],
                     ['id' => 'GENERAL_MISSING_VALUE'],
@@ -307,7 +304,7 @@ class ValidationDataTest extends FunctionalTestAbstract
                         'level' => 'error',
                         'reference' => [
                             'id' => $reportingDate->toDateString(),
-                            'type' => 'scoreboard',
+                            'type' => 'Scoreboard',
                         ],
                     ],
                 ],
@@ -376,7 +373,7 @@ class ValidationDataTest extends FunctionalTestAbstract
 
         $headers = ['Accept' => 'application/json'];
         $this->post('/api', $parameters, $headers)
-            ->seeJsonHas($expectedResponse)
-            ->seeStatusCode(400);
+             ->seeJsonHas($expectedResponse)
+             ->seeStatusCode(400);
     }
 }
