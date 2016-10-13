@@ -59,6 +59,38 @@ export default class Review extends SubmissionBase {
 }
 
 export class ReviewCategory extends React.PureComponent {
+
+    getDisplayValue(id, pageData, config) {
+        let displayValue
+        let refObject
+
+        switch (config.className) {
+        case 'Application':
+            refObject = pageData.applications.collection[id]
+            if (refObject) {
+                displayValue = `${refObject.firstName} ${refObject.lastName}`
+            }
+            break
+        case 'Course':
+            refObject = pageData.courses.collection[id]
+            if (refObject) {
+                displayValue = refObject.type + ' on ' + moment(refObject.startDate).format('MMM D, YYYY')
+            }
+            break
+        case 'TeamMember':
+            refObject = pageData.teamMembers.data.collection[id]
+            if (refObject) {
+                displayValue = `${refObject.firstName} ${refObject.lastName}`
+            }
+            break
+        case 'Scoreboard':
+            displayValue = 'Week of ' + moment(id).format('MMM D, YYYY')
+            break
+        }
+
+        return displayValue
+    }
+
     render() {
         const { config, baseUri, pageData } = this.props
         // Loop each message to create an entry
@@ -87,31 +119,8 @@ export class ReviewCategory extends React.PureComponent {
                     </div>
                 )
             })
-            let displayValue
-            let refObject
-            switch (config.className) {
-            case 'Application':
-                refObject = pageData.applications.collection[firstMessage.reference.id]
-                if (refObject) {
-                    displayValue = `${refObject.firstName} ${refObject.lastName}`
-                }
-                break
-            case 'Course':
-                refObject = pageData.courses.collection[firstMessage.reference.id]
-                if (refObject) {
-                    displayValue = refObject.type + ' on ' + moment(refObject.startDate).format('MMM D, YYYY')
-                }
-                break
-            case 'Scoreboard':
-                displayValue = 'Week of ' + moment(firstMessage.reference.id).format('MMM D, YYYY')
-                break
-            case 'TeamMember':
-                refObject = pageData.teamMembers.data.collection[firstMessage.reference.id]
-                if (refObject) {
-                    displayValue = `${refObject.firstName} ${refObject.lastName}`
-                }
-                break
-            }
+
+            const displayValue = this.getDisplayValue(firstMessage.reference.id, pageData, config)
 
             messages.push(
                 <li key={id}>
