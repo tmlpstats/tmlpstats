@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, IndexRedirect } from 'react-router'
+import { Route, IndexRedirect, Redirect } from 'react-router'
 import * as Pages from './pages'
 
 export default function SubmissionFlow() {
@@ -16,7 +16,8 @@ export default function SubmissionFlow() {
             <Route path="courses" component={Pages.CoursesIndex} />
             <Route path="courses/edit/:courseId" component={Pages.CoursesEdit} />
             <Route path="courses/add" component={Pages.CoursesAdd} />
-            <Route path="qtr_accountabilities" component={Pages.QuarterAccountabilities} />
+            <Redirect from="qtr_accountabilities" to="next_qtr_accountabilities" />
+            <Route path="next_qtr_accountabilities" component={Pages.QuarterAccountabilities} />
             <Route path="review" component={Pages.Review} />
         </Route>
     )

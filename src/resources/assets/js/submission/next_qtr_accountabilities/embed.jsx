@@ -19,6 +19,6 @@ export default class Blah extends Component {
         if (!centerId || !checkCoreData(centerId, reportingDate, core, dispatch)) {
             return <div>Loading...</div>
         }
-        return <QuarterAccountabilitiesTable />
+        return <QuarterAccountabilitiesTable params={{centerId, reportingDate}} />
     }
 }

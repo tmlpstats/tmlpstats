@@ -287,6 +287,30 @@ Api.Scoreboard = {
     setScoreboardLockQuarter: bac('Scoreboard.setScoreboardLockQuarter')
 }
 
+Api.Submission = {
+}
+
+Api.Submission.NextQtrAccountability = {
+
+    /*
+    Get team member data for a center-reportingDate, optionally including in-progress data
+    Parameters:
+      center: Center
+      reportingDate: date
+      includeInProgress: bool
+    */
+    allForCenter: bac('Submission.NextQtrAccountability.allForCenter'),
+
+    /*
+    Stash data for in-progress Team Member weekly
+    Parameters:
+      center: Center
+      reportingDate: date
+      data: array
+    */
+    stash: bac('Submission.NextQtrAccountability.stash')
+}
+
 Api.SubmissionCore = {
 
     /*

@@ -3,8 +3,11 @@
 @import 'node_modules/react-dates/css/variables.scss';
 @import 'node_modules/react-dates/css/styles.scss';
 
-
 @import 'bower_components/bootstrap-sass/assets/stylesheets/bootstrap';
+
+@import 'node_modules/react-bootstrap-typeahead/css/Typeahead.css';
+@import 'node_modules/react-bootstrap-typeahead/css/Token.css';
+
 
 .DateInput {
  	font-size: $font-size-base;

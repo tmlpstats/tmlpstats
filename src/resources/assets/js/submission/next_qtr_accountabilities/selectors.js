@@ -6,7 +6,7 @@ import { appsCollection } from '../applications/data'
 
 const accSelector = makeAccountabilitiesSelector('team')
 
-const chosenAccountabilities = [
+const REPROMISABLE_ACCOUNTABILITIES = [
     't1tl',
     't2tl',
     'statistician',
@@ -25,7 +25,7 @@ export const repromisableAccountabilities = createSelector(
     (ordered) => {
         // the 'name' property is actually more like a slug... create a lookup via that.
         const rekeyed = _.keyBy(ordered, 'name')
-        return chosenAccountabilities.map((id) => rekeyed[id])
+        return REPROMISABLE_ACCOUNTABILITIES.map((id) => rekeyed[id])
     }
 )
 
@@ -33,7 +33,6 @@ export const selectablePeople = createSelector(
     (state) => state.submission.core.lookups.team_members,
     (state) => state.submission.applications.applications,
     (team_members, applications) => {
-        console.log('selector', team_members, applications)
         var allNames = []
         var nameToKey = {}
         if (team_members) {
@@ -45,7 +44,6 @@ export const selectablePeople = createSelector(
         }
         if (applications && applications.collection) {
             appsCollection.iterItems(applications, (app, appId) => {
-                console.log('doApps', app)
                 const fullName = `${app.firstName} ${app.lastName} (incoming)`
                 allNames.push(fullName)
                 nameToKey[fullName] = ['application', appId]

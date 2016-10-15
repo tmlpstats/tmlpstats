@@ -33,6 +33,7 @@ class ApiProvider extends ServiceProvider
         $this->app->singleton(Api\LiveScoreboard::class);
         $this->app->singleton(Api\LocalReport::class);
         $this->app->singleton(Api\Scoreboard::class);
+        $this->app->singleton(Api\Submission\NextQtrAccountability::class);
         $this->app->singleton(Api\SubmissionCore::class);
         $this->app->singleton(Api\SubmissionData::class);
         $this->app->singleton(Api\TeamMember::class);
@@ -51,6 +52,7 @@ class ApiProvider extends ServiceProvider
             'TmlpStats\Api\LiveScoreboard',
             'TmlpStats\Api\LocalReport',
             'TmlpStats\Api\Scoreboard',
+            'TmlpStats\Api\Submission\NextQtrAccountability',
             'TmlpStats\Api\SubmissionCore',
             'TmlpStats\Api\SubmissionData',
             'TmlpStats\Api\TeamMember',

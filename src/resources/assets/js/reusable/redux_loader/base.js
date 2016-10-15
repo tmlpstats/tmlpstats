@@ -1,12 +1,12 @@
 import { combineReducers } from 'redux'
 import { LoadingMultiState } from '../reducers'
-import { bestErrorValue } from '../ajax_utils'
 import { delayDispatch } from '../dispatch'
 import { objectAssign } from '../ponyfill'
 
 const LOADER_DEFAULT_OPTS = {
     extraLMS: [],
     defaultState: {},
+    actions: {},
     setLoaded: false,
     transformData: x => x,
     successHandler: (data, {loader}) =>{
@@ -43,21 +43,32 @@ export class ReduxLoader {
         return opts? objectAssign({}, this.opts, opts) : this.opts
     }
 
-    load(params=null, opts=null) {
+    // Run a network action with defaults looking from various options.
+    // For example, for the action 'load' it will look for the callable
+    // named 'loader' and work with updating the state using action creator 'loadState'
+    runNetworkAction(action, params=null, opts=null) {
         opts = this._mergeOpts(opts)
+        let actionData
+        if (opts.actions[action]) {
+            actionData = objectAssign({}, opts, opts.actions[action])
+        } else {
+            actionData = objectAssign({api: opts.loader}, opts)
+        }
+
+        const loadAction = this[actionData.lmsName || `${action}State`] // loadState, saveState, etc
 
         return (dispatch, getState, extra) => {
-            dispatch(this.loadState('loading'))
+            dispatch(loadAction('loading'))
             const info = {dispatch, getState, extra, loader: this}
 
             const success = (data) => {
-                const tdata = opts.transformData(data, info)
-                const result = opts.successHandler(tdata, info)
+                const tdata = actionData.transformData(data, info)
+                const result = actionData.successHandler(tdata, info)
                 if (result) {
                     dispatch(result)
                 }
-                if (opts.setLoaded) {
-                    dispatch(this.loadState('loaded'))
+                if (actionData.setLoaded) {
+                    dispatch(loadAction('loaded'))
                 }
                 return tdata
             }
@@ -66,20 +77,28 @@ export class ReduxLoader {
                 if (!err.error) {
                     err = {error: err.message || err}
                 }
-                dispatch(this.loadState(err))
+                dispatch(loadAction(err))
+                throw err
             }
 
-            return this.opts.loader(params, info).then(success, failHandler)
+            // loader, saver, etc
+            return actionData.api(params, info).then(success, failHandler)
         }
     }
 
-    conditionalLoad(dispatch, data, loadParams = null) {
-        const { loading } = data
-        if (loading.state == 'new') {
-            delayDispatch(dispatch, this.load(loadParams))
+    load(...args) {
+        return this.runNetworkAction('load', ...args)
+    }
+
+    conditionalLoad(dispatch, loadState, ...loadParams) {
+        if(loadState.loadState) {
+            loadState = loadState.loadState
+        }
+        if (loadState.state == 'new') {
+            delayDispatch(dispatch, this.load(...loadParams))
             return false
         }
-        return (loading.state == 'loaded')
+        return (loadState.state == 'loaded')
     }
 
     /** A shortcut action creator for clearing out the whole collection and clearing load state. */
@@ -101,7 +120,12 @@ export class ReduxLoader {
         for (var k in this._lms) {
             reducerMap[k] = this._lms[k].reducer()
         }
+        objectAssign(reducerMap, this._extraReducers(opts))
         return combineReducers(reducerMap)
+    }
+
+    _extraReducers() {
+
     }
 }
 

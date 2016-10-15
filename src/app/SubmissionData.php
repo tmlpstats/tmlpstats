@@ -58,15 +58,20 @@ class SubmissionData extends Model
         return null;
     }
 
-    public function scopeCenterDate($query, $center, $reportingDate)
+    public function scopeCenter($query, $center)
     {
         if (!is_numeric($center)) {
             $center = $center->id;
         }
 
-        return $query
-            ->where('center_id', $center)
-            ->where('reporting_date', $reportingDate);
+        return $query->where('center_id', $center);
+    }
+
+    public function scopeCenterDate($query, $center, $reportingDate)
+    {
+
+        return $this->scopeCenter($query, $center)
+                    ->where('reporting_date', $reportingDate);
     }
 
     // Scope by either the type code or the class name representing the type code.
