@@ -7,4 +7,4 @@ export { Scoreboard, Review, SubmissionFlowRoot }
 export { ApplicationsIndex, ApplicationsEdit, ApplicationsAdd } from './applications'
 export { CoursesIndex, CoursesEdit, CoursesAdd } from './courses'
 export { TeamMembersIndex, TeamMembersEdit, TeamMembersAdd } from './team_members'
-export { QuarterAccountabilities } from './qtr_accountabilities/components'
+export { QuarterAccountabilities } from './next_qtr_accountabilities/components'

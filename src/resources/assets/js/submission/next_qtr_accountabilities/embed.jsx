@@ -3,7 +3,7 @@ import { checkCoreData } from '../core/SubmissionFlowRoot'
 import { connectRedux } from '../../reusable/dispatch'
 import { QuarterAccountabilitiesTable } from './components'
 
-// use jQuery because we can get settings this way.
+// use window object because we can get settings this way.
 const { settings } = window
 
 @connectRedux()
@@ -19,6 +19,6 @@ export default class Blah extends Component {
         if (!centerId || !checkCoreData(centerId, reportingDate, core, dispatch)) {
             return <div>Loading...</div>
         }
-        return <QuarterAccountabilitiesTable />
+        return <QuarterAccountabilitiesTable params={{centerId, reportingDate}} />
     }
 }

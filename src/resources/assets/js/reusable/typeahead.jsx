@@ -7,18 +7,11 @@
  * to work with react-redux-form.
  */
 import React, { PureComponent } from 'react'
-import { Typeahead as RTypeahead } from 'react-typeahead'
+import RTypeahead from 'react-bootstrap-typeahead'
 
 
 export class Typeahead extends PureComponent {
     static defaultProps = {
-        maxVisible: 10,
-        customClasses: {
-            input: 'form-control',
-            results: 'dropdown-menu',
-            hover: 'bg-success'
-        },
-        className: 'dropdown clearfix open'
     }
     render() {
         return <RTypeahead {...this.props} />

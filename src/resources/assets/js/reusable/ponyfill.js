@@ -6,8 +6,15 @@ export const objectAssign = require('object-assign')
 export const arrayFind = require('array-find')
 
 
-// Promise is an ES6 primitive not available in IE
-import { Promise } from 'es6-promise'
+// Promise is an ES6 primitive not available in IE. Unlike other polyfills, this one
+// does not test for a global one, so I wrote a simple test to see which to use.
+const Promise = (function() {
+    let testPromise = window.Promise
+    if (!testPromise || !testPromise.resolve || !testPromise.all || !testPromise.race) {
+        return require('es6-promise').Promise
+    }
+    return testPromise
+}())
 
 const { fetch, Request, Response, Headers } = require('fetch-ponyfill')({Promise})
 

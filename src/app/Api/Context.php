@@ -238,7 +238,11 @@ class Context
         ksort($ctx);
         $eKey = "${className}";
         foreach ($ctx as $k => $v) {
-            $eKey .= ":{$k}={$v->id}";
+            if ($v instanceof Carbon) {
+                $eKey .= ":{$k}={$v->toDateString()}";
+            } else {
+                $eKey .= ":{$k}={$v->id}";
+            }
         }
 
         if (($obj = array_get($this->encapsulations, $eKey, null)) == null) {

@@ -11,7 +11,7 @@ export const PAGES_CONFIG = [
     {key: 'applications', name: 'Team Expansion', className: 'Application'},
     {key: 'team_members', name: 'Class List', className: 'TeamMember'},
     {key: 'courses', name: 'Courses', className: 'Course'},
-    {key: 'qtr_accountabilities', name: 'Accountabilities', className: 'Accountability'},
+    {key: 'next_qtr_accountabilities', name: 'Accountabilities', className: 'NextQtrAccountability'},
     {key: 'review', name: 'Review'}
 ]
 

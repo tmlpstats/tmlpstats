@@ -5,7 +5,7 @@ import { Router } from 'react-router'
 
 import { LiveScoreboard } from './live_scoreboard'
 import { SubmissionFlow } from './submission'
-import QuarterAccountabilitiesEmbed from './submission/qtr_accountabilities/embed'
+import QuarterAccountabilitiesEmbed from './submission/next_qtr_accountabilities/embed'
 import AdminFlow from './admin/flow'
 import { store, history } from './store'
 
