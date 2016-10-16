@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 
 import { Form, CheckBox, SimpleField, BooleanSelect, BooleanSelectView, connectCustomField, SimpleSelect, SimpleFormGroup, AddOneLink } from '../../reusable/form_utils'
 import { objectAssign } from '../../reusable/ponyfill'
-import { ModeSelectButtons, SubmitFlip, Alert, MessagesComponent } from '../../reusable/ui_basic'
+import { ModeSelectButtons, SubmitFlip, Alert, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 import { delayDispatch, rebind } from '../../reusable/dispatch'
 
 import { SubmissionBase } from '../base_components'
@@ -364,7 +364,9 @@ class TeamMembersEditView extends _EditCreate {
         const { centerId, reportingDate } = this.props.params
 
         this.props.dispatch(actions.stashTeamMember(centerId, reportingDate, data)).then((result) => {
-            if (result.valid && !result.messages.length) {
+            if (!result || result.messages.length) {
+                scrollIntoView('submission-flow')
+            } else if (result.valid) {
                 this.context.router.push(this.teamMembersBaseUri())
             }
         })

@@ -241,3 +241,12 @@ export class Modal extends React.PureComponent {
         )
     }
 }
+
+export function scrollIntoView(id) {
+    if (window && window.document) {
+        const elem = window.document.getElementById(id)
+        if (elem && elem.scrollIntoView) {
+            elem.scrollIntoView()
+        }
+    }
+}

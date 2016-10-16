@@ -9,7 +9,7 @@ import moment from 'moment'
 
 import { SubmissionBase, React } from '../base_components'
 import { Form, SimpleField, AddOneLink } from '../../reusable/form_utils'
-import { ModeSelectButtons, SubmitFlip, MessagesComponent } from '../../reusable/ui_basic'
+import { ModeSelectButtons, SubmitFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
 import { COURSES_FORM_KEY } from './reducers'
 import { coursesSorts, coursesCollection, courseTypeMap, messages } from './data'
@@ -169,7 +169,9 @@ class _EditCreate extends CoursesBase {
 
             this.props.dispatch(messages.replace(data.id, result.messages))
 
-            if (result.valid) {
+            if (result.messages.length) {
+                scrollIntoView('submission-flow')
+            } else if (result.valid) {
                 this.props.router.push(this.baseUri() + '/courses')
             }
         })
