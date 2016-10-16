@@ -2,6 +2,7 @@
 import { actions as formActions } from 'react-redux-form'
 
 import { getMessages } from '../../reusable/ajax_utils'
+import { scrollIntoView } from '../../reusable/ui_basic'
 import Api from '../../api'
 import { coursesCollection, coursesLoad, saveCourseLoad, messages } from './data'
 
@@ -53,6 +54,7 @@ export function saveCourse(center, reportingDate, data) {
         }).catch((err) => {
             dispatch(messages.replace(data.id, getMessages(err)))
             reset()
+            scrollIntoView('submission-flow')
         })
     }
 }

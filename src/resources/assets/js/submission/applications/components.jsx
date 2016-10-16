@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 
 import { Form, SimpleField, SimpleSelect, AddOneLink } from '../../reusable/form_utils'
 import { Promise, objectAssign } from '../../reusable/ponyfill'
-import { ModeSelectButtons, LoadStateFlip, MessagesComponent } from '../../reusable/ui_basic'
+import { ModeSelectButtons, LoadStateFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
 import { SubmissionBase, React } from '../base_components'
 import { APPLICATIONS_FORM_KEY } from './reducers'
@@ -160,7 +160,9 @@ class _EditCreate extends ApplicationsBase {
 
             this.props.dispatch(messages.replace(data.id, result.messages))
 
-            if (result.valid) {
+            if (result.messages.length) {
+                scrollIntoView('submission-flow')
+            } else if (result.valid) {
                 this.props.router.push(this.baseUri() + '/applications')
             }
         })

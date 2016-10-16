@@ -1,8 +1,10 @@
+import moment from 'moment'
+
 import { SubmissionBase, React } from '../base_components'
 import { PAGES_CONFIG } from '../core/data'
 import { connectRedux } from '../../reusable/dispatch'
 import { Link } from 'react-router'
-import * as actions from './actions'
+import { loadPairs } from './data'
 
 const CLASSES = {error: 'bg-danger', warning: 'bg-warning'}
 
@@ -12,17 +14,38 @@ export default class Review extends SubmissionBase {
         return state.submission
     }
 
-    initializeMessages() {
+    checkLoading() {
         const { centerId, reportingDate } = this.props.params
-        this.props.dispatch(actions.getValidationMessages(centerId, reportingDate))
+        let alreadyLoaded = true
+
+        loadPairs.forEach((pair) => {
+            const handler = pair[0]
+            const loadState = pair[1](this.props)
+            if (!loadState.loaded && loadState.available) {
+                // if it's not available someone else has already started loading
+                this.props.dispatch(handler(centerId, reportingDate))
+                alreadyLoaded = false
+            }
+        })
+
+        return alreadyLoaded
     }
 
     render() {
+        if (!this.checkLoading()) {
+            return this.renderBasicLoading()
+        }
+
         let categories = []
         PAGES_CONFIG.forEach((config) => {
-            const rawMessages = this.props[config.key].messages
+            const pageData = this.props[config.key]
+            const rawMessages = pageData.messages
             if (rawMessages) {
-                categories.push(<ReviewCategory key={config.key} baseUri={this.baseUri()} config={config} messages={rawMessages}/>)
+                categories.push(<ReviewCategory key={config.key}
+                                                baseUri={this.baseUri()}
+                                                config={config}
+                                                messages={rawMessages}
+                                                pageData={pageData}/>)
             }
         })
 
@@ -36,18 +59,58 @@ export default class Review extends SubmissionBase {
 }
 
 export class ReviewCategory extends React.PureComponent {
+
+    getDisplayValue(id, pageData, config) {
+        let displayValue
+        let refObject
+
+        switch (config.className) {
+        case 'Application':
+            refObject = pageData.applications.collection[id]
+            if (refObject) {
+                displayValue = `${refObject.firstName} ${refObject.lastName}`
+            }
+            break
+        case 'Course':
+            refObject = pageData.courses.collection[id]
+            if (refObject) {
+                displayValue = refObject.type + ' on ' + moment(refObject.startDate).format('MMM D, YYYY')
+            }
+            break
+        case 'TeamMember':
+            refObject = pageData.teamMembers.data.collection[id]
+            if (refObject) {
+                displayValue = `${refObject.firstName} ${refObject.lastName}`
+            }
+            break
+        case 'Scoreboard':
+            displayValue = 'Week of ' + moment(id).format('MMM D, YYYY')
+            break
+        }
+
+        return displayValue
+    }
+
     render() {
-        const { config, baseUri } = this.props
+        const { config, baseUri, pageData } = this.props
         // Loop each message to create an entry
         let messages = []
 
         // messages is keyed by ID, so loop this first
         for (let id in this.props.messages) {
             const itemMessages = this.props.messages[id]
+
+            if (!itemMessages.length) {
+                continue
+            }
+
             const firstMessage = itemMessages[0]
             let uri
             if (firstMessage.reference && firstMessage.reference.id) {
-                uri = `${baseUri}/${config.key}/edit/${firstMessage.reference.id}`
+                uri = `${baseUri}/${config.key}`
+                if (config.key != 'scoreboard') {
+                    uri += `/edit/${firstMessage.reference.id}`
+                }
             }
             const info = itemMessages.map((message, idx) => {
                 return (
@@ -56,16 +119,19 @@ export class ReviewCategory extends React.PureComponent {
                     </div>
                 )
             })
+
+            const displayValue = this.getDisplayValue(firstMessage.reference.id, pageData, config)
+
             messages.push(
                 <li key={id}>
-                    <Link to={uri}>
-                        {info}
-                    </Link>
+                    <Link to={uri}>{displayValue}</Link>
+                    {info}
                 </li>
             )
-            itemMessages.forEach((message, idx) => {
+        }
 
-            })
+        if (!messages.length) {
+            return <div />
         }
 
         return (
