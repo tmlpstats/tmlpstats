@@ -7,12 +7,15 @@ use TmlpStats as Models;
 use TmlpStats\Api\Base\ApiBase;
 use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Domain;
+use TmlpStats\Traits;
 
 /**
  * Applications
  */
 class Application extends ApiBase
 {
+    use Traits\SanitizesLastNames;
+
     public function create(array $data)
     {
         $input = Domain\TeamApplication::fromArray($data, ['firstName', 'lastName', 'center', 'teamYear', 'regDate']);
@@ -100,7 +103,7 @@ class Application extends ApiBase
             return strcmp($a->firstName, $b->firstName);
         });
 
-        return array_values($allApplications);
+        return $this->sanitizeNames(array_values($allApplications));
     }
 
     /**

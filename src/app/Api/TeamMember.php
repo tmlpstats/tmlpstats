@@ -5,12 +5,15 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Domain;
+use TmlpStats\Traits;
 
 /**
  * TeamMembers
  */
 class TeamMember extends AuthenticatedApiBase
 {
+    use Traits\SanitizesLastNames;
+
     private static $omitGitwTdo = ['tdo' => true, 'gitw' => true];
 
     private function relevantReport(Models\Center $center, Carbon $reportingDate)
@@ -61,7 +64,7 @@ class TeamMember extends AuthenticatedApiBase
 
         }
 
-        return $allTeamMembers;
+        return $this->sanitizeNames($allTeamMembers);
     }
 
     /**
