@@ -33,6 +33,10 @@ trait GlobalReportDispatch {
             case 'regionsummary':
                 return 'getRegionSummary';
                 break;
+            case 'CenterStatsReports':
+            case 'centerstatsreports':
+                return 'getCenterStatsReports';
+                break;
             case 'RegionalStats':
             case 'regionalstats':
                 return 'getRegionalStats';
@@ -77,10 +81,6 @@ trait GlobalReportDispatch {
             case 'landmarkforumeffectiveness':
                 return 'getLandmarkForumEffectiveness';
                 break;
-            case 'CenterStatsReports':
-            case 'centerstatsreports':
-                return 'getCenterStatsReports';
-                break;
             case 'TmlpRegistrationsOverview':
             case 'tmlpregistrationsoverview':
                 return 'getTmlpRegistrationsOverview';
@@ -100,10 +100,6 @@ trait GlobalReportDispatch {
             case 'TmlpRegistrationsOverdue':
             case 'tmlpregistrationsoverdue':
                 return 'getTmlpRegistrationsOverdue';
-                break;
-            case 'TravelReport':
-            case 'travelreport':
-                return 'getTravelReport';
                 break;
             case 'CoursesThisWeek':
             case 'coursesthisweek':
@@ -145,6 +141,14 @@ trait GlobalReportDispatch {
             case 'tdosummary':
                 return 'getTdoSummary';
                 break;
+            case 'WithdrawReport':
+            case 'withdrawreport':
+                return 'getWithdrawReport';
+                break;
+            case 'TravelReport':
+            case 'travelreport':
+                return 'getTravelReport';
+                break;
             case 'TeamMemberStatusPotentialsOverview':
             case 'teammemberstatuspotentialsoverview':
                 return 'getTeamMemberStatusPotentialsOverview';
@@ -153,10 +157,6 @@ trait GlobalReportDispatch {
             case 'teammemberstatuspotentials':
                 return 'getTeamMemberStatusPotentials';
                 break;
-            case 'WithdrawReport':
-            case 'withdrawreport':
-                return 'getWithdrawReport';
-                break;
         }
     }
     // Get report Ratings
@@ -164,6 +164,9 @@ trait GlobalReportDispatch {
 
     // Get report At A Glance
     protected abstract function getRegionSummary();
+
+    // Get report Center Reports
+    protected abstract function getCenterStatsReports();
 
     // Get report Scoreboard
     protected abstract function getRegionalStats();
@@ -198,9 +201,6 @@ trait GlobalReportDispatch {
     // Get report LF
     protected abstract function getLandmarkForumEffectiveness();
 
-    // Get report Center Reports
-    protected abstract function getCenterStatsReports();
-
     // Get report Overview
     protected abstract function getTmlpRegistrationsOverview();
 
@@ -215,9 +215,6 @@ trait GlobalReportDispatch {
 
     // Get report Overdue
     protected abstract function getTmlpRegistrationsOverdue();
-
-    // Get report Travel Summary
-    protected abstract function getTravelReport();
 
     // Get report Completed This Week
     protected abstract function getCoursesThisWeek();
@@ -249,13 +246,16 @@ trait GlobalReportDispatch {
     // Get report Training & Development
     protected abstract function getTdoSummary();
 
+    // Get report Withdraws
+    protected abstract function getWithdrawReport();
+
+    // Get report Travel Summary
+    protected abstract function getTravelReport();
+
     // Get report Overview
     protected abstract function getTeamMemberStatusPotentialsOverview();
 
     // Get report Details
     protected abstract function getTeamMemberStatusPotentials();
-
-    // Get report Withdraws
-    protected abstract function getWithdrawReport();
 
 }
