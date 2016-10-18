@@ -7,14 +7,11 @@ const GlobalReport = {
         "WeeklySummaryGroup",
         "RegionalStatsGroup",
         "GameEffectivenessGroup",
-        "CenterStatsReports",
         "ApplicationsGroup",
-        "TravelReport",
         "CoursesGroup",
         "TeamMemberStatusGroup",
-        "TdoSummary",
-        "PotentialsGroup",
-        "WithdrawReport"
+        "TravelReport",
+        "PotentialsGroup"
     ],
     "children": {
         "RatingSummary": {
@@ -29,50 +26,58 @@ const GlobalReport = {
             "type": "report",
             "name": "At A Glance"
         },
+        "CenterStatsReports": {
+            "id": "CenterStatsReports",
+            "n": 2,
+            "type": "report",
+            "name": "Center Reports",
+            "shortName": "Centers"
+        },
         "WeeklySummaryGroup": {
             "id": "WeeklySummaryGroup",
-            "n": 2,
+            "n": 3,
             "type": "grouping",
             "name": "Weekly Summary",
             "shortName": "Summary",
             "children": [
                 "RatingSummary",
-                "RegionSummary"
+                "RegionSummary",
+                "CenterStatsReports"
             ]
         },
         "RegionalStats": {
             "id": "RegionalStats",
-            "n": 3,
+            "n": 4,
             "type": "report",
             "name": "Scoreboard"
         },
         "GamesByCenter": {
             "id": "GamesByCenter",
-            "n": 4,
+            "n": 5,
             "type": "report",
             "name": "By Center"
         },
         "RepromisesByCenter": {
             "id": "RepromisesByCenter",
-            "n": 5,
+            "n": 6,
             "type": "report",
             "name": "Repromises"
         },
         "RegPerParticipant": {
             "id": "RegPerParticipant",
-            "n": 6,
+            "n": 7,
             "type": "report",
             "name": "Reg. Per Participant"
         },
         "Gaps": {
             "id": "Gaps",
-            "n": 7,
+            "n": 8,
             "type": "report",
             "name": "Gaps"
         },
         "RegionalStatsGroup": {
             "id": "RegionalStatsGroup",
-            "n": 8,
+            "n": 9,
             "type": "grouping",
             "name": "Regional Games",
             "shortName": "Games",
@@ -86,43 +91,43 @@ const GlobalReport = {
         },
         "AccessToPowerEffectiveness": {
             "id": "AccessToPowerEffectiveness",
-            "n": 9,
+            "n": 10,
             "type": "report",
             "name": "CAP"
         },
         "PowerToCreateEffectiveness": {
             "id": "PowerToCreateEffectiveness",
-            "n": 10,
+            "n": 11,
             "type": "report",
             "name": "CPC"
         },
         "Team1ExpansionEffectiveness": {
             "id": "Team1ExpansionEffectiveness",
-            "n": 11,
+            "n": 12,
             "type": "report",
             "name": "T1X"
         },
         "Team2ExpansionEffectiveness": {
             "id": "Team2ExpansionEffectiveness",
-            "n": 12,
+            "n": 13,
             "type": "report",
             "name": "T2X"
         },
         "GameInTheWorldEffectiveness": {
             "id": "GameInTheWorldEffectiveness",
-            "n": 13,
+            "n": 14,
             "type": "report",
             "name": "GITW"
         },
         "LandmarkForumEffectiveness": {
             "id": "LandmarkForumEffectiveness",
-            "n": 14,
+            "n": 15,
             "type": "report",
             "name": "LF"
         },
         "GameEffectivenessGroup": {
             "id": "GameEffectivenessGroup",
-            "n": 15,
+            "n": 16,
             "type": "grouping",
             "name": "Games Effectiveness",
             "shortName": "Effectiveness",
@@ -134,13 +139,6 @@ const GlobalReport = {
                 "GameInTheWorldEffectiveness",
                 "LandmarkForumEffectiveness"
             ]
-        },
-        "CenterStatsReports": {
-            "id": "CenterStatsReports",
-            "n": 16,
-            "type": "report",
-            "name": "Center Reports",
-            "shortName": "Centers"
         },
         "TmlpRegistrationsOverview": {
             "id": "TmlpRegistrationsOverview",
@@ -185,52 +183,45 @@ const GlobalReport = {
                 "TmlpRegistrationsOverdue"
             ]
         },
-        "TravelReport": {
-            "id": "TravelReport",
-            "n": 23,
-            "type": "report",
-            "name": "Travel Summary",
-            "shortName": "Travel"
-        },
         "CoursesThisWeek": {
             "id": "CoursesThisWeek",
-            "n": 24,
+            "n": 23,
             "type": "report",
             "name": "Completed This Week"
         },
         "CoursesNextMonth": {
             "id": "CoursesNextMonth",
-            "n": 25,
+            "n": 24,
             "type": "report",
             "name": "Next 5 Weeks"
         },
         "CoursesUpcoming": {
             "id": "CoursesUpcoming",
-            "n": 26,
+            "n": 25,
             "type": "report",
             "name": "Upcoming"
         },
         "CoursesCompleted": {
             "id": "CoursesCompleted",
-            "n": 27,
+            "n": 26,
             "type": "report",
             "name": "Completed"
         },
         "CoursesGuestGames": {
             "id": "CoursesGuestGames",
-            "n": 28,
+            "n": 27,
             "type": "report",
             "name": "Guest Games"
         },
         "CoursesSummary": {
             "id": "CoursesSummary",
-            "n": 29,
+            "n": 28,
             "type": "report",
             "name": "Summary"
         },
         "CoursesGroup": {
             "id": "CoursesGroup",
-            "n": 30,
+            "n": 29,
             "type": "grouping",
             "name": "Courses",
             "children": [
@@ -244,67 +235,76 @@ const GlobalReport = {
         },
         "TeamMemberStatusCtw": {
             "id": "TeamMemberStatusCtw",
-            "n": 31,
+            "n": 30,
             "type": "report",
             "name": "CTW"
         },
         "TeamMemberStatusTransfer": {
             "id": "TeamMemberStatusTransfer",
-            "n": 32,
+            "n": 31,
             "type": "report",
             "name": "Transfers"
         },
         "TeamMemberStatusWithdrawn": {
             "id": "TeamMemberStatusWithdrawn",
-            "n": 33,
+            "n": 32,
             "type": "report",
             "name": "Withdrawn"
         },
+        "TdoSummary": {
+            "id": "TdoSummary",
+            "n": 33,
+            "type": "report",
+            "name": "Training & Development",
+            "shortName": "TDO"
+        },
+        "WithdrawReport": {
+            "id": "WithdrawReport",
+            "n": 34,
+            "type": "report",
+            "name": "Withdraws"
+        },
         "TeamMemberStatusGroup": {
             "id": "TeamMemberStatusGroup",
-            "n": 34,
+            "n": 35,
             "type": "grouping",
             "name": "Team Members",
             "children": [
                 "TeamMemberStatusCtw",
                 "TeamMemberStatusTransfer",
-                "TeamMemberStatusWithdrawn"
+                "TeamMemberStatusWithdrawn",
+                "TdoSummary",
+                "WithdrawReport"
             ]
         },
-        "TdoSummary": {
-            "id": "TdoSummary",
-            "n": 35,
+        "TravelReport": {
+            "id": "TravelReport",
+            "n": 36,
             "type": "report",
-            "name": "Training & Development",
-            "shortName": "TDO"
+            "name": "Travel Summary",
+            "shortName": "Travel"
         },
         "TeamMemberStatusPotentialsOverview": {
             "id": "TeamMemberStatusPotentialsOverview",
-            "n": 36,
+            "n": 37,
             "type": "report",
             "name": "Overview"
         },
         "TeamMemberStatusPotentials": {
             "id": "TeamMemberStatusPotentials",
-            "n": 37,
+            "n": 38,
             "type": "report",
             "name": "Details"
         },
         "PotentialsGroup": {
             "id": "PotentialsGroup",
-            "n": 38,
+            "n": 39,
             "type": "grouping",
             "name": "Potentials",
             "children": [
                 "TeamMemberStatusPotentialsOverview",
                 "TeamMemberStatusPotentials"
             ]
-        },
-        "WithdrawReport": {
-            "id": "WithdrawReport",
-            "n": 39,
-            "type": "report",
-            "name": "Withdraws"
         }
     }
 }
