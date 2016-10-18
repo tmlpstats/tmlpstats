@@ -30,8 +30,21 @@ trait SanitizesLastNames
 
         $result = [];
         foreach ($nameHash as $firstName => $peopleByFirstName) {
+
+            if ($firstName == 'Emma') {
+                dd(array_dot($peopleByFirstName));
+            }
+
             foreach(array_dot($peopleByFirstName) as $key => $person) {
-                $person->lastName = str_replace('.', '', $key);
+                $newLastName = str_replace('.', '', $key);
+
+                // If the new last name is longer than the old one, then it has
+                // a numeric index appended because there are multiple people with
+                // exactly the same last name. Drop the digit
+                if (strlen($newLastName) <= strlen($person->lastName)) {
+                    $person->lastName = $newLastName;
+                }
+
                 $result[$person->id] = $person;
             }
         }
@@ -86,6 +99,11 @@ trait SanitizesLastNames
                 array_set($arr, "{$sharedKey}.{$data->lastName[$uniquePos]}", $data);
             }
 
+            // If the two names have the same value, overwrite the empty key with a list of people with the
+            // same last name
+            if ($existing->lastName == $data->lastName) {
+                array_set($arr, "{$sharedKey}.", [$existing, $data]);
+            }
         } else {
             // No people at this level, add it
             array_set($arr, $newKey, $data);

@@ -226,11 +226,9 @@ class Util
      *
      * @return string
      */
-    public static function getRandomString()
+    public static function getRandomString($length = 64)
     {
-        $b64Hash = base64_encode(hash('sha512', openssl_random_pseudo_bytes(32), true));
-
-        return str_replace(['+','/','='], ['-','_',''], $b64Hash);
+        return str_random($length);
     }
 
     /**
