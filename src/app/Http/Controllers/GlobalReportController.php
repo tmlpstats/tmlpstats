@@ -274,6 +274,9 @@ class GlobalReportController extends ReportDispatchAbstractController
             case 'tdosummary':
                 $response = $this->getTdoSummary($globalReport, $region);
                 break;
+            case 'gitwsummary':
+                $response = $this->getGitwSummary($globalReport, $region);
+                break;
             case 'regperparticipant':
                 $response = $this->getRegPerParticipant($globalReport, $region);
                 break;
@@ -706,8 +709,17 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         return view('globalreports.details.traveloverview', compact('reportData', 'statsReports'));
     }
+    protected function getGitwSummary(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->getTeamMemberGameSummary($globalReport, $region, 'gitw');
+    }
 
     protected function getTdoSummary(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->getTeamMemberGameSummary($globalReport, $region, 'tdo');
+    }
+
+    protected function getTeamMemberGameSummary(Models\GlobalReport $globalReport, Models\Region $region, $game)
     {
         $teamMembers = App::make(Api\GlobalReport::class)->getClassListByCenter($globalReport, $region);
         if (!$teamMembers) {
@@ -756,7 +768,8 @@ class GlobalReportController extends ReportDispatchAbstractController
                 $reportData[$centerName][$team]['total']++;
                 $totals[$team]['total']++;
                 $totals['total']['total']++;
-                if ($memberData->tdo) {
+
+                if ($memberData->$game) {
                     $reportData[$centerName][$team]['attended']++;
                     $totals[$team]['attended']++;
                     $totals['total']['attended']++;
@@ -795,7 +808,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             }
         }
 
-        return view('globalreports.details.tdosummary', compact('reportData', 'totals', 'statsReports'));
+        return view('globalreports.details.tdogitwsummary', compact('reportData', 'totals', 'statsReports'));
     }
 
     protected function getTeam2RegisteredAtWeekend(Models\GlobalReport $globalReport, Models\Region $region)
