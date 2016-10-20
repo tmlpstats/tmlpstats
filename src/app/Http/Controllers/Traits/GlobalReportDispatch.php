@@ -129,6 +129,14 @@ trait GlobalReportDispatch {
             case 'coursessummary':
                 return 'getCoursesSummary';
                 break;
+            case 'TdoSummary':
+            case 'tdosummary':
+                return 'getTdoSummary';
+                break;
+            case 'GitwSummary':
+            case 'gitwsummary':
+                return 'getGitwSummary';
+                break;
             case 'TeamMemberStatusCtw':
             case 'teammemberstatusctw':
                 return 'getTeamMemberStatusCtw';
@@ -140,10 +148,6 @@ trait GlobalReportDispatch {
             case 'TeamMemberStatusWithdrawn':
             case 'teammemberstatuswithdrawn':
                 return 'getTeamMemberStatusWithdrawn';
-                break;
-            case 'TdoSummary':
-            case 'tdosummary':
-                return 'getTdoSummary';
                 break;
             case 'TeamMemberStatusPotentialsOverview':
             case 'teammemberstatuspotentialsoverview':
@@ -237,6 +241,12 @@ trait GlobalReportDispatch {
     // Get report Summary
     protected abstract function getCoursesSummary();
 
+    // Get report Training & Development
+    protected abstract function getTdoSummary();
+
+    // Get report GITW
+    protected abstract function getGitwSummary();
+
     // Get report CTW
     protected abstract function getTeamMemberStatusCtw();
 
@@ -245,9 +255,6 @@ trait GlobalReportDispatch {
 
     // Get report Withdrawn
     protected abstract function getTeamMemberStatusWithdrawn();
-
-    // Get report Training & Development
-    protected abstract function getTdoSummary();
 
     // Get report Overview
     protected abstract function getTeamMemberStatusPotentialsOverview();
