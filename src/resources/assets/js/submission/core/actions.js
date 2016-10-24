@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { normalize } from 'normalizr'
 
 import { coreInit, centerQuarterData, cqResponse } from './data'
@@ -38,6 +39,9 @@ export function setSubmissionLookups(data, reportingDate) {
         lookups.orderedAccountabilities = c.accountabilities  // canonically sorted accountabilities
         dispatch(centerQuarterData.replaceItems(n.entities.quarters))
         lookups.pastClassroom = {}
+        lookups.withdraw_codes_by_id = _.keyBy(lookups.withdraw_codes, function(code) {
+            return code.id
+        })
 
         /// Precompute items like pastClassroom based on quarter dates.
         if (data.currentQuarter) {

@@ -31,24 +31,71 @@ class ApplicationsBase extends SubmissionBase {
 }
 
 class ApplicationsIndexView extends ApplicationsBase {
+    renderWithdrawsTable(apps) {
+        if (!apps) {
+            return <div />
+        }
+
+        const baseUri = this.baseUri()
+        const withdraws = []
+
+        apps.forEach((app, key) => {
+            withdraws.push(
+                <tr key={key}>
+                    <td><Link to={`${baseUri}/applications/edit/${key}`}>{app.firstName} {app.lastName}</Link></td>
+                    <td>{app.teamYear}</td>
+                    <td>{app.regDate}</td>
+                    <td>{app.wdDate}</td>
+                    <td>{this.props.lookups.withdraw_codes_by_id[app.withdrawCode].display}</td>
+                </tr>
+            )
+        })
+
+        return (
+            <div>
+            <br/>
+                <h4>Withdraws</h4>
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Year</th>
+                            <th>Registered</th>
+                            <th>Withdrawn</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>{withdraws}</tbody>
+                </table>
+            </div>
+        )
+    }
+
     render() {
         if (!this.props.loading.loaded) {
             return this.renderBasicLoading()
         }
         var changeSort = (newSort) => this.props.dispatch(appsCollection.changeSortCriteria(newSort))
         var apps = []
+        var withdraws = []
         var baseUri = this.baseUri()
         appsCollection.iterItems(this.props.applications, (app, key) => {
             const status = getStatusString(app)
+            if (app.withdrawCode) {
+                withdraws.push(app)
+                return
+            }
+
             apps.push(
                 <tr key={key}>
                     <td><Link to={`${baseUri}/applications/edit/${key}`}>{app.firstName} {app.lastName}</Link></td>
-                    <td>{app.regDate}</td>
                     <td>{app.teamYear}</td>
+                    <td>{app.regDate}</td>
                     <td>{status}</td>
                 </tr>
             )
         })
+
         return (
             <div>
                 <h3>Manage Registrations</h3>
@@ -58,14 +105,15 @@ class ApplicationsIndexView extends ApplicationsBase {
                     <thead>
                         <tr>
                             <th>Name</th>
-                            <th>Registered</th>
                             <th>Year</th>
+                            <th>Registered</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>{apps}</tbody>
                 </table>
                 <AddOneLink link={`${baseUri}/applications/add`} />
+                {this.renderWithdrawsTable(withdraws)}
             </div>
         )
     }
@@ -78,7 +126,6 @@ class _EditCreate extends ApplicationsBase {
         let messages = []
         if (app && app.id) {
             messages = this.props.messages[app.id]
-            console.log(this.props, app.id,messages)
         }
 
         return (
