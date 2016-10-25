@@ -41,7 +41,7 @@ class ValidationData extends AuthenticatedApiBase
 
     public function validate(Models\Center $center, Carbon $reportingDate)
     {
-        $this->assertAuthz($this->context->can('viewSubmissionUi', $center));
+        $this->assertAuthz($this->context->can('submitStats', $center) || $this->context->can('viewSubmissionUi', $center));
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $report = LocalReport::ensureStatsReport($center, $reportingDate);

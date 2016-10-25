@@ -49,6 +49,8 @@ class ApiController extends ApiControllerBase
         "Scoreboard.stash" => "Scoreboard__stash",
         "Scoreboard.getScoreboardLockQuarter" => "Scoreboard__getScoreboardLockQuarter",
         "Scoreboard.setScoreboardLockQuarter" => "Scoreboard__setScoreboardLockQuarter",
+        "Submission.NextQtrAccountability.allForCenter" => "Submission__NextQtrAccountability__allForCenter",
+        "Submission.NextQtrAccountability.stash" => "Submission__NextQtrAccountability__stash",
         "SubmissionCore.initSubmission" => "SubmissionCore__initSubmission",
         "SubmissionData.ignoreMe" => "SubmissionData__ignoreMe",
         "TeamMember.create" => "TeamMember__create",
@@ -283,6 +285,22 @@ class ApiController extends ApiControllerBase
         return App::make(Api\Scoreboard::class)->setScoreboardLockQuarter(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'quarter', 'Quarter'),
+            $this->parse($input, 'data', 'array')
+        );
+    }
+    protected function Submission__NextQtrAccountability__allForCenter($input)
+    {
+        return App::make(Api\Submission\NextQtrAccountability::class)->allForCenter(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'includeInProgress', 'bool', false)
+        );
+    }
+    protected function Submission__NextQtrAccountability__stash($input)
+    {
+        return App::make(Api\Submission\NextQtrAccountability::class)->stash(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'data', 'array')
         );
     }

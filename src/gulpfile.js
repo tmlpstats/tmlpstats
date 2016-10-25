@@ -20,7 +20,9 @@ elixir(function(mix) {
             'bower_components/datatables/media/css/dataTables.bootstrap.min.css',
             'bower_components/jquery-loading/dist/jquery.loading.min.css',
             'bower_components/font-awesome/css/font-awesome.min.css',
-            'public/css/tmlpstats.css'
+            'node_modules/react-bootstrap-typeahead/css/Typeahead.css',
+            'node_modules/react-bootstrap-typeahead/css/Token.css',
+            'public/css/tmlpstats.css',
         ], 'public/css/main.css', './')
         .copy('public/fonts', 'public/build/fonts/bootstrap')
         .browserify(['main.jsx'], 'public/js/main.js')

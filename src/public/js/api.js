@@ -356,6 +356,32 @@ Api.Scoreboard = {
         return apiCall('Scoreboard.setScoreboardLockQuarter', params, (callback || null), (errback || null));
     }
 };
+Api.Submission = {
+};
+Api.Submission.NextQtrAccountability = {
+
+    /*
+    Get team member data for a center-reportingDate, optionally including in-progress data
+    Parameters:
+      center: Center
+      reportingDate: date
+      includeInProgress: bool
+    */
+    allForCenter: function(params, callback, errback) {
+        return apiCall('Submission.NextQtrAccountability.allForCenter', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Stash data for in-progress Team Member weekly
+    Parameters:
+      center: Center
+      reportingDate: date
+      data: array
+    */
+    stash: function(params, callback, errback) {
+        return apiCall('Submission.NextQtrAccountability.stash', params, (callback || null), (errback || null));
+    }
+};
 Api.SubmissionCore = {
 
     /*

@@ -36,6 +36,11 @@ class SubmissionData extends AuthenticatedApiBase
             'class' => Domain\TeamMember::class,
             'idAttr' => 'id',
         ],
+        [
+            'key' => 'next_qtr_accountability',
+            'class' => Domain\NextQtrAccountability::class,
+            'idAttr' => 'id',
+        ],
     ];
 
     protected $keyTypeMapping = [];
@@ -64,9 +69,41 @@ class SubmissionData extends AuthenticatedApiBase
     public function allForType(Models\Center $center, Carbon $reportingDate, $type)
     {
         $conf = $this->combinedTypeMapping[$type];
-        $className = $conf['class'];
 
         $result = Models\SubmissionData::centerDate($center, $reportingDate)->type($conf['key'])->get();
+
+        return $this->fulfillQuery($result, $conf);
+    }
+
+    /**
+     * A more efficient way of getting all stashes for a whole quarter
+     * @param  Domain\CenterQuarter $centerQuarter [description]
+     * @param  [type]               $type          [description]
+     * @param  array                $options       [description]
+     */
+    public function allForTypeWholeQuarter(Domain\CenterQuarter $centerQuarter, $type, $options = [])
+    {
+        $reverse = array_get($options, 'reverse', false);
+        $conf = $this->combinedTypeMapping[$type];
+        $result = Models\SubmissionData::type($conf['key'])
+            ->center($centerQuarter->center)
+            ->where('reporting_date', '>=', $centerQuarter->firstWeekDate)
+            ->where('reporting_date', '<=', $centerQuarter->endWeekendDate)
+            ->orderBy('reporting_date', ($reverse) ? 'desc' : 'asc');
+
+        return $this->fulfilLQuery($result->get(), $conf);
+
+    }
+
+    /**
+     * Helper to fulfill a query
+     * @param  [type] $result Iterable result set from laravel.
+     * @param  array  $conf   Config
+     * @return [type]         [description]
+     */
+    protected function fulfillQuery($result, array $conf)
+    {
+        $className = $conf['class'];
 
         return $result->map(function ($row) use ($className) {
             return $className::fromArray($row->data);

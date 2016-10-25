@@ -10,6 +10,14 @@ import { appsCollection, applicationsLoad, saveAppLoad, messages } from './data'
 export const loadState = applicationsLoad.actionCreator()
 export const saveAppState = saveAppLoad.actionCreator()
 
+export function conditionalLoadApplications(centerId, reportingDate) {
+    return (dispatch, getState) => {
+        if (getState().submission.applications.loading.state == 'new') {
+            return dispatch(loadApplications(centerId, reportingDate))
+        }
+    }
+}
+
 export function loadApplications(centerId, reportingDate) {
     return (dispatch) => {
         dispatch(loadState('loading'))
