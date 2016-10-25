@@ -7,6 +7,11 @@ use TmlpStats\User;
 
 class CenterPolicy extends Policy
 {
+    public function showNewSubmissionUi(User $user, Center $center)
+    {
+        return false; // Only used to trigger the link, and only global statisticians will have it.
+    }
+
     /**
      * Can $user view new submission UI?
      *
@@ -16,8 +21,8 @@ class CenterPolicy extends Policy
      */
     public function viewSubmissionUi(User $user, Center $center)
     {
-        // administrators are handled by "before" in the base policy
-        return ($user->hasRole('globalStatistician'));
+        // currently identical to submitStats
+        return $this->submitStats($user, $center);
     }
 
     /**

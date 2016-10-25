@@ -40,7 +40,8 @@ export class QuarterAccountabilitiesTable extends Component {
 
     constructor(props) {
         super(props)
-        rebind(this, 'onSubmit')
+        rebind(this, 'onSubmit', 'autoSaveSubmit')
+        this.debouncedAutoSave = _.debounce(this.autoSaveSubmit, 600, {trailing: true, maxWait: 10000})
     }
 
     checkLoading() {
@@ -56,6 +57,12 @@ export class QuarterAccountabilitiesTable extends Component {
         return true
     }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.nqa !== this.props.nqa && nextProps.autoSave) {
+            this.debouncedAutoSave()
+        }
+    }
+
     render() {
         if (!this.checkLoading()) {
             return <div>Loading</div>
@@ -63,7 +70,7 @@ export class QuarterAccountabilitiesTable extends Component {
 
         const MODEL = qtrAccountabilitiesData.opts.model
         const tabular = this.props.browser.greaterThan.medium
-        const submitButton = this.props.noSubmit ? undefined : <SubmitFlip loadState={this.props.nqa.saveState}>Submit</SubmitFlip>
+        const submitButton = this.props.autoSave ? undefined : <SubmitFlip loadState={this.props.nqa.saveState}>Submit</SubmitFlip>
 
         const accountabilities = this.props.accountabilities.map((acc) => {
             return (
@@ -96,11 +103,19 @@ export class QuarterAccountabilitiesTable extends Component {
             )
         } else {
             return (
-                <Form model={MODEL} className="form-horizontal nextQuarterAccountabilities">
+                <Form model={MODEL} className="form-horizontal nextQuarterAccountabilities" onSubmit={this.onSubmit}>
                     {accountabilities}
                     {submitButton}
                 </Form>
             )
+        }
+    }
+
+    autoSaveSubmit() {
+        if (!this.props.nqa.loadState.available) {
+            setTimeout(this.debouncedAutoSave, 1000)
+        } else {
+            this.onSubmit(this.props.nqa.data)
         }
     }
 
@@ -116,7 +131,9 @@ export class QuarterAccountabilitiesTable extends Component {
                 toSave.push(data[key])
             }
         }
-        this.props.dispatch(actions.batchSaveAccountabilityInfo(centerId, reportingDate, toSave))
+        if (toSave.length) {
+            this.props.dispatch(actions.batchSaveAccountabilityInfo(centerId, reportingDate, toSave))
+        }
         return false
     }
 }
@@ -147,11 +164,13 @@ class QuarterAccountabilitiesRow extends PureComponent {
         const emailField = <Field model={model+'.email'}><input type="text" className="form-control nqEmail" /></Field>
         const phoneField = <Field model={model+'.phone'}><input type="text" className="form-control nqPhone" /></Field>
         const notesField = <Field model={model+'.notes'}><input type="text" className="form-control nqNotes" /></Field>
+        const isRequired = _.includes(requiredAccountabilities, acc.name)
 
         if (tabular) {
+            const required = isRequired? '*': undefined
             return (
                 <tr>
-                    <th>{acc.display}</th>
+                    <th>{acc.display}{required}</th>
                     <td>{tmSelectField}</td>
                     <td>{emailField}</td>
                     <td>{phoneField}</td>
@@ -159,7 +178,7 @@ class QuarterAccountabilitiesRow extends PureComponent {
                 </tr>
             )
         } else {
-            const color = _.includes(requiredAccountabilities, acc.name) ? 'primary' : 'default'
+            const color = isRequired? 'primary' : 'default'
             return (
                 <Panel color={color} heading={acc.display} headingLevel="h3">
                     <SimpleFormGroup label="Team Member">{tmSelectField}</SimpleFormGroup>
@@ -225,7 +244,7 @@ class PersonInput extends PureComponent {
                 phone: tmd.teamMember.person.phone
             }))
         } else if (key[0] == 'application') {
-            // TODO actually implement this
+            // TODO hoist team member email if available
             this.props.dispatch(formActions.merge(this.props.modelBase, {
                 teamMemberId: null,
                 applicationId: key[1],

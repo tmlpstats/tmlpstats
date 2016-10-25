@@ -9,7 +9,6 @@ import { repromisableAccountabilities } from './selectors'
 export const qtrAccountabilitiesData = new FormReduxLoader({
     prefix: 'submission/next_qtr_accountabilities',
     model: 'submission.next_qtr_accountabilities.data',
-    formReducer: true,
     messageManager: true,
     extraLMS: ['saveState'],
     actions: {
@@ -19,7 +18,7 @@ export const qtrAccountabilitiesData = new FormReduxLoader({
                 let keyed = {}
                 // first initialize with blank data for all possible accountabilities.
                 repromisableAccountabilities(getState()).forEach((acc) => {
-                    keyed[acc.id] = {id: [acc.id]}
+                    keyed[acc.id] = {id: acc.id}
                 })
 
                 // override anything we just got back from the service

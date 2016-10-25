@@ -37,7 +37,7 @@ class SubmissionData extends AuthenticatedApiBase
             'idAttr' => 'id',
         ],
         [
-            'key' => 'qtr_accountability',
+            'key' => 'next_qtr_accountability',
             'class' => Domain\NextQtrAccountability::class,
             'idAttr' => 'id',
         ],

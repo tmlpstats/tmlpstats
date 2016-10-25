@@ -1,4 +1,11 @@
+@if ($showAccountabilities)
+    <div id="cr3-accountabilities" data-reportingDate="{{ $expectedDate }}" data-centerId="den"></div>
+@endif
+
 {!! Form::open(['url' => $formAction, 'files' => true]) !!}
+@if ($showAccountabilities)
+    <input type="hidden" name="showAccountabilities" value="1" />
+@endif
 <div class="form-group">
     {!! Form::label('statsFiles[]', 'Center Stats File:') !!}
     {!! Form::file('statsFiles[]', [
@@ -46,10 +53,6 @@
 <div class="alert alert-info" role="alert">
 <strong>Helpful Hint:</strong> Click 'Validate' to check your sheet for errors. Then click 'Submit' to send your completed sheet to the regional stats team. You can validate as many times as you'd like before submitting.
 </div>
-@endif
-
-@if ($showAccountabilities)
-    <div id="cr3-accountabilities" data-reportingDate="{{ $expectedDate }}" data-centerId="den"></div>
 @endif
 
 {!! Form::submit('Validate', ['id' => 'validate', 'class' => 'btn btn-primary']) !!}
