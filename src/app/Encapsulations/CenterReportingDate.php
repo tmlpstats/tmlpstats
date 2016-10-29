@@ -82,7 +82,7 @@ class CenterReportingDate
             return false;
         }
         $cq = $this->getCenterQuarter();
-        if ($this->reportingDate->toDateString() == $cq->classroom3Date->toDateString() || $reportingDate->gt($cq->classroom3Date)) {
+        if ($this->reportingDate->toDateString() == $cq->classroom3Date->toDateString() || $this->reportingDate->gt($cq->classroom3Date)) {
             return true;
         }
 
