@@ -32,9 +32,17 @@ class CenterReportingDate
         }
     }
 
-    public static function ensure(Models\Center $center, Carbon $reportingDate)
+    public static function ensure(Models\Center $center = null, Carbon $reportingDate = null)
     {
-        return App::make(Api\Context::class)->getEncapsulation(self::class, compact('center', 'reportingDate'));
+        $context = App::make(Api\Context::class);
+        if ($center === null) {
+            $center = $context->getCenter();
+        }
+        if ($reportingDate === null) {
+            $reportingDate = $context->getReportingDate();
+        }
+
+        return $context->getEncapsulation(self::class, compact('center', 'reportingDate'));
     }
 
     /**
@@ -64,5 +72,20 @@ class CenterReportingDate
             'center' => $this->center,
             'quarter' => $this->getQuarter(),
         ]);
+    }
+
+    public function canShowNextQtrAccountabilities()
+    {
+        $globalRegion = $this->context->getGlobalRegion();
+        // TODO make this configurable in the future, but for this quarter, hard-coded to NA region
+        if ($globalRegion === null || $globalRegion->abbreviation != 'NA') {
+            return false;
+        }
+        $cq = $this->getCenterQuarter();
+        if ($this->reportingDate->toDateString() == $cq->classroom3Date->toDateString() || $reportingDate->gt($cq->classroom3Date)) {
+            return true;
+        }
+
+        return false;
     }
 }

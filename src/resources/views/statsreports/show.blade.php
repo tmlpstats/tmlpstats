@@ -1,6 +1,9 @@
 @extends('template')
 
 @section('content')
+<?php
+$nextQtrAccountabilities = $centerReportingDate->canShowNextQtrAccountabilities();
+?>
 
 @if ($statsReport)
     <h2>
@@ -43,6 +46,9 @@
             <li><a href="#transitionsummary" data-toggle="tab">Transfer Check</a></li>
             @endif
             <li><a href="#weekend" data-toggle="tab">Weekend</a></li>
+            @if ($nextQtrAccountabilities)
+            <li><a href="#next_qtr_accountabilities" data-toggle="tab">Next Qtr Accountabilities</a></li>
+            @endif
         </ul>
 
         <div class="tab-content">
@@ -110,6 +116,12 @@
                 <div id="teamsummary-container"></div>
                 <div id="travel-container"></div>
             </div>
+            @if ($nextQtrAccountabilities)
+            <div class="tab-pane" id="next_qtr_accountabilities">
+                <h3>Next Quarter Accountabilities</h3>
+                <div id="next_qtr_accountabilities-container"></div>
+            </div>
+            @endif
         </div>
     </div>
 
@@ -137,6 +149,9 @@
             @endif
             'teamsummary',
             'travel',
+            @if ($nextQtrAccountabilities)
+            'next_qtr_accountabilities',
+            @endif
         ];
 
         var buttonGroups = [

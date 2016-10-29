@@ -44,4 +44,9 @@ class NextQtrAccountability extends ParserDomain
     ];
 
     // Default fromArray and toArray are sufficient for us
+
+    public function getAccountability()
+    {
+        return Models\Accountability::find($this->id);
+    }
 }

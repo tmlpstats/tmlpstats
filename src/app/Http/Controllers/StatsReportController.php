@@ -13,6 +13,7 @@ use Log;
 use Response;
 use TmlpStats as Models;
 use TmlpStats\Api;
+use TmlpStats\Encapsulations;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\Import\Xlsx\XlsxImporter;
@@ -117,6 +118,7 @@ class StatsReportController extends ReportDispatchAbstractController
         $statsReport = Models\StatsReport::findOrFail($id);
         $this->context->setCenter($statsReport->center);
         $this->context->setReportingDate($statsReport->reportingDate);
+        $centerReportingDate = Encapsulations\CenterReportingDate::ensure();
         $this->context->setDateSelectAction('ReportsController@getCenterReport', [
             'abbr' => $statsReport->center->abbrLower(),
         ]);
@@ -180,6 +182,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
         return view('statsreports.show', compact(
             'statsReport',
+            'centerReportingDate',
             'globalReport',
             'otherStatsReports',
             'sheetUrl',
@@ -371,6 +374,8 @@ class StatsReportController extends ReportDispatchAbstractController
                 break;
             case 'mobile_summary':
                 $response = $this->getMobileSummary($statsReport);
+            case 'next_qtr_accountabilities':
+                $response = $this->getNextQtrAccountabilities($statsReport);
         }
 
         return $response;
@@ -1105,6 +1110,15 @@ class StatsReportController extends ReportDispatchAbstractController
         }
 
         return view('statsreports.details.coursestransfersummary', compact('flagged', 'flaggedCount'));
+    }
+
+    protected function getNextQtrAccountabilities(Models\StatsReport $statsReport)
+    {
+        $nqa = App::make(Api\Submission\NextQtrAccountability::class);
+        $nqAccountabilities = $nqa->allForCenter($this->context->getCenter(), $this->context->getReportingDate());
+        $crd = Encapsulations\CenterReportingDate::ensure();
+
+        return view('statsreports.details.next_qtr_accountabilities', compact('nqAccountabilities'));
     }
 
     protected function coursesEqual($new, $old)
