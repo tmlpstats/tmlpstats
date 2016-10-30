@@ -511,6 +511,11 @@ class GlobalReportController extends ReportDispatchAbstractController
                     }
                 }
 
+                if (!isset($centerData['original'][$game])) {
+                    $centerData['original'][$game] = 0;
+                    $reportData[$centerName]['original'][$game] = 0;
+                }
+
                 $totals[$game]['original'] += $centerData['original'][$game];
                 $totals[$game]['promise'] += $centerData['promise'][$game];
                 $totals[$game]['delta'] = ($totals[$game]['promise'] - $totals[$game]['original']);
