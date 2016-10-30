@@ -7,7 +7,6 @@ const GlobalReport = {
         "WeeklySummaryGroup",
         "RegionalStatsGroup",
         "GameEffectivenessGroup",
-        "CenterStatsReports",
         "ApplicationsGroup",
         "TravelReport",
         "CoursesGroup",
@@ -28,50 +27,57 @@ const GlobalReport = {
             "type": "report",
             "name": "At A Glance"
         },
+        "CenterStatsReports": {
+            "id": "CenterStatsReports",
+            "n": 2,
+            "type": "report",
+            "name": "Center Reports"
+        },
         "WeeklySummaryGroup": {
             "id": "WeeklySummaryGroup",
-            "n": 2,
+            "n": 3,
             "type": "grouping",
             "name": "Weekly Summary",
             "shortName": "Summary",
             "children": [
                 "RatingSummary",
-                "RegionSummary"
+                "RegionSummary",
+                "CenterStatsReports"
             ]
         },
         "RegionalStats": {
             "id": "RegionalStats",
-            "n": 3,
+            "n": 4,
             "type": "report",
             "name": "Scoreboard"
         },
         "GamesByCenter": {
             "id": "GamesByCenter",
-            "n": 4,
+            "n": 5,
             "type": "report",
             "name": "By Center"
         },
         "RepromisesByCenter": {
             "id": "RepromisesByCenter",
-            "n": 5,
+            "n": 6,
             "type": "report",
             "name": "Repromises"
         },
         "RegPerParticipant": {
             "id": "RegPerParticipant",
-            "n": 6,
+            "n": 7,
             "type": "report",
             "name": "Reg. Per Participant"
         },
         "Gaps": {
             "id": "Gaps",
-            "n": 7,
+            "n": 8,
             "type": "report",
             "name": "Gaps"
         },
         "RegionalStatsGroup": {
             "id": "RegionalStatsGroup",
-            "n": 8,
+            "n": 9,
             "type": "grouping",
             "name": "Regional Games",
             "shortName": "Games",
@@ -85,43 +91,43 @@ const GlobalReport = {
         },
         "AccessToPowerEffectiveness": {
             "id": "AccessToPowerEffectiveness",
-            "n": 9,
+            "n": 10,
             "type": "report",
             "name": "CAP"
         },
         "PowerToCreateEffectiveness": {
             "id": "PowerToCreateEffectiveness",
-            "n": 10,
+            "n": 11,
             "type": "report",
             "name": "CPC"
         },
         "Team1ExpansionEffectiveness": {
             "id": "Team1ExpansionEffectiveness",
-            "n": 11,
+            "n": 12,
             "type": "report",
             "name": "T1X"
         },
         "Team2ExpansionEffectiveness": {
             "id": "Team2ExpansionEffectiveness",
-            "n": 12,
+            "n": 13,
             "type": "report",
             "name": "T2X"
         },
         "GameInTheWorldEffectiveness": {
             "id": "GameInTheWorldEffectiveness",
-            "n": 13,
+            "n": 14,
             "type": "report",
             "name": "GITW"
         },
         "LandmarkForumEffectiveness": {
             "id": "LandmarkForumEffectiveness",
-            "n": 14,
+            "n": 15,
             "type": "report",
             "name": "LF"
         },
         "GameEffectivenessGroup": {
             "id": "GameEffectivenessGroup",
-            "n": 15,
+            "n": 16,
             "type": "grouping",
             "name": "Games Effectiveness",
             "shortName": "Effectiveness",
@@ -133,13 +139,6 @@ const GlobalReport = {
                 "GameInTheWorldEffectiveness",
                 "LandmarkForumEffectiveness"
             ]
-        },
-        "CenterStatsReports": {
-            "id": "CenterStatsReports",
-            "n": 16,
-            "type": "report",
-            "name": "Center Reports",
-            "shortName": "Centers"
         },
         "TmlpRegistrationsOverview": {
             "id": "TmlpRegistrationsOverview",

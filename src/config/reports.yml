@@ -460,6 +460,8 @@ reportMeta:
             name: Ratings
           RegionSummary:
             name: At A Glance
+          CenterStatsReports:
+            name: Center Reports
 
       RegionalStatsGroup:
         type: grouping
@@ -494,10 +496,6 @@ reportMeta:
             name: GITW
           LandmarkForumEffectiveness:
             name: LF
-
-      CenterStatsReports:
-        name: Center Reports
-        shortName: Centers
 
       ApplicationsGroup:
         type: grouping

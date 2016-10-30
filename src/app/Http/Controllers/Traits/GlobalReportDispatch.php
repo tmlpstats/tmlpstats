@@ -33,6 +33,10 @@ trait GlobalReportDispatch {
             case 'regionsummary':
                 return 'getRegionSummary';
                 break;
+            case 'CenterStatsReports':
+            case 'centerstatsreports':
+                return 'getCenterStatsReports';
+                break;
             case 'RegionalStats':
             case 'regionalstats':
                 return 'getRegionalStats';
@@ -76,10 +80,6 @@ trait GlobalReportDispatch {
             case 'LandmarkForumEffectiveness':
             case 'landmarkforumeffectiveness':
                 return 'getLandmarkForumEffectiveness';
-                break;
-            case 'CenterStatsReports':
-            case 'centerstatsreports':
-                return 'getCenterStatsReports';
                 break;
             case 'TmlpRegistrationsOverview':
             case 'tmlpregistrationsoverview':
@@ -169,6 +169,9 @@ trait GlobalReportDispatch {
     // Get report At A Glance
     protected abstract function getRegionSummary();
 
+    // Get report Center Reports
+    protected abstract function getCenterStatsReports();
+
     // Get report Scoreboard
     protected abstract function getRegionalStats();
 
@@ -201,9 +204,6 @@ trait GlobalReportDispatch {
 
     // Get report LF
     protected abstract function getLandmarkForumEffectiveness();
-
-    // Get report Center Reports
-    protected abstract function getCenterStatsReports();
 
     // Get report Overview
     protected abstract function getTmlpRegistrationsOverview();
