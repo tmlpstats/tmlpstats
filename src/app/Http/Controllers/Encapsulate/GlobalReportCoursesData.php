@@ -210,11 +210,11 @@ class GlobalReportCoursesData
             foreach ($centerReportData as $centerName => $coursesData) {
                 foreach ($coursesData as $courseType => $courseTypeData) {
                     foreach ($courseTypeData as $courseData) {
-                        // Combine complete courses with their respective types
-                        if ($combineCompleted && $courseType == 'completed') {
-                            $courseType = $courseData['type'];
+                        $type = $courseType;
+                        if ($combineCompleted && $courseType === 'completed') {
+                            $type = $courseData['type'];
                         }
-                        $typeReportData[$courseType][] = $courseData;
+                        $typeReportData[$type][] = $courseData;
                     }
                 }
             }
