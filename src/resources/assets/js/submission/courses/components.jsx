@@ -30,37 +30,93 @@ class CoursesBase extends SubmissionBase {
     getCourseById(courseId) {
         return this.props.courses.collection[courseId]
     }
+
+    getCourseLocation(course) {
+        let location = course.location
+        if (!location) {
+            location = this.props.lookups.center.name
+        }
+
+        return location
+    }
 }
 
 class CoursesIndexView extends CoursesBase {
+    renderCompleteCourseTable(courses) {
+        if (!courses) {
+            return <div />
+        }
+
+        const baseUri = this.baseUri()
+        const completed = []
+
+        courses.forEach((course, key) => {
+            const startDate = moment(course.startDate)
+            completed.push(
+                <tr key={key}>
+                    <td><Link to={`${baseUri}/courses/edit/${key}`}>{startDate.format('MMM D, YYYY')}</Link></td>
+                    <td className="data-point">{courseTypeMap[course.type]}</td>
+                    <td>{this.getCourseLocation(course)}</td>
+                    <td className="data-point">{course.currentTer}</td>
+                    <td className="data-point">{course.completedStandardStarts}</td>
+                    <td className="data-point">{course.registrations}</td>
+                    <td className="data-point">{course.guestsConfirmed || '-'}</td>
+                </tr>
+            )
+        })
+
+        return (
+            <div>
+            <br/>
+            <h4>Past Courses</h4>
+            <table className="table">
+                <thead>
+                    <tr>
+                        <th style={{width: '8em'}}>Date</th>
+                        <th className="data-point">Type</th>
+                        <th>Location</th>
+                        <th className="data-point">Total Ever Registered</th>
+                        <th className="data-point">Completed Standard Starts</th>
+                        <th className="data-point">Registered</th>
+                        <th className="data-point">Guests Attended</th>
+                    </tr>
+                </thead>
+                <tbody>{completed}</tbody>
+            </table>
+            </div>
+        )
+    }
+
     render() {
         if (!this.props.loading.loaded) {
             return this.renderBasicLoading()
         }
         const changeSort = (newSort) => this.props.dispatch(coursesCollection.changeSortCriteria(newSort))
         const courses = []
+        const completed = []
         const baseUri = this.baseUri()
 
         coursesCollection.iterItems(this.props.courses, (course, key) => {
-            let location = course.location
-            if (!location) {
-                location = this.props.lookups.center.name
-            }
-            const type = courseTypeMap[course.type]
-
+            const location = this.getCourseLocation(course)
             const startDate = moment(course.startDate)
             const ter = course.currentTer || '-'
             const ss = course.currentStandardStarts || '-'
-            const xfer = course.currentXfer || '-'
+            const guestsConfirmed = course.guestsConfirmed || '-'
+
+            const now = moment()
+            if (now.diff(startDate, 'days') > 7) {
+                completed.push(course)
+                return
+            }
 
             courses.push(
                 <tr key={key}>
                     <td><Link to={`${baseUri}/courses/edit/${key}`}>{startDate.format('MMM D, YYYY')}</Link></td>
-                    <td className="data-point">{type}</td>
+                    <td className="data-point">{courseTypeMap[course.type]}</td>
                     <td>{location}</td>
                     <td className="data-point">{ter}</td>
                     <td className="data-point">{ss}</td>
-                    <td className="data-point">{xfer}</td>
+                    <td className="data-point">{guestsConfirmed}</td>
                 </tr>
             )
         })
@@ -77,12 +133,13 @@ class CoursesIndexView extends CoursesBase {
                             <th>Location</th>
                             <th className="data-point">Total Ever Registered</th>
                             <th className="data-point">Standard Starts</th>
-                            <th className="data-point">Transfered In</th>
+                            <th className="data-point">Guests Confirmed</th>
                         </tr>
                     </thead>
                     <tbody>{courses}</tbody>
                 </table>
                 <AddOneLink link={`${baseUri}/courses/add`} />
+                {this.renderCompleteCourseTable(completed)}
             </div>
         )
     }
