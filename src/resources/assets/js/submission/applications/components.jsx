@@ -11,7 +11,7 @@ import { appsSorts, appsCollection, messages } from './data'
 import { centerQuarterData } from '../core/data'
 import { getLabelTeamMember } from '../core/selectors'
 import { loadApplications, saveApplication, chooseApplication } from './actions'
-import AppStatus from './AppStatus'
+import { AppStatus, getStatusString } from './AppStatus'
 
 class ApplicationsBase extends SubmissionBase {
     componentDidMount() {
@@ -39,11 +39,13 @@ class ApplicationsIndexView extends ApplicationsBase {
         var apps = []
         var baseUri = this.baseUri()
         appsCollection.iterItems(this.props.applications, (app, key) => {
+            const status = getStatusString(app)
             apps.push(
                 <tr key={key}>
                     <td><Link to={`${baseUri}/applications/edit/${key}`}>{app.firstName} {app.lastName}</Link></td>
                     <td>{app.regDate}</td>
                     <td>{app.teamYear}</td>
+                    <td>{status}</td>
                 </tr>
             )
         })
@@ -58,6 +60,7 @@ class ApplicationsIndexView extends ApplicationsBase {
                             <th>Name</th>
                             <th>Registered</th>
                             <th>Year</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>{apps}</tbody>

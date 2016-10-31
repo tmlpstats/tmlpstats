@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { React } from '../base_components'
 import { Field, SimpleSelect, DateInput, SimpleDateInput } from '../../reusable/form_utils'
 import { setAppStatus } from './actions'
@@ -39,6 +40,15 @@ var STATUS_BEHAVIOUR = [
     {status: STATUS_APPR, key: 'apprDate', title: 'Approved', dateTitle: 'Date Approved'},
     {status: STATUS_WD, key: 'wdDate', title: 'Withdrawn', dateTitle: 'Withdraw Date', renderGroup: 'renderWithdrawn'}
 ]
+
+export function getStatusString(app) {
+    const statusCode = inferStatus(app)
+    const status = _.find(STATUS_BEHAVIOUR, function(o) {
+        return o.status == statusCode
+    })
+
+    return status.title
+}
 
 export default class AppStatus extends React.Component {
     render() {
