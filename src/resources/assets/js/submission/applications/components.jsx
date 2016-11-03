@@ -32,7 +32,7 @@ class ApplicationsBase extends SubmissionBase {
 
 class ApplicationsIndexView extends ApplicationsBase {
     renderWithdrawsTable(apps) {
-        if (!apps) {
+        if (!apps.length) {
             return <div />
         }
 
