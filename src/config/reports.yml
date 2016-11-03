@@ -513,10 +513,6 @@ reportMeta:
           TmlpRegistrationsOverdue:
             name: Overdue
 
-      TravelReport:
-        name: Travel Summary
-        shortName: Travel
-
       CoursesGroup:
         type: grouping
         name: Courses
@@ -550,18 +546,19 @@ reportMeta:
             name: Transfers
           TeamMemberStatusWithdrawn:
             name: Withdrawn
+          WithdrawReport:
+            name: Withdraw Compliance
 
-      PotentialsGroup:
+      WeekendGroup:
         type: grouping
-        name: Potentials
+        name: Weekend
         children:
+          TravelReport:
+            name: Travel Summary
           TeamMemberStatusPotentialsOverview:
-            name: Overview
+            name: Potentials Overview
           TeamMemberStatusPotentials:
-            name: Details
-
-      WithdrawReport:
-        name: Withdraws
+            name: Potentials Details
 
 
 

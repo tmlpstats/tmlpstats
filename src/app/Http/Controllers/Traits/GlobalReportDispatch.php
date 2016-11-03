@@ -101,10 +101,6 @@ trait GlobalReportDispatch {
             case 'tmlpregistrationsoverdue':
                 return 'getTmlpRegistrationsOverdue';
                 break;
-            case 'TravelReport':
-            case 'travelreport':
-                return 'getTravelReport';
-                break;
             case 'CoursesThisWeek':
             case 'coursesthisweek':
                 return 'getCoursesThisWeek';
@@ -149,6 +145,14 @@ trait GlobalReportDispatch {
             case 'teammemberstatuswithdrawn':
                 return 'getTeamMemberStatusWithdrawn';
                 break;
+            case 'WithdrawReport':
+            case 'withdrawreport':
+                return 'getWithdrawReport';
+                break;
+            case 'TravelReport':
+            case 'travelreport':
+                return 'getTravelReport';
+                break;
             case 'TeamMemberStatusPotentialsOverview':
             case 'teammemberstatuspotentialsoverview':
                 return 'getTeamMemberStatusPotentialsOverview';
@@ -156,10 +160,6 @@ trait GlobalReportDispatch {
             case 'TeamMemberStatusPotentials':
             case 'teammemberstatuspotentials':
                 return 'getTeamMemberStatusPotentials';
-                break;
-            case 'WithdrawReport':
-            case 'withdrawreport':
-                return 'getWithdrawReport';
                 break;
         }
     }
@@ -220,9 +220,6 @@ trait GlobalReportDispatch {
     // Get report Overdue
     protected abstract function getTmlpRegistrationsOverdue();
 
-    // Get report Travel Summary
-    protected abstract function getTravelReport();
-
     // Get report Completed This Week
     protected abstract function getCoursesThisWeek();
 
@@ -256,13 +253,16 @@ trait GlobalReportDispatch {
     // Get report Withdrawn
     protected abstract function getTeamMemberStatusWithdrawn();
 
-    // Get report Overview
+    // Get report Withdraw Compliance
+    protected abstract function getWithdrawReport();
+
+    // Get report Travel Summary
+    protected abstract function getTravelReport();
+
+    // Get report Potentials Overview
     protected abstract function getTeamMemberStatusPotentialsOverview();
 
-    // Get report Details
+    // Get report Potentials Details
     protected abstract function getTeamMemberStatusPotentials();
-
-    // Get report Withdraws
-    protected abstract function getWithdrawReport();
 
 }

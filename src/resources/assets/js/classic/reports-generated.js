@@ -8,11 +8,9 @@ const GlobalReport = {
         "RegionalStatsGroup",
         "GameEffectivenessGroup",
         "ApplicationsGroup",
-        "TravelReport",
         "CoursesGroup",
         "TeamMemberStatusGroup",
-        "PotentialsGroup",
-        "WithdrawReport"
+        "WeekendGroup"
     ],
     "children": {
         "RatingSummary": {
@@ -183,52 +181,45 @@ const GlobalReport = {
                 "TmlpRegistrationsOverdue"
             ]
         },
-        "TravelReport": {
-            "id": "TravelReport",
-            "n": 23,
-            "type": "report",
-            "name": "Travel Summary",
-            "shortName": "Travel"
-        },
         "CoursesThisWeek": {
             "id": "CoursesThisWeek",
-            "n": 24,
+            "n": 23,
             "type": "report",
             "name": "Completed This Week"
         },
         "CoursesNextMonth": {
             "id": "CoursesNextMonth",
-            "n": 25,
+            "n": 24,
             "type": "report",
             "name": "Next 5 Weeks"
         },
         "CoursesUpcoming": {
             "id": "CoursesUpcoming",
-            "n": 26,
+            "n": 25,
             "type": "report",
             "name": "Upcoming"
         },
         "CoursesCompleted": {
             "id": "CoursesCompleted",
-            "n": 27,
+            "n": 26,
             "type": "report",
             "name": "Completed"
         },
         "CoursesGuestGames": {
             "id": "CoursesGuestGames",
-            "n": 28,
+            "n": 27,
             "type": "report",
             "name": "Guest Games"
         },
         "CoursesSummary": {
             "id": "CoursesSummary",
-            "n": 29,
+            "n": 28,
             "type": "report",
             "name": "Summary"
         },
         "CoursesGroup": {
             "id": "CoursesGroup",
-            "n": 30,
+            "n": 29,
             "type": "grouping",
             "name": "Courses",
             "children": [
@@ -242,35 +233,41 @@ const GlobalReport = {
         },
         "TdoSummary": {
             "id": "TdoSummary",
-            "n": 31,
+            "n": 30,
             "type": "report",
             "name": "Training & Development",
             "shortName": "TDO"
         },
         "GitwSummary": {
             "id": "GitwSummary",
-            "n": 32,
+            "n": 31,
             "type": "report",
             "name": "GITW",
             "shortName": "GITW"
         },
         "TeamMemberStatusCtw": {
             "id": "TeamMemberStatusCtw",
-            "n": 33,
+            "n": 32,
             "type": "report",
             "name": "CTW"
         },
         "TeamMemberStatusTransfer": {
             "id": "TeamMemberStatusTransfer",
-            "n": 34,
+            "n": 33,
             "type": "report",
             "name": "Transfers"
         },
         "TeamMemberStatusWithdrawn": {
             "id": "TeamMemberStatusWithdrawn",
-            "n": 35,
+            "n": 34,
             "type": "report",
             "name": "Withdrawn"
+        },
+        "WithdrawReport": {
+            "id": "WithdrawReport",
+            "n": 35,
+            "type": "report",
+            "name": "Withdraw Compliance"
         },
         "TeamMemberStatusGroup": {
             "id": "TeamMemberStatusGroup",
@@ -282,36 +279,38 @@ const GlobalReport = {
                 "GitwSummary",
                 "TeamMemberStatusCtw",
                 "TeamMemberStatusTransfer",
-                "TeamMemberStatusWithdrawn"
+                "TeamMemberStatusWithdrawn",
+                "WithdrawReport"
             ]
+        },
+        "TravelReport": {
+            "id": "TravelReport",
+            "n": 37,
+            "type": "report",
+            "name": "Travel Summary"
         },
         "TeamMemberStatusPotentialsOverview": {
             "id": "TeamMemberStatusPotentialsOverview",
-            "n": 37,
+            "n": 38,
             "type": "report",
-            "name": "Overview"
+            "name": "Potentials Overview"
         },
         "TeamMemberStatusPotentials": {
             "id": "TeamMemberStatusPotentials",
-            "n": 38,
-            "type": "report",
-            "name": "Details"
-        },
-        "PotentialsGroup": {
-            "id": "PotentialsGroup",
             "n": 39,
+            "type": "report",
+            "name": "Potentials Details"
+        },
+        "WeekendGroup": {
+            "id": "WeekendGroup",
+            "n": 40,
             "type": "grouping",
-            "name": "Potentials",
+            "name": "Weekend",
             "children": [
+                "TravelReport",
                 "TeamMemberStatusPotentialsOverview",
                 "TeamMemberStatusPotentials"
             ]
-        },
-        "WithdrawReport": {
-            "id": "WithdrawReport",
-            "n": 40,
-            "type": "report",
-            "name": "Withdraws"
         }
     }
 }
