@@ -51,17 +51,46 @@ class TeamMembersIndexView extends TeamMembersBase {
         const baseUri = this.teamMembersBaseUri()
         const { weeklySave, weeklyReporting: wr, teamMembers } = this.props
         var teamMemberRows = []
+        var withdraws = []
         teamMembersData.iterItems(teamMembers, (teamMember, key) => {
             var updating = STATE_NOTHING
             if (wr.changed[key]) {
                 updating = (weeklySave.loaded && wr.working && wr.working[key] >= wr.changed[key])? STATE_SAVED : STATE_UPDATING
             }
-            teamMemberRows.push(
+
+            let row = (
                 <TeamMemberIndexRow
                         key={key} teamMember={teamMember} baseUri={baseUri}
-                        updating={updating} accountabilities={this.props.lookups.accountabilities}  />
+                        updating={updating} accountabilities={this.props.lookups.accountabilities}
+                        lookups={this.props.lookups} />
             )
+
+            if (teamMember.withdrawCode || teamMember.xferOut) {
+                withdraws.push(row)
+            } else {
+                teamMemberRows.push(row)
+            }
         })
+
+        let withdrawTable
+        if (withdraws.length) {
+            withdrawTable = (
+                <div>
+                <br/>
+                    <h4>Withdraws</h4>
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Year</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>{withdraws}</tbody>
+                    </table>
+                </div>
+            )
+        }
 
         return (
             <Form model={TEAM_MEMBERS_COLLECTION_FORM_KEY} onSubmit={this.saveWeeklyReporting}>
@@ -95,6 +124,7 @@ class TeamMembersIndexView extends TeamMembersBase {
                 </table>
                 <br />
                 <AddOneLink link={`${baseUri}/add`} />
+                {withdrawTable}
             </Form>
         )
     }
@@ -133,7 +163,7 @@ class TeamMemberIndexRow extends React.PureComponent {
     }
 
     render() {
-        const { teamMember, updating, accountabilities } = this.props
+        const { teamMember, updating, accountabilities, lookups } = this.props
         const modelKey = `${TEAM_MEMBERS_COLLECTION_FORM_KEY}.${teamMember.id}`
         var className, accountability
         if (updating == STATE_SAVED) {
@@ -144,6 +174,24 @@ class TeamMemberIndexRow extends React.PureComponent {
         const acc = teamMember.accountabilities
         if (acc && acc.length) {
             accountability = acc.map((accId) => accountabilities[accId].display).join(', ')
+        }
+
+        if (teamMember.withdrawCode || teamMember.xferOut) {
+            let reason = 'Transfered to another team'
+            if (teamMember.withdrawCode) {
+                reason = lookups.withdraw_codes_by_id[teamMember.withdrawCode].display
+            }
+            return (
+                <tr className={className}>
+                    <td>
+                        <Link to={`${this.props.baseUri}/edit/${teamMember.id}`}>
+                            {teamMember.firstName} {teamMember.lastName}
+                        </Link>
+                    </td>
+                    <td>T{teamMember.teamYear}</td>
+                    <td>{reason}</td>
+                </tr>
+            )
         }
 
         return (

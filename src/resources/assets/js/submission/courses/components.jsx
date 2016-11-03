@@ -43,7 +43,7 @@ class CoursesBase extends SubmissionBase {
 
 class CoursesIndexView extends CoursesBase {
     renderCompleteCourseTable(courses) {
-        if (!courses) {
+        if (!courses.length) {
             return <div />
         }
 
