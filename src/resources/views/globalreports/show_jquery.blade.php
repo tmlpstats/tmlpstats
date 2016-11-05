@@ -33,9 +33,6 @@
     <div id="loader" style="display: none">
         @include('partials.loading')
     </div>
-    <br />
-    <br />
-    <small>This is a tech demo of our faster loading Global Report. If this page is not displaying properly, <a href="{{ $context->dateSelectAction('RD') }}?viewmode=html">click here</a></small>
 
     <script type="text/javascript">
     $(function() {
