@@ -60,6 +60,7 @@ Route::get('m/{abbr}', 'ReportsController@mobileDash');
 
 // Center Info
 Route::get('center/{abbr}', 'CenterController@dashboard');
+Route::get('center/{abbr}/next_qtr_accountabilities', 'CenterController@nextQtrAccountabilities');
 Route::get('center/{abbr}/submission/{reportingDate?}/{page?}/{irrelevant?}/{irrelevant2?}', 'CenterController@submission');
 
 // Regions

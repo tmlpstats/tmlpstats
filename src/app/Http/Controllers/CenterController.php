@@ -65,4 +65,20 @@ class CenterController extends Controller
 
         return view('centers.submission', compact('center'));
     }
+
+    public function nextQtrAccountabilities($abbr, $reportingDate = null)
+    {
+        $center = Center::abbreviation($abbr)->firstorFail();
+        $this->authorize('submitStats', $center);
+        $this->context->setCenter($center);
+        if ($reportingDate === null) {
+            $reportingDate = $this->context->getReportingDate();
+        } else {
+            $reportingDate = Carbon::parse($reportingDate, 'UTC');
+            $this->context->setReportingDate($reportingDate);
+        }
+
+        return view('centers.next_qtr_accountabilities', compact('center', 'reportingDate'));
+    }
+
 }

@@ -47,4 +47,17 @@ export const scoreboardLockData = new FormReduxLoader({
     extraLMS: ['saveState']
 })
 
-export const saveScoreboardLock = new LoadingMultiState('admin/scoreboardLock/saveState')
+
+export const extraData = new SimpleReduxLoader({
+    prefix: 'admin/extra',
+    actions: {
+        centerAccountabilities: {
+            lmsName: 'loadState',
+            api: Api.Submission.NextQtrAccountability.allForCenter,
+            setLoaded: true,
+            successHandler(data, { loader, params }) {
+                return loader.replaceItem(`${params.center}/${params.reportingDate}`, data)
+            }
+        }
+    }
+})

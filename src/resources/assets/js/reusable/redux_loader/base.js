@@ -94,7 +94,7 @@ export class ReduxLoader {
             if (!actionData.inGroup) {
                 dispatch(loadAction('loading'))
             }
-            const info = {dispatch, getState, extra, loader: this}
+            const info = {dispatch, getState, extra, params, loader: this}
 
             const success = (data) => {
                 const tdata = actionData.transformData(data, info)

@@ -1,5 +1,5 @@
 @if ($showAccountabilities)
-    <div id="cr3-accountabilities" data-reportingDate="{{ $expectedDate }}" data-centerId="den"></div>
+    <div id="cr3-accountabilities" data-reportingDate="{{ $expectedDate }}"></div>
 @endif
 
 {!! Form::open(['url' => $formAction, 'files' => true]) !!}
