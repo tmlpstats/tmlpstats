@@ -121,25 +121,6 @@ class Center extends Model
         return $time;
     }
 
-    // TODO: remove me after we update the settings data
-    public function convertMailingLists()
-    {
-        $settings = Setting::name('centerReportMailingList')->get();
-
-        foreach ($settings as $setting) {
-            if (strpos($setting->value, '[') === false) {
-                $value = array_map('trim', explode(',', $setting->value));
-
-                // Canonicalize list
-                $list = array_unique($value);
-                sort($list);
-
-                $setting->value = json_encode($list);
-                $setting->save();
-            }
-        }
-    }
-
     public function getMailingList(Quarter $quarter)
     {
         return App::make(Api\Context::class)->getSetting('centerReportMailingList', $this, $quarter);
