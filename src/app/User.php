@@ -288,6 +288,11 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         return $query->whereActive($active);
     }
 
+    public function scopeEmail($query, $email)
+    {
+        return $query->whereEmail($email);
+    }
+
     public function scopeByPerson($query, Person $person)
     {
         return $query->wherePersonId($person->id);
