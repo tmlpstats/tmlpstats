@@ -1,6 +1,8 @@
 @inject('context', 'TmlpStats\Api\Context')
 <?php
-$currentUser = Auth::user();
+$currentUser = $context->getUser();
+$homeRegion = $currentUser ? $currentUser->homeRegion() : null;
+$homeGlobalRegion = $homeRegion ? $homeRegion->getParentGlobalRegion() : null;
 $homeUrl = Session::get('homePath', '/');
 if (!isset($regionSelectAction)) {
     $regionSelectAction = 'ReportsController@getRegionReport';
@@ -23,9 +25,7 @@ if ($currentRegion != null) {
 
 }
 
-
 $reportingDateString = ($reportingDate != null) ? $reportingDate->toDateString() : null;
-
 
 $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : false;
 ?>
@@ -70,7 +70,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                                     <li><a href="{{ url('/admin/users') }}">Users</a></li>
                                     <li><a href="{{ url('/users/invites') }}">Invites</a></li>
                                     <li><a href="{{ url('/admin/centers') }}">Centers</a></li>
-                                    <li><a href="{{ url('/regions') }}">Regions</a></li>
+                                    <li><a href="{{ url($homeGlobalRegion ? "/regions/{$homeGlobalRegion->id}" : '/regions') }}">Regions</a></li>
                                     <li><a href="{{ url('/globalreports') }}">Global Reports</a></li>
                                     <li><a href="{{ url('/import') }}">Import Sheets</a></li>
                                 </ul>

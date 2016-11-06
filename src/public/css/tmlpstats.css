@@ -287,6 +287,11 @@ div.box {
     font-size: medium;
 }
 
+/** ADMIN */
+.select-action-pill {
+    padding-bottom: 20px;
+}
+
 /* Live scoreboard */
 
 .live-scoreboard-group input {

@@ -19,15 +19,22 @@
     <br />
     @endif
 
+    @if (Session::get('message'))
+    <div class="alert alert-{{ Session::get('success') ? 'success' : 'danger' }}" role="alert">
+        <p>{{ Session::get('message') }}</p>
+    </div>
+    @endif
+
     <h3>Centers</h3>
-    <div>
+    <div class="select-action-pill">
         <ul class="nav nav-pills">
-            <li role="presentation" class="dropdown">
+            <li role="presentation" class="dropdown active">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
                     Actions <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="#" data-toggle="modal" data-target="#updateVersionModel">Update Version</a></li>
+                    <li><a href="#" data-toggle="modal" data-target="#updatePasswordModel">Update Password</a></li>
                     {{--<li><a href="#">Add Setting</a></li>--}}
                 </ul>
             </li>
@@ -41,12 +48,46 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="updateVersionModel">Update Version</h4>
                 </div>
-                {!! Form::open(['url' => "admin/centers", 'id' => 'centersUpdateForm']) !!}
+                {!! Form::open(['url' => "admin/centers", 'class' => 'centersUpdateForm']) !!}
                 <div class="modal-body">
                     <div class="form-group">
                         {!! Form::label('sheet_version', 'Sheet Version:', ['class' => 'col-sm-3 control-label']) !!}
                         <div class="col-sm-5">
                             {!! Form::text('sheet_version', null, ['class' => 'form-control']) !!}
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+                {!! Form::close() !!}
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="updatePasswordModel" tabindex="-1" role="dialog" aria-labelledby="updatePasswordModel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="updatePasswordModel">Update Password</h4>
+                </div>
+                {!! Form::open(['url' => "admin/centers", 'class' => 'centersUpdateForm']) !!}
+                <div class="modal-body">
+                    <div class="form-group">
+                        {!! Form::label('new_password', 'New Password:', ['class' => 'col-sm-3 control-label']) !!}
+                        <div class="col-sm-5">
+                            {!! Form::password('new_password', null, ['class' => 'form-control']) !!}
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="form-group">
+                        {!! Form::label('confirm_password', 'Confirm Password:', ['class' => 'col-sm-3 control-label']) !!}
+                        <div class="col-sm-5">
+                            {!! Form::password('confirm_password', null, ['class' => 'form-control']) !!}
                         </div>
                     </div>
                     <br />
@@ -73,7 +114,7 @@
             <tbody>
             @foreach ($region->centers as $center)
             <tr>
-                <td>{!! Form::checkbox("centers[]", $center->id, null, ['class' => 'checkedItem']) !!}</td>
+                <td>{!! Form::checkbox("centers[]", $center->id, null, ['class' => 'checkedCenter']) !!}</td>
                 <td><a href="{{ url("admin/centers/{$center->abbreviation}/edit") }}">{{ $center->name }}</a></td>
                 <td>{{ $center->sheetVersion }}</td>
                 <td>{{ $center->statsEmail }}</td>
@@ -86,7 +127,6 @@
 
     <br/>
     <br/>
-    <h3></h3>
 
 
     <script>
@@ -100,16 +140,26 @@
                 $('input:checkbox').prop('checked', this.checked);
             });
 
-            $('#centersUpdateForm').submit(function( event ) {
+            $('form.centersUpdateForm').submit(function( event ) {
                 var centerIds = [];
-                $.each($("input:checkbox[class=checkedItem]:checked"), function(){
+                $.each($("input:checkbox[class=checkedCenter]:checked"), function(){
                     centerIds.push($(this).val());
                 });
 
                 var data = {};
                 if (centerIds) {
                     data.centerIds = centerIds;
-                    data.sheetVersion = $('input[name=sheet_version]').val();
+
+                    var sheetVersion = $('input[name=sheet_version]').val()
+                    if (sheetVersion) {
+                        data.sheetVersion = sheetVersion;
+                    }
+
+                    var newPassword = $('input[name=new_password]').val()
+                    if (newPassword) {
+                        data.newPassword = newPassword;
+                        data.confirmPassword = $('input[name=confirm_password]').val();
+                    }
                 }
 
                 if (!$.isEmptyObject(data)) {
