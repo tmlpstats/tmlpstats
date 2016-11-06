@@ -8,7 +8,7 @@
     </div>
 
     <div class="form-group">
-        {!! Form::label('abbreviation', 'Abbr:', ['class' => 'col-sm-2 control-label']) !!}
+        {!! Form::label('abbreviation', 'Abbreviation:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-5">
             {!! Form::text('abbreviation', null, ['class' => 'form-control']) !!}
         </div>
@@ -53,6 +53,14 @@
         {!! Form::label('sheet_version', 'Sheet Version:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-5">
             {!! Form::text('sheet_version', null, ['class' => 'form-control']) !!}
+        </div>
+    </div>
+
+    <div class="form-group">
+        {!! Form::label('mailing_list', 'Mailing List:', ['class' => 'col-sm-2 control-label']) !!}
+        <div class="col-sm-5">
+            {!! Form::text('mailing_list', isset($center) ? implode(', ', $center->getMailingList($quarter)) : null, ['class' => 'form-control']) !!}
+            <p class="help">List additional email addresses to include when sending reports. Separate with a comma to include multiple.</p>
         </div>
     </div>
 

@@ -284,7 +284,7 @@ class ImportManager
             'statisticianApprentice' => static::getEmail($statisticianApprentice),
         ];
 
-        $emailMap['to'] = $emailMap['center'] ?: $emailMap['statistician'];
+        $emailTo = $emailMap['center'] ?: $emailMap['statistician'];
 
         // If this is the first week and the report didn't validate, we also didn't import any of the
         // new accountables. Don't send the email to last quarters accountables, and instead just send it to the
@@ -300,9 +300,7 @@ class ImportManager
             $accountablesCopied = false;
         }
 
-        $mailingList = Setting::name('centerReportMailingList')
-                              ->with($center, $quarter)
-                              ->get();
+        $mailingList = $center->getMailingList($quarter);
 
         if ($mailingList) {
             $emailMap['mailingList'] = $mailingList;
@@ -311,17 +309,18 @@ class ImportManager
         $emails = [];
         foreach ($emailMap as $accountability => $email) {
 
-            if (!$email || $accountability == 'center') {
+            if (!$email || $email == $emailTo) {
                 continue;
             }
 
-            if (strpos($email, ',') !== false) {
-                $emails = array_merge($emails, explode(',', $email));
+            if (is_array($email)) {
+                $emails = array_merge($emails, $email);
             } else {
                 $emails[] = $email;
             }
         }
         $emails = array_unique($emails);
+        natcasesort($emails);
 
         // Don't dump HTML into the logs
         if (env('MAIL_DRIVER') === 'log') {
@@ -348,11 +347,12 @@ class ImportManager
         $reportingDate = $statsReport->reportingDate;
         try {
             Mail::send('emails.statssubmitted',
-                compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'isResubmitted', 'due', 'comment', 'respondByDateTime', 'reportUrl', 'mobileDashUrl', 'reportingDate', 'accountablesCopied'),
+                compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'isResubmitted', 'due', 'comment',
+                    'respondByDateTime', 'reportUrl', 'mobileDashUrl', 'reportingDate', 'accountablesCopied'),
                 function ($message) use ($emails, $emailMap, $centerName, $sheetPath, $sheetName) {
                     // Only send email to centers in production
                     if (env('APP_ENV') === 'prod') {
-                        $message->to($emailMap['to']);
+                        $message->to($emailTo);
                         foreach ($emails as $email) {
                             $message->cc($email);
                         }
@@ -375,7 +375,7 @@ class ImportManager
                 }
             );
             $successMessage = "<strong>Thank you.</strong> We received your statistics and have sent a copy to the following emails"
-                . "<ul><li>{$emailMap['to']}</li><li>" . implode('</li><li>', array_values($emails)) . "</li></ul>"
+                . "<ul><li>{$emailTo}</li><li>" . implode('</li><li>', $emails) . "</li></ul>"
                 . " Please reply-all to that email if there is anything you need to communicate.";
 
             if (env('APP_ENV') === 'prod') {
