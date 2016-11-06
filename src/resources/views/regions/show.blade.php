@@ -19,11 +19,7 @@
     <br />
     @endif
 
-    @if (Session::get('message'))
-    <div class="alert alert-{{ Session::get('success') ? 'success' : 'danger' }}" role="alert">
-        <p>{{ Session::get('message') }}</p>
-    </div>
-    @endif
+    @include('errors.list')
 
     <h3>Centers</h3>
     <div class="select-action-pill">

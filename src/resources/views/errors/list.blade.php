@@ -7,4 +7,8 @@
             @endforeach
         </ul>
     </div>
+@elseif (Session::get('message'))
+    <div class="alert alert-{{ Session::get('success') ? 'success' : 'danger' }}" role="alert">
+        <p>{{ Session::get('message') }}</p>
+    </div>
 @endif

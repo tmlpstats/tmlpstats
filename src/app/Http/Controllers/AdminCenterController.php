@@ -1,13 +1,14 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
-use Illuminate\Http\Request;
-use TmlpStats as Models;
-use TmlpStats\Http\Requests;
-use TmlpStats\Http\Requests\CenterRequest;
-
+use Carbon\Carbon;
 use DateTimeZone;
+use Illuminate\Http\Request;
 use Log;
+use Redirect;
+use TmlpStats as Models;
+use TmlpStats\Http\Requests\CenterRequest;
+use Validator;
 
 class AdminCenterController extends Controller
 {
@@ -53,6 +54,8 @@ class AdminCenterController extends Controller
     /**
      * Store a newly created resource in storage.
      *
+     * Input validation provided by CenterRequest
+     *
      * @return \Illuminate\Http\Response
      */
     public function store(CenterRequest $request)
@@ -75,7 +78,14 @@ class AdminCenterController extends Controller
             }
         }
 
-        Models\Center::create($input);
+        $center = Models\Center::create($input);
+
+        if ($request->has('mailing_list')) {
+            $quarter = Models\Quarter::getQuarterByDate(Carbon::now(), $center->region);
+            if (!$this->saveMailingList($request, $center, $quarter)) {
+                return redirect('admin/centers/create')->withInput();
+            }
+        }
 
         return redirect('admin/centers');
     }
@@ -88,11 +98,13 @@ class AdminCenterController extends Controller
      */
     public function show($id)
     {
-        $center = Models\Center::where('abbreviation', '=', $id)->firstOrFail();
+        $center = Models\Center::abbreviation($id)->firstOrFail();
 
         $this->authorize($center);
 
-        return view('admin.centers.show', compact('center'));
+        $quarter = Models\Quarter::getQuarterByDate(Carbon::now(), $center->region);
+
+        return view('admin.centers.show', compact('center', 'quarter'));
     }
 
     /**
@@ -103,10 +115,11 @@ class AdminCenterController extends Controller
      */
     public function edit($id)
     {
-        $center = Models\Center::where('abbreviation', '=', $id)->firstOrFail();
+        $center = Models\Center::abbreviation($id)->firstOrFail();
 
         $this->authorize($center);
 
+        $quarter = Models\Quarter::getQuarterByDate(Carbon::now(), $center->region);
         $timezones = DateTimeZone::listIdentifiers();
         $selectedTimezone = array_search($center->timezone, $timezones);
 
@@ -114,18 +127,20 @@ class AdminCenterController extends Controller
             $selectedTimezone = null;
         }
 
-        return view('admin.centers.edit', compact('center', 'timezones', 'selectedTimezone'));
+        return view('admin.centers.edit', compact('center', 'quarter', 'timezones', 'selectedTimezone'));
     }
 
     /**
      * Update the specified resource in storage.
+     *
+     * Input validation provided by CenterRequest
      *
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function update(CenterRequest $request, $id)
     {
-        $center = Models\Center::where('abbreviation', '=', $id)->firstOrFail();
+        $center = Models\Center::abbreviation($id)->firstOrFail();
 
         $this->authorize($center);
 
@@ -149,6 +164,12 @@ class AdminCenterController extends Controller
             }
         }
 
+        // Don't check if there is a value first so we can remove existing lists
+        $quarter = Models\Quarter::getQuarterByDate(Carbon::now(), $center->region);
+        if (!$this->saveMailingList($request, $center, $quarter)) {
+            return redirect("admin/centers/{$center->abbreviation}/edit")->withInput();
+        }
+
         $center->update($input);
 
         $redirect = "admin/centers";
@@ -156,6 +177,44 @@ class AdminCenterController extends Controller
             $redirect = $request->get('previous_url');
         }
         return redirect($redirect);
+    }
+
+    protected function saveMailingList(Request $request, Models\Center $center, Models\Quarter $quarter)
+    {
+        $mailingList = $request->get('mailing_list');
+        $mailingList = explode(',', $mailingList);
+        $mailingList = array_unique($mailingList);
+        sort($mailingList);
+
+        $list = [];
+        $invalid = [];
+
+        // Validate list
+        foreach ($mailingList as $email) {
+            $email = trim($email);
+
+            if (!$email) {
+                continue;
+            }
+
+            $validator = Validator::make(compact('email'), ['email' => 'required|email']);
+            if ($validator->fails()) {
+                $invalid[] = $email;
+                Log::warning("Failed to include email '{$email}' in {$center->name}'s mailing list because it was not valid.");
+                continue;
+            }
+
+            $list[] = $email;
+        }
+
+        // Set error message
+        if ($invalid) {
+            $this->pushResponse($request, false, 'The following emails were not added to the mailing list '
+                . 'because they are not valid: '
+                . implode(', ', $invalid));
+        }
+
+        return $center->setMailingList($quarter, $list) && !$invalid;
     }
 
     public function batchUpdate(Request $request)

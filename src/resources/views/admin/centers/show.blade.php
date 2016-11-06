@@ -57,6 +57,15 @@
             <td>{{ $center->sheetVersion }}</td>
         </tr>
         <tr>
+            <th>Mailing List:</th>
+            <td><?php
+                $list = $center->getMailingList($quarter);
+                if ($list) {
+                    echo nl2br(e(implode(",\n", $list)));
+                }
+            ?></td>
+        </tr>
+        <tr>
             <th>Active:</th>
             <td>{{ $center->active == true ? 'Yes' : 'No' }}</td>
         </tr>

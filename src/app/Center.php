@@ -1,9 +1,11 @@
 <?php
 namespace TmlpStats;
 
+use App;
 use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Api;
 use TmlpStats\Traits\CachedRelationships;
 
 class Center extends Model
@@ -117,6 +119,51 @@ class Center extends Model
         $time->setTimezone($this->timezone);
 
         return $time;
+    }
+
+    // TODO: remove me after we update the settings data
+    public function convertMailingLists()
+    {
+        $settings = Setting::name('centerReportMailingList')->get();
+
+        foreach ($settings as $setting) {
+            if (strpos($setting->value, '[') === false) {
+                $value = array_map('trim', explode(',', $setting->value));
+
+                // Canonicalize list
+                $list = array_unique($value);
+                sort($list);
+
+                $setting->value = json_encode($list);
+                $setting->save();
+            }
+        }
+    }
+
+    public function getMailingList(Quarter $quarter)
+    {
+        return App::make(Api\Context::class)->getSetting('centerReportMailingList', $this, $quarter);
+    }
+
+    public function setMailingList(Quarter $quarter, array $list)
+    {
+        $setting = Setting::firstOrNew([
+            'center_id' => $this->id,
+            'quarter_id' => $quarter->id,
+            'name' => 'centerReportMailingList',
+        ]);
+
+        // If the list is empty, remove the setting if it exists and abort
+        if (!$list) {
+            return $setting->delete();
+        }
+
+        // Canonicalize list
+        $list = array_unique($list);
+        sort($list);
+
+        $setting->value = json_encode($list);
+        return $setting->save();
     }
 
     public function inRegion(Region $region)

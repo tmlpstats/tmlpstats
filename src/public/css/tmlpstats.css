@@ -42,6 +42,9 @@ body.no-navbar{
 .warning {
     color: orange !important;
 }
+.help {
+    color: gray !important;
+}
 
 .bg-green {
     background-color: #00a000 !important;
