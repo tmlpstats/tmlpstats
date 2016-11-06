@@ -151,14 +151,14 @@ class StatsReportController extends ReportDispatchAbstractController
             ->first();
 
         $lastReport = null;
-        if ($lastCenter) {
+        if ($lastCenter && Gate::allows('showReportNavLinks', Models\StatsReport::class)) {
             $lastReport = $globalReport->statsReports()
                 ->byCenter($lastCenter)
                 ->first();
         }
 
         $nextReport = null;
-        if ($nextCenter) {
+        if ($nextCenter && Gate::allows('showReportNavLinks', Models\StatsReport::class)) {
             $nextReport = $globalReport->statsReports()
                 ->byCenter($nextCenter)
                 ->first();
