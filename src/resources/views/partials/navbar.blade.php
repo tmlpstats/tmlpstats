@@ -1,8 +1,7 @@
 @inject('context', 'TmlpStats\Api\Context')
 <?php
 $currentUser = $context->getUser();
-$homeRegion = $currentUser ? $currentUser->homeRegion() : null;
-$homeGlobalRegion = $homeRegion ? $homeRegion->getParentGlobalRegion() : null;
+$homeRegion = $currentUser ? $currentUser->homeRegion(true) : null;
 $homeUrl = Session::get('homePath', '/');
 if (!isset($regionSelectAction)) {
     $regionSelectAction = 'ReportsController@getRegionReport';
@@ -15,14 +14,18 @@ $currentRegion = $context->getGlobalRegion(false);
 $currentCenter = $context->getCenter(true);
 $reports = null;
 $centers = [];
-if ($currentRegion != null) {
+if ($currentRegion) {
     $quarter = TmlpStats\Quarter::getQuarterByDate($reportingDate, $currentRegion);
 
-    $reports = TmlpStats\GlobalReport::between($quarter->getQuarterStartDate($currentCenter), $quarter->getQuarterEndDate($currentCenter))
-                                 ->orderBy('reporting_date', 'desc')
-                                 ->get();
-    $centers = TmlpStats\Center::byRegion($currentRegion)->orderBy('name')->get();
+    // Add a week before and after so we can switch between quarters
+    $startDate = $quarter->getQuarterStartDate($currentCenter);
+    $endDate = $quarter->getQuarterEndDate($currentCenter)->addWeek();
 
+    $reports = TmlpStats\GlobalReport::between($startDate, $endDate)
+        ->orderBy('reporting_date', 'desc')
+        ->get();
+
+    $centers = TmlpStats\Center::byRegion($currentRegion)->orderBy('name')->get();
 }
 
 $reportingDateString = ($reportingDate != null) ? $reportingDate->toDateString() : null;
@@ -70,7 +73,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                                     <li><a href="{{ url('/admin/users') }}">Users</a></li>
                                     <li><a href="{{ url('/users/invites') }}">Invites</a></li>
                                     <li><a href="{{ url('/admin/centers') }}">Centers</a></li>
-                                    <li><a href="{{ url($homeGlobalRegion ? "/regions/{$homeGlobalRegion->id}" : '/regions') }}">Regions</a></li>
+                                    <li><a href="{{ url($homeRegion ? "/regions/{$homeRegion->id}" : '/regions') }}">Regions</a></li>
                                     <li><a href="{{ url('/globalreports') }}">Global Reports</a></li>
                                     <li><a href="{{ url('/import') }}">Import Sheets</a></li>
                                 </ul>

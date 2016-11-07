@@ -159,27 +159,39 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     /**
      * Get the Region of the user's home center
      *
+     * @param  boolean $globalOnly  If true, returns the global parent region
      * @return null|Region
      */
-    public function homeRegion()
+    public function homeRegion($globalOnly = false)
     {
+        $region = null;
         if ($this->reportToken) {
             $owner = $this->reportToken->getOwner();
 
             if ($this->reportToken->ownerType == Region::class) {
-                return $owner;
+                $region = $owner;
             }
 
             if ($this->reportToken->ownerType == Center::class && $owner) {
-                return $owner->region;
+                $region = $owner->region;
             }
 
-            return null;
+            if ($region && $globalOnly) {
+                return $region->getParentGlobalRegion();
+            }
+
+            return $region;
         }
 
-        return $this->person && $this->person->center
-            ? $this->person->center->region
-            : null;
+        if ($this->person && $this->person->center) {
+            $region = $this->person->center->region;
+        }
+
+        if ($region && $globalOnly) {
+            return $region->getParentGlobalRegion();
+        }
+
+        return $region;
     }
 
     /**
