@@ -109,69 +109,60 @@ class StatsReportController extends ReportDispatchAbstractController
     /**
      * Display the specified resource.
      *
-     * @param  int $id
-     *
+     * @param  Request $request
+     * @param  integer $id
      * @return Response
      */
     public function show(Request $request, $id)
     {
         $statsReport = Models\StatsReport::findOrFail($id);
+
+        $this->authorize('read', $statsReport);
+
         $this->context->setCenter($statsReport->center);
         $this->context->setReportingDate($statsReport->reportingDate);
         $centerReportingDate = Encapsulations\CenterReportingDate::ensure();
         $this->context->setDateSelectAction('ReportsController@getCenterReport', [
             'abbr' => $statsReport->center->abbrLower(),
         ]);
-        $this->authorize('read', $statsReport);
 
-        $sheetUrl = '';
-        $globalReport = null;
-        $center = $statsReport->center;
 
         $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
 
+        $sheetUrl = '';
         if ($sheetPath) {
             $sheetUrl = $sheetPath ? url("/statsreports/{$statsReport->id}/download") : null;
         }
 
-        $quarterStartDate = $statsReport->quarter->getQuarterStartDate($center);
-        $quarterEndDate = $statsReport->quarter->getQuarterEndDate($center);
-
-        // Other Stats Reports
-        $otherStatsReports = [];
-        $searchWeek = $quarterEndDate->copy();
-
-        while ($searchWeek->gte($quarterStartDate)) {
-            $globalReport = Models\GlobalReport::reportingDate($searchWeek)->first();
-            if ($globalReport) {
-                $report = $globalReport->statsReports()->byCenter($center)->first();
-                if ($report) {
-                    $otherStatsReports[$report->id] = $report->reportingDate->format('M d, Y');
-                }
-            }
-            $searchWeek->subWeek();
-        }
-
-        // Only show last quarter's completion report on the first week
-        if ($statsReport->reportingDate->diffInWeeks($quarterStartDate) > 1) {
-            array_pop($otherStatsReports);
-        }
-
-        // When showing last quarter's data, make sure we also show this week's report
-        if ($quarterEndDate->lt(Carbon::now())) {
-            $firstWeek = $quarterEndDate->copy();
-            $firstWeek->addWeek();
-
-            $globalReport = Models\GlobalReport::reportingDate($firstWeek)->first();
-            if ($globalReport) {
-                $report = $globalReport->statsReports()->byCenter($center)->first();
-                if ($report) {
-                    $otherStatsReports = [$report->id => $report->reportingDate->format('M d, Y')] + $otherStatsReports;
-                }
-            }
-        }
-
+        $center = $statsReport->center;
         $globalReport = Models\GlobalReport::reportingDate($statsReport->reportingDate)->first();
+        $globalRegion = $center->region->getParentGlobalRegion();
+
+        $nextCenter = Models\Center::active()
+            ->byRegion($globalRegion)
+            ->where('name', '>', $center->name)
+            ->orderBy('name')
+            ->first();
+
+        $lastCenter = Models\Center::active()
+            ->byRegion($globalRegion)
+            ->where('name', '<', $center->name)
+            ->orderBy('name')
+            ->first();
+
+        $lastReport = null;
+        if ($lastCenter && Gate::allows('showReportNavLinks', Models\StatsReport::class)) {
+            $lastReport = $globalReport->statsReports()
+                ->byCenter($lastCenter)
+                ->first();
+        }
+
+        $nextReport = null;
+        if ($nextCenter && Gate::allows('showReportNavLinks', Models\StatsReport::class)) {
+            $nextReport = $globalReport->statsReports()
+                ->byCenter($nextCenter)
+                ->first();
+        }
 
         $reportToken = null;
         if (Gate::allows('readLink', Models\ReportToken::class)) {
@@ -182,9 +173,10 @@ class StatsReportController extends ReportDispatchAbstractController
 
         return view('statsreports.show', compact(
             'statsReport',
+            'lastReport',
+            'nextReport',
             'centerReportingDate',
             'globalReport',
-            'otherStatsReports',
             'sheetUrl',
             'reportToken',
             'showNavCenterSelect'
