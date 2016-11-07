@@ -148,10 +148,6 @@ class Controller extends BaseController
 
     public function setRegion(Region $region)
     {
-        if ($region) {
-            Session::set('viewRegionId', $region->id);
-        }
-
         $this->region = $region;
     }
 

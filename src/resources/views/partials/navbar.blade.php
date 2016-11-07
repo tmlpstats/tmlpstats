@@ -2,6 +2,7 @@
 <?php
 $currentUser = $context->getUser();
 $homeRegion = $currentUser ? $currentUser->homeRegion(true) : null;
+$homeUrl = Session::get('homePath', '/');
 if (!isset($regionSelectAction)) {
     $regionSelectAction = 'ReportsController@getRegionReport';
 }
@@ -25,12 +26,6 @@ if ($currentRegion) {
         ->get();
 
     $centers = TmlpStats\Center::byRegion($currentRegion)->orderBy('name')->get();
-}
-
-$homeUrl = Session::get('homePath');
-if (!$homeUrl && $homeRegion) {
-    $homeUrl = url('/home/' . $homeRegion->abbreviation);
-    Session::set('homePath', $homeUrl);
 }
 
 $reportingDateString = ($reportingDate != null) ? $reportingDate->toDateString() : null;

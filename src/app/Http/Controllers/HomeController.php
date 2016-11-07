@@ -28,15 +28,15 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         if (Auth::user()->hasRole('localStatistician')) {
-            $centerAbbr = strtolower(Auth::user()->center->abbreviation);
+            $centerAbbr = Auth::user()->center->abbrLower();
             return redirect("center/{$centerAbbr}");
-        } else {
-            $region = $this->getRegion($request);
-            if ($region != null) {
-                return redirect(action('HomeController@home', [
-                    'abbr' => $region->abbrLower(),
-                ]));
-            }
+        }
+
+        $region = $this->getRegion($request);
+        if ($region) {
+            return redirect(action('HomeController@home', [
+                'abbr' => $region->abbrLower(),
+            ]));
         }
     }
 
