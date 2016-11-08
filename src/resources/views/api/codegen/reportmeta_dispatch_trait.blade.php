@@ -17,8 +17,10 @@ namespace TmlpStats\Http\Controllers\Traits;
 use App;
 use TmlpStats\Api;
 use TmlpStats\Http\Controllers\ApiControllerBase;
-trait {{ $namespace->id }}ReportDispatch {
-    public function newDispatch($action, {!! $fwp !!}) {
+trait {{ $namespace->id }}ReportDispatch
+{
+    public function newDispatch($action, {!! $fwp !!})
+    {
         $funcName = $this->dispatchFuncName($action);
         if (!$funcName) {
             // TODO FAIL
@@ -26,10 +28,10 @@ trait {{ $namespace->id }}ReportDispatch {
         return $this->$funcName({!! $fwp !!});
     }
 
-    public function dispatchFuncName($action) {
-        switch ($action) {
+    public function dispatchFuncName($action)
+    {
+        switch (strtolower($action)) {
 @foreach ($namespace->flatReports() as $report)
-            case '{{ $report->id }}':
             case '{{ strtolower($report->id) }}':
                 return 'get{{ $report->controllerFuncName() }}';
                 break;

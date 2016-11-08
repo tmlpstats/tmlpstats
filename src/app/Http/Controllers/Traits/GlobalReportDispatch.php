@@ -14,8 +14,10 @@ namespace TmlpStats\Http\Controllers\Traits;
 use App;
 use TmlpStats\Api;
 use TmlpStats\Http\Controllers\ApiControllerBase;
-trait GlobalReportDispatch {
-    public function newDispatch($action, $globalReport, $region) {
+trait GlobalReportDispatch
+{
+    public function newDispatch($action, $globalReport, $region)
+    {
         $funcName = $this->dispatchFuncName($action);
         if (!$funcName) {
             // TODO FAIL
@@ -23,141 +25,108 @@ trait GlobalReportDispatch {
         return $this->$funcName($globalReport, $region);
     }
 
-    public function dispatchFuncName($action) {
-        switch ($action) {
-            case 'RatingSummary':
+    public function dispatchFuncName($action)
+    {
+        switch (strtolower($action)) {
             case 'ratingsummary':
                 return 'getRatingSummary';
                 break;
-            case 'RegionSummary':
             case 'regionsummary':
                 return 'getRegionSummary';
                 break;
-            case 'CenterStatsReports':
             case 'centerstatsreports':
                 return 'getCenterStatsReports';
                 break;
-            case 'RegionalStats':
             case 'regionalstats':
                 return 'getRegionalStats';
                 break;
-            case 'GamesByCenter':
             case 'gamesbycenter':
                 return 'getGamesByCenter';
                 break;
-            case 'RepromisesByCenter':
             case 'repromisesbycenter':
                 return 'getRepromisesByCenter';
                 break;
-            case 'RegPerParticipant':
             case 'regperparticipant':
                 return 'getRegPerParticipant';
                 break;
-            case 'Gaps':
             case 'gaps':
                 return 'getGaps';
                 break;
-            case 'AccessToPowerEffectiveness':
             case 'accesstopowereffectiveness':
                 return 'getAccessToPowerEffectiveness';
                 break;
-            case 'PowerToCreateEffectiveness':
             case 'powertocreateeffectiveness':
                 return 'getPowerToCreateEffectiveness';
                 break;
-            case 'Team1ExpansionEffectiveness':
             case 'team1expansioneffectiveness':
                 return 'getTeam1ExpansionEffectiveness';
                 break;
-            case 'Team2ExpansionEffectiveness':
             case 'team2expansioneffectiveness':
                 return 'getTeam2ExpansionEffectiveness';
                 break;
-            case 'GameInTheWorldEffectiveness':
             case 'gameintheworldeffectiveness':
                 return 'getGameInTheWorldEffectiveness';
                 break;
-            case 'LandmarkForumEffectiveness':
             case 'landmarkforumeffectiveness':
                 return 'getLandmarkForumEffectiveness';
                 break;
-            case 'TmlpRegistrationsOverview':
             case 'tmlpregistrationsoverview':
                 return 'getTmlpRegistrationsOverview';
                 break;
-            case 'TmlpRegistrationsByStatus':
             case 'tmlpregistrationsbystatus':
                 return 'getTmlpRegistrationsByStatus';
                 break;
-            case 'TmlpRegistrationsByCenter':
             case 'tmlpregistrationsbycenter':
                 return 'getTmlpRegistrationsByCenter';
                 break;
-            case 'Team2RegisteredAtWeekend':
             case 'team2registeredatweekend':
                 return 'getTeam2RegisteredAtWeekend';
                 break;
-            case 'TmlpRegistrationsOverdue':
             case 'tmlpregistrationsoverdue':
                 return 'getTmlpRegistrationsOverdue';
                 break;
-            case 'CoursesThisWeek':
             case 'coursesthisweek':
                 return 'getCoursesThisWeek';
                 break;
-            case 'CoursesNextMonth':
             case 'coursesnextmonth':
                 return 'getCoursesNextMonth';
                 break;
-            case 'CoursesUpcoming':
             case 'coursesupcoming':
                 return 'getCoursesUpcoming';
                 break;
-            case 'CoursesCompleted':
             case 'coursescompleted':
                 return 'getCoursesCompleted';
                 break;
-            case 'CoursesGuestGames':
             case 'coursesguestgames':
                 return 'getCoursesGuestGames';
                 break;
-            case 'CoursesSummary':
             case 'coursessummary':
                 return 'getCoursesSummary';
                 break;
-            case 'TdoSummary':
             case 'tdosummary':
                 return 'getTdoSummary';
                 break;
-            case 'GitwSummary':
             case 'gitwsummary':
                 return 'getGitwSummary';
                 break;
-            case 'TeamMemberStatusCtw':
             case 'teammemberstatusctw':
                 return 'getTeamMemberStatusCtw';
                 break;
-            case 'TeamMemberStatusTransfer':
             case 'teammemberstatustransfer':
                 return 'getTeamMemberStatusTransfer';
                 break;
-            case 'TeamMemberStatusWithdrawn':
             case 'teammemberstatuswithdrawn':
                 return 'getTeamMemberStatusWithdrawn';
                 break;
-            case 'WithdrawReport':
             case 'withdrawreport':
                 return 'getWithdrawReport';
                 break;
-            case 'TravelReport':
             case 'travelreport':
                 return 'getTravelReport';
                 break;
-            case 'TeamMemberStatusPotentialsOverview':
             case 'teammemberstatuspotentialsoverview':
                 return 'getTeamMemberStatusPotentialsOverview';
                 break;
-            case 'TeamMemberStatusPotentials':
             case 'teammemberstatuspotentials':
                 return 'getTeamMemberStatusPotentials';
                 break;
