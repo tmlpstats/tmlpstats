@@ -123,7 +123,8 @@ class Center extends Model
 
     public function getMailingList(Quarter $quarter)
     {
-        return App::make(Api\Context::class)->getSetting('centerReportMailingList', $this, $quarter);
+        $list = App::make(Api\Context::class)->getSetting('centerReportMailingList', $this, $quarter);
+        return $list ?: [];
     }
 
     public function setMailingList(Quarter $quarter, array $list)

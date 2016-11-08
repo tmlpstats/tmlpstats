@@ -20,17 +20,15 @@
                 <th>Role</th>
                 <th>Center</th>
                 <th>&nbsp;</th>
-                <th>&nbsp;</th>
             </tr>
             </thead>
             <tbody>
             @foreach ($invites as $invite)
                 <tr id="{{ $invite->id }}">
-                    <td><a href="{{ url("/users/invites/{$invite->id}") }}">{{ $invite->firstName }} {{ $invite->lastName }}</a></td>
+                    <td><a href="{{ url("/users/invites/{$invite->id}/edit") }}">{{ $invite->firstName }} {{ $invite->lastName }}</a></td>
                     <td>{{ $invite->email }}</td>
                     <td>{{ $invite->role ? $invite->role->display : '' }}</td>
                     <td>{{ $invite->center ? $invite->center->name : '' }}</td>
-                    <td><a href="{{ url("/users/invites/{$invite->id}/edit") }}">Edit</a></td>
                     <td>
                         <a href="#" class="delete" title="Delete" style="color: black">
                             <span class="glyphicon glyphicon-remove"></span>
