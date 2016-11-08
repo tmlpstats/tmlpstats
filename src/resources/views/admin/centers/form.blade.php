@@ -14,12 +14,14 @@
         </div>
     </div>
 
+    <!--
     <div class="form-group">
         {!! Form::label('team_name', 'Team Name:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-5">
             {!! Form::text('team_name', null, ['class' => 'form-control']) !!}
         </div>
     </div>
+    -->
 
     <div class="form-group">
         {!! Form::label('stats_email', 'Stats Email:', ['class' => 'col-sm-2 control-label']) !!}
@@ -42,12 +44,14 @@
         </div>
     </div>
 
+    <!--
     <div class="form-group">
         {!! Form::label('sheet_filename', 'Sheet Filename:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-5">
             {!! Form::text('sheet_filename', null, ['class' => 'form-control']) !!}
         </div>
     </div>
+    -->
 
     <div class="form-group">
         {!! Form::label('sheet_version', 'Sheet Version:', ['class' => 'col-sm-2 control-label']) !!}
