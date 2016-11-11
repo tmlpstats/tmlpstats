@@ -349,7 +349,7 @@ class ImportManager
             Mail::send('emails.statssubmitted',
                 compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'isResubmitted', 'due', 'comment',
                     'respondByDateTime', 'reportUrl', 'mobileDashUrl', 'reportingDate', 'accountablesCopied'),
-                function ($message) use ($emails, $emailMap, $centerName, $sheetPath, $sheetName) {
+                function ($message) use ($emailTo, $emails, $emailMap, $centerName, $sheetPath, $sheetName) {
                     // Only send email to centers in production
                     if (env('APP_ENV') === 'prod') {
                         $message->to($emailTo);
