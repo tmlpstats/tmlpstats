@@ -81,7 +81,7 @@ class ImportController extends Controller
         ]);
     }
 
-    protected function canShowAccountabilities(Request $request, Carbon $reportingDate)
+    public function canShowAccountabilities(Request $request, Carbon $reportingDate)
     {
         if ($request->get('showAccountabilities', false)) {
             return true;

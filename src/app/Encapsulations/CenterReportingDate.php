@@ -52,7 +52,7 @@ class CenterReportingDate
     public function getQuarter()
     {
         if ($this->quarter === null) {
-            $this->quarter = Models\Quarter::getQuarterByDate($this->reportingDate, $this->center->region);
+            $this->quarter = RegionReportingDate::ensure($this->center->region, $this->reportingDate)->getQuarter();
         }
 
         return $this->quarter;

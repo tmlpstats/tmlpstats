@@ -236,13 +236,19 @@ class PersonInput extends PureComponent {
 
         if (key[0] == 'teamMember') {
             const tmd = team_members[key[2]]
-            this.props.dispatch(formActions.merge(this.props.modelBase, {
+            let toUpdate = {
                 applicationId: null,
                 teamMemberId: tmd.teamMemberId,
-                name: name,
-                email: tmd.teamMember.person.email,
-                phone: tmd.teamMember.person.phone
-            }))
+                name: name
+            }
+            const person = tmd.teamMember.person
+            EMAIL_PHONE.forEach((k) => {
+                // only obliterate email and phone if they exist
+                if (person[k]) {
+                    toUpdate[k] = person[k]
+                }
+            })
+            this.props.dispatch(formActions.merge(this.props.modelBase, toUpdate))
         } else if (key[0] == 'application') {
             // TODO hoist team member email if available
             this.props.dispatch(formActions.merge(this.props.modelBase, {
@@ -256,3 +262,5 @@ class PersonInput extends PureComponent {
 }
 
 const requiredAccountabilities = ['t1tl', 't2tl', 'statistician', 'logistics']
+
+const EMAIL_PHONE = ['email', 'phone']

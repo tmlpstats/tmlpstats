@@ -12,6 +12,9 @@ export function makeAccountabilitiesSelector(context) {
     return createSelector(
         [orderedAccountabilitiesSelector, accountabilitiesSelector],
         (ids, allAccountabilities) => {
+            if (!ids) {
+                return []
+            }
             var accountabilities = ids.map(id => allAccountabilities[id])
             if (context) {
                 accountabilities = accountabilities.filter(acc => acc.context == context)

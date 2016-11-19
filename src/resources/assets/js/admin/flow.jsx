@@ -17,7 +17,7 @@ export default function AdminFlow() {
                     <Route path="quarter_dates" component={regionComponents.QuarterDates} />
                     <Route path="manage_scoreboards" component={regionComponents.RegionScoreboards} />
                     <Route path="manage_scoreboards/from/:centerId" component={regionComponents.EditScoreboardLock} />
-                    <Route path="accountability_rosters" component={EmptyWrapper} />
+                    <Route path="accountability_rosters" component={regionComponents.AccountabilityRosters} />
                 </Route>
             </Route>
         </Route>

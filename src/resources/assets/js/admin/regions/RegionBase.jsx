@@ -1,4 +1,6 @@
 import React from 'react'
+import { createSelector } from 'reselect'
+
 import { delayDispatch } from '../../reusable/dispatch'
 
 import * as actions from './actions'
@@ -18,10 +20,7 @@ export default class RegionBase extends React.Component {
     }
 
     regionCenters() {
-        const {regionAbbr} = this.props.params
-        const region = this.props.regions.data[regionAbbr]
-        const centers = region.centers.map((centerId) => this.props.centers.data[centerId])
-        return { region, centers }
+        return regionCenters(this.props)
     }
 
     regionsBaseUri() {
@@ -36,6 +35,17 @@ export default class RegionBase extends React.Component {
         return regionQuarterBaseUri(this)
     }
 }
+
+const regionCenters = createSelector(
+    (props) => props.regions.data[props.params.regionAbbr],
+    (props) => props.centers,
+    (props) => props.params.quarterId,
+    (region, allCenters, quarterId) => {
+        const regionQuarter = quarterId? region.regionQuarters[`${region.id}/${quarterId}`] : null
+        const centers = region.centers.map((centerId) => allCenters.data[centerId])
+        return { region, centers, regionQuarter }
+    }
+)
 
 export function regionsBaseUri() {
     return '/admin/regions'
