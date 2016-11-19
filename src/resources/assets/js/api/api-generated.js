@@ -21,6 +21,15 @@ Api.Admin.Region = {
     getRegion: bac('Admin.Region.getRegion')
 }
 
+Api.Admin.Quarter = {
+
+    /*
+    Filter/list all quarters
+    Parameters:
+    */
+    filter: bac('Admin.Quarter.filter')
+}
+
 Api.Application = {
 
     /*

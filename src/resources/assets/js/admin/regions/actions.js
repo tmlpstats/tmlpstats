@@ -11,10 +11,12 @@ export function loadRegionsData(region) {
     })
 }
 
-function initializeRegionsData(region, data) {
+function initializeRegionsData(regionAbbr, data) {
     return (dispatch) => {
         const n = normalize(data, regionSchema)
-        dispatch(regionsData.replaceItem(region, n.entities.regions[n.result]))
+        const region = n.entities.regions[n.result]
+        region.regionQuarters = n.entities.regionQuarters
+        dispatch(regionsData.replaceItem(regionAbbr, region))
         dispatch(centersData.replaceItems(n.entities.centers))
         dispatch(regionsData.loadState('loaded'))
     }

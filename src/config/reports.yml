@@ -46,6 +46,12 @@ api:
             params:
               - name: region
                 type: Region
+      Quarter:
+        type: namespace
+        children:
+          filter:
+            desc: Filter/list all quarters
+            params: []
 
   Application:
     type: namespace

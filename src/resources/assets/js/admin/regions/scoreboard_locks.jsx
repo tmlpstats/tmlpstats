@@ -1,51 +1,25 @@
 import React from 'react'
-import { connect } from 'react-redux'
 import { Link, withRouter } from 'react-router'
-import { delayDispatch } from '../../reusable/dispatch'
+import { delayDispatch, connectRedux } from '../../reusable/dispatch'
 import { Form, Field, SimpleSelect } from '../../reusable/form_utils'
 import { SubmitFlip } from '../../reusable/ui_basic'
 
+import RegionBase from './RegionBase'
 import * as actions from './actions'
 
+const mapStateToProps = (state) => state.admin.regions
 
-class RegionsBase extends React.Component {
-    checkRegions() {
-        const { regionAbbr } = this.props.params
-        const { loadState, data } = this.props.regions
-        if (!data[regionAbbr] && loadState.available) {
-            delayDispatch(this, actions.loadRegionsData(regionAbbr))
-            return false
-        }
-        return loadState.loaded
-    }
-
-    regionCenters() {
-        const {regionAbbr} = this.props.params
-        const region = this.props.regions.data[regionAbbr]
-        const centers = region.centers.map((centerId) => this.props.centers.data[centerId])
-        return { region, centers }
-    }
-
-    regionsBaseUri() {
-        return '/admin/regions'
-    }
-
-    regionBaseUri() {
-        const { regionAbbr } = this.props.params
-        return `${this.regionsBaseUri()}/${regionAbbr}`
-    }
-}
-
-class RegionScoreboardsView extends RegionsBase {
+@connectRedux(mapStateToProps)
+export class RegionScoreboards extends RegionBase {
     render() {
         if (!this.checkRegions()) {
             return <div>Loading...</div>
         }
-        const {regionAbbr} = this.props.params
+        const baseUri = this.regionQuarterBaseUri()
         const { region, centers } = this.regionCenters()
 
         const dispCenters = centers.map((center) => {
-            const href = `/admin/regions/${regionAbbr}/manage_scoreboards/from/${center.abbreviation}`
+            const href = `${baseUri}/manage_scoreboards/from/${center.abbreviation}`
             return <div key={center.id}><Link to={href}>{center.name}</Link></div>
         })
         return (
@@ -57,14 +31,16 @@ class RegionScoreboardsView extends RegionsBase {
     }
 }
 
-class EditScoreboardLockView extends RegionsBase {
+@withRouter
+@connectRedux(mapStateToProps)
+export class EditScoreboardLock extends RegionBase {
     checkLock() {
-        const { centerId } = this.props.params
+        const { centerId, quarterId } = this.props.params
         const { data, loadState } = this.props.scoreboardLock
         if ((!data || data.centerId != centerId) && loadState.available) {
             const { region } = this.regionCenters()
             if (region) {
-                delayDispatch(this, actions.loadScoreboardLockData(centerId, region.currentQuarter))
+                delayDispatch(this, actions.loadScoreboardLockData(centerId, quarterId))
             }
             return false
         }
@@ -126,13 +102,7 @@ class EditScoreboardLockView extends RegionsBase {
 
     onSubmit(data) {
         this.props.dispatch(actions.saveScoreboardLocks(data.applyCenter, data.quarterId, data)).then(() => {
-            this.props.router.push(this.regionBaseUri() + '/manage_scoreboards')
+            this.props.router.push(this.regionQuarterBaseUri() + '/manage_scoreboards')
         })
     }
 }
-
-const mapStateToProps = (state) => state.admin.regions
-const connector = connect(mapStateToProps)
-
-export const RegionScoreboards = connector(RegionScoreboardsView)
-export const EditScoreboardLock = connector(withRouter(EditScoreboardLockView))

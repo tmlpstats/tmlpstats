@@ -37,6 +37,16 @@ Api.Admin.Region = {
         return apiCall('Admin.Region.getRegion', params, (callback || null), (errback || null));
     }
 };
+Api.Admin.Quarter = {
+
+    /*
+    Filter/list all quarters
+    Parameters:
+    */
+    filter: function(params, callback, errback) {
+        return apiCall('Admin.Quarter.filter', params, (callback || null), (errback || null));
+    }
+};
 Api.Application = {
 
     /*

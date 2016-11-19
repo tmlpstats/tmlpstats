@@ -12,22 +12,23 @@ use TmlpStats\Domain\Logic\QuarterDates;
  * Use it through the Context class or via the `::ensure` method
  * to allow the context to manage the instantiation and caching of these details.
  */
-class RegionQuarter
+class RegionQuarter implements \JsonSerializable
 {
     protected $region;
     protected $quarter;
 
     private $dates = [];
 
-    public function __construct(Models\Region $region, Models\Quarter $quarter)
+    public function __construct(Models\Region $region, Models\Quarter $quarter, Models\RegionQuarterDetails $rqd = null)
     {
         $this->region = $region;
         $this->quarter = $quarter;
 
-        $rqd = Models\RegionQuarterDetails::byQuarter($quarter)
-            ->byRegion($region)
-            ->first();
-
+        if ($rqd === null || !$rqd->id) {
+            $rqd = Models\RegionQuarterDetails::byQuarter($quarter)
+                ->byRegion($region)
+                ->first();
+        }
         foreach (QuarterDates::SIMPLE_DATE_FIELDS as $field) {
             $this->dates[$field] = QuarterDates::fixDateInput($rqd->$field);
         }
@@ -48,4 +49,24 @@ class RegionQuarter
     {
         return $this->dates;
     }
+
+    public function toArray()
+    {
+        $v = [
+            'id' => "{$this->region->id}/{$this->quarter->id}",
+            'regionId' => $this->region->id,
+            'quarterId' => $this->quarter->id,
+        ];
+        foreach ($this->dates as $k => $d) {
+            $v[$k] = QuarterDates::formatDate($d);
+        }
+
+        return $v;
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
 }
