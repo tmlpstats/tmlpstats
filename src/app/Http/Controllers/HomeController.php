@@ -93,7 +93,19 @@ class HomeController extends Controller
             $reportingDates[$dateString] = $report->reportingDate->format('F j, Y');
         }
 
-        $reportingDate = $this->getReportingDate($request, array_keys($reportingDates));
+        // Find the best reportingDate
+        $reportingDateString = '';
+        if (Session::has('viewReportingDate')) {
+            $reportingDateString = Session::get('viewReportingDate');
+        }
+
+        if (!$reportingDateString || !isset($reportingDates[$reportingDateString])) {
+            $dateStrings = array_keys($reportingDates);
+            $reportingDateString = $dateStrings[0];
+        }
+
+        $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString)->startOfDay();
+
         $centers = Center::active()
             ->byRegion($region)
             ->orderBy('name', 'asc')

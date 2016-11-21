@@ -5,7 +5,7 @@ if (!isset($skip_navbar)) {
 
 $center = App::make(TmlpStats\Http\Controllers\Controller::class)->getCenter(Request::instance());
 $region = App::make(TmlpStats\Http\Controllers\Controller::class)->getRegion(Request::instance());
-$reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getReportingDate(Request::instance());
+$reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getReportingDate();
 
 ?>
 <!DOCTYPE html>

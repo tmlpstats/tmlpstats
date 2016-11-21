@@ -202,7 +202,6 @@ class GlobalReportController extends ReportDispatchAbstractController
         $region = array_get($extra, 'region', $this->context->getRegion(true));
         $this->context->setRegion($region);
         $this->context->setReportingDate($globalReport->reportingDate);
-        $this->setReportingDate($globalReport->reportingDate);
 
         $response = null;
         switch ($report) {

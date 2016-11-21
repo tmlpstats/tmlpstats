@@ -4,7 +4,6 @@ namespace TmlpStats\Http\Controllers;
 use Cache;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use TmlpStats\Util;
 
 abstract class ReportDispatchAbstractController extends Controller
 {
@@ -83,7 +82,7 @@ abstract class ReportDispatchAbstractController extends Controller
 
         $this->authorizeReport($model, $report);
 
-        Util::setReportDate($model->reportingDate);
+        $this->context->setReportingDate($model->reportingDate);
 
         $response = null;
 

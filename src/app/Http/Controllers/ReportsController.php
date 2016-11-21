@@ -237,7 +237,7 @@ class ReportsController extends Controller
         // even if there hasn't been a report created yet
         $globalReport = null;
         if (!$reportingDate) {
-            $reportingDate = $this->getReportingDate($request);
+            $reportingDate = $this->getReportingDate();
 
             $globalReport = GlobalReport::reportingDate($reportingDate)->first();
             if (!$globalReport) {
@@ -279,7 +279,7 @@ class ReportsController extends Controller
     public function mobileDash(Request $request, $abbr)
     {
         $center = Center::abbreviation($abbr)->firstOrFail();
-        $reportingDate = $this->getReportingDate($request);
+        $reportingDate = $this->getReportingDate();
 
         $this->setCenter($center);
 
