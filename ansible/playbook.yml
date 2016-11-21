@@ -107,22 +107,24 @@
   # PHP: Setup PHP 5.6
 
   - name: add php5.6 ppa
-    apt_repository: repo='ppa:ondrej/php5-5.6'
+    apt_repository: repo='ppa:ondrej/php'
 
   - name: install PHP5 packages
     apt: name={{ item }} state=latest install_recommends=no
     with_items:
-      - php5
+      - php5.6
       - libapache2-mod-php5
-      - php5-cli
-      - php5-dev
-      - php5-mysql
-      - php5-mcrypt
-      - php5-gd
-      - php5-curl
-      - php5-xdebug
-      - php5-memcache
-      - php5-memcached
+      - php5.6-cli
+      - php5.6-dev
+      - php5.6-mysql
+      - php5.6-mcrypt
+      - php5.6-gd
+      - php5.6-curl
+      - php5.6-xdebug
+      - php5.6-memcache
+      - php5.6-memcached
+      - php5.6-mbstring
+      - php5.6-xml
 
   # Xdebug
 
