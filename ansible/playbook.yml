@@ -30,6 +30,7 @@
       - nodejs
       - npm
       - libffi-dev
+      - zip
 
   # Puppet & Chef - Not Installed
 
@@ -125,6 +126,7 @@
       - php5.6-memcached
       - php5.6-mbstring
       - php5.6-xml
+      - php5.6-zip
 
   # Xdebug
 
