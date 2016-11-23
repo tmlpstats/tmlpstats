@@ -109,6 +109,13 @@ class ImportManager
                     throw new Exception("There was a problem uploading '$fileName'. Please try again.");
                 }
 
+                $fileSize = round($file->getClientSize() / 1024);
+                if ($fileSize >= 300) {
+                    Log::error("Error uploading '{$fileName}': File is {$fileSize} KB. It is likely corrupt");
+                    $file = null;
+                    throw new Exception("The file you uploaded, '{$fileName}', looks like it's corrupt. Please contact your regional statistician for information on what to do.");
+                }
+
                 try {
                     $importer = new Xlsx\XlsxImporter($file->getRealPath(), $fileName, $this->expectedDate, $this->enforceVersion);
                     $importer->import();
