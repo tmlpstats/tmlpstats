@@ -107,7 +107,7 @@ class Controller extends BaseController
         $reportingDate = null;
         $reportingDateString = '';
 
-        // Then try to pull it from the session if it's there
+        // First check if the date is already cached in the session
         if (Session::has('viewReportingDate')) {
             $reportingDateString = Session::get('viewReportingDate');
         }
@@ -123,7 +123,7 @@ class Controller extends BaseController
             }
         }
 
-        // Finally, if we don't have it yet make an educated guess
+        // Finally, create date or get reasonable default
         if ($reportingDateString) {
             $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
         } else {
