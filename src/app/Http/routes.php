@@ -43,6 +43,8 @@ Route::get('statsreports/{id}/{report}', 'StatsReportController@dispatchReport')
 
 // Global Reports
 Route::resource('globalreports', 'GlobalReportController');
+Route::get('globalreports', 'GlobalReportController@index');
+Route::get('globalreports/{$id}', 'GlobalReportController@show');
 Route::get('globalreports/{id}/{report}/{regionAbbr?}', 'GlobalReportController@dispatchReport');
 
 // Report Tokens
