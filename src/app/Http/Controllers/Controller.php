@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use App;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -8,6 +9,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Session;
+use TmlpStats\Api;
 use TmlpStats\Center;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Region;
@@ -17,6 +19,7 @@ class Controller extends BaseController
 {
     use ValidatesRequests, AuthorizesRequests;
 
+    protected $context;
     protected $region = null;
     protected $center = null;
     protected $reportingDate = null;
@@ -27,6 +30,7 @@ class Controller extends BaseController
     public function __construct()
     {
         $this->middleware('auth');
+        $this->context = App::make(Api\Context::class);
     }
 
     /**
@@ -98,42 +102,29 @@ class Controller extends BaseController
         return $center;
     }
 
-    public function getReportingDate(Request $request, $reportingDates = [])
+    public function getReportingDate()
     {
         $reportingDate = null;
         $reportingDateString = '';
 
-        // First try to get the date from the request
-        if ($request->has('reportingDate') && preg_match('/^\d\d\d\d-\d\d-\d\d$/', $request->get('reportingDate'))) {
-            $reportingDateString = $request->get('reportingDate');
-        }
-
-        // Then try to pull it from the session if it's there
-        if (!$reportingDateString && Session::has('viewReportingDate')) {
+        // First check if the date is already cached in the session
+        if (Session::has('viewReportingDate')) {
             $reportingDateString = Session::get('viewReportingDate');
         }
 
         // If we have a reportToken, use the reportingDate from that report
         if (!$reportingDateString && Session::has('reportTokenId')) {
             $reportToken = ReportToken::find(Session::get('reportTokenId'));
-            $report = $reportToken
-            ? $reportToken->getReport()
-            : null;
 
-            if ($report) {
+            if ($reportToken) {
+                $report = $reportToken->getReport();
                 $reportingDateString = $report->reportingDate->toDateString();
                 Session::set('viewReportingDate', $reportingDateString);
             }
         }
 
-        // Finally, if we don't have it yet make an educated guess
-        if ($reportingDates) {
-            if (in_array($reportingDateString, $reportingDates)) {
-                $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
-            } else {
-                $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDates[0]);
-            }
-        } else if ($reportingDateString) {
+        // Finally, create date or get reasonable default
+        if ($reportingDateString) {
             $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
         } else {
             $reportingDate = ImportManager::getExpectedReportDate();

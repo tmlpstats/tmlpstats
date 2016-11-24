@@ -313,7 +313,6 @@ class StatsReportController extends ReportDispatchAbstractController
     {
         $this->setCenter($statsReport->center);
         $this->context->setCenter($statsReport->center);
-        $this->setReportingDate($statsReport->reportingDate);
         $this->context->setReportingDate($statsReport->reportingDate);
 
         if (!$statsReport->isValidated() && $report != 'results') {

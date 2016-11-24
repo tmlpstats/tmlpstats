@@ -175,12 +175,11 @@ class Context
      */
     public function getReportingDate()
     {
-        $reportingDate = $this->reportingDate;
-        if (!$reportingDate) {
-            $reportingDate = App::make(Controller::class)->getReportingDate($this->request);
+        if ($this->reportingDate) {
+            return $this->reportingDate;
         }
 
-        return $reportingDate;
+        return App::make(Controller::class)->getReportingDate();
     }
 
     /**
