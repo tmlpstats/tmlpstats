@@ -8,7 +8,7 @@ class TeamMembersByQuarter extends BaseArrangement
     public function build($data)
     {
         $teamMembersData = $data['teamMembersData'];
-        $includeXferAsWithdrawn = $data['includeXferAsWithdrawn'];
+        $includeXferAsWithdrawn = array_get($data, 'includeXferAsWithdrawn', false);
 
         $reportData = [
             'team1'     => [],
