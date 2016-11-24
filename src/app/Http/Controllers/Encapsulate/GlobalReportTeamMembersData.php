@@ -201,22 +201,23 @@ class GlobalReportTeamMembersData
             $potentials = $data['reportData']['t2Potential'];
             foreach ($potentials as $member) {
                 foreach ($registrations as $registration) {
-                    if ($registration->teamYear == 2
-                        && !$registration->isWithdrawn()
-                        && $registration->center->id == $member->center->id
+                    if ($registration->teamYear != 2
+                        || $registration->xferOut
+                        || $registration->isWithdrawn()
+                        || $registration->center->id != $member->center->id
                     ) {
-                        if ($member->teamMember->personId == $registration->registration->personId) {
-                            $potentialsThatRegistered[$member->teamMember->personId] = $registration;
-                            break;
-                        }
+                        continue;
+                    }
+
+                    if ($member->teamMember->personId == $registration->registration->personId) {
+                        $potentialsThatRegistered[$member->teamMember->personId] = $registration;
+                        break;
                     }
                 }
             }
         }
 
-        $potentialsData = $this->potentialsData = array_merge($data, ['registrations' => $potentialsThatRegistered]);
-
-        return $potentialsData;
+        return $this->potentialsData = array_merge($data, ['registrations' => $potentialsThatRegistered]);
     }
 
 }
