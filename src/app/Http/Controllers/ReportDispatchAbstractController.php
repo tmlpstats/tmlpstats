@@ -4,6 +4,7 @@ namespace TmlpStats\Http\Controllers;
 use Cache;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use TmlpStats\Util;
 
 abstract class ReportDispatchAbstractController extends Controller
 {
