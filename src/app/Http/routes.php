@@ -17,10 +17,6 @@ Route::post('api', 'ApiController@apiCall');
 Route::post('api/{method}', 'ApiController@apiCall');
 
 Route::group(['prefix' => 'admin'], function () {
-    Route::match(['get', 'post'], 'dashboard', 'AdminController@index');
-    Route::get('status', 'AdminController@status');
-    Route::get('peoplereport', 'AdminController@getPeopleReport');
-
     Route::resource('centers', 'AdminCenterController');
     Route::post('centers', 'AdminCenterController@batchUpdate');
 
