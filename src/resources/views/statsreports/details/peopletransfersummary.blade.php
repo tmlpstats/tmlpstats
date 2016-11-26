@@ -188,7 +188,7 @@
                 $new = $existingPair[0];
                 $old = $existingPair[1];
 
-                $attributes = [
+                $classes = $oldValues = [
                     'teamYear' => '',
                     'regDate' => '',
                     'appOutDate' => '',
@@ -196,19 +196,18 @@
                     'apprDate' => '',
                     'incomingQuarterId' => '',
                 ];
-                foreach (array_keys($attributes) as $field) {
+                foreach (array_keys($classes) as $field) {
                     if (strpos($field, 'Date') !== false) {
                         if (($new->$field && $old->$field && $new->$field->ne($old->$field))
                             || ($old->$field && !$new->$field)
                         ) {
-                            $attributes[$field] = 'class="bg-warning" title="Was ' . $old->$field->format(TmlpStats\Util::getLocaleDateFormat()) . '"';
+                            $classes[$field] = 'bg-warning';
+                            $oldValues[$field] = $old->$field;
                         }
                     } else {
                         if ($new->$field != $old->$field) {
-                            $attributes[$field] = 'class="bg-warning"';
-                            if (!preg_match('/Id$/', $field)) {
-                                $attributes[$field] .= ' title="Was ' . $old->$field . '"';
-                            }
+                            $classes[$field] = 'bg-warning';
+                            $oldValues[$field] = $old->$field;
                         }
                     }
                 }
@@ -217,30 +216,42 @@
                 <td><input type="checkbox" /></td>
                 <td>{{ $new->firstName }}</td>
                 <td>{{ $new->lastName }}</td>
-                <td {!! $attributes['teamYear'] !!} class="data-point">
+                <td class="data-point {{ $classes['teamYear'] }}">
                     {{ $new->teamYear }}
                 </td>
-                <td {!! $attributes['regDate'] !!} class="data-point">
+                <td class="data-point {{ $classes['regDate'] }}">
                     @if ($new->regDate)
                         @date($new->regDate)
+                        @if ($oldValues['regDate'])
+                            was @date($oldValues['regDate'])
+                        @endif
                     @endif
                 </td>
-                <td {!! $attributes['appOutDate'] !!} class="data-point">
+                <td class="data-point {{ $classes['appOutDate'] }}">
                     @if ($new->appOutDate)
                         @date($new->appOutDate)
+                        @if ($oldValues['appOutDate'])
+                            was @date($oldValues['appOutDate'])
+                        @endif
                     @endif
                 </td>
-                <td {!! $attributes['appInDate'] !!} class="data-point">
+                <td class="data-point {{ $classes['appInDate'] }}">
                     @if ($new->appInDate)
                         @date($new->appInDate)
+                        @if ($oldValues['appInDate'])
+                            was @date($oldValues['appInDate'])
+                        @endif
                     @endif
                 </td>
-                <td {!! $attributes['apprDate'] !!} class="data-point">
+                <td class="data-point {{ $classes['apprDate'] }}">
                     @if ($new->apprDate)
                         @date($new->apprDate)
+                        @if ($oldValues['apprDate'])
+                            was @date($oldValues['apprDate'])
+                        @endif
                     @endif
                 </td>
-                <td {!! $attributes['incomingQuarterId'] !!} class="data-point">
+                <td class="data-point {{ $classes['incomingQuarterId'] }}">
                     {{ $new->incomingQuarterId == $thisQuarter->getNextQuarter()->id ? 'Next' : 'Future' }}
                 </td>
                 <td><?php
