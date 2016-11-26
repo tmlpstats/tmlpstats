@@ -939,7 +939,17 @@ class StatsReportController extends ReportDispatchAbstractController
                         }
                         unset($incomingThisWeekByQuarter[$team][$field][$idx]);
                     } else {
-                        $incomingSummary['missing'][] = [null, $lastWeekData];
+                        $withdrewThisQuarter = false;
+                        foreach (array_flatten($incomingThisWeekByQuarter['withdrawn']) as $wd) {
+                            if ($this->objectsAreEqual($wd, $lastWeekData)) {
+                                $withdrewThisQuarter = true;
+                                break;
+                            }
+                        }
+
+                        if (!$withdrewThisQuarter) {
+                            $incomingSummary['missing'][] = [null, $lastWeekData];
+                        }
                     }
                 }
             }
