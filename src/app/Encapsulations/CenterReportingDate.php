@@ -5,6 +5,7 @@ use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api;
+use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Domain;
 
 /**
@@ -28,7 +29,7 @@ class CenterReportingDate
         $this->center = $center;
         $this->reportingDate = $reportingDate;
         if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
-            throw new Exceptions\BadRequestException('Reporting date must be a Friday.');
+            throw new ApiExceptions\BadRequestException('Reporting date must be a Friday.');
         }
     }
 
