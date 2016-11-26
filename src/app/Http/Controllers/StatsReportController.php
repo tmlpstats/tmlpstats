@@ -8,7 +8,6 @@ use Carbon\Carbon;
 use Exception;
 use Gate;
 use Illuminate\Http\Request;
-use Input;
 use Log;
 use Response;
 use TmlpStats as Models;
@@ -32,78 +31,6 @@ class StatsReportController extends ReportDispatchAbstractController
         $this->middleware('auth.token');
         $this->middleware('auth');
         $this->context = App::make(Api\Context::class);
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
-    public function index(Request $request)
-    {
-        $this->authorize('index', Models\StatsReport::class);
-
-        $selectedRegion = $this->getRegion($request);
-
-        $allReports = Models\StatsReport::currentQuarter($selectedRegion)
-            ->groupBy('reporting_date')
-            ->orderBy('reporting_date', 'desc')
-            ->get();
-        if ($allReports->isEmpty()) {
-            $allReports = Models\StatsReport::lastQuarter($selectedRegion)
-                ->groupBy('reporting_date')
-                ->orderBy('reporting_date', 'desc')
-                ->get();
-        }
-
-        $today = Carbon::now();
-        $reportingDates = [];
-
-        if ($today->dayOfWeek == Carbon::FRIDAY) {
-            $reportingDates[$today->toDateString()] = $today->format('F j, Y');
-        }
-        foreach ($allReports as $report) {
-            $dateString = $report->reportingDate->toDateString();
-            $reportingDates[$dateString] = $report->reportingDate->format('F j, Y');
-        }
-
-        $reportingDate = null;
-        $reportingDateString = Input::get('stats_report', '');
-
-        if ($reportingDateString && isset($reportingDates[$reportingDateString])) {
-            $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
-        } else if ($today->dayOfWeek == Carbon::FRIDAY) {
-            $reportingDate = $today;
-        } else if (!$reportingDate && $reportingDates) {
-            $reportingDate = $allReports[0]->reportingDate;
-        } else {
-            $reportingDate = ImportManager::getExpectedReportDate();
-        }
-
-        $centers = Models\Center::active()
-            ->byRegion($selectedRegion)
-            ->orderBy('name', 'asc')
-            ->get();
-
-        $statsReportList = [];
-        foreach ($centers as $center) {
-            $report = Models\StatsReport::reportingDate($reportingDate)
-                ->byCenter($center)
-                ->orderBy('submitted_at', 'desc')
-                ->first();
-            $statsReportList[$center->name] = [
-                'center' => $center,
-                'report' => $report,
-                'viewable' => $this->authorize('read', $report),
-            ];
-        }
-
-        return view('statsreports.index', compact(
-            'statsReportList',
-            'reportingDates',
-            'reportingDate',
-            'selectedRegion'
-        ));
     }
 
     /**
@@ -192,7 +119,7 @@ class StatsReportController extends ReportDispatchAbstractController
      *
      * @return Response
      */
-    public function submit($id)
+    public function submit(Request $request, $id)
     {
         $statsReport = Models\StatsReport::findOrFail($id);
 
@@ -205,7 +132,7 @@ class StatsReportController extends ReportDispatchAbstractController
             'message' => '',
         ];
 
-        $action = Input::get('function', null);
+        $action = $request->get('function', null);
         if ($action === 'submit') {
 
             $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
@@ -228,7 +155,7 @@ class StatsReportController extends ReportDispatchAbstractController
                 $sheet = $importer->getResults();
 
                 $statsReport->submittedAt = Carbon::now();
-                $statsReport->submitComment = Input::get('comment', null);
+                $statsReport->submitComment = $request->get('comment', null);
                 $statsReport->locked = true;
             } catch (Exception $e) {
                 Log::error('Error validating sheet: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
