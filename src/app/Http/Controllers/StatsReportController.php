@@ -365,8 +365,10 @@ class StatsReportController extends ReportDispatchAbstractController
                 break;
             case 'mobile_summary':
                 $response = $this->getMobileSummary($statsReport);
+                break;
             case 'next_qtr_accountabilities':
                 $response = $this->getNextQtrAccountabilities($statsReport);
+                break;
         }
 
         return $response;
