@@ -17,12 +17,12 @@
         </tr>
         </thead>
         <tbody>
-            @foreach (['missing', 'new'] as $type)
+            @foreach (['missing', 'new', 'changed'] as $type)
                 @if ($teamMemberSummary[$type] )
                     @foreach ($teamMemberSummary[$type] as $existingPair)
                         <?php $new = $existingPair[0]; ?>
                         <?php $old = $existingPair[1]; ?>
-                        <?php $member = $type == 'new' ? $new : $old; ?>
+                        <?php $member = $type !== 'missing' ? $new : $old; ?>
                         @if ($member->quarterNumber != 1)
                         <tr>
                             <td><input type="checkbox" /></td>
@@ -31,11 +31,14 @@
                             <td class="data-point">{{ $member->teamYear }}</td>
                             <td class="data-point">Q{{ $member->quarterNumber }}</td>
                             <td>{{ $type }}</td>
-                            <td><?php
-                                if ($type == 'new') {
-                                    if ($old) {
-                                        echo 'Withdrawn last quarter: ' . $old->withdrawCode->display;
-                                    }
+                            <td {!! ($type == 'changed') ? 'class="bg-warning"' : '' !!}><?php
+                                if ($type == 'new' && $old) {
+                                    echo 'Withdrawn last quarter: ' . $old->withdrawCode->display;
+                                } else if ($type == 'changed' && $new->incomingQuarter->id != $old->incomingQuarter->id) {
+                                    // Quarter number is calculated based on the current report date. That means when we get the quarter number
+                                    // for a person from the previous quarter, we need to manually adjust the value to be accurate.
+                                    $teamQuarterLastWeek = $old->quarterNumber - 1;
+                                    echo "Was listed as Q{$teamQuarterLastWeek} last quarter, but is Q{$new->quarterNumber} this quarter. Were they added to the correct section on the class list?";
                                 }
                             ?></td>
                         </tr>
@@ -277,35 +280,35 @@
 
         var tables = [
             {
-                id: "teamMembersTable",
-                emptyMessage: "All team members transferred correctly"
+                id: 'teamMembersTable',
+                emptyMessage: 'All team members transferred correctly'
             },
             {
-                id: "q1Table",
-                emptyMessage: "All Q1 incoming transferred"
+                id: 'q1Table',
+                emptyMessage: 'All Q1 incoming transferred'
             },
             {
-                id: "incomingTable",
-                emptyMessage: "No new or missing applications"
+                id: 'incomingTable',
+                emptyMessage: 'No new or missing applications'
             },
             {
-                id: "ongoingTable",
-                emptyMessage: "All existing incoming transferred correctly"
+                id: 'ongoingTable',
+                emptyMessage: 'All existing incoming transferred correctly'
             }
-        ];
+        ]
 
         $.each(tables, function(index, table) {
             $('#' + table.id).dataTable({
-                "paging":    false,
-                "searching": false,
-                "order": [[ 1, "asc" ]],
-                "columnDefs": [ { "targets": 0, "orderable": false } ],
+                'paging':    false,
+                'searching': false,
+                'order': [[ 1, 'asc' ]],
+                'columnDefs': [ { 'targets': 0, 'orderable': false } ],
                 fnDrawCallback: function (settings) {
                     if (settings.fnRecordsDisplay() == 0) {
-                        $(this).closest("div.tableContainer").html("<p>" + table.emptyMessage + "</p>");
+                        $(this).closest('div.tableContainer').html('<p>' + table.emptyMessage + '</p>')
                     }
                 }
-            });
-        });
-    });
+            })
+        })
+    })
 </script>

@@ -894,7 +894,10 @@ class StatsReportController extends ReportDispatchAbstractController
         $teamThisWeekByQuarter = $a->compose();
         $teamThisWeekByQuarter = $teamThisWeekByQuarter['reportData'];
 
-        $a = new Arrangements\TeamMembersByQuarter(['teamMembersData' => $teamMemberDataLastWeek]);
+        $a = new Arrangements\TeamMembersByQuarter([
+            'teamMembersData' => $teamMemberDataLastWeek,
+            'includeXferAsWithdrawn' => true, // we don't want to deal with people that transfered last quarter
+        ]);
         $teamLastWeekByQuarter = $a->compose();
         $teamLastWeekByQuarter = $teamLastWeekByQuarter['reportData'];
 
@@ -971,6 +974,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
         $teamMemberSummary = [
             'new' => [],
+            'changed' => [],
             'missing' => [],
         ];
 
@@ -982,17 +986,23 @@ class StatsReportController extends ReportDispatchAbstractController
                     continue;
                 }
 
-                foreach ($quarterData as $lasWeekData) {
+                foreach ($quarterData as $lastWeekData) {
                     list($field, $idx, $data) = $this->hasPerson([
                         'Q2',
                         'Q3',
                         'Q4',
-                    ], $lasWeekData, $teamThisWeekByQuarter[$team]);
+                    ], $lastWeekData, $teamThisWeekByQuarter[$team]);
                     if ($field !== null) {
+                        // Make sure they were put in the correct section by making sure the incoming quarter didn't change
+                        $thisWeekData = $teamThisWeekByQuarter[$team][$field][$idx];
+                        if ($thisWeekData->incomingQuarter->id != $lastWeekData->incomingQuarter->id) {
+                            $teamMemberSummary['changed'][] = [$thisWeekData, $lastWeekData];
+                        }
+
                         // We found it! remove it from the search list
                         unset($teamThisWeekByQuarter[$team][$field][$idx]);
                     } else {
-                        $teamMemberSummary['missing'][] = [null, $lasWeekData];
+                        $teamMemberSummary['missing'][] = [null, $lastWeekData];
                     }
                 }
             }
