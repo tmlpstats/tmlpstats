@@ -265,7 +265,11 @@
                         $newExpectedQuarter = $new->incomingQuarterId == $thisQuarter->getNextQuarter()->id
                             ? 'next'
                             : 'in a future';
-                        echo "Was expected {$expectedQuarter} quarter, now is expected {$newExpectedQuarter} quarter.";
+                        if ($expectedQuarter == $newExpectedQuarter) {
+                            echo "Last quarter {$new->firstName} was listed as incoming in a future quarter. They are still listed as incoming in a future quarter. Please confirm this is correct.";
+                        } else {
+                            echo "Was expected {$expectedQuarter} quarter, now is expected {$newExpectedQuarter} quarter.";
+                        }
                     }
                 ?></td>
             </tr>
