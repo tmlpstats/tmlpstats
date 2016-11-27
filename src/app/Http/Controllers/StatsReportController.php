@@ -728,7 +728,10 @@ class StatsReportController extends ReportDispatchAbstractController
             }
         }
 
-        $a = new Arrangements\TeamMembersByQuarter(['teamMembersData' => $teamMembers]);
+        $a = new Arrangements\TeamMembersByQuarter([
+            'teamMembersData' => $teamMembers,
+            'includeXferAsWithdrawn' => true,
+        ]);
         $teamMembers = $a->compose();
         $teamMembers = $teamMembers['reportData'];
 
