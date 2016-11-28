@@ -1,6 +1,11 @@
 require('es6-promise').polyfill()
 var elixir = require('laravel-elixir')
 
+// Don't run gulp-notify in production
+if (elixir.config.production) {
+    process.env.DISABLE_NOTIFIER = true
+}
+
 // Allow us to use the .jsx extension for React files
 elixir.config.js.browserify.options.extensions = ['.jsx', '.js']
 elixir.config.js.browserify.transformers[0].options.plugins = ['transform-decorators-legacy', 'transform-class-properties', 'lodash']
