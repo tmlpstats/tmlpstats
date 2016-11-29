@@ -149,6 +149,14 @@ trait GlobalReportDispatch {
             case 'withdrawreport':
                 return 'getWithdrawReport';
                 break;
+            case 'Team1SummaryGrid':
+            case 'team1summarygrid':
+                return 'getTeam1SummaryGrid';
+                break;
+            case 'Team2SummaryGrid':
+            case 'team2summarygrid':
+                return 'getTeam2SummaryGrid';
+                break;
             case 'TravelReport':
             case 'travelreport':
                 return 'getTravelReport';
@@ -259,6 +267,12 @@ trait GlobalReportDispatch {
 
     // Get report Withdraw Compliance
     protected abstract function getWithdrawReport();
+
+    // Get report Team 1 Summary Grid
+    protected abstract function getTeam1SummaryGrid();
+
+    // Get report Team 2 Summary Grid
+    protected abstract function getTeam2SummaryGrid();
 
     // Get report Travel Summary
     protected abstract function getTravelReport();

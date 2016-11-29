@@ -597,6 +597,10 @@ reportMeta:
             name: Withdrawn
           WithdrawReport:
             name: Withdraw Compliance
+          Team1SummaryGrid:
+            name: Team 1 Summary Grid
+          Team2SummaryGrid:
+            name: Team 2 Summary Grid
 
       WeekendGroup:
         type: grouping

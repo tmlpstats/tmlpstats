@@ -262,9 +262,21 @@ const GlobalReport = {
         "type": "report",
         "name": "Withdraw Compliance"
     },
+    "Team1SummaryGrid": {
+        "id": "Team1SummaryGrid",
+        "n": 36,
+        "type": "report",
+        "name": "Team 1 Summary Grid"
+    },
+    "Team2SummaryGrid": {
+        "id": "Team2SummaryGrid",
+        "n": 37,
+        "type": "report",
+        "name": "Team 2 Summary Grid"
+    },
     "TeamMemberStatusGroup": {
         "id": "TeamMemberStatusGroup",
-        "n": 36,
+        "n": 38,
         "type": "grouping",
         "name": "Team Members",
         "children": [
@@ -273,30 +285,32 @@ const GlobalReport = {
             "TeamMemberStatusCtw",
             "TeamMemberStatusTransfer",
             "TeamMemberStatusWithdrawn",
-            "WithdrawReport"
+            "WithdrawReport",
+            "Team1SummaryGrid",
+            "Team2SummaryGrid"
         ]
     },
     "TravelReport": {
         "id": "TravelReport",
-        "n": 37,
+        "n": 39,
         "type": "report",
         "name": "Travel Summary"
     },
     "TeamMemberStatusPotentialsOverview": {
         "id": "TeamMemberStatusPotentialsOverview",
-        "n": 38,
+        "n": 40,
         "type": "report",
         "name": "Potentials Overview"
     },
     "TeamMemberStatusPotentials": {
         "id": "TeamMemberStatusPotentials",
-        "n": 39,
+        "n": 41,
         "type": "report",
         "name": "Potentials Details"
     },
     "AcknowledgementReport": {
         "id": "AcknowledgementReport",
-        "n": 40,
+        "n": 42,
         "type": "report",
         "name": "Acknowledgement Report",
         "requiredFlags": [
@@ -305,7 +319,7 @@ const GlobalReport = {
     },
     "WeekendGroup": {
         "id": "WeekendGroup",
-        "n": 41,
+        "n": 43,
         "type": "grouping",
         "name": "Weekend",
         "children": [

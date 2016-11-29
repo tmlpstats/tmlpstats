@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Log;
 use Session;
+use TmlpStats as Models;
 use TmlpStats\Center;
 use TmlpStats\GlobalReport;
 use TmlpStats\Region;
@@ -159,7 +160,7 @@ class ReportsController extends Controller
             Session::set('viewCenterId', $center->id);
         }
 
-        return $this->getReport($request, $abbr, $date, 'center', 'viewCenterId');
+        return $this->getReport($request, $abbr, $date, 'center', 'viewCenterId', null);
     }
 
     /**
@@ -171,7 +172,7 @@ class ReportsController extends Controller
      *
      * @return mixed
      */
-    public function getRegionReport(Request $request, $abbr = null, $date = null)
+    public function getRegionReport(Request $request, $abbr = null, $date = null, $reportOverride = null)
     {
         if ($request->has('reportRedirect')) {
             Session::set('reportRedirect', $request->get('reportRedirect'));
@@ -196,10 +197,10 @@ class ReportsController extends Controller
             Session::set('viewRegionId', $region->id);
         }
 
-        return $this->getReport($request, $abbr, $date, 'region', 'viewRegionId');
+        return $this->getReport($request, $abbr, $date, 'region', 'viewRegionId', $reportOverride);
     }
 
-    protected function getReport(Request $request, $abbr, $date, $reportType, $sessionField)
+    protected function getReport(Request $request, $abbr, $date, $reportType, $sessionField, $reportOverride)
     {
         if ($reportType == 'region') {
             $reportTargetClass = Region::class;
@@ -254,6 +255,14 @@ class ReportsController extends Controller
         if ($reportType == 'region') {
             $report = $globalReport ?: GlobalReport::reportingDate($reportingDate)->firstOrFail();
             $redirectUrl = App::make(GlobalReportController::class)->getUrl($report, $reportTarget);
+            if ($reportOverride) {
+                return view('globalreports.show_single', [
+                    'globalReport' => $report,
+                    'region' => $reportTarget,
+                    'quarter' => Models\Quarter::getQuarterByDate($report->reportingDate, $reportTarget),
+                    'reportName' => $reportOverride,
+                ]);
+            }
             if (!$reportViewUpdate) {
                 return App::make($controllerClass)->showForRegion($request, $report, $reportTarget);
             }
