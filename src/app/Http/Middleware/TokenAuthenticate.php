@@ -1,13 +1,11 @@
 <?php
 namespace TmlpStats\Http\Middleware;
 
-use Illuminate\Contracts\Auth\Guard;
-use TmlpStats\ReportToken;
-use TmlpStats\User;
-
 use Auth;
 use Closure;
+use Illuminate\Contracts\Auth\Guard;
 use Session;
+use TmlpStats\ReportToken;
 
 class TokenAuthenticate
 {
@@ -30,20 +28,16 @@ class TokenAuthenticate
     }
 
     /**
-     * Authenticate user based on a valid bearer token
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
+     * Run token authenticator manually
      */
-    public function handle($request, Closure $next)
+    public function authenticate()
     {
         if (Session::has('reportTokenId')) {
 
             if (!$this->auth->check() && !$this->auth->user()) {
 
                 $reportToken = ReportToken::find(Session::get('reportTokenId'));
-                if (!$reportToken->isValid()) {
+                if (!$reportToken || !$reportToken->isValid()) {
                     abort(403);
                 }
 
@@ -55,9 +49,19 @@ class TokenAuthenticate
                 Session::set('homePath', $reportToken->getReportPath());
             }
         }
+    }
+
+    /**
+     * Authenticate user based on a valid bearer token
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle($request, Closure $next)
+    {
+        $this->authenticate();
 
         return $next($request);
     }
-
-
 }
