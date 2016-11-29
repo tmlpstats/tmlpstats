@@ -17,10 +17,6 @@ Route::post('api', 'ApiController@apiCall');
 Route::post('api/{method}', 'ApiController@apiCall');
 
 Route::group(['prefix' => 'admin'], function () {
-    Route::match(['get', 'post'], 'dashboard', 'AdminController@index');
-    Route::get('status', 'AdminController@status');
-    Route::get('peoplereport', 'AdminController@getPeopleReport');
-
     Route::resource('centers', 'AdminCenterController');
     Route::post('centers', 'AdminCenterController@batchUpdate');
 
@@ -36,10 +32,10 @@ Route::get('invites/{token}', 'InviteController@viewInvite');
 Route::post('invites/{token}', 'InviteController@acceptInvite');
 
 // Stats Reports
-Route::resource('statsreports', 'StatsReportController');
 Route::post('statsreports/{id}/submit', 'StatsReportController@submit');
 Route::get('statsreports/{id}/download', 'StatsReportController@downloadSheet');
 Route::get('statsreports/{id}/{report}', 'StatsReportController@dispatchReport');
+Route::get('statsreports/{id}', 'StatsReportController@show');
 
 // Global Reports
 Route::resource('globalreports', 'GlobalReportController');
