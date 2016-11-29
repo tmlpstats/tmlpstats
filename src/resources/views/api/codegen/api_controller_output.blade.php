@@ -23,6 +23,14 @@ class ApiController extends ApiControllerBase
 @endforeach
     ];
 
+    protected $tokenAuthenticatedMethods = [
+@foreach ($apiMethodsFlat as $method)
+@if ($method->access === 'token')
+        "{{ $method->absNameLocal() }}",
+@endif
+@endforeach
+    ];
+
     protected $unauthenticatedMethods = [
 @foreach ($apiMethodsFlat as $method)
 @if ($method->access === 'any')

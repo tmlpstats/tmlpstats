@@ -64,6 +64,10 @@ class ApiController extends ApiControllerBase
         "ValidationData.validate" => "ValidationData__validate",
     ];
 
+    protected $tokenAuthenticatedMethods = [
+        "GlobalReport__getReportPages",
+    ];
+
     protected $unauthenticatedMethods = [
         "LiveScoreboard__getCurrentScores",
     ];

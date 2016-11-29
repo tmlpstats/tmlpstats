@@ -2,12 +2,14 @@
 
 namespace TmlpStats\Http\Controllers;
 
+use App;
 use Auth;
 use Illuminate\Http\Request;
 use Response;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Api\Parsers;
+use TmlpStats\Http\Middleware\TokenAuthenticate;
 
 class ApiControllerBase extends Controller
 {
@@ -42,7 +44,9 @@ class ApiControllerBase extends Controller
         }
         $callable = $this->methods[$method];
 
-        if (!in_array($callable, $this->unauthenticatedMethods) && Auth::user() == null) {
+        if (in_array($callable, $this->tokenAuthenticatedMethods)) {
+            App::make(TokenAuthenticate::class)->manualHandle();
+        } else if (!in_array($callable, $this->unauthenticatedMethods) && Auth::user() == null) {
             throw new ApiExceptions\NotAuthenticatedException('You must be authenticated to access the api.');
         }
 

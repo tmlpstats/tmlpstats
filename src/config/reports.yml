@@ -5,6 +5,7 @@ access_levels:
     TBD: [TBD, global]
     regional_up: [regional, global, global_leader]
     any: __any__
+    token: __token__
 
 scopes:
   local:
@@ -202,6 +203,7 @@ api:
 
       getReportPages:
         desc: Get the global report page(s) named
+        access: token
         params:
           - name: globalReport
             type: GlobalReport
