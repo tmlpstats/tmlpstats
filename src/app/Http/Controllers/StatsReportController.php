@@ -944,17 +944,7 @@ class StatsReportController extends ReportDispatchAbstractController
                         }
                         unset($incomingThisWeekByQuarter[$team][$field][$idx]);
                     } else {
-                        $withdrewThisQuarter = false;
-                        foreach (array_flatten($incomingThisWeekByQuarter['withdrawn']) as $wd) {
-                            if ($this->objectsAreEqual($wd, $lastWeekData)) {
-                                $withdrewThisQuarter = true;
-                                break;
-                            }
-                        }
-
-                        if (!$withdrewThisQuarter) {
-                            $incomingSummary['missing'][] = [null, $lastWeekData];
-                        }
+                        $incomingSummary['missing'][] = [null, $lastWeekData];
                     }
                 }
             }
@@ -1042,6 +1032,40 @@ class StatsReportController extends ReportDispatchAbstractController
                     }
                     if (!$matched) {
                         $teamMemberSummary['new'][] = [$thisWeekData, $lastWeekData];
+                    }
+                }
+            }
+        }
+
+        // Go through everyone that withdrew this week, and remove them from the missing lists
+        foreach ($teamThisWeekByQuarter['withdrawn'] as $quarterNumber => $quarterData) {
+            foreach ($quarterData as $thisWeekData) {
+                if ($quarterNumber == 'Q1') {
+                    // check for missing applications
+                    foreach ($incomingSummary['missing'] as $idx => $missingData) {
+                        if ($this->objectsAreEqual($missingData[1], $thisWeekData)) {
+                            unset($incomingSummary['missing'][$idx]);
+                            break;
+                        }
+                    }
+                } else {
+                    // check for missing applications
+                    foreach ($teamMemberSummary['missing'] as $idx => $missingData) {
+                        if ($this->objectsAreEqual($missingData[1], $thisWeekData)) {
+                            unset($teamMemberSummary['missing'][$idx]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        foreach ($incomingThisWeekByQuarter['withdrawn'] as $quarterNumber => $quarterData) {
+            foreach ($quarterData as $thisWeekData) {
+                // check for missing applications
+                foreach ($incomingSummary['missing'] as $idx => $missingData) {
+                    if ($this->objectsAreEqual($missingData[1], $thisWeekData)) {
+                        unset($incomingSummary['missing'][$idx]);
+                        break;
                     }
                 }
             }
