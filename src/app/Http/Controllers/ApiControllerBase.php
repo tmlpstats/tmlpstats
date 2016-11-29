@@ -45,7 +45,7 @@ class ApiControllerBase extends Controller
         $callable = $this->methods[$method];
 
         if (in_array($callable, $this->tokenAuthenticatedMethods)) {
-            App::make(TokenAuthenticate::class)->manualHandle();
+            App::make(TokenAuthenticate::class)->authenticate();
         } else if (!in_array($callable, $this->unauthenticatedMethods) && Auth::user() == null) {
             throw new ApiExceptions\NotAuthenticatedException('You must be authenticated to access the api.');
         }

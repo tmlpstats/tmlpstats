@@ -30,7 +30,7 @@ class TokenAuthenticate
     /**
      * Run token authenticator manually
      */
-    public function manualHandle()
+    public function authenticate()
     {
         if (Session::has('reportTokenId')) {
 
@@ -60,7 +60,7 @@ class TokenAuthenticate
      */
     public function handle($request, Closure $next)
     {
-        $this->manualHandle();
+        $this->authenticate();
 
         return $next($request);
     }
