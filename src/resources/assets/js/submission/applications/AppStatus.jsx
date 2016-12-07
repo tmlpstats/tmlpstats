@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { React } from '../base_components'
-import { Field, SimpleSelect, DateInput, SimpleDateInput } from '../../reusable/form_utils'
+import { Field, SimpleSelect, SimpleDateInput } from '../../reusable/form_utils'
 import { setAppStatus } from './actions'
 
 const STATUS_UNKNOWN=0,
@@ -50,7 +50,7 @@ export function getStatusString(app) {
     return status.title
 }
 
-export default class AppStatus extends React.Component {
+export class AppStatus extends React.Component {
     render() {
         const { model, currentApp, dispatch } = this.props
         var currentStatus = inferStatus(currentApp)
