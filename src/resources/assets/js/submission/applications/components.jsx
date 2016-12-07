@@ -11,7 +11,7 @@ import { appsSorts, appsCollection, messages } from './data'
 import { centerQuarterData } from '../core/data'
 import { getLabelTeamMember } from '../core/selectors'
 import { loadApplications, saveApplication, chooseApplication } from './actions'
-import { AppStatus, getStatusString } from './AppStatus'
+import AppStatus, { getStatusString } from './AppStatus'
 
 class ApplicationsBase extends SubmissionBase {
     componentDidMount() {
