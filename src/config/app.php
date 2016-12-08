@@ -97,6 +97,8 @@ return [
 
     'log' => 'daily',
 
+    'log_max_files' => env('APP_LOG_RETENTION', 30),
+
     /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers
