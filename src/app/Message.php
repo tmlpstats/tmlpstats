@@ -762,7 +762,7 @@ class Message
             ],
         ],
         'CONTACTINFO_BOUNCED_EMAIL' => [
-            'type' => Message::ERROR,
+            'type' => Message::WARNING,
             'format' => 'The email provided for %%accountability%% (%%email%%) is not reachable. Please correct it.',
             'arguments' => [
                 '%%accountability%%',
