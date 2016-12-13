@@ -36,7 +36,10 @@
     "world-flags-sprite": "*",
     "moment": "~2.10.6",
     "jquery-stickytabs": "git://github.com/pdarg/jquery-stickytabs.git#~1.2.1",
-    "highcharts": "^4.2.3"
+    "highcharts": "^4.2.3",
+    "bootstrap-sass": "^3.3.7"
+  },
+  "devDependencies": {
   },
   "homepage": "https://github.com/pdarg/tmlpstats",
   "authors": [
@@ -45,8 +48,5 @@
   "description": "",
   "moduleType": [],
   "license": "MIT",
-  "private": true,
-  "devDependencies": {
-    "bootstrap-sass": "^3.3.7"
-  }
+  "private": true
 }
