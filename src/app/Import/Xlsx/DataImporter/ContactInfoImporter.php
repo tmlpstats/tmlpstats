@@ -130,8 +130,7 @@ class ContactInfoImporter extends DataImporterAbstract
 
         $possibleMembers = Person::firstName($nameParts['firstName'])
             ->lastName($nameParts['lastName'])
-            ->byCenter($this->statsReport->center)
-            ->get();
+            ->byCenter($this->statsReport->center);
 
         if ($possibleMembers->count() == 1) {
             $member = $possibleMembers->first();
