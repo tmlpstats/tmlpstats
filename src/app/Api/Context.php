@@ -54,6 +54,10 @@ class Context
      */
     public function can($priv, $target)
     {
+        if (!$this->getUser()) {
+            return false;
+        }
+
         return $this->getUser()->can($priv, $target);
     }
 
