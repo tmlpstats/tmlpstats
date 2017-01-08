@@ -49,6 +49,27 @@ class SubmissionCore extends AuthenticatedApiBase
         ];
     }
 
+    /**
+     * Finalizes a submission
+     *
+     * @param  Models\Center $center
+     * @param  Carbon        $reportingDate
+     * @return array
+     */
+    public function completeSubmission(Models\Center $center, Carbon $reportingDate)
+    {
+        $this->checkCenterDate($center, $reportingDate);
+
+        // authorize user
+
+        // validate data and create all db objects
+
+        return [
+            'success' => true,
+            'id' => $center->id,
+        ];
+    }
+
     public function checkCenterDate(Models\Center $center, Carbon $reportingDate)
     {
         if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {

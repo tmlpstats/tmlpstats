@@ -53,6 +53,7 @@ class ApiController extends ApiControllerBase
         "Submission.NextQtrAccountability.allForCenter" => "Submission__NextQtrAccountability__allForCenter",
         "Submission.NextQtrAccountability.stash" => "Submission__NextQtrAccountability__stash",
         "SubmissionCore.initSubmission" => "SubmissionCore__initSubmission",
+        "SubmissionCore.completeSubmission" => "SubmissionCore__completeSubmission",
         "SubmissionData.ignoreMe" => "SubmissionData__ignoreMe",
         "TeamMember.create" => "TeamMember__create",
         "TeamMember.update" => "TeamMember__update",
@@ -317,6 +318,13 @@ class ApiController extends ApiControllerBase
     protected function SubmissionCore__initSubmission($input)
     {
         return App::make(Api\SubmissionCore::class)->initSubmission(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date')
+        );
+    }
+    protected function SubmissionCore__completeSubmission($input)
+    {
+        return App::make(Api\SubmissionCore::class)->completeSubmission(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date')
         );

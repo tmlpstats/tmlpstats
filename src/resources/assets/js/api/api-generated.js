@@ -328,7 +328,15 @@ Api.SubmissionCore = {
       center: Center
       reportingDate: date
     */
-    initSubmission: bac('SubmissionCore.initSubmission')
+    initSubmission: bac('SubmissionCore.initSubmission'),
+
+    /*
+    Finalizes Submission. Validates and creates new db objects for report details
+    Parameters:
+      center: Center
+      reportingDate: date
+    */
+    completeSubmission: bac('SubmissionCore.completeSubmission')
 }
 
 Api.SubmissionData = {
