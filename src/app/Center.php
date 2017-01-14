@@ -135,6 +135,11 @@ class Center extends Model
             'name' => 'centerReportMailingList',
         ]);
 
+        // No list and no existing setting. Nothing to do
+        if (!$list && !$setting->exists) {
+            return true;
+        }
+
         // If the list is empty, remove the setting if it exists and abort
         if (!$list) {
             return $setting->delete();

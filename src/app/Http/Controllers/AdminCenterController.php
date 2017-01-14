@@ -164,13 +164,14 @@ class AdminCenterController extends Controller
             }
         }
 
+        // Save what we have so far. Mailing lists saved separately
+        $center->update($input);
+
         // Don't check if there is a value first so we can remove existing lists
         $quarter = Models\Quarter::getQuarterByDate(Carbon::now(), $center->region);
         if (!$this->saveMailingList($request, $center, $quarter)) {
             return redirect("admin/centers/{$center->abbreviation}/edit")->withInput();
         }
-
-        $center->update($input);
 
         $redirect = "admin/centers";
         if ($request->has('previous_url')) {
