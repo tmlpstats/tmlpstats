@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { React } from '../base_components'
-import { Field, SimpleSelect, SimpleDateInput } from '../../reusable/form_utils'
+import { SimpleSelect, SimpleDateInput } from '../../reusable/form_utils'
 import { setAppStatus } from './actions'
 
 const STATUS_UNKNOWN=0,
@@ -100,15 +100,14 @@ export default class AppStatus extends React.Component {
             return <div key={item.key}></div>
         }
         return (
-            <div className="row" key={item.key}>
-                <label className="control-label col-sm-3">{dateTitle}</label>
-                <div className="col-sm-6">
-                    <Field model={model+'.'+item.key}>
-                        <label>Withdraw Date</label>
-                        <input type="text" className="form-control" />
-                    </Field>
-                    <br />
-                    <SimpleSelect model={model+'.withdrawCode'} keyProp="id" labelProp="display" items={this.props.lookups.withdraw_codes} emptyChoice="Choose One" />
+            <div key={item.key}>
+                <SimpleDateInput key={item.key} model={model+'.'+item.key} label={dateTitle} labelClass="col-sm-3" divClass="col-sm-6" />
+
+                <div className="form-group">
+                    <label className="col-sm-3 control-label">Withdraw Reason</label>
+                    <div className="col-sm-3">
+                        <SimpleSelect model={model+'.withdrawCode'} keyProp="id" labelProp="display" items={this.props.lookups.withdraw_codes} emptyChoice="Choose One" />
+                    </div>
                 </div>
             </div>
         )
@@ -120,7 +119,7 @@ export default class AppStatus extends React.Component {
             style['visibility'] = 'hidden'
         }
         return (
-            <SimpleDateInput key={item.key}model={model+'.'+item.key} label={dateTitle} labelClass="col-sm-3" divClass="col-sm-6" />
+            <SimpleDateInput key={item.key} model={model+'.'+item.key} label={dateTitle} labelClass="col-sm-3" divClass="col-sm-6" />
         )
     }
 }
