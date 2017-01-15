@@ -47,7 +47,8 @@ class DateInputView extends React.Component {
             <SingleDatePicker
                     { ...pickerForwardProps}
                     id={id} date={date} onDateChange={this.onDateChange}
-                    focused={focused} onFocusChange={this.onFocusChange} />
+                    focused={focused} onFocusChange={this.onFocusChange}
+                    isOutsideRange={() => false} />
         )
     }
 
