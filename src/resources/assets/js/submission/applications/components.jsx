@@ -39,7 +39,8 @@ class ApplicationsIndexView extends ApplicationsBase {
         const baseUri = this.baseUri()
         const withdraws = []
 
-        apps.forEach((app, key) => {
+        apps.forEach((app) => {
+            let key = app.id
             withdraws.push(
                 <tr key={key}>
                     <td><Link to={`${baseUri}/applications/edit/${key}`}>{app.firstName} {app.lastName}</Link></td>
