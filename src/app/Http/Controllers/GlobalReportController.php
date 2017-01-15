@@ -1083,6 +1083,7 @@ class GlobalReportController extends Controller
         return view('globalreports.details.withdrawreport', compact('reportData', 'almostOutOfCompliance'));
     }
 
+
     protected function rppData($globalReport, $region)
     {
         return $this->context->getEncapsulation(Encapsulate\GlobalReportRegPerParticipantData::class, compact('globalReport', 'region'));
@@ -1098,241 +1099,19 @@ class GlobalReportController extends Controller
         return $this->rppData($globalReport, $region)->getOne('RegPerParticipantWeekly');
     }
 
-    public function getTeamSummaryGrid(Models\GlobalReport $globalReport, Models\Region $region, $teamYear)
+    protected function teamSummaryData(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        $registrations = App::make(Api\GlobalReport::class)->getApplicationsListByCenter($globalReport, $region, [
-            'returnUnprocessed' => true,
-        ]);
-        if (!$registrations) {
-            return null;
-        }
-
-        $teamMembers = App::make(Api\GlobalReport::class)->getClassListByCenter($globalReport, $region, [
-            'returnUnprocessed' => true,
-        ]);
-        if (!$teamMembers) {
-            return null;
-        }
-
-
-
-        $thisQuarter = Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region);
-        $nextQuarter = $thisQuarter->getNextQuarter();
-
-        $centerGamesData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region, [
-            'date' => $thisQuarter->getQuarterEndDate(),
-        ]);
-        if (!$centerGamesData) {
-            return null;
-        }
-
-
-        $template = [
-            'qtrPromise' => 0,
-            'registrations' => [
-                'total' => 0,
-                'net' => 0,
-            ],
-            'wkndReg' => [
-                'before' => 0,
-                'after' => 0,
-            ],
-            'appStatus' => [
-                'appOut' => 0,
-                'appIn' => 0,
-                'appr' => 0,
-                'wd' => 0,
-            ],
-            'appStatusNext' => [
-                'appOut' => 0,
-                'appIn' => 0,
-                'appr' => 0,
-                'wd' => 0,
-            ],
-            'onTeamAtWknd' => 0,
-            'xferIn' => 0,
-            'xferOut' => 0,
-            'withdraws' => [
-                'q1' => 0,
-                'q2' => 0,
-                'q3' => 0,
-                'q4' => 0,
-                'all' => 0,
-            ],
-            'wbo' => 0,
-            'ctw' => 0,
-            'rereg' => 0,
-            'currentOnTeam' => 0,
-            'tdo' => 0,
-            'completing' => 0,
-            'onTeamNextQtr' => 0,
-            'attendingWeekend' => 0,
-        ];
-
-        $reportData = [];
-        foreach ($registrations as $registration) {
-            $centerName = $registration->statsReport->center->name;
-
-            if ($registration->teamYear != $teamYear) {
-                continue;
-            }
-
-            if (!isset($reportData[$centerName])) {
-                $reportData[$centerName] = $template;
-            }
-
-            $reportData[$centerName]['qtrPromise'] = $centerGamesData[$centerName]['promise']["t{$teamYear}x"];
-
-            $reportData[$centerName]['registrations']['total']++;
-            if ($registration->apprDate !== null) {
-                $reportData[$centerName]['registrations']['net']++;
-            }
-
-            if ($registration->regDate->lte($thisQuarter->getQuarterStartDate())) {
-                $reportData[$centerName]['wkndReg']['before']++;
-            } else {
-                $reportData[$centerName]['wkndReg']['after']++;
-            }
-
-            if ($registration->withdrawCode !== null) {
-                $reportData[$centerName]['appStatus']['wd']++;
-                if ($registration->incomingQuarterId === $nextQuarter->id) {
-                    $reportData[$centerName]['appStatusNext']['wd']++;
-                }
-            } else if ($registration->apprDate !== null) {
-                $reportData[$centerName]['appStatus']['appr']++;
-                if ($registration->incomingQuarterId === $nextQuarter->id) {
-                    $reportData[$centerName]['appStatusNext']['appr']++;
-                    $reportData[$centerName]['onTeamNextQtr']++;
-                    $reportData[$centerName]['attendingWeekend']++;
-                }
-            } else if ($registration->appInDate !== null) {
-                $reportData[$centerName]['appStatus']['appIn']++;
-                if ($registration->incomingQuarterId === $nextQuarter->id) {
-                    $reportData[$centerName]['appStatusNext']['appIn']++;
-                }
-            } else if ($registration->appOutDate !== null) {
-                $reportData[$centerName]['appStatus']['appOut']++;
-                if ($registration->incomingQuarterId === $nextQuarter->id) {
-                    $reportData[$centerName]['appStatusNext']['appOut']++;
-                }
-            }
-        }
-
-        foreach ($teamMembers as $member) {
-            $centerName = $member->statsReport->center->name;
-
-            if ($member->teamYear != $teamYear) {
-                continue;
-            }
-
-            if (!isset($reportData[$centerName])) {
-                $reportData[$centerName] = $template;
-            }
-
-            if ($member->xferIn) {
-                $reportData[$centerName]['xferIn']++;
-            } else if ($member->atWeekend) {
-                $reportData[$centerName]['onTeamAtWknd']++;
-            }
-
-            if ($member->xferOut) {
-                $reportData[$centerName]['xferOut']++;
-            }
-
-             if ($member->withdrawCode !== null) {
-                $reportData[$centerName]['withdraws']['q' . $member->quarterNumber]++;
-                $reportData[$centerName]['withdraws']['all']++;
-
-                if ($member->withdrawCode->code == 'WB') {
-                    $reportData[$centerName]['wbo']++;
-                }
-            }
-
-            if ($member->ctw) {
-                $reportData[$centerName]['ctw']++;
-            }
-
-            if ($member->rereg) {
-                $reportData[$centerName]['rereg']++;
-            }
-
-            if ($member->isActiveMember()) {
-                $reportData[$centerName]['currentOnTeam']++;
-                $reportData[$centerName]['attendingWeekend']++;
-
-                if ($member->quarterNumber == 4) {
-                    $reportData[$centerName]['completing']++;
-                } else {
-                    $reportData[$centerName]['onTeamNextQtr']++;
-                }
-            }
-
-            if ($member->tdo) {
-                $reportData[$centerName]['tdo']++;
-            }
-        }
-        ksort($reportData);
-
-        $totals = $template;
-        foreach ($reportData as $centerName => $centerData) {
-            foreach ($centerData as $key => $value) {
-                if (is_array($value)) {
-                    foreach ($value as $subKey => $subValue) {
-                        $totals[$key][$subKey] += $subValue;
-                    }
-                } else {
-                    $totals[$key] += $value;
-                }
-            }
-        }
-
-        $regFulfill = $template;
-
-        if ($totals['registrations']['total']) {
-            $regFulfill['appStatus']['appOut'] = $totals['appStatus']['appOut'] / $totals['registrations']['total'];
-            $regFulfill['appStatus']['appIn'] = $totals['appStatus']['appIn'] / $totals['registrations']['total'];
-            $regFulfill['appStatus']['appr'] = $totals['appStatus']['appr'] / $totals['registrations']['total'];
-            $regFulfill['appStatus']['wd'] = $totals['appStatus']['wd'] / $totals['registrations']['total'];
-        }
-
-        $appStatusNextSum = $totals['appStatusNext']['appOut']
-            + $totals['appStatusNext']['appIn']
-            + $totals['appStatusNext']['appr']
-            + $totals['appStatusNext']['wd'];
-
-        if ($appStatusNextSum) {
-            $regFulfill['appStatusNext']['appOut'] = $totals['appStatusNext']['appOut'] / $appStatusNextSum;
-            $regFulfill['appStatusNext']['appIn'] = $totals['appStatusNext']['appIn'] / $appStatusNextSum;
-            $regFulfill['appStatusNext']['appr'] = $totals['appStatusNext']['appr'] / $appStatusNextSum;
-            $regFulfill['appStatusNext']['wd'] = $totals['appStatusNext']['wd'] / $appStatusNextSum;
-        }
-
-        if ($totals['onTeamAtWknd']) {
-            $regFulfill['withdraws']['all'] = $totals['withdraws']['all'] / $totals['onTeamAtWknd'];
-        }
-
-        foreach ($regFulfill as $key => $value) {
-            if (is_array($value)) {
-                foreach ($value as $subKey => $subValue) {
-                    $regFulfill[$key][$subKey] = round($subValue * 100);
-                }
-            } else {
-                $regFulfill[$key] = round($value * 100);
-            }
-        }
-
-        return view('globalreports.details.teamsummarygrid', compact('reportData', 'totals', 'regFulfill'));
+        return $this->context->getEncapsulation(Encapsulate\GlobalReportTeamSummaryData::class, compact('globalReport', 'region'));
     }
 
     public function getTeam1SummaryGrid(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        return $this->getTeamSummaryGrid($globalReport, $region, 1);
+        return $this->teamSummaryData($globalReport, $region)->getOne('Team1SummaryGrid');
     }
 
     public function getTeam2SummaryGrid(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        return $this->getTeamSummaryGrid($globalReport, $region, 2);
+        return $this->teamSummaryData($globalReport, $region)->getOne('Team2SummaryGrid');
     }
 
     public static function getUrl(Models\GlobalReport $globalReport, Models\Region $region)
