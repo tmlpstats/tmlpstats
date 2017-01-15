@@ -364,6 +364,13 @@ api:
             type: Center
           - name: reportingDate
             type: date
+      completeSubmission:
+        desc: Finalizes Submission. Validates and creates new db objects for report details
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
 
   SubmissionData:
     type: namespace

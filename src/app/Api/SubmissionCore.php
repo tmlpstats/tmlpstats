@@ -12,9 +12,9 @@ class SubmissionCore extends AuthenticatedApiBase
 {
     /**
      * Initialize a submission, checking if parameters are valid.
-     * @param  Models\Center $center        [description]
-     * @param  Carbon        $reportingDate [description]
-     * @return [type]                       [description]
+     * @param  Models\Center $center
+     * @param  Carbon        $reportingDate
+     * @return array
      */
     public function initSubmission(Models\Center $center, Carbon $reportingDate)
     {
@@ -46,6 +46,39 @@ class SubmissionCore extends AuthenticatedApiBase
             'lookups' => compact('withdraw_codes', 'team_members', 'center', 'centers'),
             'accountabilities' => $accountabilities,
             'currentQuarter' => $centerQuarter,
+        ];
+    }
+
+    /**
+     * Finalizes a submission
+     *
+     * @param  Models\Center $center
+     * @param  Carbon        $reportingDate
+     * @return array
+     */
+    public function completeSubmission(Models\Center $center, Carbon $reportingDate)
+    {
+        $this->checkCenterDate($center, $reportingDate);
+
+        $this->assertAuthz($this->context->can('submitStats', $center));
+
+        $results = App::make(ValidationData::class)->validate($center, $reportingDate);
+        if (!$results['valid']) {
+            // TODO: figure out what we want to do here
+            // validation failed. for now, exit
+            return [
+                'success' => false,
+                'id' => $center->id,
+                'message' => 'Validation failed'
+            ];
+        }
+
+        // Create all of the db objects
+        $success = true;
+
+        return [
+            'success' => $success,
+            'id' => $center->id,
         ];
     }
 

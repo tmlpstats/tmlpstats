@@ -402,6 +402,16 @@ Api.SubmissionCore = {
     */
     initSubmission: function(params, callback, errback) {
         return apiCall('SubmissionCore.initSubmission', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Finalizes Submission. Validates and creates new db objects for report details
+    Parameters:
+      center: Center
+      reportingDate: date
+    */
+    completeSubmission: function(params, callback, errback) {
+        return apiCall('SubmissionCore.completeSubmission', params, (callback || null), (errback || null));
     }
 };
 Api.SubmissionData = {
