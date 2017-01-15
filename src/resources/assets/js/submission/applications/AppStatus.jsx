@@ -100,7 +100,7 @@ export default class AppStatus extends React.Component {
             return <div key={item.key}></div>
         }
         return (
-            <div>
+            <div key={item.key}>
                 <SimpleDateInput key={item.key} model={model+'.'+item.key} label={dateTitle} labelClass="col-sm-3" divClass="col-sm-6" />
 
                 <div className="form-group">
