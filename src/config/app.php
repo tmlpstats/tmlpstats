@@ -157,6 +157,7 @@ return [
         Intouch\LaravelNewrelic\NewrelicServiceProvider::class,
         Barryvdh\Debugbar\ServiceProvider::class,
         PragmaRX\Tracker\Vendor\Laravel\ServiceProvider::class,
+        Fideloper\Proxy\TrustedProxyServiceProvider::class,
     ],
 
     /*

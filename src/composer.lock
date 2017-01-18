@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "a83814b91ea693ae5f351ca8cdd29a04",
-    "content-hash": "b63a501d892a0e0497c7b80dcaf626bf",
+    "hash": "14a574f27a12c79d4edd0342d949e0a7",
+    "content-hash": "38f7c53a5de005ad73d8f824c5384aa8",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -787,6 +787,57 @@
                 "parser"
             ],
             "time": "2014-09-09 13:34:57"
+        },
+        {
+            "name": "fideloper/proxy",
+            "version": "3.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/fideloper/TrustedProxy.git",
+                "reference": "b270bfa52915e55cfb67faa0f16863a479c36121"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fideloper/TrustedProxy/zipball/b270bfa52915e55cfb67faa0f16863a479c36121",
+                "reference": "b270bfa52915e55cfb67faa0f16863a479c36121",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "~5.0",
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "illuminate/http": "~5.0",
+                "mockery/mockery": "~0.9.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.1-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Fideloper\\Proxy\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Chris Fidao",
+                    "email": "fideloper@gmail.com"
+                }
+            ],
+            "description": "Set trusted proxies for Laravel",
+            "keywords": [
+                "load balancing",
+                "proxy",
+                "trusted proxy"
+            ],
+            "time": "2016-12-20 14:23:22"
         },
         {
             "name": "geoip/geoip",
