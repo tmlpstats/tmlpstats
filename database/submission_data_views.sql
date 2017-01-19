@@ -25,9 +25,9 @@ CREATE or replace VIEW `submission_data_scoreboard` AS
 CREATE OR REPLACE
 VIEW `submission_data_applications` AS
     SELECT 
-		id,
-        center_id,
-		reporting_date,
+		`submission_data`.id,
+        `submission_data`.center_id,
+		`submission_data`.reporting_date,
         `submission_data`.`stored_id` AS `stored_id`,
         JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.firstName')) AS `first_name`,
         JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.lastName')) AS `last_name`,
@@ -39,12 +39,15 @@ VIEW `submission_data_applications` AS
         JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.appInDate')) AS `appinDate`,
         JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.apprDate')) AS `apprDate`,
         JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.wdDate')) AS `wdDate`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.teamYear')) AS `team_year`,
         JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`,
                         '$.withdrawCode')) AS `withdrawCode`,
         JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`,
-                        '$.committedTeamMember')) AS `committeddteamMember`
+                        '$.committedTeamMember')) AS `committeddteamMember`,
+		`tmlp_registrations`.person_id
     FROM
-        `submission_data`
+        `submission_data` left outer join `tmlp_registrations`
+              on `submission_data`.stored_id=`tmlp_registrations`.id
     WHERE
         (`submission_data`.`stored_type` = 'application');
 
@@ -56,7 +59,7 @@ VIEW `submission_data_team_members` AS
          id,
          center_id,
          reporting_date,
-        `submission_data`.`id` AS `team_member_id`,
+        `submission_data`.`stored_id` AS `team_member_id`,
         JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.firstName')) AS `first_name`,
         JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.lastName')) AS `last_name`,
         JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.email')) AS `email`,
@@ -101,3 +104,33 @@ CREATE OR REPLACE VIEW submission_data_accountabilities AS
     WHERE
        json_contains(a.accountabilities,concat('"',accountabilities.id,'"'))=1
        and t.id=a.team_member_id;
+
+
+CREATE OR REPLACE
+VIEW `submission_data_team_members` AS
+    SELECT 
+         id,
+         center_id,
+         reporting_date,
+        `submission_data`.`id` AS `team_member_id`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.startDate')) AS `start_date`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.type')) AS `type`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.location')) AS `location`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.id')) AS `course_id`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.quarterStartTer')) AS `quarter_start_ter`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.quarterStartStandardStarts')) AS `quarter_start_standard_starts`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.quarterStartXfer')) AS `quarter_start_xfer`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.currentTer')) AS `current_ter`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.currentStandardStarts')) AS `current_standard_starts`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.currentXfer')) AS `current_xfer`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.completedStandardStarts')) AS `completed_standard_starts`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.potentials')) AS `potentials`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.registrations')) AS `registrations`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.guestsPromised')) AS `guests_promised`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.guestsInvited')) AS `guests_invited`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.guestsConfirmed')) AS `guests_confirmed`,
+        JSON_UNQUOTE(JSON_EXTRACT(`submission_data`.`data`, '$.guestsAttended')) AS `guests_ttended`
+    FROM
+        `submission_data`
+    WHERE
+        (`submission_data`.`stored_type` = 'course');
