@@ -61,8 +61,8 @@ const GlobalReport = {
             "type": "report",
             "name": "Repromises"
         },
-        "RegPerParticipant": {
-            "id": "RegPerParticipant",
+        "RegPerParticipantWeekly": {
+            "id": "RegPerParticipantWeekly",
             "n": 7,
             "type": "report",
             "name": "Reg. Per Participant"
@@ -83,7 +83,7 @@ const GlobalReport = {
                 "RegionalStats",
                 "GamesByCenter",
                 "RepromisesByCenter",
-                "RegPerParticipant",
+                "RegPerParticipantWeekly",
                 "Gaps"
             ]
         },

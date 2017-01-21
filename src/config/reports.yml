@@ -489,7 +489,8 @@ reportMeta:
             name: By Center
           RepromisesByCenter:
             name: Repromises
-          RegPerParticipant:
+          # RegPerParticipant:
+          RegPerParticipantWeekly:
             name: Reg. Per Participant
           Gaps:
             name: Gaps
