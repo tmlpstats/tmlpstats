@@ -847,81 +847,6 @@ class GlobalReportController extends ReportDispatchAbstractController
         ]);
     }
 
-    protected function getRegPerParticipant(Models\GlobalReport $globalReport, Models\Region $region, $returnRawData = false)
-    {
-        $reportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region);
-        if (!$reportData) {
-            return null;
-        }
-
-        $lastWeekDate = $globalReport->reportingDate->copy()->subWeek();
-        $lastGlobalReport = Models\GlobalReport::reportingDate($lastWeekDate)
-            ->first();
-        if (!$lastGlobalReport) {
-            return null;
-        }
-
-        $regionQuarter = App::make(Api\Context::class)->getEncapsulation(Encapsulations\RegionQuarter::class, [
-            'quarter' => Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region),
-            'region' => $region,
-        ]);
-
-        $lastWeekReportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($lastGlobalReport, $region);
-
-        $statsReportsAll = $this->getStatsReports($globalReport, $region);
-
-        $statsReports = [];
-        foreach ($statsReportsAll as $report) {
-            $centerName = $report->center->name;
-            $statsReports[$centerName] = $report;
-        }
-
-        $games = ['cap', 'cpc', 'lf'];
-        foreach ($reportData as $centerName => $centerData) {
-            $reportData[$centerName]['statsReport'] = $statsReports[$centerName];
-        }
-        ksort($reportData);
-
-        foreach ($reportData as $centerName => $centerData) {
-            $participantCount = Models\TeamMemberData::byStatsReport($statsReports[$centerName])
-                ->active()
-                ->count();
-            $totalWeekly = 0;
-            $totalQuarterly = 0;
-            foreach ($games as $game) {
-                $change = 0;
-                $rppWeekly = 0;
-                $rppQuarterly = 0;
-                if (isset($centerData['actual'])) {
-                    $actual = $centerData['actual'][$game];
-                    $totalQuarterly += $actual;
-                    $rppQuarterly = $actual / $participantCount;
-
-                    if ($lastWeekDate->eq($regionQuarter->startWeekendDate)) {
-                        $lastWeekReportData[$centerName]['actual'][$game] = 0;
-                    }
-
-                    if (isset($lastWeekReportData[$centerName]['actual'])) {
-                        $change = $actual - $lastWeekReportData[$centerName]['actual'][$game];
-                        $totalWeekly += $change;
-                        $rppWeekly = $change / $participantCount;
-                    }
-                }
-                $reportData[$centerName]['change'][$game] = $change;
-                $reportData[$centerName]['rpp']['week'][$game] = round($rppWeekly, 1);
-                $reportData[$centerName]['rpp']['quarter'][$game] = round($rppQuarterly, 1);
-            }
-            $reportData[$centerName]['rpp']['week']['total'] = round($totalWeekly / $participantCount, 1);
-            $reportData[$centerName]['rpp']['quarter']['total'] = round($totalQuarterly / $participantCount, 1);
-        }
-
-        if ($returnRawData) {
-            return $reportData;
-        }
-
-        return view('globalreports.details.regperparticipant', compact('reportData', 'games'));
-    }
-
     protected function teamMembersData(Models\GlobalReport $globalReport, Models\Region $region)
     {
         return $this->context->getEncapsulation(Encapsulate\GlobalReportTeamMembersData::class, compact('globalReport', 'region'));
@@ -1183,42 +1108,19 @@ class GlobalReportController extends ReportDispatchAbstractController
         return view('globalreports.details.withdrawreport', compact('reportData', 'almostOutOfCompliance'));
     }
 
+    protected function rppData($globalReport, $region)
+    {
+        return $this->context->getEncapsulation(Encapsulate\GlobalReportRegPerParticipantData::class, compact('globalReport', 'region'));
+    }
+
+    protected function getRegPerParticipant(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->rppData($globalReport, $region)->getOne('RegPerParticipant');
+    }
+
     protected function getRegPerParticipantWeekly(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        $regionQuarter = App::make(Api\Context::class)->getEncapsulation(Encapsulations\RegionQuarter::class, [
-            'quarter' => Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region),
-            'region' => $region,
-        ]);
-
-        $reports = Models\GlobalReport::between(
-            $regionQuarter->startWeekendDate->copy()->addWeek(),
-            $regionQuarter->endWeekendDate
-        )->get();
-
-        $initialData = [];
-        foreach ($reports as $weekReport) {
-            $dateStr = $weekReport->reportingDate->toDateString();
-            $initialData[$dateStr] = $this->getRegPerParticipant($weekReport, $region, true);
-        }
-
-        $reportData = [];
-        $dates = [];
-        foreach ($initialData as $dateStr => $weekData) {
-            if (!is_array($weekData)) {
-                continue;
-            }
-            $dates[] = Carbon::parse($dateStr);
-            foreach ($weekData as $centerName => $centerWeekData) {
-                $reportData[$centerName][$dateStr] = $centerWeekData;
-            }
-        }
-
-        return view('globalreports.details.rppweekly', [
-            'reportData' => $reportData,
-            'games' => ['cap', 'cpc', 'lf'],
-            'dates' => $dates,
-            'milestones' => $regionQuarter->datesAsArray(),
-        ]);
+        return $this->rppData($globalReport, $region)->getOne('RegPerParticipantWeekly');
     }
 
     public static function getUrl(Models\GlobalReport $globalReport, Models\Region $region)
