@@ -2,12 +2,14 @@
 namespace TmlpStats\Http\Controllers;
 
 use App;
+use Carbon\Carbon;
 use Gate;
 use Illuminate\Http\Request;
 use Response;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Domain\Scoreboard;
+use TmlpStats\Encapsulations;
 use TmlpStats\Http\Controllers\Encapsulate;
 use TmlpStats\Http\Controllers\Traits\GlobalReportDispatch;
 use TmlpStats\Reports\Arrangements;
@@ -845,18 +847,24 @@ class GlobalReportController extends ReportDispatchAbstractController
         ]);
     }
 
-    protected function getRegPerParticipant(Models\GlobalReport $globalReport, Models\Region $region)
+    protected function getRegPerParticipant(Models\GlobalReport $globalReport, Models\Region $region, $returnRawData = false)
     {
         $reportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region);
         if (!$reportData) {
             return null;
         }
 
-        $lastGlobalReport = Models\GlobalReport::reportingDate($globalReport->reportingDate->copy()->subWeek())
+        $lastWeekDate = $globalReport->reportingDate->copy()->subWeek();
+        $lastGlobalReport = Models\GlobalReport::reportingDate($lastWeekDate)
             ->first();
         if (!$lastGlobalReport) {
             return null;
         }
+
+        $regionQuarter = App::make(Api\Context::class)->getEncapsulation(Encapsulations\RegionQuarter::class, [
+            'quarter' => Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region),
+            'region' => $region,
+        ]);
 
         $lastWeekReportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($lastGlobalReport, $region);
 
@@ -889,6 +897,10 @@ class GlobalReportController extends ReportDispatchAbstractController
                     $totalQuarterly += $actual;
                     $rppQuarterly = $actual / $participantCount;
 
+                    if ($lastWeekDate->eq($regionQuarter->startWeekendDate)) {
+                        $lastWeekReportData[$centerName]['actual'][$game] = 0;
+                    }
+
                     if (isset($lastWeekReportData[$centerName]['actual'])) {
                         $change = $actual - $lastWeekReportData[$centerName]['actual'][$game];
                         $totalWeekly += $change;
@@ -901,6 +913,10 @@ class GlobalReportController extends ReportDispatchAbstractController
             }
             $reportData[$centerName]['rpp']['week']['total'] = round($totalWeekly / $participantCount, 1);
             $reportData[$centerName]['rpp']['quarter']['total'] = round($totalQuarterly / $participantCount, 1);
+        }
+
+        if ($returnRawData) {
+            return $reportData;
         }
 
         return view('globalreports.details.regperparticipant', compact('reportData', 'games'));
@@ -1165,6 +1181,44 @@ class GlobalReportController extends ReportDispatchAbstractController
         }
 
         return view('globalreports.details.withdrawreport', compact('reportData', 'almostOutOfCompliance'));
+    }
+
+    protected function getRegPerParticipantWeekly(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        $regionQuarter = App::make(Api\Context::class)->getEncapsulation(Encapsulations\RegionQuarter::class, [
+            'quarter' => Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region),
+            'region' => $region,
+        ]);
+
+        $reports = Models\GlobalReport::between(
+            $regionQuarter->startWeekendDate->copy()->addWeek(),
+            $regionQuarter->endWeekendDate
+        )->get();
+
+        $initialData = [];
+        foreach ($reports as $weekReport) {
+            $dateStr = $weekReport->reportingDate->toDateString();
+            $initialData[$dateStr] = $this->getRegPerParticipant($weekReport, $region, true);
+        }
+
+        $reportData = [];
+        $dates = [];
+        foreach ($initialData as $dateStr => $weekData) {
+            if (!is_array($weekData)) {
+                continue;
+            }
+            $dates[] = Carbon::parse($dateStr);
+            foreach ($weekData as $centerName => $centerWeekData) {
+                $reportData[$centerName][$dateStr] = $centerWeekData;
+            }
+        }
+
+        return view('globalreports.details.rppweekly', [
+            'reportData' => $reportData,
+            'games' => ['cap', 'cpc', 'lf'],
+            'dates' => $dates,
+            'milestones' => $regionQuarter->datesAsArray(),
+        ]);
     }
 
     public static function getUrl(Models\GlobalReport $globalReport, Models\Region $region)

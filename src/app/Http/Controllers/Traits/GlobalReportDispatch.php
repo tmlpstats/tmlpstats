@@ -49,9 +49,9 @@ trait GlobalReportDispatch {
             case 'repromisesbycenter':
                 return 'getRepromisesByCenter';
                 break;
-            case 'RegPerParticipant':
-            case 'regperparticipant':
-                return 'getRegPerParticipant';
+            case 'RegPerParticipantWeekly':
+            case 'regperparticipantweekly':
+                return 'getRegPerParticipantWeekly';
                 break;
             case 'Gaps':
             case 'gaps':
@@ -182,7 +182,7 @@ trait GlobalReportDispatch {
     protected abstract function getRepromisesByCenter();
 
     // Get report Reg. Per Participant
-    protected abstract function getRegPerParticipant();
+    protected abstract function getRegPerParticipantWeekly();
 
     // Get report Gaps
     protected abstract function getGaps();
