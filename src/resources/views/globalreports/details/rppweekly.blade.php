@@ -1,9 +1,3 @@
-<?php
-    // $dates = array_keys($reportData);
-    // foreach ($dates as $i => $dateStr) {
-    //     $dates[$i] = Carbon\Carbon::parse($dateStr);
-    // }
-?>
 <br>
 <h5>Data so far this quarter</h5>
 <div class="table-responsive">
