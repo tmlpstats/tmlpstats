@@ -1,9 +1,12 @@
 import moment from 'moment'
-
-import { SubmissionBase, React } from '../base_components'
-import { PAGES_CONFIG } from '../core/data'
-import { connectRedux } from '../../reusable/dispatch'
 import { Link } from 'react-router'
+
+import { PAGES_CONFIG } from '../core/data'
+import { connectRedux, rebind } from '../../reusable/dispatch'
+import { SubmitFlip, Alert } from '../../reusable/ui_basic'
+import { SubmissionBase, React } from '../base_components'
+
+import { submitReport } from './actions'
 import { loadPairs } from './data'
 
 const CLASSES = {error: 'bg-danger', warning: 'bg-warning'}
@@ -12,6 +15,11 @@ const CLASSES = {error: 'bg-danger', warning: 'bg-warning'}
 export default class Review extends SubmissionBase {
     static mapStateToProps(state) {
         return state.submission
+    }
+
+    constructor(props) {
+        super(props)
+        rebind(this, 'onSubmit')
     }
 
     checkLoading() {
@@ -29,6 +37,22 @@ export default class Review extends SubmissionBase {
         })
 
         return alreadyLoaded
+    }
+
+    onSubmit() {
+        const { centerId, reportingDate } = this.props.params
+        this.props.dispatch(submitReport(centerId, reportingDate)).then((result) => {
+            if (!result || !result.success) {
+                throw new Error(result)
+            }
+            console.log('got result in submitReport', result)
+            alert('Temporary alert: Submission OK')
+        }).catch((err) => {
+            console.log('got error in submitReport', err)
+            if (err.message) {
+                alert('Temporary alert: got error ' + err.message)
+            }
+        })
     }
 
     render() {
@@ -53,6 +77,11 @@ export default class Review extends SubmissionBase {
             <div>
                 <h3>Review</h3>
                 <ul>{categories}</ul>
+                <div>
+                    <Alert alert="warning">Submission is in extreme beta. Note you may need to refresh this page after submitting, which is not the long-term intent.</Alert>
+                    <button type="button" className="btn btn-primary btn-lg" onClick={this.onSubmit}>Submit Report</button>
+                </div>
+
             </div>
         )
     }
