@@ -24,7 +24,16 @@ export const teamMembersSorts = [
 export const teamMembersData = new SortableReduxLoader({
     prefix: 'submission.team_members',
     extraLMS: ['saveState'],
-    loader: Api.TeamMember.allForCenter,
+    actions: {
+        load: {
+            api: Api.TeamMember.allForCenter,
+            setLoaded: true
+        },
+        save: {
+            api: Api.TeamMember.stash,
+            setLoaded: true
+        }
+    },
     sortable: {
         key_prop: 'id',
         sort_by: 'teamYear_first_last',

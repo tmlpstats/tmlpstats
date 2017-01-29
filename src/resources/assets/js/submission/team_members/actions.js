@@ -77,24 +77,20 @@ export function setExitChoice(exitChoice) {
 }
 
 export function stashTeamMember(center, reportingDate, data) {
-    return (dispatch) => {
-        dispatch(teamMembersData.saveState('loading'))
-
-        return Api.TeamMember.stash({center, reportingDate, data}).then(
-            (result) => {
-                if (!result.storedId) {
-                    throw new Error('Expected storedId in result')
-                }
-                dispatch(teamMembersData.saveState('loaded'))
-                const newData = objectAssign({}, data, {id: result.storedId, meta: result.meta})
-                dispatch(messages.replace(newData.id, result.messages))
-                dispatch(teamMembersData.replaceItem(newData))
-                return result
-            },
-            (err) => {
-                dispatch(teamMembersData.saveState({error: err.error || err}))
-                dispatch(messages.replace(data.id, getMessages(err)))
+    return teamMembersData.runNetworkAction('save', {center, reportingDate, data}, {
+        successHandler(result, { dispatch }) {
+            if (!result.storedId) {
+                dispatch(teamMembersData.saveState({error: 'Validation Failed', messages: result.messages}))
+                setTimeout(() => { dispatch(teamMembersData.saveState('new')) }, 3000)
+                dispatch(messages.replace('create', result.messages))
+                return
             }
-        )
-    }
+            const newData = objectAssign({}, data, {id: result.storedId, meta: result.meta})
+            dispatch(messages.replace(newData.id, result.messages))
+            dispatch(teamMembersData.replaceItem(newData))
+            if (!data.id) {
+                dispatch(messages.replace('create', []))
+            }
+        }
+    })
 }

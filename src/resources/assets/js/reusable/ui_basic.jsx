@@ -242,7 +242,11 @@ export class Modal extends React.PureComponent {
     }
 }
 
-export function scrollIntoView(id) {
+export function scrollIntoView(id, after=null) {
+    if (after) {
+        setTimeout(() => scrollIntoView(id), after)
+        return
+    }
     if (window && window.document) {
         const elem = window.document.getElementById(id)
         if (elem && elem.scrollIntoView) {

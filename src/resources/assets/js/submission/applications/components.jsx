@@ -1,7 +1,7 @@
 import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
 
-import { Form, SimpleField, SimpleSelect, AddOneLink } from '../../reusable/form_utils'
+import { Form, SimpleField, SimpleSelect, SimpleFormGroup, BooleanSelect, AddOneLink } from '../../reusable/form_utils'
 import { Promise, objectAssign } from '../../reusable/ponyfill'
 import { ModeSelectButtons, LoadStateFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
@@ -163,6 +163,7 @@ class _EditCreate extends ApplicationsBase {
                             <AppStatus model={modelKey} currentApp={this.props.currentApp} lookups={this.props.lookups} dispatch={this.props.dispatch} />
                         </div>
                     </div>
+                    {this.renderTravelRoom(modelKey)}
                     <div className="form-group">
                         <div className="col-sm-offset-2 col-sm-8">
                             <LoadStateFlip loadState={this.props.saveApp}>
@@ -197,6 +198,19 @@ class _EditCreate extends ApplicationsBase {
             <div className="form-group">
                 <label className="col-md-2 control-label">Starting Quarter</label>
                 <div className="col-md-6">{body}</div>
+            </div>
+        )
+    }
+
+    renderTravelRoom(modelKey) {
+        return (
+            <div>
+                <SimpleFormGroup label="Travel Booked" divClass="col-md-6 boolSelect">
+                    <BooleanSelect model={modelKey+'.travel'} style={{maxWidth: '4em'}} />
+                </SimpleFormGroup>
+                <SimpleFormGroup label="Room Booked" divClass="col-md-6 boolSelect">
+                    <BooleanSelect model={modelKey+'.room'} />
+                </SimpleFormGroup>
             </div>
         )
     }

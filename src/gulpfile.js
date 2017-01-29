@@ -8,7 +8,7 @@ if (elixir.config.production) {
 
 // Allow us to use the .jsx extension for React files
 elixir.config.js.browserify.options.extensions = ['.jsx', '.js']
-elixir.config.js.browserify.transformers[0].options.plugins = ['transform-decorators-legacy', 'transform-class-properties', 'lodash']
+elixir.config.js.browserify.transformers[0].options.plugins = ['transform-decorators-legacy', 'transform-class-properties', 'lodash', 'transform-object-rest-spread']
 elixir.config.js.browserify.transformers.push({
     name: 'envify',
     options: {
