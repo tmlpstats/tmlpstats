@@ -83,12 +83,20 @@ class TeamMember extends AuthenticatedApiBase
             $domain = Domain\TeamMember::fromModel(null, $tm);
             $domain->updateFromArray($data, ['incomingQuarter']);
         } else {
-            $domain = Domain\TeamMember::fromArray($data);
+            $domain = Domain\TeamMember::fromArray($data, ['incomingQuarter', 'teamYear']);
         }
-        $submissionData->store($center, $reportingDate, $domain);
-
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $domain, $teamMemberId);
+
+        if ($teamMemberId > 0 || $validationResults['valid']) {
+            $submissionData->store($center, $reportingDate, $domain);
+        } else {
+            return [
+                'success' => false,
+                'valid' => $validationResults['valid'],
+                'messages' => $validationResults['messages'],
+            ];
+        }
 
         return [
             'success' => true,
@@ -207,6 +215,7 @@ class TeamMember extends AuthenticatedApiBase
     public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
     {
         $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\TeamMember::class);
+
         return array_flatten($collection->getDictionary());
     }
 }

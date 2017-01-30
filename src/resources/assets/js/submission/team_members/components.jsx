@@ -6,6 +6,7 @@ import { Form, CheckBox, SimpleField, BooleanSelect, BooleanSelectView, connectC
 import { objectAssign } from '../../reusable/ponyfill'
 import { ModeSelectButtons, SubmitFlip, Alert, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 import { delayDispatch, rebind } from '../../reusable/dispatch'
+import { Typeahead, FormTypeahead } from '../../reusable/typeahead'
 
 import { SubmissionBase } from '../base_components'
 import { centerQuarterData } from '../core/data'
@@ -238,6 +239,7 @@ class _EditCreate extends TeamMembersBase {
     }
 
     render() {
+        console.log(this.props.teamAccountabilities)
         const modelKey = TEAM_MEMBER_FORM_KEY
         const options = this.getRenderOptions()
 
@@ -258,7 +260,7 @@ class _EditCreate extends TeamMembersBase {
                     <input type="email" className="form-control" />
                 </SimpleField>
                 <SimpleFormGroup label="Accountabilities">
-                    <SimpleSelect
+                    <FormTypeahead
                             model={modelKey+'.accountabilities'} items={this.props.teamAccountabilities}
                             multiple={true} rows={1} keyProp="id" labelProp="display" />
                 </SimpleFormGroup>
@@ -385,6 +387,19 @@ class _EditCreate extends TeamMembersBase {
             </div>
         )
     }
+
+    saveTeamMember(data) {
+        const { centerId, reportingDate } = this.props.params
+
+        this.props.dispatch(actions.stashTeamMember(centerId, reportingDate, data)).then((result) => {
+            if (!result || result.messages && result.messages.length) {
+                scrollIntoView('submission-flow', 10)
+            } else if (result.valid) {
+                this.context.router.push(this.teamMembersBaseUri())
+            }
+            return result
+        })
+    }
 }
 
 // Detailed edit of class list
@@ -406,18 +421,6 @@ class TeamMembersEditView extends _EditCreate {
 
     getRenderOptions() {
         return { disableYearQuarter: true }
-    }
-
-    saveTeamMember(data) {
-        const { centerId, reportingDate } = this.props.params
-
-        this.props.dispatch(actions.stashTeamMember(centerId, reportingDate, data)).then((result) => {
-            if (!result || result.messages.length) {
-                scrollIntoView('submission-flow')
-            } else if (result.valid) {
-                this.context.router.push(this.teamMembersBaseUri())
-            }
-        })
     }
 
     render() {
@@ -468,13 +471,13 @@ class TeamMembersEditView extends _EditCreate {
 }
 
 class TeamMembersAddView extends _EditCreate {
-    defaultTeamMember = {exitChoice: '', teamYear: 1, }
+    defaultTeamMember = {exitChoice: '', teamYear: '1'}
     checkLoading() {
         if (!super.checkLoading()) {
             return false
         }
         const { currentMember, dispatch } = this.props
-        if (currentMember && currentMember.id) {
+        if (!currentMember || currentMember.id || !currentMember.teamYear) {
             delayDispatch(dispatch, actions.chooseTeamMember(this.defaultTeamMember))
             return false
         }
@@ -483,10 +486,6 @@ class TeamMembersAddView extends _EditCreate {
     }
     getRenderOptions() {
         return {}
-    }
-
-    saveTeamMember() {
-        // TODO
     }
 
     render() {
@@ -502,8 +501,12 @@ class TeamMembersAddView extends _EditCreate {
     }
 
     renderContent(modelKey, options) {
+        let messages = (this.props.messages? this.props.messages['create'] : null)
         return (
             <div>
+                <div id="add-messages">
+                    <MessagesComponent messages={messages || []} />
+                </div>
                 <div className="row">
                     <div className="col-lg-12">
                         <h4>Basic Info</h4>
