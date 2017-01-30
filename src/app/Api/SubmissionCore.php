@@ -64,7 +64,7 @@ class SubmissionCore extends AuthenticatedApiBase
 
         $this->assertAuthz($this->context->can('submitStats', $center));
 
-       /* $results = App::make(ValidationData::class)->validate($center, $reportingDate);
+        $results = App::make(ValidationData::class)->validate($center, $reportingDate);
         if (!$results['valid']) {
             // TODO: figure out what we want to do here
             // validation failed. for now, exit
@@ -74,7 +74,7 @@ class SubmissionCore extends AuthenticatedApiBase
                 'message' => 'Validation failed'
             ];
         }
-*/
+
 
 		DB::beginTransaction();
 		$debug_message = '';
@@ -229,7 +229,7 @@ class SubmissionCore extends AuthenticatedApiBase
                      }
 
         $success = true;
-		DB::rollback();
+		DB::commit();
         return [
             'success' => $success,
             'id' => $center->id,
