@@ -186,6 +186,29 @@ class Context
         return App::make(Controller::class)->getReportingDate();
     }
 
+    public function getSubmissionReportingDate()
+    {
+        $reportingDate = null;
+
+        switch (Carbon::now()->dayOfWeek) {
+            case Carbon::SATURDAY:
+                $reportingDate = new Carbon('last friday');
+                break;
+            case Carbon::SUNDAY:
+            case Carbon::MONDAY:
+            case Carbon::TUESDAY:
+            case Carbon::WEDNESDAY:
+            case Carbon::THURSDAY:
+                $reportingDate = new Carbon('next friday');
+                break;
+            case Carbon::FRIDAY:
+                $reportingDate = Carbon::now();
+                break;
+        }
+
+        return $reportingDate->startOfDay();
+    }
+
     /**
      * Set the action to be routed to on date select.
      * Used in views that have a reportingDate route parameter to allow the date select dropdown to work.

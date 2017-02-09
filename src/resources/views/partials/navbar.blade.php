@@ -13,6 +13,10 @@ $regions = TmlpStats\Region::isGlobal()->get();
 $currentRegion = $context->getGlobalRegion(false);
 $currentCenter = $context->getCenter(true);
 
+// This has to be a separate variable because the submission reporting date and the reports reporting date use
+// different logic to determine the best value. Submission needs to default to the next week
+$submissionReportingDate = $context->getSubmissionReportingDate();
+
 $crd = null;
 $showNextQtrAccountabilities = false;
 if ($currentCenter !== null && $reportingDate != null) {
@@ -70,7 +74,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
 
                         @can ('showNewSubmissionUi', $currentCenter)
                         <li {!! Request::is('submission') ? 'class="active"' : '' !!}>
-                            <a href="{{ action('CenterController@submission', ['abbr' => $currentCenter->abbrLower(), 'reportingDate' => $reportingDateString]) }}">Submit Report (beta)</a>
+                            <a href="{{ action('CenterController@submission', ['abbr' => $currentCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Submit Report (beta)</a>
                         </li>
                         @endcan
 
