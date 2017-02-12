@@ -54,10 +54,20 @@ export function saveApplication(center, reportingDate, data) {
         return Api.Application.stash({
             center, reportingDate, data
         }).then((result) => {
+            // We successfully saved, reset any existing parser messages
+            if (data.id == undefined) {
+                dispatch(messages.replace('new', []))
+            }
             reset()
             return result // Because it's a Promise is you have to return results to continue the chain.
         }).catch((err) => {
-            dispatch(messages.replace(data.id, getMessages(err)))
+            // If this is a parser error, we won't have an ID yet, use 'new'
+            let id = 'new'
+            if (data.id != undefined) {
+                id = data.id
+            }
+            dispatch(messages.replace(id, getMessages(err)))
+
             reset()
             scrollIntoView('submission-flow')
         })

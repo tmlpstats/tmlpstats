@@ -127,6 +127,8 @@ class _EditCreate extends ApplicationsBase {
         let messages = []
         if (app && app.id) {
             messages = this.props.messages[app.id]
+        } else if (this.isNewApp() && this.props.messages['new']) {
+            messages = this.props.messages['new']
         }
 
         return (
@@ -182,10 +184,16 @@ class _EditCreate extends ApplicationsBase {
         return (!currentApp.id || parseInt(currentApp.id) < 0)
     }
 
-    renderStartingQuarter(modelKey) {
-        const { currentApp, lookups } = this.props
+    getCenterQuarters() {
         const cqData = this.props.centerQuarters.data
-        const centerQuarters = lookups.validRegQuarters.map(id => cqData[id])
+        const centerQuarters = this.props.lookups.validRegQuarters.map(id => cqData[id])
+
+        return { cqData, centerQuarters }
+    }
+
+    renderStartingQuarter(modelKey) {
+        const { currentApp } = this.props
+        const { cqData, centerQuarters } = this.getCenterQuarters()
         let body = ''
         if (this.isNewApp()) {
             body = <SimpleSelect model={modelKey+'.incomingQuarter'} items={centerQuarters}
@@ -218,6 +226,10 @@ class _EditCreate extends ApplicationsBase {
     // saveAppData for now is the same between edit and create flows
     saveAppData(data) {
         this.props.dispatch(saveApplication(this.props.params.centerId, this.reportingDateString(), data)).then((result) => {
+            if (!result) {
+                return
+            }
+
             if (result.success && result.storedId) {
                 data = objectAssign({}, data, {id: result.storedId})
                 this.props.dispatch(appsCollection.replaceItem(data))
@@ -227,6 +239,11 @@ class _EditCreate extends ApplicationsBase {
 
             if (result.messages.length) {
                 scrollIntoView('submission-flow')
+
+                if (this.isNewApp()) {
+                    // New apps that have errors, now have an id. Redirect to the edit view
+                    this.props.router.push(this.baseUri() + '/applications/edit/' + data.id)
+                }
             } else if (result.valid) {
                 this.props.router.push(this.baseUri() + '/applications')
             }
@@ -273,12 +290,14 @@ class ApplicationsAddView extends _EditCreate {
     componentDidMount() {
         super.setupApplications().then(() => {
             if (this.props.currentApp) {
+                const { centerQuarters } = this.getCenterQuarters()
                 const blankApp = {
                     firstName: '',
                     lastName: '',
                     teamYear: 1,
                     regDate: this.reportingDateString(),
-                    committedTeamMember: ''
+                    committedTeamMember: '',
+                    incomingQuarter: centerQuarters[0].quarterId
                 }
                 this.props.dispatch(chooseApplication('', blankApp))
             }

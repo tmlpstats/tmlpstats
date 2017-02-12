@@ -6,7 +6,7 @@ import { Form, CheckBox, SimpleField, BooleanSelect, BooleanSelectView, connectC
 import { objectAssign } from '../../reusable/ponyfill'
 import { ModeSelectButtons, SubmitFlip, Alert, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 import { delayDispatch, rebind } from '../../reusable/dispatch'
-import { Typeahead, FormTypeahead } from '../../reusable/typeahead'
+import { FormTypeahead } from '../../reusable/typeahead'
 
 import { SubmissionBase } from '../base_components'
 import { centerQuarterData } from '../core/data'
@@ -239,7 +239,6 @@ class _EditCreate extends TeamMembersBase {
     }
 
     render() {
-        console.log(this.props.teamAccountabilities)
         const modelKey = TEAM_MEMBER_FORM_KEY
         const options = this.getRenderOptions()
 
