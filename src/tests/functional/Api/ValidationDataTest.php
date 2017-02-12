@@ -299,14 +299,6 @@ class ValidationDataTest extends FunctionalTestAbstract
                     ['id' => 'GENERAL_MISSING_VALUE'],
                     ['id' => 'GENERAL_MISSING_VALUE'],
                     ['id' => 'GENERAL_MISSING_VALUE'],
-                    [
-                        'id' => 'VALDATA_NOT_UPDATED',
-                        'level' => 'error',
-                        'reference' => [
-                            'id' => $reportingDate->toDateString(),
-                            'type' => 'Scoreboard',
-                        ],
-                    ],
                 ],
             ],
         ];
