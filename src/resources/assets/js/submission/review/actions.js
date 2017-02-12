@@ -30,6 +30,11 @@ export function getValidationMessages(center, reportingDate) {
     }
 }
 
+export function submitReport(center, reportingDate) {
+    return (dispatch) => {
+        return Api.SubmissionCore.completeSubmission({center, reportingDate})
+    }
+}
 export function setMessages(messages) {
     return {
         type: 'review/setMessages',
