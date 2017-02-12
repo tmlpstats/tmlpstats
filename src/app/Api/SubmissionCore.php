@@ -20,6 +20,11 @@ class SubmissionCore extends AuthenticatedApiBase
     {
         $this->checkCenterDate($center, $reportingDate);
 
+        // Make sure a global report exists
+        $globalReport = Models\GlobalReport::firstOrCreate([
+            'reporting_date' => $reportingDate,
+        ]);
+
         $localReport = App::make(LocalReport::class);
         $rq = $this->reportAndQuarter($center, $reportingDate);
 
