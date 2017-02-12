@@ -91,6 +91,7 @@ class Scoreboard extends AuthenticatedApiBase
             'success' => true,
             'valid' => $validationResults['valid'],
             'messages' => $validationResults['messages'],
+            'week' => $scoreboard->week->toDateString(),
         ];
     }
 

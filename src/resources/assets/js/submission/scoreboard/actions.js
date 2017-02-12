@@ -1,7 +1,7 @@
 import { actions as formActions } from 'react-redux-form'
 
 import Api from '../../api'
-import { SCOREBOARDS_FORM_KEY, SCOREBOARD_SAVED, scoreboardLoad, scoreboardSave, annotateScoreboards } from './data'
+import { SCOREBOARDS_FORM_KEY, SCOREBOARD_SAVED, scoreboardLoad, scoreboardSave, annotateScoreboards, messages } from './data'
 
 export const loadState = scoreboardLoad.actionCreator()
 const saveState = scoreboardSave.actionCreator()
@@ -42,6 +42,7 @@ export function saveScoreboards(centerId, reportingDate, toSave, scoreboards) {
             // Probably we don't need to check data.success anymore, as any errors should go into the 'catch' flow.
             if (data.success) {
                 dispatch(scoreboardSaved(toSave[0]))
+                dispatch(messages.replace(data.week, data.messages))
                 dispatch(saveState('loaded'))
             } else {
                 throw data
