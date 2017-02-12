@@ -125,11 +125,10 @@ class _EditCreate extends ApplicationsBase {
         const modelKey = APPLICATIONS_FORM_KEY
         const app = this.props.currentApp
         let messages = []
-
         if (app && app.id) {
             messages = this.props.messages[app.id]
-        } else if (this.isNewApp()) {
-            messages = this.props.messages[undefined]
+        } else if (this.isNewApp() && this.props.messages['new']) {
+            messages = this.props.messages['new']
         }
 
         return (
