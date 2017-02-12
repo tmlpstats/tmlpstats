@@ -21,7 +21,7 @@ class SubmissionCore extends AuthenticatedApiBase
         $this->checkCenterDate($center, $reportingDate);
 
         // Make sure a global report exists
-        $this->globalReport = Models\GlobalReport::firstOrCreate([
+        $globalReport = Models\GlobalReport::firstOrCreate([
             'reporting_date' => $reportingDate,
         ]);
 
