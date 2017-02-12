@@ -25,7 +25,7 @@ class ValidationData extends AuthenticatedApiBase
         'TeamMember' => [
             'apiClass' => TeamMember::class,
             'typeName' => 'TeamMember',
-            'updateRequired' => true,
+            'updateRequired' => false,
         ],
         'Course' => [
             'apiClass' => Course::class,
@@ -35,7 +35,7 @@ class ValidationData extends AuthenticatedApiBase
         'Scoreboard' => [
             'apiClass' => Scoreboard::class,
             'typeName' => 'Scoreboard',
-            'updateRequired' => true,
+            'updateRequired' => false,
         ],
     ];
 
