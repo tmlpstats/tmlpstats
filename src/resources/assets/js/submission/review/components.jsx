@@ -54,6 +54,7 @@ export default class Review extends SubmissionBase {
             // TODO: report this in a better way.
             console.log('got result in submitReport', result)
             alert('Your submission was accepted.')
+            window.location.href = `/reports/centers/${centerId}/${reportingDate}`
         }).catch((err) => {
             // TODO: report this in a better way.
             console.log('got error in submitReport', err)
