@@ -49,6 +49,7 @@ const Accountability = new Schema('accountabilities')
 export const cqResponse = new Schema('c')
 cqResponse.define({
     validRegQuarters: arrayOf(CenterQuarter),
+    validStartQuarters: arrayOf(CenterQuarter),
     accountabilities: arrayOf(Accountability),
     currentQuarter: CenterQuarter
 })

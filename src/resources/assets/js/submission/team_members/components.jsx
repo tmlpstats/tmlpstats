@@ -10,7 +10,7 @@ import { FormTypeahead } from '../../reusable/typeahead'
 
 import { SubmissionBase } from '../base_components'
 import { centerQuarterData } from '../core/data'
-import { makeAccountabilitiesSelector } from '../core/selectors'
+import { makeAccountabilitiesSelector, makeQuartersSelector } from '../core/selectors'
 import { TEAM_MEMBERS_COLLECTION_FORM_KEY, TEAM_MEMBER_FORM_KEY } from './reducers'
 import { teamMembersSorts, teamMembersData } from './data'
 import { EXIT_CHOICES, EXIT_CHOICES_HELP } from './exit_choice'
@@ -274,11 +274,9 @@ class _EditCreate extends TeamMembersBase {
         if (disableYearQuarter) {
             yearQuarter = <p className="form-control-static">{centerQuarterData.getLabel(incomingQuarter)}</p>
         } else {
-            const cqd = this.props.centerQuarters.data
-            const cqc = Object.keys(cqd).map((k) => cqd[k])
             yearQuarter = (
                 <SimpleSelect
-                        model={modelKey+'.incomingQuarter'} items={cqc} emptyChoice=" "
+                        model={modelKey+'.incomingQuarter'} items={this.props.validStartQuarters} emptyChoice=" "
                         keyProp="quarterId" getLabel={centerQuarterData.getLabel} />
             )
         }
@@ -526,11 +524,13 @@ class TeamMembersAddView extends _EditCreate {
 }
 
 const getTeamAccountabilities = makeAccountabilitiesSelector('team')
+const getValidStartQuarters = makeQuartersSelector('validStartQuarters')
 
 const mapStateToProps = (state) => {
     const { centerQuarters, lookups } = state.submission.core
     const teamAccountabilities = getTeamAccountabilities(state)
-    const n = {centerQuarters, lookups, teamAccountabilities, browser:state.browser}
+    const validStartQuarters = getValidStartQuarters(state.submission.core)
+    const n = {centerQuarters, lookups, teamAccountabilities, validStartQuarters, browser:state.browser}
     return objectAssign(n, state.submission.team_members)
 }
 const connector = connect(mapStateToProps)

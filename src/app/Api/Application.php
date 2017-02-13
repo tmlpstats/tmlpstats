@@ -190,13 +190,13 @@ class Application extends ApiBase
         $next2 = $next1->getNextQuarter();
 
         $quarters = [
-            Domain\CenterQuarter::fromModel($center, $next1),
-            Domain\CenterQuarter::fromModel($center, $next2),
+            Domain\CenterQuarter::ensure($center, $next1),
+            Domain\CenterQuarter::ensure($center, $next2),
         ];
 
         // In the last 2 weeks of the quarter, we can also register into the next-next quarter.
         if ($startQuarter->getQuarterEndDate($center)->copy()->subWeeks(2)->lt($reportingDate)) {
-            $quarters[] = Domain\CenterQuarter::fromModel($center, $next2->getNextQuarter());
+            $quarters[] = Domain\CenterQuarter::ensure($center, $next2->getNextQuarter());
         }
 
         return $quarters;

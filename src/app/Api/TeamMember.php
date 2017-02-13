@@ -218,4 +218,38 @@ class TeamMember extends AuthenticatedApiBase
 
         return array_flatten($collection->getDictionary());
     }
+
+    /**
+     * Return a list of valid CenterQuarters that someone can use as a starting quarter.
+     * @param  Models\Center  $center        The center we care about
+     * @param  Carbon         $reportingDate The current reporting date to use as reference.
+     * @param  Models\Quarter $startQuarter  If provided, a reference start quarter to help prevent lookups.
+     * @return array<Domain\CenterQuarter>
+     */
+    public function validStartQuarters(Models\Center $center, Carbon $reportingDate, Models\Quarter $currentQuarter = null)
+    {
+        if ($currentQuarter == null) {
+            $currentQuarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
+        }
+
+        // Get 1 year of prior quarters in a single shot, save extra queries.
+        // If right now is Q3 2015, this executes the query similar to:
+        //   WHERE (year = 2014 AND quarter >= 3) OR (year=2015 AND quarter < 3)
+        $result = Models\Quarter::where(function ($query) use ($currentQuarter) {
+            $query->where('year', $currentQuarter->year - 1)
+                  ->where('quarter_number', '>=', $currentQuarter->quarterNumber);
+        })->orWhere(function ($query) use ($currentQuarter) {
+            $query->where('year', $currentQuarter->year)
+                  ->where('quarter_number', '<', $currentQuarter->quarterNumber);
+        })->get();
+
+        // Now we have 5 quarters when including the current one.
+        $result->push($currentQuarter);
+
+        // Return each one as a CenterQuarter. Make use of the collection features of laravel.
+
+        return $result->map(function ($q) use ($center) {
+            return Domain\CenterQuarter::ensure($center, $q);
+        });
+    }
 }
