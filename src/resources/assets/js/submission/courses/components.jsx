@@ -8,7 +8,7 @@ import { Field } from 'react-redux-form'
 import moment from 'moment'
 
 import { SubmissionBase, React } from '../base_components'
-import { Form, SimpleField, AddOneLink } from '../../reusable/form_utils'
+import { Form, SimpleField, SimpleDateInput, AddOneLink } from '../../reusable/form_utils'
 import { ModeSelectButtons, SubmitFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
 import { COURSES_FORM_KEY } from './reducers'
@@ -199,7 +199,7 @@ class _EditCreate extends CoursesBase {
                             <option value="CPC">{courseTypeMap['CPC']}</option>
                         </select>
                     </SimpleField>
-                    <SimpleField label="Start Date" model={modelKey+'.startDate'} labelClass="col-md-2" divClass="col-md-4"/>
+                    <SimpleDateInput label="Start Date" model={modelKey+'.startDate'} labelClass="col-md-2" divClass="col-md-4" />
                     <SimpleField label="Location" model={modelKey+'.location'} labelClass="col-md-2" divClass="col-md-4"/>
                 </div>
                 </div>
