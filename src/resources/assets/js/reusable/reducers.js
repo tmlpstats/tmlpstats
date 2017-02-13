@@ -59,7 +59,7 @@ export class MessageManager {
             if (action.payload && action.payload.namespace && action.payload.namespace == this.namespace) {
                 switch (action.type) {
                 case REPLACE_MESSAGES:
-                    return objectAssign({}, state, {[action.payload.pk]: action.payload.messages})
+                    return objectAssign({}, state, action.payload.messages)
                 case REPLACE_ALL_MESSAGES:
                     return action.payload.messages
                 }
@@ -72,8 +72,12 @@ export class MessageManager {
         return {type: REPLACE_ALL_MESSAGES, payload: {messages, namespace: namespace || this.namespace}}
     }
 
+    replaceMany(messageMap) {
+        return {type: REPLACE_MESSAGES, payload: {messages: messageMap, namespace: this.namespace}}
+    }
+
     replace(pk, messages) {
-        return {type: REPLACE_MESSAGES, payload: {pk, messages, namespace: this.namespace}}
+        return this.replaceMany({[pk]: messages})
     }
 
     reset() {

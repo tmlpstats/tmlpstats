@@ -101,7 +101,7 @@ class TeamMembersIndexView extends TeamMembersBase {
                 <Alert alert="info">
                     Tip: you can use the "tab" key to quickly jump through the GITW/TDO.
                     <p>Set each one with the keyboard using "E" "I" for GITW and "Y" "N" for TDO.
-                    You can quick-save theGITW/TDO by hitting the enter key.</p>
+                    You can quick-save the GITW/TDO by hitting the enter key.</p>
                 </Alert>
                 <table className="table submissionTeamMembers">
                     <thead>
