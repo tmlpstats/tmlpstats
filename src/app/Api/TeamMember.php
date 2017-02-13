@@ -111,15 +111,19 @@ class TeamMember extends AuthenticatedApiBase
         $this->assertCan('submitStats', $center);
         $submissionData = App::make(SubmissionData::class);
         $sourceData = $this->allForCenter($center, $reportingDate, true);
+        $report = LocalReport::ensureStatsReport($center, $reportingDate);
+        $messages = [];
         foreach ($updates as $item) {
             $updatedDomain = Domain\TeamMember::fromArray($item, ['id', 'gitw', 'tdo']);
             $existing = array_get($sourceData, $updatedDomain->id, null);
             $existing->gitw = $updatedDomain->gitw;
             $existing->tdo = $updatedDomain->tdo;
             $submissionData->store($center, $reportingDate, $existing);
+            $validationResults = $this->validateObject($report, $existing, $existing->id);
+            $messages[$updatedDomain->id] = $validationResults['messages'];
         }
 
-        return [];
+        return ['messages' => $messages];
     }
 
     public function create(array $data)

@@ -57,6 +57,9 @@ export function weeklyReportingSubmit(center, reportingDate, tracking, rawData) 
 
         const success = (data) => {
             dispatch(weeklySaveState('loaded'))
+            if (data && data.messages) {
+                dispatch(messages.replaceMany(data.messages))
+            }
             setTimeout(() => {
                 dispatch(weeklyReportingData.endWork())
                 dispatch(weeklySaveState('new'))
