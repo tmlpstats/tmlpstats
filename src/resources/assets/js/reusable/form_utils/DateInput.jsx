@@ -39,8 +39,6 @@ class DateInputView extends React.Component {
         let date
         if (modelValue) {
             date = moment(modelValue)
-        } else {
-            date = moment().day('Saturday')
         }
 
         const id = 'dp-' + model.replace('.', '-')

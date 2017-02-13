@@ -127,8 +127,8 @@ class _EditCreate extends ApplicationsBase {
         let messages = []
         if (app && app.id) {
             messages = this.props.messages[app.id]
-        } else if (this.isNewApp() && this.props.messages['new']) {
-            messages = this.props.messages['new']
+        } else if (this.isNewApp() && this.props.messages['create']) {
+            messages = this.props.messages['create']
         }
 
         return (
@@ -230,19 +230,12 @@ class _EditCreate extends ApplicationsBase {
                 return
             }
 
-            if (result.success && result.storedId) {
-                data = objectAssign({}, data, {id: result.storedId})
-                this.props.dispatch(appsCollection.replaceItem(data))
-            }
-
-            this.props.dispatch(messages.replace(data.id, result.messages))
-
-            if (result.messages.length) {
+            if (result.messages && result.messages.length) {
                 scrollIntoView('submission-flow')
 
-                if (this.isNewApp()) {
-                    // New apps that have errors, now have an id. Redirect to the edit view
-                    this.props.router.push(this.baseUri() + '/applications/edit/' + data.id)
+                // Redirect to edit view if there are warning messages
+                if (this.isNewApp() && result.valid) {
+                    this.props.router.push(this.baseUri() + '/applications/edit/' + result.storedId)
                 }
             } else if (result.valid) {
                 this.props.router.push(this.baseUri() + '/applications')

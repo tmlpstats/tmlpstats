@@ -79,15 +79,19 @@ export function setExitChoice(exitChoice) {
 export function stashTeamMember(center, reportingDate, data) {
     return teamMembersData.runNetworkAction('save', {center, reportingDate, data}, {
         successHandler(result, { dispatch }) {
+            // The request failed before creating an id (parser error)
             if (!result.storedId) {
                 dispatch(teamMembersData.saveState({error: 'Validation Failed', messages: result.messages}))
                 setTimeout(() => { dispatch(teamMembersData.saveState('new')) }, 3000)
                 dispatch(messages.replace('create', result.messages))
                 return
             }
+
             const newData = objectAssign({}, data, {id: result.storedId, meta: result.meta})
             dispatch(messages.replace(newData.id, getMessages(result)))
             dispatch(teamMembersData.replaceItem(newData))
+
+            // If this is a new entry, clear out any messages
             if (!data.id) {
                 dispatch(messages.replace('create', []))
             }
