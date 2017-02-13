@@ -36,9 +36,11 @@ class DateInputView extends React.Component {
 
     render() {
         const { modelValue, model, focused } = this.props
-        var date = modelValue
-        if (date != null) {
-            date = moment(date)
+        let date
+        if (modelValue) {
+            date = moment(modelValue)
+        } else {
+            date = moment().day('Saturday')
         }
 
         const id = 'dp-' + model.replace('.', '-')
@@ -53,7 +55,6 @@ class DateInputView extends React.Component {
     }
 
     onDateChange(value) {
-        console.log('new date', value)
         // Convert Moment back to iso8601 datetime representation
         if (value !== null) {
             value = value.format('YYYY-MM-DD')
@@ -62,7 +63,6 @@ class DateInputView extends React.Component {
     }
 
     onFocusChange({focused}) {
-        console.log('onfocusChange', this.props.model, focused)
         if (focused) {
             this.props.dispatch(formActions.focus(this.props.model))
         } else {
