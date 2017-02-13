@@ -1,13 +1,12 @@
 import moment from 'moment'
 import _ from 'lodash'
 import React, { PropTypes } from 'react'
-import { connect } from 'react-redux'
 import { actions as formActions, utils as rrfUtils } from 'react-redux-form'
 import { SingleDatePicker } from 'react-dates'
 
 import { SimpleFormGroup } from './index'
 import { objectAssign } from '../ponyfill'
-import { rebind } from '../dispatch'
+import { rebind, connectRedux } from '../dispatch'
 
 const sdpProps = _.omit(SingleDatePicker.propTypes, ['id', 'onDateChange', 'focused', 'onFocusChange'])
 const datePickerProps = Object.keys(sdpProps)
@@ -19,7 +18,15 @@ const datePickerProps = Object.keys(sdpProps)
  *
  * Only required prop is "model" which is the RRF model.
  */
-class DateInputView extends React.Component {
+@connectRedux()
+export class DateInput extends React.Component {
+    static mapStateToProps(state, props) {
+        const modelValue = _.get(state, props.model)
+        const field = rrfUtils.getFieldFromState(state, props.model)
+        const focused = rrfUtils.isFocused(field)
+        return {modelValue, focused}
+    }
+
     static propTypes = objectAssign({
         model: PropTypes.string,
         modelValue: PropTypes.string,
@@ -35,12 +42,12 @@ class DateInputView extends React.Component {
     }
 
     render() {
-        const { modelValue, model, focused } = this.props
+        const { modelValue, model, focused, defaultValue } = this.props
         let date
         if (modelValue) {
             date = moment(modelValue)
-        } else {
-            date = moment().day('Saturday')
+        } else if (defaultValue) {
+            date = defaultValue
         }
 
         const id = 'dp-' + model.replace('.', '-')
@@ -71,14 +78,6 @@ class DateInputView extends React.Component {
     }
 }
 
-const datePickerMSP = (state, props) => {
-    const modelValue = _.get(state, props.model)
-    const field = rrfUtils.getFieldFromState(state, props.model)
-    const focused = rrfUtils.isFocused(field)
-    return {modelValue, focused}
-}
-
-export const DateInput = connect(datePickerMSP)(DateInputView)
 export default DateInput
 
 
