@@ -761,12 +761,44 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 ],
                 false,
             ],
+            // ValidateTravel Fails When Missing Travel and comment is an empty string
+            [
+                [
+                    'travel' => null,
+                    'room' => true,
+                    'comment' => '',
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_TRAVEL_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+            ],
             // ValidateTravel Fails When Missing Room
             [
                 [
                     'travel' => true,
                     'room' => null,
                     'comment' => null,
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ROOM_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+            ],
+            // ValidateTravel Fails When Missing Room and comment is an empty string
+            [
+                [
+                    'travel' => true,
+                    'room' => null,
+                    'comment' => '',
                     '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
                 [
