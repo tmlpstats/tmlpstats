@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 
 import { PAGES_CONFIG } from '../core/data'
 import { connectRedux, rebind } from '../../reusable/dispatch'
-import { SubmitFlip, Alert } from '../../reusable/ui_basic'
+import { Alert } from '../../reusable/ui_basic'
 import { SubmissionBase, React } from '../base_components'
 
 import { submitReport } from './actions'
@@ -42,16 +42,22 @@ export default class Review extends SubmissionBase {
     onSubmit() {
         const { centerId, reportingDate } = this.props.params
         this.props.dispatch(submitReport(centerId, reportingDate)).then((result) => {
-            if (!result || !result.success) {
-                throw new Error(result)
+            if (!result) {
+                console.log('result is undefined')
+                throw new Error('Failed to submit report. Please try again.')
             }
+
+            if (!result.success) {
+                throw new Error(result.message)
+            }
+
+            // TODO: report this in a better way.
             console.log('got result in submitReport', result)
-            alert('Temporary alert: Submission OK')
+            alert('Your submission was accepted.')
         }).catch((err) => {
+            // TODO: report this in a better way.
             console.log('got error in submitReport', err)
-            if (err.message) {
-                alert('Temporary alert: got error ' + err.message)
-            }
+            alert(err)
         })
     }
 
