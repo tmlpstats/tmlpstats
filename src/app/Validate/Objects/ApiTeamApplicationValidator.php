@@ -291,7 +291,7 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
         if ($this->isTimeToCheckTravel()) {
             if (is_null($data->travel)) {
                 // Error if no comment provided, warning to look at it otherwise
-                if (is_null($data->comment)) {
+                if (!$data->comment) {
                     $this->addMessage('error', [
                         'id' => 'TEAMAPP_TRAVEL_COMMENT_MISSING',
                         'ref' => $data->getReference(['field' => 'comment']),
@@ -306,7 +306,7 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
             }
             if (is_null($data->room)) {
                 // Error if no comment provided, warning to look at it otherwise
-                if (is_null($data->comment)) {
+                if (!$data->comment) {
                     $this->addMessage('error', [
                         'id' => 'TEAMAPP_ROOM_COMMENT_MISSING',
                         'ref' => $data->getReference(['field' => 'comment']),

@@ -116,8 +116,7 @@ class TeamMembersIndexView extends TeamMembersBase {
                     <tbody>{teamMemberRows}</tbody>
                     <tfoot>
                         <tr>
-                            <td colSpan="2"></td>
-                            <td colSpan="2" style={{minWidth: '15em'}}>
+                            <td colSpan="4" style={{minWidth: '15em'}}>
                                 <SubmitFlip loadState={weeklySave} wrapGroup={false}>Save GITW/TDO changes</SubmitFlip>
                             </td>
                         </tr>
@@ -238,6 +237,11 @@ class _EditCreate extends TeamMembersBase {
         return true
     }
 
+    isNewTeamMember() {
+        const { currentMember } = this.props
+        return (!currentMember.id || parseInt(currentMember.id) < 0)
+    }
+
     render() {
         const modelKey = TEAM_MEMBER_FORM_KEY
         const options = this.getRenderOptions()
@@ -245,7 +249,7 @@ class _EditCreate extends TeamMembersBase {
         return (
             <Form className="form-horizontal submissionTeamMembersEdit" model={modelKey} onSubmit={this.saveTeamMember.bind(this)}>
                 {this.renderContent(modelKey, options)}
-                <SubmitFlip loadState={this.props.teamMembers.saveState}>Save</SubmitFlip>
+                <SubmitFlip loadState={this.props.teamMembers.saveState} offset='col-md-offset-1 col-md-8'>Save</SubmitFlip>
             </Form>
         )
     }
@@ -389,11 +393,21 @@ class _EditCreate extends TeamMembersBase {
         const { centerId, reportingDate } = this.props.params
 
         this.props.dispatch(actions.stashTeamMember(centerId, reportingDate, data)).then((result) => {
-            if (!result || result.messages && result.messages.length) {
+            if (!result) {
+                return
+            }
+
+            if (result.messages && result.messages.length) {
                 scrollIntoView('submission-flow', 10)
+
+                // Redirect to edit view if there are warning messages
+                if (this.isNewTeamMember() && result.valid) {
+                    this.context.router.push(this.teamMembersBaseUri() + '/edit/' + result.storedId)
+                }
             } else if (result.valid) {
                 this.context.router.push(this.teamMembersBaseUri())
             }
+
             return result
         })
     }
@@ -428,7 +442,10 @@ class TeamMembersEditView extends _EditCreate {
         let messages = []
         if (teamMember && teamMember.id) {
             messages = this.props.messages[teamMember.id]
+        } else if (this.isNewTeamMember() && this.props.messages['create']) {
+            messages = this.props.messages['create']
         }
+
         return (
             <div>
                 <h3>Edit Team Member {teamMember.firstName} {teamMember.lastName}</h3>

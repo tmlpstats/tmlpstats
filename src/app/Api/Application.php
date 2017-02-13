@@ -130,10 +130,18 @@ class Application extends ApiBase
             }
             $teamApp = Domain\TeamApplication::fromArray($data);
         }
-        $submissionData->store($center, $reportingDate, $teamApp);
-
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $teamApp, $appId);
+
+        if ($appId > 0 || $validationResults['valid']) {
+            $submissionData->store($center, $reportingDate, $teamApp);
+        } else {
+            return [
+                'success' => false,
+                'valid' => $validationResults['valid'],
+                'messages' => $validationResults['messages'],
+            ];
+        }
 
         return [
             'success' => true,

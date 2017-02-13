@@ -173,6 +173,8 @@ class ApplicationTest extends FunctionalTestAbstract
      */
     public function testStashFailsValidation($id)
     {
+        $isNew = $id === null;
+
         $reportingDate = '2016-04-15';
 
         $parameters = [
@@ -190,7 +192,7 @@ class ApplicationTest extends FunctionalTestAbstract
             ],
         ];
 
-        if ($id) {
+        if (!$isNew) {
             $parameters['data']['id'] = $this->application->id;
         }
 
@@ -198,18 +200,20 @@ class ApplicationTest extends FunctionalTestAbstract
         $applicationDataId = $this->applicationData->id;
 
         $expectedResponse = [
-            'success' => true,
+            'success' => !$isNew,
             'valid' => false,
         ];
 
         $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
         $result1 = App::make(Api\SubmissionData::class)->allForType($this->center, new Carbon($reportingDate), Domain\TeamApplication::class);
 
-        $this->assertEquals(1, count($result1));
-        $result = $result1[0];
-        $this->assertEquals('2016-04-09', $result->appOutDate->toDateString());
-        $this->assertEquals('2016-04-10', $result->appInDate->toDateString());
-        $this->assertEquals('2016-04-08', $result->apprDate->toDateString());
+        $this->assertEquals($isNew ? 0 : 1, count($result1));
+        if (!$isNew) {
+            $result = $result1[0];
+            $this->assertEquals('2016-04-09', $result->appOutDate->toDateString());
+            $this->assertEquals('2016-04-10', $result->appInDate->toDateString());
+            $this->assertEquals('2016-04-08', $result->apprDate->toDateString());
+        }
     }
 
     public function providerStashFailsValidation()
