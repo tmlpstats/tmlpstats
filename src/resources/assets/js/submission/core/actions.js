@@ -34,6 +34,7 @@ export function setSubmissionLookups(data, reportingDate) {
         const n = normalize(data, cqResponse)
         const c = n.entities.c[n.result]
         lookups.validRegQuarters = c.validRegQuarters
+        lookups.validStartQuarters = c.validStartQuarters
         lookups.accountabilities = n.entities.accountabilities
         lookups.currentQuarter = c.currentQuarter
         lookups.orderedAccountabilities = c.accountabilities  // canonically sorted accountabilities

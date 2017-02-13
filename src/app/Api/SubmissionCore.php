@@ -3,12 +3,13 @@ namespace TmlpStats\Api;
 
 use App;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use TmlpStats as Models;
-use TmlpStats\Domain;
+use TmlpStats\Api;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Api\Exceptions;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
+use TmlpStats\Domain;
 
 class SubmissionCore extends AuthenticatedApiBase
 {
@@ -42,7 +43,8 @@ class SubmissionCore extends AuthenticatedApiBase
 
         // Get values for lookups
         $withdraw_codes = Models\WithdrawCode::get();
-        $validRegQuarters = App::make(Application::class)->validRegistrationQuarters($center, $reportingDate, $quarter);
+        $validRegQuarters = App::make(Api\Application::class)->validRegistrationQuarters($center, $reportingDate, $quarter);
+        $validStartQuarters = App::make(Api\TeamMember::class)->validStartQuarters($center, $reportingDate, $quarter);
         $accountabilities = Models\Accountability::orderBy('name')->get();
         $centers = Models\Center::byRegion($center->getGlobalRegion())->active()->orderBy('name')->get();
 
@@ -50,6 +52,7 @@ class SubmissionCore extends AuthenticatedApiBase
             'success' => true,
             'id' => $center->id,
             'validRegQuarters' => $validRegQuarters,
+            'validStartQuarters' => $validStartQuarters,
             'lookups' => compact('withdraw_codes', 'team_members', 'center', 'centers'),
             'accountabilities' => $accountabilities,
             'currentQuarter' => $centerQuarter,
@@ -76,14 +79,14 @@ class SubmissionCore extends AuthenticatedApiBase
             return [
                 'success' => false,
                 'id' => $center->id,
-                'message' => 'Validation failed. Please correct issues indicated on the Review page and try again.'
+                'message' => 'Validation failed. Please correct issues indicated on the Review page and try again.',
             ];
         }
 
         DB::beginTransaction();
         $debug_message = '';
-        $person_id=-1;
-        $reg_id=-1;
+        $person_id = -1;
+        $reg_id = -1;
 
         // Create stats_report record and get id
         try {
@@ -91,8 +94,8 @@ class SubmissionCore extends AuthenticatedApiBase
             DB::insert('insert into stats_reports ( reporting_date,version,validated,center_id,quarter_id,locked,created_at,updated_at, user_id, submitted_at)
                         select  reporting_date,\'api\' version,1 validated, center_id,
                                 quarter_id,\'1\', sysdate(),sysdate(), ?, sysdate() from submission_data_scoreboard
-                        where center_id = ? and reporting_date =?' ,
-                    [Auth::user()->id, $center->id, $reportingDate->toDateString()]);
+                        where center_id = ? and reporting_date =?',
+                [Auth::user()->id, $center->id, $reportingDate->toDateString()]);
             $sr_id = DB::getPdo()->lastInsertId();
             $debug_message .= ' sr_id=' . $sr_id;
 
@@ -105,7 +108,7 @@ class SubmissionCore extends AuthenticatedApiBase
                             lf, points, null, null, ?, sysdate(), sysdate()
                         from submission_data_scoreboard
                         where center_id = ? and reporting_date= ?',
-                        [$sr_id, $center->id, $reportingDate->toDateString()]);
+                [$sr_id, $center->id, $reportingDate->toDateString()]);
             $cs_id = DB::getPdo()->lastInsertId();
             $debug_message .= ' cs_id=' . $cs_id;
 
@@ -120,14 +123,14 @@ class SubmissionCore extends AuthenticatedApiBase
                                     left outer join tmlp_registrations r
                                         on r.id=i.stored_id
                                     where i.center_id=?  and i.reporting_date=?;',
-                                    [$center->id, $reportingDate->toDateString()]);
+                [$center->id, $reportingDate->toDateString()]);
             foreach ($result as $r) {
                 if ($r->stored_id < 0) {
                     DB::insert('insert into  people
                                     ( id, first_name, last_name, email, center_id, identifier, unsubscribed, created_at, updated_at)
                                         select null, i.first_name, i.last_name, i.email, i.center_id, concat(\'r:\',regDate,\':\'), 0, sysdate(), sysdate()
                                     from submission_data_applications i where i.id=?',
-                                    [$r->id]);
+                        [$r->id]);
                     $person_id = DB::getPdo()->lastInsertId();
                     $debug_message .= ' sreg_id=' . $r->id . ' person_id=' . $person_id;
 
@@ -135,7 +138,7 @@ class SubmissionCore extends AuthenticatedApiBase
                                     (person_id, team_year, reg_date, is_reviewer, created_at, updated_at)
                                     select ?, team_year, regDate,isReviewer,sysdate(),sysdate()
                                     from submission_data_applications i where i.id=?',
-                                    [$person_id, $r->id]);
+                        [$person_id, $r->id]);
                     $reg_id = DB::getPdo()->lastInsertId();
                     $debug_message .= ' reg_id=' . $reg_id;
 
@@ -153,7 +156,7 @@ class SubmissionCore extends AuthenticatedApiBase
                                             or coalesce(p.last_name,\'\') != coalesce(sda.last_name,\'\')
                                             or coalesce(p.email,\'\') != coalesce(sda.email,\'\')
                                       )',
-                                [$r->id]);
+                        [$r->id]);
                     DB::update('update tmlp_registrations p, submission_data_applications sda
                                 set p.updated_at=sysdate(),
                                     p.team_year=sda.team_year,
@@ -164,7 +167,7 @@ class SubmissionCore extends AuthenticatedApiBase
                                       and (coalesce(p.team_year,\'\') != coalesce(sda.team_year,\'\')
                                             or coalesce(p.reg_date,\'\') != coalesce(sda.regDate,\'\')
                                             or coalesce(p.is_reviewer,\'\') != coalesce(sda.isReviewer,\'\'))',
-                                [$r->id]);
+                        [$r->id]);
                     $person_id = $r->person_id;
                 };
 
@@ -174,7 +177,7 @@ class SubmissionCore extends AuthenticatedApiBase
                             select ?, regDate,appOutDate,appinDate,apprDate,wdDate, withdrawCode,committeddteamMember,
                             incomingQuarter,comment,travel,room,?, sysdate(),sysdate()
                             from submission_data_applications i where i.id=?;',
-                            [$reg_id, $sr_id, $r->id]);
+                    [$reg_id, $sr_id, $r->id]);
 
                 $trd_id = DB::getPdo()->lastInsertId();
                 $debug_message .= ' trd_id=' . $trd_id;
@@ -188,7 +191,7 @@ class SubmissionCore extends AuthenticatedApiBase
                     gitw,tdo,?,sysdate(),sysdate()
                     from submission_data_team_members
                     where center_id=? and reporting_date=?',
-                    [$sr_id, $center->id, $reportingDate->toDateString()]);
+                [$sr_id, $center->id, $reportingDate->toDateString()]);
 
             $tmd_id = DB::getPdo()->lastInsertId();
             $debug_message .= ' tmd_rows=' . $affected . ' last_tmd_id=' . $tmd_id;
@@ -217,23 +220,24 @@ class SubmissionCore extends AuthenticatedApiBase
             DB::insert('insert into global_report_stats_report
                         (stats_report_id, global_report_id,created_at,updated_at)
                           values(?,?,sysdate(),sysdate())',
-                        [$sr_id, $gr_id]);
+                [$sr_id, $gr_id]);
         } catch (\Exception $e) {
             return [
                 'success' => false,
                 'id' => $center->id,
                 'message' => $e->getMessage(),
-                'debug_message' => $debug_message
+                'debug_message' => $debug_message,
             ];
         }
 
         $success = true;
         DB::commit();
+
         return [
             'success' => $success,
             'id' => $center->id,
             'message' => 'Success',
-            'debug_message' => $debug_message
+            'debug_message' => $debug_message,
         ];
     }
 
