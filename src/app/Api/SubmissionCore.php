@@ -98,6 +98,8 @@ class SubmissionCore extends AuthenticatedApiBase
             $statsReport->userId = $this->context->getUser()->id;
             $statsReport->save();
 
+            $lastStatsReportDate = $reportingDate->copy()->subWeek();
+
             $debug_message .= ' sr_id=' . $statsReport->id;
 
             // Insert into CENTER_STATS_DATA and get id
@@ -184,6 +186,24 @@ class SubmissionCore extends AuthenticatedApiBase
                 $trd_id = DB::getPdo()->lastInsertId();
                 $debug_message .= ' trd_id=' . $trd_id;
             } // end application processing
+
+            // Insert data rows for any applications that weren't updated this week
+            DB::insert('INSERT INTO tmlp_registrations_data
+                    (tmlp_registration_id, reg_date, app_out_date, app_in_date, appr_date,
+                    wd_date, withdraw_code_id, committed_team_member_id, incoming_quarter_id,
+                    comment, travel, room, stats_report_id, created_at, updated_at)
+                SELECT  trd.tmlp_registration_id, trd.reg_date, trd.app_out_date, trd.app_in_date,
+                        trd.appr_date, trd.wd_date, trd.withdraw_code_id, trd.committed_team_member_id,
+                        trd.incoming_quarter_id, trd.comment, trd.travel, trd.room, ?, sysdate(), sysdate()
+                FROM tmlp_registrations_data trd
+                INNER JOIN stats_reports sr ON sr.id = trd.stats_report_id
+                INNER JOIN global_report_stats_report grsr ON grsr.stats_report_id = trd.stats_report_id
+                WHERE
+                    sr.center_id = ?
+                    AND sr.reporting_date = ?
+                    AND trd.tmlp_registration_id NOT IN (SELECT tmlp_registration_id FROM tmlp_registrations_data WHERE stats_report_id = ?)',
+                [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
+
 
             // Process team members
             $affected = DB::insert('insert into team_members_data
