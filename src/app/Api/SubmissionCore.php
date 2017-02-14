@@ -169,6 +169,7 @@ class SubmissionCore extends AuthenticatedApiBase
                                             or coalesce(p.reg_date,\'\') != coalesce(sda.regDate,\'\')
                                             or coalesce(p.is_reviewer,\'\') != coalesce(sda.isReviewer,\'\'))',
                         [$r->id]);
+                    $reg_id = $r->stored_id;
                     $person_id = $r->person_id;
                 };
 
