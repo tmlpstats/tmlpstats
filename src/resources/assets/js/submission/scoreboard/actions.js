@@ -29,19 +29,19 @@ export function initializeScoreboard(data) {
     }
 }
 
-export function saveScoreboards(centerId, reportingDate, toSave, scoreboards) {
+export function saveScoreboards(centerId, reportingDate, toSaveItems, scoreboards) {
     return (dispatch) => {
-        const candidate = toSave[0]
+        const candidate = toSaveItems.entrySeq().first()
 
         dispatch(saveState('loading'))
         return Api.Scoreboard.stash({
             center: centerId,
             reportingDate: reportingDate,
-            data: scoreboards[candidate]
+            data: scoreboards[candidate[0]]
         }).then((data) => {
             // Probably we don't need to check data.success anymore, as any errors should go into the 'catch' flow.
             if (data.success) {
-                dispatch(scoreboardSaved(toSave[0]))
+                dispatch(scoreboardSaved(candidate))
                 dispatch(messages.replace(data.week, data.messages))
                 dispatch(saveState('loaded'))
             } else {
@@ -54,6 +54,6 @@ export function saveScoreboards(centerId, reportingDate, toSave, scoreboards) {
     }
 }
 
-function scoreboardSaved(key) {
-    return {type: SCOREBOARD_SAVED, payload: key}
+function scoreboardSaved(candidate) {
+    return {type: SCOREBOARD_SAVED, payload: candidate}
 }
