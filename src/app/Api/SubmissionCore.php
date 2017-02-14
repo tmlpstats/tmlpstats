@@ -91,13 +91,16 @@ class SubmissionCore extends AuthenticatedApiBase
         // Create stats_report record and get id
         try {
             // Insert into STATS_REPORTS and get id
-            DB::insert('insert into stats_reports ( reporting_date,version,validated,center_id,quarter_id,locked,created_at,updated_at, user_id, submitted_at)
-                        select  reporting_date,\'api\' version,1 validated, center_id,
-                                quarter_id,\'1\', sysdate(),sysdate(), ?, sysdate() from submission_data_scoreboard
-                        where center_id = ? and reporting_date =?',
-                [Auth::user()->id, $center->id, $reportingDate->toDateString()]);
-            $sr_id = DB::getPdo()->lastInsertId();
-            $debug_message .= ' sr_id=' . $sr_id;
+            $statsReport = LocalReport::ensureStatsReport($center, $reportingDate);
+            $statsReport->validated = true;
+            $statsReport->locked = true;
+            $statsReport->submittedAt = Carbon::now();
+            $statsReport->userId = $this->context->getUser()->id;
+            $statsReport->save();
+
+            $lastStatsReportDate = $reportingDate->copy()->subWeek();
+
+            $debug_message .= ' sr_id=' . $statsReport->id;
 
             // Insert into CENTER_STATS_DATA and get id
             DB::insert('insert into center_stats_data
@@ -108,7 +111,7 @@ class SubmissionCore extends AuthenticatedApiBase
                             lf, points, null, null, ?, sysdate(), sysdate()
                         from submission_data_scoreboard
                         where center_id = ? and reporting_date= ?',
-                [$sr_id, $center->id, $reportingDate->toDateString()]);
+                [$statsReport->id, $center->id, $reportingDate->toDateString()]);
             $cs_id = DB::getPdo()->lastInsertId();
             $debug_message .= ' cs_id=' . $cs_id;
 
@@ -168,6 +171,7 @@ class SubmissionCore extends AuthenticatedApiBase
                                             or coalesce(p.reg_date,\'\') != coalesce(sda.regDate,\'\')
                                             or coalesce(p.is_reviewer,\'\') != coalesce(sda.isReviewer,\'\'))',
                         [$r->id]);
+                    $reg_id = $r->stored_id;
                     $person_id = $r->person_id;
                 };
 
@@ -177,11 +181,29 @@ class SubmissionCore extends AuthenticatedApiBase
                             select ?, regDate,appOutDate,appinDate,apprDate,wdDate, withdrawCode,committeddteamMember,
                             incomingQuarter,comment,travel,room,?, sysdate(),sysdate()
                             from submission_data_applications i where i.id=?;',
-                    [$reg_id, $sr_id, $r->id]);
+                    [$reg_id, $statsReport->id, $r->id]);
 
                 $trd_id = DB::getPdo()->lastInsertId();
                 $debug_message .= ' trd_id=' . $trd_id;
             } // end application processing
+
+            // Insert data rows for any applications that weren't updated this week
+            DB::insert('INSERT INTO tmlp_registrations_data
+                    (tmlp_registration_id, reg_date, app_out_date, app_in_date, appr_date,
+                    wd_date, withdraw_code_id, committed_team_member_id, incoming_quarter_id,
+                    comment, travel, room, stats_report_id, created_at, updated_at)
+                SELECT  trd.tmlp_registration_id, trd.reg_date, trd.app_out_date, trd.app_in_date,
+                        trd.appr_date, trd.wd_date, trd.withdraw_code_id, trd.committed_team_member_id,
+                        trd.incoming_quarter_id, trd.comment, trd.travel, trd.room, ?, sysdate(), sysdate()
+                FROM tmlp_registrations_data trd
+                INNER JOIN stats_reports sr ON sr.id = trd.stats_report_id
+                INNER JOIN global_report_stats_report grsr ON grsr.stats_report_id = trd.stats_report_id
+                WHERE
+                    sr.center_id = ?
+                    AND sr.reporting_date = ?
+                    AND trd.tmlp_registration_id NOT IN (SELECT tmlp_registration_id FROM tmlp_registrations_data WHERE stats_report_id = ?)',
+                [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
+
 
             // Process team members
             $affected = DB::insert('insert into team_members_data
@@ -191,36 +213,33 @@ class SubmissionCore extends AuthenticatedApiBase
                     gitw,tdo,?,sysdate(),sysdate()
                     from submission_data_team_members
                     where center_id=? and reporting_date=?',
-                [$sr_id, $center->id, $reportingDate->toDateString()]);
+                [$statsReport->id, $center->id, $reportingDate->toDateString()]);
 
             $tmd_id = DB::getPdo()->lastInsertId();
             $debug_message .= ' tmd_rows=' . $affected . ' last_tmd_id=' . $tmd_id;
 
-            // Link the report in global_report_stats_report, create record in global_report if needed
-            $results = DB::query('select id from global_reports where reporting_date=?', [$reportingDate->toDateString()]);
-            foreach ($result as $r) {
-                $gr_id = $r->id;
-            }
+            // Insert data rows for any team members that have withdrawn and weren't updated this week
+            DB::insert('INSERT INTO team_members_data
+                    (team_member_id, at_weekend, xfer_out, xfer_in, ctw, withdraw_code_id,
+                    travel, room, comment, gitw, tdo, stats_report_id, created_at, updated_at)
+                SELECT  tmd.team_member_id, tmd.at_weekend, tmd.xfer_out, tmd.xfer_in, tmd.ctw,
+                        tmd.withdraw_code_id, tmd.travel, tmd.room, tmd.comment, tmd.gitw, tmd.tdo,
+                        ?, sysdate(), sysdate()
+                FROM team_members_data tmd
+                INNER JOIN stats_reports sr ON sr.id = tmd.stats_report_id
+                INNER JOIN global_report_stats_report grsr ON grsr.stats_report_id = tmd.stats_report_id
+                WHERE
+                    sr.center_id = ?
+                    AND sr.reporting_date = ?
+                    AND tmd.withdraw_code_id IS NOT NULL
+                    AND tmd.team_member_id NOT IN (SELECT team_member_id FROM team_members_data WHERE stats_report_id = ?)',
+                [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
 
-            if (!isset($gr_id)) {
-                $affected = DB::insert('insert into global_reports
-                                        (reporting_date,locked,created_at,updated_at)
-                                        values (?,0,sysdate(),sysdate())',
-                    [$reportingDate->toDateString()]);
-
-                $gr_id = DB::getPdo()->lastInsertId();
-            }
-            $debug_message .= ' gr_id=' . $gr_id . ' gr_ins=' . $affected;
-
-            DB::statement(
-                'delete from global_report_stats_report where global_report_id=? and stats_report_id in (select id from stats_reports where center_id=? and reporting_date=?)',
-                [$gr_id, $center->id, $reportingDate->toDateString()]
-            );
-
-            DB::insert('insert into global_report_stats_report
-                        (stats_report_id, global_report_id,created_at,updated_at)
-                          values(?,?,sysdate(),sysdate())',
-                [$sr_id, $gr_id]);
+            // Mark stats report as 'official'
+            $globalReport = Models\GlobalReport::firstOrCreate([
+                'reporting_date' => $reportingDate,
+            ]);
+            $globalReport->addCenterReport($statsReport);
         } catch (\Exception $e) {
             return [
                 'success' => false,
