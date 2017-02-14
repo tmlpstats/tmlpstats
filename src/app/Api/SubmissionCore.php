@@ -235,31 +235,11 @@ class SubmissionCore extends AuthenticatedApiBase
                     AND tmd.team_member_id NOT IN (SELECT team_member_id FROM team_members_data WHERE stats_report_id = ?)',
                 [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
 
-            // Link the report in global_report_stats_report, create record in global_report if needed
-            $results = DB::query('select id from global_reports where reporting_date=?', [$reportingDate->toDateString()]);
-            foreach ($result as $r) {
-                $gr_id = $r->id;
-            }
-
-            if (!isset($gr_id)) {
-                $affected = DB::insert('insert into global_reports
-                                        (reporting_date,locked,created_at,updated_at)
-                                        values (?,0,sysdate(),sysdate())',
-                    [$reportingDate->toDateString()]);
-
-                $gr_id = DB::getPdo()->lastInsertId();
-            }
-            $debug_message .= ' gr_id=' . $gr_id . ' gr_ins=' . $affected;
-
-            DB::statement(
-                'delete from global_report_stats_report where global_report_id=? and stats_report_id in (select id from stats_reports where center_id=? and reporting_date=?)',
-                [$gr_id, $center->id, $reportingDate->toDateString()]
-            );
-
-            DB::insert('insert into global_report_stats_report
-                        (stats_report_id, global_report_id,created_at,updated_at)
-                          values(?,?,sysdate(),sysdate())',
-                [$statsReport->id, $gr_id]);
+            // Mark stats report as 'official'
+            $globalReport = Models\GlobalReport::firstOrCreate([
+                'reporting_date' => $reportingDate,
+            ]);
+            $globalReport->addCenterReport($statsReport);
         } catch (\Exception $e) {
             return [
                 'success' => false,
