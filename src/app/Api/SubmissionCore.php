@@ -91,13 +91,14 @@ class SubmissionCore extends AuthenticatedApiBase
         // Create stats_report record and get id
         try {
             // Insert into STATS_REPORTS and get id
-            DB::insert('insert into stats_reports ( reporting_date,version,validated,center_id,quarter_id,locked,created_at,updated_at, user_id, submitted_at)
-                        select  reporting_date,\'api\' version,1 validated, center_id,
-                                quarter_id,\'1\', sysdate(),sysdate(), ?, sysdate() from submission_data_scoreboard
-                        where center_id = ? and reporting_date =?',
-                [Auth::user()->id, $center->id, $reportingDate->toDateString()]);
-            $sr_id = DB::getPdo()->lastInsertId();
-            $debug_message .= ' sr_id=' . $sr_id;
+            $statsReport = LocalReport::ensureStatsReport($center, $reportingDate);
+            $statsReport->validated = true;
+            $statsReport->locked = true;
+            $statsReport->submittedAt = Carbon::now();
+            $statsReport->userId = $this->context->getUser()->id;
+            $statsReport->save();
+
+            $debug_message .= ' sr_id=' . $statsReport->id;
 
             // Insert into CENTER_STATS_DATA and get id
             DB::insert('insert into center_stats_data
@@ -108,7 +109,7 @@ class SubmissionCore extends AuthenticatedApiBase
                             lf, points, null, null, ?, sysdate(), sysdate()
                         from submission_data_scoreboard
                         where center_id = ? and reporting_date= ?',
-                [$sr_id, $center->id, $reportingDate->toDateString()]);
+                [$statsReport->id, $center->id, $reportingDate->toDateString()]);
             $cs_id = DB::getPdo()->lastInsertId();
             $debug_message .= ' cs_id=' . $cs_id;
 
@@ -177,7 +178,7 @@ class SubmissionCore extends AuthenticatedApiBase
                             select ?, regDate,appOutDate,appinDate,apprDate,wdDate, withdrawCode,committeddteamMember,
                             incomingQuarter,comment,travel,room,?, sysdate(),sysdate()
                             from submission_data_applications i where i.id=?;',
-                    [$reg_id, $sr_id, $r->id]);
+                    [$reg_id, $statsReport->id, $r->id]);
 
                 $trd_id = DB::getPdo()->lastInsertId();
                 $debug_message .= ' trd_id=' . $trd_id;
@@ -191,7 +192,7 @@ class SubmissionCore extends AuthenticatedApiBase
                     gitw,tdo,?,sysdate(),sysdate()
                     from submission_data_team_members
                     where center_id=? and reporting_date=?',
-                [$sr_id, $center->id, $reportingDate->toDateString()]);
+                [$statsReport->id, $center->id, $reportingDate->toDateString()]);
 
             $tmd_id = DB::getPdo()->lastInsertId();
             $debug_message .= ' tmd_rows=' . $affected . ' last_tmd_id=' . $tmd_id;
@@ -220,7 +221,7 @@ class SubmissionCore extends AuthenticatedApiBase
             DB::insert('insert into global_report_stats_report
                         (stats_report_id, global_report_id,created_at,updated_at)
                           values(?,?,sysdate(),sysdate())',
-                [$sr_id, $gr_id]);
+                [$statsReport->id, $gr_id]);
         } catch (\Exception $e) {
             return [
                 'success' => false,
