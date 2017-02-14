@@ -218,6 +218,23 @@ class SubmissionCore extends AuthenticatedApiBase
             $tmd_id = DB::getPdo()->lastInsertId();
             $debug_message .= ' tmd_rows=' . $affected . ' last_tmd_id=' . $tmd_id;
 
+            // Insert data rows for any team members that have withdrawn and weren't updated this week
+            DB::insert('INSERT INTO team_members_data
+                    (team_member_id, at_weekend, xfer_out, xfer_in, ctw, withdraw_code_id,
+                    travel, room, comment, gitw, tdo, stats_report_id, created_at, updated_at)
+                SELECT  tmd.team_member_id, tmd.at_weekend, tmd.xfer_out, tmd.xfer_in, tmd.ctw,
+                        tmd.withdraw_code_id, tmd.travel, tmd.room, tmd.comment, tmd.gitw, tmd.tdo,
+                        ?, sysdate(), sysdate()
+                FROM team_members_data tmd
+                INNER JOIN stats_reports sr ON sr.id = tmd.stats_report_id
+                INNER JOIN global_report_stats_report grsr ON grsr.stats_report_id = tmd.stats_report_id
+                WHERE
+                    sr.center_id = ?
+                    AND sr.reporting_date = ?
+                    AND tmd.withdraw_code_id IS NOT NULL
+                    AND tmd.team_member_id NOT IN (SELECT team_member_id FROM team_members_data WHERE stats_report_id = ?)',
+                [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
+
             // Link the report in global_report_stats_report, create record in global_report if needed
             $results = DB::query('select id from global_reports where reporting_date=?', [$reportingDate->toDateString()]);
             foreach ($result as $r) {
