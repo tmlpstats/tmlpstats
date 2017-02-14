@@ -1,10 +1,11 @@
+import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
 import { Form, Field } from 'react-redux-form'
 import moment from 'moment'
 
 import { shallowArrayElementsEqual } from '../../reusable/compare'
-import { delayDispatch } from '../../reusable/dispatch'
+import { delayDispatch, rebind } from '../../reusable/dispatch'
 import Scoreboard, { GAME_KEYS } from '../../reusable/scoreboard'
 import { SubmitFlip, MessagesComponent } from '../../reusable/ui_basic'
 import { objectAssign } from '../../reusable/ponyfill'
@@ -17,6 +18,12 @@ import { SCOREBOARDS_FORM_KEY } from './data'
  * SubmissionScoreboard is the root component for rendering the scoreboard view.
  */
 class SubmissionScoreboard extends SubmissionBase {
+    constructor(props) {
+        super(props)
+        rebind(this, 'checkToSave')
+        this.debouncedCheckToSave = _.debounce(this.checkToSave, 600, {trailing: true, maxWait: 10000})
+    }
+
     // Check the loading state of our initial data, and dispatch a loadScoreboard if we never loaded
     checkLoading() {
         if (this.props.loading.state == 'new') {
@@ -32,9 +39,11 @@ class SubmissionScoreboard extends SubmissionBase {
         if (saving.state == 'failed') {
             return // TODO, have some status loop and reap failed weeks
         }
-        if (saving.state != 'loading' && toSave.length > 0) {
+        if (saving.state == 'loading') {
+            setTimeout(this.checkToSave, 2000)
+        } else if (toSave.items.size > 0) {
             const { centerId, reportingDate } = this.props.params
-            delayDispatch(this, saveScoreboards(centerId, reportingDate, toSave, scoreboards))
+            delayDispatch(this, saveScoreboards(centerId, reportingDate, toSave.items, scoreboards))
         }
     }
 
@@ -45,7 +54,7 @@ class SubmissionScoreboard extends SubmissionBase {
             // This should never happen, should it?
             return <div>No data!?!?</div>
         }
-        this.checkToSave()
+        this.debouncedCheckToSave()
         var rows = []
         rowSplit(this.props.scoreboards, (row, key) => {
             rows.push(
@@ -66,7 +75,7 @@ class SubmissionScoreboard extends SubmissionBase {
                                                 referenceString={referenceString} />)
         }
         return (
-            <Form model={SCOREBOARDS_FORM_KEY} onSubmit={this.checkToSave.bind(this)}>
+            <Form model={SCOREBOARDS_FORM_KEY} onSubmit={this.checkToSave}>
                 <h3>Scoreboard</h3>
                 <div>{allMessages}</div>
                 <div>{rows}</div>
