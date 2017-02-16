@@ -237,6 +237,8 @@ class _EditCreate extends CoursesBase {
             } else if (result.valid) {
                 this.props.router.push(this.baseUri() + '/courses')
             }
+
+            this.props.dispatch(chooseCourse(result.storedId, this.getCourseById(result.storedId)))
         })
     }
 
