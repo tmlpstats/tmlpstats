@@ -59,7 +59,7 @@ export function saveCourse(center, reportingDate, data) {
 
             data = objectAssign({}, data, {id: result.storedId, meta: result.meta})
             dispatch(coursesCollection.replaceItem(data))
-            dispatch(chooseCourse(data.id, this.getCourseById(data.id)))
+            dispatch(messages.replace(data.id, result.messages))
 
             // We successfully saved, reset any existing parser messages
             if (!data.id) {

@@ -350,7 +350,10 @@ class CoursesEditView extends _EditCreate {
         super.setupCourses().then(() => {
             const courseId = this.props.params.courseId
             if (!this.props.currentCourse || this.props.currentCourse.id != courseId) {
-                this.props.dispatch(chooseCourse(courseId, this.getCourseById(courseId)))
+                let course = this.getCourseById(courseId)
+                if (course) {
+                    this.props.dispatch(chooseCourse(courseId, course))
+                }
             }
         })
     }
