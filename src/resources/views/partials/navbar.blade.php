@@ -20,14 +20,8 @@ $submissionReportingDate = $context->getSubmissionReportingDate();
 $crd = null;
 $showNextQtrAccountabilities = false;
 if ($currentCenter !== null && $reportingDate != null) {
-    try {
-        $crd = TmlpStats\Encapsulations\CenterReportingDate::ensure($currentCenter, $reportingDate);
-        $showNextQtrAccountabilities = $crd->canShowNextQtrAccountabilities();
-    } catch (\Exception $e) {
-        // call to CenterReportingDate will throw an exception if the reporting date is not a Friday
-        // since this code is run by every page, ignore it and allow the main business logic to handle
-        // the error
-    }
+    $crd = TmlpStats\Encapsulations\CenterReportingDate::ensure($currentCenter, $reportingDate);
+    $showNextQtrAccountabilities = $crd->canShowNextQtrAccountabilities();
 }
 
 $reports = null;
