@@ -155,10 +155,19 @@ class Course extends ApiBase
             }
             $course = Domain\Course::fromArray($data);
         }
-        $submissionData->store($center, $reportingDate, $course);
 
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $course, $courseId);
+
+        if ($courseId > 0 || $validationResults['valid']) {
+            $submissionData->store($center, $reportingDate, $course);
+        } else {
+            return [
+                'success' => false,
+                'valid' => $validationResults['valid'],
+                'messages' => $validationResults['messages'],
+            ];
+        }
 
         return [
             'success' => true,
