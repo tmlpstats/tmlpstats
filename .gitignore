@@ -2,8 +2,10 @@
 .DS_STORE
 .idea
 .vagrant
+ansible/playbook.retry
 ansible/templates/etc/ssl
 ansible/templates/home/ubuntu/bin/sync
+composer.phar
 email-output.log
 export
 node_modules
