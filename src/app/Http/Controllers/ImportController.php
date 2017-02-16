@@ -71,12 +71,20 @@ class ImportController extends Controller
         $request->flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
         $expectedDate = ImportManager::getExpectedReportDate();
 
+        $canShowAccountabilities = false;
+        try {
+            $canShowAccountabilities = $this->canShowAccountabilities($request, $expectedDate);
+        } catch (\Exception $e) {
+            // call to Encapsulations\CenterReportingDate will throw an exception if the reporting date is not a Friday
+            // we have already caught and dealt with this in ImportManager, so ignore it here
+        }
+
         return view('import.index')->with([
             'submitReport' => isset($results['sheets'][0]['statsReportId']),
             'showUploadForm' => true,
             'showReportCheckSettings' => true,
             'expectedDate' => $expectedDate->toDateString(),
-            'showAccountabilities' => $this->canShowAccountabilities($request, $expectedDate),
+            'showAccountabilities' => $canShowAccountabilities,
             'results' => $results,
         ]);
     }
