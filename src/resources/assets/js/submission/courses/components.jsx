@@ -12,7 +12,7 @@ import { Form, SimpleField, SimpleDateInput, AddOneLink } from '../../reusable/f
 import { ModeSelectButtons, SubmitFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
 import { COURSES_FORM_KEY } from './reducers'
-import { coursesSorts, coursesCollection, courseTypeMap, messages } from './data'
+import { coursesSorts, coursesCollection, courseTypeMap } from './data'
 import { loadCourses, saveCourse, chooseCourse } from './actions'
 
 class CoursesBase extends SubmissionBase {
@@ -181,7 +181,12 @@ class _EditCreate extends CoursesBase {
         const completionFields = this.getCompletionFields(modelKey, completionState)
         const currentBalanceFields = this.getCurrentBalanceFields(modelKey, qstartState, currentState)
 
-        const messages = course ? this.props.messages[course.id] : []
+        let messages = []
+        if (course && course.id) {
+            messages = this.props.messages[course.id]
+        } else if (this.isNewCourse() && this.props.messages['create']) {
+            messages = this.props.messages['create']
+        }
 
         return (
             <div>
@@ -218,21 +223,31 @@ class _EditCreate extends CoursesBase {
     // saveCourseData for now is the same between edit and create flows
     saveCourseData(data) {
         this.props.dispatch(saveCourse(this.props.params.centerId, this.reportingDateString(), data)).then((result) => {
-            if (result.success && result.storedId) {
-                data = objectAssign({}, data, {id: result.storedId, meta: result.meta})
-                this.props.dispatch(coursesCollection.replaceItem(data))
-                this.props.dispatch(chooseCourse(data.id, this.getCourseById(data.id)))
+            if (!result) {
+                return
             }
 
-            this.props.dispatch(messages.replace(data.id, result.messages))
-
-            if (result.messages.length) {
+            if (result.messages && result.messages.length) {
                 scrollIntoView('submission-flow')
+
+                // Redirect to edit view if there are warning messages
+                if (this.isNewCourse() && result.valid) {
+                    this.props.router.push(this.baseUri() + '/courses/edit/' + result.storedId)
+                }
             } else if (result.valid) {
                 this.props.router.push(this.baseUri() + '/courses')
             }
+
+            this.props.dispatch(chooseCourse(result.storedId, this.getCourseById(result.storedId)))
         })
     }
+
+    // Return true if this is a new app
+    isNewCourse() {
+        const { currentCourse } = this.props
+        return (!currentCourse.id || parseInt(currentCourse.id) < 0)
+    }
+
     getGuestGameFields(modelKey, guestsState, completionState) {
         let guestGameFields = ''
         if (guestsState != 'hidden') {
@@ -337,7 +352,10 @@ class CoursesEditView extends _EditCreate {
         super.setupCourses().then(() => {
             const courseId = this.props.params.courseId
             if (!this.props.currentCourse || this.props.currentCourse.id != courseId) {
-                this.props.dispatch(chooseCourse(courseId, this.getCourseById(courseId)))
+                let course = this.getCourseById(courseId)
+                if (course) {
+                    this.props.dispatch(chooseCourse(courseId, course))
+                }
             }
         })
     }

@@ -135,7 +135,8 @@ export class ReviewCategory extends React.PureComponent {
         for (let id in this.props.messages) {
             const itemMessages = this.props.messages[id]
 
-            if (!itemMessages.length) {
+            // Skip errors in new (non-stashed) objects
+            if (!itemMessages.length || id == 'create') {
                 continue
             }
 

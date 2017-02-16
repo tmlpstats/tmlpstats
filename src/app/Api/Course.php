@@ -134,6 +134,8 @@ class Course extends ApiBase
             $courseId = intval($courseId);
         }
 
+        $isNew = ($courseId === null);
+
         if ($courseId !== null && $courseId > 0) {
             $courseModel = Models\Course::findOrFail($courseId);
             $course = Domain\Course::fromModel(null, $courseModel);
@@ -155,10 +157,19 @@ class Course extends ApiBase
             }
             $course = Domain\Course::fromArray($data);
         }
-        $submissionData->store($center, $reportingDate, $course);
 
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $course, $courseId);
+
+        if (!$isNew || $validationResults['valid']) {
+            $submissionData->store($center, $reportingDate, $course);
+        } else {
+            return [
+                'success' => false,
+                'valid' => $validationResults['valid'],
+                'messages' => $validationResults['messages'],
+            ];
+        }
 
         return [
             'success' => true,
