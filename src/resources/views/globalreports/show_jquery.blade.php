@@ -44,6 +44,7 @@
                 region: @json($region->abbreviation)
             },
             pastClassroom2: @json($globalReport->reportingDate->gte($quarter->getClassroom2Date())),
+            isLastWeek: @json($globalReport->reportingDate->eq($quarter->getQuarterEndDate())),
         })
     })
     </script>

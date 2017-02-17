@@ -161,6 +161,10 @@ trait GlobalReportDispatch {
             case 'teammemberstatuspotentials':
                 return 'getTeamMemberStatusPotentials';
                 break;
+            case 'AcknowledgementReport':
+            case 'acknowledgementreport':
+                return 'getAcknowledgementReport';
+                break;
         }
     }
     // Get report Ratings
@@ -264,5 +268,8 @@ trait GlobalReportDispatch {
 
     // Get report Potentials Details
     protected abstract function getTeamMemberStatusPotentials();
+
+    // Get report Acknowledgement Report
+    protected abstract function getAcknowledgementReport();
 
 }

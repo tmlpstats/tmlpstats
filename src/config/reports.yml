@@ -575,8 +575,8 @@ reportMeta:
             name: Potentials Overview
           TeamMemberStatusPotentials:
             name: Potentials Details
-
-
+          AcknowledgementReport:
+            name: Acknowledgement Report
 
 reports:
   # --- Local Statistician

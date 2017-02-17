@@ -301,15 +301,22 @@ const GlobalReport = {
             "type": "report",
             "name": "Potentials Details"
         },
+        "AcknowledgementReport": {
+            "id": "AcknowledgementReport",
+            "n": 40,
+            "type": "report",
+            "name": "Acknowledgement Report"
+        },
         "WeekendGroup": {
             "id": "WeekendGroup",
-            "n": 40,
+            "n": 41,
             "type": "grouping",
             "name": "Weekend",
             "children": [
                 "TravelReport",
                 "TeamMemberStatusPotentialsOverview",
-                "TeamMemberStatusPotentials"
+                "TeamMemberStatusPotentials",
+                "AcknowledgementReport"
             ]
         }
     }
