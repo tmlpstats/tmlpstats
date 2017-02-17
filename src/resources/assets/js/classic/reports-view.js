@@ -16,7 +16,7 @@ window.showReportView = function(config) {
     const fullReport = Reports[config.report]
     const target = $(config.target)
     const reportApi = Api[config.report + 'Report']
-    const { pastClassroom2 } = config
+    const { pastClassroom2, isLastWeek } = config
 
     var loadQueue = []
     var loaded = {}
@@ -24,6 +24,11 @@ window.showReportView = function(config) {
     if (!pastClassroom2 && config.report == 'Global') {
         delete fullReport.children.RepromisesByCenter
         _.pull(fullReport.children.RegionalStatsGroup.children, 'RepromisesByCenter')
+    }
+
+    if (!isLastWeek && config.report == 'Global') {
+        delete fullReport.children.AcknowledgementReport
+        _.pull(fullReport.children.WeekendGroup.children, 'AcknowledgementReport')
     }
 
     /// SHOW REPORT OF CHOOSING. ACTUAL AJAX STUFF
