@@ -239,10 +239,11 @@ class SubmissionCore extends AuthenticatedApiBase
 					left outer join team_members b on a.team_member_id=b.id
 				where (IFNULL(b.person_id,-1),first_name,last_name,ifnull(email,\'\'))
 						not in (select id, first_name, last_name,ifnull(email,\'\') from people)
-						and  a.center_id=? and a.reporting_date=?
+						and  a.center_id=? and a.reporting_date=? 
 				on duplicate key update 
 					updated_at=sysdate(), first_name=values(first_name), last_name=values(last_name), email=values(email)',
-				[$statsReport->id, $center->id, $reportingDate->toDateString()]);
+				[$center->id, $reportingDate->toDateString()]);
+			$debug_message .= ' upd_peeps_rows=' . $affected;
 			
             $affected = DB::insert('insert into team_members_data
             (team_member_id,at_weekend,xfer_out,xfer_in,ctw,withdraw_code_id,travel,room,comment,
