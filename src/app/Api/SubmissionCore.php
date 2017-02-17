@@ -205,14 +205,52 @@ class SubmissionCore extends AuthenticatedApiBase
                 [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
 
 
-            // Process team members
+            // Process new team members
+            $result = DB::select('select i.* from submission_data_team_members i
+                                       where i.team_member_id<0 and i.center_id=?  and i.reporting_date=?;',
+                [$center->id, $reportingDate->toDateString()]);
+            foreach ($result as $r) {
+                if ($r->stored_id < 0) 
+				{
+                    DB::insert('insert into  people
+                                    ( id, first_name, last_name, email, center_id, identifier, unsubscribed, created_at, updated_at)
+                                        select null, i.first_name, i.last_name, i.email, i.center_id, concat(\'r:\',regDate,\':\'), 0, sysdate(), sysdate()
+                                    from submission_data_team_members i where i.id=?',
+                        [$r->id]);
+                    $person_id = DB::getPdo()->lastInsertId();
+                    $debug_message .= ' snewtm_id=' . $r->id . ' person_id=' . $person_id;
+
+                    DB::insert('insert into team_members
+                                    (person_id, team_year, incoming_quarter_id, is_reviewer, created_at, updated_at)
+                                    select ?, team_year, incoming_quarter_id,is_reviewer,sysdate(),sysdate()
+                                    from submission_data_team_members i where i.id=?',
+                        [$person_id, $r->id]);
+                    $reg_id = DB::getPdo()->lastInsertId();
+                    $debug_message .= ' newtm_id=' . $reg_id;
+
+                    DB::update('update submission_data set stored_id=? where id=?', [$reg_id, $r->id]);
+                }  // end new team members processing
+			}
+			
+			$affected = DB::insert('insert into people 
+			(id, first_name, last_name, email, center_id, identifier, unsubscribed, created_at, updated_at)
+				select b.person_id , first_name, last_name, email, center_id, a.id, 0, sysdate(), sysdate() 
+				from submission_data_team_members a
+					left outer join team_members b on a.team_member_id=b.id
+				where (IFNULL(b.person_id,-1),first_name,last_name,ifnull(email,\'\'))
+						not in (select id, first_name, last_name,ifnull(email,\'\') from people)
+						and  a.center_id=? and a.reporting_date=?
+				on duplicate key update 
+					updated_at=sysdate(), first_name=values(first_name), last_name=values(last_name), email=values(email)',
+				[$statsReport->id, $center->id, $reportingDate->toDateString()]);
+			
             $affected = DB::insert('insert into team_members_data
             (team_member_id,at_weekend,xfer_out,xfer_in,ctw,withdraw_code_id,travel,room,comment,
                     gitw,tdo,stats_report_id, created_at, updated_at)
                     select      team_member_id,atWeekend,xfer_in,xfer_out,ctw,withdrawCode,travel,room,comment,
                     gitw,tdo,?,sysdate(),sysdate()
                     from submission_data_team_members
-                    where center_id=? and reporting_date=?',
+                    where center_id=? and reporting_date=? and team_member_id>0',
                 [$statsReport->id, $center->id, $reportingDate->toDateString()]);
 
             $tmd_id = DB::getPdo()->lastInsertId();
