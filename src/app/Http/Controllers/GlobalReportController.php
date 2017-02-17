@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Response;
 use TmlpStats as Models;
 use TmlpStats\Api;
-use TmlpStats\Domain\Scoreboard;
+use TmlpStats\Domain;
 use TmlpStats\Encapsulations;
 use TmlpStats\Http\Controllers\Encapsulate;
 use TmlpStats\Http\Controllers\Traits\GlobalReportDispatch;
@@ -258,6 +258,9 @@ class GlobalReportController extends ReportDispatchAbstractController
             case 'potentialsoverview':
                 $response = $this->teamMembersData($globalReport, $region)->getOne($report);
                 break;
+            case 'acknowledgementreport':
+                $response = $this->getAcknowledgementReport($globalReport, $region);
+                break;
             case 'teammemberstatusall':
                 $response = $this->teamMembersData($globalReport, $region)->getTeamMemberStatusAllClassic();
                 break;
@@ -364,7 +367,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             if ($nextMilestone->ne($globalReport->reportingDate)) {
                 $promiseData = App::make(Api\GlobalReport::class)->getWeekScoreboard($globalReport, $childRegion, $nextMilestone);
 
-                $scoreboard = Scoreboard::blank();
+                $scoreboard = Domain\Scoreboard::blank();
 
                 $promises = isset($promiseData['promise']) ? $promiseData['promise'] : 0;
                 $actuals = isset($regionsData[$childRegion->abbreviation]['actual']) ? $regionsData[$childRegion->abbreviation]['actual'] : 0;
@@ -399,7 +402,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         return view('reports.centergames.milestones', $data);
     }
 
-    protected function getGamesByCenter(Models\GlobalReport $globalReport, Models\Region $region)
+    protected function getGamesByCenter(Models\GlobalReport $globalReport, Models\Region $region, $rawData = false)
     {
         $reportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region);
         if (!$reportData) {
@@ -434,6 +437,10 @@ class GlobalReportController extends ReportDispatchAbstractController
         $totals['gitw']['promise'] = round($totals['gitw']['promise'] / count($reportData));
         if (isset($centerData['actual'])) {
             $totals['gitw']['actual'] = round($totals['gitw']['actual'] / count($reportData));
+        }
+
+        if ($rawData) {
+            return compact('reportData', 'totals');
         }
 
         $includeActual = true;
@@ -878,6 +885,74 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getTeamMemberStatusPotentials(Models\GlobalReport $globalReport, Models\Region $region)
     {
         return $this->teamMembersData($globalReport, $region)->getOne('Potentials');
+    }
+
+    protected function getAcknowledgementReport(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        $template = [
+            'effectiveness' => '',
+            'centers' => [
+                'Powerful' => [],
+                'High Performing' => [],
+                'Effective' => [],
+                'Marginally Effective' => [],
+                'Ineffective' => [],
+            ],
+        ];
+
+
+        $reportData = [
+            'regions' => [],
+            '100pctGames' => [
+                'cap' => [],
+                'cpc' => [],
+                't1x' => [],
+                't2x' => [],
+                'gitw' => [],
+                'lf' => [],
+                '4+' => [],
+            ],
+        ];
+
+        $regions = $region->getChildRegions();
+        if (!$regions || $regions->isEmpty()) {
+            $regions = [$region];
+        }
+
+        foreach ($regions as $reportRegion) {
+            $regionName = $reportRegion->name;
+            if (!isset($reportData['regions'][$regionName])) {
+                $reportData['regions'][$regionName] = $template;
+            }
+
+            $gameData = $this->getGamesByCenter($globalReport, $reportRegion, true);
+
+            $scoreboard = Domain\Scoreboard::fromArray([
+                'week' => $globalReport->reportingDate->toDateString(),
+                'games' => $gameData['totals'],
+            ]);
+
+            $reportData['regions'][$regionName]['effectiveness'] = $scoreboard->rating();
+
+            foreach ($gameData['reportData'] as $centerName => $scoreboard) {
+                $reportData['regions'][$regionName]['centers'][$scoreboard['rating']][] = $centerName;
+
+                $gameCount = 0;
+                foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
+                    if ($scoreboard['percent'][$game] >= 100) {
+                        $reportData['100pctGames'][$game][] = $centerName;
+                        $gameCount++;
+                    }
+                }
+
+                if ($gameCount >= 4) {
+                    $reportData['100pctGames']['4+'][] = $centerName;
+                }
+            }
+        }
+        ksort($reportData['regions']);
+
+        return view('globalreports.details.acknowledgementreport', compact('reportData'));
     }
 
     protected function getCenterStatsReports(Models\GlobalReport $globalReport, Models\Region $region)

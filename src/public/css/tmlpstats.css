@@ -108,6 +108,10 @@ table .live-scoreboard .centerStatsSummaryTable {
     border-width: 1px;
 }
 
+table.ratingTable td {
+    padding: 0px 10px 0px 10px;
+}
+
 table {
     empty-cells: show;
 }
