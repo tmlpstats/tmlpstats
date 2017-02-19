@@ -188,7 +188,7 @@ class SubmissionCore extends AuthenticatedApiBase
             } // end application processing
 
             // Insert data rows for any applications that weren't updated this week
-            DB::insert('INSERT INTO tmlp_registrations_data
+            $affected = DB::insert('INSERT INTO tmlp_registrations_data
                     (tmlp_registration_id, reg_date, app_out_date, app_in_date, appr_date,
                     wd_date, withdraw_code_id, committed_team_member_id, incoming_quarter_id,
                     comment, travel, room, stats_report_id, created_at, updated_at)
@@ -203,7 +203,7 @@ class SubmissionCore extends AuthenticatedApiBase
                     AND sr.reporting_date = ?
                     AND trd.tmlp_registration_id NOT IN (SELECT tmlp_registration_id FROM tmlp_registrations_data WHERE stats_report_id = ?)',
                 [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
-
+			$debug_message .= ' last-rep=' . $lastStatsReportDate->toDateString() . ' ins-tmd=' . $affected;
 
             // Process new team members
             $result = DB::select('select i.* from submission_data_team_members i
@@ -251,11 +251,11 @@ class SubmissionCore extends AuthenticatedApiBase
                     select      team_member_id,atWeekend,xfer_in,xfer_out,ctw,withdrawCode,travel,room,comment,
                     gitw,tdo,?,sysdate(),sysdate()
                     from submission_data_team_members
-                    where center_id=? and reporting_date=? and team_member_id>0',
+                    where center_id=? and reporting_date=?',
                 [$statsReport->id, $center->id, $reportingDate->toDateString()]);
-
+			$debug_message .= ' tmd_rows=' . $affected;
             $tmd_id = DB::getPdo()->lastInsertId();
-            $debug_message .= ' tmd_rows=' . $affected . ' last_tmd_id=' . $tmd_id;
+            $debug_message .= ' last_tmd_id=' . $tmd_id;
 
             // Insert data rows for any team members that have withdrawn and weren't updated this week
             DB::insert('INSERT INTO team_members_data
