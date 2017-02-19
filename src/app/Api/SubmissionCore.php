@@ -274,6 +274,47 @@ class SubmissionCore extends AuthenticatedApiBase
                     AND tmd.team_member_id NOT IN (SELECT team_member_id FROM team_members_data WHERE stats_report_id = ?)',
                 [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
 
+			//Insert course data
+			$result = DB::select('select i.* from submission_data_courses i
+                                       where i.center_id=?  and i.reporting_date=? and i.course_id<0',
+                [$center->id, $reportingDate->toDateString()]);
+			foreach ($result as $r) {
+				    DB::insert('insert into  courses
+                                    ( id, start_date, type, location, center_id,  created_at, updated_at)
+                                        select null, i.start_date, i.type, i.location, i.center_id,  sysdate(), sysdate()
+                                    from submission_data_courses i where i.id=?',
+                        [$r->id]);
+                    $new_course_id = DB::getPdo()->lastInsertId();
+                    $debug_message .= ' new_course_id=' . $new_course_id;
+					DB::update(
+					'update submission_data set stored_id=? where id=?',
+					[$new_course_id,$r->id]);
+			}
+			$affected = DB::insert(
+				'insert into courses_data
+					(id, course_id, quarter_start_ter, quarter_start_standard_starts, quarter_start_xfer, current_ter, current_standard_starts, current_xfer, completed_standard_starts, potentials, registrations, guests_promised, guests_invited, guests_confirmed, guests_attended, stats_report_id, created_at, updated_at)
+				 select null, course_id, quarter_start_ter, quarter_start_standard_starts, 	quarter_start_xfer, current_ter, current_standard_starts, current_xfer, completed_standard_starts, potentials, registrations, guests_promised, guests_invited, guests_confirmed, guests_attended, ?, sysdate(),sysdate()
+				 from submission_data_courses where center_id=? and reporting_date=?',
+				[$statsReport->id, $center->id, $reportingDate->toDateString()]);
+			$debug_message .= ' upd_courses_rows=' . $affected;	
+			
+			$affected = DB::insert(
+				'insert into courses_data
+					(id, course_id, quarter_start_ter, quarter_start_standard_starts, quarter_start_xfer, current_ter, current_standard_starts, current_xfer, completed_standard_starts, potentials, registrations, guests_promised, guests_invited, guests_confirmed, guests_attended, stats_report_id, created_at, updated_at)
+				 select null, course_id, quarter_start_ter, quarter_start_standard_starts, 	quarter_start_xfer, current_ter, current_standard_starts, current_xfer, completed_standard_starts, potentials, registrations, guests_promised, guests_invited, guests_confirmed, guests_attended, ?, sysdate(),sysdate()
+				 from courses_data
+						where stats_report_id in 
+							(select id from global_report_stats_report gr, stats_reports s 
+									where gr.stats_report_id=s.id 
+										and s.reporting_date=? and 
+										s.center_id=?
+							)
+							and course_id not in 
+								(select course_id from submission_data_courses 
+									where center_id=? and reporting_date=?)',
+				[$statsReport->id,$lastStatsReportDate->toDateString(),$center->id,
+				      $center->id,$reportingDate->toDateString()]);
+			
             // Mark stats report as 'official'
             $globalReport = Models\GlobalReport::firstOrCreate([
                 'reporting_date' => $reportingDate,
