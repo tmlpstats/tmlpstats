@@ -159,12 +159,11 @@ VIEW `submission_data_courses` AS
          id,
          center_id,
          reporting_date,
-        `submission_data`.`id` AS `team_member_id`,
         `submission_data`.`data`->> '$.startDate' AS `start_date`,
         `submission_data`.`data`->> '$.type' AS `type`,
          case when `submission_data`.`data`->> '$.location' = 'null' then NULL
               else `submission_data`.`data`->> '$.location' end AS `location`,
-        `submission_data`.`data`->> '$.id' AS `course_id`,
+        `submission_data`.`stored_id` AS `course_id`,
         `submission_data`.`data`->> '$.quarterStartTer' AS `quarter_start_ter`,
         `submission_data`.`data`->> '$.quarterStartStandardStarts' AS `quarter_start_standard_starts`,
         `submission_data`.`data`->> '$.quarterStartXfer' AS `quarter_start_xfer`,
@@ -181,7 +180,7 @@ VIEW `submission_data_courses` AS
         case when `submission_data`.`data`->> '$.guestsConfirmed' ='null' then NULL
              else `submission_data`.`data`->> '$.guestsConfirmed' end AS `guests_confirmed`,
         case when `submission_data`.`data`->> '$.guestsAttended' = 'null' then NULL 
-             else `submission_data`.`data`->> '$.guestsAttended' end AS `guests_ttended`
+             else `submission_data`.`data`->> '$.guestsAttended' end AS `guests_attended`
     FROM
         `submission_data`
     WHERE
