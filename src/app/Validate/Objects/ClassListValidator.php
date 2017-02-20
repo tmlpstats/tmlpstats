@@ -37,18 +37,21 @@ class ClassListValidator extends ObjectsValidatorAbstract
             '1 NW',
             '1 OOC',
             '1 T',
+            '1 WB',
             '2 AP',
             '2 FIN',
             '2 MOA',
             '2 NW',
             '2 OOC',
             '2 T',
+            '2 WB',
             'R AP',
             'R FIN',
             'R MOA',
             'R NW',
             'R OOC',
             'R T',
+            'R WB',
         ];
 
         $this->dataValidators['firstName'] = $nameValidator;
