@@ -64,6 +64,17 @@ export class Scoreboard {
     key(suffix) {
         return this.week + (suffix || '')
     }
+
+    hasActuals() {
+        for (let i = 0; i < GAME_KEYS.length; i++) {
+            const actual = this.games[GAME_KEYS[i]].actual
+            if (actual !== null && actual !== '') {
+                return true
+            }
+        }
+        return false
+    }
+
 }
 
 export class ScoreboardGame {

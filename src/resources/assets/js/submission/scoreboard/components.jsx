@@ -107,40 +107,42 @@ class ScoreboardRow extends SubmissionBase {
 
     render() {
         const { currentWeek, weeks } = this.props
-        var headingsA = []
-        var headingsB = []
-        var weekScoreboards = []
-        var gameBodies = []
-        var lastWeek
+        let headingsA = []
+        let headingsB = []
+        let weekScoreboards = []
+        let gameBodies = []
+        let lastWeek
 
 
         //// FIRST LOOP: go through the weeks and put some information in place for headings and set some stuff up.
         weeks.forEach((sb) => {
-            var scoreboard = new Scoreboard(sb)
+            const scoreboard = new Scoreboard(sb)
             weekScoreboards.push(scoreboard)
-            if (scoreboard.games.cap.actual !== null) {
+            if (scoreboard.hasActuals()) {
                 lastWeek = scoreboard
             }
 
-            var classes = 'dayHead'
+            let classes = 'dayHead'
             if (sb.week == currentWeek) {
                 classes += ' currentWeek'
             }
 
             headingsA.push(<th key={sb.week} colSpan="2" className={classes}>{moment(sb.week).format('MMM D, YYYY')}</th>)
-            headingsB.push(<th key={scoreboard.key('P')} className="info">P</th>)
-            headingsB.push(<th key={scoreboard.key('A')} className="">A</th>)
+            headingsB.push(
+                <th key={scoreboard.key('P')} className="info">P</th>,
+                <th key={scoreboard.key('A')} className="">A</th>
+            )
         })
 
 
         //// SECOND LOOP: because tables of this type go down games and across weeks, we need to
         ///  loop the games outside and weeks inside in order to 'stripe' through the weeks.
         GAME_KEYS.forEach((gameKey) => {
-            var values = []  // This will alternate Promise, Actual, Promise, Actual elements.
+            let values = []  // This will alternate Promise, Actual, Promise, Actual elements.
 
             weekScoreboards.forEach((scoreboard) => {
                 //var game = scoreboard.games[gameKey]
-                var modelKey = scoreboard.meta.modelKey + `.games.${gameKey}`
+                const modelKey = scoreboard.meta.modelKey + `.games.${gameKey}`
 
                 const promiseVal = (
                     <Field model={modelKey+'.promise'}>
