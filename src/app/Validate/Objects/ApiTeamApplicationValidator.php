@@ -102,11 +102,10 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
         }
 
         if (is_null($data->committedTeamMemberId) && is_null($data->withdrawCodeId)) {
-            $this->addMessage('error', [
+            $this->addMessage('warning', [
                 'id' => 'TEAMAPP_NO_COMMITTED_TEAM_MEMBER',
                 'ref' => $data->getReference(['field' => 'committedTeamMemberId']),
             ]);
-            $isValid = false;
         }
 
         return $isValid;
