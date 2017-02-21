@@ -62,7 +62,7 @@ class ValidationData extends AuthenticatedApiBase
     {
         $data = [];
         foreach ($this->dataTypesConf as $group => $conf) {
-            $data[lcfirst($conf['typeName'])] = App::make($conf['apiClass'])->getCurrentWeekSoFar(
+            $data[$conf['typeName']] = App::make($conf['apiClass'])->getWeekSoFar(
                 $report->center,
                 $report->reportingDate
             );
@@ -71,7 +71,7 @@ class ValidationData extends AuthenticatedApiBase
         $results = [];
         $validationResults = $this->validateAll($report, $data);
         if ($validationResults['messages']) {
-            $results[$group] = $validationResults['messages'];
+            $results = $validationResults['messages'];
         }
 
         return $results;

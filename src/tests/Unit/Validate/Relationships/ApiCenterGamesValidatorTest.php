@@ -348,16 +348,16 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
         $this->qStartApps = [];
 
         foreach ($this->courseData as $course) {
-            $this->data['course'][] = Domain\Course::fromArray($course);
+            $this->data['Course'][] = Domain\Course::fromArray($course);
         }
 
         foreach ($this->teamMemberData as $teamMember) {
-            $this->data['teamMember'][] = Domain\TeamMember::fromArray($teamMember);
+            $this->data['TeamMember'][] = Domain\TeamMember::fromArray($teamMember);
         }
 
         foreach ($this->teamApplicationData as $app) {
             $appDomain = Domain\TeamApplication::fromArray($app);
-            $this->data['teamApplication'][] = $appDomain;
+            $this->data['TeamApplication'][] = $appDomain;
 
             // Create a list of quarter starting approved applications for function mock
             if ($appDomain->apprDate && $appDomain->apprDate->lte(Carbon::parse('2016-08-19'))) {
@@ -387,7 +387,7 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
                 }
             }
 
-            $this->data['scoreboard'][] = Domain\Scoreboard::fromArray($scoreboard);
+            $this->data['Scoreboard'][] = Domain\Scoreboard::fromArray($scoreboard);
         }
 
         $validator = $this->getObjectMock();
@@ -511,7 +511,7 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
                 continue;
             }
 
-            $this->data['scoreboard'][] = Domain\Scoreboard::fromArray($scoreboard);
+            $this->data['Scoreboard'][] = Domain\Scoreboard::fromArray($scoreboard);
         }
 
         $validator = $this->getObjectMock();

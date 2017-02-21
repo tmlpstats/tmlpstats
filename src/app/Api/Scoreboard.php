@@ -121,13 +121,18 @@ class Scoreboard extends AuthenticatedApiBase
         ]);
     }
 
-    public function getCurrentWeekSoFar(Models\Center $center, Carbon $reportingDate)
+    public function getWeekSoFar(Models\Center $center, Carbon $reportingDate)
     {
         $results = [];
 
         $allData = $this->allForCenter($center, $reportingDate, true);
         foreach ($allData as $dataArr) {
-            $results[] = Domain\Scoreboard::fromArray($dataArr);
+            $meta = array_get($dataArr, 'meta', []);
+            $dataObject = Domain\Scoreboard::fromArray($dataArr);
+
+            if (array_get($meta, 'canEditPromise', false) || array_get($meta, 'canEditActual', false)) {
+                $results[] = $dataObject;
+            }
         }
 
         return $results;

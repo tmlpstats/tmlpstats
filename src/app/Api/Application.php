@@ -210,7 +210,7 @@ class Application extends ApiBase
         return $quarters;
     }
 
-    public function getCurrentWeekSoFar(Models\Center $center, Carbon $reportingDate)
+    public function getWeekSoFar(Models\Center $center, Carbon $reportingDate)
     {
         return $this->allForCenter($center, $reportingDate, true);
     }
