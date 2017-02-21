@@ -87,10 +87,20 @@ class Scoreboard extends AuthenticatedApiBase
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = App::make(ValidationData::class)->validate($center, $reportingDate);
 
+        $messages = [];
+        if (isset($validationResults['messages']['Scoreboard'])) {
+            $weekString = $scoreboard->week->toDateString();
+            foreach ($validationResults['messages']['Scoreboard'] as $message) {
+                if ($message->reference()['id'] == $weekString) {
+                    $messages[] = $message;
+                }
+            }
+        }
+
         return [
             'success' => true,
             'valid' => $validationResults['valid'],
-            'messages' => isset($validationResults['messages']['Scoreboard']) ? $validationResults['messages']['Scoreboard'] : [],
+            'messages' => $messages,
             'week' => $scoreboard->week->toDateString(),
         ];
     }

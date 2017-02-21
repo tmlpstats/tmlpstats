@@ -77,7 +77,7 @@ class SubmissionScoreboard extends SubmissionBase {
         return (
             <Form model={SCOREBOARDS_FORM_KEY} onSubmit={this.checkToSave}>
                 <h3>Scoreboard</h3>
-                <div>{allMessages}</div>
+                <div style={{overflow: 'scroll', maxHeight: '14em'}}>{allMessages}</div>
                 <div>{rows}</div>
                 <SubmitFlip loadState={this.props.saving} offset='col-sm-12'>Save</SubmitFlip>
             </Form>
