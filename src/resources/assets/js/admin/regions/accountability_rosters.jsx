@@ -5,7 +5,7 @@ import { objectAssign } from '../../reusable/ponyfill'
 import { connectRedux } from '../../reusable/dispatch'
 import { Alert } from '../../reusable/ui_basic'
 
-import { checkCoreData } from '../../submission/core/SubmissionFlowRoot'
+import checkCoreData from '../../submission/core/checkCoreData'
 import { repromisableAccountabilities } from '../../submission/next_qtr_accountabilities/selectors'
 import RegionBase from './RegionBase'
 import { extraData } from './data'

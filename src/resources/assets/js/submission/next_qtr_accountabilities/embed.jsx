@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import { connectRedux } from '../../reusable/dispatch'
 import { Alert } from '../../reusable/ui_basic'
 
-import { checkCoreData } from '../core/SubmissionFlowRoot'
+import checkCoreData from '../core/checkCoreData'
 import { QuarterAccountabilitiesTable } from './components'
 
 // use window object because we can get settings this way.
