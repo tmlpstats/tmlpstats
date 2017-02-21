@@ -13,7 +13,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         $reportedActuals = null;
         $ref = null;
 
-        foreach ($data['scoreboard'] as $scoreboard) {
+        foreach ($data['Scoreboard'] as $scoreboard) {
             if ($scoreboard->week->eq($this->reportingDate)) {
                 $weekData = $scoreboard->toArray();
 
@@ -65,7 +65,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
     {
         $isValid = true;
 
-        $calculated = $this->calculateCourseRegistrations($data['course']);
+        $calculated = $this->calculateCourseRegistrations($data['Course']);
 
         foreach (['cap', 'cpc'] as $game) {
             if (!$this->validateGame($game, $reportedActuals[$game], $calculated[$game], $ref)) {
@@ -80,7 +80,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
     {
         $isValid = true;
 
-        $calculated = $this->calculateTeamApplicationApprovals($data['teamApplication']);
+        $calculated = $this->calculateTeamApplicationApprovals($data['TeamApplication']);
 
         foreach (['t1x', 't2x'] as $game) {
             if (!$this->validateGame($game, $reportedActuals[$game], $calculated[$game], $ref)) {
@@ -95,7 +95,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
     {
         $isValid = true;
 
-        $calculated = $this->calculateGitw($data['teamMember']);
+        $calculated = $this->calculateGitw($data['TeamMember']);
 
         return $this->validateGame('gitw', $reportedActuals['gitw'], $calculated, $ref);
     }
@@ -193,11 +193,14 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         $startWeekendDate = Carbon::parse($centerQuarter['startWeekendDate']);
 
         $firstReport = Models\StatsReport::byCenter($this->center)
-            ->reportingDate($startWeekendDate)
-            ->where('apprDate', '<=', $startWeekendDate)
+            ->reportingDate($startWeekendDate->copy()->addWeek())
             ->official()
             ->first();
 
-        return $firstReport ? $firstReport->tmlpRegistrationData() : [];
+        if (!$firstReport) {
+            return [];
+        }
+
+        return $firstReport->tmlpRegistrationData()->where('appr_date', '<=', $startWeekendDate)->get();
     }
 }

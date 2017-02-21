@@ -30,8 +30,7 @@ class ApiValidationManager
         $isValid = true;
 
         foreach ($data as $type => $list) {
-            $apiType = 'api' . ucfirst($type);
-            if (!$this->processDataList($apiType, $list)) {
+            if (!$this->processDataList($type, $list)) {
                 $isValid = false;
             }
         }
@@ -40,7 +39,7 @@ class ApiValidationManager
         if (!$validator->run($data)) {
             $isValid = false;
         }
-        $this->mergeMessages($validator->getMessages());
+        $this->mergeMessages($validator->getMessages(), 'Scoreboard');
 
         return $isValid;
     }
@@ -64,12 +63,15 @@ class ApiValidationManager
     protected function processDataList($type, $list)
     {
         $isValid = true;
+
+        $apiType = 'api' . ucfirst($type);
+
         foreach ($list as $id => $dataObj) {
-            $validator = ValidatorFactory::build($this->statsReport, $type);
+            $validator = ValidatorFactory::build($this->statsReport, $apiType);
             if (!$validator->run($dataObj)) {
                 $isValid = false;
             }
-            $this->mergeMessages($validator->getMessages());
+            $this->mergeMessages($validator->getMessages(), $type);
         }
 
         return $isValid;
@@ -80,8 +82,17 @@ class ApiValidationManager
         return $this->messages;
     }
 
-    protected function mergeMessages($messages)
+    protected function mergeMessages($messages, $type = null)
     {
-        $this->messages = array_merge($this->messages, $messages);
+        if (!$type) {
+            $this->messages = array_merge($this->messages, $messages);
+            return;
+        }
+
+        if (!isset($this->messages[$type])) {
+            $this->messages[$type] = [];
+        }
+
+        $this->messages[$type] = array_merge($this->messages[$type], $messages);
     }
 }

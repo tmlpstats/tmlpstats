@@ -205,6 +205,18 @@ class ApiBase
         return array_merge($arr1, $arr2);
     }
 
+    public function validateAll(Models\StatsReport $statsReport, array $data)
+    {
+        $validator = new ApiValidationManager($statsReport);
+
+        $success = $validator->run($data);
+
+        return [
+            'valid' => $success,
+            'messages' => $validator->getMessages(),
+        ];
+    }
+
     public function validateObject(Models\StatsReport $statsReport, $object, $id = null)
     {
         $validator = new ApiValidationManager($statsReport);
