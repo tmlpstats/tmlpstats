@@ -289,7 +289,6 @@ class ApplicationsAddView extends _EditCreate {
                     lastName: '',
                     teamYear: 1,
                     regDate: this.reportingDateString(),
-                    committedTeamMember: '',
                     incomingQuarter: centerQuarters[0].quarterId
                 }
                 this.props.dispatch(chooseApplication('', blankApp))
