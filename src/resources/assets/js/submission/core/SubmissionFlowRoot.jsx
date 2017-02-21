@@ -50,11 +50,6 @@ class SubmissionFlowComponent extends SubmissionBase {
         }
         return (
             <div>
-                <div className="row">
-                    <div className="col-md-12">
-                        <h4>This page is a work in progress. Please don't submit anything, but feel free to look around. Currently, this is only visible for the Regional team and site administrators.</h4>
-                    </div>
-                </div>
                 {layout}
             </div>
         )
