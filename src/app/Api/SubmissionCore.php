@@ -5,6 +5,8 @@ use App;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Log;
+use Mail;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
@@ -353,10 +355,14 @@ class SubmissionCore extends AuthenticatedApiBase
         $success = true;
         DB::commit();
 
+        $emailResults = $this->sendStatsSubmittedEmail($statsReport);
+        $submittedAt = $statsReport->submittedAt->copy()->setTimezone($center->timezone);
+
         return [
             'success' => $success,
             'id' => $center->id,
-            'message' => 'Success',
+            'submittedAt' => $submittedAt->toDateTimeString(),
+            'message' => $emailResults,
             'debug_message' => $debug_message,
         ];
     }
@@ -393,5 +399,130 @@ class SubmissionCore extends AuthenticatedApiBase
         }
 
         return compact('report', 'quarter');
+    }
+
+    public function sendStatsSubmittedEmail(Models\StatsReport $statsReport)
+    {
+        $result = [];
+
+        $user    = ucfirst($this->context->getUser()->firstName);
+        $quarter = $statsReport->quarter;
+        $center  = $statsReport->center;
+        $region  = $center->region;
+
+        $submittedAt = $statsReport->submittedAt->copy()->setTimezone($center->timezone);
+
+        $due               = $statsReport->due();
+        $respondByDateTime = $statsReport->responseDue();
+
+        $isLate = $submittedAt->gt($due);
+
+        $programManager         = $center->getProgramManager($quarter);
+        $classroomLeader        = $center->getClassroomLeader($quarter);
+        $t1TeamLeader           = $center->getT1TeamLeader($quarter);
+        $t2TeamLeader           = $center->getT2TeamLeader($quarter);
+        $statistician           = $center->getStatistician($quarter);
+        $statisticianApprentice = $center->getStatisticianApprentice($quarter);
+
+        $emailMap = [
+            'center'                 => $center->statsEmail,
+            'regional'               => $region->email,
+            'programManager'         => $this->getEmail($programManager),
+            'classroomLeader'        => $this->getEmail($classroomLeader),
+            't1TeamLeader'           => $this->getEmail($t1TeamLeader),
+            't2TeamLeader'           => $this->getEmail($t2TeamLeader),
+            'statistician'           => $this->getEmail($statistician),
+            'statisticianApprentice' => $this->getEmail($statisticianApprentice),
+        ];
+
+        $emailTo = $emailMap['center'] ?: $emailMap['statistician'];
+
+        $mailingList = $center->getMailingList($quarter);
+
+        if ($mailingList) {
+            $emailMap['mailingList'] = $mailingList;
+        }
+
+        $emails = [];
+        foreach ($emailMap as $accountability => $email) {
+
+            if (!$email || $email == $emailTo) {
+                continue;
+            }
+
+            if (is_array($email)) {
+                $emails = array_merge($emails, $email);
+            } else {
+                $emails[] = $email;
+            }
+        }
+        $emails = array_unique($emails);
+        natcasesort($emails);
+
+        $globalReport = Models\GlobalReport::reportingDate($statsReport->reportingDate)->first();
+
+        $reportToken = Models\ReportToken::get($globalReport, $center);
+        $reportUrl   = url("/report/{$reportToken->token}");
+
+        $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($center->abbreviation);
+
+        $submittedCount = Models\StatsReport::byCenter($center)
+                                     ->reportingDate($statsReport->reportingDate)
+                                     ->submitted()
+                                     ->count();
+        $isResubmitted = ($submittedCount > 1);
+
+        $centerName    = $center->name;
+        $comment       = $statsReport->submitComment;
+        $reportingDate = $statsReport->reportingDate;
+        try {
+            Mail::send('emails.apistatssubmitted',
+                compact('centerName', 'comment', 'due', 'isLate', 'isResubmitted', 'mobileDashUrl',
+                    'reportingDate', 'reportUrl', 'respondByDateTime', 'submittedAt', 'user'),
+                function ($message) use ($emailTo, $emails, $emailMap, $centerName) {
+                    // Only send email to centers in production
+                    if (env('APP_ENV') === 'prod') {
+                        $message->to($emailTo);
+                        foreach ($emails as $email) {
+                            $message->cc($email);
+                        }
+                    } else {
+                        $message->to(env('ADMIN_EMAIL'));
+                    }
+
+                    if ($emailMap['regional']) {
+                        $message->replyTo($emailMap['regional']);
+                    }
+
+                    $message->subject("Team {$centerName} Statistics Submitted");
+                }
+            );
+            $successMessage = "<strong>Thank you.</strong> We received your statistics and notified the following emails"
+                . " <ul><li>{$emailTo}</li><li>" . implode('</li><li>', $emails) . "</li></ul>"
+                . " Please reply-all to that email if there is anything you need to communicate.";
+
+            if (env('APP_ENV') === 'prod') {
+                Log::info("Sent emails to the following people with team {$centerName}'s report: " . implode(', ', $emails));
+            } else {
+                Log::info("Sent emails to the following people with team {$centerName}'s report: " . env('ADMIN_EMAIL'));
+                $successMessage .= "<br/><br/><strong>Since this is development, we sent it to "
+                    . env('ADMIN_EMAIL') . " instead.</strong>";
+            }
+
+            return $successMessage;
+        } catch (\Exception $e) {
+            Log::error("Exception caught sending error email: " . $e->getMessage());
+
+            return  "There was a problem emailing everyone about your stats. Please contact your"
+                . " Regional Statistician ({$emailMap['regional']}) using your center stats email"
+                . " ({$emailMap['center']}) letting them know.";
+        }
+    }
+
+    public function getEmail(Models\Person $person = null)
+    {
+        return ($person && !$person->unsubscribed)
+            ? $person->email
+            : null;
     }
 }

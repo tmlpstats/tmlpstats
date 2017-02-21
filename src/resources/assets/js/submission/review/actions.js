@@ -35,9 +35,31 @@ export function submitReport(center, reportingDate) {
         return Api.SubmissionCore.completeSubmission({center, reportingDate})
     }
 }
+
 export function setMessages(messages) {
     return {
         type: 'review/setMessages',
         payload: messages
+    }
+}
+
+export function setSubmitResults(results) {
+    return {
+        type: 'review/setSubmitResults',
+        payload: results
+    }
+}
+
+export function setPreSubmitModal(show) {
+    return {
+        type: 'review/setPreSubmitModal',
+        payload: show
+    }
+}
+
+export function setPostSubmitModal(show) {
+    return {
+        type: 'review/setPostSubmitModal',
+        payload: show
     }
 }

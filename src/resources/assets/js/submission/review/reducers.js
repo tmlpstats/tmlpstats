@@ -7,6 +7,33 @@ function messagesReducer(state=null, action) {
     return state
 }
 
+function submitResultReducer(state=null, action) {
+    if (action.type == 'review/setSubmitResults') {
+        state = action.payload
+    }
+    return state
+}
+
+function preSubmitReducer(state=false, action) {
+    if (action.type == 'review/setPreSubmitModal') {
+        return action.payload
+    }
+
+    return state
+}
+
+function postSubmitReducer(state=false, action) {
+
+    if (action.type == 'review/setPostSubmitModal') {
+        return action.payload
+    }
+
+    return state
+}
+
 export default combineReducers({
-    oldMessages: messagesReducer
+    oldMessages: messagesReducer,
+    submitResults: submitResultReducer,
+    showPreSubmitModal: preSubmitReducer,
+    showPostSubmitModal: postSubmitReducer,
 })
