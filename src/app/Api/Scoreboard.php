@@ -85,12 +85,12 @@ class Scoreboard extends AuthenticatedApiBase
         $submissionData->store($center, $reportingDate, $scoreboard);
 
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
-        $validationResults = $this->validateObject($report, $scoreboard, $reportingDate->toDateString());
+        $validationResults = App::make(ValidationData::class)->validate($center, $reportingDate);
 
         return [
             'success' => true,
             'valid' => $validationResults['valid'],
-            'messages' => $validationResults['messages'],
+            'messages' => isset($validationResults['messages']['Scoreboard']) ? $validationResults['messages']['Scoreboard'] : [],
             'week' => $scoreboard->week->toDateString(),
         ];
     }
@@ -119,6 +119,18 @@ class Scoreboard extends AuthenticatedApiBase
             'quarter' => $quarter,
             'value' => json_encode($locks->toArray()),
         ]);
+    }
+
+    public function getCurrentWeekSoFar(Models\Center $center, Carbon $reportingDate)
+    {
+        $results = [];
+
+        $allData = $this->allForCenter($center, $reportingDate, true);
+        foreach ($allData as $dataArr) {
+            $results[] = Domain\Scoreboard::fromArray($dataArr);
+        }
+
+        return $results;
     }
 
     public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)

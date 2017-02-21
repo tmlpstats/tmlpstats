@@ -13,29 +13,22 @@ use TmlpStats\Domain;
  */
 class ValidationData extends AuthenticatedApiBase
 {
-    // updateRequired: Not all objects require updates every week, but some do. For those that do,
-    //                 if no update is needed, they'll need to take some action to confirm the
-    //                 data is the same. That "confirmation" will create a submissionData entry
     protected $dataTypesConf = [
         'Application' => [
             'apiClass' => Application::class,
             'typeName' => 'TeamApplication',
-            'updateRequired' => false,
         ],
         'TeamMember' => [
             'apiClass' => TeamMember::class,
             'typeName' => 'TeamMember',
-            'updateRequired' => false,
         ],
         'Course' => [
             'apiClass' => Course::class,
             'typeName' => 'Course',
-            'updateRequired' => false,
         ],
         'Scoreboard' => [
             'apiClass' => Scoreboard::class,
             'typeName' => 'Scoreboard',
-            'updateRequired' => false,
         ],
     ];
 
@@ -46,10 +39,7 @@ class ValidationData extends AuthenticatedApiBase
 
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
 
-        $results = array_merge_recursive(
-            $this->validateSubmissionData($report),
-            $this->validateStaleData($report)
-        );
+        $results = $this->validateSubmissionData($report);
         $isValid = true;
 
         foreach ($results as $group => $groupData) {
@@ -72,66 +62,16 @@ class ValidationData extends AuthenticatedApiBase
     {
         $data = [];
         foreach ($this->dataTypesConf as $group => $conf) {
-            $data[$group] = App::make($conf['apiClass'])->getChangedFromLastReport(
+            $data[lcfirst($conf['typeName'])] = App::make($conf['apiClass'])->getCurrentWeekSoFar(
                 $report->center,
                 $report->reportingDate
             );
         }
 
         $results = [];
-        foreach ($data as $group => $groupData) {
-            if (!isset($results[$group])) {
-                $results[$group] = [];
-            }
-            foreach ($groupData as $object) {
-                $id = $object->getKey();
-                $validationResults = $this->validateObject($report, $object, $id);
-
-                if ($validationResults['messages']) {
-                    $results[$group] = array_merge($results[$group], $validationResults['messages']);
-                }
-            }
-        }
-
-        return $results;
-    }
-
-    protected function validateStaleData(Models\StatsReport $report)
-    {
-        $data = [];
-        foreach ($this->dataTypesConf as $group => $conf) {
-            $data[$group] = App::make($conf['apiClass'])->getUnchangedFromLastReport(
-                $report->center,
-                $report->reportingDate
-            );
-        }
-
-        $results = [];
-        foreach ($data as $group => $groupData) {
-            $conf = $this->dataTypesConf[$group];
-            foreach ($groupData as $object) {
-                $id = null;
-                if ($object instanceof Referenceable) {
-                    $id = $object->getKey();
-                }
-                $validationResults = $this->validateObject($report, $object, $id);
-
-                if ($conf['updateRequired']) {
-                    $validationResults['valid'] = false;
-                    $validationResults['messages'][] = Domain\ValidationMessage::error([
-                        'id' => 'VALDATA_NOT_UPDATED',
-                        'ref' => $object,
-                        'params' => ['type' => $conf['typeName']],
-                    ]);
-                }
-
-                if ($validationResults['messages']) {
-                    if (!isset($results[$group])) {
-                        $results[$group] = [];
-                    }
-                    $results[$group] = array_merge($results[$group], $validationResults['messages']);
-                }
-            }
+        $validationResults = $this->validateAll($report, $data);
+        if ($validationResults['messages']) {
+            $results[$group] = $validationResults['messages'];
         }
 
         return $results;

@@ -202,6 +202,11 @@ class TeamMember extends AuthenticatedApiBase
         return $teamMemberData->load('teamMember.person', 'teamMember.incomingQuarter', 'statsReport', 'withdrawCode');
     }
 
+    public function getCurrentWeekSoFar(Models\Center $center, Carbon $reportingDate)
+    {
+        return $this->allForCenter($center, $reportingDate, true);
+    }
+
     public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
     {
         $results = [];

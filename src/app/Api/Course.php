@@ -206,6 +206,11 @@ class Course extends ApiBase
         return $courseData->load('course', 'course.center', 'statsReport');
     }
 
+    public function getCurrentWeekSoFar(Models\Center $center, Carbon $reportingDate)
+    {
+        return $this->allForCenter($center, $reportingDate, true);
+    }
+
     public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
     {
         $results = [];

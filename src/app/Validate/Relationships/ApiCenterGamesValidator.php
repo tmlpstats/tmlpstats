@@ -193,11 +193,14 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         $startWeekendDate = Carbon::parse($centerQuarter['startWeekendDate']);
 
         $firstReport = Models\StatsReport::byCenter($this->center)
-            ->reportingDate($startWeekendDate)
-            ->where('apprDate', '<=', $startWeekendDate)
+            ->reportingDate($startWeekendDate->copy()->addWeek())
             ->official()
             ->first();
 
-        return $firstReport ? $firstReport->tmlpRegistrationData() : [];
+        if (!$firstReport) {
+            return [];
+        }
+
+        return $firstReport->tmlpRegistrationData()->where('appr_date', '<=', $startWeekendDate)->get();
     }
 }

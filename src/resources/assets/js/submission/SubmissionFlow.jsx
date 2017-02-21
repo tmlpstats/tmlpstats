@@ -18,7 +18,7 @@ export default function SubmissionFlow() {
             <Route path="courses/add" component={Pages.CoursesAdd} />
             <Redirect from="qtr_accountabilities" to="next_qtr_accountabilities" />
             <Route path="next_qtr_accountabilities" component={Pages.QuarterAccountabilities} />
-            <Route path="review" component={Pages.Review} />
+            <Route path="review" component={Pages.Review} onEnter={Pages.Review.onRouteEnter}  />
         </Route>
     )
 }

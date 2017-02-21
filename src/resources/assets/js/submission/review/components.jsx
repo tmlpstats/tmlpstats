@@ -6,7 +6,7 @@ import { connectRedux, rebind } from '../../reusable/dispatch'
 import { Alert } from '../../reusable/ui_basic'
 import { SubmissionBase, React } from '../base_components'
 
-import { submitReport } from './actions'
+import { getValidationMessages, submitReport } from './actions'
 import { loadPairs } from './data'
 
 const CLASSES = {error: 'bg-danger', warning: 'bg-warning'}
@@ -15,6 +15,11 @@ const CLASSES = {error: 'bg-danger', warning: 'bg-warning'}
 export default class Review extends SubmissionBase {
     static mapStateToProps(state) {
         return state.submission
+    }
+
+    static onRouteEnter(nextState, replace) {
+        const { store } = require('../../store')
+        store.dispatch(getValidationMessages(nextState.params.centerId, nextState.params.reportingDate))
     }
 
     constructor(props) {
