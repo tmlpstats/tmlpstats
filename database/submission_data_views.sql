@@ -8,7 +8,9 @@ CREATE or replace VIEW `submission_data_scoreboard` AS
         a.data->>'$.games.gitw.actual' AS `gitw`,
         a.data->>'$.games.lf.actual' AS `lf`,
         (((((JSON_EXTRACT(`a`.`data`, '$.games.cap.points') + JSON_EXTRACT(`a`.`data`, '$.games.cpc.points')) + JSON_EXTRACT(`a`.`data`, '$.games.t1x.points')) + JSON_EXTRACT(`a`.`data`, '$.games.t2x.points')) + JSON_EXTRACT(`a`.`data`, '$.games.gitw.points')) + JSON_EXTRACT(`a`.`data`, '$.games.lf.points')) AS `points`,
-        null tdo,
+        (select round(100*sum(tdo)/IF(count(*)=0,1,count(*))) from submission_data_team_members b 
+		     where a.center_id=b.center_id 
+					and a.reporting_date=b.reporting_date) tdo,
         `a`.`id` AS `id`,
         `a`.`center_id` AS `center_id`,
         `a`.`reporting_date` AS `reporting_date`,
