@@ -1,7 +1,7 @@
 <div class="table-responsive acknowledgementReport">
     <br/>
     <h3>Acknowledgement Report</h3>
-    <h4>February 2017</h4>
+    <h4>{{ $reportData['quarterString'] }}</h4>
     <br/>
 
     @foreach ($reportData['regions'] as $regionName => $regionData)
