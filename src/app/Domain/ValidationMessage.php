@@ -109,6 +109,11 @@ class ValidationMessage implements Arrayable, \JsonSerializable
         return $this->level;
     }
 
+    public function reference()
+    {
+        return $this->reference;
+    }
+
     /**
      * Get resolved message text
      *
