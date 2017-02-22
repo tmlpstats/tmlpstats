@@ -902,6 +902,7 @@ class GlobalReportController extends ReportDispatchAbstractController
 
 
         $reportData = [
+            'quarterString' => $globalReport->reportingDate->format('F Y'),
             'regions' => [],
             '100pctGames' => [
                 'cap' => [],
