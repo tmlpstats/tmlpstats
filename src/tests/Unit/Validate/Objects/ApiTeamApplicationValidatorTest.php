@@ -135,6 +135,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     $this->getMessageData($this->messageTemplate, [
                         'id' => 'TEAMAPP_NO_COMMITTED_TEAM_MEMBER',
                         'reference.field' => 'committedTeamMemberId',
+                        'level' => 'warning',
                     ]),
                 ],
                 false,
@@ -385,9 +386,10 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     $this->getMessageData($this->messageTemplate, [
                         'id' => 'TEAMAPP_NO_COMMITTED_TEAM_MEMBER',
                         'reference.field' => 'committedTeamMemberId',
+                        'level' => 'warning',
                     ]),
                 ],
-                false,
+                true,
             ],
         ];
     }
