@@ -83,6 +83,8 @@ export default class Review extends SubmissionBase {
                 message: err,
                 isSuccess: false,
             }))
+            // There is a more reduxy way to do this, which we can do later, this method works.
+            window.location.reload()
         })
 
         this.hidePreSubmitModal()
