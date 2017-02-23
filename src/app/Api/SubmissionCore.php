@@ -115,6 +115,18 @@ class SubmissionCore extends AuthenticatedApiBase
             $cs_id = DB::getPdo()->lastInsertId();
             $debug_message .= ' cs_id=' . $cs_id;
 
+			DB::insert('insert into center_stats_data
+                        (id, reporting_date, type, tdo, cap, cpc, t1x, t2x, gitw,lf,
+                            program_manager_attending_weekend, classroom_leader_attending_weekend,
+                            stats_report_id, created_at, updated_at)
+                        select null, promise_date, type, 100,  cap, cpc, t1x, t2x, gitw,
+                            lf,  null, null, ?, sysdate(), sysdate()
+                        from submission_data_promises
+                        where center_id = ? and reporting_date= ?',
+                [$statsReport->id, $center->id, $reportingDate->toDateString()]);
+            $csp_id = DB::getPdo()->lastInsertId();
+            $debug_message .= ' csp_id=' . $csp_id;
+			
             // Process applications
             // Loop through all applications ins ubmission data and do the following:
             // - if application is new (stored_id<0), then insert new person, otherwise update info in people table

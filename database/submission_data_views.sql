@@ -33,6 +33,76 @@ CREATE or replace VIEW `submission_data_scoreboard` AS
 				 and a.center_id=b.center_id
     WHERE
         (`a`.`stored_type` = 'scoreboard_week');
+
+CREATE or replace VIEW `submission_data_promises` AS
+    SELECT 
+        'actual' AS `type`,
+        a.data->>'$.games.cap.actual' AS `cap`,
+        a.data->>'$.games.cpc.actual' AS `cpc`,
+        a.data->>'$.games.t1x.actual' AS `t1x`,
+        a.data->>'$.games.t2x.actual' AS `t2x`,
+        a.data->>'$.games.gitw.actual' AS `gitw`,
+        a.data->>'$.games.lf.actual' AS `lf`,
+        (((((JSON_EXTRACT(`a`.`data`, '$.games.cap.points') + JSON_EXTRACT(`a`.`data`, '$.games.cpc.points')) + JSON_EXTRACT(`a`.`data`, '$.games.t1x.points')) + JSON_EXTRACT(`a`.`data`, '$.games.t2x.points')) + JSON_EXTRACT(`a`.`data`, '$.games.gitw.points')) + JSON_EXTRACT(`a`.`data`, '$.games.lf.points')) AS `points`,
+        (select round(100*sum(tdo)/IF(count(*)=0,1,count(*))) from submission_data_team_members b 
+		     where a.center_id=b.center_id 
+					and a.reporting_date=b.reporting_date) tdo,
+        `a`.`id` AS `id`,
+        `a`.`center_id` AS `center_id`,
+        `a`.`reporting_date` AS `reporting_date`,
+        `a`.`stored_type` AS `stored_type`,
+        `a`.`stored_id` AS `stored_id`,
+        `a`.`user_id` AS `user_id`,
+        `a`.`created_at` AS `created_at`,
+        `a`.`updated_at` AS `updated_at`,
+         b.quarter_id,
+        `a`.`data` AS `data`
+    FROM
+        `submission_data` `a` 
+            left outer join 
+                 ( select aa.quarter_id, bb.id center_id, aa.start_weekend_date, aa.end_weekend_date
+                        from region_quarter_details aa, centers bb, regions cc
+                        where 
+                        cc.id=bb.region_id and 
+                        aa.region_id=coalesce(cc.parent_id,cc.id) ) b
+              on a.reporting_date between b.start_weekend_date and b.end_weekend_date
+				 and a.center_id=b.center_id
+    WHERE
+        (`a`.`stored_type` = 'scoreboard_week');
+
+		CREATE or replace VIEW `submission_data_promises` AS
+    SELECT 
+        'promise' AS `type`,
+        a.data->>'$.games.cap.promise' AS `cap`,
+        a.data->>'$.games.cpc.promise' AS `cpc`,
+        a.data->>'$.games.t1x.promise' AS `t1x`,
+        a.data->>'$.games.t2x.promise' AS `t2x`,
+        a.data->>'$.games.gitw.promise' AS `gitw`,
+        a.data->>'$.games.lf.promise' AS `lf`,
+        a.data->>'$.week' AS 'promise_date',
+        `a`.`id` AS `id`,
+        `a`.`center_id` AS `center_id`,
+        `a`.`reporting_date` AS `reporting_date`,
+        `a`.`stored_type` AS `stored_type`,
+        `a`.`stored_id` AS `stored_id`,
+        `a`.`user_id` AS `user_id`,
+        `a`.`created_at` AS `created_at`,
+        `a`.`updated_at` AS `updated_at`,
+         b.quarter_id,
+        `a`.`data` AS `data`
+    FROM
+        `submission_data` `a` 
+            left outer join 
+                 ( select aa.quarter_id, bb.id center_id, aa.start_weekend_date, aa.end_weekend_date
+                        from region_quarter_details aa, centers bb, regions cc
+                        where 
+                        cc.id=bb.region_id and 
+                        aa.region_id=coalesce(cc.parent_id,cc.id) ) b
+              on a.reporting_date between b.start_weekend_date and b.end_weekend_date
+				 and a.center_id=b.center_id
+    WHERE
+        (`a`.`stored_type` = 'scoreboard_week')
+        and a.data->>'$.games.cap.promise' is not null;
         
 CREATE OR REPLACE
 VIEW `submission_data_applications` AS
