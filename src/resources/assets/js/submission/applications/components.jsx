@@ -7,7 +7,7 @@ import { ModeSelectButtons, LoadStateFlip, MessagesComponent, scrollIntoView } f
 
 import { SubmissionBase, React } from '../base_components'
 import { APPLICATIONS_FORM_KEY } from './reducers'
-import { appsSorts, appsCollection, messages } from './data'
+import { appsSorts, appsCollection } from './data'
 import { centerQuarterData } from '../core/data'
 import { getLabelTeamMember } from '../core/selectors'
 import { loadApplications, saveApplication, chooseApplication } from './actions'

@@ -406,6 +406,8 @@ class _EditCreate extends TeamMembersBase {
                 }
             } else if (result.valid) {
                 this.context.router.push(this.teamMembersBaseUri())
+                // Reset currentMember so if we visit Add again, it'll be blank
+                delayDispatch(this.props.dispatch, actions.chooseTeamMember({}))
             }
 
             return result
