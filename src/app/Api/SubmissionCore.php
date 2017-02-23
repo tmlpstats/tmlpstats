@@ -99,6 +99,8 @@ class SubmissionCore extends AuthenticatedApiBase
             $statsReport->save();
 
             $lastStatsReportDate = $reportingDate->copy()->subWeek();
+			
+			$isFirstWeek = $statsReport->reportingDate->eq($statsReport->quarter->getFirstWeekDate($statsReport->center));
 
             $debug_message .= ' sr_id=' . $statsReport->id;
 
@@ -200,6 +202,7 @@ class SubmissionCore extends AuthenticatedApiBase
             } // end application processing
 
             // Insert data rows for any applications that weren't updated this week
+			if (!$isFirstWeek) {
             $affected = DB::insert('INSERT INTO tmlp_registrations_data
                     (tmlp_registration_id, reg_date, app_out_date, app_in_date, appr_date,
                     wd_date, withdraw_code_id, committed_team_member_id, incoming_quarter_id,
@@ -216,6 +219,7 @@ class SubmissionCore extends AuthenticatedApiBase
                     AND trd.tmlp_registration_id NOT IN (SELECT tmlp_registration_id FROM tmlp_registrations_data WHERE stats_report_id = ?)',
                 [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
 			$debug_message .= ' last-rep=' . $lastStatsReportDate->toDateString() . ' ins-tmd=' . $affected;
+			}
 
             // Process new team members
             $result = DB::select('select i.* from submission_data_team_members i
@@ -257,6 +261,7 @@ class SubmissionCore extends AuthenticatedApiBase
 				[$center->id, $reportingDate->toDateString()]);
 			$debug_message .= ' upd_peeps_rows=' . $affected;
 			
+			
             $affected = DB::insert('insert into team_members_data
             (team_member_id,at_weekend,xfer_out,xfer_in,ctw,withdraw_code_id,travel,room,comment,
                     gitw,tdo,stats_report_id, created_at, updated_at)
@@ -268,9 +273,11 @@ class SubmissionCore extends AuthenticatedApiBase
 			$debug_message .= ' tmd_rows=' . $affected;
             $tmd_id = DB::getPdo()->lastInsertId();
             $debug_message .= ' last_tmd_id=' . $tmd_id;
-
+			
+			
             // Insert data rows for any team members that have withdrawn and weren't updated this week
-            DB::insert('INSERT INTO team_members_data
+			if (!$isFirstWeek) {
+              DB::insert('INSERT INTO team_members_data
                     (team_member_id, at_weekend, xfer_out, xfer_in, ctw, withdraw_code_id,
                     travel, room, comment, gitw, tdo, stats_report_id, created_at, updated_at)
                 SELECT  tmd.team_member_id, tmd.at_weekend, tmd.xfer_out, tmd.xfer_in, tmd.ctw,
@@ -285,7 +292,8 @@ class SubmissionCore extends AuthenticatedApiBase
                     AND tmd.withdraw_code_id IS NOT NULL
                     AND tmd.team_member_id NOT IN (SELECT team_member_id FROM team_members_data WHERE stats_report_id = ?)',
                 [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
-
+			}
+			
 			//Insert course data
 			$result = DB::select('select i.* from submission_data_courses i
                                        where i.center_id=?  and i.reporting_date=? and i.course_id<0',
@@ -310,6 +318,7 @@ class SubmissionCore extends AuthenticatedApiBase
 				[$statsReport->id, $center->id, $reportingDate->toDateString()]);
 			$debug_message .= ' upd_courses_rows=' . $affected;	
 			
+			if (!$isFirstWeek) {
 			$affected = DB::insert(
 				'insert into courses_data
 					(id, course_id, quarter_start_ter, quarter_start_standard_starts, quarter_start_xfer, current_ter, current_standard_starts, current_xfer, completed_standard_starts, potentials, registrations, guests_promised, guests_invited, guests_confirmed, guests_attended, stats_report_id, created_at, updated_at)
@@ -325,8 +334,8 @@ class SubmissionCore extends AuthenticatedApiBase
 								(select course_id from submission_data_courses 
 									where center_id=? and reporting_date=?)',
 				[$statsReport->id,$lastStatsReportDate->toDateString(),$center->id,
-				      $center->id,$reportingDate->toDateString()]);
-			
+			      $center->id,$reportingDate->toDateString()]);
+			}
             // Mark stats report as 'official'
             $globalReport = Models\GlobalReport::firstOrCreate([
                 'reporting_date' => $reportingDate,
