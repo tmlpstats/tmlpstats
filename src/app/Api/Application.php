@@ -114,26 +114,19 @@ class Application extends ApiBase
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $submissionData = App::make(SubmissionData::class);
-        $appId = array_get($data, 'id', null);
-        if (is_numeric($appId)) {
-            $appId = intval($appId);
-        }
+        $appId = $submissionData->numericStorageId($data, 'id');
 
         if ($appId !== null && $appId > 0) {
             $application = Models\TmlpRegistration::findOrFail($appId);
             $teamApp = Domain\TeamApplication::fromModel(null, $application);
             $teamApp->updateFromArray($data, ['incomingQuarter']);
         } else {
-            if (!$appId) {
-                $appId = $submissionData->generateId();
-                $data['id'] = $appId;
-            }
             $teamApp = Domain\TeamApplication::fromArray($data);
         }
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $teamApp, $appId);
 
-        if ($appId > 0 || $validationResults['valid']) {
+        if (!isset($data['_idGenerated']) || $validationResults['valid']) {
             $submissionData->store($center, $reportingDate, $teamApp);
         } else {
             return [

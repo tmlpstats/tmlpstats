@@ -129,12 +129,7 @@ class Course extends ApiBase
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $submissionData = App::make(SubmissionData::class);
-        $courseId = array_get($data, 'id', null);
-        if (is_numeric($courseId)) {
-            $courseId = intval($courseId);
-        }
-
-        $isNew = ($courseId === null);
+        $courseId = $submissionData->numericStorageId($data, 'id');
 
         if ($courseId !== null && $courseId > 0) {
             $courseModel = Models\Course::findOrFail($courseId);
@@ -151,17 +146,12 @@ class Course extends ApiBase
                 'currentXfer',
             ]);
         } else {
-            if (!$courseId) {
-                $courseId = $submissionData->generateId();
-                $data['id'] = $courseId;
-            }
             $course = Domain\Course::fromArray($data);
         }
-
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $course, $courseId);
 
-        if (!$isNew || $validationResults['valid']) {
+        if (!isset($data['_idGenerated']) || $validationResults['valid']) {
             $submissionData->store($center, $reportingDate, $course);
         } else {
             return [
