@@ -98,6 +98,12 @@ export function stashTeamMember(center, reportingDate, data) {
             if (!data.id) {
                 dispatch(messages.replace('create', []))
             }
+        },
+
+        failHandler(err, { dispatch }) {
+            // If this is a parser error, we won't have an ID yet, use 'create'
+            const id = data.id ? data.id : 'create'
+            dispatch(messages.replace(id, getMessages(err)))
         }
     })
 }

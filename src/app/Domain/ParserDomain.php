@@ -106,7 +106,7 @@ class ParserDomain implements Arrayable, \JsonSerializable, Referenceable
     public static function fromArray($input, $requiredParams = [])
     {
         $obj = new static();
-        $obj->updateFromArray($input);
+        $obj->updateFromArray($input, $requiredParams);
 
         return $obj;
     }

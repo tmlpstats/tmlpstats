@@ -108,16 +108,18 @@ export class ReduxLoader {
                 return tdata
             }
 
-            const failHandler = (err) => {
-                if (!actionData.inGroup) {
-                    const fixedErr = (err.error)? err : {error: err.message || err}
-                    dispatch(loadAction(fixedErr))
+            const fail = (err) => {
+                if (actionData.failHandler) {
+                    const fixedErr = (err.error) ? err : {error: err.message || err}
+                    actionData.failHandler(fixedErr, info)
                 }
-                throw err
+                if (actionData.setLoaded && !actionData.inGroup) {
+                    dispatch(loadAction('loaded'))
+                }
             }
 
             // loader, saver, etc
-            return actionData.api(params, info).then(success, failHandler)
+            return actionData.api(params, info).then(success, fail)
         }
     }
 
