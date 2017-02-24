@@ -301,8 +301,8 @@ class SubmissionCore extends AuthenticatedApiBase
                                 select ?, atWeekend, xfer_in, xfer_out, ctw, withdrawCode, travel, room, comment,
                                     gitw, tdo, ?, sysdate(), sysdate()
                                 from submission_data_team_members
-                                where center_id=? and reporting_date=?',
-                            [$tm_id, $statsReport->id, $center->id, $reportingDate->toDateString()]);
+                                where center_id=? and reporting_date=? and team_member_id=?',
+                            [$tm_id, $statsReport->id, $center->id, $reportingDate->toDateString(), $tm_id]);
                     $tmd_id = DB::getPdo()->lastInsertId();
                     $debug_message .= ' last_tmd_id=' . $tmd_id;
                 }
