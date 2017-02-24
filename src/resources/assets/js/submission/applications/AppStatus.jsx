@@ -119,7 +119,7 @@ export default class AppStatus extends React.Component {
             style['visibility'] = 'hidden'
         }
         return (
-            <div style={style}>
+            <div style={style} key={item.key}>
                 <SimpleDateInput key={item.key} model={model+'.'+item.key} label={dateTitle} labelClass="col-sm-3" divClass="col-sm-6"/>
             </div>
         )
