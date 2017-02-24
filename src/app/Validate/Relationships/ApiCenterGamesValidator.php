@@ -1,8 +1,10 @@
 <?php
 namespace TmlpStats\Validate\Relationships;
 
+use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
+use TmlpStats\Api;
 use TmlpStats\Domain;
 use TmlpStats\Validate\ApiValidatorAbstract;
 
@@ -80,8 +82,6 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
     {
         $isValid = true;
 
-        return true;
-
         $calculated = $this->calculateTeamApplicationApprovals($data['TeamApplication']);
 
         foreach (['t1x', 't2x'] as $game) {
@@ -153,8 +153,6 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
     {
         $t1CurrentApproved = 0;
         $t2CurrentApproved = 0;
-        $t1QStartApproved = 0;
-        $t2QStartApproved = 0;
 
         foreach ($teamApplicationData as $app) {
             if ($app->withdrawCodeId !== null
@@ -171,26 +169,20 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
             }
         }
 
-        $applicationData = $this->getQuarterStartingApprovedApplications();
-        foreach ($applicationData as $app) {
-            // TODO: How should withdrawn at the weekend be reported?
-            if ($app->registration->teamYear == 1) {
-                $t1QStartApproved++;
-            } else {
-                $t2QStartApproved++;
-            }
-        }
+        $approvedCounts = $this->getQuarterStartingApprovedCounts();
 
         return [
-            't1x' => $t1CurrentApproved - $t1QStartApproved,
-            't2x' => $t2CurrentApproved - $t2QStartApproved,
+            't1x' => $t1CurrentApproved - $approvedCounts['t1x'],
+            't2x' => $t2CurrentApproved - $approvedCounts['t2x'],
         ];
     }
 
-    protected function getQuarterStartingApprovedApplications()
+    protected function getQuarterStartingApprovedCounts()
     {
         // toArray is done here to deal with an interesting issue with parsing dates before 1900
         $centerQuarter = Domain\CenterQuarter::ensure($this->center, $this->quarter)->toArray();
+
+        $counts = ['t1x' => 0, 't2x' => 0];
 
         $startWeekendDate = Carbon::parse($centerQuarter['startWeekendDate']);
 
@@ -199,10 +191,29 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
             ->official()
             ->first();
 
-        if (!$firstReport) {
-            return [];
+        if ($firstReport) {
+            $items = $firstReport
+                ->tmlpRegistrationData()
+                ->where('appr_date', '<=', $startWeekendDate)
+                ->get()
+                ->map(function ($app) {
+                    return $app->registration->teamYear;
+                });
+        } else {
+            // When it's the first week, we don't have counts, so use the stash data.
+            $result = App::make(Api\Application::class)->allForCenter($this->center, $this->reportingDate, true);
+
+            $items = collect($result)->filter(function ($teamApp) use ($startWeekendDate) {
+                return $teamApp->apprDate !== null && $teamApp->apprDate->lte($startWeekendDate);
+            })->map(function ($teamApp) {
+                return $teamApp->teamYear;
+            });
         }
 
-        return $firstReport->tmlpRegistrationData()->where('appr_date', '<=', $startWeekendDate)->get();
+        foreach ($items->all() as $teamYear) {
+            $counts["t${teamYear}x"] += 1;
+        }
+
+        return $counts;
     }
 }

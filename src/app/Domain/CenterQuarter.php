@@ -126,7 +126,7 @@ class CenterQuarter implements Arrayable, \JsonSerializable
         return $this->repromiseDate;
     }
 
-        /**
+    /**
      * Is provided date the week to accept repromises?
      *
      * Will check for a setting override, otherwise uses the classroom2 date
