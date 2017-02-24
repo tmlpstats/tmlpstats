@@ -80,6 +80,8 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
     {
         $isValid = true;
 
+        return true;
+
         $calculated = $this->calculateTeamApplicationApprovals($data['TeamApplication']);
 
         foreach (['t1x', 't2x'] as $game) {
