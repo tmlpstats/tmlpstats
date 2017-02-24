@@ -252,7 +252,7 @@ class ApplicationsEditView extends _EditCreate {
             if (!this.props.currentApp || this.props.currentApp.id != appId) {
                 let app = this.getAppById(appId)
                 if (app){
-                    app = objectAssign({}, app, {committedTeamMember: app.committedTeamMember || ''})
+                    app = objectAssign({}, app, {committedTeamMember: app.committedTeamMember || null})
                     this.props.dispatch(chooseApplication(appId, app))
                 }
             }

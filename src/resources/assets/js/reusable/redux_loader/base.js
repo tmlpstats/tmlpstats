@@ -12,6 +12,9 @@ const LOADER_DEFAULT_OPTS = {
     transformData: x => x,
     successHandler: (data, {loader}) =>{
         return loader.replaceCollection(data)
+    },
+    failHandler: (err) =>{
+        throw err
     }
 }
 
@@ -108,16 +111,19 @@ export class ReduxLoader {
                 return tdata
             }
 
-            const failHandler = (err) => {
-                if (!actionData.inGroup) {
-                    const fixedErr = (err.error)? err : {error: err.message || err}
-                    dispatch(loadAction(fixedErr))
+            const fail = (err) => {
+                const fixedErr = (err.error) ? err : {error: err.message || err}
+                const result = actionData.failHandler(fixedErr, info)
+                if (result) {
+                    dispatch(result)
                 }
-                throw err
+                if (actionData.setLoaded && !actionData.inGroup) {
+                    dispatch(loadAction('loaded'))
+                }
             }
 
             // loader, saver, etc
-            return actionData.api(params, info).then(success, failHandler)
+            return actionData.api(params, info).then(success, fail)
         }
     }
 
