@@ -85,14 +85,15 @@ class SubmissionCore extends AuthenticatedApiBase
             ];
         }
 
+        $reportingDate->startOfDay();
+
         DB::beginTransaction();
         $debug_message = '';
         $person_id = -1;
         $reg_id = -1;
 
-        // Create stats_report record and get id
         try {
-            // Insert into STATS_REPORTS and get id
+            // Create stats_report record and get id
             $statsReport = LocalReport::ensureStatsReport($center, $reportingDate);
             $statsReport->validated = true;
             $statsReport->locked = true;
@@ -101,43 +102,44 @@ class SubmissionCore extends AuthenticatedApiBase
             $statsReport->save();
 
             $lastStatsReportDate = $reportingDate->copy()->subWeek();
-			
-			$quarterStartDate = $statsReport->quarter->getQuarterStartDate($statsReport->center);
-			$quarterEndDate = $statsReport->quarter->getQuarterEndDate($statsReport->center);
-			
-			$isFirstWeek = $statsReport->reportingDate->eq($statsReport->quarter->getFirstWeekDate($statsReport->center));
+
+            $quarterStartDate = $statsReport->quarter->getQuarterStartDate($statsReport->center);
+            $quarterEndDate = $statsReport->quarter->getQuarterEndDate($statsReport->center);
+
+            $isFirstWeek = $statsReport->reportingDate->eq($statsReport->quarter->getFirstWeekDate($statsReport->center));
 
             $debug_message .= ' sr_id=' . $statsReport->id;
 
-            // Insert into CENTER_STATS_DATA and get id
+            // Insert Actuals
             DB::insert('insert into center_stats_data
-                        (id, reporting_date, type, tdo, cap, cpc, t1x, t2x, gitw,lf,points,
+                        (id, reporting_date, type, tdo, cap, cpc, t1x, t2x, gitw, lf, points,
                             program_manager_attending_weekend, classroom_leader_attending_weekend,
                             stats_report_id, created_at, updated_at)
-                        select null, reporting_date, type, tdo , cap, cpc, t1x, t2x, gitw,
-                            lf, points, null, null, ?, sysdate(), sysdate()
+                        select null, stored_id, type, tdo, cap, cpc, t1x, t2x, gitw, lf, points,
+                            null, null, ?, sysdate(), sysdate()
                         from submission_data_scoreboard
-                        where center_id = ? and reporting_date= ?',
-                [$statsReport->id, $center->id, $reportingDate->toDateString()]);
+                        where center_id = ? and reporting_date = ? and stored_id = ?',
+                [$statsReport->id, $center->id, $reportingDate->toDateString(), $reportingDate->toDateTimeString()]);
             $cs_id = DB::getPdo()->lastInsertId();
-            $debug_message .= ' cs_id=' . $cs_id;
+            $debug_message .= ' csa_id=' . $cs_id;
 
-			DB::insert('insert into center_stats_data
-                        (id, reporting_date, type, tdo, cap, cpc, t1x, t2x, gitw,lf,
+            // Insert Promises
+            DB::insert('insert into center_stats_data
+                        (id, reporting_date, type, tdo, cap, cpc, t1x, t2x, gitw, lf,
                             program_manager_attending_weekend, classroom_leader_attending_weekend,
                             stats_report_id, created_at, updated_at)
-                        select null, promise_date, type, 100,  cap, cpc, t1x, t2x, gitw,
-                            lf,  null, null, ?, sysdate(), sysdate()
+                        select null, promise_date, type, 100,  cap, cpc, t1x, t2x, gitw, lf,
+                            null, null, ?, sysdate(), sysdate()
                         from submission_data_promises
-                        where center_id = ? and reporting_date= ?',
+                        where center_id = ? and reporting_date = ?',
                 [$statsReport->id, $center->id, $reportingDate->toDateString()]);
             $csp_id = DB::getPdo()->lastInsertId();
             $debug_message .= ' csp_id=' . $csp_id;
-			
+
             // Process applications
-            // Loop through all applications ins ubmission data and do the following:
+            // Loop through all applications in submission data and do the following:
             // - if application is new (stored_id<0), then insert new person, otherwise update info in people table
-            // - insert new records into tmlp_
+            // - insert new records into tmlp_registration_data
             //
             // ? - Possibly run the "carry over" for all ones that were not changed
             //      by
@@ -146,229 +148,250 @@ class SubmissionCore extends AuthenticatedApiBase
                                         on r.id=i.stored_id
                                     where i.center_id=?  and i.reporting_date=?;',
                 [$center->id, $reportingDate->toDateString()]);
-			if ( !empty($result) ) {
-              foreach ($result as $r) {
-                if ($r->stored_id < 0) {
-                    DB::insert('insert into  people
-                                    ( id, first_name, last_name, email, center_id, identifier, unsubscribed, created_at, updated_at)
-                                        select null, i.first_name, i.last_name, i.email, i.center_id, concat(\'r:\',regDate,\':\'), 0, sysdate(), sysdate()
-                                    from submission_data_applications i where i.id=?',
-                        [$r->id]);
-                    $person_id = DB::getPdo()->lastInsertId();
-                    $debug_message .= ' sreg_id=' . $r->id . ' person_id=' . $person_id;
+            if (!empty($result)) {
+                foreach ($result as $r) {
+                    if ($r->stored_id < 0) {
+                        // This is a new application, create the things
+                        DB::insert('insert into people
+                                        (first_name, last_name, email, center_id, created_at, updated_at)
+                                            select i.first_name, i.last_name, i.email, i.center_id, sysdate(), sysdate()
+                                        from submission_data_applications i where i.id=?',
+                            [$r->id]);
+                        $person_id = DB::getPdo()->lastInsertId();
+                        $debug_message .= ' sreg_id=' . $r->id . ' person_id=' . $person_id;
 
-                    DB::insert('insert into tmlp_registrations
-                                    (person_id, team_year, reg_date, is_reviewer, created_at, updated_at)
-                                    select ?, team_year, regDate,isReviewer,sysdate(),sysdate()
-                                    from submission_data_applications i where i.id=?',
-                        [$person_id, $r->id]);
-                    $reg_id = DB::getPdo()->lastInsertId();
-                    $debug_message .= ' reg_id=' . $reg_id;
+                        DB::insert('insert into tmlp_registrations
+                                        (person_id, team_year, reg_date, is_reviewer, created_at, updated_at)
+                                        select ?, team_year, regDate, isReviewer, sysdate(), sysdate()
+                                        from submission_data_applications i where i.id=?',
+                            [$person_id, $r->id]);
+                        $reg_id = DB::getPdo()->lastInsertId();
+                        $debug_message .= ' reg_id=' . $reg_id;
 
-                    DB::update('update submission_data set stored_id=? where id=?', [$reg_id, $r->id]);
-                } else {
-                    // Update PEOPLE table if anything changed
-                    DB::update('update people p, submission_data_applications sda
-                                set p.updated_at=sysdate(),
-                                    p.first_name=sda.first_name,
-                                    p.last_name=sda.last_name,
-                                    p.email=sda.email
-                                where p.id=sda.person_id
-                                      and sda.id=?
-                                      and (coalesce(p.first_name,\'\') != coalesce(sda.first_name,\'\')
-                                            or coalesce(p.last_name,\'\') != coalesce(sda.last_name,\'\')
-                                            or coalesce(p.email,\'\') != coalesce(sda.email,\'\')
-                                      )',
-                        [$r->id]);
-                    DB::update('update tmlp_registrations p, submission_data_applications sda
-                                set p.updated_at=sysdate(),
-                                    p.team_year=sda.team_year,
-                                    p.reg_date=sda.regDate,
-                                    p.is_reviewer=sda.isReviewer
-                                where p.id=sda.stored_id
-                                      and sda.id=?
-                                      and (coalesce(p.team_year,\'\') != coalesce(sda.team_year,\'\')
-                                            or coalesce(p.reg_date,\'\') != coalesce(sda.regDate,\'\')
-                                            or coalesce(p.is_reviewer,\'\') != coalesce(sda.isReviewer,\'\'))',
-                        [$r->id]);
-                    $reg_id = $r->stored_id;
-                    $person_id = $r->person_id;
-                };
+                        // Update submission_data with new id so we don't overwrite if the report is resubmitted
+                        DB::update('update submission_data set stored_id=?, data = JSON_SET(data, "$.id", ?) where id=?', [$reg_id, $reg_id, $r->id]);
+                    } else {
+                        // This is an existing application, update the things
+                        DB::update('update people p, submission_data_applications sda
+                                    set p.updated_at=sysdate(),
+                                        p.first_name=sda.first_name,
+                                        p.last_name=sda.last_name,
+                                        p.email=sda.email,
+                                        p.updated_at=sysdate()
+                                    where p.id=sda.person_id
+                                          and sda.id=?
+                                          and (coalesce(p.first_name,\'\') != coalesce(sda.first_name,\'\')
+                                                or coalesce(p.last_name,\'\') != coalesce(sda.last_name,\'\')
+                                                or coalesce(p.email,\'\') != coalesce(sda.email,\'\')
+                                          )',
+                            [$r->id]);
+                        DB::update('update tmlp_registrations p, submission_data_applications sda
+                                    set p.updated_at=sysdate(),
+                                        p.team_year=sda.team_year,
+                                        p.reg_date=sda.regDate,
+                                        p.is_reviewer=sda.isReviewer,
+                                        p.updated_at=sysdate()
+                                    where p.id=sda.stored_id
+                                          and sda.id=?
+                                          and (coalesce(p.team_year,\'\') != coalesce(sda.team_year,\'\')
+                                                or coalesce(p.reg_date,\'\') != coalesce(sda.regDate,\'\')
+                                                or coalesce(p.is_reviewer,\'\') != coalesce(sda.isReviewer,\'\'))',
+                            [$r->id]);
+                        $reg_id = $r->stored_id;
+                        $person_id = $r->person_id;
+                    };
 
-                DB::insert('insert into tmlp_registrations_data
-                            (tmlp_registration_id, reg_date, app_out_date, app_in_date, appr_date, wd_date,
-                                withdraw_code_id, committed_team_member_id, incoming_quarter_id, comment, travel, room, stats_report_id, created_at, updated_at)
-                            select ?, regDate,appOutDate,appinDate,apprDate,wdDate, withdrawCode,committeddteamMember,
-                            incomingQuarter,comment,travel,room,?, sysdate(),sysdate()
-                            from submission_data_applications i where i.id=?;',
-                    [$reg_id, $statsReport->id, $r->id]);
+                    // Create application data row
+                    DB::insert('insert into tmlp_registrations_data
+                                (tmlp_registration_id, reg_date, app_out_date, app_in_date, appr_date, wd_date,
+                                    withdraw_code_id, committed_team_member_id, incoming_quarter_id, comment, travel, room, stats_report_id, created_at, updated_at)
+                                select ?, regDate,appOutDate,appinDate,apprDate,wdDate, withdrawCode,committeddteamMember,
+                                incomingQuarter,comment,travel,room,?, sysdate(),sysdate()
+                                from submission_data_applications i where i.id=?;',
+                        [$reg_id, $statsReport->id, $r->id]);
 
-                $trd_id = DB::getPdo()->lastInsertId();
-                $debug_message .= ' trd_id=' . $trd_id;
-              }
-			}// end application processing
+                    $trd_id = DB::getPdo()->lastInsertId();
+                    $debug_message .= ' trd_id=' . $trd_id;
+                }
+            }// end application processing
 
             // Insert data rows for any applications that weren't updated this week
-			if (!$isFirstWeek) {
-            $affected = DB::insert('INSERT INTO tmlp_registrations_data
-                    (tmlp_registration_id, reg_date, app_out_date, app_in_date, appr_date,
-                    wd_date, withdraw_code_id, committed_team_member_id, incoming_quarter_id,
-                    comment, travel, room, stats_report_id, created_at, updated_at)
-                SELECT  trd.tmlp_registration_id, trd.reg_date, trd.app_out_date, trd.app_in_date,
-                        trd.appr_date, trd.wd_date, trd.withdraw_code_id, trd.committed_team_member_id,
-                        trd.incoming_quarter_id, trd.comment, trd.travel, trd.room, ?, sysdate(), sysdate()
-                FROM tmlp_registrations_data trd
-                INNER JOIN stats_reports sr ON sr.id = trd.stats_report_id
-                INNER JOIN global_report_stats_report grsr ON grsr.stats_report_id = trd.stats_report_id
-                WHERE
-                    sr.center_id = ?
-                    AND sr.reporting_date = ?
-                    AND trd.tmlp_registration_id NOT IN (SELECT tmlp_registration_id FROM tmlp_registrations_data WHERE stats_report_id = ?)',
-                [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
-			$debug_message .= ' last-rep=' . $lastStatsReportDate->toDateString() . ' ins-tmd=' . $affected;
-			}
+            if (!$isFirstWeek) {
+                $affected = DB::insert('INSERT INTO tmlp_registrations_data
+                        (tmlp_registration_id, reg_date, app_out_date, app_in_date, appr_date,
+                        wd_date, withdraw_code_id, committed_team_member_id, incoming_quarter_id,
+                        comment, travel, room, stats_report_id, created_at, updated_at)
+                    SELECT  trd.tmlp_registration_id, trd.reg_date, trd.app_out_date, trd.app_in_date,
+                            trd.appr_date, trd.wd_date, trd.withdraw_code_id, trd.committed_team_member_id,
+                            trd.incoming_quarter_id, trd.comment, trd.travel, trd.room, ?, sysdate(), sysdate()
+                    FROM tmlp_registrations_data trd
+                    INNER JOIN stats_reports sr ON sr.id = trd.stats_report_id
+                    INNER JOIN global_report_stats_report grsr ON grsr.stats_report_id = trd.stats_report_id
+                    WHERE
+                        sr.center_id = ?
+                        AND sr.reporting_date = ?
+                        AND trd.tmlp_registration_id NOT IN (SELECT tmlp_registration_id FROM tmlp_registrations_data WHERE stats_report_id = ?)',
+                    [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
+                $debug_message .= ' last-rep=' . $lastStatsReportDate->toDateString() . ' ins-tmd=' . $affected;
+            }
 
-            // Process new team members
             $result = DB::select('select i.* from submission_data_team_members i
-                                       where i.team_member_id<0 and i.center_id=?  and i.reporting_date=?;',
+                                    left outer join team_members t
+                                        on t.id=i.team_member_id
+                                    where i.center_id=?  and i.reporting_date=?;',
                 [$center->id, $reportingDate->toDateString()]);
-			if (!empty($result)) {	
-            foreach ($result as $r) {
-                if ($r->stored_id < 0) 
-				{
-                    DB::insert('insert into  people
-                                    ( id, first_name, last_name, email, center_id, identifier, unsubscribed, created_at, updated_at)
-                                        select null, i.first_name, i.last_name, i.email, i.center_id, concat(\'r:\',regDate,\':\'), 0, sysdate(), sysdate()
+            if (!empty($result)) {
+                foreach ($result as $r) {
+                    $tm_id = -1;
+                    if ($r->team_member_id < 0) {
+                        // This is a new team member, create the things
+                        DB::insert('insert into people
+                                        (first_name, last_name, email, center_id, created_at, updated_at)
+                                    select i.first_name, i.last_name, i.email, i.center_id, sysdate(), sysdate()
                                     from submission_data_team_members i where i.id=?',
-                        [$r->id]);
-                    $person_id = DB::getPdo()->lastInsertId();
-                    $debug_message .= ' snewtm_id=' . $r->id . ' person_id=' . $person_id;
+                            [$r->id]);
+                        $person_id = DB::getPdo()->lastInsertId();
+                        $debug_message .= ' snewtm_id=' . $r->id . ' person_id=' . $person_id;
 
-                    DB::insert('insert into team_members
-                                    (person_id, team_year, incoming_quarter_id, is_reviewer, created_at, updated_at)
-                                    select ?, team_year, incoming_quarter_id,is_reviewer,sysdate(),sysdate()
+                        DB::insert('insert into team_members
+                                        (person_id, team_year, incoming_quarter_id, is_reviewer, created_at, updated_at)
+                                    select ?, team_year, incoming_quarter_id, is_reviewer, sysdate(), sysdate()
                                     from submission_data_team_members i where i.id=?',
-                        [$person_id, $r->id]);
-                    $reg_id = DB::getPdo()->lastInsertId();
-                    $debug_message .= ' newtm_id=' . $reg_id;
+                            [$person_id, $r->id]);
+                        $tm_id = DB::getPdo()->lastInsertId();
+                        $debug_message .= ' newtm_id=' . $tm_id;
 
-                    DB::update('update submission_data set stored_id=? where id=?', [$reg_id, $r->id]);
-                }  // end new team members processing
-			  }
-			}
-			
-			$affected = DB::insert('insert into people 
-			(id, first_name, last_name, email, center_id, identifier, unsubscribed, created_at, updated_at)
-				select b.person_id , first_name, last_name, email, center_id, a.id, 0, sysdate(), sysdate() 
-				from submission_data_team_members a
-					left outer join team_members b on a.team_member_id=b.id
-				where (IFNULL(b.person_id,-1),first_name,last_name,ifnull(email,\'\'))
-						not in (select id, first_name, last_name,ifnull(email,\'\') from people)
-						and  a.center_id=? and a.reporting_date=? 
-				on duplicate key update 
-					updated_at=sysdate(), first_name=values(first_name), last_name=values(last_name), email=values(email)',
-				[$center->id, $reportingDate->toDateString()]);
-			$debug_message .= ' upd_peeps_rows=' . $affected;
-			
-			
-            $affected = DB::insert('insert into team_members_data
-            (team_member_id,at_weekend,xfer_out,xfer_in,ctw,withdraw_code_id,travel,room,comment,
-                    gitw,tdo,stats_report_id, created_at, updated_at)
-                    select      team_member_id,atWeekend,xfer_in,xfer_out,ctw,withdrawCode,travel,room,comment,
-                    gitw,tdo,?,sysdate(),sysdate()
-                    from submission_data_team_members
-                    where center_id=? and reporting_date=?',
-                [$statsReport->id, $center->id, $reportingDate->toDateString()]);
-			$debug_message .= ' tmd_rows=' . $affected;
-            $tmd_id = DB::getPdo()->lastInsertId();
-            $debug_message .= ' last_tmd_id=' . $tmd_id;
-			
-			
+                        // Update submission_data with new id so we don't overwrite if the report is resubmitted
+                        DB::update('update submission_data set stored_id=?, data = JSON_SET(data, "$.id", ?) where id=?', [$tm_id, $tm_id, $r->id]);
+                    } else {
+                        // This is an existing application, update the things
+                        DB::update('update people p, submission_data_team_members sda
+                                    set p.updated_at=sysdate(),
+                                        p.first_name=sda.first_name,
+                                        p.last_name=sda.last_name,
+                                        p.email=sda.email,
+                                        p.updated_at=sysdate()
+                                    where p.id=sda.person_id
+                                          and sda.id=?
+                                          and (coalesce(p.first_name,\'\') != coalesce(sda.first_name,\'\')
+                                                or coalesce(p.last_name,\'\') != coalesce(sda.last_name,\'\')
+                                                or coalesce(p.email,\'\') != coalesce(sda.email,\'\')
+                                          )',
+                            [$r->id]);
+                        DB::update('update team_members p, submission_data_team_members sda
+                                    set p.updated_at=sysdate(),
+                                        p.team_year=sda.team_year,
+                                        p.incoming_quarter_id=sda.incoming_quarter_id,
+                                        p.is_reviewer=sda.is_reviewer,
+                                        p.updated_at=sysdate()
+                                    where p.id=sda.team_member_id
+                                          and sda.id=?
+                                          and (coalesce(p.team_year,\'\') != coalesce(sda.team_year,\'\')
+                                                or coalesce(p.incoming_quarter_id,\'\') != coalesce(sda.incoming_quarter_id,\'\')
+                                                or coalesce(p.is_reviewer,\'\') != coalesce(sda.is_reviewer,\'\'))',
+                            [$r->id]);
+                        $tm_id = $r->team_member_id;
+                        $person_id = $r->person_id;
+                    };
+
+                    // Create team member data row
+                    DB::insert('insert into team_members_data
+                                    (team_member_id, at_weekend, xfer_out, xfer_in, ctw, withdraw_code_id, travel, room, comment,
+                                    gitw, tdo, stats_report_id, created_at, updated_at)
+                                select ?, atWeekend, xfer_in, xfer_out, ctw, withdrawCode, travel, room, comment,
+                                    gitw, tdo, ?, sysdate(), sysdate()
+                                from submission_data_team_members
+                                where center_id=? and reporting_date=?',
+                            [$tm_id, $statsReport->id, $center->id, $reportingDate->toDateString()]);
+                    $tmd_id = DB::getPdo()->lastInsertId();
+                    $debug_message .= ' last_tmd_id=' . $tmd_id;
+                }
+            }// end team member processing
+
             // Insert data rows for any team members that have withdrawn and weren't updated this week
-			if (!$isFirstWeek) {
-              DB::insert('INSERT INTO team_members_data
-                    (team_member_id, at_weekend, xfer_out, xfer_in, ctw, withdraw_code_id,
-                    travel, room, comment, gitw, tdo, stats_report_id, created_at, updated_at)
-                SELECT  tmd.team_member_id, tmd.at_weekend, tmd.xfer_out, tmd.xfer_in, tmd.ctw,
-                        tmd.withdraw_code_id, tmd.travel, tmd.room, tmd.comment, tmd.gitw, tmd.tdo,
-                        ?, sysdate(), sysdate()
-                FROM team_members_data tmd
-                INNER JOIN stats_reports sr ON sr.id = tmd.stats_report_id
-                INNER JOIN global_report_stats_report grsr ON grsr.stats_report_id = tmd.stats_report_id
-                WHERE
-                    sr.center_id = ?
-                    AND sr.reporting_date = ?
-                    AND tmd.withdraw_code_id IS NOT NULL
-                    AND tmd.team_member_id NOT IN (SELECT team_member_id FROM team_members_data WHERE stats_report_id = ?)',
-                [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
-			}
-			
-			
-			//Insert course data
-			$result = DB::select('select i.* from submission_data_courses i
+            if (!$isFirstWeek) {
+                DB::insert('INSERT INTO team_members_data
+                        (team_member_id, at_weekend, xfer_out, xfer_in, ctw, withdraw_code_id,
+                        travel, room, comment, gitw, tdo, stats_report_id, created_at, updated_at)
+                    SELECT  tmd.team_member_id, tmd.at_weekend, tmd.xfer_out, tmd.xfer_in, tmd.ctw,
+                            tmd.withdraw_code_id, tmd.travel, tmd.room, tmd.comment, tmd.gitw, tmd.tdo,
+                            ?, sysdate(), sysdate()
+                    FROM team_members_data tmd
+                    INNER JOIN stats_reports sr ON sr.id = tmd.stats_report_id
+                    INNER JOIN global_report_stats_report grsr ON grsr.stats_report_id = tmd.stats_report_id
+                    WHERE
+                        sr.center_id = ?
+                        AND sr.reporting_date = ?
+                        AND tmd.withdraw_code_id IS NOT NULL
+                        AND tmd.team_member_id NOT IN (SELECT team_member_id FROM team_members_data WHERE stats_report_id = ?)',
+                    [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
+            }
+
+            //Insert course data
+            $result = DB::select('select i.* from submission_data_courses i
                                        where i.center_id=?  and i.reporting_date=? and i.course_id<0',
                 [$center->id, $reportingDate->toDateString()]);
-			foreach ($result as $r) {
-				    DB::insert('insert into  courses
+            foreach ($result as $r) {
+                    DB::insert('insert into  courses
                                     ( id, start_date, type, location, center_id,  created_at, updated_at)
                                         select null, i.start_date, i.type, i.location, i.center_id,  sysdate(), sysdate()
                                     from submission_data_courses i where i.id=?',
                         [$r->id]);
                     $new_course_id = DB::getPdo()->lastInsertId();
                     $debug_message .= ' new_course_id=' . $new_course_id;
-					DB::update(
-					'update submission_data set stored_id=? where id=?',
-					[$new_course_id,$r->id]);
-			}
-			$affected = DB::insert(
-				'insert into courses_data
-					(id, course_id, quarter_start_ter, quarter_start_standard_starts, quarter_start_xfer, current_ter, current_standard_starts, current_xfer, completed_standard_starts, potentials, registrations, guests_promised, guests_invited, guests_confirmed, guests_attended, stats_report_id, created_at, updated_at)
-				 select null, course_id, quarter_start_ter, quarter_start_standard_starts, 	quarter_start_xfer, current_ter, current_standard_starts, current_xfer, completed_standard_starts, potentials, registrations, guests_promised, guests_invited, guests_confirmed, guests_attended, ?, sysdate(),sysdate()
-				 from submission_data_courses where center_id=? and reporting_date=?',
-				[$statsReport->id, $center->id, $reportingDate->toDateString()]);
-			$debug_message .= ' upd_courses_rows=' . $affected;	
-			
-			if (!$isFirstWeek) {
-			$affected = DB::insert(
-				'insert into courses_data
-					(id, course_id, quarter_start_ter, quarter_start_standard_starts, quarter_start_xfer, current_ter, current_standard_starts, current_xfer, completed_standard_starts, potentials, registrations, guests_promised, guests_invited, guests_confirmed, guests_attended, stats_report_id, created_at, updated_at)
-				 select null, course_id, quarter_start_ter, quarter_start_standard_starts, 	quarter_start_xfer, current_ter, current_standard_starts, current_xfer, completed_standard_starts, potentials, registrations, guests_promised, guests_invited, guests_confirmed, guests_attended, ?, sysdate(),sysdate()
-				 from courses_data
-						where stats_report_id in 
-							(select id from global_report_stats_report gr, stats_reports s 
-									where gr.stats_report_id=s.id 
-										and s.reporting_date=? and 
-										s.center_id=?
-							)
-							and course_id not in 
-								(select course_id from submission_data_courses 
-									where center_id=? and reporting_date=?)',
-				[$statsReport->id,$lastStatsReportDate->toDateString(),$center->id,
-			      $center->id,$reportingDate->toDateString()]);
-			}
-			// Process accountabilities
-			// Insert all new ones 
-			$affected = DB::insert(
-			'insert into accountability_person 
-				(person_id, accountability_id, starts_at, ends_at, created_at, updated_at);
-					select person_id, accountability_id, sysdate(), ?, sysdate(), sysdate()
-						from submission_data_accountabilities a 
-						where a.center_id=? and a.reporting_date=?
-							and (a.person_id, a.accountability_id) not in 
-							(select ap.person_id, ap.accountability_id 
-								from accountability_person ap where ap.starts_at>=?
-							and (ap.ends_at is null or ap.ends_at>=sysdate()));'
-			,[ $quarterEndDate, $center->id,$reportingDate->toDateString(),$quarterStartDate ]);
-			// End date any accounabilities that were reassigned
-			// End date any one sthat were removed and not reassigned 
-			
+
+                    // Update submission_data with new id so we don't overwrite if the report is resubmitted
+                    DB::update('update submission_data set stored_id=?, data = JSON_SET(data, "$.id", ?) where id=?', [$new_course_id, $new_course_id, $r->id]);
+            }
+            $affected = DB::insert(
+                'insert into courses_data
+                    (id, course_id, quarter_start_ter, quarter_start_standard_starts, quarter_start_xfer, current_ter, current_standard_starts, current_xfer, completed_standard_starts, potentials, registrations, guests_promised, guests_invited, guests_confirmed, guests_attended, stats_report_id, created_at, updated_at)
+                 select null, course_id, quarter_start_ter, quarter_start_standard_starts,  quarter_start_xfer, current_ter, current_standard_starts, current_xfer, completed_standard_starts, potentials, registrations, guests_promised, guests_invited, guests_confirmed, guests_attended, ?, sysdate(),sysdate()
+                 from submission_data_courses where center_id=? and reporting_date=?',
+                [$statsReport->id, $center->id, $reportingDate->toDateString()]);
+            $debug_message .= ' upd_courses_rows=' . $affected;
+
+            if (!$isFirstWeek) {
+                $affected = DB::insert(
+                    'insert into courses_data
+                        (id, course_id, quarter_start_ter, quarter_start_standard_starts, quarter_start_xfer, current_ter, current_standard_starts, current_xfer, completed_standard_starts, potentials, registrations, guests_promised, guests_invited, guests_confirmed, guests_attended, stats_report_id, created_at, updated_at)
+                     select null, course_id, quarter_start_ter, quarter_start_standard_starts,  quarter_start_xfer, current_ter, current_standard_starts, current_xfer, completed_standard_starts, potentials, registrations, guests_promised, guests_invited, guests_confirmed, guests_attended, ?, sysdate(),sysdate()
+                     from courses_data
+                            where stats_report_id in
+                                (select id from global_report_stats_report gr, stats_reports s
+                                        where gr.stats_report_id=s.id
+                                            and s.reporting_date=? and
+                                            s.center_id=?
+                                )
+                                and course_id not in
+                                    (select course_id from submission_data_courses
+                                        where center_id=? and reporting_date=?)',
+                    [$statsReport->id,$lastStatsReportDate->toDateString(),$center->id,
+                      $center->id,$reportingDate->toDateString()]);
+            }
+            // Process accountabilities
+            // Insert all new ones
+            $affected = DB::insert(
+                'insert into accountability_person
+                    (person_id, accountability_id, starts_at, ends_at, created_at, updated_at)
+                select person_id, accountability_id, sysdate(), ?, sysdate(), sysdate()
+                from submission_data_accountabilities a
+                where a.center_id=? and a.reporting_date=?
+                    and (a.person_id, a.accountability_id) not in
+                    (select ap.person_id, ap.accountability_id
+                        from accountability_person ap where ap.starts_at>=?
+                    and (ap.ends_at is null or ap.ends_at>=sysdate()));'
+                ,[ $quarterEndDate, $center->id,$reportingDate->toDateString(),$quarterStartDate ]);
+            // End date any accounabilities that were reassigned
+            // End date any one sthat were removed and not reassigned
+
             // Mark stats report as 'official'
             $globalReport = Models\GlobalReport::firstOrCreate([
                 'reporting_date' => $reportingDate,
             ]);
             $globalReport->addCenterReport($statsReport);
         } catch (\Exception $e) {
-			DB::rollback();
+            DB::rollback();
             return [
                 'success' => false,
                 'id' => $center->id,
