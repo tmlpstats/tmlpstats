@@ -371,17 +371,20 @@ class SubmissionCore extends AuthenticatedApiBase
             }
             // Process accountabilities
             // Insert all new ones
-            $affected = DB::insert(
-                'insert into accountability_person
-                    (person_id, accountability_id, starts_at, ends_at, created_at, updated_at)
-                select person_id, accountability_id, sysdate(), ?, sysdate(), sysdate()
-                from submission_data_accountabilities a
-                where a.center_id=? and a.reporting_date=?
-                    and (a.person_id, a.accountability_id) not in
-                    (select ap.person_id, ap.accountability_id
-                        from accountability_person ap where ap.starts_at>=?
-                    and (ap.ends_at is null or ap.ends_at>=sysdate()));'
-                ,[ $quarterEndDate, $center->id,$reportingDate->toDateString(),$quarterStartDate ]);
+            //
+            // TODO: uncomment and fixme
+            //
+            // $affected = DB::insert(
+            //     'insert into accountability_person
+            //         (person_id, accountability_id, starts_at, ends_at, created_at, updated_at)
+            //     select person_id, accountability_id, sysdate(), ?, sysdate(), sysdate()
+            //     from submission_data_accountabilities a
+            //     where a.center_id=? and a.reporting_date=?
+            //         and (a.person_id, a.accountability_id) not in
+            //         (select ap.person_id, ap.accountability_id
+            //             from accountability_person ap where ap.starts_at<=?
+            //         and (ap.ends_at is null or ap.ends_at>=sysdate()));'
+            //     ,[ $quarterEndDate, $center->id,$reportingDate->toDateString(),$quarterStartDate ]);
             // End date any accounabilities that were reassigned
             // End date any one sthat were removed and not reassigned
 
