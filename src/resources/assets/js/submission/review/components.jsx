@@ -144,7 +144,7 @@ export default class Review extends SubmissionBase {
                 <h3>Review</h3>
                 <ul>{categories}</ul>
                 <div>
-                    <Alert alert="warning">&nbsp;Submission is new and we still adding the finishing touches. Let us know using the "Feedback" tab on the left if anything doesn't look right.</Alert>
+                    <Alert alert="warning">&nbsp;Submission is new and we are still adding the finishing touches. Let us know using the "Feedback" tab on the left if anything doesn't look right.</Alert>
                     <button type="button" className="btn btn-primary btn-lg" onClick={this.displayPreSubmitModal}>Submit Report</button>
                 </div>
                 {modal}
