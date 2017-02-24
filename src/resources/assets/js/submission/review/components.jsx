@@ -18,14 +18,14 @@ export default class Review extends SubmissionBase {
         return state.submission
     }
 
-    static onRouteEnter(nextState, replace) {
+    static onRouteEnter(nextState) {
         const { store } = require('../../store')
         store.dispatch(getValidationMessages(nextState.params.centerId, nextState.params.reportingDate))
     }
 
     constructor(props) {
         super(props)
-        rebind(this, 'displayPreSubmitModal', 'hidePreSubmitModal', 'displayPostSubmitModal', 'hidePostSubmitModal', 'onSubmit', 'completeSubmission')
+        rebind(this, 'displayPreSubmitModal', 'hidePreSubmitModal', 'onSubmit', 'completeSubmission', 'failSubmission')
     }
 
     checkLoading() {
@@ -83,8 +83,6 @@ export default class Review extends SubmissionBase {
                 message: err,
                 isSuccess: false,
             }))
-            // There is a more reduxy way to do this, which we can do later, this method works.
-            window.location.reload()
         })
 
         this.hidePreSubmitModal()
@@ -94,6 +92,12 @@ export default class Review extends SubmissionBase {
     completeSubmission() {
         const { centerId, reportingDate } = this.props.params
         window.location.href = `/reports/centers/${centerId}/${reportingDate}`
+    }
+
+    failSubmission() {
+        this.hidePostSubmitModal()
+        // There is a more reduxy way to do this, which we can do later, this method works.
+        window.location.reload()
     }
 
     render() {
@@ -125,7 +129,7 @@ export default class Review extends SubmissionBase {
         } else if (showPostSubmitModal && submitResults) {
             let dismiss = this.completeSubmission
             if (!submitResults.isSuccess) {
-                dismiss = this.hidePostSubmitModal
+                dismiss = this.failSubmission
             }
             modal = (
                 <PostSubmitModal dismiss={dismiss}
@@ -140,7 +144,7 @@ export default class Review extends SubmissionBase {
                 <h3>Review</h3>
                 <ul>{categories}</ul>
                 <div>
-                    <Alert alert="warning">Submission is in extreme beta. Note you may need to refresh this page after submitting, which is not the long-term intent.</Alert>
+                    <Alert alert="warning">&nbsp;Submission is new and we still adding the finishing touches. Let us know using the "Feedback" tab on the left if anything doesn't look right.</Alert>
                     <button type="button" className="btn btn-primary btn-lg" onClick={this.displayPreSubmitModal}>Submit Report</button>
                 </div>
                 {modal}
