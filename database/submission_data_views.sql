@@ -1,8 +1,8 @@
 CREATE or replace VIEW `submission_data_scoreboard` AS
     SELECT 
         'actual' AS `type`,
-        a.data->>'$.games.cap.actual' AS `cap`,
         a.data->>'$.games.cpc.actual' AS `cpc`,
+        a.data->>'$.games.cap.actual' AS `cap`,
         a.data->>'$.games.t1x.actual' AS `t1x`,
         a.data->>'$.games.t2x.actual' AS `t2x`,
         a.data->>'$.games.gitw.actual' AS `gitw`,
@@ -213,16 +213,20 @@ CREATE OR REPLACE VIEW submission_data_accountabilities AS
         a.id,
         a.center_id,
         a.reporting_date,
-        accountabilities.id accountability_id,
+        b.id accountability_id,
         a.team_member_id,
-        t.person_id
-    FROM
-        submission_data_team_members a,
-        accountabilities,
-        team_members t
+        c.person_id
+    FROM        
+        submission_data_team_members a
+            LEFT OUTER JOIN
+               team_members c ON a.team_member_id = c.id
+			JOIN accountabilities b
     WHERE
-       json_contains(a.accountabilities,concat('"',accountabilities.id,'"'))=1
-       and t.id=a.team_member_id;
+        FIND_IN_SET(b.id,
+                REPLACE(REPLACE(a.accountabilities, '[', ''),
+                    ']',
+                    ''))
+;
 
 
 CREATE OR REPLACE

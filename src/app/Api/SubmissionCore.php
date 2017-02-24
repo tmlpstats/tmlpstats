@@ -102,6 +102,9 @@ class SubmissionCore extends AuthenticatedApiBase
 
             $lastStatsReportDate = $reportingDate->copy()->subWeek();
 			
+			$quarterStartDate = $statsReport->quarter->getQuarterStartDate($statsReport->center);
+			$quarterEndDate = $statsReport->quarter->getQuarterEndDate($statsReport->center);
+			
 			$isFirstWeek = $statsReport->reportingDate->eq($statsReport->quarter->getFirstWeekDate($statsReport->center));
 
             $debug_message .= ' sr_id=' . $statsReport->id;
@@ -143,7 +146,8 @@ class SubmissionCore extends AuthenticatedApiBase
                                         on r.id=i.stored_id
                                     where i.center_id=?  and i.reporting_date=?;',
                 [$center->id, $reportingDate->toDateString()]);
-            foreach ($result as $r) {
+			if ( !empty($result) ) {
+              foreach ($result as $r) {
                 if ($r->stored_id < 0) {
                     DB::insert('insert into  people
                                     ( id, first_name, last_name, email, center_id, identifier, unsubscribed, created_at, updated_at)
@@ -201,7 +205,8 @@ class SubmissionCore extends AuthenticatedApiBase
 
                 $trd_id = DB::getPdo()->lastInsertId();
                 $debug_message .= ' trd_id=' . $trd_id;
-            } // end application processing
+              }
+			}// end application processing
 
             // Insert data rows for any applications that weren't updated this week
 			if (!$isFirstWeek) {
@@ -227,6 +232,7 @@ class SubmissionCore extends AuthenticatedApiBase
             $result = DB::select('select i.* from submission_data_team_members i
                                        where i.team_member_id<0 and i.center_id=?  and i.reporting_date=?;',
                 [$center->id, $reportingDate->toDateString()]);
+			if (!empty($result)) {	
             foreach ($result as $r) {
                 if ($r->stored_id < 0) 
 				{
@@ -248,6 +254,7 @@ class SubmissionCore extends AuthenticatedApiBase
 
                     DB::update('update submission_data set stored_id=? where id=?', [$reg_id, $r->id]);
                 }  // end new team members processing
+			  }
 			}
 			
 			$affected = DB::insert('insert into people 
@@ -296,6 +303,7 @@ class SubmissionCore extends AuthenticatedApiBase
                 [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
 			}
 			
+			
 			//Insert course data
 			$result = DB::select('select i.* from submission_data_courses i
                                        where i.center_id=?  and i.reporting_date=? and i.course_id<0',
@@ -338,12 +346,29 @@ class SubmissionCore extends AuthenticatedApiBase
 				[$statsReport->id,$lastStatsReportDate->toDateString(),$center->id,
 			      $center->id,$reportingDate->toDateString()]);
 			}
+			// Process accountabilities
+			// Insert all new ones 
+			$affected = DB::insert(
+			'insert into accountability_person 
+				(person_id, accountability_id, starts_at, ends_at, created_at, updated_at);
+					select person_id, accountability_id, sysdate(), ?, sysdate(), sysdate()
+						from submission_data_accountabilities a 
+						where a.center_id=? and a.reporting_date=?
+							and (a.person_id, a.accountability_id) not in 
+							(select ap.person_id, ap.accountability_id 
+								from accountability_person ap where ap.starts_at>=?
+							and (ap.ends_at is null or ap.ends_at>=sysdate()));'
+			,[ $quarterEndDate, $center->id,$reportingDate->toDateString(),$quarterStartDate ]);
+			// End date any accounabilities that were reassigned
+			// End date any one sthat were removed and not reassigned 
+			
             // Mark stats report as 'official'
             $globalReport = Models\GlobalReport::firstOrCreate([
                 'reporting_date' => $reportingDate,
             ]);
             $globalReport->addCenterReport($statsReport);
         } catch (\Exception $e) {
+			DB::rollback();
             return [
                 'success' => false,
                 'id' => $center->id,
