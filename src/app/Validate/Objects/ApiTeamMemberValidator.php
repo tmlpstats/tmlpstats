@@ -2,6 +2,7 @@
 namespace TmlpStats\Validate\Objects;
 
 use Respect\Validation\Validator as v;
+use TmlpStats as Models;
 use TmlpStats\Traits;
 
 class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
@@ -53,6 +54,10 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
         if (!$this->validateTravel($data)) {
             $this->isValid = false;
         }
+        // TODO: enable and add unit tests
+        // if (!$this->validateAccountabilities($data)) {
+        //     $this->isValid = false;
+        // }
 
         return $this->isValid;
     }
@@ -155,7 +160,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
                 'ref' => $data->getReference(['field' => $data->xferIn ? 'xferIn' : 'xferOut']),
             ]);
 
-            if (is_null($data->comment)) {
+            if (!$data->comment) {
                 $this->addMessage('error', [
                     'id' => 'CLASSLIST_XFER_COMMENT_MISSING',
                     'ref' => $data->getReference(['field' => 'comment']),
@@ -180,7 +185,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
         }
 
         if (!is_null($data->withdrawCodeId)) {
-            if (is_null($data->comment)) {
+            if (!$data->comment) {
                 $this->addMessage('error', [
                     'id' => 'CLASSLIST_WD_COMMENT_MISSING',
                     'ref' => $data->getReference(['field' => 'comment']),
@@ -188,7 +193,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
                 $isValid = false;
             }
         } else if ($data->ctw) {
-            if (is_null($data->comment)) {
+            if (!$data->comment) {
                 $this->addMessage('error', [
                     'id' => 'CLASSLIST_CTW_COMMENT_MISSING',
                     'ref' => $data->getReference(['field' => 'comment']),
@@ -238,6 +243,53 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
                         'id' => 'CLASSLIST_ROOM_COMMENT_REVIEW',
                         'ref' => $data->getReference(['field' => 'comment']),
                     ]);
+                }
+            }
+        }
+
+        return $isValid;
+    }
+
+    public function validateAccountabilities($data)
+    {
+        $isValid = true;
+        if (!$data->accountabilities) {
+            return $isValid;
+        }
+
+        if (!is_null($data->withdrawCodeId) || $data->xferOut) {
+            $this->addMessage('error', [
+                'id' => 'CLASSLIST_ACCOUNTABLE_AND_WITHDRAWN',
+                'ref' => $data->getReference(['field' => 'email']),
+            ]);
+            // We don't need to ask for contact info if they shouldn't be accountable
+            return false;
+        }
+
+        $requiresContact = [4, 5, 6, 7, 8, 9];
+        foreach ($data->accountabilities as $accountability) {
+            if (in_array($accountability, $requiresContact)) {
+                if (!$data->phone) {
+                    $this->addMessage('error', [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_PHONE_MISSING',
+                        'ref' => $data->getReference(['field' => 'phone']),
+                        'params' => ['accountability' => Models\Accountability::find($accountability)->display],
+                    ]);
+                    $isValid = false;
+                }
+
+                if (!$data->email) {
+                    $this->addMessage('error', [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_EMAIL_MISSING',
+                        'ref' => $data->getReference(['field' => 'email']),
+                        'params' => ['accountability' => Models\Accountability::find($accountability)->display],
+                    ]);
+                    $isValid = false;
+                }
+
+                if (!$isValid) {
+                    // we only need one message
+                    break;
                 }
             }
         }

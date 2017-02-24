@@ -50,11 +50,11 @@ class CoursesIndexView extends CoursesBase {
         const baseUri = this.baseUri()
         const completed = []
 
-        courses.forEach((course, key) => {
+        courses.forEach((course) => {
             const startDate = moment(course.startDate)
             completed.push(
-                <tr key={key}>
-                    <td><Link to={`${baseUri}/courses/edit/${key}`}>{startDate.format('MMM D, YYYY')}</Link></td>
+                <tr key={course.id}>
+                    <td><Link to={`${baseUri}/courses/edit/${course.id}`}>{startDate.format('MMM D, YYYY')}</Link></td>
                     <td className="data-point">{courseTypeMap[course.type]}</td>
                     <td>{this.getCourseLocation(course)}</td>
                     <td className="data-point">{course.currentTer}</td>
@@ -99,7 +99,7 @@ class CoursesIndexView extends CoursesBase {
         coursesCollection.iterItems(this.props.courses, (course, key) => {
             const location = this.getCourseLocation(course)
             const startDate = moment(course.startDate)
-            const ter = course.currentTer || '-'
+            const qss = course.quarterStartStandardStarts || '-'
             const ss = course.currentStandardStarts || '-'
             const guestsConfirmed = course.guestsConfirmed || '-'
 
@@ -114,7 +114,7 @@ class CoursesIndexView extends CoursesBase {
                     <td><Link to={`${baseUri}/courses/edit/${key}`}>{startDate.format('MMM D, YYYY')}</Link></td>
                     <td className="data-point">{courseTypeMap[course.type]}</td>
                     <td>{location}</td>
-                    <td className="data-point">{ter}</td>
+                    <td className="data-point">{qss}</td>
                     <td className="data-point">{ss}</td>
                     <td className="data-point">{guestsConfirmed}</td>
                 </tr>
@@ -131,7 +131,7 @@ class CoursesIndexView extends CoursesBase {
                             <th style={{width: '8em'}}>Date</th>
                             <th className="data-point">Type</th>
                             <th>Location</th>
-                            <th className="data-point">Total Ever Registered</th>
+                            <th className="data-point">Quarter Starting Standard Starts</th>
                             <th className="data-point">Standard Starts</th>
                             <th className="data-point">Guests Confirmed</th>
                         </tr>

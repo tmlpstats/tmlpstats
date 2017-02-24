@@ -92,6 +92,7 @@ class ApplicationsIndexView extends ApplicationsBase {
                     <td><Link to={`${baseUri}/applications/edit/${key}`}>{app.firstName} {app.lastName}</Link></td>
                     <td>{app.teamYear}</td>
                     <td>{app.regDate}</td>
+                    <td>{app.apprDate}</td>
                     <td>{status}</td>
                 </tr>
             )
@@ -108,6 +109,7 @@ class ApplicationsIndexView extends ApplicationsBase {
                             <th>Name</th>
                             <th>Year</th>
                             <th>Registered</th>
+                            <th>Approved</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -252,7 +254,7 @@ class ApplicationsEditView extends _EditCreate {
             if (!this.props.currentApp || this.props.currentApp.id != appId) {
                 let app = this.getAppById(appId)
                 if (app){
-                    app = objectAssign({}, app, {committedTeamMember: app.committedTeamMember || null})
+                    app = objectAssign({}, app, {committedTeamMember: app.committedTeamMember || undefined})
                     this.props.dispatch(chooseApplication(appId, app))
                 }
             }
