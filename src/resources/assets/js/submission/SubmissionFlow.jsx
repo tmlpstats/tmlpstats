@@ -6,7 +6,7 @@ export default function SubmissionFlow() {
     return (
         <Route path="/center/:centerId/submission/:reportingDate" component={Pages.SubmissionFlowRoot}>
             <IndexRedirect to="scoreboard" />
-            <Route path="scoreboard" component={Pages.Scoreboard} />
+            <Route path="scoreboard" component={Pages.Scoreboard} onEnter={Pages.Scoreboard.onRouteEnter} />
             <Route path="applications" component={Pages.ApplicationsIndex} />
             <Route path="applications/edit/:appId" component={Pages.ApplicationsEdit} />
             <Route path="applications/add" component={Pages.ApplicationsAdd} />

@@ -14,10 +14,18 @@ import { SubmissionBase } from '../base_components'
 import { loadScoreboard, saveScoreboards } from './actions'
 import { SCOREBOARDS_FORM_KEY } from './data'
 
+import { getValidationMessages } from '../review/actions'
+
 /**
  * SubmissionScoreboard is the root component for rendering the scoreboard view.
  */
 class SubmissionScoreboard extends SubmissionBase {
+
+    static onRouteEnter(nextState) {
+        const { store } = require('../../store')
+        store.dispatch(getValidationMessages(nextState.params.centerId, nextState.params.reportingDate))
+    }
+
     constructor(props) {
         super(props)
         rebind(this, 'checkToSave')

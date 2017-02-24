@@ -78,7 +78,7 @@ class TeamMembersIndexView extends TeamMembersBase {
             withdrawTable = (
                 <div>
                 <br/>
-                    <h4>Withdraws</h4>
+                    <h4>Withdraws/Transfers</h4>
                     <table className="table">
                         <thead>
                             <tr>
@@ -324,31 +324,31 @@ class _EditCreate extends TeamMembersBase {
         case 'xferOut':
             content = (
                 <div>
-                    <Alert alert="info">{EXIT_CHOICES_HELP.xferOut}</Alert>
+                    <Alert alert="info">&nbsp;{EXIT_CHOICES_HELP.xferOut}</Alert>
                 </div>
             )
             break
         case 'wbo':
             content = (
                 <div>
-                    <Alert alert="info">{EXIT_CHOICES_HELP.wbo}</Alert>
+                    <Alert alert="info">&nbsp;{EXIT_CHOICES_HELP.wbo}</Alert>
                     <CheckBox model={modelKey+'.rereg'} label="Rereg" />
                 </div>
             )
             break
         case 'ctw':
             content = (
-                <Alert alert="info">{EXIT_CHOICES_HELP.ctw}</Alert>
+                <Alert alert="info">&nbsp;{EXIT_CHOICES_HELP.ctw}</Alert>
             )
             break
         case 'wd':
             content = (
                 <div>
-                    <Alert alert="info">{EXIT_CHOICES_HELP.wd}</Alert>
+                    <Alert alert="info">&nbsp;{EXIT_CHOICES_HELP.wd}</Alert>
                     <label>Withdraw Reason</label>
                     <SimpleSelect
                             model={modelKey+'.withdrawCode'} items={this.props.lookups.withdraw_codes}
-                            labelProp="display" keyProp="id" />
+                            labelProp="display" keyProp="id" emptyChoice=" " />
                 </div>
             )
             break
@@ -425,6 +425,9 @@ class TeamMembersEditView extends _EditCreate {
         if (!currentMember || currentMember.id != params.teamMemberId) {
             const item = teamMembers.data.collection[params.teamMemberId]
             if (item) {
+                if (item.exitChoice == 'wd' && !item.withdrawCode) {
+                    item.exitChoice = ''
+                }
                 delayDispatch(dispatch, actions.chooseTeamMember(item))
             }
             return false
@@ -460,7 +463,7 @@ class TeamMembersEditView extends _EditCreate {
     }
 
     renderContent(modelKey, options) {
-        const column = (this.props.browser.greaterThan.huge)? 'col-lg-6' : 'col-lg-12'
+        const column = (this.props.browser.greaterThan.huge) ? 'col-lg-6' : 'col-lg-12'
         const className = column + ' tmBox'
 
         return (
