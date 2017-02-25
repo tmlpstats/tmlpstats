@@ -927,6 +927,9 @@ class GlobalReportController extends ReportDispatchAbstractController
             }
 
             $gameData = $this->getGamesByCenter($globalReport, $reportRegion, true);
+            if (!$gameData) {
+                continue;
+            }
 
             $scoreboard = Domain\Scoreboard::fromArray([
                 'week' => $globalReport->reportingDate->toDateString(),
