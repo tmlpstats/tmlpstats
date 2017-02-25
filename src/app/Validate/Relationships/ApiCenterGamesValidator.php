@@ -1,10 +1,8 @@
 <?php
 namespace TmlpStats\Validate\Relationships;
 
-use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
-use TmlpStats\Api;
 use TmlpStats\Domain;
 use TmlpStats\Validate\ApiValidatorAbstract;
 
@@ -169,7 +167,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
             }
         }
 
-        $approvedCounts = $this->getQuarterStartingApprovedCounts();
+        $approvedCounts = $this->getQuarterStartingApprovedCounts($teamApplicationData);
 
         return [
             't1x' => $t1CurrentApproved - $approvedCounts['t1x'],
@@ -177,43 +175,30 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         ];
     }
 
-    protected function getQuarterStartingApprovedCounts()
+    protected function getQuarterStartingApprovedCounts($teamApplicationData)
     {
-        // toArray is done here to deal with an interesting issue with parsing dates before 1900
-        $centerQuarter = Domain\CenterQuarter::ensure($this->center, $this->quarter)->toArray();
+        $centerQuarter = $this->getCenterQuarterDates();
 
         $counts = ['t1x' => 0, 't2x' => 0];
 
         $startWeekendDate = Carbon::parse($centerQuarter['startWeekendDate']);
 
-        $firstReport = Models\StatsReport::byCenter($this->center)
-            ->reportingDate($startWeekendDate->copy()->addWeek())
-            ->official()
-            ->first();
-
-        if ($firstReport) {
-            $items = $firstReport
-                ->tmlpRegistrationData()
-                ->where('appr_date', '<=', $startWeekendDate)
-                ->get()
-                ->map(function ($app) {
-                    return $app->registration->teamYear;
-                });
-        } else {
-            // When it's the first week, we don't have counts, so use the stash data.
-            $result = App::make(Api\Application::class)->allForCenter($this->center, $this->reportingDate, true);
-
-            $items = collect($result)->filter(function ($teamApp) use ($startWeekendDate) {
-                return $teamApp->apprDate !== null && $teamApp->apprDate->lte($startWeekendDate);
-            })->map(function ($teamApp) {
-                return $teamApp->teamYear;
-            });
-        }
+        $items = collect($teamApplicationData)->filter(function ($teamApp) use ($startWeekendDate) {
+            return $teamApp->apprDate !== null && $teamApp->apprDate->lte($startWeekendDate);
+        })->map(function ($teamApp) {
+            return $teamApp->teamYear;
+        });
 
         foreach ($items->all() as $teamYear) {
             $counts["t${teamYear}x"] += 1;
         }
 
         return $counts;
+    }
+
+    protected function getCenterQuarterDates()
+    {
+        // toArray is done here to deal with an interesting issue with parsing dates before 1900
+        return Domain\CenterQuarter::ensure($this->center, $this->quarter)->toArray();
     }
 }
