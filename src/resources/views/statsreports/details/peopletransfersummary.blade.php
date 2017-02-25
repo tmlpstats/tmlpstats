@@ -32,7 +32,7 @@
                             <td class="data-point">Q{{ $member->quarterNumber }}</td>
                             <td>{{ $type }}</td>
                             <td {!! ($type == 'changed') ? 'class="bg-warning"' : '' !!}><?php
-                                if ($type == 'new' && $old) {
+                                if ($type == 'new' && $old && $old->withdrawCode) {
                                     echo 'Withdrawn last quarter: ' . $old->withdrawCode->display;
                                 } else if ($type == 'changed' && $new->incomingQuarter->id != $old->incomingQuarter->id) {
                                     // Quarter number is calculated based on the current report date. That means when we get the quarter number
