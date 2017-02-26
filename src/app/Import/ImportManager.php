@@ -265,6 +265,7 @@ class ImportManager
         $quarter = $statsReport->quarter;
         $center  = $statsReport->center;
         $region  = $center->region;
+        $reportingDate = $statsReport->reportingDate;
 
         $submittedAt = $statsReport->submittedAt->copy()->setTimezone($center->timezone);
 
@@ -273,12 +274,14 @@ class ImportManager
 
         $isLate = $submittedAt->gt($due);
 
-        $programManager         = $center->getProgramManager($quarter);
-        $classroomLeader        = $center->getClassroomLeader($quarter);
-        $t1TeamLeader           = $center->getT1TeamLeader($quarter);
-        $t2TeamLeader           = $center->getT2TeamLeader($quarter);
-        $statistician           = $center->getStatistician($quarter);
-        $statisticianApprentice = $center->getStatisticianApprentice($quarter);
+        $reportNow = $reportingDate->copy()->setTime(15, 0, 0);
+
+        $programManager         = $center->getProgramManager($reportNow);
+        $classroomLeader        = $center->getClassroomLeader($reportNow);
+        $t1TeamLeader           = $center->getT1TeamLeader($reportNow);
+        $t2TeamLeader           = $center->getT2TeamLeader($reportNow);
+        $statistician           = $center->getStatistician($reportNow);
+        $statisticianApprentice = $center->getStatisticianApprentice($reportNow);
 
         $emailMap = [
             'center'                 => $center->statsEmail,
@@ -351,7 +354,6 @@ class ImportManager
         $sheetName     = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
         $centerName    = $center->name;
         $comment       = $statsReport->submitComment;
-        $reportingDate = $statsReport->reportingDate;
         try {
             Mail::send('emails.statssubmitted',
                 compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'isResubmitted', 'due', 'comment',

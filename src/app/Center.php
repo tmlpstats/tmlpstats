@@ -28,37 +28,37 @@ class Center extends Model
         'active' => 'bool',
     );
 
-    public function getProgramManager($date = null)
+    public function getProgramManager(Carbon $date = null)
     {
         return $this->getAccountable('programManager', $date);
     }
 
-    public function getClassroomLeader($date = null)
+    public function getClassroomLeader(Carbon $date = null)
     {
         return $this->getAccountable('classroomLeader', $date);
     }
 
-    public function getT1TeamLeader($date = null)
+    public function getT1TeamLeader(Carbon $date = null)
     {
         return $this->getAccountable('t1tl', $date);
     }
 
-    public function getT2TeamLeader($date = null)
+    public function getT2TeamLeader(Carbon $date = null)
     {
         return $this->getAccountable('t2tl', $date);
     }
 
-    public function getStatistician($date = null)
+    public function getStatistician(Carbon $date = null)
     {
         return $this->getAccountable('statistician', $date);
     }
 
-    public function getStatisticianApprentice($date = null)
+    public function getStatisticianApprentice(Carbon $date = null)
     {
         return $this->getAccountable('statisticianApprentice', $date);
     }
 
-    public function getAccountable($accountabilityName, $date = null)
+    public function getAccountable($accountabilityName, Carbon $date = null)
     {
         $accountability = Accountability::name($accountabilityName)->first();
 

@@ -542,9 +542,12 @@ class StatsReportController extends ReportDispatchAbstractController
             'statistician',
             'statisticianApprentice',
         ];
+
+        $reportNow = $statsReport->reportingDate->copy()->setTime(15, 0, 0);
+
         foreach ($accountabilities as $accountability) {
             $accountabilityObj = Models\Accountability::name($accountability)->first();
-            $contacts[$accountabilityObj->display] = $statsReport->center->getAccountable($accountability);
+            $contacts[$accountabilityObj->display] = $statsReport->center->getAccountable($accountability, $reportNow);
         }
         if (!$contacts) {
             return null;

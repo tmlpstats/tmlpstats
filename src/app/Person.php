@@ -196,6 +196,28 @@ class Person extends Model
         }
     }
 
+    public function takeoverAccountability(Accountability $accountability, Carbon $starts = null, Carbon $ends = null)
+    {
+        if ($starts == null) {
+            $starts = Util::now();
+        }
+
+        // Remove accountability from any existing holders
+        DB::update("
+            UPDATE  accountability_person ap
+            INNER JOIN people p ON p.id = ap.person_id
+            SET ap.ends_at = ?
+            WHERE
+                ap.accountability_id = ?
+                AND p.center_id = ?
+                AND (ap.ends_at IS NULL OR ap.ends_at > ?)",
+            [$starts->copy()->subSecond(), $accountability->id, $this->center->id, $starts]
+        );
+
+        // Add accountability
+        $this->addAccountability($accountability, $starts, $ends);
+    }
+
     /**
      * Get the Region where the person's center is located
      *
@@ -238,7 +260,7 @@ class Person extends Model
         return $query->whereCenterId($center->id);
     }
 
-    public function scopeByAccountability($query, $accountability, $when = null)
+    public function scopeByAccountability($query, Accountability $accountability, Carbon $when = null)
     {
         if ($when == null) {
             $when = Util::now();
