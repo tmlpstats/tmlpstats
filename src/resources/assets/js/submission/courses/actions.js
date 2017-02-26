@@ -57,9 +57,9 @@ export function saveCourse(center, reportingDate, data) {
                 return result
             }
 
-            data = objectAssign({}, data, {id: result.storedId, meta: result.meta})
-            dispatch(coursesCollection.replaceItem(data))
-            dispatch(messages.replace(data.id, result.messages))
+            let newData = objectAssign({}, data, {id: result.storedId, meta: result.meta})
+            dispatch(coursesCollection.replaceItem(newData))
+            dispatch(messages.replace(newData.id, result.messages))
 
             // We successfully saved, reset any existing parser messages
             if (!data.id) {
