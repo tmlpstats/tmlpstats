@@ -104,7 +104,6 @@ class SubmissionCore extends AuthenticatedApiBase
             $lastStatsReportDate = $reportingDate->copy()->subWeek();
 
             $reportNow = $reportingDate->copy()->setTime(15, 0, 0);
-            $quarterStartDate = $statsReport->quarter->getQuarterStartDate($statsReport->center)->setTime(15, 0, 0);
             $quarterEndDate = $statsReport->quarter->getQuarterEndDate($statsReport->center)->setTime(14, 59, 59);
 
             $isFirstWeek = $statsReport->reportingDate->eq($statsReport->quarter->getFirstWeekDate($statsReport->center));
