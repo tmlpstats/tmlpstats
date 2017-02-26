@@ -400,7 +400,7 @@ class SubmissionCore extends AuthenticatedApiBase
 
                 $person = Models\Person::find($result[$accountability->id]->person_id);
                 if (!$person) {
-                    // TODO: log an errors?
+                    Log::error("Person {$result[$accountability->id]->person_id} was submitted in accountability_person but doesn't exist.");
                     continue;
                 }
 
