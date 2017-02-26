@@ -246,8 +246,8 @@ class SubmissionCore extends AuthenticatedApiBase
                     if ($r->team_member_id < 0) {
                         // This is a new team member, create the things
                         DB::insert('insert into people
-                                        (first_name, last_name, email, center_id, created_at, updated_at)
-                                    select i.first_name, i.last_name, i.email, i.center_id, sysdate(), sysdate()
+                                        (first_name, last_name, email, phone, center_id, created_at, updated_at)
+                                    select i.first_name, i.last_name, i.email, i.phone, i.center_id, sysdate(), sysdate()
                                     from submission_data_team_members i where i.id=?',
                             [$r->id]);
                         $person_id = DB::getPdo()->lastInsertId();
@@ -270,12 +270,14 @@ class SubmissionCore extends AuthenticatedApiBase
                                         p.first_name=sda.first_name,
                                         p.last_name=sda.last_name,
                                         p.email=sda.email,
+                                        p.phone=sda.phone,
                                         p.updated_at=sysdate()
                                     where p.id=sda.person_id
                                           and sda.id=?
                                           and (coalesce(p.first_name,\'\') != coalesce(sda.first_name,\'\')
                                                 or coalesce(p.last_name,\'\') != coalesce(sda.last_name,\'\')
                                                 or coalesce(p.email,\'\') != coalesce(sda.email,\'\')
+                                                or coalesce(p.phone,\'\') != coalesce(sda.phone,\'\')
                                           )',
                             [$r->id]);
                         DB::update('update team_members p, submission_data_team_members sda

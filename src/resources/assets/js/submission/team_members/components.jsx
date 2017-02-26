@@ -262,6 +262,7 @@ class _EditCreate extends TeamMembersBase {
                 <SimpleField label="Email" model={modelKey+'.email'} divClass="col-md-8" customField={true}>
                     <input type="email" className="form-control" />
                 </SimpleField>
+                <SimpleField label="Phone" model={modelKey+'.phone'} divClass="col-md-6" disabled={disableBasicInfo} />
                 <SimpleFormGroup label="Accountabilities">
                     <FormTypeahead
                             model={modelKey+'.accountabilities'} items={this.props.teamAccountabilities}
