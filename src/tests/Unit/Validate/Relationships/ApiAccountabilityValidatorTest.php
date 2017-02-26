@@ -60,7 +60,10 @@ class ApiAccountabilityValidatorTest extends ApiValidatorTestAbstract
         'comment' => null,
     ];
 
-    public function testRunWithAllValidAccountabilities()
+    /**
+     * @dataProvider providerMissingAccountabilities
+     */
+    public function testRunWithAllValidAccountabilities($missingList)
     {
         $faker = Factory::create();
 
@@ -68,6 +71,10 @@ class ApiAccountabilityValidatorTest extends ApiValidatorTestAbstract
             'TeamMember' => [],
         ];
         foreach ($this->accountabilities as $id => $display) {
+            if (in_array($id, $missingList)) {
+                continue;
+            }
+
             $teamMember = array_merge($this->teamMemberTemplate, [
                 'firstName' => $faker->unique()->firstName(),
                 'lastName' => $faker->lastName(),
@@ -92,10 +99,33 @@ class ApiAccountabilityValidatorTest extends ApiValidatorTestAbstract
 
         $result = $validator->run($data);
 
-        $this->assertMessages([], $validator->getMessages());
+        $messages = [];
+        if ($missingList) {
+            $messages = [
+                $this->getMessageData($this->messageTemplate, [
+                    'id' => 'CLASSLIST_MISSING_ACCOUNTABLE',
+                    'reference.id' => 4,
+                    'level' => 'warning',
+                ]),
+                $this->getMessageData($this->messageTemplate, [
+                    'id' => 'CLASSLIST_MISSING_ACCOUNTABLE',
+                    'reference.id' => 6,
+                    'level' => 'warning',
+                ]),
+            ];
+        }
+
+        $this->assertMessages($messages, $validator->getMessages());
         $this->assertTrue($result);
     }
 
+    public function providerMissingAccountabilities()
+    {
+        return [
+            [[]],
+            [[4, 5, 6]],
+        ];
+    }
 
     public function testRunWithDuplicateAccountabilities()
     {

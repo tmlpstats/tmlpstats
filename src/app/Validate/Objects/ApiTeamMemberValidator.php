@@ -283,9 +283,10 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
                     'params' => ['accountabilityId' => $id],
                 ]);
                 $isValid = false;
+                continue;
             }
 
-            if (!$accountability || !in_array($id, $requiresContact)) {
+            if (!in_array($id, $requiresContact)) {
                 continue;
             }
 

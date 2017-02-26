@@ -11,6 +11,11 @@ class ApiAccountabilityValidator extends ApiValidatorAbstract
 {
     protected $accountabilityCache = [];
 
+    // Statistician, T1TL, T2TL, PM, CL
+    // Does not include Stats Apprentice
+    // TODO: does not include PM/CL. add them
+    protected $requiredAccountability = [4, 6, 7];
+
     protected function validate($data)
     {
         // Initiate count array for ids 4 - 17
@@ -31,6 +36,12 @@ class ApiAccountabilityValidator extends ApiValidatorAbstract
                     'params' => ['accountability' => $this->getAccountability($id)->display],
                 ]);
                 $isValid = false;
+            } else if ($count === 0 && in_array($id, $this->requiredAccountability)) {
+                $this->addMessage('warning', [
+                    'id' => 'CLASSLIST_MISSING_ACCOUNTABLE',
+                    'ref' => ['type' => 'TeamMember', 'id' => $id],
+                    'params' => ['accountability' => $this->getAccountability($id)->display],
+                ]);
             }
         }
 
