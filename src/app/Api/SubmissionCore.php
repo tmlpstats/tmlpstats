@@ -460,6 +460,7 @@ class SubmissionCore extends AuthenticatedApiBase
         $quarter = $statsReport->quarter;
         $center  = $statsReport->center;
         $region  = $center->region;
+        $reportingDate = $statsReport->reportingDate;
 
         $submittedAt = $statsReport->submittedAt->copy()->setTimezone($center->timezone);
 
@@ -468,12 +469,14 @@ class SubmissionCore extends AuthenticatedApiBase
 
         $isLate = $submittedAt->gt($due);
 
-        $programManager         = $center->getProgramManager($quarter);
-        $classroomLeader        = $center->getClassroomLeader($quarter);
-        $t1TeamLeader           = $center->getT1TeamLeader($quarter);
-        $t2TeamLeader           = $center->getT2TeamLeader($quarter);
-        $statistician           = $center->getStatistician($quarter);
-        $statisticianApprentice = $center->getStatisticianApprentice($quarter);
+        $reportNow = $reportingDate->copy()->setTime(15, 0, 0);
+
+        $programManager         = $center->getProgramManager($quarter, $reportNow);
+        $classroomLeader        = $center->getClassroomLeader($quarter, $reportNow);
+        $t1TeamLeader           = $center->getT1TeamLeader($quarter, $reportNow);
+        $t2TeamLeader           = $center->getT2TeamLeader($quarter, $reportNow);
+        $statistician           = $center->getStatistician($quarter, $reportNow);
+        $statisticianApprentice = $center->getStatisticianApprentice($quarter, $reportNow);
 
         $emailMap = [
             'center'                 => $center->statsEmail,
@@ -525,7 +528,6 @@ class SubmissionCore extends AuthenticatedApiBase
 
         $centerName    = $center->name;
         $comment       = $statsReport->submitComment;
-        $reportingDate = $statsReport->reportingDate;
         try {
             Mail::send('emails.apistatssubmitted',
                 compact('centerName', 'comment', 'due', 'isLate', 'isResubmitted', 'mobileDashUrl',

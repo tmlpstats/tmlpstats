@@ -182,13 +182,17 @@ class Person extends Model
      *
      * @param Accountability $accountability
      */
-    public function removeAccountability(Accountability $accountability)
+    public function removeAccountability(Accountability $accountability, Carbon $when = null)
     {
+        if ($when == null) {
+            $when = Util::now()->copy()->subSecond();
+        }
+
         if ($this->hasAccountability($accountability)) {
             DB::table('accountability_person')
                 ->where('person_id', $this->id)
                 ->where('accountability_id', $accountability->id)
-                ->update(['ends_at' => Util::now()->copy()->subSecond()]);
+                ->update(['ends_at' => $when]);
         }
     }
 
@@ -234,13 +238,17 @@ class Person extends Model
         return $query->whereCenterId($center->id);
     }
 
-    public function scopeByAccountability($query, $accountability)
+    public function scopeByAccountability($query, $accountability, $when = null)
     {
-        return $query->whereHas('accountabilities', function ($query) use ($accountability) {
+        if ($when == null) {
+            $when = Util::now();
+        }
+
+        return $query->whereHas('accountabilities', function ($query) use ($accountability, $when) {
             $query->whereName($accountability->name)
-                  ->where('starts_at', '<=', Util::now())
-                  ->where(function ($query) {
-                      $query->where('ends_at', '>', Util::now())
+                  ->where('starts_at', '<=', $when)
+                  ->where(function ($query) use ($when) {
+                      $query->where('ends_at', '>', $when)
                             ->orWhereNull('ends_at');
                   });
         });
