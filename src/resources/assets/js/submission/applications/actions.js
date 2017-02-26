@@ -51,6 +51,10 @@ export function saveApplication(center, reportingDate, data) {
     return (dispatch) => {
         const reset = () => dispatch(saveAppState('new'))
 
+        if (data.committedTeamMember == '') {
+            data = objectAssign({}, data, {committedTeamMember: undefined})
+        }
+
         dispatch(saveAppState('loading'))
         return Api.Application.stash({
             center, reportingDate, data
@@ -62,9 +66,9 @@ export function saveApplication(center, reportingDate, data) {
                 return result
             }
 
-            data = objectAssign({}, data, {id: result.storedId})
-            dispatch(appsCollection.replaceItem(data))
-            dispatch(messages.replace(data.id, result.messages))
+            let newData = objectAssign({}, data, {id: result.storedId})
+            dispatch(appsCollection.replaceItem(newData))
+            dispatch(messages.replace(result.storedId, result.messages))
 
             // We successfully saved, reset any existing parser messages
             if (!data.id) {
