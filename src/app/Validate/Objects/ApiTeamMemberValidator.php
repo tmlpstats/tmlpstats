@@ -328,7 +328,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
     protected function getAccountability($id)
     {
         if (!$this->accountabilityCache) {
-            $this->accountabilityCache = Cache::remember('accountabilities', 10, function () {
+            $this->accountabilityCache = Cache::remember('team_accountabilities', 10, function () {
                 $allAccountabilities = Models\Accountability::context('team')->get();
                 return collect($allAccountabilities)->keyBy(function ($item) {
                     return $item->id;
