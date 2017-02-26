@@ -244,7 +244,6 @@ class _EditCreate extends ApplicationsBase {
             }
         })
     }
-
 }
 
 class ApplicationsEditView extends _EditCreate {
@@ -254,7 +253,7 @@ class ApplicationsEditView extends _EditCreate {
             if (!this.props.currentApp || this.props.currentApp.id != appId) {
                 let app = this.getAppById(appId)
                 if (app){
-                    app = objectAssign({}, app, {committedTeamMember: app.committedTeamMember || undefined})
+                    app = objectAssign({}, app, {committedTeamMember: app.committedTeamMember || ''})
                     this.props.dispatch(chooseApplication(appId, app))
                 }
             }
@@ -291,7 +290,8 @@ class ApplicationsAddView extends _EditCreate {
                     lastName: '',
                     teamYear: 1,
                     regDate: this.reportingDateString(),
-                    incomingQuarter: centerQuarters[0].quarterId
+                    incomingQuarter: centerQuarters[0].quarterId,
+                    committedTeamMember: '',
                 }
                 this.props.dispatch(chooseApplication('', blankApp))
             }
