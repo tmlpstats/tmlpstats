@@ -139,6 +139,8 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
             ]),
         ];
 
+        $this->centerQuarterDates = ['startWeekendDate' => '2016-08-19'];
+
         $this->scoreboardData = [
             [
                 'week' => '2016-08-26',
@@ -345,7 +347,7 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
             'teamMember' => [],
         ];
 
-        $this->qStartApps = [];
+        $this->qStartApprCount = ['t1x' => 0, 't2x' => 0];
 
         foreach ($this->courseData as $course) {
             $this->data['Course'][] = Domain\Course::fromArray($course);
@@ -370,7 +372,7 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
                     $appModel->$field = $value;
                 }
 
-                $this->qStartApps[] = $appModel;
+                $this->qStartApprCount["t{$appModel->teamYear}x"]++;
             }
         }
     }
@@ -390,10 +392,10 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
             $this->data['Scoreboard'][] = Domain\Scoreboard::fromArray($scoreboard);
         }
 
-        $validator = $this->getObjectMock();
+        $validator = $this->getObjectMock(['getCenterQuarterDates']);
         $validator->expects($this->once())
-                  ->method('getQuarterStartingApprovedApplications')
-                  ->willReturn($this->qStartApps);
+                  ->method('getCenterQuarterDates')
+                  ->willReturn($this->centerQuarterDates);
 
         $result = $validator->run($this->data);
 
@@ -514,9 +516,9 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
             $this->data['Scoreboard'][] = Domain\Scoreboard::fromArray($scoreboard);
         }
 
-        $validator = $this->getObjectMock();
+        $validator = $this->getObjectMock(['getQuarterStartingApprovedCounts']);
         $validator->expects($this->never())
-                  ->method('getQuarterStartingApprovedApplications');
+                  ->method('getQuarterStartingApprovedCounts');
 
         $result = $validator->run($this->data);
 
