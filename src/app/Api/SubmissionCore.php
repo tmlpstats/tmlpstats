@@ -103,8 +103,8 @@ class SubmissionCore extends AuthenticatedApiBase
 
             $lastStatsReportDate = $reportingDate->copy()->subWeek();
 
-            $quarterStartDate = $statsReport->quarter->getQuarterStartDate($statsReport->center);
-            $quarterEndDate = $statsReport->quarter->getQuarterEndDate($statsReport->center);
+            $reportNow = $reportingDate->copy()->setTime(15, 0, 0);
+            $quarterEndDate = $statsReport->quarter->getQuarterEndDate($statsReport->center)->setTime(14, 59, 59);
 
             $isFirstWeek = $statsReport->reportingDate->eq($statsReport->quarter->getFirstWeekDate($statsReport->center));
 
@@ -369,24 +369,46 @@ class SubmissionCore extends AuthenticatedApiBase
                     [$statsReport->id,$lastStatsReportDate->toDateString(),$center->id,
                       $center->id,$reportingDate->toDateString()]);
             }
-            // Process accountabilities
-            // Insert all new ones
-            //
-            // TODO: uncomment and fixme
-            //
-            // $affected = DB::insert(
-            //     'insert into accountability_person
-            //         (person_id, accountability_id, starts_at, ends_at, created_at, updated_at)
-            //     select person_id, accountability_id, sysdate(), ?, sysdate(), sysdate()
-            //     from submission_data_accountabilities a
-            //     where a.center_id=? and a.reporting_date=?
-            //         and (a.person_id, a.accountability_id) not in
-            //         (select ap.person_id, ap.accountability_id
-            //             from accountability_person ap where ap.starts_at<=?
-            //         and (ap.ends_at is null or ap.ends_at>=sysdate()));'
-            //     ,[ $quarterEndDate, $center->id,$reportingDate->toDateString(),$quarterStartDate ]);
-            // End date any accounabilities that were reassigned
-            // End date any one sthat were removed and not reassigned
+
+            // Add/update all accountability holders
+            $result = collect(DB::select(
+                'select i.* from submission_data_accountabilities i
+                    where i.center_id=? and i.reporting_date=?',
+                [$center->id, $reportingDate->toDateString()]
+            ))->keyBy(function ($item) {
+                return $item->accountability_id;
+            });
+
+            // Skip program managers and classroom leaders for now
+            // TODO: we'll need to import them at some point
+            $allAccountabilities = Models\Accountability::context('team')->whereNotIn('id', [8, 9])->get();
+            foreach ($allAccountabilities as $accountability) {
+                if (!isset($result[$accountability->id])) {
+                    // No one is listed as accountable, remove any existing accountables
+                    DB::update("
+                        UPDATE  accountability_person ap
+                        INNER JOIN people p ON p.id = ap.person_id
+                        SET ap.ends_at = ?, ap.updated_at = sysdate()
+                        WHERE
+                            ap.accountability_id = ?
+                            AND p.center_id = ?
+                            AND (ap.ends_at IS NULL OR ap.ends_at > ?)",
+                        [$reportNow->copy()->subSecond(), $accountability->id, $center->id, $reportNow]
+                    );
+                    continue;
+                }
+
+                $person = Models\Person::find($result[$accountability->id]->person_id);
+                if (!$person) {
+                    Log::error("Person {$result[$accountability->id]->person_id} was submitted in accountability_person but doesn't exist.");
+                    continue;
+                }
+
+                // If the person doesn't already have this accountability, add it and remove previous holder
+                if (!$person->hasAccountability($accountability, $reportNow)) {
+                    $person->takeoverAccountability($accountability, $reportNow, $quarterEndDate);
+                }
+            }
 
             // Mark stats report as 'official'
             $globalReport = Models\GlobalReport::firstOrCreate([
@@ -460,6 +482,7 @@ class SubmissionCore extends AuthenticatedApiBase
         $quarter = $statsReport->quarter;
         $center  = $statsReport->center;
         $region  = $center->region;
+        $reportingDate = $statsReport->reportingDate;
 
         $submittedAt = $statsReport->submittedAt->copy()->setTimezone($center->timezone);
 
@@ -468,12 +491,14 @@ class SubmissionCore extends AuthenticatedApiBase
 
         $isLate = $submittedAt->gt($due);
 
-        $programManager         = $center->getProgramManager($quarter);
-        $classroomLeader        = $center->getClassroomLeader($quarter);
-        $t1TeamLeader           = $center->getT1TeamLeader($quarter);
-        $t2TeamLeader           = $center->getT2TeamLeader($quarter);
-        $statistician           = $center->getStatistician($quarter);
-        $statisticianApprentice = $center->getStatisticianApprentice($quarter);
+        $reportNow = $reportingDate->copy()->setTime(15, 0, 0);
+
+        $programManager         = $center->getProgramManager($reportNow);
+        $classroomLeader        = $center->getClassroomLeader($reportNow);
+        $t1TeamLeader           = $center->getT1TeamLeader($reportNow);
+        $t2TeamLeader           = $center->getT2TeamLeader($reportNow);
+        $statistician           = $center->getStatistician($reportNow);
+        $statisticianApprentice = $center->getStatisticianApprentice($reportNow);
 
         $emailMap = [
             'center'                 => $center->statsEmail,
@@ -523,9 +548,8 @@ class SubmissionCore extends AuthenticatedApiBase
                                      ->count();
         $isResubmitted = ($submittedCount > 1);
 
-        $centerName    = $center->name;
-        $comment       = $statsReport->submitComment;
-        $reportingDate = $statsReport->reportingDate;
+        $centerName = $center->name;
+        $comment = $statsReport->submitComment;
         try {
             Mail::send('emails.apistatssubmitted',
                 compact('centerName', 'comment', 'due', 'isLate', 'isResubmitted', 'mobileDashUrl',
@@ -572,8 +596,10 @@ class SubmissionCore extends AuthenticatedApiBase
 
     public function getEmail(Models\Person $person = null)
     {
-        return ($person && !$person->unsubscribed)
-            ? $person->email
-            : null;
+        if (!$person || $person->unsubscribed) {
+            return null;
+        }
+
+        return $person->email;
     }
 }
