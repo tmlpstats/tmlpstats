@@ -37,6 +37,8 @@ return [
     'CLASSLIST_ACCOUNTABLE_PHONE_MISSING' => 'Team member is the :accountability accountable. Please provide their phone number in case we need to contact them regarding stats.',
     'CLASSLIST_ACCOUNTABLE_EMAIL_MISSING' => 'Team member is the :accountability accountable. Please provide their email address in case we need to contact them regarding stats.',
     'CLASSLIST_ACCOUNTABLE_AND_WITHDRAWN' => 'Team member has left the team. Please remove accountabilities.',
+    'CLASSLIST_MULTIPLE_ACCOUNTABLES' => 'Multiple team members have accountability :accountability. Please provide no more than 1 person.',
+    'CLASSLIST_UNKNOWN_ACCOUNTABILITY' => 'Unrecognized accountability (:accountabilityId) provided.',
     'COURSE_COMPLETED_REGISTRATIONS_GREATER_THAN_POTENTIALS' => 'Registrations (:registrations) cannot be greater than the number of potentials for the course (:potentials). Please confirm what the correct values are with the course supervisor and/or your program manager.',
     'COURSE_COMPLETED_SS_GREATER_THAN_CURRENT_SS' => 'More people completed the course than started. Make sure Current Standard Starts matches the number of people that started the course, and Completed Standard Starts matches the number of people that completed the course.',
     'COURSE_COMPLETED_SS_LESS_THAN_CURRENT_SS' => 'Completed Standard Starts is :delta less than the course starting standard starts. Confirm with your regional statistician that :delta people did withdraw during the course.',

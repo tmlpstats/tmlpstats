@@ -113,6 +113,8 @@ class ApiValidatorTestAbstract extends ValidatorTestAbstract
             return new $this->testClass($report);
         }
 
+        $methods = array_unique(array_merge($this->defaultObjectMethods, $methods));
+
         if (!$constructorArgs) {
             $constructorArgs = [$this->statsReport];
         }

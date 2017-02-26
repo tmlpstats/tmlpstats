@@ -30,6 +30,7 @@ class ValidatorFactory
             case 'teamExpansion':
             case 'centerGames':
             case 'apiCenterGames':
+            case 'apiAccountability':
                 $class = '\\TmlpStats\\Validate\\Relationships\\' . ucfirst($type) . 'Validator';
                 break;
             case 'null':
