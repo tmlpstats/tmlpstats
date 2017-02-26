@@ -150,9 +150,13 @@ class Person extends Model
      *
      * @return bool
      */
-    public function hasAccountability(Accountability $accountability)
+    public function hasAccountability(Accountability $accountability, Carbon $when = null)
     {
-        $accountabilities = $this->getAccountabilities();
+        if ($when == null) {
+            $when = Util::now();
+        }
+
+        $accountabilities = $this->getAccountabilities($when);
         foreach ($accountabilities as $myAccountability) {
             if ($myAccountability->id == $accountability->id) {
                 return true;
