@@ -22,6 +22,10 @@ class ApiAccountabilityValidator extends ApiValidatorAbstract
         $accountabilities = array_fill(4, 14, 0);
 
         foreach ($data['TeamMember'] as $member) {
+            if (!$member->accountabilities) {
+                continue;
+            }
+
             foreach ($member->accountabilities as $id) {
                 $accountabilities[$id]++;
             }
