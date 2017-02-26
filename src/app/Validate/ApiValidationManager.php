@@ -41,6 +41,12 @@ class ApiValidationManager
         }
         $this->mergeMessages($validator->getMessages(), 'Scoreboard');
 
+        $validator = ValidatorFactory::build($this->statsReport, 'apiAccountability');
+        if (!$validator->run($data)) {
+            $isValid = false;
+        }
+        $this->mergeMessages($validator->getMessages(), 'TeamMember');
+
         return $isValid;
     }
 

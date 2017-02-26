@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Validate\Objects;
 
+use Cache;
 use Respect\Validation\Validator as v;
 use TmlpStats as Models;
 use TmlpStats\Traits;
@@ -8,6 +9,8 @@ use TmlpStats\Traits;
 class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
 {
     use Traits\ValidatesTravelWithConfig;
+
+    protected $accountabilityCache = [];
 
     protected function populateValidators($data)
     {
@@ -54,10 +57,9 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
         if (!$this->validateTravel($data)) {
             $this->isValid = false;
         }
-        // TODO: enable and add unit tests
-        // if (!$this->validateAccountabilities($data)) {
-        //     $this->isValid = false;
-        // }
+        if (!$this->validateAccountabilities($data)) {
+            $this->isValid = false;
+        }
 
         return $this->isValid;
     }
@@ -253,47 +255,88 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
     public function validateAccountabilities($data)
     {
         $isValid = true;
+
         if (!$data->accountabilities) {
-            return $isValid;
+            return true;
         }
 
         if (!is_null($data->withdrawCodeId) || $data->xferOut) {
             $this->addMessage('error', [
                 'id' => 'CLASSLIST_ACCOUNTABLE_AND_WITHDRAWN',
-                'ref' => $data->getReference(['field' => 'email']),
+                'ref' => $data->getReference(['field' => 'accountabilities']),
             ]);
             // We don't need to ask for contact info if they shouldn't be accountable
             return false;
         }
 
+        $hasMissingPhoneMessage = false;
+        $hasMissingEmailMessage = false;
+
         $requiresContact = [4, 5, 6, 7, 8, 9];
-        foreach ($data->accountabilities as $accountability) {
-            if (in_array($accountability, $requiresContact)) {
-                if (!$data->phone) {
-                    $this->addMessage('error', [
-                        'id' => 'CLASSLIST_ACCOUNTABLE_PHONE_MISSING',
-                        'ref' => $data->getReference(['field' => 'phone']),
-                        'params' => ['accountability' => Models\Accountability::find($accountability)->display],
-                    ]);
-                    $isValid = false;
-                }
+        foreach ($data->accountabilities as $id) {
+            $accountability = $this->getAccountability($id);
 
-                if (!$data->email) {
-                    $this->addMessage('error', [
-                        'id' => 'CLASSLIST_ACCOUNTABLE_EMAIL_MISSING',
-                        'ref' => $data->getReference(['field' => 'email']),
-                        'params' => ['accountability' => Models\Accountability::find($accountability)->display],
-                    ]);
-                    $isValid = false;
-                }
+            if (!$accountability) {
+                $this->addMessage('error', [
+                    'id' => 'CLASSLIST_UNKNOWN_ACCOUNTABILITY',
+                    'ref' => $data->getReference(['field' => 'accountability']),
+                    'params' => ['accountabilityId' => $id],
+                ]);
+                $isValid = false;
+                continue;
+            }
 
-                if (!$isValid) {
-                    // we only need one message
-                    break;
-                }
+            if (!in_array($id, $requiresContact)) {
+                continue;
+            }
+
+            if (!$data->phone && !$hasMissingPhoneMessage) {
+                $this->addMessage('error', [
+                    'id' => 'CLASSLIST_ACCOUNTABLE_PHONE_MISSING',
+                    'ref' => $data->getReference(['field' => 'phone']),
+                    'params' => ['accountability' => $accountability->display],
+                ]);
+                $isValid = false;
+
+                // Only log one error for missing contact info
+                $hasMissingPhoneMessage = true;
+            }
+
+            if (!$data->email && !$hasMissingEmailMessage) {
+                $this->addMessage('error', [
+                    'id' => 'CLASSLIST_ACCOUNTABLE_EMAIL_MISSING',
+                    'ref' => $data->getReference(['field' => 'email']),
+                    'params' => ['accountability' => $accountability->display],
+                ]);
+                $isValid = false;
+
+                // Only log one error for missing contact info
+                $hasMissingEmailMessage = true;
             }
         }
 
         return $isValid;
+    }
+
+    /**
+     * Get accountability object
+     *
+     * Using a cache to avoid multiple lookups within a single report validation
+     *
+     * @param  integer $id Accountability Id
+     * @return Models\Accountability
+     */
+    protected function getAccountability($id)
+    {
+        if (!$this->accountabilityCache) {
+            $this->accountabilityCache = Cache::remember('team_accountabilities', 10, function () {
+                $allAccountabilities = Models\Accountability::context('team')->get();
+                return collect($allAccountabilities)->keyBy(function ($item) {
+                    return $item->id;
+                })->all();
+            });
+        }
+
+        return isset($this->accountabilityCache[$id]) ? $this->accountabilityCache[$id] : null;
     }
 }

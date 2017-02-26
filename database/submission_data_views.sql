@@ -169,7 +169,7 @@ VIEW `submission_data_team_members` AS
         case when `submission_data`.`data`->> '$.email'='null' then null
                      else `submission_data`.`data`->> '$.email' end  AS `email`,
         case when `submission_data`.`data`->> '$.phone'='null' then null
-					else `submission_data`.`data`->> '$.phone'='null' end AS `phone`,
+                     else `submission_data`.`data`->> '$.phone' end  AS `phone`,
         `submission_data`.`data`->> '$.center' AS `center`,
         `submission_data`.`data`->> '$.teamYear' AS `team_year`,
         `submission_data`.`data`->> '$.incomingQuarter' AS `incoming_quarter_id`,
