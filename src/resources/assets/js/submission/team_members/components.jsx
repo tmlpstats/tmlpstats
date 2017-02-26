@@ -491,7 +491,7 @@ class TeamMembersEditView extends _EditCreate {
 }
 
 class TeamMembersAddView extends _EditCreate {
-    defaultTeamMember = {exitChoice: '', teamYear: '1'}
+    defaultTeamMember = {exitChoice: '', teamYear: '1', atWeekend: false}
     checkLoading() {
         if (!super.checkLoading()) {
             return false
