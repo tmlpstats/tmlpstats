@@ -57,6 +57,15 @@ export class Scoreboard {
         return total
     }
 
+    percent() {
+        var total = 0
+        // NOTE a for..in loop does not guarantee property ordering. This is fine for percent()
+        for(var name in this.games) {
+            total += Math.max(Math.min(this.games[name].percent(), 100), 0)
+        }
+        return Math.round(total / Object.keys(this.games).length)
+    }
+
     rating() {
         return ratingsByPoints[this.points()]
     }

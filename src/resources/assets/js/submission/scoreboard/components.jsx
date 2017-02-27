@@ -119,8 +119,8 @@ class ScoreboardRow extends SubmissionBase {
         let headingsB = []
         let weekScoreboards = []
         let gameBodies = []
+        let totalBodies = []
         let lastWeek
-
 
         //// FIRST LOOP: go through the weeks and put some information in place for headings and set some stuff up.
         weeks.forEach((sb) => {
@@ -187,6 +187,13 @@ class ScoreboardRow extends SubmissionBase {
                 </tr>
             )
         })
+        if (lastWeek) {
+            totalBodies.push(
+                <th key="totals_space" colSpan={weeks.length * 2 + 1}>{lastWeek.rating()}</th>,
+                <th key="totals_pct" className="pct">{lastWeek.percent()}%</th>,
+                <th key="totals_points">{lastWeek.points()}</th>
+            )
+        }
 
         return (
             <table className="table table-condensed table-bordered table-hover submissionCenterStats">
@@ -205,6 +212,9 @@ class ScoreboardRow extends SubmissionBase {
                 <tbody>
                     {gameBodies}
                 </tbody>
+                <tfoot>
+                    <tr>{totalBodies}</tr>
+                </tfoot>
             </table>
         )
     }
