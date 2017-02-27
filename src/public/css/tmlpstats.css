@@ -363,7 +363,7 @@ table.submissionCenterStats {
 }
 
 
-.submissionCenterStats td.pct {
+.submissionCenterStats td.pct, .submissionCenterStats th.pct {
     text-align: right;
     min-width: 3.2em;
 }
