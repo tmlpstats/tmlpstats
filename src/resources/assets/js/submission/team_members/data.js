@@ -5,9 +5,9 @@ import Api from '../../api'
 
 export const teamMembersSorts = [
     {
-        key: 'teamYear_first_last',
+        key: 'teamYear_quarter_first_last',
         label: 'Default',
-        comparator: compositeKey([['teamYear', 'number'], ['firstName', 'string'], ['lastName', 'string']])
+        comparator: compositeKey([['teamYear', 'number'], ['quarterNumber', 'number'], ['firstName', 'string'], ['lastName', 'string']])
     },
     {
         key: 'first_last',
@@ -36,7 +36,7 @@ export const teamMembersData = new SortableReduxLoader({
     },
     sortable: {
         key_prop: 'id',
-        sort_by: 'teamYear_first_last',
+        sort_by: 'teamYear_quarter_first_last',
         sorts: teamMembersSorts
     }
 })

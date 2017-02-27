@@ -29,7 +29,6 @@ class TeamMember extends AuthenticatedApiBase
 
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
-
         $allTeamMembers = [];
 
         if ($includeInProgress) {
