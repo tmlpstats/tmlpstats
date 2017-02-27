@@ -188,7 +188,7 @@ class TeamMemberIndexRow extends React.PureComponent {
                             {teamMember.firstName} {teamMember.lastName}
                         </Link>
                     </td>
-                    <td>T{teamMember.teamYear}</td>
+                    <td>T{teamMember.teamYear} Q{teamMember.quarterNumber}</td>
                     <td>{reason}</td>
                 </tr>
             )
@@ -201,7 +201,7 @@ class TeamMemberIndexRow extends React.PureComponent {
                         {teamMember.firstName} {teamMember.lastName}
                     </Link>
                 </td>
-                <td>T{teamMember.teamYear}</td>
+                <td>T{teamMember.teamYear} Q{teamMember.quarterNumber}</td>
                 <td>{accountability}</td>
                 <td className="gitw"><GitwTdoLiveSelect model={modelKey+'.gitw'} emptyChoice=" " labels={GITW_LABELS} /></td>
                 <td className="tdo"><GitwTdoLiveSelect model={modelKey+'.tdo'} emptyChoice=" " labels={TDO_LABELS} /></td>

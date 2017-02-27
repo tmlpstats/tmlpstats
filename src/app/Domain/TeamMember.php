@@ -102,6 +102,10 @@ class TeamMember extends ParserDomain
             'owner' => '__Accountability', // Marking a specialty object owner
             'type' => 'array',
         ],
+        'quarterNumber' => [
+            'owner' => 'teamMember',
+            'type' => 'int',
+        ],
     ];
 
     public static function fromModel($teamMemberData, $teamMember = null, $person = null, $options = [])
