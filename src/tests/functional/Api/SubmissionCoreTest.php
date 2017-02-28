@@ -44,7 +44,7 @@ class SubmissionCoreTest extends FunctionalTestAbstract
             return false;
         })->install();
 
-        $this->api->completeSubmission($this->center, $this->reportingDate);
+        $this->api->completeSubmission($this->center, $this->reportingDate, ['comment' => 'great success']);
     }
 
     /**
@@ -69,7 +69,7 @@ class SubmissionCoreTest extends FunctionalTestAbstract
             return $validateApi;
         });
 
-        $result = $this->api->completeSubmission($this->center, $this->reportingDate);
+        $result = $this->api->completeSubmission($this->center, $this->reportingDate, ['comment' => 'great success']);
 
         $this->assertEquals($expectedResults, $result);
     }
