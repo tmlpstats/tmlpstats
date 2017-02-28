@@ -10,7 +10,8 @@ export { DateInput, SimpleDateInput } from './DateInput'
 export class SimpleField extends React.Component {
     static defaultProps = {
         labelClass: 'col-md-2',
-        divClass: 'col-md-8'
+        divClass: 'col-md-8',
+        required: false
     }
     render() {
         var field
@@ -22,11 +23,16 @@ export class SimpleField extends React.Component {
             field = <input type="text" className="form-control" />
         }
 
-        const { labelClass, divClass } = this.props
+        const { labelClass, divClass, required } = this.props
+
+        let requiredClass = ''
+        if (required) {
+            requiredClass = 'required'
+        }
 
         return (
             <Field model={this.props.model}>
-                <div className="form-group">
+                <div className={requiredClass + ' form-group'}>
                     <label className={labelClass + ' control-label'}>{this.props.label}</label>
                     <div className={divClass}>{field}</div>
                 </div>
@@ -38,17 +44,24 @@ export class SimpleField extends React.Component {
 export class SimpleFormGroup extends React.PureComponent {
     static defaultProps = {
         labelClass: 'col-md-2',
-        divClass: 'col-md-8'
+        divClass: 'col-md-8',
+        required: false
     }
     static propTypes = {
         labelClass: PropTypes.string.isRequired,
         divClass: PropTypes.string,
-        label: PropTypes.any.isRequired
+        label: PropTypes.any.isRequired,
+        required: PropTypes.bool
     }
     render() {
-        const { label, labelClass, divClass } = this.props
+        const { label, labelClass, divClass, required } = this.props
+
+        let requiredClass = ''
+        if (required) {
+            requiredClass = 'required'
+        }
         return (
-            <div className="form-group">
+            <div className={requiredClass + ' form-group'}>
                 <label className={labelClass + ' control-label'}>{label}</label>
                 <div className={divClass}>{this.props.children}</div>
             </div>
@@ -75,7 +88,8 @@ export class SimpleSelect extends React.PureComponent {
         keyProp: 'key',
         labelProp: 'label',
         multiple: false,
-        rows: 1
+        rows: 1,
+        required: false
     }
     static propTypes = {
         items: PropTypes.arrayOf(PropTypes.object).isRequired,
@@ -89,12 +103,17 @@ export class SimpleSelect extends React.PureComponent {
     }
     render() {
         const items = this.props.items
-        let { getKey, getLabel, emptyChoice } = this.props
+        let { getKey, getLabel, emptyChoice, required } = this.props
         if (!getKey) {
             getKey = (obj) => obj[this.props.keyProp]
         }
         if (!getLabel) {
             getLabel = (obj) => obj[this.props.labelProp]
+        }
+
+        let requiredClass = ''
+        if (required) {
+            requiredClass = 'required'
         }
 
         const options = []
@@ -108,7 +127,7 @@ export class SimpleSelect extends React.PureComponent {
         })
         return (
             <Field model={this.props.model} multiple={this.props.multiple} changeAction={this.props.changeAction}>
-                <select className="form-control" multiple={this.props.multiple} rows={this.props.rows}>
+                <select className={requiredClass + ' form-control'} multiple={this.props.multiple} rows={this.props.rows}>
                     {options}
                 </select>
             </Field>
