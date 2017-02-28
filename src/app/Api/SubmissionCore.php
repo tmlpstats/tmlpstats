@@ -68,7 +68,7 @@ class SubmissionCore extends AuthenticatedApiBase
      * @param  Carbon        $reportingDate
      * @return array
      */
-    public function completeSubmission(Models\Center $center, Carbon $reportingDate)
+    public function completeSubmission(Models\Center $center, Carbon $reportingDate, array $data)
     {
         $this->checkCenterDate($center, $reportingDate);
 
@@ -99,6 +99,7 @@ class SubmissionCore extends AuthenticatedApiBase
             $statsReport->locked = true;
             $statsReport->submittedAt = Carbon::now();
             $statsReport->userId = $this->context->getUser()->id;
+            $statsReport->submitComment = array_get($data, 'comment', null);
             $statsReport->save();
 
             $lastStatsReportDate = $reportingDate->copy()->subWeek();

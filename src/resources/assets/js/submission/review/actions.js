@@ -30,9 +30,9 @@ export function getValidationMessages(center, reportingDate) {
     }
 }
 
-export function submitReport(center, reportingDate) {
+export function submitReport(center, reportingDate, data) {
     return (dispatch) => {
-        return Api.SubmissionCore.completeSubmission({center, reportingDate})
+        return Api.SubmissionCore.completeSubmission({center, reportingDate, data})
     }
 }
 
@@ -40,6 +40,13 @@ export function setMessages(messages) {
     return {
         type: 'review/setMessages',
         payload: messages
+    }
+}
+
+export function setSubmitData(data) {
+    return {
+        type: 'review/setSubmitData',
+        payload: data
     }
 }
 

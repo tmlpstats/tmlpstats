@@ -326,7 +326,8 @@ class ApiController extends ApiControllerBase
     {
         return App::make(Api\SubmissionCore::class)->completeSubmission(
             $this->parse($input, 'center', 'Center'),
-            $this->parse($input, 'reportingDate', 'date')
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'data', 'array')
         );
     }
     protected function SubmissionData__ignoreMe($input)

@@ -4,11 +4,14 @@ import { Button, Modal } from 'react-bootstrap'
 
 import { PAGES_CONFIG } from '../core/data'
 import { connectRedux, rebind } from '../../reusable/dispatch'
+import { Field } from 'react-redux-form'
+import { Form } from '../../reusable/form_utils'
 import { Alert } from '../../reusable/ui_basic'
 import { SubmissionBase, React } from '../base_components'
 
-import { getValidationMessages, submitReport, setPreSubmitModal, setPostSubmitModal, setSubmitResults } from './actions'
+import { getValidationMessages, submitReport, setPreSubmitModal, setPostSubmitModal, setSubmitResults, setSubmitData } from './actions'
 import { loadPairs } from './data'
+import { REVIEW_SUBMIT_FORM_KEY } from './reducers'
 
 const CLASSES = {error: 'bg-danger', warning: 'bg-warning'}
 
@@ -26,6 +29,7 @@ export default class Review extends SubmissionBase {
     constructor(props) {
         super(props)
         rebind(this, 'displayPreSubmitModal', 'hidePreSubmitModal', 'onSubmit', 'completeSubmission', 'failSubmission')
+        this.props.dispatch(setSubmitData({ comment: '' }))
     }
 
     checkLoading() {
@@ -63,8 +67,9 @@ export default class Review extends SubmissionBase {
 
     onSubmit() {
         const { centerId, reportingDate } = this.props.params
+        const data = this.props.review.submitData
 
-        this.props.dispatch(submitReport(centerId, reportingDate)).then((result) => {
+        this.props.dispatch(submitReport(centerId, reportingDate, data)).then((result) => {
             if (!result) {
                 throw new Error('Failed to submit report. Please try again.')
             }
@@ -242,6 +247,7 @@ export class ReviewCategory extends React.PureComponent {
 class PreSubmitModal extends React.PureComponent {
     render() {
         const { dismiss, onSubmit } = this.props
+
         return (
             <div className="static-modal">
                 <Modal show={true} onHide={dismiss}>
@@ -261,6 +267,14 @@ class PreSubmitModal extends React.PureComponent {
                         </ul>
                         You can re-submit your stats before 7PM your local time on Friday.
                         <br/><br/>
+                        <Form model={REVIEW_SUBMIT_FORM_KEY} onSubmit={onSubmit}>
+                            <Field model={REVIEW_SUBMIT_FORM_KEY+'.comment'}>
+                                <div className="form-group">
+                                    <label htmlFor="comment" className="control-label">Comment:</label>
+                                    <textarea name="comment" className="form-control" rows="10" />
+                                </div>
+                            </Field>
+                        </Form>
                     </Modal.Body>
 
                     <Modal.Footer>
