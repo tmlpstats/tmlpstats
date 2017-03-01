@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Api;
+<?php
+namespace TmlpStats\Api;
 
 use App;
 use Carbon\Carbon;

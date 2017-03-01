@@ -158,6 +158,11 @@ class TeamApplication extends ParserDomain
         }
     }
 
+    public function getFlattenedReference(array $supplemental = [])
+    {
+        return "{$this->firstName} {$this->lastName}";
+    }
+
     public function toArray()
     {
         $output = parent::toArray();

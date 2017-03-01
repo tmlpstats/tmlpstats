@@ -104,11 +104,13 @@ class ApiAccountabilityValidatorTest extends ApiValidatorTestAbstract
             $messages = [
                 $this->getMessageData($this->messageTemplate, [
                     'id' => 'CLASSLIST_MISSING_ACCOUNTABLE',
+                    'reference.type' => 'Accountability',
                     'reference.id' => 4,
                     'level' => 'warning',
                 ]),
                 $this->getMessageData($this->messageTemplate, [
                     'id' => 'CLASSLIST_MISSING_ACCOUNTABLE',
+                    'reference.type' => 'Accountability',
                     'reference.id' => 6,
                     'level' => 'warning',
                 ]),
@@ -163,11 +165,13 @@ class ApiAccountabilityValidatorTest extends ApiValidatorTestAbstract
         $this->assertMessages([
             $this->getMessageData($this->messageTemplate, [
                 'id' => 'CLASSLIST_MULTIPLE_ACCOUNTABLES',
+                'reference.type' => 'Accountability',
                 'reference.id' => 4,
                 'level' => 'error',
             ]),
             $this->getMessageData($this->messageTemplate, [
                 'id' => 'CLASSLIST_MULTIPLE_ACCOUNTABLES',
+                'reference.type' => 'Accountability',
                 'reference.id' => 5,
                 'level' => 'error',
             ]),

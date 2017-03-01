@@ -45,9 +45,11 @@ class Scoreboard implements Arrayable, Referenceable
      */
     public function getReference($supplemental = [])
     {
+        $id = $this->getKey();
         return array_merge([
-            'id' => $this->getKey(),
+            'id' => $id,
             'type' => 'Scoreboard',
+            'flattened' => "Week of {$id}",
         ], $supplemental);
     }
 

@@ -34,6 +34,7 @@ class StatsReport extends Model
     protected $casts = [
         'validated' => 'boolean',
         'locked' => 'boolean',
+        'validation_messages' => 'json',
     ];
 
     public function __get($name)
