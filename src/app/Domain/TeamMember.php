@@ -175,7 +175,10 @@ class TeamMember extends ParserDomain
 
     public function getFlattenedReference(array $supplemental = [])
     {
-        return "{$this->firstName} {$this->lastName}";
+        $firstName = $this->firstName ?: 'unknown';
+        $lastName = $this->lastName ?: 'unknown';
+
+        return "{$firstName} {$lastName}";
     }
 
     public function toArray()

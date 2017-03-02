@@ -174,7 +174,11 @@ class Course extends ParserDomain
 
     public function getFlattenedReference(array $supplemental = [])
     {
-        return "{$this->location} {$this->type} {$this->startDate->toDateString()}";
+        $location = $this->location ?: 'unknown';
+        $type = $this->type ?: 'unknown';
+        $startDate = $this->startDate ? $this->startDate->toDateString() : 'unknown';
+
+        return "{$location} {$type} {$startDate}";
     }
 
     public function toArray()

@@ -91,6 +91,9 @@ class ApiValidatorTestAbstract extends ValidatorTestAbstract
             if (!isset($expectedMessage['message'])) {
                 unset($message['message']);
             }
+            if (!isset($expectedMessage['reference']['flattened'])) {
+                unset($message['reference']['flattened']);
+            }
 
             $this->assertEquals($expectedMessage, $message);
         }
