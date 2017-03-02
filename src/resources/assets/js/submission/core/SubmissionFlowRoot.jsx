@@ -10,7 +10,7 @@ import SubmissionNav from './SubmissionNav'
 import { PAGES_CONFIG } from './data'
 
 const steps = PAGES_CONFIG
-const stepsBeforeCr3 = _.reject(steps, {key: 'qtr_accountabilities'})
+const stepsBeforeCr3 = _.reject(steps, {key: 'next_qtr_accountabilities'})
 
 @connectRedux()
 export default class SubmissionFlowRoot extends SubmissionBase {
