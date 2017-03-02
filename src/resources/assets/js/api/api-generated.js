@@ -180,7 +180,16 @@ Api.GlobalReport = {
       region: Region
       pages: array
     */
-    getReportPages: bac('GlobalReport.getReportPages')
+    getReportPages: bac('GlobalReport.getReportPages'),
+
+    /*
+    Get the global report page(s) named
+    Parameters:
+      region: Region
+      reportingDate: date
+      pages: array
+    */
+    getReportPagesByDate: bac('GlobalReport.getReportPagesByDate')
 }
 
 Api.LiveScoreboard = {

@@ -7,6 +7,7 @@ import { LiveScoreboard } from './live_scoreboard'
 import { SubmissionFlow } from './submission'
 import QuarterAccountabilitiesEmbed from './submission/next_qtr_accountabilities/embed'
 import AdminFlow from './admin/flow'
+import ReportsFlow from './reports/flow'
 import { store, history } from './store'
 
 function _routedFlow() {
@@ -15,6 +16,7 @@ function _routedFlow() {
             <Router history={history}>
                 {SubmissionFlow()}
                 {AdminFlow()}
+                {ReportsFlow()}
             </Router>
         </Provider>
     )

@@ -22,7 +22,7 @@ Route::group(['prefix' => 'admin'], function () {
 
     Route::resource('users', 'UserController');
 
-    Route::get('regions/{regionAbbr}/{page?}/{irrelevant?}/{irrelevant2?}/{irrelevant3?}/{irrelevant4?}', 'ManageController@region');
+    Route::get('regions/{regionAbbr}/{page?}/{tab1?}/{tab2?}/{irrelevant3?}/{irrelevant4?}', 'ManageController@region');
 });
 
 // Invites
@@ -47,7 +47,7 @@ Route::resource('reporttokens', 'ReportTokenController');
 // Reports
 Route::get('report/{token}', 'ReportsController@getByToken');
 Route::get('reports/centers/{abbr?}/{date?}', 'ReportsController@getCenterReport');
-Route::get('reports/regions/{abbr?}/{date?}', 'ReportsController@getRegionReport');
+Route::get('reports/regions/{abbr?}/{date?}/{tab1?}/{tab2?}', 'ReportsController@getRegionReport');
 
 Route::post('reports/centers/setActive', 'ReportsController@setActiveCenter');
 Route::post('reports/regions/setActive', 'ReportsController@setActiveRegion');

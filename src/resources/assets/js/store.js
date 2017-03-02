@@ -7,6 +7,7 @@ import thunk from 'redux-thunk'
 import { submissionReducer } from './submission/reducers'
 import adminReducer from './admin/reducers'
 import liveScoreboardReducer from './live_scoreboard/reducers'
+import reportsReducer from './reports/reducers'
 
 const responsiveBreakpoints = {
     extraSmall: 480,
@@ -21,6 +22,7 @@ const reducer = combineReducers({
     routing: routerReducer,
     admin: adminReducer,
     live_scoreboard: liveScoreboardReducer,
+    reports: reportsReducer,
     submission: submissionReducer
 })
 

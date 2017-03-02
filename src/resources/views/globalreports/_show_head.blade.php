@@ -1,8 +1,3 @@
-@extends('template')
-@inject('context', 'TmlpStats\Api\Context')
-
-@section('content')
-    <div id="content">
         <h2>
             {{ $region ? $region->name : 'Global' }} Report - {{ $globalReport->reportingDate->format('F j, Y') }}
             @if ($reportToken)
@@ -27,25 +22,3 @@
             </div>
         @endif
         <br />
-
-        <div id="globalreport-dest"></div>
-
-        <div id="loader" style="display: none">
-            @include('partials.loading')
-        </div>
-    </div>
-    <script type="text/javascript">
-    $(function() {
-        showReportView({
-            report: 'Global',
-            target: '#globalreport-dest',
-            params: {
-                globalReport: @json($globalReport->id),
-                region: @json($region->abbreviation)
-            },
-            pastClassroom2: @json($globalReport->reportingDate->gte($quarter->getClassroom2Date())),
-            isLastWeek: @json($globalReport->reportingDate->eq($quarter->getQuarterEndDate())),
-        })
-    })
-    </script>
-@endsection

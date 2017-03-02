@@ -59,7 +59,10 @@ const GlobalReport = {
             "id": "RepromisesByCenter",
             "n": 6,
             "type": "report",
-            "name": "Repromises"
+            "name": "Repromises",
+            "requiredFlags": [
+                "afterClassroom2"
+            ]
         },
         "RegPerParticipantWeekly": {
             "id": "RegPerParticipantWeekly",

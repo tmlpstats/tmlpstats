@@ -265,4 +265,11 @@ class GlobalReport extends AuthenticatedApiBase
 
         return ['pages' => $output];
     }
+
+    public function getReportPagesByDate(Models\Region $region, Carbon $reportingDate, $pages)
+    {
+        $report = Models\GlobalReport::reportingDate($reportingDate)->firstOrFail();
+
+        return $this->getReportPages($report, $region, $pages);
+    }
 }
