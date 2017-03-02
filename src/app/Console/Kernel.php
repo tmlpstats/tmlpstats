@@ -4,8 +4,8 @@ namespace TmlpStats\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
-class Kernel extends ConsoleKernel {
-
+class Kernel extends ConsoleKernel
+{
     /**
      * The Artisan commands provided by your application.
      *
@@ -16,7 +16,6 @@ class Kernel extends ConsoleKernel {
         Commands\FlushTablesCommand::class,
         Commands\ClearTablesCommand::class,
         Commands\ReportsCodegen::class,
-        Commands\ReportsWiki::class,
         Commands\FlushReportsCacheCommand::class,
         Commands\SanitizeDb::class,
         Commands\MergeDuplicatePeople::class,

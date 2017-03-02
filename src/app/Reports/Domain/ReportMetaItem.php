@@ -9,7 +9,7 @@ class ReportMetaItem
     public $uriSlug = '';
     public $name = '';
     public $shortName = null;
-
+    public $requiredFlags = [];
 
     /**
      * All the child methods and namespaces of this namespace.
@@ -25,6 +25,7 @@ class ReportMetaItem
         $this->shortName = array_get($body, 'shortName', null);
         $this->type = array_get($body, 'type', 'report');
         $this->children = array_get($body, 'children', []);
+        $this->requiredFlags = array_get($body, 'requiredFlags', []);
     }
 
     /**

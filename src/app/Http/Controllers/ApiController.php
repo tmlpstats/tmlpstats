@@ -37,6 +37,7 @@ class ApiController extends ApiControllerBase
         "GlobalReport.getClassListByCenter" => "GlobalReport__getClassListByCenter",
         "GlobalReport.getCourseList" => "GlobalReport__getCourseList",
         "GlobalReport.getReportPages" => "GlobalReport__getReportPages",
+        "GlobalReport.getReportPagesByDate" => "GlobalReport__getReportPagesByDate",
         "LiveScoreboard.getCurrentScores" => "LiveScoreboard__getCurrentScores",
         "LiveScoreboard.setScore" => "LiveScoreboard__setScore",
         "LocalReport.getQuarterScoreboard" => "LocalReport__getQuarterScoreboard",
@@ -67,6 +68,7 @@ class ApiController extends ApiControllerBase
 
     protected $tokenAuthenticatedMethods = [
         "GlobalReport__getReportPages",
+        "GlobalReport__getReportPagesByDate",
     ];
 
     protected $unauthenticatedMethods = [
@@ -205,6 +207,14 @@ class ApiController extends ApiControllerBase
         return App::make(Api\GlobalReport::class)->getReportPages(
             $this->parse($input, 'globalReport', 'GlobalReport'),
             $this->parse($input, 'region', 'Region'),
+            $this->parse($input, 'pages', 'array')
+        );
+    }
+    protected function GlobalReport__getReportPagesByDate($input)
+    {
+        return App::make(Api\GlobalReport::class)->getReportPagesByDate(
+            $this->parse($input, 'region', 'Region'),
+            $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'pages', 'array')
         );
     }

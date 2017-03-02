@@ -72,6 +72,9 @@ class ReportMetaNamespace
             if ($childrenIds = $report->childrenIds()) {
                 $r['children'] = $childrenIds;
             }
+            if (count($report->requiredFlags)) {
+                $r['requiredFlags'] = $report->requiredFlags;
+            }
             $items[$report->id] = $r;
         }
 

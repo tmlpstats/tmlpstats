@@ -2,19 +2,17 @@
 namespace TmlpStats\Http\Controllers;
 
 use App;
-use Carbon\Carbon;
 use Gate;
 use Illuminate\Http\Request;
 use Response;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Domain;
-use TmlpStats\Encapsulations;
 use TmlpStats\Http\Controllers\Encapsulate;
 use TmlpStats\Http\Controllers\Traits\GlobalReportDispatch;
 use TmlpStats\Reports\Arrangements;
 
-class GlobalReportController extends ReportDispatchAbstractController
+class GlobalReportController extends Controller
 {
     use GlobalReportDispatch;
 
@@ -88,15 +86,17 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         $showNavCenterSelect = true;
 
-        $vmode = $request->has('viewmode') ? $request->input('viewmode') : env('GLOBAL_REPORT_VIEW_MODE', 'html');
+        $defaultVmode = $request->has('tab1') ? 'react' : env('GLOBAL_REPORT_VIEW_MODE', 'jq');
+        $vmode = $request->has('viewmode') ? $request->input('viewmode') : $defaultVmode;
 
         switch (strtolower($vmode)) {
+            case 'react':
+                $template = 'show_react';
+                break;
             case 'jq':
+            default:
                 $template = 'show_jquery';
                 break;
-            case 'html':
-            default:
-                $template = 'show';
         }
 
         return view("globalreports.{$template}", compact(
@@ -187,112 +187,9 @@ class GlobalReportController extends ReportDispatchAbstractController
         return array_merge($tags, ["globalReport{$model->id}"]);
     }
 
-    public function dispatchReport(Request $request, $id, $report, $regionAbbr = null)
+    public function useCache($report)
     {
-        $extra = [];
-        if ($regionAbbr) {
-            $region = Models\Region::abbreviation($regionAbbr)->firstOrFail();
-            $this->context->setRegion($region);
-            $extra['region'] = $region;
-        }
-
-        return parent::dispatchReport($request, $id, $report, $extra);
-    }
-
-    public function runDispatcher(Request $request, $globalReport, $report, $extra)
-    {
-        $region = array_get($extra, 'region', $this->context->getRegion(true));
-        $this->context->setRegion($region);
-        $this->context->setReportingDate($globalReport->reportingDate);
-
-        $response = null;
-        switch ($report) {
-            case 'ratingsummary':
-                $response = $this->getRatingSummary($globalReport, $region);
-                break;
-            case 'regionsummary':
-                $response = $this->getRegionSummary($globalReport, $region);
-                break;
-            case 'regionalstats':
-                $response = $this->getRegionalStats($globalReport, $region);
-                break;
-            case 'gamesbycenter':
-                $response = $this->getGamesByCenter($globalReport, $region);
-                break;
-            case 'repromisesbycenter':
-                $response = $this->getRepromisesByCenter($globalReport, $region);
-                break;
-            case 'statsreports':
-                $response = $this->getCenterStatsReports($globalReport, $region);
-                break;
-            case 'applicationsbystatus':
-                $response = $this->getTmlpRegistrationsByStatus($globalReport, $region);
-                break;
-            case 'applicationsoverdue':
-                $response = $this->getTmlpRegistrationsOverdue($globalReport, $region);
-                break;
-            case 'applicationsbycenter':
-                $response = $this->getTmlpRegistrationsByCenter($globalReport, $region);
-                break;
-            case 'applicationsoverview':
-                $response = $this->getTmlpRegistrationsOverview($globalReport, $region);
-                break;
-            case 'traveloverview':
-                $response = $this->getTravelReport($globalReport, $region);
-                break;
-            case 'coursesthisweek':
-            case 'coursesnextmonth':
-            case 'coursesupcoming':
-            case 'coursescompleted':
-            case 'coursesguestgames':
-            case 'coursessummary':
-                $response = $this->coursesData($globalReport, $region)->getOne($report);
-                break;
-            case 'coursesall':
-                $response = $this->coursesData($globalReport, $region)->getCoursesAllClassic($globalReport, $region);
-                break;
-            case 'teammemberstatuswithdrawn':
-            case 'teammemberstatusctw':
-            case 'teammemberstatustransfer':
-            case 'potentialsdetails':
-            case 'potentialsoverview':
-                $response = $this->teamMembersData($globalReport, $region)->getOne($report);
-                break;
-            case 'acknowledgementreport':
-                $response = $this->getAcknowledgementReport($globalReport, $region);
-                break;
-            case 'teammemberstatusall':
-                $response = $this->teamMembersData($globalReport, $region)->getTeamMemberStatusAllClassic();
-                break;
-            case 'accesstopowereffectiveness':
-            case 'powertocreateeffectiveness':
-            case 'gameintheworldeffectiveness':
-            case 'team1expansioneffectiveness':
-            case 'team2expansioneffectiveness':
-            case 'landmarkforumeffectiveness':
-                $response = $this->centersGamesData($globalReport, $region)->getOne($report);
-                break;
-            case 'applicationst2fromweekend':
-                $response = $this->getTeam2RegisteredAtWeekend($globalReport, $region);
-                break;
-            case 'tdosummary':
-                $response = $this->getTdoSummary($globalReport, $region);
-                break;
-            case 'gitwsummary':
-                $response = $this->getGitwSummary($globalReport, $region);
-                break;
-            case 'regperparticipant':
-                $response = $this->getRegPerParticipant($globalReport, $region);
-                break;
-            case 'gaps':
-                $response = $this->getGaps($globalReport, $region);
-                break;
-            case 'withdrawreport':
-                $response = $this->getWithdrawReport($globalReport, $region);
-                break;
-        }
-
-        return $response;
+        return env('REPORTS_USE_CACHE', true);
     }
 
     protected function getRatingSummary(Models\GlobalReport $globalReport, Models\Region $region)
@@ -899,7 +796,6 @@ class GlobalReportController extends ReportDispatchAbstractController
                 'Ineffective' => [],
             ],
         ];
-
 
         $reportData = [
             'quarterString' => $globalReport->reportingDate->format('F Y'),

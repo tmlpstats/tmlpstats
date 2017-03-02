@@ -228,6 +228,17 @@ Api.GlobalReport = {
     */
     getReportPages: function(params, callback, errback) {
         return apiCall('GlobalReport.getReportPages', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get the global report page(s) named
+    Parameters:
+      region: Region
+      reportingDate: date
+      pages: array
+    */
+    getReportPagesByDate: function(params, callback, errback) {
+        return apiCall('GlobalReport.getReportPagesByDate', params, (callback || null), (errback || null));
     }
 };
 Api.LiveScoreboard = {
