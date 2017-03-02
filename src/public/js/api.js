@@ -409,6 +409,7 @@ Api.SubmissionCore = {
     Parameters:
       center: Center
       reportingDate: date
+      data: array
     */
     completeSubmission: function(params, callback, errback) {
         return apiCall('SubmissionCore.completeSubmission', params, (callback || null), (errback || null));

@@ -335,6 +335,7 @@ Api.SubmissionCore = {
     Parameters:
       center: Center
       reportingDate: date
+      data: array
     */
     completeSubmission: bac('SubmissionCore.completeSubmission')
 }
