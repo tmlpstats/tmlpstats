@@ -399,7 +399,7 @@ class _EditCreate extends TeamMembersBase {
             }
 
             if (result.messages && result.messages.length) {
-                scrollIntoView('submission-flow', 10)
+                scrollIntoView('react-routed-flow', 10)
 
                 // Redirect to edit view if there are warning messages
                 if (this.isNewTeamMember() && result.valid) {

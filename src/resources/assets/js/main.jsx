@@ -24,7 +24,7 @@ function _routedFlow() {
 
 var _components = [
     ['#live-scoreboard', function(elem) { ReactDOM.render(<Provider store={store}><LiveScoreboard/></Provider>, elem) }],
-    ['#submission-flow', function(elem) { ReactDOM.render(_routedFlow(), elem) }],
+    ['#react-routed-flow', function(elem) { ReactDOM.render(_routedFlow(), elem) }],
     ['#cr3-accountabilities', function(elem) { ReactDOM.render(<Provider store={store}><QuarterAccountabilitiesEmbed /></Provider>, elem)}]
 ]
 

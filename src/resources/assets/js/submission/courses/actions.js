@@ -73,7 +73,7 @@ export function saveCourse(center, reportingDate, data) {
             dispatch(messages.replace(id, getMessages(err)))
 
             reset()
-            scrollIntoView('submission-flow')
+            scrollIntoView('react-routed-flow')
         })
     }
 }

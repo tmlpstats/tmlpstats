@@ -5,7 +5,7 @@
     <div id="content">
         @include('globalreports._show_head')
 
-        <div id="submission-flow"></div>
+        <div id="react-routed-flow"></div>
 
         <div id="loader" style="display: none">
             @include('partials.loading')

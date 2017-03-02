@@ -239,7 +239,7 @@ class _EditCreate extends ApplicationsBase {
             }
 
             if (result.messages && result.messages.length) {
-                scrollIntoView('submission-flow')
+                scrollIntoView('react-routed-flow')
 
                 // Redirect to edit view if there are warning messages
                 if (this.isNewApp() && result.valid) {

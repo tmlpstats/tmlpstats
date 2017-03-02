@@ -2,5 +2,5 @@
 
 @section('content')
     <h1>Team {{ $center->name }}</h1>
-    <div id="submission-flow"></div>
+    <div id="react-routed-flow"></div>
 @endsection
