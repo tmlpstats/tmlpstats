@@ -141,29 +141,29 @@ class _EditCreate extends ApplicationsBase {
 
                 <Form className="form-horizontal" model={modelKey} onSubmit={this.saveAppData.bind(this)}>
                     {this.renderStartingQuarter(modelKey)}
-                    <SimpleField label="First Name" model={modelKey+'.firstName'} divClass="col-md-6" />
-                    <SimpleField label="Last Name" model={modelKey+'.lastName'} divClass="col-md-6" />
-                    <SimpleField label="Team Year" model={modelKey+'.teamYear'} divClass="col-md-4" customField={true}>
+                    <SimpleField label="First Name" model={modelKey+'.firstName'} divClass="col-md-6" required={true} />
+                    <SimpleField label="Last Name" model={modelKey+'.lastName'} divClass="col-md-6" required={true} />
+                    <SimpleField label="Team Year" model={modelKey+'.teamYear'} divClass="col-md-1" required={true} customField={true}>
                         <select className="form-control">
                             <option value="1">Team 1</option>
                             <option value="2">Team 2</option>
                         </select>
                     </SimpleField>
-                    <SimpleField label="Email" model={modelKey+'.email'} divClass="col-md-8" />
-                    <SimpleField label="Comment" model={modelKey+'.comment'} customField={true}>
+                    <SimpleField label="Email" model={modelKey+'.email'} divClass="col-md-6" />
+                    <SimpleField label="Comment" model={modelKey+'.comment'} divClass="col-md-6" customField={true}>
                         <textarea className="form-control" rows="3"></textarea>
                     </SimpleField>
-                    <div className="form-group">
-                        <label className="col-sm-2">Committed Team Member</label>
-                        <div className="col-sm-10">
+                    <div className="required form-group">
+                        <label className="col-md-2 control-label">Committed Team Member</label>
+                        <div className="col-md-6">
                             <SimpleSelect
                                     model={modelKey+'.committedTeamMember'} items={this.props.lookups.team_members}
                                     keyProp="teamMemberId" getLabel={getLabelTeamMember} emptyChoice="Choose One" />
                         </div>
                     </div>
-                    <div className="form-group">
-                        <label className="col-sm-2">Application Status</label>
-                        <div className="col-sm-10">
+                    <div className="required form-group">
+                        <label className="col-md-2 control-label">Application Status</label>
+                        <div className="col-md-6">
                             <AppStatus model={modelKey} currentApp={this.props.currentApp} lookups={this.props.lookups} dispatch={this.props.dispatch} />
                         </div>
                     </div>
@@ -204,8 +204,14 @@ class _EditCreate extends ApplicationsBase {
             const cq = cqData[currentApp.incomingQuarter]
             body = (cq)? centerQuarterData.getLabel(cq) : 'Unknown'
         }
+
+        let requiredClass = ''
+        if (this.isNewApp()) {
+            requiredClass = 'required'
+        }
+
         return (
-            <div className="form-group">
+            <div className={requiredClass + ' form-group'}>
                 <label className="col-md-2 control-label">Starting Quarter</label>
                 <div className="col-md-6">{body}</div>
             </div>

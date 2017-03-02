@@ -37,6 +37,11 @@ body.no-navbar{
     padding-top: 0;
 }
 
+.form-group.required .control-label:after {
+   content:"*";
+   color:red;
+}
+
 .ok {
     color: green !important;
 }

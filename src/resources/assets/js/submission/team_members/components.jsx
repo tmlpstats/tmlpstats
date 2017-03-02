@@ -257,8 +257,8 @@ class _EditCreate extends TeamMembersBase {
     renderBasicInfo(modelKey, { disableBasicInfo }) {
         return (
             <div>
-                <SimpleField label="First Name" model={modelKey+'.firstName'} divClass="col-md-6" disabled={disableBasicInfo} />
-                <SimpleField label="Last Name" model={modelKey+'.lastName'} divClass="col-md-6" disabled={disableBasicInfo} />
+                <SimpleField label="First Name" model={modelKey+'.firstName'} divClass="col-md-6" disabled={disableBasicInfo} required={!disableBasicInfo} />
+                <SimpleField label="Last Name" model={modelKey+'.lastName'} divClass="col-md-6" disabled={disableBasicInfo} required={!disableBasicInfo} />
                 <SimpleField label="Email" model={modelKey+'.email'} divClass="col-md-8" customField={true}>
                     <input type="email" className="form-control" />
                 </SimpleField>
@@ -293,16 +293,16 @@ class _EditCreate extends TeamMembersBase {
 
         return (
             <div>
-                <SimpleField label="Team Year" model={modelKey+'.teamYear'} divClass="col-md-4" customField={true}>
+                <SimpleField label="Team Year" model={modelKey+'.teamYear'} divClass="col-md-4" customField={true} required={!disableYearQuarter}>
                     <select disabled={disableYearQuarter} className="form-control">
                         <option value="1">Team 1</option>
                         <option value="2">Team 2</option>
                     </select>
                 </SimpleField>
-                <SimpleFormGroup label="Starting Quarter">
+                <SimpleFormGroup label="Starting Quarter" required={!disableYearQuarter}>
                     {yearQuarter}
                 </SimpleFormGroup>
-                <SimpleFormGroup label="Settings">
+                <SimpleFormGroup label="Settings" required={true}>
                     {reviewerCheckbox}
                     <CheckBox model={modelKey+'.atWeekend'} label="On team at weekend" />
                     <CheckBox model={modelKey+'.xferIn'} label="Transfer In" />
@@ -379,10 +379,10 @@ class _EditCreate extends TeamMembersBase {
     renderGitwTdo(modelKey) {
         return (
             <div>
-                <SimpleFormGroup label="GITW">
+                <SimpleFormGroup label="GITW" required={true}>
                     <BooleanSelect model={modelKey+'.gitw'} emptyChoice=" " labels={GITW_LABELS} className="form-control gitw" />
                 </SimpleFormGroup>
-                <SimpleFormGroup label="TDO">
+                <SimpleFormGroup label="TDO" required={true}>
                     <BooleanSelect model={modelKey+'.tdo'} emptyChoice=" " labels={TDO_LABELS} className="form-control boolSelect" />
                 </SimpleFormGroup>
 

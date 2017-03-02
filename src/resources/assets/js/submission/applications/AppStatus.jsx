@@ -101,12 +101,12 @@ export default class AppStatus extends React.Component {
         }
         return (
             <div key={item.key}>
-                <SimpleDateInput key={item.key} model={model+'.'+item.key} label={dateTitle} labelClass="col-sm-3" divClass="col-sm-6" />
+                <SimpleDateInput key={item.key} model={model+'.'+item.key} label={dateTitle} labelClass="col-sm-3" divClass="col-sm-6" required={true} />
 
                 <div className="form-group">
                     <label className="col-sm-3 control-label">Withdraw Reason</label>
                     <div className="col-sm-3">
-                        <SimpleSelect model={model+'.withdrawCode'} keyProp="id" labelProp="display" items={this.props.lookups.withdraw_codes} emptyChoice="Choose One" />
+                        <SimpleSelect model={model+'.withdrawCode'} keyProp="id" labelProp="display" items={this.props.lookups.withdraw_codes} emptyChoice="Choose One" required={true} />
                     </div>
                 </div>
             </div>
@@ -120,7 +120,7 @@ export default class AppStatus extends React.Component {
         }
         return (
             <div style={style} key={item.key}>
-                <SimpleDateInput key={item.key} model={model+'.'+item.key} label={dateTitle} labelClass="col-sm-3" divClass="col-sm-6"/>
+                <SimpleDateInput key={item.key} model={model+'.'+item.key} label={dateTitle} labelClass="col-sm-3" divClass="col-sm-6" required={true && !disabled}/>
             </div>
         )
     }

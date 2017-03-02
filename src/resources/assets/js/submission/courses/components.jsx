@@ -198,13 +198,13 @@ class _EditCreate extends CoursesBase {
 
                 <div className="row">
                 <div className="col-md-12">
-                    <SimpleField label="Type" model={modelKey+'.type'} customField={true} labelClass="col-md-2" divClass="col-md-4">
+                    <SimpleField label="Type" model={modelKey+'.type'} customField={true} labelClass="col-md-2" divClass="col-md-4" required={true} >
                         <select className="form-control">
                             <option value="CAP">{courseTypeMap['CAP']}</option>
                             <option value="CPC">{courseTypeMap['CPC']}</option>
                         </select>
                     </SimpleField>
-                    <SimpleDateInput label="Start Date" model={modelKey+'.startDate'} labelClass="col-md-2" divClass="col-md-4" />
+                    <SimpleDateInput label="Start Date" model={modelKey+'.startDate'} labelClass="col-md-2" divClass="col-md-4" required={true} />
                     <SimpleField label="Location" model={modelKey+'.location'} labelClass="col-md-2" divClass="col-md-4"/>
                 </div>
                 </div>
@@ -280,14 +280,20 @@ class _EditCreate extends CoursesBase {
     }
     getCompletionFields(modelKey, completionState) {
         let completionFields = ''
+
+        let required = false
+        if (completionState != 'disabled') {
+            required = true
+        }
+
         if (completionState != 'hidden') {
             completionFields = (
                 <div className="row">
                 <div className="col-md-12">
                     <h4>Completion</h4>
-                    <SimpleField label="Completed Standard Starts" model={modelKey+'.completedStandardStarts'} labelClass="col-md-2" divClass="col-md-2" disabled={completionState == 'disabled'} />
-                    <SimpleField label="Potentials" model={modelKey+'.potentials'} labelClass="col-md-2" divClass="col-md-2" disabled={completionState == 'disabled'} />
-                    <SimpleField label="Registrations" model={modelKey+'.registrations'} labelClass="col-md-2" divClass="col-md-2" disabled={completionState == 'disabled'} />
+                    <SimpleField label="Completed Standard Starts" model={modelKey+'.completedStandardStarts'} labelClass="col-md-2" divClass="col-md-2" disabled={completionState == 'disabled'} required={required} />
+                    <SimpleField label="Potentials" model={modelKey+'.potentials'} labelClass="col-md-2" divClass="col-md-2" disabled={completionState == 'disabled'} required={required} />
+                    <SimpleField label="Registrations" model={modelKey+'.registrations'} labelClass="col-md-2" divClass="col-md-2" disabled={completionState == 'disabled'} required={required} />
                 </div>
                 </div>
             )
@@ -306,10 +312,15 @@ class _EditCreate extends CoursesBase {
             const qstartModelStr = modelKey + '.quarterStart' + row.fieldSuffix
             const currentModelStr = modelKey + '.current' + row.fieldSuffix
 
+            let requiredClass = ''
+            if (currentState != 'disabled') {
+                requiredClass = 'required'
+            }
+
             rows.push(
                 <div className="row" key={row.fieldSuffix}>
                 <div className="col-md-12">
-                    <div className="form-group">
+                    <div className={requiredClass + ' form-group'}>
                         <label className="col-md-2 control-label">{row.name}</label>
                         <div className="col-md-2">
                             <Field model={qstartModelStr}><input type="text" className="form-control" disabled={qstartState == 'disabled'} /></Field>
