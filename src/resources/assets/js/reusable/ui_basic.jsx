@@ -57,16 +57,27 @@ export class ModeSelectButtons extends React.Component {
  * This should
  */
 export class LoadStateFlip extends React.PureComponent {
+    static defaultProps = {
+        catchFailure: true,
+        wrapGroup: true
+    }
+    static propTypes = {
+        loadState: PropTypes.object.isRequired,
+        catchFailure: PropTypes.bool,
+        wrapGroup: PropTypes.bool
+    }
     render() {
-        var loadState = this.props.loadState
+        var { loadState, catchFailure, wrapGroup } = this.props
         if (loadState.state == 'loading') {
             return <div><span className="glyphicon glyphicon-send"></span>TODO spinner here...</div>
-        } else if (loadState.state == 'failed') {
+        } else if (loadState.state == 'failed' && catchFailure) {
             var error = 'FAILED '
             if (loadState.error) {
                 error += getErrMessage(loadState.error)
             }
             return <div className="bg-danger">{error}</div>
+        } else if (!wrapGroup) {
+            return this.props.children
         } else {
             return <div>{this.props.children}</div>
         }

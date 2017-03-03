@@ -1,13 +1,15 @@
 <?php
     $title = "{$centerName}: {$reportingDate->format('M j, Y')}";
+
+    // We use inline CSS below because this can also be embedded in emails
 ?>
 @if (!$reportMessages)
 <ul>
-    <li class="ok">{{ $title }}</li>
+    <li style="color: green">{{ $title }}</li>
 <ul>
 @else
 <ul>
-    <li class="warning">{{ $title }}
+    <li style="color: orange">{{ $title }}
         <ul>
             @foreach ($reportMessages as $group => $groupData)
                 <li>{{ ucfirst($group) }}

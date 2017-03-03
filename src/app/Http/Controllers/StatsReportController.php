@@ -606,18 +606,29 @@ class StatsReportController extends ReportDispatchAbstractController
         return view('statsreports.details.teammembersweekly', $data);
     }
 
+    public function compileApiReportMessages(Models\StatsReport $statsReport)
+    {
+        if ($statsReport->version !== 'api') {
+            return [];
+        }
+
+        $storedMessages = $statsReport->validationMessages ?: [];
+
+        $reportMessages = [];
+        foreach ($storedMessages as $group => $groupMessages) {
+            foreach ($groupMessages as $msg) {
+                $display = array_get($msg, 'reference.flattened', '');
+                $reportMessages[$group][$display][] = $msg;
+            }
+        }
+
+        return $reportMessages;
+    }
+
     protected function getResults(Models\StatsReport $statsReport)
     {
         if ($statsReport->version === 'api') {
-            $storedMessages = $statsReport->validationMessages ?: [];
-
-            $reportMessages = [];
-            foreach ($storedMessages as $group => $groupMessages) {
-                foreach ($groupMessages as $msg) {
-                    $display = array_get($msg, 'reference.flattened', '');
-                    $reportMessages[$group][$display][] = $msg;
-                }
-            }
+            $reportMessages = $this->compileApiReportMessages($statsReport);
 
             $centerName = $statsReport->center->name;
             $reportingDate = $statsReport->reportingDate;
