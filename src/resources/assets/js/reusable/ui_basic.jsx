@@ -57,27 +57,16 @@ export class ModeSelectButtons extends React.Component {
  * This should
  */
 export class LoadStateFlip extends React.PureComponent {
-    static defaultProps = {
-        catchFailure: true,
-        wrapGroup: true
-    }
-    static propTypes = {
-        loadState: PropTypes.object.isRequired,
-        catchFailure: PropTypes.bool,
-        wrapGroup: PropTypes.bool
-    }
     render() {
-        var { loadState, catchFailure, wrapGroup } = this.props
+        var loadState = this.props.loadState
         if (loadState.state == 'loading') {
             return <div><span className="glyphicon glyphicon-send"></span>TODO spinner here...</div>
-        } else if (loadState.state == 'failed' && catchFailure) {
+        } else if (loadState.state == 'failed') {
             var error = 'FAILED '
             if (loadState.error) {
                 error += getErrMessage(loadState.error)
             }
             return <div className="bg-danger">{error}</div>
-        } else if (!wrapGroup) {
-            return this.props.children
         } else {
             return <div>{this.props.children}</div>
         }
@@ -115,6 +104,25 @@ export class SubmitFlip extends React.PureComponent {
             )
         } else {
             return body
+        }
+    }
+}
+
+export class ButtonStateFlip extends React.PureComponent {
+    static defaultProps = {
+        buttonClass: 'btn btn-primary',
+        onClick: () => { }
+    }
+    static propTypes = {
+        loadState: PropTypes.object.isRequired
+    }
+    render() {
+        var { buttonClass, loadState, onClick } = this.props
+
+        if (loadState.state == 'loading') {
+            return <button className={buttonClass + ' m-progress'}>{this.props.children}</button>
+        } else {
+            return <button className={buttonClass} onClick={onClick}>{this.props.children}</button>
         }
     }
 }

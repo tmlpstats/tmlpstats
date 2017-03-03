@@ -6,7 +6,7 @@ import { PAGES_CONFIG } from '../core/data'
 import { connectRedux, rebind } from '../../reusable/dispatch'
 import { Field } from 'react-redux-form'
 import { Form } from '../../reusable/form_utils'
-import { Alert, LoadStateFlip } from '../../reusable/ui_basic'
+import { Alert, ButtonStateFlip } from '../../reusable/ui_basic'
 import { SubmissionBase, React } from '../base_components'
 
 import { getValidationMessages, displayState, submitReport, setSubmitData } from './actions'
@@ -124,9 +124,9 @@ export default class Review extends SubmissionBase {
                 <ul>{categories}</ul>
                 <div>
                     <Alert alert="warning">&nbsp;Submission is new and we are still adding the finishing touches. Let us know using the "Feedback" tab on the left if anything doesn't look right.</Alert>
-                    <LoadStateFlip loadState={reportSubmitting} catchFailure={false} wrapGroup={false}>
-                        <button className="btn btn-primary btn-lg" onClick={this.displayPreSubmitModal}>Submit Report</button>
-                    </LoadStateFlip>
+                    <ButtonStateFlip loadState={reportSubmitting}
+                                     buttonClass="btn btn-primary btn-lg"
+                                     onClick={this.displayPreSubmitModal}>Submit Report</ButtonStateFlip>
                 </div>
                 {modal}
             </div>
@@ -255,9 +255,7 @@ class PreSubmitModal extends React.PureComponent {
 
                     <Modal.Footer>
                         <Button bsStyle="default" onClick={dismiss}>Cancel</Button>
-                        <LoadStateFlip loadState={loadState} catchFailure={false} wrapGroup={false}>
-                            <Button bsStyle="primary" type="submit" onClick={onSubmit}>Submit</Button>
-                        </LoadStateFlip>
+                        <ButtonStateFlip loadState={loadState} onClick={onSubmit}>Submit</ButtonStateFlip>
                     </Modal.Footer>
                 </Modal>
             </div>
