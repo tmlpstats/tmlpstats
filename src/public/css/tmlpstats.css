@@ -408,9 +408,7 @@ table.submissionClassList {
 }
 
 
-
-
-
+/** SUBMISSION - Loading Buttons */
 
 @-webkit-keyframes ld {
   0%   { transform: rotate(0deg) scale(1); }
