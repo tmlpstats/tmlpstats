@@ -608,6 +608,26 @@ class StatsReportController extends ReportDispatchAbstractController
 
     protected function getResults(Models\StatsReport $statsReport)
     {
+        if ($statsReport->version === 'api') {
+            $storedMessages = $statsReport->validationMessages ?: [];
+
+            $reportMessages = [];
+            foreach ($storedMessages as $group => $groupMessages) {
+                foreach ($groupMessages as $msg) {
+                    $display = array_get($msg, 'reference.flattened', '');
+                    $reportMessages[$group][$display][] = $msg;
+                }
+            }
+
+            $centerName = $statsReport->center->name;
+            $reportingDate = $statsReport->reportingDate;
+            return view('import.apiresults', compact(
+                'centerName',
+                'reportingDate',
+                'reportMessages'
+            ));
+        }
+
         $sheet = [];
         $sheetUrl = '';
 

@@ -36,14 +36,14 @@ class ApiAccountabilityValidator extends ApiValidatorAbstract
             if ($count > 1) {
                 $this->addMessage('error', [
                     'id' => 'CLASSLIST_MULTIPLE_ACCOUNTABLES',
-                    'ref' => ['type' => 'TeamMember', 'id' => $id],
+                    'ref' => ['type' => 'Accountability', 'id' => $id],
                     'params' => ['accountability' => $this->getAccountability($id)->display],
                 ]);
                 $isValid = false;
             } else if ($count === 0 && in_array($id, $this->requiredAccountability)) {
                 $this->addMessage('warning', [
                     'id' => 'CLASSLIST_MISSING_ACCOUNTABLE',
-                    'ref' => ['type' => 'TeamMember', 'id' => $id],
+                    'ref' => ['type' => 'Accountability', 'id' => $id],
                     'params' => ['accountability' => $this->getAccountability($id)->display],
                 ]);
             }

@@ -98,6 +98,7 @@ class SubmissionCore extends AuthenticatedApiBase
             $statsReport->validated = true;
             $statsReport->locked = true;
             $statsReport->submittedAt = Carbon::now();
+            $statsReport->validationMessages = $results['messages'];
             $statsReport->userId = $this->context->getUser()->id;
             $statsReport->submitComment = array_get($data, 'comment', null);
             $statsReport->save();
