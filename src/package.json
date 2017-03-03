@@ -8,6 +8,7 @@
   "devDependencies": {
     "babel": "^6.5.2",
     "babel-eslint": "^6.0.4",
+    "babel-loader": "^6.3.2",
     "babel-plugin-lodash": "^3",
     "babel-plugin-transform-class-properties": "^6.8.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
@@ -15,14 +16,14 @@
     "babel-preset-es2015": "^6.14",
     "babel-preset-react": "^6.5.0",
     "babelify": "^7.2.0",
-    "browser-sync": "^2.15",
-    "browserify": "^13",
     "envify": "^3.4.0",
     "eslint": "^3.5",
-    "eslint-plugin-react": "^6",
+    "eslint-plugin-react": "^6.0.0",
     "gulp": "^3.9.1",
     "jest": "^18.1.0",
-    "laravel-elixir": "^5.0.0"
+    "laravel-elixir": "^6.0.0-15",
+    "laravel-elixir-browsersync-official": "^1.0.0",
+    "laravel-elixir-webpack-official": "^1.0.10"
   },
   "dependencies": {
     "array-find": "^1.0.0",
@@ -31,6 +32,7 @@
     "fetch-ponyfill": "^3.0.0",
     "lodash": "^4.15.0",
     "moment": "^2.14.1",
+    "node-libs-browser": "^1.1.1",
     "normalizr": "^2.2.1",
     "object-assign": "^4.1.0",
     "react": "^15.4.0",
@@ -53,7 +55,10 @@
     "test": "jest"
   },
   "jest": {
-    "moduleFileExtensions": ["js", "jsx"],
+    "moduleFileExtensions": [
+      "js",
+      "jsx"
+    ],
     "rootDir": "resources/assets/js"
   }
 }

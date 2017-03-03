@@ -26,7 +26,6 @@ $reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getRep
     <![endif]-->
 
     <link href="{{ elixir('css/app.css') }}" rel="stylesheet">
-    <link href="{{ elixir('css/main.css') }}" rel="stylesheet">
 
     @yield('headers')
 </head>
@@ -92,6 +91,7 @@ $reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getRep
     <script src="{{ asset('js/vendor.js') }}" type="text/javascript"></script>
     <script src="{{ elixir('js/api.js') }}" type="text/javascript"></script>
     <script src="{{ elixir('js/tmlpstats.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/commons.js') }}" type="text/javascript"></script>
     <script src="{{ elixir('js/main.js') }}" type="text/javascript"></script>
 
     <script type="text/javascript">
