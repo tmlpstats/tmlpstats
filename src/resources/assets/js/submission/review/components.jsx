@@ -99,13 +99,13 @@ export default class Review extends SubmissionBase {
         })
 
         let modal
-        if (displayFlow.state == 'loading') {
+        if (displayFlow.state == DISPLAY_STATES.preSubmit) {
             modal = (
                 <PreSubmitModal dismiss={this.hidePreSubmitModal}
                                 onSubmit={this.onSubmit}
                                 loadState={reportSubmitting} />
             )
-        } else if (displayFlow.state == 'loaded' && submitResults) {
+        } else if (displayFlow.state == DISPLAY_STATES.postSubmit && submitResults) {
             let dismiss = this.completeSubmission
             if (!submitResults.isSuccess) {
                 dismiss = this.failSubmission
