@@ -31,5 +31,9 @@ You are not complete yet. Your regional statistician will review your sheet and 
     -----<br/>
 @endif
 <br/>
+@if ($reportMessages)
+    @include('import.apiresults')
+@endif
+<br/>
 Best,<br/>
 Your Regional Statisticians<br/>

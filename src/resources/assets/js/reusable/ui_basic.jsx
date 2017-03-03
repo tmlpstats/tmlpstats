@@ -108,6 +108,25 @@ export class SubmitFlip extends React.PureComponent {
     }
 }
 
+export class ButtonStateFlip extends React.PureComponent {
+    static defaultProps = {
+        buttonClass: 'btn btn-primary',
+        onClick: () => { }
+    }
+    static propTypes = {
+        loadState: PropTypes.object.isRequired
+    }
+    render() {
+        var { buttonClass, loadState, onClick } = this.props
+
+        if (loadState.state == 'loading') {
+            return <button className={buttonClass + ' m-progress'}>{this.props.children}</button>
+        } else {
+            return <button className={buttonClass} onClick={onClick}>{this.props.children}</button>
+        }
+    }
+}
+
 /**
  * MessagesComponent formats an array of messages for display.
  *

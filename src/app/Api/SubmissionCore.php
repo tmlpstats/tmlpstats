@@ -12,6 +12,7 @@ use TmlpStats\Api;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Api\Exceptions;
 use TmlpStats\Domain;
+use TmlpStats\Http\Controllers;
 
 class SubmissionCore extends AuthenticatedApiBase
 {
@@ -554,10 +555,11 @@ class SubmissionCore extends AuthenticatedApiBase
 
         $centerName = $center->name;
         $comment = $statsReport->submitComment;
+        $reportMessages = App::make(Controllers\StatsReportController::class)->compileApiReportMessages($statsReport);
         try {
             Mail::send('emails.apistatssubmitted',
                 compact('centerName', 'comment', 'due', 'isLate', 'isResubmitted', 'mobileDashUrl',
-                    'reportingDate', 'reportUrl', 'respondByDateTime', 'submittedAt', 'user'),
+                    'reportingDate', 'reportUrl', 'respondByDateTime', 'submittedAt', 'user', 'reportMessages'),
                 function ($message) use ($emailTo, $emails, $emailMap, $centerName) {
                     // Only send email to centers in production
                     if (env('APP_ENV') === 'prod') {

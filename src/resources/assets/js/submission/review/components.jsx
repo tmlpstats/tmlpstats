@@ -6,11 +6,11 @@ import { PAGES_CONFIG } from '../core/data'
 import { connectRedux, rebind } from '../../reusable/dispatch'
 import { Field } from 'react-redux-form'
 import { Form } from '../../reusable/form_utils'
-import { Alert } from '../../reusable/ui_basic'
+import { Alert, ButtonStateFlip } from '../../reusable/ui_basic'
 import { SubmissionBase, React } from '../base_components'
 
-import { getValidationMessages, submitReport, setPreSubmitModal, setPostSubmitModal, setSubmitResults, setSubmitData } from './actions'
-import { loadPairs } from './data'
+import { getValidationMessages, displayState, submitReport, setSubmitData } from './actions'
+import { loadPairs, DISPLAY_STATES } from './data'
 import { REVIEW_SUBMIT_FORM_KEY } from './reducers'
 
 const CLASSES = {error: 'bg-danger', warning: 'bg-warning'}
@@ -30,6 +30,7 @@ export default class Review extends SubmissionBase {
         super(props)
         rebind(this, 'displayPreSubmitModal', 'hidePreSubmitModal', 'onSubmit', 'completeSubmission', 'failSubmission')
         this.props.dispatch(setSubmitData({ comment: '' }))
+        this.props.dispatch(displayState(DISPLAY_STATES.main))
     }
 
     checkLoading() {
@@ -50,57 +51,29 @@ export default class Review extends SubmissionBase {
     }
 
     displayPreSubmitModal() {
-        this.props.dispatch(setPreSubmitModal(true))
+        this.props.dispatch(displayState(DISPLAY_STATES.preSubmit))
     }
 
     hidePreSubmitModal() {
-        this.props.dispatch(setPreSubmitModal(false))
-    }
-
-    displayPostSubmitModal() {
-        this.props.dispatch(setPostSubmitModal(true))
-    }
-
-    hidePostSubmitModal() {
-        this.props.dispatch(setPostSubmitModal(false))
+        this.props.dispatch(displayState(DISPLAY_STATES.main))
     }
 
     onSubmit() {
         const { centerId, reportingDate } = this.props.params
         const data = this.props.review.submitData
 
-        this.props.dispatch(submitReport(centerId, reportingDate, data)).then((result) => {
-            if (!result) {
-                throw new Error('Failed to submit report. Please try again.')
-            }
-
-            if (!result.success) {
-                throw new Error(result.message)
-            }
-
-            this.props.dispatch(setSubmitResults({
-                message: result.message,
-                submittedAt: result.submittedAt,
-                isSuccess: true,
-            }))
-        }).catch((err) => {
-            this.props.dispatch(setSubmitResults({
-                message: err,
-                isSuccess: false,
-            }))
-        })
-
-        this.hidePreSubmitModal()
-        this.displayPostSubmitModal()
+        this.props.dispatch(submitReport(centerId, reportingDate, data))
     }
 
     completeSubmission() {
         const { centerId, reportingDate } = this.props.params
+        this.props.dispatch(displayState(DISPLAY_STATES.main))
+        this.props.dispatch(setSubmitData({ comment: '' }))
         window.location.href = `/reports/centers/${centerId}/${reportingDate}`
     }
 
     failSubmission() {
-        this.hidePostSubmitModal()
+        this.props.dispatch(displayState(DISPLAY_STATES.main))
         // There is a more reduxy way to do this, which we can do later, this method works.
         window.location.reload()
     }
@@ -110,7 +83,7 @@ export default class Review extends SubmissionBase {
             return this.renderBasicLoading()
         }
 
-        const { showPreSubmitModal, showPostSubmitModal, submitResults } = this.props.review
+        const { submitResults, displayFlow, reportSubmitting } = this.props.review
 
         let categories = []
         PAGES_CONFIG.forEach((config) => {
@@ -126,12 +99,13 @@ export default class Review extends SubmissionBase {
         })
 
         let modal
-        if (showPreSubmitModal) {
+        if (displayFlow.state == DISPLAY_STATES.preSubmit) {
             modal = (
                 <PreSubmitModal dismiss={this.hidePreSubmitModal}
-                                onSubmit={this.onSubmit} />
+                                onSubmit={this.onSubmit}
+                                loadState={reportSubmitting} />
             )
-        } else if (showPostSubmitModal && submitResults) {
+        } else if (displayFlow.state == DISPLAY_STATES.postSubmit && submitResults) {
             let dismiss = this.completeSubmission
             if (!submitResults.isSuccess) {
                 dismiss = this.failSubmission
@@ -150,7 +124,9 @@ export default class Review extends SubmissionBase {
                 <ul>{categories}</ul>
                 <div>
                     <Alert alert="warning">&nbsp;Submission is new and we are still adding the finishing touches. Let us know using the "Feedback" tab on the left if anything doesn't look right.</Alert>
-                    <button type="button" className="btn btn-primary btn-lg" onClick={this.displayPreSubmitModal}>Submit Report</button>
+                    <ButtonStateFlip loadState={reportSubmitting}
+                                     buttonClass="btn btn-primary btn-lg"
+                                     onClick={this.displayPreSubmitModal}>Submit Report</ButtonStateFlip>
                 </div>
                 {modal}
             </div>
@@ -246,7 +222,7 @@ export class ReviewCategory extends React.PureComponent {
 
 class PreSubmitModal extends React.PureComponent {
     render() {
-        const { dismiss, onSubmit } = this.props
+        const { dismiss, onSubmit, loadState } = this.props
 
         return (
             <div className="static-modal">
@@ -279,7 +255,7 @@ class PreSubmitModal extends React.PureComponent {
 
                     <Modal.Footer>
                         <Button bsStyle="default" onClick={dismiss}>Cancel</Button>
-                        <Button bsStyle="primary" type="submit" onClick={onSubmit}>Submit</Button>
+                        <ButtonStateFlip loadState={loadState} onClick={onSubmit}>Submit</ButtonStateFlip>
                     </Modal.Footer>
                 </Modal>
             </div>
