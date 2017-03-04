@@ -2,7 +2,7 @@ import { objectAssign } from '../reusable/ponyfill'
 import Api from '../api'
 import _ from 'lodash'
 
-import Reports from './reports-generated'
+import ReportsMeta from '../reports/meta'
 
 const { $, console } = window
 
@@ -13,7 +13,7 @@ const debug = (...x) => {
 window.showReportView = function(config) {
     const loaderHTML = $('#loader').html()
 
-    const fullReport = Reports[config.report]
+    const fullReport = ReportsMeta[config.report]
     const target = $(config.target)
     const reportApi = Api[config.report + 'Report']
     const { pastClassroom2, isLastWeek } = config

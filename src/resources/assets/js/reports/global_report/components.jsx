@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { createSelector } from 'reselect'
-import Reports from '../../classic/reports-generated'
+import ReportsMeta from '../meta'
 import { TabbedReport } from '../tabbed_report/components'
 import { filterReportFlags } from '../tabbed_report/util'
 import { reportData } from './data'
@@ -18,7 +18,7 @@ export class GlobalReport extends Component {
         super(props)
 
         // XXX TODO deal with report flags actually changing after classroom 2
-        this.fullReport = filterReportFlags(Reports['Global'], DEFAULT_FLAGS)
+        this.fullReport = filterReportFlags(ReportsMeta['Global'], DEFAULT_FLAGS)
 
         this.makeTabParams = createSelector(
             (params) => params.tab1,
