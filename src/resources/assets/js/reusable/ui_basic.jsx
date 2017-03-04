@@ -108,6 +108,9 @@ export class SubmitFlip extends React.PureComponent {
     }
 }
 
+/**
+ * Display a button with a loading effect. Controlled by LoadingMultiState result
+ */
 export class ButtonStateFlip extends React.PureComponent {
     static defaultProps = {
         buttonClass: 'btn btn-primary',
