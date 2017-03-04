@@ -131,7 +131,7 @@ class ImportDocument extends ImportDocumentAbstract
 
             $version = $data[2]['L'];
 
-            if (!preg_match("/^V((\d+\.\d+)(\.\d+)?)$/i", $version, $matches)) {
+            if (!preg_match("/^V((\d+\.\d+)(\.\d+)?[a-z]?)$/i", $version, $matches)) {
                 $this->addMessage(static::TAB_WEEKLY_STATS, 'IMPORTDOC_VERSION_FORMAT_INCORRECT', $version);
             } else {
                 $this->version = $matches[1]; // only grab to num
