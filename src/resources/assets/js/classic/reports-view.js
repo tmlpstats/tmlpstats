@@ -22,18 +22,18 @@ window.showReportView = function(config) {
     var loaded = {}
 
     if (!pastClassroom2 && config.report == 'Global') {
-        delete fullReport.children.RepromisesByCenter
-        _.pull(fullReport.children.RegionalStatsGroup.children, 'RepromisesByCenter')
+        delete fullReport.RepromisesByCenter
+        _.pull(fullReport.RegionalStatsGroup.children, 'RepromisesByCenter')
     }
 
     if (!isLastWeek && config.report == 'Global') {
-        delete fullReport.children.AcknowledgementReport
-        _.pull(fullReport.children.WeekendGroup.children, 'AcknowledgementReport')
+        delete fullReport.AcknowledgementReport
+        _.pull(fullReport.WeekendGroup.children, 'AcknowledgementReport')
     }
 
     /// SHOW REPORT OF CHOOSING. ACTUAL AJAX STUFF
     function showReport(cid) {
-        const report = fullReport.children[cid]
+        const report = fullReport[cid]
         if (!report) {
             debug('avoiding report', cid)
             return 'no'
@@ -102,8 +102,8 @@ window.showReportView = function(config) {
 
     var tabs = '<div><ul id="tabs" class="nav nav-tabs tabs-top brief-tabs" data-tabs="tabs">'
     var content = '<div><div class="tab-content">'
-    fullReport.root.forEach((id) => {
-        const report = fullReport.children[id]
+    fullReport._root.children.forEach((id) => {
+        const report = fullReport[id]
         const className = (report.id == window.location.hash.substr(1)) ? 'active': ''
         const rtype = (report.type == 'report')? report.id : ''
         const tabLabel = responsiveLabel(report)
@@ -115,7 +115,7 @@ window.showReportView = function(config) {
             var blah = '</div><div class="subtabContent">'
             report.children.forEach((cid) => {
                 queueLoad(cid)
-                const report = fullReport.children[cid]
+                const report = fullReport[cid]
                 subtabs += `<button data-cid="${cid}" type="button" class="btn btn-default">${report.name}</button>`
                 blah += `<div id="${cid}-content">${loaderHTML}</div>`
             })

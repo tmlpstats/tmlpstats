@@ -22,6 +22,8 @@ export function filterReportFlags(report, flags) {
         }
     })
 
+    let newReport = objectAssign({}, report)
+
     // Loop 2: Remove any flagged reports
     flagged.forEach((child) => {
         let good = true
@@ -31,12 +33,19 @@ export function filterReportFlags(report, flags) {
             }
         })
         if (!good) {
-            delete report.children[child.id]
-            _.pull(report.children[child.parent].children, child.id)
+            delete newReport[child.id]
+            const parentId = child.parent || '_root'
+            newReport[parentId] = filterChildren(newReport[parentId], child.id)
         }
     })
 
-    return report
+    return newReport
+}
+
+function filterChildren(report, childId) {
+    return objectAssign({}, report, {
+        children: _.without(report.children, childId)
+    })
 }
 
 function eachReportChild(report, callback) {

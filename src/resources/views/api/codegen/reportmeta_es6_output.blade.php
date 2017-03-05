@@ -6,10 +6,8 @@
 {{-- We disable eslint because our aggressive linting doesn't like pure JSON even though it is valid JS --}}
 /* eslint-disable */
 @foreach ($reportMeta as $namespace)
-const {{ $namespace->id }}Report = @json_pretty([
-    'root' => $namespace->childrenIds(),
-    'children' => $namespace->flatEs6Array(),
-])
+const {{ $namespace->id }}Report = @json_pretty($namespace->flatEs6ArrayWithVirtualRoot())
+
 @endforeach
 
 {{-- Because blade aggressively chops newlines after a foreach, we need an _extra_ one before this one --}}

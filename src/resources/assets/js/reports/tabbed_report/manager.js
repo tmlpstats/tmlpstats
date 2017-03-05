@@ -22,7 +22,7 @@ export class TabbedReportManager extends ReduxLoader {
     }
 
     extraReducers(opts) {
-        const loadQueue = Immutable.Map(opts.report.children)
+        const loadQueue = Immutable.Map(opts.report)
                 .valueSeq()
                 .filter((report) => report.type == 'report')
                 .sortBy((report) => report.n)

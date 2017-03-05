@@ -5,15 +5,10 @@ import { routerShape } from 'react-router/lib/PropTypes'
 
 import { createImmutableMemoize } from '../../reusable/immutable_utils'
 
-const reportRootShape = PropTypes.shape({
-    root: PropTypes.array.isRequired,
-    children: PropTypes.object.isRequired
-})
-
 const contextShape = PropTypes.shape({
     responsiveLabel: PropTypes.func.isRequired,
     reportUri: PropTypes.func.isRequired,
-    fullReport: reportRootShape.isRequired
+    fullReport: PropTypes.object.isRequired
 })
 
 export class TabbedReport extends Component {
@@ -33,8 +28,8 @@ export class TabbedReport extends Component {
         let navTabs = []
         let content
 
-        reportContext.fullReport.root.forEach((id) => {
-            const report = reportContext.fullReport.children[id]
+        reportContext.fullReport._root.children.forEach((id) => {
+            const report = reportContext.fullReport[id]
             const active = (report.id == tabs[0])
             const uriBasis = report.type == 'grouping' ? [id, report.children[0]] : [id]
             const href = reportContext.reportUri(uriBasis)
@@ -82,7 +77,7 @@ export class ReportContent extends PureComponent {
             let content
 
             report.children.forEach((cid) => {
-                const report = reportContext.fullReport.children[cid]
+                const report = reportContext.fullReport[cid]
                 const handler = () => {
                     this.context.router.push(reportContext.reportUri(path.slice(0, level).concat([cid])))
                 }

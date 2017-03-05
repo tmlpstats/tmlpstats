@@ -80,4 +80,16 @@ class ReportMetaNamespace
 
         return $items;
     }
+
+    public function flatEs6ArrayWithVirtualRoot()
+    {
+        $items = $this->flatEs6Array();
+        $items['_root'] = [
+            'type' => 'grouping',
+            'name' => 'Fake Root',
+            'children' => $this->childrenIds(),
+        ];
+
+        return $items;
+    }
 }
