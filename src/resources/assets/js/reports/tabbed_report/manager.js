@@ -6,14 +6,15 @@ const MAX_PAGES = 5
 
 const LoaderState = Immutable.Record({
     queue: Immutable.OrderedSet(),
-    inprogress: null,
-    done: Immutable.Map(),
+    inprogress: Immutable.Set(),
+    done: Immutable.Set(),
     perLoad: 1
 })
 
 export class TabbedReportManager extends ReduxLoader {
     constructor(opts) {
         super(opts)
+        this.init_action = opts.prefix + '/init'
         this.queue_action = opts.prefix + '/queue'
         this.start_action = opts.prefix + '/start'
         this.finish_action = opts.prefix + '/finish'
@@ -22,18 +23,18 @@ export class TabbedReportManager extends ReduxLoader {
     }
 
     extraReducers(opts) {
-        const loadQueue = Immutable.Map(opts.report)
-                .valueSeq()
-                .filter((report) => report.type == 'report')
-                .sortBy((report) => report.n)
-                .map((report) => report.id)
-        const defaultState = new LoaderState({queue: Immutable.OrderedSet(loadQueue)})
+        let init = {}
+        if (opts.report) {
+            init.queue = this._queueFromReport(opts.report)
+        }
+
+        const defaultState = new LoaderState(init)
 
         const lsReducer = (state=defaultState, action) => {
             if (action.type.startsWith(opts.prefix)) {
                 if (action.type == this.queue_action) {
                     let id = action.payload
-                    if (!state.done.has(id)) {
+                    if (!state.done.has(id) && !state.inprogress.has(id)) {
                         // Push the element to the end of the queue which would be the highest priority
                         state = state.set('queue', state.queue.remove(id).add(id))
                     }
@@ -42,21 +43,34 @@ export class TabbedReportManager extends ReduxLoader {
                     let queue = state.queue.subtract(inprogress)
                     state = state.set('queue', queue).set('inprogress', inprogress)
                 } else if (action.type == this.finish_action) {
-                    let changes = Immutable.Map(action.payload)
-                    let keys = changes.keySeq()
-                    console.log('finished loading', keys.toJS())
+                    let changes = Immutable.Set(action.payload)
+                    console.log('finished loading', changes.toJS())
                     let newData = {
-                        done: state.done.merge(changes),
-                        inprogress: state.inprogress.subtract(keys),
-                        queue: state.queue.subtract(keys),
+                        done: state.done.union(changes),
+                        inprogress: Immutable.Set(),
+                        queue: state.queue.subtract(changes),
                         perLoad: Math.min(MAX_PAGES, state.perLoad + 1)
                     }
                     state = state.merge(newData)
+                } else if (action.type == this.init_action) {
+                    // On initialize, we want the original priorities to stay ahead, so we subtract and re-add them.
+                    let result = this._queueFromReport(action.payload)
+                    result = result.subtract(state.inprogress).subtract(state.done).subtract(state.queue).union(state.queue)
+                    state = state.set('queue', result)
                 }
             }
             return state
         }
         return {loader: lsReducer}
+    }
+
+    _queueFromReport(input) {
+        return Immutable.Map(input)
+            .valueSeq()
+            .filter((report) => report.type == 'report')
+            .sortBy((report) => report.n)
+            .map((report) => report.id)
+            .toOrderedSet()
     }
 
     // Separated out because then it's a bit less boilerplate to manage.
@@ -103,7 +117,8 @@ export class TabbedReportManager extends ReduxLoader {
                         pages.forEach((reportId) => {
                             toUpdate[reportId] = data.pages[reportId]
                         })
-                        dispatch({type: this.finish_action, payload: toUpdate})
+                        dispatch({type: this.replace_items_action, payload: toUpdate})
+                        dispatch({type: this.finish_action, payload: pages})
                         setTimeout(flow, 200)
                     }
                 }))
@@ -123,5 +138,9 @@ export class TabbedReportManager extends ReduxLoader {
 
     replaceItems(values) {
         return {type: this.replace_items_action, payload: values}
+    }
+
+    init(reportRoot) {
+        return {type: this.init_action, payload: reportRoot}
     }
 }

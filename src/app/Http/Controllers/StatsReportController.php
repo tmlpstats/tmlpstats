@@ -13,6 +13,7 @@ use Response;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Encapsulations;
+use TmlpStats\Http\Controllers\Traits\LocalReportDispatch;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\Import\Xlsx\XlsxImporter;
@@ -20,6 +21,8 @@ use TmlpStats\Reports\Arrangements;
 
 class StatsReportController extends ReportDispatchAbstractController
 {
+    use LocalReportDispatch;
+
     const CACHE_TTL = 7 * 24 * 60;
     protected $context;
 
@@ -53,13 +56,7 @@ class StatsReportController extends ReportDispatchAbstractController
             'abbr' => $statsReport->center->abbrLower(),
         ]);
 
-
-        $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
-
-        $sheetUrl = '';
-        if ($sheetPath) {
-            $sheetUrl = $sheetPath ? url("/statsreports/{$statsReport->id}/download") : null;
-        }
+        list($sheetPath, $sheetUrl) = $this->getSheetPathUrl($statsReport);
 
         $center = $statsReport->center;
         $globalReport = Models\GlobalReport::reportingDate($statsReport->reportingDate)->first();
@@ -80,15 +77,15 @@ class StatsReportController extends ReportDispatchAbstractController
         $lastReport = null;
         if ($lastCenter && Gate::allows('showReportNavLinks', Models\StatsReport::class)) {
             $lastReport = $globalReport->statsReports()
-                ->byCenter($lastCenter)
-                ->first();
+                                       ->byCenter($lastCenter)
+                                       ->first();
         }
 
         $nextReport = null;
         if ($nextCenter && Gate::allows('showReportNavLinks', Models\StatsReport::class)) {
             $nextReport = $globalReport->statsReports()
-                ->byCenter($nextCenter)
-                ->first();
+                                       ->byCenter($nextCenter)
+                                       ->first();
         }
 
         $reportToken = null;
@@ -97,8 +94,20 @@ class StatsReportController extends ReportDispatchAbstractController
         }
 
         $showNavCenterSelect = true;
+        $defaultVmode = env('LOCAL_REPORT_VIEW_MODE', 'html');
+        $vmode = $request->has('viewmode') ? $request->input('viewmode') : $defaultVmode;
 
-        return view('statsreports.show', compact(
+        switch (strtolower($vmode)) {
+            case 'react':
+                $template = 'show_react';
+                break;
+            case 'html':
+            default:
+                $template = 'show';
+                break;
+        }
+
+        return view("statsreports.{$template}", compact(
             'statsReport',
             'lastReport',
             'nextReport',
@@ -108,6 +117,18 @@ class StatsReportController extends ReportDispatchAbstractController
             'reportToken',
             'showNavCenterSelect'
         ));
+    }
+
+    protected function getSheetPathUrl($statsReport)
+    {
+        $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+
+        $sheetUrl = '';
+        if ($sheetPath) {
+            $sheetUrl = $sheetPath ? url("/statsreports/{$statsReport->id}/download") : null;
+        }
+
+        return [$sheetPath, $sheetUrl];
     }
 
     /**
@@ -625,6 +646,17 @@ class StatsReportController extends ReportDispatchAbstractController
         return $reportMessages;
     }
 
+    protected function getOverview(Models\StatsReport $statsReport)
+    {
+        list($sheetPath, $sheetUrl) = $this->getSheetPathUrl($statsReport);
+
+        return view('statsreports.details.overview_combined', [
+            'statsReport' => $statsReport,
+            'sheetUrl' => $sheetUrl,
+            'results' => $this->getResults($statsReport),
+        ]);
+    }
+
     protected function getResults(Models\StatsReport $statsReport)
     {
         if ($statsReport->version === 'api') {
@@ -632,6 +664,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
             $centerName = $statsReport->center->name;
             $reportingDate = $statsReport->reportingDate;
+
             return view('import.apiresults', compact(
                 'centerName',
                 'reportingDate',
@@ -642,7 +675,7 @@ class StatsReportController extends ReportDispatchAbstractController
         $sheet = [];
         $sheetUrl = '';
 
-        $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+        list($sheetPath, $sheetUrl) = $this->getSheetPathUrl($statsReport);
 
         if ($sheetPath) {
             try {
@@ -653,7 +686,6 @@ class StatsReportController extends ReportDispatchAbstractController
                 Log::error('Error validating sheet: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             }
 
-            $sheetUrl = $sheetPath ? url("/statsreports/{$statsReport->id}/download") : null;
         }
 
         if (!$sheetUrl) {

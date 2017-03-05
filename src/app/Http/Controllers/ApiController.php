@@ -47,6 +47,8 @@ class ApiController extends ApiControllerBase
         "LocalReport.getClassListByQuarter" => "LocalReport__getClassListByQuarter",
         "LocalReport.getCourseList" => "LocalReport__getCourseList",
         "LocalReport.getCenterQuarter" => "LocalReport__getCenterQuarter",
+        "LocalReport.reportViewOptions" => "LocalReport__reportViewOptions",
+        "LocalReport.getReportPages" => "LocalReport__getReportPages",
         "Scoreboard.allForCenter" => "Scoreboard__allForCenter",
         "Scoreboard.stash" => "Scoreboard__stash",
         "Scoreboard.getScoreboardLockQuarter" => "Scoreboard__getScoreboardLockQuarter",
@@ -276,6 +278,21 @@ class ApiController extends ApiControllerBase
         return App::make(Api\LocalReport::class)->getCenterQuarter(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'quarter', 'Quarter')
+        );
+    }
+    protected function LocalReport__reportViewOptions($input)
+    {
+        return App::make(Api\LocalReport::class)->reportViewOptions(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date')
+        );
+    }
+    protected function LocalReport__getReportPages($input)
+    {
+        return App::make(Api\LocalReport::class)->getReportPages(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'pages', 'array')
         );
     }
     protected function Scoreboard__allForCenter($input)
