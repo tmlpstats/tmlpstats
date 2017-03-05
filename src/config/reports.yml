@@ -591,5 +591,6 @@ reportMeta:
             name: Potentials Details
           AcknowledgementReport:
             name: Acknowledgement Report
+            requiredFlags: ['lastWeek']
 
 reports: {}

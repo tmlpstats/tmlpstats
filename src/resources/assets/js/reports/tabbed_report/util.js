@@ -14,7 +14,7 @@ export function filterReportFlags(report, flags) {
     eachReportChild(report, (key, child) => {
         if (child.children) {
             child.children.forEach((subChildKey) => {
-                report.children[subChildKey].parent = key
+                report[subChildKey].parent = key
             })
         }
         if (child.requiredFlags && child.requiredFlags.length) {
@@ -33,6 +33,7 @@ export function filterReportFlags(report, flags) {
             }
         })
         if (!good) {
+            console.log('removing', child.id)
             delete newReport[child.id]
             const parentId = child.parent || '_root'
             newReport[parentId] = filterChildren(newReport[parentId], child.id)
@@ -49,7 +50,7 @@ function filterChildren(report, childId) {
 }
 
 function eachReportChild(report, callback) {
-    for (let key in report.children) {
-        callback(key, report.children[key])
+    for (let key in report) {
+        callback(key, report[key])
     }
 }

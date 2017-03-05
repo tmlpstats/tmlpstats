@@ -298,7 +298,10 @@ const GlobalReport = {
         "id": "AcknowledgementReport",
         "n": 40,
         "type": "report",
-        "name": "Acknowledgement Report"
+        "name": "Acknowledgement Report",
+        "requiredFlags": [
+            "lastWeek"
+        ]
     },
     "WeekendGroup": {
         "id": "WeekendGroup",
