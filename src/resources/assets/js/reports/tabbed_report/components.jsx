@@ -7,6 +7,7 @@ import { createImmutableMemoize } from '../../reusable/immutable_utils'
 
 const contextShape = PropTypes.shape({
     responsiveLabel: PropTypes.func.isRequired,
+    getContent: PropTypes.func.isRequired,
     reportUri: PropTypes.func.isRequired,
     fullReport: PropTypes.object.isRequired
 })
@@ -38,8 +39,7 @@ export class TabbedReport extends Component {
             )
 
             if (active) {
-                const doneSet = reportContext.props.loader.done
-                const contentTemp = Immutable.List(tabs.map((tab) => doneSet.get(tab, '')))
+                const contentTemp = Immutable.List(tabs.map((tab) => reportContext.getContent(tab)))
                 const contentVec = this.contentLookup(contentTemp)
                 content = <ReportContent key={id} report={report} path={tabs} active={active} contentVec={contentVec} reportContext={reportContext} />
             }
@@ -75,12 +75,13 @@ export class ReportContent extends PureComponent {
         if (report.type == 'grouping') {
             let tabs = []
             let content
+            const jump = (cid) => {
+                this.context.router.push(reportContext.reportUri(path.slice(0, level).concat([cid])))
+            }
 
             report.children.forEach((cid) => {
                 const report = reportContext.fullReport[cid]
-                const handler = () => {
-                    this.context.router.push(reportContext.reportUri(path.slice(0, level).concat([cid])))
-                }
+                const handler = () => jump(cid)
                 let class2 = 'btn-default'
                 if (path && path[level] == cid) {
                     content = <ReportContent level={level + 1} path={path} active={true} contentVec={contentVec} reportContext={reportContext} report={report} />
@@ -93,11 +94,12 @@ export class ReportContent extends PureComponent {
             })
             if (path && !content) {
                 setTimeout(() => {
-                    this.context.router.push(reportContext.reportUri(path.concat([report.children[0]])))
+                    jump(report.children[0])
                 })
             }
             return (
                 <div style={activeStyle(active)}>
+                    <h3>{report.name}</h3>
                     <div className="btn-group grouping" role="group">
                         {tabs}
                     </div>

@@ -46,7 +46,7 @@ Route::resource('reporttokens', 'ReportTokenController');
 
 // Reports
 Route::get('report/{token}', 'ReportsController@getByToken');
-Route::get('reports/centers/{abbr?}/{date?}', 'ReportsController@getCenterReport');
+Route::get('reports/centers/{abbr?}/{date?}/{tab1?}/{tab2?}', 'ReportsController@getCenterReport');
 Route::get('reports/regions/{abbr?}/{date?}/{tab1?}/{tab2?}', 'ReportsController@getRegionReport');
 
 Route::post('reports/centers/setActive', 'ReportsController@setActiveCenter');

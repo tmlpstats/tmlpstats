@@ -19,12 +19,12 @@ $nextQtrAccountabilities = $centerReportingDate->canShowNextQtrAccountabilities(
         </div>
         <div class="col-sm-1 hide-mobile" style="text-align: right">
             @if (isset($lastReport))
-                <a href="{{ url('/statsreports/' . $lastReport->id) }}"><< Last</a><br/><br/>
+                <a href="{{ $lastReport->getUriLocalReport() }}"><< Last</a><br/><br/>
             @endif
         </div>
         <div class="col-sm-1 hide-mobile">
             @if (isset($nextReport))
-                <a href="{{ url('/statsreports/' . $nextReport->id) }}">Next >></a><br/><br/>
+                <a href="{{ $nextReport->getUriLocalReport() }}">Next >></a><br/><br/>
             @endif
         </div>
     </div>

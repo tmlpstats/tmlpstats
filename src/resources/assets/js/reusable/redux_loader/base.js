@@ -3,7 +3,7 @@ import { LoadingMultiState, MessageManager } from '../reducers'
 import { delayDispatch } from '../dispatch'
 import { objectAssign } from '../ponyfill'
 
-const LOADER_DEFAULT_OPTS = {
+export const LOADER_DEFAULT_OPTS = {
     extraLMS: [],
     defaultState: {},
     actions: {},
@@ -28,11 +28,11 @@ const LOADER_DEFAULT_OPTS = {
  *   - Optional MessageManager
  */
 export class ReduxLoader {
-    constructor(opts) {
+    constructor(opts, _defaults=LOADER_DEFAULT_OPTS) {
         if (!opts) {
             opts = {}
         }
-        opts = objectAssign({}, LOADER_DEFAULT_OPTS, opts)
+        opts = objectAssign({}, _defaults, opts)
         this.opts = opts
 
         if (opts.messageManager) {

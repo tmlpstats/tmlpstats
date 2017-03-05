@@ -299,6 +299,24 @@ api:
           - name: quarter
             type: Quarter
 
+      reportViewOptions:
+        desc: View options for report
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+
+      getReportPages:
+        desc: Get report pages
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+          - name: pages
+            type: array
+
   Scoreboard:
     type: namespace
     children:
@@ -474,6 +492,7 @@ api:
 
 
 reportMeta:
+  # ------------ GLOBAL REPORT
   Global:
     controller: GlobalReportController
     forwardParams: ['$globalReport', '$region']
@@ -592,5 +611,73 @@ reportMeta:
           AcknowledgementReport:
             name: Acknowledgement Report
             requiredFlags: ['lastWeek']
+
+  # ------------ LOCAL REPORT
+  Local:
+    controller: StatsReportController
+    forwardParams: ['$statsReport']
+    children:
+      Summary:
+        name: Weekly Summary
+
+      Overview:
+        name: Report Details
+
+      CenterStats:
+        name: Center Games
+
+      TeamMembers:
+        name: Team Members
+        type: grouping
+        children:
+          ClassList:
+            name: Summary
+          GitwSummary:
+            name: GITW
+          TdoSummary:
+            name: TDO
+
+      TeamExpansion:
+        name: Team Expansion
+        type: grouping
+        children:
+          TmlpRegistrations:
+            name: By Team Year
+          TmlpRegistrationsByStatus:
+            name: By Status
+
+      Courses:
+        name: Courses
+
+      ContactInfo:
+        name: Contact Info
+        shortName: Contacts
+        requiredFlags: ['canReadContactInfo']
+
+      TransferCheck:
+        name: Transfer Check
+        type: grouping
+        requiredFlags: ['firstWeek']
+        children:
+          PeopleTransferSummary:
+            name: People
+          CoursesTransferSummary:
+            name: Courses
+
+      Weekend:
+        name: Weekend Information
+        shortName: Weekend
+        type: grouping
+        children:
+          TeamWeekendSummary:
+            name: Team Summary
+          TeamTravelSummary:
+            name: Travel / Room
+
+      NextQtrAccountabilities:
+        name: Next Quarter Accountabilities
+        shortName: Accountabilities
+        requiredFlags: ['nextQtrAccountabilities']
+
 
 reports: {}

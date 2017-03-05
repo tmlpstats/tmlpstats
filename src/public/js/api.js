@@ -330,6 +330,27 @@ Api.LocalReport = {
     */
     getCenterQuarter: function(params, callback, errback) {
         return apiCall('LocalReport.getCenterQuarter', params, (callback || null), (errback || null));
+    },
+
+    /*
+    View options for report
+    Parameters:
+      center: Center
+      reportingDate: date
+    */
+    reportViewOptions: function(params, callback, errback) {
+        return apiCall('LocalReport.reportViewOptions', params, (callback || null), (errback || null));
+    },
+
+    /*
+    Get report pages
+    Parameters:
+      center: Center
+      reportingDate: date
+      pages: array
+    */
+    getReportPages: function(params, callback, errback) {
+        return apiCall('LocalReport.getReportPages', params, (callback || null), (errback || null));
     }
 };
 Api.Scoreboard = {

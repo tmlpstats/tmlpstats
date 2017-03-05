@@ -329,12 +329,174 @@ const GlobalReport = {
         ]
     }
 }
+const LocalReport = {
+    "Summary": {
+        "id": "Summary",
+        "n": 0,
+        "type": "report",
+        "name": "Weekly Summary"
+    },
+    "Overview": {
+        "id": "Overview",
+        "n": 1,
+        "type": "report",
+        "name": "Report Details"
+    },
+    "CenterStats": {
+        "id": "CenterStats",
+        "n": 2,
+        "type": "report",
+        "name": "Center Games"
+    },
+    "ClassList": {
+        "id": "ClassList",
+        "n": 3,
+        "type": "report",
+        "name": "Summary"
+    },
+    "GitwSummary": {
+        "id": "GitwSummary",
+        "n": 4,
+        "type": "report",
+        "name": "GITW"
+    },
+    "TdoSummary": {
+        "id": "TdoSummary",
+        "n": 5,
+        "type": "report",
+        "name": "TDO"
+    },
+    "TeamMembers": {
+        "id": "TeamMembers",
+        "n": 6,
+        "type": "grouping",
+        "name": "Team Members",
+        "children": [
+            "ClassList",
+            "GitwSummary",
+            "TdoSummary"
+        ]
+    },
+    "TmlpRegistrations": {
+        "id": "TmlpRegistrations",
+        "n": 7,
+        "type": "report",
+        "name": "By Team Year"
+    },
+    "TmlpRegistrationsByStatus": {
+        "id": "TmlpRegistrationsByStatus",
+        "n": 8,
+        "type": "report",
+        "name": "By Status"
+    },
+    "TeamExpansion": {
+        "id": "TeamExpansion",
+        "n": 9,
+        "type": "grouping",
+        "name": "Team Expansion",
+        "children": [
+            "TmlpRegistrations",
+            "TmlpRegistrationsByStatus"
+        ]
+    },
+    "Courses": {
+        "id": "Courses",
+        "n": 10,
+        "type": "report",
+        "name": "Courses"
+    },
+    "ContactInfo": {
+        "id": "ContactInfo",
+        "n": 11,
+        "type": "report",
+        "name": "Contact Info",
+        "shortName": "Contacts",
+        "requiredFlags": [
+            "canReadContactInfo"
+        ]
+    },
+    "PeopleTransferSummary": {
+        "id": "PeopleTransferSummary",
+        "n": 12,
+        "type": "report",
+        "name": "People"
+    },
+    "CoursesTransferSummary": {
+        "id": "CoursesTransferSummary",
+        "n": 13,
+        "type": "report",
+        "name": "Courses"
+    },
+    "TransferCheck": {
+        "id": "TransferCheck",
+        "n": 14,
+        "type": "grouping",
+        "name": "Transfer Check",
+        "children": [
+            "PeopleTransferSummary",
+            "CoursesTransferSummary"
+        ],
+        "requiredFlags": [
+            "firstWeek"
+        ]
+    },
+    "TeamWeekendSummary": {
+        "id": "TeamWeekendSummary",
+        "n": 15,
+        "type": "report",
+        "name": "Team Summary"
+    },
+    "TeamTravelSummary": {
+        "id": "TeamTravelSummary",
+        "n": 16,
+        "type": "report",
+        "name": "Travel \/ Room"
+    },
+    "Weekend": {
+        "id": "Weekend",
+        "n": 17,
+        "type": "grouping",
+        "name": "Weekend Information",
+        "shortName": "Weekend",
+        "children": [
+            "TeamWeekendSummary",
+            "TeamTravelSummary"
+        ]
+    },
+    "NextQtrAccountabilities": {
+        "id": "NextQtrAccountabilities",
+        "n": 18,
+        "type": "report",
+        "name": "Next Quarter Accountabilities",
+        "shortName": "Accountabilities",
+        "requiredFlags": [
+            "nextQtrAccountabilities"
+        ]
+    },
+    "_root": {
+        "type": "grouping",
+        "name": "Fake Root",
+        "children": [
+            "Summary",
+            "Overview",
+            "CenterStats",
+            "TeamMembers",
+            "TeamExpansion",
+            "Courses",
+            "ContactInfo",
+            "TransferCheck",
+            "Weekend",
+            "NextQtrAccountabilities"
+        ]
+    }
+}
 
 /* eslint-enable */
 
 
 const Reports = {
-    Global: GlobalReport
+    Global: GlobalReport,
+    Local: LocalReport
 }
 
 export default Reports

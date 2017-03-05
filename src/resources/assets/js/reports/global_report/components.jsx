@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { createSelector } from 'reselect'
 import ReportsMeta from '../meta'
 import { TabbedReport } from '../tabbed_report/components'
-import { filterReportFlags } from '../tabbed_report/util'
+import { filterReportFlags, makeTwoTabParamsSelector } from '../tabbed_report/util'
 import { reportData } from './data'
 import { connectRedux, delayDispatch } from '../../reusable/dispatch'
 
@@ -19,24 +19,22 @@ export class GlobalReport extends Component {
 
         // XXX TODO deal with report flags actually changing after classroom 2
         this.fullReport = filterReportFlags(ReportsMeta['Global'], DEFAULT_FLAGS)
-
-        this.makeTabParams = createSelector(
-            (params) => params.tab1,
-            (params) => params.tab2,
-            (tab1, tab2) => {
-                let tabs = [tab1]
-                if (tab2) {
-                    tabs.push(tab2)
-                    this.showReport(tab2)
-                }
-                return tabs
-            }
-        )
+        this.makeTabParams = makeTwoTabParamsSelector()
+        const { params } = props
+        if (params) {
+            this.showReport(params.tab2 || params.tab1)
+        }
     }
 
     reportUriBase() {
         const { regionAbbr, reportingDate } = this.props.params
         return `/reports/regions/${regionAbbr}/${reportingDate}`
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.params !== this.props.params) {
+            this.showReport(nextProps.params.tab2 || nextProps.params.tab1)
+        }
     }
 
     reportUri(parts) {
@@ -47,6 +45,10 @@ export class GlobalReport extends Component {
     showReport(reportId) {
         const { regionAbbr, reportingDate } = this.props.params
         delayDispatch(this, reportData.loadReport(reportId, {region: regionAbbr, reportingDate}))
+    }
+
+    getContent(reportId) {
+        return this.props.data[reportId] || ''
     }
 
     responsiveLabel(report) {

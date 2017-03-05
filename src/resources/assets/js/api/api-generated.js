@@ -264,7 +264,24 @@ Api.LocalReport = {
       center: Center
       quarter: Quarter
     */
-    getCenterQuarter: bac('LocalReport.getCenterQuarter')
+    getCenterQuarter: bac('LocalReport.getCenterQuarter'),
+
+    /*
+    View options for report
+    Parameters:
+      center: Center
+      reportingDate: date
+    */
+    reportViewOptions: bac('LocalReport.reportViewOptions'),
+
+    /*
+    Get report pages
+    Parameters:
+      center: Center
+      reportingDate: date
+      pages: array
+    */
+    getReportPages: bac('LocalReport.getReportPages')
 }
 
 Api.Scoreboard = {

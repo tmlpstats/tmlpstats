@@ -33,7 +33,6 @@ export function filterReportFlags(report, flags) {
             }
         })
         if (!good) {
-            console.log('removing', child.id)
             delete newReport[child.id]
             const parentId = child.parent || '_root'
             newReport[parentId] = filterChildren(newReport[parentId], child.id)
@@ -53,4 +52,18 @@ function eachReportChild(report, callback) {
     for (let key in report) {
         callback(key, report[key])
     }
+}
+
+export function makeTwoTabParamsSelector() {
+    return createSelector(
+        (params) => params.tab1,
+        (params) => params.tab2,
+        (tab1, tab2) => {
+            let tabs = [tab1]
+            if (tab2) {
+                tabs.push(tab2)
+            }
+            return tabs
+        }
+    )
 }
