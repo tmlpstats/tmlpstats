@@ -67,144 +67,147 @@
 
     $originals = []; // getOfficialData($teamYear);
 
-    function getClasses ($name, $centerName, $reportData, $originals) {
-        $classes = '';
-        switch ($name) {
-            case 'registrations.total':
-            case 'wkndReg.before':
-            case 'wkndReg.during':
-            case 'appStatus.appOut':
-            case 'appStatus.appIn':
-            case 'appStatus.appr':
-            case 'appStatusNext.appOut':
-            case 'appStatusNext.appIn':
-            case 'appStatusNext.appr':
-            case 'withdraws.q1':
-            case 'withdraws.q2':
-            case 'withdraws.q3':
-            case 'withdraws.q4':
-                $classes = 'data-point';
-            default:
-                $classes = 'data-point border-right';
-        }
+    // check if function exists incase both grids load in the same request
+    if (!function_exists('getClasses')) {
+        function getClasses ($name, $centerName, $reportData, $originals) {
+            $classes = '';
+            switch ($name) {
+                case 'registrations.total':
+                case 'wkndReg.before':
+                case 'wkndReg.during':
+                case 'appStatus.appOut':
+                case 'appStatus.appIn':
+                case 'appStatus.appr':
+                case 'appStatusNext.appOut':
+                case 'appStatusNext.appIn':
+                case 'appStatusNext.appr':
+                case 'withdraws.q1':
+                case 'withdraws.q2':
+                case 'withdraws.q3':
+                case 'withdraws.q4':
+                    $classes = 'data-point';
+                default:
+                    $classes = 'data-point border-right';
+            }
 
-        // Keeping these functions around for debugging later. For prod, short circuit
-        if (!$originals) {
+            // Keeping these functions around for debugging later. For prod, short circuit
+            if (!$originals) {
+                return $classes;
+            }
+
+            $original = array_get($originals[$centerName], $name);
+            $ours = array_get($reportData[$centerName], $name);
+
+            if ($original != $ours) {
+                $classes .= ' warning';
+            }
+
             return $classes;
         }
 
-        $original = array_get($originals[$centerName], $name);
-        $ours = array_get($reportData[$centerName], $name);
-
-        if ($original != $ours) {
-            $classes .= ' warning';
-        }
-
-        return $classes;
-    }
-
-    function getValue($name, $centerName, $reportData, $originals) {
-        // Keeping these functions around for debugging later. For prod, short circuit
-        if (!$originals) {
-            return array_get($reportData[$centerName], $name);
-        }
-
-        $original = array_get($originals[$centerName], $name);
-        $value = array_get($reportData[$centerName], $name);
-
-        if ($original != $value) {
-            $value .= " ({$original})";
-        }
-
-        return $value;
-    }
-
-    function getOfficialData($teamYear) {
-        // Keeping these functions around for debugging later. For prod, short circuit
-        $data = file(storage_path() . "/app/team{$teamYear}summary.csv");
-        $csv = array_map('str_getcsv', $data);
-
-        array_walk($csv, function(&$a) use ($csv) {
-            if (count($a) != count($csv[0])) {
-                $diff = count($csv[0]) - count($a);
-                $a = array_merge($a, array_fill(count($a), $diff, ''));
-            }
-            $a = array_combine($csv[0], $a);
-        });
-        // remove column header
-        array_shift($csv);
-
-        $dataArr = [];
-        foreach ($csv as $row) {
-            if (!$row['centerName']) {
-                continue;
+        function getValue($name, $centerName, $reportData, $originals) {
+            // Keeping these functions around for debugging later. For prod, short circuit
+            if (!$originals) {
+                return array_get($reportData[$centerName], $name);
             }
 
-            $centerName = getName($row['centerName']);
-            $dataArr[$centerName] = $row;
+            $original = array_get($originals[$centerName], $name);
+            $value = array_get($reportData[$centerName], $name);
+
+            if ($original != $value) {
+                $value .= " ({$original})";
+            }
+
+            return $value;
         }
 
-        return $dataArr;
-    }
+        function getOfficialData($teamYear) {
+            // Keeping these functions around for debugging later. For prod, short circuit
+            $data = file(storage_path() . "/app/team{$teamYear}summary.csv");
+            $csv = array_map('str_getcsv', $data);
 
-    function getName($name) {
-        // Keeping these functions around for debugging later. For prod, short circuit
-        switch($name) {
-            case 'ATLANTA':
-                return 'Atlanta';
-            case 'BOSTON':
-                return 'Boston';
-            case 'CHICAGO':
-                return 'Chicago';
-            case 'Dallas':
-                return 'Dallas';
-            case 'Denver':
-                return 'Denver';
-            case 'DETROIT':
-                return 'Detroit';
-            case 'FLORIDA':
-                return 'Florida';
-            case 'Houston':
-                return 'Houston';
-            case 'Los Angeles':
-                return 'Los Angeles';
-            case 'Mexico':
-                return 'Mexico';
-            case 'MINN/ST PAUL':
-                return 'MSP';
-            case 'MONTREAL':
-                return 'Montreal';
-            case 'NEW JERSEY':
-                return 'New Jersey';
-            case 'NEW YORK':
-                return 'New York';
-            case 'Orange County':
-                return 'Orange County';
-            case 'PHILADELPHIA':
-                return 'Philadelphia';
-            case 'Phoenix':
-                return 'Phoenix';
-            case 'San Diego':
-                return 'San Diego';
-            case 'San Francisco':
-                return 'San Francisco';
-            case 'San Jose':
-                return 'San Jose';
-            case 'Seattle':
-                return 'Seattle';
-            case 'TORONTO':
-                return 'Toronto';
-            case 'Vancouver':
-                return 'Vancouver';
-            case 'WASH DC':
-                return 'Washington, DC';
-            case 'North America Totals':
-                return 'totals';
-            case 'Registration Fulfillment:':
-                return 'regfulfill';
+            array_walk($csv, function(&$a) use ($csv) {
+                if (count($a) != count($csv[0])) {
+                    $diff = count($csv[0]) - count($a);
+                    $a = array_merge($a, array_fill(count($a), $diff, ''));
+                }
+                $a = array_combine($csv[0], $a);
+            });
+            // remove column header
+            array_shift($csv);
+
+            $dataArr = [];
+            foreach ($csv as $row) {
+                if (!$row['centerName']) {
+                    continue;
+                }
+
+                $centerName = getName($row['centerName']);
+                $dataArr[$centerName] = $row;
+            }
+
+            return $dataArr;
         }
 
-        return $name;
+        function getName($name) {
+            // Keeping these functions around for debugging later. For prod, short circuit
+            switch($name) {
+                case 'ATLANTA':
+                    return 'Atlanta';
+                case 'BOSTON':
+                    return 'Boston';
+                case 'CHICAGO':
+                    return 'Chicago';
+                case 'Dallas':
+                    return 'Dallas';
+                case 'Denver':
+                    return 'Denver';
+                case 'DETROIT':
+                    return 'Detroit';
+                case 'FLORIDA':
+                    return 'Florida';
+                case 'Houston':
+                    return 'Houston';
+                case 'Los Angeles':
+                    return 'Los Angeles';
+                case 'Mexico':
+                    return 'Mexico';
+                case 'MINN/ST PAUL':
+                    return 'MSP';
+                case 'MONTREAL':
+                    return 'Montreal';
+                case 'NEW JERSEY':
+                    return 'New Jersey';
+                case 'NEW YORK':
+                    return 'New York';
+                case 'Orange County':
+                    return 'Orange County';
+                case 'PHILADELPHIA':
+                    return 'Philadelphia';
+                case 'Phoenix':
+                    return 'Phoenix';
+                case 'San Diego':
+                    return 'San Diego';
+                case 'San Francisco':
+                    return 'San Francisco';
+                case 'San Jose':
+                    return 'San Jose';
+                case 'Seattle':
+                    return 'Seattle';
+                case 'TORONTO':
+                    return 'Toronto';
+                case 'Vancouver':
+                    return 'Vancouver';
+                case 'WASH DC':
+                    return 'Washington, DC';
+                case 'North America Totals':
+                    return 'totals';
+                case 'Registration Fulfillment:':
+                    return 'regfulfill';
+            }
+
+            return $name;
+        }
     }
 ?>
 <br/>
