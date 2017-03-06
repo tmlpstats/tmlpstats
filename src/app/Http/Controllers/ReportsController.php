@@ -164,15 +164,17 @@ class ReportsController extends Controller
     }
 
     /**
+     *
      * Get a regional report
      *
      * @param Request $request
-     * @param         $abbr
+     * @param string  $abbr
      * @param null    $date
-     *
+     * @param string  $tab1
+     * @param string  $tab2
      * @return mixed
      */
-    public function getRegionReport(Request $request, $abbr = null, $date = null, $reportOverride = null)
+    public function getRegionReport(Request $request, $abbr = null, $date = null, $tab1 = null, $tab2 = null)
     {
         if ($request->has('reportRedirect')) {
             Session::set('reportRedirect', $request->get('reportRedirect'));
@@ -195,6 +197,11 @@ class ReportsController extends Controller
                 ? Region::abbreviation($abbr)->firstOrFail()
                 : $this->getRegion($request);
             Session::set('viewRegionId', $region->id);
+        }
+
+        $reportOverride = null;
+        if ($tab1 === 'single' && $tab2 !== null) {
+            $reportOverride = $tab2;
         }
 
         return $this->getReport($request, $abbr, $date, 'region', 'viewRegionId', $reportOverride);

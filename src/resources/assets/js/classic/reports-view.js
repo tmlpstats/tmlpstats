@@ -13,38 +13,29 @@ const debug = (...x) => {
 window.showReportView = function(config) {
     const loaderHTML = $('#loader').html()
 
-<<<<<<< HEAD
-    const fullReport = ReportsMeta[config.report]
-=======
     let fullReport
     if (config.report_override) {
+        // Config is overriden to only display a single report. (for dev)
         fullReport = config.report_override
     } else {
-        fullReport = Reports[config.report]
+        fullReport = ReportsMeta[config.report]
     }
 
->>>>>>> Add support for viewing a single regional report
     const target = $(config.target)
     const reportApi = Api[config.report + 'Report']
     const { pastClassroom2, isLastWeek } = config
 
     var loadQueue = []
     var loaded = {}
-<<<<<<< HEAD
 
-    if (!pastClassroom2 && config.report == 'Global') {
-        delete fullReport.RepromisesByCenter
-        _.pull(fullReport.RegionalStatsGroup.children, 'RepromisesByCenter')
-=======
     if (!pastClassroom2 && config.report == 'Global' && !config.report_override) {
         delete fullReport.children.RepromisesByCenter
         _.pull(fullReport.children.RegionalStatsGroup.children, 'RepromisesByCenter')
->>>>>>> Add support for viewing a single regional report
     }
 
-    if (!isLastWeek && config.report == 'Global') {
-        delete fullReport.AcknowledgementReport
-        _.pull(fullReport.WeekendGroup.children, 'AcknowledgementReport')
+    if (!isLastWeek && config.report == 'Global' && !config.report_override) {
+        delete fullReport.children.AcknowledgementReport
+        _.pull(fullReport.children.WeekendGroup.children, 'AcknowledgementReport')
     }
 
     /// SHOW REPORT OF CHOOSING. ACTUAL AJAX STUFF

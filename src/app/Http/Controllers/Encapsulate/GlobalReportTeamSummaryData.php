@@ -38,6 +38,8 @@ class GlobalReportTeamSummaryData
         $thisQuarter = Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region);
         $nextQuarter = $thisQuarter->getNextQuarter();
 
+        $thisQuarterStartDate = $thisQuarter->getQuarterStartDate();
+
         $centerGamesData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region, [
             'date' => $thisQuarter->getQuarterEndDate(),
         ]);
@@ -53,6 +55,7 @@ class GlobalReportTeamSummaryData
             ],
             'wkndReg' => [
                 'before' => 0,
+                'during' => 0,
                 'after' => 0,
             ],
             'appStatus' => [
@@ -100,23 +103,22 @@ class GlobalReportTeamSummaryData
                 continue;
             }
 
-            $reportData[$centerName]['registrations']['total']++;
-            if ($registration->apprDate !== null) {
-                $reportData[$centerName]['registrations']['net']++;
-            }
-
-            if ($registration->regDate->lte($thisQuarter->getQuarterStartDate())) {
+            if ($registration->regDate->lte($thisQuarterStartDate)) {
                 $reportData[$centerName]['wkndReg']['before']++;
+            } else if ($teamYear == 2 && $registration->regDate->lte($thisQuarterStartDate->copy()->addDays(2))) {
+                $reportData[$centerName]['wkndReg']['during']++;
             } else {
                 $reportData[$centerName]['wkndReg']['after']++;
             }
 
+            $reportData[$centerName]['registrations']['total']++;
             if ($registration->withdrawCode !== null) {
                 $reportData[$centerName]['appStatus']['wd']++;
                 if ($registration->incomingQuarterId === $nextQuarter->id) {
                     $reportData[$centerName]['appStatusNext']['wd']++;
                 }
             } else if ($registration->apprDate !== null) {
+                $reportData[$centerName]['registrations']['net']++;
                 $reportData[$centerName]['appStatus']['appr']++;
                 if ($registration->incomingQuarterId === $nextQuarter->id) {
                     $reportData[$centerName]['appStatusNext']['appr']++;
@@ -158,11 +160,11 @@ class GlobalReportTeamSummaryData
             }
 
              if ($member->withdrawCode !== null) {
-                $reportData[$centerName]['withdraws']['q' . $member->quarterNumber]++;
-                $reportData[$centerName]['withdraws']['all']++;
-
                 if ($member->withdrawCode->code == 'WB') {
                     $reportData[$centerName]['wbo']++;
+                } else {
+                    $reportData[$centerName]['withdraws']['q' . $member->quarterNumber]++;
+                    $reportData[$centerName]['withdraws']['all']++;
                 }
             }
 
@@ -239,7 +241,7 @@ class GlobalReportTeamSummaryData
             }
         }
 
-        return compact('reportData', 'totals', 'regFulfill');
+        return compact('reportData', 'totals', 'regFulfill', 'teamYear');
     }
 
     public function getOne($page)
