@@ -11,7 +11,7 @@ import { appsSorts, appsCollection } from './data'
 import { centerQuarterData } from '../core/data'
 import { getLabelTeamMember } from '../core/selectors'
 import { loadApplications, saveApplication, chooseApplication } from './actions'
-import AppStatus, { getStatusString } from './AppStatus'
+import AppStatus from './AppStatus'
 
 class ApplicationsBase extends SubmissionBase {
     componentDidMount() {
@@ -81,7 +81,7 @@ class ApplicationsIndexView extends ApplicationsBase {
         var withdraws = []
         var baseUri = this.baseUri()
         appsCollection.iterItems(this.props.applications, (app, key) => {
-            const status = getStatusString(app)
+            const status = AppStatus.getStatusString(app)
             if (app.withdrawCode) {
                 withdraws.push(app)
                 return
@@ -161,9 +161,9 @@ class _EditCreate extends ApplicationsBase {
                                     keyProp="teamMemberId" getLabel={getLabelTeamMember} emptyChoice="Choose One" />
                         </div>
                     </div>
-                    <div className="required form-group">
+                    <div className="form-group">
                         <label className="col-md-2 control-label">Application Status</label>
-                        <div className="col-md-6">
+                        <div className="col-md-9">
                             <AppStatus model={modelKey} currentApp={this.props.currentApp} lookups={this.props.lookups} dispatch={this.props.dispatch} />
                         </div>
                     </div>
