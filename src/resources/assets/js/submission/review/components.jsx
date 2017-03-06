@@ -1,6 +1,5 @@
 import moment from 'moment'
 import { Link } from 'react-router'
-import { Button, Modal } from 'react-bootstrap'
 
 import { PAGES_CONFIG } from '../core/data'
 import { connectRedux, rebind } from '../../reusable/dispatch'
@@ -9,7 +8,7 @@ import { Form } from '../../reusable/form_utils'
 import { Alert, ButtonStateFlip } from '../../reusable/ui_basic'
 import { SubmissionBase, React } from '../base_components'
 
-import { getValidationMessages, displayState, submitReport, setSubmitData } from './actions'
+import { getValidationMessages, displayState, submitReport, submitState, setSubmitData } from './actions'
 import { loadPairs, DISPLAY_STATES } from './data'
 import { REVIEW_SUBMIT_FORM_KEY } from './reducers'
 
@@ -31,6 +30,7 @@ export default class Review extends SubmissionBase {
         rebind(this, 'displayPreSubmitModal', 'hidePreSubmitModal', 'onSubmit', 'completeSubmission', 'failSubmission')
         this.props.dispatch(setSubmitData({ comment: '' }))
         this.props.dispatch(displayState(DISPLAY_STATES.main))
+        this.props.dispatch(submitState('new'))
     }
 
     checkLoading() {
@@ -67,8 +67,8 @@ export default class Review extends SubmissionBase {
 
     completeSubmission() {
         const { centerId, reportingDate } = this.props.params
-        this.props.dispatch(displayState(DISPLAY_STATES.main))
         this.props.dispatch(setSubmitData({ comment: '' }))
+        this.props.dispatch(submitState('loading'))
         window.location.href = `/reports/centers/${centerId}/${reportingDate}`
     }
 
@@ -85,6 +85,28 @@ export default class Review extends SubmissionBase {
 
         const { submitResults, displayFlow, reportSubmitting } = this.props.review
 
+        if (displayFlow.state == DISPLAY_STATES.preSubmit) {
+            return (
+                <PreSubmitCard dismiss={this.hidePreSubmitModal}
+                               onSubmit={this.onSubmit}
+                               loadState={reportSubmitting} />
+            )
+        }
+
+        if (displayFlow.state == DISPLAY_STATES.postSubmit && submitResults) {
+            let dismiss = this.completeSubmission
+            if (!submitResults.isSuccess) {
+                dismiss = this.failSubmission
+            }
+            return (
+                <PostSubmitCard dismiss={dismiss}
+                                submittedAt={moment(submitResults.submittedAt).format('MMM Do YYYY, h:mm:ss a')}
+                                message={submitResults.message}
+                                isSuccess={submitResults.isSuccess}
+                                loadState={reportSubmitting} />
+            )
+        }
+
         let categories = []
         PAGES_CONFIG.forEach((config) => {
             const pageData = this.props[config.key]
@@ -98,26 +120,6 @@ export default class Review extends SubmissionBase {
             }
         })
 
-        let modal
-        if (displayFlow.state == DISPLAY_STATES.preSubmit) {
-            modal = (
-                <PreSubmitModal dismiss={this.hidePreSubmitModal}
-                                onSubmit={this.onSubmit}
-                                loadState={reportSubmitting} />
-            )
-        } else if (displayFlow.state == DISPLAY_STATES.postSubmit && submitResults) {
-            let dismiss = this.completeSubmission
-            if (!submitResults.isSuccess) {
-                dismiss = this.failSubmission
-            }
-            modal = (
-                <PostSubmitModal dismiss={dismiss}
-                                 submittedAt={moment(submitResults.submittedAt).format('MMM Do YYYY, h:mm:ss a')}
-                                 message={submitResults.message}
-                                 isSuccess={submitResults.isSuccess} />
-            )
-        }
-
         return (
             <div>
                 <h3>Review</h3>
@@ -128,7 +130,6 @@ export default class Review extends SubmissionBase {
                                      buttonClass="btn btn-primary btn-lg"
                                      onClick={this.displayPreSubmitModal}>Submit Report</ButtonStateFlip>
                 </div>
-                {modal}
             </div>
         )
     }
@@ -220,57 +221,52 @@ export class ReviewCategory extends React.PureComponent {
     }
 }
 
-class PreSubmitModal extends React.PureComponent {
+class PreSubmitCard extends React.PureComponent {
     render() {
         const { dismiss, onSubmit, loadState } = this.props
 
         return (
-            <div className="static-modal">
-                <Modal show={true} onHide={dismiss}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Submit your stats</Modal.Title>
-                    </Modal.Header>
-
-                    <Modal.Body>
-                        Clicking submit will send your stats to the regional stats team. We will also send a copy to your
-                        <ul>
-                            <li>Program Manager</li>
-                            <li>Classroom Leader</li>
-                            <li>Team 2 Team Leader</li>
-                            <li>Team 1 Team Leader</li>
-                            <li>Statistician</li>
-                            <li>Statistician Apprentice</li>
-                        </ul>
-                        You can re-submit your stats before 7PM your local time on Friday.
-                        <br/><br/>
-                        <Form model={REVIEW_SUBMIT_FORM_KEY} onSubmit={onSubmit}>
-                            <Field model={REVIEW_SUBMIT_FORM_KEY+'.comment'}>
-                                <div className="form-group">
-                                    <label htmlFor="comment" className="control-label">Comment:</label>
-                                    <textarea name="comment" className="form-control" rows="10" />
-                                </div>
-                            </Field>
-                        </Form>
-                    </Modal.Body>
-
-                    <Modal.Footer>
-                        <Button bsStyle="default" onClick={dismiss}>Cancel</Button>
-                        <ButtonStateFlip loadState={loadState} onClick={onSubmit}>Submit</ButtonStateFlip>
-                    </Modal.Footer>
-                </Modal>
+            <div>
+                <h3>Submit your stats</h3>
+                <div>
+                    Clicking submit will send your stats to the regional stats team. We will also send a copy to your
+                    <ul>
+                        <li>Program Manager</li>
+                        <li>Classroom Leader</li>
+                        <li>Team 2 Team Leader</li>
+                        <li>Team 1 Team Leader</li>
+                        <li>Statistician</li>
+                        <li>Statistician Apprentice</li>
+                    </ul>
+                    You can re-submit your stats before 7PM your local time on Friday.
+                    <br/><br/>
+                    <Form model={REVIEW_SUBMIT_FORM_KEY} onSubmit={onSubmit}>
+                        <Field model={REVIEW_SUBMIT_FORM_KEY+'.comment'}>
+                            <div className="form-group">
+                                <label htmlFor="comment" className="control-label">Comment:</label>
+                                <textarea name="comment" className="form-control" rows="10" />
+                            </div>
+                        </Field>
+                    </Form>
+                </div>
+                <div>
+                    <button className="btn btn-default" onClick={dismiss}>Back</button>
+                    <ButtonStateFlip loadState={loadState} onClick={onSubmit}>Submit</ButtonStateFlip>
+                </div>
             </div>
         )
     }
 }
 
-class PostSubmitModal extends React.PureComponent {
+class PostSubmitCard extends React.PureComponent {
     createMarkup() {
         // TODO: stop passing html from the api. generate it here
         return {__html: this.props.message}
     }
 
     render() {
-        const { submittedAt, isSuccess, dismiss } = this.props
+        const { submittedAt, isSuccess, dismiss, loadState } = this.props
+
         let messageHeader
         let messageClass
         if (isSuccess) {
@@ -282,22 +278,16 @@ class PostSubmitModal extends React.PureComponent {
         }
 
         return (
-            <div className="static-modal">
-                <Modal show={true} onHide={dismiss}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Your stats are submitted!</Modal.Title>
-                    </Modal.Header>
-
-                    <Modal.Body>
-                        <div>{messageHeader}</div>
-                        <br/>
-                        <div className={messageClass + ' alert'} role="alert" dangerouslySetInnerHTML={this.createMarkup()}></div>
-                    </Modal.Body>
-
-                    <Modal.Footer>
-                        <Button bsStyle="primary" onClick={dismiss}>Okay</Button>
-                    </Modal.Footer>
-                </Modal>
+            <div>
+                <h3>Your stats are submitted!</h3>
+                <div>
+                    <div>{messageHeader}</div>
+                    <br/>
+                    <div className={messageClass + ' alert'} role="alert" dangerouslySetInnerHTML={this.createMarkup()}></div>
+                </div>
+                <div>
+                    <ButtonStateFlip loadState={loadState} onClick={dismiss}>Show Me</ButtonStateFlip>
+                </div>
             </div>
         )
     }
