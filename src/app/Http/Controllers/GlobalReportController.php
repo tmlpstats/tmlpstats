@@ -1083,6 +1083,7 @@ class GlobalReportController extends Controller
         return view('globalreports.details.withdrawreport', compact('reportData', 'almostOutOfCompliance'));
     }
 
+
     protected function rppData($globalReport, $region)
     {
         return $this->context->getEncapsulation(Encapsulate\GlobalReportRegPerParticipantData::class, compact('globalReport', 'region'));
@@ -1096,6 +1097,21 @@ class GlobalReportController extends Controller
     protected function getRegPerParticipantWeekly(Models\GlobalReport $globalReport, Models\Region $region)
     {
         return $this->rppData($globalReport, $region)->getOne('RegPerParticipantWeekly');
+    }
+
+    protected function teamSummaryData(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->context->getEncapsulation(Encapsulate\GlobalReportTeamSummaryData::class, compact('globalReport', 'region'));
+    }
+
+    public function getTeam1SummaryGrid(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->teamSummaryData($globalReport, $region)->getOne('Team1SummaryGrid');
+    }
+
+    public function getTeam2SummaryGrid(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->teamSummaryData($globalReport, $region)->getOne('Team2SummaryGrid');
     }
 
     public static function getUrl(Models\GlobalReport $globalReport, Models\Region $region)
