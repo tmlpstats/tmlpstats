@@ -208,6 +208,16 @@ export class Alert extends React.PureComponent {
     }
 }
 
+export class Glyphicon extends React.PureComponent {
+    static propTypes = {
+        icon: PropTypes.string
+    }
+
+    render() {
+        return <span className={'glyphicon glyphicon-' + this.props.icon} aria-hidden="true"></span>
+    }
+}
+
 export class Panel extends React.PureComponent {
     static defaultProps = {
         color: 'default',
