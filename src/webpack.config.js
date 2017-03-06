@@ -5,15 +5,7 @@ var plugins = [
     new webpack.optimize.CommonsChunkPlugin({
         name: 'commons',
         filename: 'commons.js',
-        minChunks: function(module, count) {
-            // module.resource is the filename, module.context is the module name
-            if (/node_modules/.test(module.context)) {
-                return true
-            } else if (count > 3) {
-                return true
-            }
-            return false
-        }
+        minChunks: 3
     }),
 ]
 
@@ -29,7 +21,7 @@ if (process.env.NODE_ENV == 'production') {
 module.exports = {
     entry: {
         main: './resources/assets/js/main',
-        commons: ['es6-promise', 'react', 'react-router'],
+        commons: ['es6-promise', 'react', 'react-router', 'immutable', 'moment'],
     },
     output: {
         path: path.join(__dirname, 'public', 'js'),
