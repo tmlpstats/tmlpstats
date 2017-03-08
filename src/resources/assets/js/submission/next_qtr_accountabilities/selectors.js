@@ -48,7 +48,6 @@ export const selectablePeople = createSelector(
                 allNames.push(fullName)
                 nameToKey[fullName] = ['application', appId]
             })
-            applications.sortedKeys.forEach
         }
         return {
             team_members,

@@ -1,6 +1,8 @@
 @inject('context', 'TmlpStats\Api\Context')
 <?php
 $currentUser = Auth::user();
+$center = $context->getCenter(true);
+$region = $context->getRegion(true);
 ?>
 <script type="text/javascript">
     var settings = {

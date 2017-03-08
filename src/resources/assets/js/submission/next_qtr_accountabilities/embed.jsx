@@ -26,7 +26,10 @@ export default class QtrAccountabilitiesEmbedded extends Component {
             <div>
                 <Alert alert="info">
                     After classroom 3: teams <b>must</b> fill out the following 4 accountabilities for the upcoming quarter:
-                    Team 1 Team Leader, Team 2 Team Leader, Statistician, Logistics. You may also fill out any other accountabilities as well.
+                    Team 1 Team Leader, Team 2 Team Leader, Statistician, Logistics.
+                    <br />
+                    We request you fill out other accountabilities as soon as you know them; this greatly helps the weekend
+                    teams with setting up the accountability clinics.
                 </Alert>
                 <QuarterAccountabilitiesTable params={{centerId, reportingDate}} autoSave={true} />
             </div>

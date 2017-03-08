@@ -26,8 +26,12 @@ class DictInput
         foreach ($shape as $key => $conf) {
             $required = in_array($key, $requiredParams);
 
-            if (!$data->has($key) && !$required) {
-                continue;
+            if (!$data->has($key)) {
+                if (array_get($conf, 'assignId', false) && $data->has($key . 'Id')) {
+                    $data->set($key, $data->get($key . 'Id'));
+                } else if (!$required) {
+                    continue;
+                }
             }
 
             $parser = Factory::build($shape[$key]['type']);

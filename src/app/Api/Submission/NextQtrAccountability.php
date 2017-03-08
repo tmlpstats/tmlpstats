@@ -38,13 +38,13 @@ class NextQtrAccountability
         }
 
         // email and phone must be able to be blanked out for saving incomplete accountabilities back.
-        $qa = Domain\NextQtrAccountability::fromArray($data, ['id', 'name']);
+        $nqa = Domain\NextQtrAccountability::fromArray($data, ['id', 'name']);
 
-        $submissionData->store($center, $reportingDate, $qa);
+        $submissionData->store($center, $reportingDate, $nqa);
 
         // currently no validation exists
         //    $report = LocalReport::ensureStatsReport($center, $reportingDate);
-        //   $validationResults = $this->validateObject($report, $qa, $someId);
+        //   $validationResults = $this->validateObject($report, $nqa, $someId);
 
         return ['storedId' => $accountabilityId];
     }

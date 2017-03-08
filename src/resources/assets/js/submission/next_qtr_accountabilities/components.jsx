@@ -149,8 +149,14 @@ class QuarterAccountabilitiesRow extends PureComponent {
         people: PropTypes.object,
         tabular: PropTypes.bool,
     }
+
     static defaultProps = {
         entry: {name: ''}
+    }
+
+    constructor(props) {
+        super(props)
+        rebind(this, 'onNameChange')
     }
 
     render() {
@@ -159,7 +165,7 @@ class QuarterAccountabilitiesRow extends PureComponent {
         const model = modelBase + '.' + acc.id
 
         const tmSelectField = (
-            <PersonInput people={this.props.people} modelBase={model} dispatch={this.props.dispatch} name={this.props.entry.name} />
+            <PersonInput people={this.props.people} onChange={this.onNameChange} name={this.props.entry.name} />
         )
         const emailField = <Field model={model+'.email'}><input type="text" className="form-control nqEmail" /></Field>
         const phoneField = <Field model={model+'.phone'}><input type="text" className="form-control nqPhone" /></Field>
@@ -188,19 +194,58 @@ class QuarterAccountabilitiesRow extends PureComponent {
             )
         }
     }
+
+    onNameChange(names) {
+        if (!names.length) {
+            return
+        }
+        const name = names[0]
+
+        let toUpdate = {
+            name: name,
+            application: null,
+            teamMember: null
+        }
+
+        function updateEmailPhone(input) {
+            if (input) {
+                EMAIL_PHONE.forEach((k) => {
+                    // only obliterate email and phone if they exist
+                    if (input[k]) {
+                        toUpdate[k] = input[k]
+                    }
+                })
+            }
+        }
+
+        if (name.customOption) {
+            // In this case, it's a custom entry.
+            toUpdate.name = name.name
+        } else {
+            const { nameToKey, team_members, applications: {collection: appsCollection} } = this.props.people
+            const key = nameToKey[name]
+
+            if (key[0] == 'teamMember') {
+                const tmd = team_members[key[2]]
+                toUpdate.teamMember = tmd.teamMemberId
+                updateEmailPhone(tmd.teamMember.person)
+
+            } else if (key[0] == 'application') {
+                toUpdate.application = key[1] // this is the application ID but just called application here
+                updateEmailPhone(appsCollection[key[1]])
+            } else {
+                return
+            }
+        }
+        const model = this.props.modelBase + '.' + this.props.acc.id
+        this.props.dispatch(formActions.merge(model, toUpdate))
+    }
 }
 
 class PersonInput extends PureComponent {
     static propTypes = {
         people: PropTypes.object,
-        modelBase: PropTypes.string.isRequired,
-        name: PropTypes.string,
-        dispatch: PropTypes.func.isRequired
-    }
-
-    constructor(props) {
-        super(props)
-        rebind(this, 'onChange')
+        name: PropTypes.string
     }
 
     render() {
@@ -210,55 +255,11 @@ class PersonInput extends PureComponent {
                 options={props.people.allNames}
                 selected={[this.props.name]}
                 allowNew={true}
-                onChange={this.onChange}
+                onChange={this.props.onChange}
                 minLength={1}
                 />
         )
     }
-
-    onChange(names) {
-        if (!names.length) {
-            return
-        }
-        const name = names[0]
-        if (name.customOption) {
-            // In this case, it's a custom entry.
-            this.props.dispatch(formActions.merge(this.props.modelBase, {
-                teamMemberId: null,
-                applicationId: null,
-                name: name.label
-            }))
-            return
-        }
-
-        const { nameToKey, team_members } = this.props.people
-        const key = nameToKey[name]
-
-        if (key[0] == 'teamMember') {
-            const tmd = team_members[key[2]]
-            let toUpdate = {
-                applicationId: null,
-                teamMemberId: tmd.teamMemberId,
-                name: name
-            }
-            const person = tmd.teamMember.person
-            EMAIL_PHONE.forEach((k) => {
-                // only obliterate email and phone if they exist
-                if (person[k]) {
-                    toUpdate[k] = person[k]
-                }
-            })
-            this.props.dispatch(formActions.merge(this.props.modelBase, toUpdate))
-        } else if (key[0] == 'application') {
-            // TODO hoist team member email if available
-            this.props.dispatch(formActions.merge(this.props.modelBase, {
-                teamMemberId: null,
-                applicationId: key[1],
-                name: name
-            }))
-        }
-    }
-
 }
 
 const requiredAccountabilities = ['t1tl', 't2tl', 'statistician', 'logistics']
