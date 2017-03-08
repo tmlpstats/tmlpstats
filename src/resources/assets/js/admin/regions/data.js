@@ -3,7 +3,6 @@ import { Schema, arrayOf } from 'normalizr'
 import { objectAssign } from '../../reusable/ponyfill'
 import SimpleReduxLoader from '../../reusable/redux_loader/simple'
 import FormReduxLoader from '../../reusable/redux_loader/rrf'
-import { LoadingMultiState } from '../../reusable/reducers'
 import Api from '../../api'
 
 
