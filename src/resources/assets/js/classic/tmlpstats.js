@@ -1,9 +1,16 @@
+import Api from '../api'
+
+// Here are things which we get from 'classic' javascript.
+// Eventually we want to eliminate these, but for now this gives a pathway for eslint.
+const { $, jstz } = window
+
+
 /**
  * Get a human readable message from the HTTP status code
  * @param code
  * @returns {string}
  */
-function getErrorMessage(code) {
+window.getErrorMessage = function(code) {
     var message = '';
     if (code == 404) {
         message = 'Unable to find report.';
@@ -21,7 +28,7 @@ function getErrorMessage(code) {
  *      en-US: 12/2/15
  *      en-UK: 2/12/15
  */
-function updateDates(context) {
+window.updateDates = function(context) {
     $('span.date', context).each(function (index, dateElem) {
         var formatted = moment($(dateElem).data('date')).format('l');
         formatted = formatted.replace(/\d\d(\d\d)/, "$1");
@@ -35,7 +42,7 @@ function updateDates(context) {
  * @param tableClass
  * @param context: If specified, must be a DOM context for jquery to work with.
  */
-function initDataTables(options, tableClass, context) {
+window.initDataTables = function(options, tableClass, context) {
     if (!options) {
         tableClass = 'want-datatable';
         options = {
@@ -197,9 +204,9 @@ window.Tmlp = (function(window, $) {
         }
 
         if (!$.isEmptyObject(data)) {
-            Api.UserProfile.setLocale(data, function() {
+            Api.UserProfile.setLocale(data).then(function() {
                 if (config.isHome){
-                    location.reload();
+                    location.reload()
                 }
             });
         }
@@ -207,7 +214,8 @@ window.Tmlp = (function(window, $) {
 
     var Tmlp = {
         enableFeedback: enableFeedback,
-        setTimezone: setTimezone
+        setTimezone: setTimezone,
+        Api: Api,
     };
     return Tmlp;
-})(window, jQuery);
+})(window, $);

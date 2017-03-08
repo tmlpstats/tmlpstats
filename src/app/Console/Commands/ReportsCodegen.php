@@ -51,10 +51,6 @@ class ReportsCodegen extends Command
         $apiProvider = view('api.codegen.api_provider_output', compact('packageNames'))->render();
         $this->writeFile('app/Providers/ApiProvider.php', $apiProvider);
 
-        // Write a javascript API. PROTOTYPE
-        $script = view('api.codegen.js_output', compact('namespacesFlat'))->render();
-        $this->writeFile('public/js/api.js', $this->stripLine($script));
-
         $es6 = view('api.codegen.es6_output', compact('namespacesFlat'))->render();
         $this->writeFile('resources/assets/js/api/api-generated.js', $this->stripLine($es6));
 
