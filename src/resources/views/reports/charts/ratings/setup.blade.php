@@ -125,6 +125,7 @@
                 <?php
                 $requestJson = "{localReport: {$statsReport->id}}";
                 ?>
+                console.log('about to check ratings setup')
                 Tmlp.Api.LocalReport.getQuarterScoreboard({!! $requestJson !!}).then(function (reportData) {
                     updateChart(reportData, "{{ $statsReport->center->name }}");
                 });

@@ -279,6 +279,7 @@
     </div>
 </div>
 
+<!-- SCRIPTS_FOLLOW -->
 <script type="text/javascript">
     $(document).ready(function() {
 

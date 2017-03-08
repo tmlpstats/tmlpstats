@@ -3,7 +3,7 @@
         @if (isset($reportData[$group]))
             <br/>
             <h4>{{ ucwords($group) }}</h4>
-            <table class="table table-condensed table-striped table-hover classListTable">
+            <table class="table table-condensed table-striped table-hover classListTable want-datatable">
                 <thead>
                 <tr>
                     <th>First Name</th>
@@ -91,12 +91,3 @@
         @endif
     @endforeach
 </div>
-
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('table.classListTable').dataTable({
-            "paging": false,
-            "searching": false
-        });
-    });
-</script>

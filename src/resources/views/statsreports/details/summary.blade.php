@@ -158,6 +158,7 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
     @include('reports.charts.ratings.chart')
 </div>
 
+<!-- SCRIPTS_FOLLOW -->
 @include('reports.charts.ratings.setup')
 
 <script>
