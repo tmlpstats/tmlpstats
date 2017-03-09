@@ -111,12 +111,24 @@ export class ReportContent extends PureComponent {
             const { $ } = window
             let divId = 'content-' + report.id
             console.log('rendering inner', report.id)
+            let rawHtml = contentVec.get(level - 1) || $('#loader').html()
+            let followScript
+            if (/SCRIPTS_FOLLOW/.test(rawHtml)) {
+                let parts = rawHtml.split('<!-- SCRIPTS_FOLLOW -->')
+                rawHtml = parts[0]
+                followScript = parts[1]
+            }
+
             setTimeout(() => {
                 const container = $(`#${divId}`)
                 window.updateDates(container)
                 window.initDataTables(undefined, undefined, container)
+                if (followScript) {
+                    console.log('Running follow-up-script')
+                    $('body').append(followScript)
+                }
             })
-            let content = { __html: contentVec.get(level - 1) || $('#loader').html() }
+            let content = { __html: rawHtml }
             return <div id={divId} dangerouslySetInnerHTML={content} />
         }
     }

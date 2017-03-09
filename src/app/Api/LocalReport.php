@@ -235,7 +235,7 @@ class LocalReport extends AuthenticatedApiBase
             'statsReportId' => $statsReport->id,
             'flags' => [
                 'canReadContactInfo' => $this->context->can('readContactInfo', $statsReport),
-                'firstWeek' => false,
+                'firstWeek' => $cq->firstWeekDate->toDateString() == $reportingDate->toDateString(),
                 'nextQtrAccountabilities' => $crd->canShowNextQtrAccountabilities(),
             ],
         ];

@@ -88,6 +88,7 @@
         @endif
     @endforeach
 </div>
+<!-- SCRIPTS_FOLLOW -->
 <script>
 $(document).ready(function() {
   $('[data-toggle="tooltip"]').tooltip();
