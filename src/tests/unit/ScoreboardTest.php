@@ -96,6 +96,26 @@ class ScoreboardTest extends TestAbstract
                     'lf' => '100',
                 ]),
                 Util::arrayToObject([
+                    'cap' => '74', // 0 points
+                    'cpc' => '74', // 0 points
+                    't1x' => '74', // 0 points
+                    't2x' => '74', // 0 points
+                    'gitw' => '74', // 0 points
+                    'lf' => '74', // 0 points
+                ]),
+                0,
+            ],
+            // Calculates total based on all games
+            [
+                Util::arrayToObject([
+                    'cap' => '100',
+                    'cpc' => '100',
+                    't1x' => '100',
+                    't2x' => '100',
+                    'gitw' => '100',
+                    'lf' => '100',
+                ]),
+                Util::arrayToObject([
                     'cap' => '75', // 2 points
                     'cpc' => '75', // 1 points
                     't1x' => '75', // 1 points
@@ -174,9 +194,8 @@ class ScoreboardTest extends TestAbstract
         $game = new ScoreboardGame('cap');
         $game->setPromise($promise);
         $game->setActual($actual);
-        $percent = $game->percent();
 
-        $this->assertEquals($expectedResult, $percent);
+        $this->assertEquals($expectedResult, $game->percent());
     }
 
     public function providerPercent()
@@ -1054,6 +1073,24 @@ class ScoreboardTest extends TestAbstract
                 (float) ((1 / 2) + 89),
                 'cap',
                 6,
+            ],
+            // Float percent rounds up correctly (99.5000 => 99)
+            [
+                (float) ((1 / 2) + 99),
+                'cap',
+                6,
+            ],
+            // Float percent rounds up correctly (99.7500 => 99)
+            [
+                (float) ((3 / 4) + 99),
+                'cap',
+                6,
+            ],
+            // Float percent rounds up correctly (100.250 => 100)
+            [
+                (float) ((1 / 4) + 100),
+                'cap',
+                8,
             ],
             // Over 100% returns max points
             [
