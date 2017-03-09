@@ -55,6 +55,13 @@ body.no-navbar{
     color: gray !important;
 }
 
+.info-lite {
+    background-color: #e5eff5;
+}
+.table-hover > tbody > tr:hover > td.info-lite, .table-hover > tbody > tr:hover > th.info-lite {
+    background-color: #D9EDF8 ;
+}
+
 .bg-green {
     background-color: #00a000 !important;
 }

@@ -69,9 +69,12 @@
 
     // check if function exists incase both grids load in the same request
     if (!function_exists('getClasses')) {
-        function getClasses ($name, $centerName, $reportData, $originals) {
-            $classes = '';
+        function getClasses($name, $centerName, $reportData, $originals, $teamYear) {
+            $classes = [];
             switch ($name) {
+                case 'centerName':
+                    $classes[] = 'border-right';
+                    break;
                 case 'registrations.total':
                 case 'wkndReg.before':
                 case 'wkndReg.during':
@@ -85,24 +88,85 @@
                 case 'withdraws.q2':
                 case 'withdraws.q3':
                 case 'withdraws.q4':
-                    $classes = 'data-point';
+                    $classes[] = 'data-point';
+                    break;
                 default:
-                    $classes = 'data-point border-right';
+                    $classes[] = 'data-point';
+                    $classes[] = 'border-right';
+                    break;
+            }
+
+            if ($centerName !== 'totals') {
+                switch ($name) {
+                    case 'centerName':
+                    case 'onTeamNextQtr':
+                        $onTeam = array_get($reportData, "{$centerName}.onTeamNextQtr");
+                        if ($teamYear == 1 && $onTeam <= 7 || $teamYear == 2 && $onTeam <= 1) {
+                            $classes[] = 'warning';
+                        }
+                        break;
+                    case 'withdraws.q1':
+                    case 'withdraws.q2':
+                    case 'withdraws.q3':
+                    case 'withdraws.q4':
+                    case 'withdraws.all':
+                    case 'ctw':
+                        $value = array_get($reportData, "{$centerName}.{$name}");
+                        if ($value >= 1) {
+                            $classes[] = 'warning';
+                        } else {
+                            $classes[] = 'info-lite';
+                        }
+                        break;
+
+                    case 'appStatus.appOut':
+                    case 'appStatus.appIn':
+                    case 'appStatus.appr':
+                    case 'appStatus.wd':
+                    case 'appStatusNext.appOut':
+                    case 'appStatusNext.appIn':
+                    case 'appStatusNext.appr':
+                    case 'appStatusNext.wd':
+                        $classes[] = 'info-lite';
+                        break;
+
+                    case 'qtrPromise':
+                        $qtrPromise = array_get($reportData, "{$centerName}.qtrPromise");
+                        $completing = array_get($reportData, "{$centerName}.completing");
+                        $wds = array_get($reportData, "{$centerName}.withdraws.all");
+                        $wbo = array_get($reportData, "{$centerName}.wbo");
+                        if (($qtrPromise - $completing - $wds - $wbo) < 1) {
+                            $classes[] = 'warning';
+                        }
+                        break;
+                }
+            } else {
+                switch ($name) {
+                    case 'xferOut':
+                    case 'xferIn':
+                        $xferOut = array_get($reportData, "{$centerName}.xferOut");
+                        $xferIn = array_get($reportData, "{$centerName}.xferIn");
+
+                        if ($xferOut != $xferIn) {
+                            $classes[] = 'danger';
+                        }
+                        break;
+                }
             }
 
             // Keeping these functions around for debugging later. For prod, short circuit
             if (!$originals) {
-                return $classes;
+                return implode(' ', array_unique($classes));
             }
 
             $original = array_get($originals[$centerName], $name);
             $ours = array_get($reportData[$centerName], $name);
 
             if ($original != $ours) {
-                $classes .= ' warning';
+                $classes[] = 'warning';
             }
 
-            return $classes;
+            return implode(' ', array_unique($classes));
         }
 
         function getValue($name, $centerName, $reportData, $originals) {
@@ -221,7 +285,7 @@
             <th colspan="{{ ($teamYear == 2) ? 3 : 2 }}" class="data-point border-right">Weekend Reg</th>
             <th colspan="4" class="data-point border-right">Applications for Upcoming AND Future Weekends</th>
             <th colspan="4" class="data-point border-right">Applications For Upcoming Weekend</th>
-            <th colspan="1" class="data-point border-right">On Team At Weekend</th>
+            <th colspan="1" class="data-point border-right">On Team At Last Weekend</th>
             <th colspan="1" class="data-point border-right">Xfer Out</th>
             <th colspan="1" class="data-point border-right">Xfer In</th>
             <th colspan="5" class="data-point border-right">Withdraws</th>
@@ -272,11 +336,11 @@
         <tbody>
         @foreach ($reportData as $centerName => $centerData)
             <tr>
-                <td class="border-right">
+                <td class="{{ getClasses('centerName', $centerName, $reportData, $originals, $teamYear) }}">
                     {{ $centerName }}
                 </td>
                 @foreach ($cols as $col)
-                    <td class="{{ getClasses($col, $centerName, $reportData, $originals) }}">{{ getValue($col, $centerName, $reportData, $originals) }}</td>
+                    <td class="{{ getClasses($col, $centerName, $reportData, $originals, $teamYear) }}">{{ getValue($col, $centerName, $reportData, $originals) }}</td>
                 @endforeach
             </tr>
         @endforeach
@@ -284,7 +348,7 @@
         <tr>
             <th class="border-right">Totals:</th>
             @foreach ($cols as $col)
-                <th class="{{ getClasses($col, $centerName, ['totals' => $totals], []) }}">{{ getValue($col, 'totals', ['totals' => $totals], []) }}</th>
+                <th class="{{ getClasses($col, 'totals', ['totals' => $totals], [], $teamYear) }}">{{ getValue($col, 'totals', ['totals' => $totals], []) }}</th>
             @endforeach
         </tr>
         <tr>
@@ -303,4 +367,14 @@
             <th colspan="8" class="data-point border-right"></th>
         </tr>
     </table>
+
+    <h4>Highlights</h4>
+    @if ($teamYear == 1)
+    <p><strong>Center</strong> or <strong>On Team Next Quarter</strong> highlighted: Team 1 on Team Next Quarter is 7 or less</p>
+    @else
+    <p><strong>Center</strong> or <strong>On Team Next Quarter</strong> highlighted: Team 2 on Team Next Quarter is 2 or less</p>
+    @endif
+    <p><strong>Qtr Promise</strong>: Promise is insufficient for expansion next quarter (Quarter Promise minus Number Completing Next Weekend minus Withdrawn minus Well Being Withdraw is less than 1)</p>
+    <p><strong>Withdraws</strong> or <strong>Conv. To Withdraw</strong>: Withdrawn and Conversation To Withdraw greater than zero</p>
+    <p><strong>Xfer Out</strong> or <strong>Xfer In</strong>: Transfers do not match</p>
 </div>
