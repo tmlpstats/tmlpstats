@@ -13,7 +13,7 @@ $region = $context->getRegion(true);
             csrfToken: @json(csrf_token()),
         },
 
-        feedbackUrl: @json(url('/feedback')),
+        feedbackUrl: @json(url('/feedback'), JSON_UNESCAPED_SLASHES),
 
         @if ($currentUser)
         user: {
