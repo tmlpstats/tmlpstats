@@ -65,7 +65,7 @@ class CenterController extends Controller
         $this->context->setRegion($center->region);
 
         $alreadySubmitted = false;
-        if (Models\StatsReport::reportingDate($reportingDate)->official()->count()) {
+        if (Models\StatsReport::byCenter($center)->reportingDate($reportingDate)->official()->count()) {
             $alreadySubmitted = true;
         }
 
