@@ -4,9 +4,8 @@ namespace TmlpStats\Http\Controllers;
 
 use App;
 use Carbon\Carbon;
+use TmlpStats as Models;
 use TmlpStats\Api;
-use TmlpStats\Center;
-use TmlpStats\StatsReport;
 
 class CenterController extends Controller
 {
@@ -17,7 +16,7 @@ class CenterController extends Controller
     }
     public function dashboard($abbr)
     {
-        $center = Center::abbreviation($abbr)->first();
+        $center = Models\Center::abbreviation($abbr)->first();
         if (!$center) {
             abort(404);
         }
@@ -25,7 +24,7 @@ class CenterController extends Controller
         $context->setCenter($center);
         $this->setCenter($center);
 
-        $statsReport = StatsReport::byCenter($center)
+        $statsReport = Models\StatsReport::byCenter($center)
             ->official()
             ->orderBy('reporting_date', 'desc')
             ->first();
@@ -58,17 +57,24 @@ class CenterController extends Controller
 
     public function submission($abbr, $reportingDate)
     {
-        $center = Center::abbreviation($abbr)->firstorFail();
+        $center = Models\Center::abbreviation($abbr)->firstOrFail();
+        $reportingDate = Carbon::parse($reportingDate, 'UTC');
+
         $this->context->setDateSelectAction('CenterController@submission', ['abbr' => $abbr]);
-        $this->context->setReportingDate(Carbon::parse($reportingDate, 'UTC'));
+        $this->context->setReportingDate($reportingDate);
         $this->context->setRegion($center->region);
 
-        return view('centers.submission', compact('center'));
+        $alreadySubmitted = false;
+        if (Models\StatsReport::reportingDate($reportingDate)->official()->count()) {
+            $alreadySubmitted = true;
+        }
+
+        return view('centers.submission', compact('center', 'reportingDate', 'alreadySubmitted'));
     }
 
     public function nextQtrAccountabilities($abbr, $reportingDate = null)
     {
-        $center = Center::abbreviation($abbr)->firstorFail();
+        $center = Models\Center::abbreviation($abbr)->firstorFail();
         $this->authorize('submitStats', $center);
         $this->context->setCenter($center);
         if ($reportingDate === null) {

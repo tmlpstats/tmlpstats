@@ -1,4 +1,4 @@
-//// DATE PICKER 
+//// DATE PICKER
 
 @import 'node_modules/react-dates/css/variables.scss';
 @import 'node_modules/react-dates/css/styles.scss';
@@ -29,6 +29,18 @@
 	border: 0
 }
 
+#react-routed-flow  {
+    padding-top: 10px;
+}
+
+.date-title {
+    font-size: smaller;
+}
+
+.already-submitted {
+    font-size: smaller;
+    color: red;
+}
 
 // TODO let's integrate this
 @import 'public/css/tmlpstats';
