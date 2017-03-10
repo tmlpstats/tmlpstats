@@ -10,7 +10,10 @@ $region = $context->getRegion(true);
             viewCenterId: @json(Session::get('viewCenterId')),
             viewRegionId: @json(Session::get('viewRegionId')),
             viewReportingDate: @json(Session::get('viewReportingDate')),
+            csrfToken: @json(csrf_token()),
         },
+
+        feedbackUrl: @json(url('/feedback')),
 
         @if ($currentUser)
         user: {

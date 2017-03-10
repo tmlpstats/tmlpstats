@@ -96,7 +96,6 @@ window.Tmlp = (function(window, $) {
         var feedbackFormDirty = false;
 
         function resetFeedbackForm() {
-
             $("#feedbackSubmitResult").hide();
             $("#feedbackForm").show();
 
@@ -105,9 +104,8 @@ window.Tmlp = (function(window, $) {
 
             $("#submitFeedbackCancel").val('Cancel');
 
-
-            $("input[name=name]").val(config.firstName);
-            $("input[name=email]").val(config.email);
+            $("input[name=name]").val(config.user.firstName);
+            $("input[name=email]").val(config.user.email);
             $("textarea[name=message]").val("");
             $("input[name=copySender]").prop('checked', true);
 
@@ -148,7 +146,7 @@ window.Tmlp = (function(window, $) {
                 url: config.feedbackUrl,
                 data: $.param(data),
                 beforeSend: function (request) {
-                    request.setRequestHeader("X-CSRF-TOKEN", config.csrfToken);
+                    request.setRequestHeader("X-CSRF-TOKEN", config.session.csrfToken);
                 },
                 success: function(response) {
                     var $resultDiv = $("#feedbackSubmitResult");
