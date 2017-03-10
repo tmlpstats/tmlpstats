@@ -24,17 +24,26 @@ class ContactController extends Controller
         }
 
         $sender = Auth::user();
-        $senderName = $request->has('name')
-            ? $request->get('name')
-            : "{$sender->firstName} {$sender->lastName}";
-        $senderEmail = $request->has('email')
-            ? $request->get('email')
-            : $sender->email;
+
+        $senderName = "{$sender->firstName} {$sender->lastName}";
+        if ($request->has('name')) {
+            $senderName = $request->get('name');
+        }
+
+        $senderEmail = $sender->email;
+        if ($request->has('email')) {
+            $senderEmail = $request->get('email');
+        }
+
+        $url = 'not provided';
+        if ($request->has('feedbackUrl')) {
+            $url = $request->get('feedbackUrl');
+        }
 
         $ccSender = $request->has('copySender');
         $feedback = $request->get('message');
 
-        Mail::send('emails.feedback', compact('feedback', 'sender', 'senderName', 'senderEmail'),
+        Mail::send('emails.feedback', compact('feedback', 'sender', 'senderName', 'senderEmail', 'url'),
             function($message) use ($sender, $senderEmail, $ccSender) {
 
             $message->to(env('ADMIN_EMAIL'));
