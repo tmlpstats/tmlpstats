@@ -51,12 +51,7 @@ $reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getRep
     <script type="text/javascript">
         $(document).ready(function() {
             @if (Auth::check())
-                Tmlp.enableFeedback({
-                    firstName: @json(Auth::user() ? Auth::user()->firstName : ''),
-                    email: @json(Auth::user() ? Auth::user()->email : ''),
-                    feedbackUrl: @json(url('/feedback')),
-                    csrfToken: @json(csrf_token())
-                });
+                Tmlp.enableFeedback(settings);
                 @if (!Session::has('timezone') && !Session::has('locale'))
                     Tmlp.setTimezone({
                         isHome: @json(Request::is('/home'))

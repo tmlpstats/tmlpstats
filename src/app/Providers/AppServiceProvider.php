@@ -39,7 +39,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Blade::directive('statsReportLink', function ($expression) {
-
             // Remove wrapping parens
             $data = substr($expression, 1, -1);
             $query = '';
@@ -70,10 +69,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Using @json($foo) works out to the equivalent of {!! json_encode($foo) !!}
         Blade::directive('json', function ($expression) {
-            return "<?php echo json_encode({$expression}) ?>";
+            return "<?php echo json_encode{$expression} ?>";
         });
 
         Blade::directive('json_pretty', function ($expression) {
+            $expression = substr($expression, 1, -1);
             return "<?php echo json_encode({$expression}, JSON_PRETTY_PRINT) ?>";
         });
     }
