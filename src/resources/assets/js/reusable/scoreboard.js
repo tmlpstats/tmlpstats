@@ -103,7 +103,13 @@ export class ScoreboardGame {
             return 0
         }
 
-        return Math.round(calculatePercent(this.promise, this.actual))
+        const percent = Math.round(calculatePercent(this.promise, this.actual))
+
+        if (percent == 100 && this.actual < this.promise) {
+            return 99
+        }
+
+        return percent
     }
 
     points() {

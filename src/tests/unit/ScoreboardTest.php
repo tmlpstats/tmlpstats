@@ -85,6 +85,86 @@ class ScoreboardTest extends TestAbstract
                 ]),
                 12,
             ],
+            // Calculates total based on all games
+            [
+                Util::arrayToObject([
+                    'cap' => '100',
+                    'cpc' => '100',
+                    't1x' => '100',
+                    't2x' => '100',
+                    'gitw' => '100',
+                    'lf' => '100',
+                ]),
+                Util::arrayToObject([
+                    'cap' => '74', // 0 points
+                    'cpc' => '74', // 0 points
+                    't1x' => '74', // 0 points
+                    't2x' => '74', // 0 points
+                    'gitw' => '74', // 0 points
+                    'lf' => '74', // 0 points
+                ]),
+                0,
+            ],
+            // Calculates total based on all games
+            [
+                Util::arrayToObject([
+                    'cap' => '100',
+                    'cpc' => '100',
+                    't1x' => '100',
+                    't2x' => '100',
+                    'gitw' => '100',
+                    'lf' => '100',
+                ]),
+                Util::arrayToObject([
+                    'cap' => '75', // 2 points
+                    'cpc' => '75', // 1 points
+                    't1x' => '75', // 1 points
+                    't2x' => '75', // 1 points
+                    'gitw' => '75', // 1 points
+                    'lf' => '75', // 1 points
+                ]),
+                7,
+            ],
+            // Calculates total based on all games
+            [
+                Util::arrayToObject([
+                    'cap' => '100',
+                    'cpc' => '100',
+                    't1x' => '100',
+                    't2x' => '100',
+                    'gitw' => '100',
+                    'lf' => '100',
+                ]),
+                Util::arrayToObject([
+                    'cap' => '80', // 4 points
+                    'cpc' => '80', // 2 points
+                    't1x' => '80', // 2 points
+                    't2x' => '80', // 2 points
+                    'gitw' => '80', // 2 points
+                    'lf' => '80', // 2 points
+                ]),
+                14,
+            ],
+            // Calculates total based on all games
+            [
+                Util::arrayToObject([
+                    'cap' => '100',
+                    'cpc' => '100',
+                    't1x' => '100',
+                    't2x' => '100',
+                    'gitw' => '100',
+                    'lf' => '100',
+                ]),
+                Util::arrayToObject([
+                    'cap' => '90', // 6 points
+                    'cpc' => '90', // 3 points
+                    't1x' => '90', // 3 points
+                    't2x' => '90', // 3 points
+                    'gitw' => '90', // 3 points
+                    'lf' => '90', // 3 points
+                ]),
+                21,
+            ],
         ];
     }
 
@@ -103,6 +183,499 @@ class ScoreboardTest extends TestAbstract
             [null, null],
             [null, new stdClass()],
             [new stdClass(), null],
+        ];
+    }
+
+    /**
+     * @dataProvider providerPercent
+     */
+    public function testPercent($promise, $actual, $expectedResult)
+    {
+        $game = new ScoreboardGame('cap');
+        $game->setPromise($promise);
+        $game->setActual($actual);
+
+        $this->assertEquals($expectedResult, $game->percent());
+    }
+
+    public function providerPercent()
+    {
+        return [
+            // 100%
+            [
+                100,
+                100,
+                100,
+            ],
+            // 0%
+            [
+                100,
+                0,
+                0,
+            ],
+            // simple percent
+            [
+                100,
+                87,
+                87,
+            ],
+            // over 100% returns over 100%
+            [
+                100,
+                110,
+                110,
+            ],
+            // less than 0% returns 0%
+            [
+                100,
+                -10,
+                0,
+            ],
+            // simple %
+            [
+                4,
+                3,
+                75,
+            ],
+            // returns float
+            [
+                3,
+                2,
+                67,
+            ],
+            // returns float
+            [
+                3,
+                1,
+                33,
+            ],
+            // returns float
+            [
+                8,
+                1,
+                13,
+            ],
+            // Promise 0 always 0
+            [
+                0,
+                5,
+                0,
+            ],
+            // Promise < 0 always 0
+            [
+                -5,
+                5,
+                0,
+            ],
+            // > 99.5 rounds to 99
+            [
+                400,
+                399,
+                99,
+            ],
+            // < 100.25 rounds to 100
+            [
+                400,
+                401,
+                100,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerPoints
+     */
+    public function testPoints($promise, $actual, $gameKey, $expectedResult)
+    {
+        $game = new ScoreboardGame($gameKey);
+        $game->setPromise($promise);
+        $game->setActual($actual);
+
+        $this->assertEquals($expectedResult, $game->points());
+    }
+
+    public function providerPoints()
+    {
+        return [
+            // CPC
+            [
+                100,
+                100,
+                'cpc',
+                4,
+            ],
+            [
+                100,
+                99,
+                'cpc',
+                3,
+            ],
+            [
+                100,
+                90,
+                'cpc',
+                3,
+            ],
+            [
+                100,
+                89,
+                'cpc',
+                2,
+            ],
+            [
+                100,
+                80,
+                'cpc',
+                2,
+            ],
+            [
+                100,
+                79,
+                'cpc',
+                1,
+            ],
+            [
+                100,
+                75,
+                'cpc',
+                1,
+            ],
+            [
+                100,
+                74,
+                'cpc',
+                0,
+            ],
+            [
+                100,
+                0,
+                'cpc',
+                0,
+            ],
+            // T1x
+            [
+                100,
+                100,
+                't1x',
+                4,
+            ],
+            [
+                100,
+                99,
+                't1x',
+                3,
+            ],
+            [
+                100,
+                90,
+                't1x',
+                3,
+            ],
+            [
+                100,
+                89,
+                't1x',
+                2,
+            ],
+            [
+                100,
+                80,
+                't1x',
+                2,
+            ],
+            [
+                100,
+                79,
+                't1x',
+                1,
+            ],
+            [
+                100,
+                75,
+                't1x',
+                1,
+            ],
+            [
+                100,
+                74,
+                't1x',
+                0,
+            ],
+            [
+                100,
+                0,
+                't1x',
+                0,
+            ],
+            // T2x
+            [
+                100,
+                100,
+                't2x',
+                4,
+            ],
+            [
+                100,
+                99,
+                't2x',
+                3,
+            ],
+            [
+                100,
+                90,
+                't2x',
+                3,
+            ],
+            [
+                100,
+                89,
+                't2x',
+                2,
+            ],
+            [
+                100,
+                80,
+                't2x',
+                2,
+            ],
+            [
+                100,
+                79,
+                't2x',
+                1,
+            ],
+            [
+                100,
+                75,
+                't2x',
+                1,
+            ],
+            [
+                100,
+                74,
+                't2x',
+                0,
+            ],
+            [
+                100,
+                0,
+                't2x',
+                0,
+            ],
+            // GITW
+            [
+                100,
+                100,
+                'gitw',
+                4,
+            ],
+            [
+                100,
+                99,
+                'gitw',
+                3,
+            ],
+            [
+                100,
+                90,
+                'gitw',
+                3,
+            ],
+            [
+                100,
+                89,
+                'gitw',
+                2,
+            ],
+            [
+                100,
+                80,
+                'gitw',
+                2,
+            ],
+            [
+                100,
+                79,
+                'gitw',
+                1,
+            ],
+            [
+                100,
+                75,
+                'gitw',
+                1,
+            ],
+            [
+                100,
+                74,
+                'gitw',
+                0,
+            ],
+            [
+                100,
+                0,
+                'gitw',
+                0,
+            ],
+            // LF
+            [
+                100,
+                100,
+                'lf',
+                4,
+            ],
+            [
+                100,
+                99,
+                'lf',
+                3,
+            ],
+            [
+                100,
+                90,
+                'lf',
+                3,
+            ],
+            [
+                100,
+                89,
+                'lf',
+                2,
+            ],
+            [
+                100,
+                80,
+                'lf',
+                2,
+            ],
+            [
+                100,
+                79,
+                'lf',
+                1,
+            ],
+            [
+                100,
+                75,
+                'lf',
+                1,
+            ],
+            [
+                100,
+                74,
+                'lf',
+                0,
+            ],
+            [
+                100,
+                0,
+                'lf',
+                0,
+            ],
+            // CAP (applies multiplier)
+            [
+                100,
+                100,
+                'cap',
+                8,
+            ],
+            [
+                100,
+                99,
+                'cap',
+                6,
+            ],
+            [
+                100,
+                90,
+                'cap',
+                6,
+            ],
+            [
+                100,
+                89,
+                'cap',
+                4,
+            ],
+            [
+                100,
+                80,
+                'cap',
+                4,
+            ],
+            [
+                100,
+                79,
+                'cap',
+                2,
+            ],
+            [
+                100,
+                75,
+                'cap',
+                2,
+            ],
+            [
+                100,
+                74,
+                'cap',
+                0,
+            ],
+            [
+                100,
+                0,
+                'cap',
+                0,
+            ],
+            // Capitalized game returns correct result
+            [
+                100,
+                75,
+                'CAP',
+                2,
+            ],
+            // Float percent rounds down correctly (74.25 => 74)
+            [
+                400,
+                297,
+                'cap',
+                0,
+            ],
+            // Float percent rounds up correctly (79.5000 => 80)
+            [
+                200,
+                159,
+                'cap',
+                4,
+            ],
+            // Float percent rounds up correctly (89.5000 => 90)
+            [
+                200,
+                179,
+                'cap',
+                6,
+            ],
+            // Over 100% returns max points
+            [
+                100,
+                110,
+                'cap',
+                8,
+            ],
+            // > 99.5 rounds to 99
+            [
+                400,
+                399,
+                'cap',
+                6,
+            ],
+            // 100.25 rounds to 100
+            [
+                400,
+                401,
+                'cap',
+                8,
+            ],
         ];
     }
 
@@ -500,6 +1073,24 @@ class ScoreboardTest extends TestAbstract
                 (float) ((1 / 2) + 89),
                 'cap',
                 6,
+            ],
+            // Float percent rounds up correctly (99.5000 => 99)
+            [
+                (float) ((1 / 2) + 99),
+                'cap',
+                6,
+            ],
+            // Float percent rounds up correctly (99.7500 => 99)
+            [
+                (float) ((3 / 4) + 99),
+                'cap',
+                6,
+            ],
+            // Float percent rounds up correctly (100.250 => 100)
+            [
+                (float) ((1 / 4) + 100),
+                'cap',
+                8,
             ],
             // Over 100% returns max points
             [
