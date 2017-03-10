@@ -21,7 +21,6 @@
                 </div>
                 <div id="feedbackForm">
                     {!! Form::open(['url' => url('/feedback')]) !!}
-                    {!! Form::hidden('feedbackUrl', 'not captured', ['id' => 'feedbackUrl']) !!}
 
                     <br/>
                     {!! Form::label('name', 'Name:', ['class' => 'control-label']) !!}

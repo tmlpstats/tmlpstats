@@ -95,8 +95,6 @@ window.Tmlp = (function(window, $) {
     function enableFeedback(config) {
         var feedbackFormDirty = false;
 
-        $('#feedbackUrl').val(location.href);
-
         function resetFeedbackForm() {
 
             $("#feedbackSubmitResult").hide();
@@ -136,7 +134,7 @@ window.Tmlp = (function(window, $) {
             data.name = $("input[name=name]").val();
             data.email = $("input[name=email]").val();
             data.message = $("textarea[name=message]").val();
-            data.feedbackUrl = $("input[name=feedbackUrl]").val();
+            data.feedbackUrl = location.href;
 
             var copySender = $("input[name=copySender]").val();
             if (copySender) {
