@@ -10,11 +10,9 @@ services:
       - "./:/app"
     environment:
       - VHOSTNAME=vagrant.tmlpstats.com
-      - APP_ENV=local
       - APP_DEBUG=true
       - DB_HOST=mysql
       - MEMCACHED_HOST=memcached
-      - DB_DATABASE=tmlpstats_dev
 
   # The "localdev" docker image is a developer image
   localdev:

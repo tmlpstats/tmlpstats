@@ -12,3 +12,4 @@ node_modules
 npm-debug.log
 docker/mysql/sql/dump.sql
 docker/mysql/sql/030-dump.sql
+docker/mysql/sql/030-dump.sql.gz

@@ -2,7 +2,7 @@ FROM tmlpstats/builder
 
 EXPOSE 3000
 
-ENV DB_DATABASE=tmlpstats_dev \
+ENV DB_DATABASE=tmlpstats_main \
     DB_USERNAME=tmlpstats \
     DB_PASSWORD=doesntmatter \
     CACHE_DRIVER=memcached \
@@ -15,7 +15,8 @@ ENV DB_DATABASE=tmlpstats_dev \
     MAIL_PASSWORD=null \
     ADMIN_EMAIL=your@email.com \
     MAIL_PRETEND=true \
-    APP_KEY=4a2d4738b5d10e8b6b452d3eb60372d5
+    APP_KEY=4a2d4738b5d10e8b6b452d3eb60372d5 \
+    APP_ENV=local
 
 COPY docker/localdev/000-default.conf /etc/apache2/sites-available
 COPY docker/localdev/start.sh /usr/bin/
