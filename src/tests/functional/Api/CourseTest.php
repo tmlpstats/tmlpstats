@@ -53,53 +53,6 @@ class CourseTest extends FunctionalTestAbstract
     }
 
     /**
-     * @dataProvider providerCreate
-     */
-    public function testCreate($parameterUpdates, $expectedResponseUpdates)
-    {
-        $parameters = [
-            'method' => 'Course.create',
-            'data' => [
-                'center' => $this->center->id,
-                'startDate' => Carbon::parse('2016-04-22'),
-                'type' => $this->faker->randomElement(['CAP', 'CPC']),
-            ],
-        ];
-
-        $lastCourseId = Models\Course::count();
-
-        $expectedResponse = [
-            'id' => $lastCourseId + 1,
-            'centerId' => $this->center->id,
-            'startDate' => $parameters['data']['startDate']->toDateTimeString(),
-            'type' => $parameters['data']['type'],
-            'center' => $this->center->toArray(),
-        ];
-
-        $parameters = $this->replaceInto($parameters, $parameterUpdates);
-        $expectedResponse = $this->replaceInto($expectedResponse, $expectedResponseUpdates);
-
-        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
-    }
-
-    public function providerCreate()
-    {
-        return [
-            // Required Parameters Only
-            [[], []],
-            // Additional Parameters
-            [
-                [ // Request
-                    'data.location' => 'Another Place',
-                ],
-                [ // Response
-                    'location' => 'Another Place',
-                ],
-            ],
-        ];
-    }
-
-    /**
      * @dataProvider providerStash
      */
     public function testStash($reportingDate)

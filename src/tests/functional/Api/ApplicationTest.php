@@ -53,68 +53,6 @@ class ApplicationTest extends FunctionalTestAbstract
     }
 
     /**
-     * @dataProvider providerCreate
-     */
-    public function testCreate($parameterUpdates, $expectedResponseUpdates)
-    {
-        $parameters = [
-            'method' => 'Application.create',
-            'data' => [
-                'firstName' => $this->faker->firstName(),
-                'lastName' => $this->faker->lastName(),
-                'center' => $this->center->id,
-                'teamYear' => 2,
-                'regDate' => '2016-04-15',
-            ],
-        ];
-
-        $lastPersonId = Models\Person::count();
-        $lastApplicationId = Models\TmlpRegistration::count();
-
-        $expectedResponse = [
-            'id' => $lastApplicationId + 1,
-            'regDate' => "{$parameters['data']['regDate']} 00:00:00",
-            'teamYear' => $parameters['data']['teamYear'],
-            'personId' => $lastPersonId + 1,
-            'isReviewer' => false,
-            'person' => [
-                'id' => $lastPersonId + 1,
-                'firstName' => $parameters['data']['firstName'],
-                'lastName' => $parameters['data']['lastName'],
-                'phone' => null,
-                'email' => null,
-                'centerId' => $this->center->id,
-            ],
-        ];
-
-        $parameters = $this->replaceInto($parameters, $parameterUpdates);
-        $expectedResponse = $this->replaceInto($expectedResponse, $expectedResponseUpdates);
-
-        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
-    }
-
-    public function providerCreate()
-    {
-        return [
-            // Required Parameters Only
-            [[], []],
-            // Additional Parameters
-            [
-                [ // Request
-                    'data.isReviewer' => true,
-                    'data.phone' => '555-555-1234',
-                    'data.email' => 'peter.tests.a.lot@tmlpstats.com',
-                ],
-                [ // Response
-                    'isReviewer' => true,
-                    'person.phone' => '555-555-1234',
-                    'person.email' => 'peter.tests.a.lot@tmlpstats.com',
-                ],
-            ],
-        ];
-    }
-
-    /**
      * @dataProvider providerStash
      */
     public function testStash($reportingDate)

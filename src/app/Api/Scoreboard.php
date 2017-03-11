@@ -147,30 +147,4 @@ class Scoreboard extends AuthenticatedApiBase
 
         return $results;
     }
-
-    public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $results = [];
-
-        $allData = $this->allForCenter($center, $reportingDate, true);
-        foreach ($allData as $dataArr) {
-            $meta = array_get($dataArr, 'meta', []);
-            $dataObject = Domain\Scoreboard::fromArray($dataArr);
-
-            if ((array_get($meta, 'canEditPromise', false) || array_get($meta, 'canEditActual', false))
-                && !array_get($meta, 'localChanges', false)
-            ) {
-                $results[] = $dataObject;
-            }
-        }
-
-        return $results;
-    }
-
-    public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\Scoreboard::class);
-
-        return array_flatten($collection->getDictionary());
-    }
 }

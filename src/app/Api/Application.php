@@ -13,39 +13,6 @@ use TmlpStats\Domain;
  */
 class Application extends ApiBase
 {
-    public function create(array $data)
-    {
-        $input = Domain\TeamApplication::fromArray($data, ['firstName', 'lastName', 'center', 'teamYear', 'regDate']);
-
-        $application = Models\TmlpRegistration::firstOrNew([
-            'first_name' => $input->firstName,
-            'last_name' => $input->lastName,
-            'center_id' => $input->center->id,
-            'team_year' => $input->teamYear,
-            'reg_date' => $input->regDate,
-        ]);
-
-        // Create only creates
-        if ($application->exists) {
-            throw new ApiExceptions\BadRequestException('Application already exists');
-        }
-
-        if ($input->has('email')) {
-            $application->person->email = $input->email;
-        }
-        if ($input->has('phone')) {
-            $application->person->phone = $input->phone;
-        }
-        if ($input->has('isReviewer')) {
-            $application->isReviewer = $input->isReviewer;
-        }
-
-        $application->person->save();
-        $application->save();
-
-        return $application->load('person');
-    }
-
     public function allForCenter(Models\Center $center, Carbon $reportingDate = null, $includeInProgress = false)
     {
         if ($reportingDate === null) {
@@ -207,26 +174,4 @@ class Application extends ApiBase
     {
         return $this->allForCenter($center, $reportingDate, true);
     }
-
-    public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $results = [];
-
-        $allData = $this->allForCenter($center, $reportingDate, true);
-        foreach ($allData as $dataObject) {
-            if (!array_get($dataObject->meta, 'localChanges', false)) {
-                $results[] = $dataObject;
-            }
-        }
-
-        return $results;
-    }
-
-    public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\TeamApplication::class);
-
-        return array_flatten($collection->getDictionary());
-    }
-
 }

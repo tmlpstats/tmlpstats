@@ -13,50 +13,6 @@ use TmlpStats\Domain;
  */
 class Course extends ApiBase
 {
-    public function create(array $data)
-    {
-        $input = Domain\Course::fromArray($data, ['center', 'startDate', 'type']);
-
-        $courseData = [
-            'center_id' => $input->center->id,
-            'start_date' => $input->startDate,
-            'type' => $input->type,
-        ];
-
-        // London has a special situation where international (INTL) and local stats
-        // are reported separately for courses. This means they may have 2 "courses"
-        // for a single center/date
-        // We only need to worry about this when creating a new course
-        if ($input->has('location') && $input->center->name === 'London') {
-            $courseData['is_international'] = (strtoupper($input->location) === 'INTL');
-        }
-
-        $course = Models\Course::firstOrNew($courseData);
-
-        // Create only creates
-        if ($course->exists) {
-            throw new ApiExceptions\BadRequestException('Course already exists');
-        }
-
-        if ($input->has('location')) {
-            $course->location = $input->location;
-        }
-
-        $course->save();
-
-        return $course->load('center');
-    }
-
-    public function update(Models\Course $course, array $data)
-    {
-        $courseDomain = Domain\Course::fromArray($data);
-        $courseDomain->fillModel(null, $course);
-
-        $course->save();
-
-        return $course->load('center');
-    }
-
     public function allForCenter(Models\Center $center, Carbon $reportingDate = null, $includeInProgress = false)
     {
         if ($reportingDate === null) {
@@ -199,27 +155,6 @@ class Course extends ApiBase
     public function getWeekSoFar(Models\Center $center, Carbon $reportingDate)
     {
         return $this->allForCenter($center, $reportingDate, true);
-    }
-
-    public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $results = [];
-
-        $allData = $this->allForCenter($center, $reportingDate, true);
-        foreach ($allData as $dataObject) {
-            if (!array_get($dataObject->meta, 'localChanges', false)) {
-                $results[] = $dataObject;
-            }
-        }
-
-        return $results;
-    }
-
-    public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\Course::class);
-
-        return array_flatten($collection->getDictionary());
     }
 
     protected function getCourseMeta(Domain\Course $course, Models\Center $center, Carbon $reportingDate)
