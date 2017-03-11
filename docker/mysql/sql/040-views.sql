@@ -1,5 +1,14 @@
 -- This file is hand-written; named 040-views.sql to give room to insert a dump at 030-dump.sql 
 
+-- Trick - Create a temporary view simply to solve the circular reference issue
+-- that happens because some views need submission_data_team_members but other 
+-- views need it.
+CREATE OR REPLACE VIEW `submission_data_team_members` AS 
+    SELECT 1 AS `cpc`, 1 as `center_id`, 1 as `tdo`, 1 as `reporting_date`;
+
+
+-- ACTUAL VIEWS FOLLOW NOW
+
 CREATE or replace VIEW `submission_data_scoreboard` AS
     SELECT
         'actual' AS `type`,
@@ -12,7 +21,7 @@ CREATE or replace VIEW `submission_data_scoreboard` AS
         (((((JSON_EXTRACT(`a`.`data`, '$.games.cap.points') + JSON_EXTRACT(`a`.`data`, '$.games.cpc.points')) + JSON_EXTRACT(`a`.`data`, '$.games.t1x.points')) + JSON_EXTRACT(`a`.`data`, '$.games.t2x.points')) + JSON_EXTRACT(`a`.`data`, '$.games.gitw.points')) + JSON_EXTRACT(`a`.`data`, '$.games.lf.points')) AS `points`,
         (select round(100*sum(tdo)/IF(count(*)=0,1,count(*))) from submission_data_team_members b
 		     where a.center_id=b.center_id
-					and a.reporting_date=b.reporting_date) tdo,
+					and a.reporting_date=b.reporting_date) AS `tdo`,
         `a`.`id` AS `id`,
         `a`.`center_id` AS `center_id`,
         `a`.`reporting_date` AS `reporting_date`,
