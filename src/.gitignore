@@ -1,5 +1,6 @@
 .DS_STORE
 .env
+.localdev
 vendor
 _ide_helper*
 bower_components
