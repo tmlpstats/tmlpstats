@@ -1,3 +1,5 @@
+-- This file is hand-written; named 040-views.sql to give room to insert a dump at 030-dump.sql 
+
 CREATE or replace VIEW `submission_data_scoreboard` AS
     SELECT
         'actual' AS `type`,

@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     wget                                 \
  && docker-php-ext-install -j$(nproc)    \
     mcrypt                               \
+    pdo_mysql                            \
     xml                                  \
     zip                                  \
  && git clone --branch php7 https://github.com/php-memcached-dev/php-memcached /usr/src/php/ext/memcached \
@@ -35,7 +36,8 @@ RUN /usr/bin/npm install -g n              \
  && /usr/local/bin/npm install -g bower    \
  && /usr/local/bin/npm install -g gulp-cli
 
-RUN mkdir -p /var/www/tmlpstats/src
+RUN mkdir -p /var/www/tmlpstats/src && \
+    a2enmod rewrite
 WORKDIR /var/www/tmlpstats/src 
 
 ##### Variant processes - Bake in as much as we can, make the module install much smaller later
@@ -48,6 +50,11 @@ RUN composer install --no-autoloader --no-scripts
 ADD src/package.json /var/www/tmlpstats/src/
 RUN npm set progress=false && npm install
 
+# Bower
+ADD src/bower.json /var/www/tmlpstats/src
+RUN bower install --allow-root
+
+RUN md5sum package.json bower.json > hashes.install
 
 ADD docker/builder/symlink-farm.sh /tmp/
 RUN bash /tmp/symlink-farm.sh /var/www/tmlpstats /app

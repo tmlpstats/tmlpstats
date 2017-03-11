@@ -1,0 +1,28 @@
+version: '2'
+services:
+  localdev:
+    build:
+      context: .
+      dockerfile: docker/localdev/Dockerfile
+    ports:
+      - "8080:80"
+    links:
+      - mysql
+      - memcached
+    volumes:
+      - "./:/app"
+    environment:
+      - VHOSTNAME=vagrant.tmlpstats.com
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_HOST=mysql
+      - MEMCACHED_HOST=memcached
+      - DB_DATABASE=tmlpstats_dev
+
+
+  mysql:
+    build:
+      context: docker/mysql
+
+  memcached:
+    image: memcached:1.4-alpine
