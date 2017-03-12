@@ -39,12 +39,17 @@ export class GlobalReport extends Component {
 
     reportUri(parts) {
         let tabParts = parts.join('/')
-        return `${this.reportUriBase()}/${tabParts}?viewmode=react`
+        return `${this.reportUriBase()}/${tabParts}`
     }
 
     showReport(reportId) {
-        const { regionAbbr, reportingDate } = this.props.params
-        delayDispatch(this, reportData.loadReport(reportId, {region: regionAbbr, reportingDate}))
+        const report = this.fullReport[reportId]
+        if (!report) {
+            alert('Unknown report page: ' + reportId)
+        } else if (report.type != 'grouping') {
+            const { regionAbbr, reportingDate } = this.props.params
+            delayDispatch(this, reportData.loadReport(reportId, {region: regionAbbr, reportingDate}))
+        }
     }
 
     getContent(reportId) {

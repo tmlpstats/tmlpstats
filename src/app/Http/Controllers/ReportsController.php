@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Log;
 use Session;
+use TmlpStats\Api;
 use TmlpStats\Center;
 use TmlpStats\GlobalReport;
 use TmlpStats\Region;
@@ -288,6 +289,10 @@ class ReportsController extends Controller
             $report = StatsReport::byCenter($center)->official()->orderBy('reporting_date', 'desc')->first();
         }
 
-        return App::make(StatsReportController::class)->runDispatcher($request, $report, 'mobile_summary');
+        $context = App::make(Api\Context::class);
+        $context->setCenter($center);
+        $context->setReportingDate($report->reportingDate);
+
+        return App::make(StatsReportController::class)->getMobileSummary($report);
     }
 }
