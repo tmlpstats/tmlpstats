@@ -7,98 +7,54 @@ use TmlpStats as Models;
 use TmlpStats\Api\Base\ApiBase;
 use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Domain;
+use TmlpStats\Encapsulations;
 
 /**
  * Applications
  */
 class Application extends ApiBase
 {
-    public function create(array $data)
+    private function relevantReport(Models\Center $center, Carbon $reportingDate)
     {
-        $input = Domain\TeamApplication::fromArray($data, ['firstName', 'lastName', 'center', 'teamYear', 'regDate']);
+        $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
+        $quarter = $crd->getQuarter();
 
-        $application = Models\TmlpRegistration::firstOrNew([
-            'first_name' => $input->firstName,
-            'last_name' => $input->lastName,
-            'center_id' => $input->center->id,
-            'team_year' => $input->teamYear,
-            'reg_date' => $input->regDate,
-        ]);
-
-        // Create only creates
-        if ($application->exists) {
-            throw new ApiExceptions\BadRequestException('Application already exists');
-        }
-
-        if ($input->has('email')) {
-            $application->person->email = $input->email;
-        }
-        if ($input->has('phone')) {
-            $application->person->phone = $input->phone;
-        }
-        if ($input->has('isReviewer')) {
-            $application->isReviewer = $input->isReviewer;
-        }
-
-        $application->person->save();
-        $application->save();
-
-        return $application->load('person');
-    }
-
-    public function allForCenter(Models\Center $center, Carbon $reportingDate = null, $includeInProgress = false)
-    {
-        if ($reportingDate === null) {
-            $reportingDate = LocalReport::getReportingDate($center);
-        } else {
-            App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
-        }
-
-        $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
-
-        $reports = Models\StatsReport::byCenter($center)
+        return Models\StatsReport::byCenter($center)
             ->byQuarter($quarter)
             ->official()
             ->where('reporting_date', '<=', $reportingDate)
-            ->orderBy('reporting_date', 'asc')
-            ->with('tmlpRegistrationData')
-            ->get();
+            ->orderBy('reporting_date', 'desc')
+            ->first();
+    }
+
+    public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
+    {
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $allApplications = [];
-
-        foreach ($reports as $report) {
-            foreach ($report->tmlpRegistrationData as $app) {
-                // Store indexed here so we end up with only the most recent one for each application
-                $allApplications[$app->tmlpRegistrationId] = Domain\TeamApplication::fromModel($app);
-            }
-        }
-
-        // Pick up any applications that are new this week
-        $thisReport = LocalReport::ensureStatsReport($center, $reportingDate, true);
-        foreach ($thisReport->tmlpRegistrationData() as $app) {
-            if (isset($allApplications[$app->tmlpRegistrationId])) {
-                continue;
-            }
-
-            $allApplications[$app->tmlpRegistrationId] = Domain\TeamApplication::fromModel($app);
-        }
-
         if ($includeInProgress) {
             $submissionData = App::make(SubmissionData::class);
             $found = $submissionData->allForType($center, $reportingDate, Domain\TeamApplication::class);
-            foreach ($found as $app) {
-                $app->meta['localChanges'] = true;
-                $allApplications[$app->id] = $app;
+            foreach ($found as $domain) {
+                $allApplications[$domain->id] = $domain;
+                $domain->meta['localChanges'] = true;
             }
         }
 
-        usort($allApplications, function ($a, $b) {
-            if ($a->firstName === $b->firstName) {
-                return strcmp($a->lastName, $b->lastName);
-            }
+        $lastReport = $this->relevantReport($center, $reportingDate);
+        if ($lastReport) {
+            $applications = App::make(LocalReport::class)->getApplicationsList($lastReport, ['returnUnprocessed' => true]);
+            foreach ($applications as $appData) {
+                // it's a small optimization, but prevent creating domain if we have an existing SubmissionData version
+                if (isset($allApplications[$appData->tmlpRegistrationId])) {
+                    continue;
+                }
 
-            return strcmp($a->firstName, $b->firstName);
-        });
+                $domain = Domain\TeamApplication::fromModel($appData, $appData->tmlpRegistration);
+                $domain->meta['fromReport'] = true;
+                $allApplications[$domain->id] = $domain;
+            }
+        }
 
         return array_values($allApplications);
     }
@@ -207,26 +163,4 @@ class Application extends ApiBase
     {
         return $this->allForCenter($center, $reportingDate, true);
     }
-
-    public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $results = [];
-
-        $allData = $this->allForCenter($center, $reportingDate, true);
-        foreach ($allData as $dataObject) {
-            if (!array_get($dataObject->meta, 'localChanges', false)) {
-                $results[] = $dataObject;
-            }
-        }
-
-        return $results;
-    }
-
-    public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\TeamApplication::class);
-
-        return array_flatten($collection->getDictionary());
-    }
-
 }

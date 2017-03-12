@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Tests\Functional\Api;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use TmlpStats as Models;
@@ -40,93 +41,53 @@ class TeamMemberTest extends FunctionalTestAbstract
             'team_member_id' => $this->teamMember->id,
             'stats_report_id' => $this->report->id,
         ]);
+
+        $this->headers = ['Accept' => 'application/json'];
+    }
+
+    public function testStash()
+    {
+        $this->markTestIncomplete('We need to add tests');
+    }
+
+    public function testAllForCenter($reportingDate = null)
+    {
+        $this->markTestIncomplete('We need to add tests');
     }
 
     /**
-     * @dataProvider providerCreate
+     * @dataProvider providerApiThrowsExceptionForInvalidDate
      */
-    public function testCreate($parameterUpdates, $expectedResponseUpdates)
+    public function testApiThrowsExceptionForInvalidDate($method)
     {
-        $parameters = [
-            'method' => 'TeamMember.create',
-            'data' => [
-                'firstName' => $this->faker->firstName(),
-                'lastName' => $this->faker->lastName(),
-                'center' => $this->center->id,
-                'teamYear' => 2,
-                'incomingQuarter' => $this->lastQuarter->id,
-            ],
-        ];
+        $reportingDate = Carbon::parse('this thursday', $this->center->timezone)
+            ->startOfDay()
+            ->toDateString();
 
-        $lastPersonId = Models\Person::count();
-        $lastTeamMemberId = Models\TeamMember::count();
+        $parameters = [
+            'method' => $method,
+            'reportingDate' => $reportingDate,
+            'center' => $this->center->id,
+            'data' => [],
+        ];
 
         $expectedResponse = [
-            'id' => $lastTeamMemberId + 1,
-            'teamYear' => $parameters['data']['teamYear'],
-            'personId' => $lastPersonId + 1,
-            'isReviewer' => false,
-            'incomingQuarterId' => $parameters['data']['incomingQuarter'],
-            'person' => [
-                'id' => $lastPersonId + 1,
-                'firstName' => $parameters['data']['firstName'],
-                'lastName' => $parameters['data']['lastName'],
-                'phone' => null,
-                'email' => null,
-                'centerId' => $this->center->id,
-                'unsubscribed' => false,
+            'success' => false,
+            'error' => [
+                'message' => 'Reporting date must be a Friday.',
             ],
         ];
 
-        $parameters = $this->replaceInto($parameters, $parameterUpdates);
-        $expectedResponse = $this->replaceInto($expectedResponse, $expectedResponseUpdates);
-
-        $this->post('/api', $parameters)->seeJsonHas($expectedResponse);
+        $this->post('/api', $parameters, $this->headers)
+             ->seeJsonHas($expectedResponse)
+             ->seeStatusCode(400);
     }
 
-    public function providerCreate()
+    public function providerApiThrowsExceptionForInvalidDate()
     {
         return [
-            // Required Parameters Only
-            [[], []],
-            // Additional Parameters
-            [
-                [ // Request
-                    'data.isReviewer' => true,
-                    'data.phone' => '555-555-1234',
-                    'data.email' => 'peter.tests.a.lot@tmlpstats.com',
-                ],
-                [ // Response
-                    'isReviewer' => true,
-                    'person.phone' => '555-555-1234',
-                    'person.email' => 'peter.tests.a.lot@tmlpstats.com',
-                ],
-            ],
+            ['TeamMember.allForCenter'],
+            ['TeamMember.stash'],
         ];
     }
-
-    public function testUpdate()
-    {
-        $parameters = [
-            'method' => 'TeamMember.update',
-            'teamMember' => $this->teamMember->id,
-            'data' => [
-                'phone' => '555-555-5678',
-                'email' => 'testers@tmlpstats.com',
-                'lastName' => 'McTester',
-            ],
-        ];
-
-        $expectedResponse = $this->teamMember->load('person')->toArray();
-        $expectedResponse['person']['phone'] = $parameters['data']['phone'];
-        $expectedResponse['person']['email'] = $parameters['data']['email'];
-        $expectedResponse['person']['lastName'] = $parameters['data']['lastName'];
-
-        //\App::make(\TmlpStats\Api\TeamMember::class)->update($this->teamMember, $parameters['data']);
-
-        $response = $this->post('/api', $parameters);
-        $response->assertResponseStatus(200);
-        $response->seeJsonHas($expectedResponse);
-    }
-
 }

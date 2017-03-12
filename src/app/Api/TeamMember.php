@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Domain;
+use TmlpStats\Encapsulations;
 
 /**
  * TeamMembers
@@ -16,7 +17,8 @@ class TeamMember extends AuthenticatedApiBase
 
     private function relevantReport(Models\Center $center, Carbon $reportingDate)
     {
-        $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
+        $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
+        $quarter = $crd->getQuarter();
 
         // Get the last stats report in order to pre-populate the class list effectively
 
@@ -30,6 +32,8 @@ class TeamMember extends AuthenticatedApiBase
 
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+
         $allTeamMembers = [];
 
         if ($includeInProgress) {
@@ -73,6 +77,8 @@ class TeamMember extends AuthenticatedApiBase
      */
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+
         $this->assertCan('submitStats', $center);
 
         $submissionData = App::make(SubmissionData::class);
@@ -126,51 +132,6 @@ class TeamMember extends AuthenticatedApiBase
         return ['messages' => $messages];
     }
 
-    public function create(array $data)
-    {
-        $domain = Domain\TeamMember::fromArray($data, ['firstName', 'lastName', 'center', 'teamYear', 'incomingQuarter']);
-        $this->assertAuthz($this->context->can('submitStats', $domain->center));
-
-        $memberQuarterNumber = Models\TeamMember::getQuarterNumber($domain->incomingQuarter, $domain->center->region);
-
-        $teamMember = Models\TeamMember::firstOrNew([
-            'first_name' => $domain->firstName,
-            'last_name' => $domain->lastName,
-            'center_id' => $domain->center->id,
-            'team_year' => $domain->teamYear,
-            'incoming_quarter_id' => $domain->incomingQuarter->id,
-            'team_quarter' => $memberQuarterNumber,
-        ]);
-
-        $teamMember->person->email = $domain->email;
-        $teamMember->person->phone = $domain->phone;
-        $teamMember->isReviewer = $domain->isReviewer ?: false;
-
-        if ($teamMember->person->isDirty()) {
-            $teamMember->person->save();
-        }
-        $teamMember->save();
-
-        return $teamMember->load('person');
-    }
-
-    public function update(Models\TeamMember $teamMember, array $data)
-    {
-        $domain = Domain\TeamMember::fromArray($data);
-        $this->assertAuthz($this->context->can('submitStats', $teamMember->center));
-
-        $domain->fillModel(null, $teamMember, true);
-
-        if ($teamMember->person->isDirty()) {
-            $teamMember->person->save();
-        }
-        if ($teamMember->isDirty()) {
-            $teamMember->save();
-        }
-
-        return $teamMember->load('person');
-    }
-
     public function setWeekData(Models\TeamMember $teamMember, Carbon $reportingDate, array $data)
     {
         $this->assertAuthz($this->context->can('submitStats', $teamMember->person->center));
@@ -205,27 +166,6 @@ class TeamMember extends AuthenticatedApiBase
     public function getWeekSoFar(Models\Center $center, Carbon $reportingDate)
     {
         return $this->allForCenter($center, $reportingDate, true);
-    }
-
-    public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $results = [];
-
-        $allData = $this->allForCenter($center, $reportingDate, true);
-        foreach ($allData as $dataObject) {
-            if (!array_get($dataObject->meta, 'localChanges', false)) {
-                $results[] = $dataObject;
-            }
-        }
-
-        return $results;
-    }
-
-    public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\TeamMember::class);
-
-        return array_flatten($collection->getDictionary());
     }
 
     /**

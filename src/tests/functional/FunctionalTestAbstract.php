@@ -5,6 +5,7 @@ use Faker\Factory;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use TmlpStats as Models;
+use TmlpStats\ModelCache;
 use TmlpStats\Tests\TestAbstract;
 
 class FunctionalTestAbstract extends TestAbstract
@@ -22,6 +23,8 @@ class FunctionalTestAbstract extends TestAbstract
         $this->faker = Factory::create();
         $this->user = factory(Models\User::class)->create();
         $this->be($this->user);
+
+        ModelCache::create()->flush();
     }
 
     /**

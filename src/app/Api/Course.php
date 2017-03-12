@@ -7,112 +7,52 @@ use TmlpStats as Models;
 use TmlpStats\Api\Base\ApiBase;
 use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Domain;
+use TmlpStats\Encapsulations;
 
 /**
  * Courses
  */
 class Course extends ApiBase
 {
-    public function create(array $data)
+    private function relevantReport(Models\Center $center, Carbon $reportingDate)
     {
-        $input = Domain\Course::fromArray($data, ['center', 'startDate', 'type']);
+        $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
+        $quarter = $crd->getQuarter();
 
-        $courseData = [
-            'center_id' => $input->center->id,
-            'start_date' => $input->startDate,
-            'type' => $input->type,
-        ];
-
-        // London has a special situation where international (INTL) and local stats
-        // are reported separately for courses. This means they may have 2 "courses"
-        // for a single center/date
-        // We only need to worry about this when creating a new course
-        if ($input->has('location') && $input->center->name === 'London') {
-            $courseData['is_international'] = (strtoupper($input->location) === 'INTL');
-        }
-
-        $course = Models\Course::firstOrNew($courseData);
-
-        // Create only creates
-        if ($course->exists) {
-            throw new ApiExceptions\BadRequestException('Course already exists');
-        }
-
-        if ($input->has('location')) {
-            $course->location = $input->location;
-        }
-
-        $course->save();
-
-        return $course->load('center');
-    }
-
-    public function update(Models\Course $course, array $data)
-    {
-        $courseDomain = Domain\Course::fromArray($data);
-        $courseDomain->fillModel(null, $course);
-
-        $course->save();
-
-        return $course->load('center');
-    }
-
-    public function allForCenter(Models\Center $center, Carbon $reportingDate = null, $includeInProgress = false)
-    {
-        if ($reportingDate === null) {
-            $reportingDate = LocalReport::getReportingDate($center);
-        } else {
-            App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
-        }
-
-        $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
-
-        $reports = Models\StatsReport::byCenter($center)
+        return Models\StatsReport::byCenter($center)
             ->byQuarter($quarter)
             ->official()
             ->where('reporting_date', '<=', $reportingDate)
-            ->orderBy('reporting_date', 'asc')
-            ->with('courseData')
-            ->get();
+            ->orderBy('reporting_date', 'desc')
+            ->first();
+    }
+
+    public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
+    {
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $allCourses = [];
-
-        foreach ($reports as $report) {
-            foreach ($report->courseData as $courseData) {
-                // Store indexed here so we end up with only the most recent one for each course
-                $allCourses[$courseData->courseId] = Domain\Course::fromModel($courseData);
-            }
-        }
-
-        // Pick up any courses that are new this week
-        $thisReport = LocalReport::ensureStatsReport($center, $reportingDate, true);
-        foreach ($thisReport->courseData() as $courseData) {
-            if (isset($allCourses[$courseData->courseId])) {
-                continue;
-            }
-
-            $allCourses[$courseData->courseId] = Domain\Course::fromModel($courseData);
-        }
-
         if ($includeInProgress) {
             $submissionData = App::make(SubmissionData::class);
             $found = $submissionData->allForType($center, $reportingDate, Domain\Course::class);
-            foreach ($found as $courseData) {
-                $courseData->meta['localChanges'] = true;
-                $allCourses[$courseData->id] = $courseData;
+            foreach ($found as $domain) {
+                $allCourses[$domain->id] = $domain;
+                $domain->meta['localChanges'] = true;
             }
         }
 
-        usort($allCourses, function ($a, $b) {
-            if ($a->startDate->eq($b->startDate)) {
-                return 0;
+        $lastReport = $this->relevantReport($center, $reportingDate);
+        if ($lastReport) {
+            foreach (App::make(LocalReport::class)->getCourseList($lastReport) as $cd) {
+                // it's a small optimization, but prevent creating domain if we have an existing SubmissionData version
+                if (isset($allCourses[$cd->courseId])) {
+                    continue;
+                }
+
+                $domain = Domain\Course::fromModel($cd, $cd->course);
+                $domain->meta['fromReport'] = true;
+                $allCourses[$domain->id] = $domain;
             }
-
-            return $a->startDate->lt($b->startDate) ? -1 : 1;
-        });
-
-        foreach ($allCourses as $course) {
-            $course->meta = $this->getCourseMeta($course, $center, $reportingDate);
         }
 
         return array_values($allCourses);
@@ -199,27 +139,6 @@ class Course extends ApiBase
     public function getWeekSoFar(Models\Center $center, Carbon $reportingDate)
     {
         return $this->allForCenter($center, $reportingDate, true);
-    }
-
-    public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $results = [];
-
-        $allData = $this->allForCenter($center, $reportingDate, true);
-        foreach ($allData as $dataObject) {
-            if (!array_get($dataObject->meta, 'localChanges', false)) {
-                $results[] = $dataObject;
-            }
-        }
-
-        return $results;
-    }
-
-    public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\Course::class);
-
-        return array_flatten($collection->getDictionary());
     }
 
     protected function getCourseMeta(Domain\Course $course, Models\Center $center, Carbon $reportingDate)
