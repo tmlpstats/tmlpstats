@@ -18,7 +18,6 @@
         "laravelcollective/html": "~5.1",
         "nesbot/carbon": "~1.0",
         "phpoffice/phpexcel": "~1.8",
-        "pragmarx/tracker": "^1.0",
         "respect/validation": "~1.0"
     },
     "require-dev": {
