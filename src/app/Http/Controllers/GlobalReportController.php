@@ -86,16 +86,13 @@ class GlobalReportController extends Controller
 
         $showNavCenterSelect = true;
 
-        $defaultVmode = $request->has('tab1') ? 'react' : env('GLOBAL_REPORT_VIEW_MODE', 'jq');
+        $defaultVmode = env('GLOBAL_REPORT_VIEW_MODE', 'react');
         $vmode = $request->has('viewmode') ? $request->input('viewmode') : $defaultVmode;
 
         switch (strtolower($vmode)) {
             case 'react':
-                $template = 'show_react';
-                break;
-            case 'jq':
             default:
-                $template = 'show_jquery';
+                $template = 'show_react';
                 break;
         }
 
@@ -1082,7 +1079,6 @@ class GlobalReportController extends Controller
 
         return view('globalreports.details.withdrawreport', compact('reportData', 'almostOutOfCompliance'));
     }
-
 
     protected function rppData($globalReport, $region)
     {

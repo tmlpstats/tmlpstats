@@ -65,7 +65,7 @@ export class LocalReport extends Component {
      */
     reportUri(parts) {
         let tabParts = parts.join('/')
-        return `${this.reportUriBase()}/${tabParts}?viewmode=react`
+        return `${this.reportUriBase()}/${tabParts}`
     }
 
     /**
@@ -82,8 +82,13 @@ export class LocalReport extends Component {
         if (!reportId) {
             return
         }
-        const params = this.storageKey.queryParams()
-        delayDispatch(this, reportData.loadReport(reportId, params))
+        const report = this.fullReport[reportId]
+        if (!report) {
+            alert('Unknown report page: ' + reportId)
+        } else if (report.type != 'grouping') {
+            const params = this.storageKey.queryParams()
+            delayDispatch(this, reportData.loadReport(reportId, params))
+        }
     }
 
     responsiveLabel(report) {

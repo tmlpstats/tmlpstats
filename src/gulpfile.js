@@ -19,7 +19,6 @@ elixir(function(mix) {
             'bower_components/datatables.net/js/jquery.dataTables.min.js',
             'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js',
             'bower_components/jquery-loading/dist/jquery.loading.min.js',
-            'bower_components/jquery-stickytabs/jquery.stickytabs.js',
             'bower_components/highcharts/highcharts.js',
         ], 'public/js/vendor.js', './')
         .copy('bower_components/html5shiv/dist/html5shiv.min.js', 'public/vendor/js/html5shiv.min.js')

@@ -19,7 +19,7 @@ use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\Import\Xlsx\XlsxImporter;
 use TmlpStats\Reports\Arrangements;
 
-class StatsReportController extends ReportDispatchAbstractController
+class StatsReportController extends Controller
 {
     use LocalReportDispatch;
 
@@ -34,6 +34,11 @@ class StatsReportController extends ReportDispatchAbstractController
         $this->middleware('auth.token');
         $this->middleware('auth');
         $this->context = App::make(Api\Context::class);
+    }
+
+    public function useCache($report)
+    {
+        return env('REPORTS_USE_CACHE', true);
     }
 
     /**
@@ -99,11 +104,8 @@ class StatsReportController extends ReportDispatchAbstractController
 
         switch (strtolower($vmode)) {
             case 'react':
-                $template = 'show_react';
-                break;
-            case 'html':
             default:
-                $template = 'show';
+                $template = 'show_react';
                 break;
         }
 
@@ -255,71 +257,6 @@ class StatsReportController extends ReportDispatchAbstractController
             default:
                 parent::authorizeReport($statsReport, $report);
         }
-    }
-
-    public function runDispatcher(Request $request, $statsReport, $report, $extra = null)
-    {
-        $this->setCenter($statsReport->center);
-        $this->context->setCenter($statsReport->center);
-        $this->context->setReportingDate($statsReport->reportingDate);
-
-        if (!$statsReport->isValidated() && $report != 'results') {
-            return '<p>This report did not pass validation. See Report Details for more information.</p>';
-        }
-
-        $response = null;
-        switch ($report) {
-            case 'summary':
-                $response = $this->getSummary($statsReport);
-                break;
-            case 'results':
-                $response = $this->getResults($statsReport);
-                break;
-            case 'centerstats':
-                $response = $this->getCenterStats($statsReport);
-                break;
-            case 'classlist':
-                $response = $this->getClassList($statsReport);
-                break;
-            case 'tmlpregistrations':
-                $response = $this->getTmlpRegistrations($statsReport);
-                break;
-            case 'tmlpregistrationsbystatus':
-                $response = $this->getTmlpRegistrationsByStatus($statsReport);
-                break;
-            case 'courses':
-                $response = $this->getCourses($statsReport);
-                break;
-            case 'contactinfo':
-                $response = $this->getContactInfo($statsReport);
-                break;
-            case 'gitwsummary':
-                $response = $this->getGitwSummary($statsReport);
-                break;
-            case 'tdosummary':
-                $response = $this->getTdoSummary($statsReport);
-                break;
-            case 'peopletransfersummary':
-                $response = $this->getPeopleTransferSummary($statsReport);
-                break;
-            case 'coursestransfersummary':
-                $response = $this->getCoursesTransferSummary($statsReport);
-                break;
-            case 'teamsummary':
-                $response = $this->getTeamWeekendSummary($statsReport);
-                break;
-            case 'travel':
-                $response = $this->getTeamTravelSummary($statsReport);
-                break;
-            case 'mobile_summary':
-                $response = $this->getMobileSummary($statsReport);
-                break;
-            case 'next_qtr_accountabilities':
-                $response = $this->getNextQtrAccountabilities($statsReport);
-                break;
-        }
-
-        return $response;
     }
 
     public function getCoursesSummary(Models\StatsReport $statsReport)
@@ -487,7 +424,7 @@ class StatsReportController extends ReportDispatchAbstractController
         return view('statsreports.details.summary', $data);
     }
 
-    protected function getMobileSummary(Models\StatsReport $statsReport)
+    public function getMobileSummary(Models\StatsReport $statsReport)
     {
         $data = $this->getSummaryPageData($statsReport, true);
         $data['skip_navbar'] = true;
