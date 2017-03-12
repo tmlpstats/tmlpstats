@@ -17,8 +17,8 @@
     "/js"
   ],
   "main": [
-    "public/css/tmlpstats.css",
-    "public/js/tmlpstats.js"
+    "resources/assets/sass/app.scss",
+    "resources/assets/js/main.jsx"
   ],
   "dependencies": {
     "jquery-loading": "~1.1.0",

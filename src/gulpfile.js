@@ -15,7 +15,7 @@ elixir(function(mix) {
         .copy('public/fonts', 'public/build/fonts/bootstrap')
         .webpack('main.jsx', 'public/js/main.js')
         .scripts([
-            'bower_components/bootstrap/dist/js/bootstrap.min.js',
+            'bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js',
             'bower_components/datatables.net/js/jquery.dataTables.min.js',
             'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js',
             'bower_components/jquery-loading/dist/jquery.loading.min.js',
