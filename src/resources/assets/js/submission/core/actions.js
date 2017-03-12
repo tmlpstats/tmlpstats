@@ -1,3 +1,4 @@
+import moment from 'moment'
 import _ from 'lodash'
 import { normalize } from 'normalizr'
 
@@ -5,8 +6,6 @@ import { coreInit, centerQuarterData, cqResponse } from './data'
 import { objectAssign } from '../../reusable/ponyfill'
 import { delayDispatch } from '../../reusable/dispatch'
 import Api from '../../api'
-
-const { moment } = window
 
 export const initState = coreInit.actionCreator()
 

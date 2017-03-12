@@ -22,7 +22,6 @@
   ],
   "dependencies": {
     "jquery-loading": "~1.1.0",
-    "jstz": "https://github.com/HenningM/jstimezonedetect.git",
     "html5shiv": "~3.7.3",
     "datatables-plugins": "~1.10.10",
     "datatables": "~1.10.10",
@@ -34,13 +33,11 @@
     "datatables.net": "~1.10.10",
     "datatables.net-bs": "~1.10.10",
     "world-flags-sprite": "*",
-    "moment": "~2.10.6",
     "jquery-stickytabs": "git://github.com/pdarg/jquery-stickytabs.git#~1.2.1",
     "highcharts": "^4.2.3",
     "bootstrap-sass": "^3.3.7"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "homepage": "https://github.com/pdarg/tmlpstats",
   "authors": [
     "Peter <peter.argue@gmail.com>"

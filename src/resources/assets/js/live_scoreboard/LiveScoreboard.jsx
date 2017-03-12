@@ -1,3 +1,4 @@
+import moment from 'moment'
 import React from 'react'
 import { connect } from 'react-redux'
 import { GAME_KEYS } from '../reusable/scoreboard'
@@ -6,7 +7,6 @@ import GameRow from './GameRow'
 import * as actions from './actions'
 
 const settings = window.settings
-const moment = window.moment // TODO consider ponyfill
 
 class LiveScoreboardView extends React.Component {
     componentWillMount() {
