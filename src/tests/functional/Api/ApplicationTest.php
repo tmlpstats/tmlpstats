@@ -47,6 +47,7 @@ class ApplicationTest extends FunctionalTestAbstract
             'tmlp_registration_id' => $this->application->id,
             'stats_report_id' => $this->report->id,
             'reg_date' => $this->application->regDate,
+            'comment' => 'This week',
         ]);
 
         $this->headers = ['Accept' => 'application/json'];
@@ -187,19 +188,14 @@ class ApplicationTest extends FunctionalTestAbstract
     /**
      * @dataProvider providerAllForCenter
      */
-    public function testAllForCenter($reportingDate = null)
+    public function testAllForCenter($reportingDate)
     {
-        if (!$reportingDate) {
-            Carbon::setTestNow(Carbon::create(2016, 05, 20));
-        }
         $parameters = [
             'method' => 'Application.allForCenter',
             'center' => $this->center->id,
+            'reportingDate' => $reportingDate,
             'includeInProgress' => false,
         ];
-        if ($reportingDate) {
-            $parameters['reportingDate'] = $reportingDate;
-        }
 
         //
         // Last Week's Report
@@ -241,6 +237,13 @@ class ApplicationTest extends FunctionalTestAbstract
         // This Week's Report
         //
         $this->report->submittedAt = '2016-04-15 18:55:00';
+
+        $app2ThisWeekData = Models\TmlpRegistrationData::create([
+            'tmlp_registration_id' => $app2->id,
+            'stats_report_id' => $this->report->id,
+            'reg_date' => $app2->regDate,
+            'comment' => 'This week',
+        ]);
 
         $thisWeeksGlobalReport = Models\GlobalReport::firstOrCreate([
             'reporting_date' => '2016-04-15',
@@ -284,37 +287,29 @@ class ApplicationTest extends FunctionalTestAbstract
 
         $nextWeeksGlobalReport->addCenterReport($nextWeeksReport);
 
-        // When a reporting date is provided, we get
-        //      app1 with this week's data
+        // When last reporting date is provided, we get
+        //      app1 with last week's data
         //      app2 with last week's data
         //
-        // When no reporting date is provided, we get
-        //      app1 with 'next' week's data
+        // When this reporting date is provided, we get
+        //      app1 with this week's data
         //      app2 with last week's data
-        //      app3 with 'next' week's data
-        if ($reportingDate) {
+        //      app3 not included
+        if ($reportingDate == '2016-04-08') {
             // Reporting Date provided
             $expectedResponse = [
-                Domain\TeamApplication::fromModel($this->applicationData),
+                Domain\TeamApplication::fromModel($app1LastWeekData),
                 Domain\TeamApplication::fromModel($app2LastWeekData),
             ];
         } else {
             // Reporting Date not provided
             $expectedResponse = [
-                Domain\TeamApplication::fromModel($app1NextWeekData),
-                Domain\TeamApplication::fromModel($app2LastWeekData),
-                Domain\TeamApplication::fromModel($app3NextWeekData),
+                Domain\TeamApplication::fromModel($this->applicationData),
+                Domain\TeamApplication::fromModel($app2ThisWeekData),
             ];
         }
 
         $expectedResponse = json_decode(json_encode($expectedResponse), true);
-
-        usort($expectedResponse, function ($a, $b) {
-            return strcmp(
-                $a['firstName'],
-                $b['firstName']
-            );
-        });
 
         $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
     }
@@ -322,8 +317,8 @@ class ApplicationTest extends FunctionalTestAbstract
     public function providerAllForCenter()
     {
         return [
-            ['2016-04-15'], // Existing report
-            [null], // No report
+            ['2016-04-08'],
+            ['2016-04-15'],
         ];
     }
 

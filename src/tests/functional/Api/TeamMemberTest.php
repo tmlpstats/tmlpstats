@@ -41,6 +41,8 @@ class TeamMemberTest extends FunctionalTestAbstract
             'team_member_id' => $this->teamMember->id,
             'stats_report_id' => $this->report->id,
         ]);
+
+        $this->headers = ['Accept' => 'application/json'];
     }
 
     public function testStash()

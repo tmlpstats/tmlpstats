@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Domain;
+use TmlpStats\Encapsulations;
 
 /**
  * TeamMembers
@@ -16,7 +17,8 @@ class TeamMember extends AuthenticatedApiBase
 
     private function relevantReport(Models\Center $center, Carbon $reportingDate)
     {
-        $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
+        $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
+        $quarter = $crd->getQuarter();
 
         // Get the last stats report in order to pre-populate the class list effectively
 
@@ -30,6 +32,8 @@ class TeamMember extends AuthenticatedApiBase
 
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+
         $allTeamMembers = [];
 
         if ($includeInProgress) {
@@ -73,6 +77,8 @@ class TeamMember extends AuthenticatedApiBase
      */
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+
         $this->assertCan('submitStats', $center);
 
         $submissionData = App::make(SubmissionData::class);

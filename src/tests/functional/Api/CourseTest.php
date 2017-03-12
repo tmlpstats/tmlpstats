@@ -221,18 +221,13 @@ class CourseTest extends FunctionalTestAbstract
     /**
      * @dataProvider providerAllForCenter
      */
-    public function testAllForCenter($reportingDate = null)
+    public function testAllForCenter($reportingDate)
     {
-        if (!$reportingDate) {
-            Carbon::setTestNow(Carbon::create(2016, 05, 20));
-        }
         $parameters = [
             'method' => 'Course.allForCenter',
             'center' => $this->center->id,
+            'reportingDate' => $reportingDate,
         ];
-        if ($reportingDate) {
-            $parameters['reportingDate'] = $reportingDate;
-        }
 
         //
         // Last Week's Report
@@ -257,7 +252,7 @@ class CourseTest extends FunctionalTestAbstract
             'current_xfer' => 2,
         ]);
 
-        // New person. Only has data last week
+        // New course. Only has data last week
         $course2 = factory(Models\Course::class)->create([
             'center_id' => $this->center->id,
             'start_date' => Carbon::parse('2016-04-30'),
@@ -283,6 +278,17 @@ class CourseTest extends FunctionalTestAbstract
         // This Week's Report
         //
         $this->report->submittedAt = '2016-04-15 18:55:00';
+
+        $course2ThisWeekData = Models\CourseData::create([
+            'course_id' => $course2->id,
+            'stats_report_id' => $this->report->id,
+            'quarter_start_ter' => 15,
+            'quarter_start_standardStarts' => 12,
+            'quarter_start_xfer' => 0,
+            'current_ter' => 32,
+            'current_standard_starts' => 29,
+            'current_xfer' => 2,
+        ]);
 
         $thisWeeksGlobalReport = Models\GlobalReport::firstOrCreate([
             'reporting_date' => '2016-04-15',
@@ -329,26 +335,23 @@ class CourseTest extends FunctionalTestAbstract
 
         $nextWeeksGlobalReport->addCenterReport($nextWeeksReport);
 
-        // When a reporting date is provided, we get
-        //      course1 with this week's data
+        // When a last reporting date is provided, we get
+        //      course1 with last week's data
         //      course2 with last week's data
         //
-        // When no reporting date is provided, we get
-        //      course1 with 'next' week's data
-        //      course2 with last week's data
-        //      course3 with 'next' week's data
-        if ($reportingDate) {
-            // Reporting Date provided
+        // When this reporting date is provided, we get
+        //      course1 with this week's data
+        //      course2 with this week's data
+        //      course3 is not included
+        if ($reportingDate == '2016-04-08') {
             $expectedResponse = [
-                Domain\Course::fromModel($this->courseData),
+                Domain\Course::fromModel($course1LastWeekData),
                 Domain\Course::fromModel($course2LastWeekData),
             ];
         } else {
-            // Reporting Date not provided
             $expectedResponse = [
-                Domain\Course::fromModel($course1NextWeekData),
-                Domain\Course::fromModel($course2LastWeekData),
-                Domain\Course::fromModel($course3NextWeekData),
+                Domain\Course::fromModel($this->courseData),
+                Domain\Course::fromModel($course2ThisWeekData),
             ];
         }
 
@@ -367,8 +370,8 @@ class CourseTest extends FunctionalTestAbstract
     public function providerAllForCenter()
     {
         return [
-            ['2016-04-15'], // Existing report
-            [null], // No report
+            ['2016-04-08'],
+            ['2016-04-15'],
         ];
     }
 
@@ -407,32 +410,5 @@ class CourseTest extends FunctionalTestAbstract
             ['Course.allForCenter'],
             ['Course.stash'],
         ];
-    }
-
-    public function testApiThrowsExceptionForInvalidDateInStash()
-    {
-        $reportingDate = Carbon::parse('this thursday', $this->center->timezone)
-            ->startOfDay()
-            ->toDateString();
-
-        $parameters = [
-            'method' => 'Course.stash',
-            'reportingDate' => $reportingDate,
-            'center' => $this->center->id,
-            'data' => [
-                'id' => $this->course->id,
-            ],
-        ];
-
-        $expectedResponse = [
-            'success' => false,
-            'error' => [
-                'message' => 'Reporting date must be a Friday.',
-            ],
-        ];
-
-        $this->post('/api', $parameters, $this->headers)
-             ->seeJsonHas($expectedResponse)
-             ->seeStatusCode(400);
     }
 }
