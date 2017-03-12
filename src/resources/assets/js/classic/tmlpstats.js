@@ -1,8 +1,10 @@
+import moment from 'moment'
+
 import Api from '../api'
 
 // Here are things which we get from 'classic' javascript.
 // Eventually we want to eliminate these, but for now this gives a pathway for eslint.
-const { $, jstz } = window
+const { $ } = window
 
 
 /**
@@ -191,10 +193,11 @@ window.Tmlp = (function(window, $) {
     //////////////////////////////
     //////////// TIMEZONE SETTING
     var setTimezone = function(config) {
-        var tz = jstz.determine();
-        var locale = navigator.language;
+        const jstz = require('jstz')
+        var tz = jstz.determine()
+        var locale = navigator.language
 
-        var data = {};
+        var data = {}
         if (typeof (tz) !== 'undefined') {
             data.timezone = tz.name();
         }

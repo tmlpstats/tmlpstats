@@ -29,6 +29,7 @@
     "bower": "^1.7",
     "es6-promise": "^3.2.1",
     "fetch-ponyfill": "^3.0.0",
+    "jstz": "^1.0.9",
     "lodash": "^4.15.0",
     "moment": "^2.14.1",
     "node-libs-browser": "^1.1.1",
