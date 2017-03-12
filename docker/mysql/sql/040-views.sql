@@ -1,9 +1,9 @@
--- This file is hand-written; named 040-views.sql to give room to insert a dump at 030-dump.sql 
+-- This file is hand-written; named 040-views.sql to give room to insert a dump at 030-dump.sql
 
 -- Trick - Create a temporary view simply to solve the circular reference issue
--- that happens because some views need submission_data_team_members but other 
+-- that happens because some views need submission_data_team_members but other
 -- views need it.
-CREATE OR REPLACE VIEW `submission_data_team_members` AS 
+CREATE OR REPLACE VIEW `submission_data_team_members` AS
     SELECT 1 AS `cpc`, 1 as `center_id`, 1 as `tdo`, 1 as `reporting_date`;
 
 
@@ -20,8 +20,8 @@ CREATE or replace VIEW `submission_data_scoreboard` AS
         a.data->>'$.games.lf.actual' AS `lf`,
         (((((JSON_EXTRACT(`a`.`data`, '$.games.cap.points') + JSON_EXTRACT(`a`.`data`, '$.games.cpc.points')) + JSON_EXTRACT(`a`.`data`, '$.games.t1x.points')) + JSON_EXTRACT(`a`.`data`, '$.games.t2x.points')) + JSON_EXTRACT(`a`.`data`, '$.games.gitw.points')) + JSON_EXTRACT(`a`.`data`, '$.games.lf.points')) AS `points`,
         (select round(100*sum(tdo)/IF(count(*)=0,1,count(*))) from submission_data_team_members b
-		     where a.center_id=b.center_id
-					and a.reporting_date=b.reporting_date) AS `tdo`,
+             where a.center_id=b.center_id
+                    and a.reporting_date=b.reporting_date) tdo,
         `a`.`id` AS `id`,
         `a`.`center_id` AS `center_id`,
         `a`.`reporting_date` AS `reporting_date`,
@@ -41,7 +41,7 @@ CREATE or replace VIEW `submission_data_scoreboard` AS
                         cc.id=bb.region_id and
                         aa.region_id=coalesce(cc.parent_id,cc.id) ) b
               on a.reporting_date between b.start_weekend_date and b.end_weekend_date
-				 and a.center_id=b.center_id
+                 and a.center_id=b.center_id
     WHERE
         (`a`.`stored_type` = 'scoreboard_week');
 
@@ -56,8 +56,8 @@ CREATE or replace VIEW `submission_data_promises` AS
         a.data->>'$.games.lf.actual' AS `lf`,
         (((((JSON_EXTRACT(`a`.`data`, '$.games.cap.points') + JSON_EXTRACT(`a`.`data`, '$.games.cpc.points')) + JSON_EXTRACT(`a`.`data`, '$.games.t1x.points')) + JSON_EXTRACT(`a`.`data`, '$.games.t2x.points')) + JSON_EXTRACT(`a`.`data`, '$.games.gitw.points')) + JSON_EXTRACT(`a`.`data`, '$.games.lf.points')) AS `points`,
         (select round(100*sum(tdo)/IF(count(*)=0,1,count(*))) from submission_data_team_members b
-		     where a.center_id=b.center_id
-					and a.reporting_date=b.reporting_date) tdo,
+             where a.center_id=b.center_id
+                    and a.reporting_date=b.reporting_date) tdo,
         `a`.`id` AS `id`,
         `a`.`center_id` AS `center_id`,
         `a`.`reporting_date` AS `reporting_date`,
@@ -77,11 +77,11 @@ CREATE or replace VIEW `submission_data_promises` AS
                         cc.id=bb.region_id and
                         aa.region_id=coalesce(cc.parent_id,cc.id) ) b
               on a.reporting_date between b.start_weekend_date and b.end_weekend_date
-				 and a.center_id=b.center_id
+                 and a.center_id=b.center_id
     WHERE
         (`a`.`stored_type` = 'scoreboard_week');
 
-		CREATE or replace VIEW `submission_data_promises` AS
+        CREATE or replace VIEW `submission_data_promises` AS
     SELECT
         'promise' AS `type`,
         a.data->>'$.games.cap.promise' AS `cap`,
@@ -110,7 +110,7 @@ CREATE or replace VIEW `submission_data_promises` AS
                         cc.id=bb.region_id and
                         aa.region_id=coalesce(cc.parent_id,cc.id) ) b
               on a.reporting_date between b.start_weekend_date and b.end_weekend_date
-				 and a.center_id=b.center_id
+                 and a.center_id=b.center_id
     WHERE
         (`a`.`stored_type` = 'scoreboard_week')
         and a.data->>'$.games.cap.promise' is not null;
@@ -118,48 +118,36 @@ CREATE or replace VIEW `submission_data_promises` AS
 CREATE OR REPLACE
 VIEW `submission_data_applications` AS
     SELECT
-		`submission_data`.id,
+        `submission_data`.id,
         `submission_data`.center_id,
-		`submission_data`.reporting_date,
+        `submission_data`.reporting_date,
         `submission_data`.`stored_id` AS `stored_id`,
         `submission_data`.`data`->>'$.firstName' AS `first_name`,
         `submission_data`.`data`->> '$.lastName' AS `last_name`,
-        case when
-	 `submission_data`.`data`->> '$.email' = 'null' then NULL
-          else  `submission_data`.`data`->> '$.email' end
-         AS `email`,
+        case when `submission_data`.`data`->> '$.email' = 'null' then NULL
+             else `submission_data`.`data`->> '$.email' end AS `email`,
         `submission_data`.`data`->> '$.regDate' AS `regDate`,
-        case when
-        `submission_data`.`data`->> '$.isReviewer'='true' then 1
-        else 0
-        end
-        AS `isReviewer`,
+        case when `submission_data`.`data`->> '$.isReviewer'='true' then 1
+             else 0 end AS `isReviewer`,
         `submission_data`.`data`->> '$.phone' AS `phone`,
         case when `submission_data`.`data`->> '$.appOutDate' = 'null' then NULL
-            else `submission_data`.`data`->> '$.appOutDate' end
-        AS `appOutDate`,
+             else `submission_data`.`data`->> '$.appOutDate' end AS `appOutDate`,
         case when `submission_data`.`data`->> '$.appInDate' ='null' then NULL
-          else `submission_data`.`data`->> '$.appInDate' end AS `appinDate`,
+             else `submission_data`.`data`->> '$.appInDate' end AS `appinDate`,
         case when `submission_data`.`data`->> '$.apprDate' = 'null' then NULL
-              else `submission_data`.`data`->> '$.apprDate' end  AS `apprDate`,
+             else `submission_data`.`data`->> '$.apprDate' end  AS `apprDate`,
         case when `submission_data`.`data`->> '$.wdDate' = 'null' then NULL
-            else  `submission_data`.`data`->> '$.wdDate' end AS `wdDate`,
+             else  `submission_data`.`data`->> '$.wdDate' end AS `wdDate`,
         `submission_data`.`data`->> '$.teamYear' AS `team_year`,
-		`submission_data`.`data`->> '$.incomingQuarter' AS `incomingQuarter`,
+        `submission_data`.`data`->> '$.incomingQuarter' AS `incomingQuarter`,
         `submission_data`.`data`->> '$.travel' AS `travel`,
         `submission_data`.`data`->> '$.room' AS `room`,
-	case when `submission_data`.`data`->> '$.comment'='null' then NULL
-          else `submission_data`.`data`->> '$.comment' end AS `comment`,
-        case
-			 when `submission_data`.`data`->>
-                        '$.withdrawCode' ='null' then null
-             else `submission_data`.`data`->>
-                        '$.withdrawCode'
-		end
-             AS `withdrawCode`,
-        `submission_data`.`data`->>
-                        '$.committedTeamMember' AS `committeddteamMember`,
-		`tmlp_registrations`.person_id
+        case when `submission_data`.`data`->> '$.comment'='null' then NULL
+            else `submission_data`.`data`->> '$.comment' end AS `comment`,
+        case when `submission_data`.`data`->> '$.withdrawCode' ='null' then null
+             else `submission_data`.`data`->> '$.withdrawCode' end AS `withdrawCode`,
+        `submission_data`.`data`->> '$.committedTeamMember' AS `committeddteamMember`,
+        `tmlp_registrations`.person_id
     FROM
         `submission_data` left outer join `tmlp_registrations`
               on `submission_data`.stored_id=`tmlp_registrations`.id
@@ -178,42 +166,38 @@ VIEW `submission_data_team_members` AS
         `submission_data`.`data`->> '$.firstName' AS `first_name`,
         `submission_data`.`data`->> '$.lastName' AS `last_name`,
         case when `submission_data`.`data`->> '$.email'='null' then null
-                     else `submission_data`.`data`->> '$.email' end  AS `email`,
+             else `submission_data`.`data`->> '$.email' end  AS `email`,
         case when `submission_data`.`data`->> '$.phone'='null' then null
-                     else `submission_data`.`data`->> '$.phone' end  AS `phone`,
+             else `submission_data`.`data`->> '$.phone' end  AS `phone`,
         `submission_data`.`data`->> '$.center' AS `center`,
         `submission_data`.`data`->> '$.teamYear' AS `team_year`,
         `submission_data`.`data`->> '$.incomingQuarter' AS `incoming_quarter_id`,
         case when `submission_data`.`data`->> '$.isReviewer'='true' then 1
-					else 0 end AS `is_reviewer`,
+             else 0 end AS `is_reviewer`,
         case when `submission_data`.`data`->> '$.atWeekend'='true' then 1
-					else 0 end AS `atWeekend`,
+             else 0 end AS `atWeekend`,
         case when `submission_data`.`data`->> '$.xferIn'='true' then 1
-					else 0 end AS `xfer_in`,
+             else 0 end AS `xfer_in`,
         case when `submission_data`.`data`->> '$.xferOut'='true' then 1
-					else 0 end AS `xfer_out`,
+             else 0 end AS `xfer_out`,
         case when `submission_data`.`data`->> '$.ctw'='true' then 1
-					else 0 end AS `ctw`,
+             else 0 end AS `ctw`,
         case when `submission_data`.`data`->> '$.rereg'='true' then 1
-					else 0 end AS `rereg`,
+             else 0 end AS `rereg`,
         `submission_data`.`data`->> '$.except' AS `except`,
         case when `submission_data`.`data`->> '$.travel'='true' then 1
-					else 0 end AS `travel`,
+             else 0 end AS `travel`,
         case when `submission_data`.`data`->> '$.room'='true' then 1
-					else 0 end AS `room`,
+             else 0 end AS `room`,
         case when `submission_data`.`data`->> '$.gitw'='true' then 1
-					else 0 end AS `gitw`,
+             else 0 end AS `gitw`,
         case when `submission_data`.`data`->> '$.tdo'='true' then 1
-					else 0 end AS `tdo`,
-        case when `submission_data`.`data`->>
-                        '$.withdrawCode'='null' then null
-                        else `submission_data`.`data`->>
-                        '$.withdrawCode' end AS `withdrawCode`,
-        case when `submission_data`.`data`->>
-                        '$.comment' = 'null' then NULL
-              else `submission_data`.`data`->> '$.comment' end AS `comment`,
-		`submission_data`.`data`->>
-                        '$.accountabilities' AS `accountabilities`,
+             else 0 end AS `tdo`,
+        case when `submission_data`.`data`->> '$.withdrawCode'='null' then null
+             else `submission_data`.`data`->> '$.withdrawCode' end AS `withdrawCode`,
+        case when `submission_data`.`data`->> '$.comment' = 'null' then NULL
+             else `submission_data`.`data`->> '$.comment' end AS `comment`,
+        `submission_data`.`data`->> '$.accountabilities' AS `accountabilities`,
         `team_members`.person_id
     FROM
         `submission_data` left outer join `team_members`
@@ -233,7 +217,7 @@ CREATE OR REPLACE VIEW submission_data_accountabilities AS
         submission_data_team_members a
             LEFT OUTER JOIN
                team_members c ON a.team_member_id = c.id
-			JOIN accountabilities b
+            JOIN accountabilities b
     WHERE
         FIND_IN_SET(b.id,
                 REPLACE(REPLACE(a.accountabilities, '[', ''),
@@ -259,9 +243,12 @@ VIEW `submission_data_courses` AS
         `submission_data`.`data`->> '$.currentTer' AS `current_ter`,
         `submission_data`.`data`->> '$.currentStandardStarts' AS `current_standard_starts`,
         `submission_data`.`data`->> '$.currentXfer' AS `current_xfer`,
-        `submission_data`.`data`->> '$.completedStandardStarts' AS `completed_standard_starts`,
-        `submission_data`.`data`->> '$.potentials' AS `potentials`,
-        `submission_data`.`data`->> '$.registrations' AS `registrations`,
+        case when `submission_data`.`data`->> '$.completedStandardStarts'='null' then NULL
+             else `submission_data`.`data`->> '$.completedStandardStarts' end  AS `completed_standard_starts`,
+        case when `submission_data`.`data`->> '$.potentials'='null' then NULL
+             else `submission_data`.`data`->> '$.potentials' end  AS `potentials`,
+        case when `submission_data`.`data`->> '$.registrations'='null' then NULL
+             else `submission_data`.`data`->> '$.registrations' end  AS `registrations`,
         case when `submission_data`.`data`->> '$.guestsPromised'='null' then NULL
              else `submission_data`.`data`->> '$.guestsPromised' end  AS `guests_promised`,
         case when `submission_data`.`data`->> '$.guestsInvited' ='null' then NULL
