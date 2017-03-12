@@ -1,6 +1,6 @@
 {
   "presets": [
-    "es2015",
+    ["es2015", {"modules": false}],
     "react"
   ],
   "plugins": ["transform-decorators-legacy", "transform-class-properties", "lodash", "transform-object-rest-spread"]

@@ -9,7 +9,7 @@ import { Alert, ButtonStateFlip } from '../../reusable/ui_basic'
 import { SubmissionBase, React } from '../base_components'
 
 import { getValidationMessages, displayState, submitReport, submitState, setSubmitData } from './actions'
-import { loadPairs, DISPLAY_STATES } from './data'
+import { DISPLAY_STATES } from './data'
 import { REVIEW_SUBMIT_FORM_KEY } from './reducers'
 
 const CLASSES = {error: 'bg-danger', warning: 'bg-warning'}
@@ -31,13 +31,14 @@ export default class Review extends SubmissionBase {
         this.props.dispatch(setSubmitData({ comment: '' }))
         this.props.dispatch(displayState(DISPLAY_STATES.main))
         this.props.dispatch(submitState('new'))
+        this.loadPairs = require('./loadPairs').default
     }
 
     checkLoading() {
         const { centerId, reportingDate } = this.props.params
         let alreadyLoaded = true
 
-        loadPairs.forEach((pair) => {
+        this.loadPairs.forEach((pair) => {
             const handler = pair[0]
             const loadState = pair[1](this.props)
             if (!loadState.loaded && loadState.available) {
