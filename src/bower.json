@@ -29,10 +29,8 @@
     "jquery": "~2.1.4",
     "respond": "~1.4.2",
     "font-awesome": "~4.4.0",
-    "sb-admin-2": "*",
     "datatables.net": "~1.10.10",
     "datatables.net-bs": "~1.10.10",
-    "world-flags-sprite": "*",
     "jquery-stickytabs": "git://github.com/pdarg/jquery-stickytabs.git#~1.2.1",
     "highcharts": "^4.2.3",
     "bootstrap-sass": "^3.3.7"
