@@ -17,8 +17,6 @@ import { objectAssign } from './ponyfill'
 
 
 export class Typeahead extends PureComponent {
-    static defaultProps = {
-    }
     render() {
         return <RTypeahead {...this.props} />
     }

@@ -1,9 +1,9 @@
-import { Scoreboard, ScoreboardGame, GAME_KEYS } from './scoreboard'
-
 import yaml from 'js-yaml'
 import fs from 'fs'
 
-const input = yaml.safeLoad(fs.readFileSync(`${__dirname}/../../../../tests/inputs/scoreboard.yml`, 'utf8'))
+import { Scoreboard, ScoreboardGame, GAME_KEYS } from '../../reusable/scoreboard'
+
+const input = yaml.safeLoad(fs.readFileSync(`${__dirname}/../../../../../tests/inputs/scoreboard.yml`, 'utf8'))
 
 describe('ScoreboardGame', () => {
     describe('Points', () => {
