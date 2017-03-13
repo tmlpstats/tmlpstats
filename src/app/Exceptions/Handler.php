@@ -5,10 +5,12 @@ use App;
 use Auth;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Session\TokenMismatchException;
+use Illuminate\Validation\ValidationException;
 use Log;
 use Mail;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -25,6 +27,8 @@ class Handler extends ExceptionHandler
         HttpException::class,
         ModelNotFoundException::class,
         TokenMismatchException::class,
+        AuthorizationException::class,
+        ValidationException::class,
     ];
 
     /**

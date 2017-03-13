@@ -1,14 +1,13 @@
 <?php namespace TmlpStats\Handlers\Events;
 
+use Carbon\Carbon;
+use Illuminate\Auth\Events as AuthEvents;
 use Log;
 use Request;
-
 use TmlpStats\User;
-use Carbon\Carbon;
 
 class AuthLoginEventHandler
 {
-
     /**
      * Create the event handler.
      */
@@ -22,8 +21,9 @@ class AuthLoginEventHandler
      *
      * @param  User $user
      */
-    public function handle(User $user)
+    public function handle(AuthEvents\login $event)
     {
+        $user = $event->user;
         $user->lastLoginAt = Carbon::now();
         $user->save();
 

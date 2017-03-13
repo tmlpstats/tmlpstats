@@ -16,7 +16,8 @@ ENV DB_DATABASE=tmlpstats_main \
     ADMIN_EMAIL=your@email.com \
     MAIL_PRETEND=true \
     APP_KEY=4a2d4738b5d10e8b6b452d3eb60372d5 \
-    APP_ENV=local
+    APP_ENV=local \
+    APP_DEBUG=true
 
 COPY docker/localdev/000-default.conf /etc/apache2/sites-available
 COPY docker/localdev/start.sh /usr/bin/

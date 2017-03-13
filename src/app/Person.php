@@ -138,7 +138,7 @@ class Person extends Model
             ->where(function ($query) use ($when) {
                 $query->whereNull('ends_at')
                       ->orWhere('ends_at', '>', $when);
-            })->lists('accountability_id');
+            })->pluck('accountability_id');
 
         return $items;
     }
@@ -207,14 +207,14 @@ class Person extends Model
         }
 
         // Remove accountability from any existing holders
-        DB::update("
+        DB::update('
             UPDATE  accountability_person ap
             INNER JOIN people p ON p.id = ap.person_id
             SET ap.ends_at = ?
             WHERE
                 ap.accountability_id = ?
                 AND p.center_id = ?
-                AND (ap.ends_at IS NULL OR ap.ends_at > ?)",
+                AND (ap.ends_at IS NULL OR ap.ends_at > ?)',
             [$starts->copy()->subSecond(), $accountability->id, $this->center->id, $starts]
         );
 

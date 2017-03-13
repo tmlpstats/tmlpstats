@@ -355,6 +355,10 @@ class CourseTest extends FunctionalTestAbstract
             ];
         }
 
+        foreach ($expectedResponse as &$c) {
+            $c->meta['fromReport'] = true;
+        }
+
         $expectedResponse = json_decode(json_encode($expectedResponse), true);
 
         usort($expectedResponse, function ($a, $b) {

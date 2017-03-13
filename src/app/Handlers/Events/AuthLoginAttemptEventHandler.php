@@ -1,14 +1,11 @@
 <?php namespace TmlpStats\Handlers\Events;
 
+use Illuminate\Auth\Events as AuthEvents;
 use Log;
 use Request;
 
-use TmlpStats\User;
-use Carbon\Carbon;
-
 class AuthLoginAttemptEventHandler
 {
-
     /**
      * Create the event handler.
      */
@@ -22,8 +19,8 @@ class AuthLoginAttemptEventHandler
      *
      * @param  array $input
      */
-    public function handle(array $input)
+    public function handle(AuthEvents\Attempting $input)
     {
-        Log::info("User attempted login for {$input['email']} from " . Request::ip());
+        Log::info("User attempted login for {$input->credentials['email']} from " . Request::ip());
     }
 }
