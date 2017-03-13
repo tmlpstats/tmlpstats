@@ -45,7 +45,7 @@ $reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getRep
 
     <script src="{{ elixir('js/tmlp-polyfill.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/vendor.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('js/commons.js') }}" type="text/javascript"></script>
+    <script src="{{ elixir('js/commons.js') }}" type="text/javascript"></script>
     <script src="{{ elixir('js/main.js') }}" type="text/javascript"></script>
 
     <script type="text/javascript">
