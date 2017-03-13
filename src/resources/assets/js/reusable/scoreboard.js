@@ -5,7 +5,7 @@ export const GAME_KEYS = ['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf']
 const MAX_POINTS = 28
 const MIN_POINTS = 0
 
-var ratingsByPoints = initRatingsByPoints()
+const ratingsByPoints = initRatingsByPoints()
 
 const pointsByPercent = [
     [100, 4],
