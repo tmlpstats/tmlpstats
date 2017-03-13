@@ -79,7 +79,8 @@ export class LocalReport extends Component {
 
     // Dispatches an action on delay to prioritize/load a given report tab.
     showReport(reportId) {
-        if (!reportId) {
+        if (!this.fullReport) {
+            setTimeout(() => this.showReport(reportId), 200)
             return
         }
         const report = this.fullReport[reportId]
