@@ -61,15 +61,21 @@ class ValidationData extends AuthenticatedApiBase
     protected function validateSubmissionData(Models\StatsReport $report)
     {
         $data = [];
+        $pastWeeks = [];
         foreach ($this->dataTypesConf as $group => $conf) {
             $data[$conf['typeName']] = App::make($conf['apiClass'])->getWeekSoFar(
                 $report->center,
                 $report->reportingDate
             );
+            $pastWeeks[$conf['typeName']] = App::make($conf['apiClass'])->getWeekSoFar(
+                $report->center,
+                $report->reportingDate->copy()->subWeek(),
+                false
+            );
         }
 
         $results = [];
-        $validationResults = $this->validateAll($report, $data);
+        $validationResults = $this->validateAll($report, $data, $pastWeeks);
         if ($validationResults['messages']) {
             $results = $validationResults['messages'];
         }

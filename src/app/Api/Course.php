@@ -37,6 +37,7 @@ class Course extends ApiBase
             $found = $submissionData->allForType($center, $reportingDate, Domain\Course::class);
             foreach ($found as $domain) {
                 $allCourses[$domain->id] = $domain;
+                $domain->meta = $this->getCourseMeta($domain, $center, $reportingDate);
                 $domain->meta['localChanges'] = true;
             }
         }
@@ -50,12 +51,13 @@ class Course extends ApiBase
                 }
 
                 $domain = Domain\Course::fromModel($cd, $cd->course);
+                $domain->meta = $this->getCourseMeta($domain, $center, $reportingDate);
                 $domain->meta['fromReport'] = true;
                 $allCourses[$domain->id] = $domain;
             }
         }
 
-        return array_values($allCourses);
+        return $allCourses;
     }
 
     /**
@@ -71,6 +73,8 @@ class Course extends ApiBase
         $submissionData = App::make(SubmissionData::class);
         $courseId = $submissionData->numericStorageId($data, 'id');
 
+        $pastWeeks = [];
+
         if ($courseId !== null && $courseId > 0) {
             $courseModel = Models\Course::findOrFail($courseId);
             $course = Domain\Course::fromModel(null, $courseModel);
@@ -85,11 +89,13 @@ class Course extends ApiBase
                 'currentStandardStarts',
                 'currentXfer',
             ]);
+
+            $pastWeeks = $this->getPastWeeksData($center, $reportingDate, $courseModel);
         } else {
             $course = Domain\Course::fromArray($data);
         }
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
-        $validationResults = $this->validateObject($report, $course, $courseId);
+        $validationResults = $this->validateObject($report, $course, $courseId, $pastWeeks);
 
         if (!isset($data['_idGenerated']) || $validationResults['valid']) {
             $submissionData->store($center, $reportingDate, $course);
@@ -110,35 +116,26 @@ class Course extends ApiBase
         ];
     }
 
-    /**
-     * TODO implement me. This is copypasta from application.
-     * @param  Models\Course  $course
-     * @param  Carbon         $reportingDate [description]
-     * @param  Domain\Course  $data          [description]
-     */
-    public function commitStashedCourse(Models\Course $course, Carbon $reportingDate, array $data)
+    public function getWeekSoFar(Models\Center $center, Carbon $reportingDate, $includeInProgress = true)
     {
-        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
-
-        //TODO get from submissionData
-        //$courseData = $this->getWeekData($course, $reportingDate);
-
-        $courseDomain = Domain\Course::fromModel($courseData, $course);
-        $courseDomain->courseId = $course->id;
-        $courseDomain->clearSetValues();
-
-        // Now insert our newly changed data, validating and coercing too
-        $courseDomain->updateFromArray($data);
-        $courseDomain->fillModel($courseData, $course);
-
-        $courseData->save();
-
-        return $courseData->load('course', 'course.center', 'statsReport');
+        return $this->allForCenter($center, $reportingDate, $includeInProgress);
     }
 
-    public function getWeekSoFar(Models\Center $center, Carbon $reportingDate)
+    protected function getPastWeeksData(Models\Center $center, Carbon $reportingDate, Models\Course $course)
     {
-        return $this->allForCenter($center, $reportingDate, true);
+        $lastReport = $this->relevantReport($center, $reportingDate);
+        if (!$lastReport) {
+            return [];
+        }
+
+        $lastWeekData = Models\CourseData::byStatsReport($lastReport)->byCourse($course)->first();
+        if (!$lastWeekData) {
+            return [];
+        }
+
+        return [
+            Domain\Course::fromModel($lastWeekData, $course),
+        ];
     }
 
     protected function getCourseMeta(Domain\Course $course, Models\Center $center, Carbon $reportingDate)

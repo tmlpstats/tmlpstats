@@ -41,7 +41,7 @@ class TeamApplication extends ParserDomain
             'type' => 'bool',
         ],
         'id' => [
-            'owner' => 'applicationData',
+            'owner' => 'application',
             'type' => 'int',
         ],
         'appOutDate' => [

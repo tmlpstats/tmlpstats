@@ -84,15 +84,19 @@ class TeamMember extends AuthenticatedApiBase
         $submissionData = App::make(SubmissionData::class);
         $teamMemberId = $submissionData->numericStorageId($data, 'id');
 
+        $pastWeeks = [];
+
         if ($teamMemberId !== null && $teamMemberId > 0) {
             $tm = Models\TeamMember::findOrFail($teamMemberId);
             $domain = Domain\TeamMember::fromModel(null, $tm);
             $domain->updateFromArray($data, ['incomingQuarter']);
+
+            $pastWeeks = $this->getPastWeeksData($center, $reportingDate, $tm);
         } else {
             $domain = Domain\TeamMember::fromArray($data, ['incomingQuarter', 'teamYear']);
         }
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
-        $validationResults = $this->validateObject($report, $domain, $teamMemberId);
+        $validationResults = $this->validateObject($report, $domain, $teamMemberId, $pastWeeks);
 
         if (!isset($data['_idGenerated']) || $validationResults['valid']) {
             $submissionData->store($center, $reportingDate, $domain);
@@ -163,9 +167,26 @@ class TeamMember extends AuthenticatedApiBase
         return $teamMemberData->load('teamMember.person', 'teamMember.incomingQuarter', 'statsReport', 'withdrawCode');
     }
 
-    public function getWeekSoFar(Models\Center $center, Carbon $reportingDate)
+    public function getWeekSoFar(Models\Center $center, Carbon $reportingDate, $includeInProgress = true)
     {
-        return $this->allForCenter($center, $reportingDate, true);
+        return $this->allForCenter($center, $reportingDate, $includeInProgress);
+    }
+
+    protected function getPastWeeksData(Models\Center $center, Carbon $reportingDate, Models\TeamMember $member)
+    {
+        $lastReport = $this->relevantReport($center, $reportingDate);
+        if (!$lastReport) {
+            return [];
+        }
+
+        $lastWeekData = Models\TeamMemberData::byStatsReport($lastReport)->byTeamMember($member)->first();
+        if (!$lastWeekData) {
+            return [];
+        }
+
+        return [
+            Domain\TeamMember::fromModel($lastWeekData, $member),
+        ];
     }
 
     /**

@@ -131,11 +131,11 @@ class Scoreboard extends AuthenticatedApiBase
         ]);
     }
 
-    public function getWeekSoFar(Models\Center $center, Carbon $reportingDate)
+    public function getWeekSoFar(Models\Center $center, Carbon $reportingDate, $includeInProgress = true)
     {
         $results = [];
 
-        $allData = $this->allForCenter($center, $reportingDate, true);
+        $allData = $this->allForCenter($center, $reportingDate, $includeInProgress);
         foreach ($allData as $dataArr) {
             $meta = array_get($dataArr, 'meta', []);
             $dataObject = Domain\Scoreboard::fromArray($dataArr);

@@ -153,7 +153,8 @@ class ApiCourseValidator extends ApiObjectsValidatorAbstract
             ]);
             $isValid = false;
         }
-        if ($startDate && $startDate->dayOfWeek !== Carbon::SATURDAY) {
+
+        if (!$this->pastWeeks && $startDate && $startDate->dayOfWeek !== Carbon::SATURDAY) {
             $this->addMessage('warning', [
                 'id' => 'COURSE_START_DATE_NOT_SATURDAY',
                 'ref' => $data->getReference(['field' => 'startDate']),
@@ -221,7 +222,11 @@ class ApiCourseValidator extends ApiObjectsValidatorAbstract
                 $isValid = false;
             }
 
-            if ($data->currentTer < $data->quarterStartTer) {
+            $lastWeek = count($this->pastWeeks) ? $this->pastWeeks[0] : null;
+
+            if ($data->currentTer < $data->quarterStartTer
+                && (!$lastWeek || $lastWeek->currentTer >= $lastWeek->quarterStartTer)
+            ) {
                 $this->addMessage('warning', [
                     'id' => 'COURSE_CURRENT_TER_LESS_THAN_QSTART_TER',
                     'ref' => $data->getReference(['field' => 'currentTer']),
@@ -231,7 +236,9 @@ class ApiCourseValidator extends ApiObjectsValidatorAbstract
                     ],
                 ]);
             }
-            if ($data->currentXfer < $data->quarterStartXfer) {
+            if ($data->currentXfer < $data->quarterStartXfer
+                && (!$lastWeek || $lastWeek->currentTer >= $lastWeek->quarterStartXfer)
+            ) {
                 $this->addMessage('warning', [
                     'id' => 'COURSE_CURRENT_XFER_LESS_THAN_QSTART_XFER',
                     'ref' => $data->getReference(['field' => 'currentXfer']),

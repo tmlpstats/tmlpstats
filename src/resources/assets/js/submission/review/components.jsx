@@ -142,7 +142,7 @@ export class ReviewCategory extends React.PureComponent {
         let refObject
 
         switch (config.className) {
-        case 'Application':
+        case 'TeamApplication':
             refObject = pageData.applications.collection[id]
             if (refObject) {
                 displayValue = `${refObject.firstName} ${refObject.lastName}`
