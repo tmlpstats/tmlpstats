@@ -95,6 +95,9 @@ window.Tmlp = (function(window, $) {
     ////////////////////////////
     ///////// FEEDBACK SYSTEM
     function enableFeedback(config) {
+        window._beforeSend = function (request) {
+            request.setRequestHeader("X-CSRF-TOKEN", config.session.csrfToken);
+        }
         var feedbackFormDirty = false;
 
         function resetFeedbackForm() {
@@ -147,9 +150,7 @@ window.Tmlp = (function(window, $) {
                 type: "POST",
                 url: config.feedbackUrl,
                 data: $.param(data),
-                beforeSend: function (request) {
-                    request.setRequestHeader("X-CSRF-TOKEN", config.session.csrfToken);
-                },
+                beforeSend: window._beforeSend,
                 success: function(response) {
                     var $resultDiv = $("#feedbackSubmitResult");
                     $resultDiv.find("span.message").html(response.message);
@@ -221,3 +222,46 @@ window.Tmlp = (function(window, $) {
     };
     return Tmlp;
 })(window, $);
+
+
+/**
+ * NAVBAR AND DATE SELECT HELPERS
+ */
+// Enable hover dropdowns in nav menu
+$(function () {
+    $('.dropdown').hover(
+        function () {
+            $('.dropdown-menu', this).stop(true, true).fadeIn("fast");
+            $(this).toggleClass('open');
+            $('b', this).toggleClass("caret caret-up");
+        },
+        function () {
+            $('.dropdown-menu', this).stop(true, true).fadeOut("fast");
+            $(this).toggleClass('open');
+            $('b', this).toggleClass("caret caret-up");
+        }
+    )
+
+    const reportSelect = $('#reportSelect')
+    if (reportSelect.hasClass('ajax-report-select')) {
+        reportSelect.on('click', 'li.menu-option', function (e) {
+            const li = $(this)
+            var url = li.data('url')
+            var data = {
+                date: li.data('value')
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                beforeSend: window._beforeSend,
+                data: $.param(data),
+                success: function (response) {
+                    if (response.success) {
+                        location.reload()
+                    }
+                }
+            })
+        })
+    }
+});

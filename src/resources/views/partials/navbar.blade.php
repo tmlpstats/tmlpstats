@@ -112,27 +112,31 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                                     Report <span class="caret"></span>
                                 @endif
                             </a>
-                            <ul id="reportSelect" class="dropdown-menu" role="menu">
-                                @foreach ($reports as $report)
-                                    @if ($dateSelectAction)
+                            @if ($dateSelectAction)
+                                <ul id="reportSelect" class="dropdown-menu" role="menu">
+                                    @foreach ($reports as $report)
                                         <li class="menu-option">
                                             <a href="{{ $context->dateSelectAction($report->reportingDate) }}">{{ $report->reportingDate->format('M j, Y')}}</a>
                                         </li>
-                                    @else
-                                    <li class="menu-option" data-url="{{ url("/reports/dates/setActive") }}"
-                                        data-value="{{ $report->reportingDate->toDateString() }}">
-                                        <a href="#">
-                                            @if ($reportingDate && $report->reportingDate->eq($reportingDate))
-                                                <span class="glyphicon glyphicon-ok"></span>
-                                            @else
-                                                <span class="glyphicon">&nbsp;</span>
-                                            @endif
-                                            {{ $report->reportingDate->format('M j, Y')}}
-                                        </a>
-                                    </li>
-                                    @endif
-                                @endforeach
-                            </ul>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <ul id="reportSelect" class="dropdown-menu ajax-report-select" role="menu">
+                                    @foreach ($reports as $report)
+                                        <li class="menu-option" data-url="{{ url("/reports/dates/setActive") }}"
+                                            data-value="{{ $report->reportingDate->toDateString() }}">
+                                            <a href="#">
+                                                @if ($reportingDate && $report->reportingDate->eq($reportingDate))
+                                                    <span class="glyphicon glyphicon-ok"></span>
+                                                @else
+                                                    <span class="glyphicon">&nbsp;</span>
+                                                @endif
+                                                {{ $report->reportingDate->format('M j, Y')}}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
                         </li>
 
                         {{-- Region report button shows when you're not in a regional report --}}
@@ -207,43 +211,3 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
         </div>
     </div>
 </nav>
-
-<script type="text/javascript">
-    // Enable hover dropdowns in nav menu
-    $(function () {
-        $(".dropdown").hover(
-            function () {
-                $('.dropdown-menu', this).stop(true, true).fadeIn("fast");
-                $(this).toggleClass('open');
-                $('b', this).toggleClass("caret caret-up");
-            },
-            function () {
-                $('.dropdown-menu', this).stop(true, true).fadeOut("fast");
-                $(this).toggleClass('open');
-                $('b', this).toggleClass("caret caret-up");
-            }
-        );
-
-        @if (!$dateSelectAction)
-        $("#reportSelect").on("click", "li.menu-option", function (e) {
-            var url = $(this).attr('data-url');
-            var data = {};
-            data.date = $(this).attr('data-value');
-
-            $.ajax({
-                type: "POST",
-                url: url,
-                beforeSend: function (request) {
-                    request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
-                },
-                data: $.param(data),
-                success: function (response) {
-                    if (response.success) {
-                        location.reload();
-                    }
-                }
-            });
-        });
-        @endif
-    });
-</script>
