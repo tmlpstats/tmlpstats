@@ -2,10 +2,10 @@
 if (!isset($skip_navbar)) {
     $skip_navbar = false;
 }
-
-$center = App::make(TmlpStats\Http\Controllers\Controller::class)->getCenter(Request::instance());
-$region = App::make(TmlpStats\Http\Controllers\Controller::class)->getRegion(Request::instance());
-$reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getReportingDate();
+$baseController = App::make(TmlpStats\Http\Controllers\Controller::class);
+$center = $baseController->getCenter(Request::instance());
+$region = $baseController->getRegion(Request::instance());
+$reportingDate = $baseController->getReportingDate();
 
 ?>
 <!DOCTYPE html>
@@ -18,8 +18,8 @@ $reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getRep
 
     <script type="text/javascript" src="{{ asset('vendor/js/jquery.min.js') }}"></script>
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    {{-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries --}}
+    {{-- WARNING: Respond.js doesn't work if you view the page via file:// --}}
     <!--[if lt IE 9]>
     <script src="{{ asset('vendor/js/html5shiv/dist/html5shiv.min.js') }}"></script>
     <script src="{{ asset('vendor/js/response/dist/respond.min.js') }}"></script>
@@ -48,18 +48,18 @@ $reportingDate = App::make(TmlpStats\Http\Controllers\Controller::class)->getRep
     <script src="{{ elixir('js/commons.js') }}" type="text/javascript"></script>
     <script src="{{ elixir('js/main.js') }}" type="text/javascript"></script>
 
-    <script type="text/javascript">
-        $(document).ready(function() {
-            @if (Auth::check())
+    @if (Auth::check())
+        <script type="text/javascript">
+            $(document).ready(function() {
                 Tmlp.enableFeedback(settings);
                 @if (!Session::has('timezone') && !Session::has('locale'))
                     Tmlp.setTimezone({
                         isHome: @json(Request::is('/home'))
                     });
                 @endif
-            @endif
-        });
-    </script>
+            });
+        </script>
+    @endif
 
     @yield('scripts')
 
