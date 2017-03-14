@@ -1,4 +1,4 @@
-import { MessageManager } from './reducers'
+import { MessageManager } from '../../reusable/reducers'
 
 describe('MessageManager', () => {
     let mgr = new MessageManager('foo')

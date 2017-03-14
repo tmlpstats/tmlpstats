@@ -57,6 +57,11 @@ export class ModeSelectButtons extends React.Component {
  * This should
  */
 export class LoadStateFlip extends React.PureComponent {
+    static propTypes = {
+        loadState: PropTypes.shape({
+            state: PropTypes.string.isRequired
+        }).isRequired
+    }
     render() {
         var loadState = this.props.loadState
         if (loadState.state == 'loading') {

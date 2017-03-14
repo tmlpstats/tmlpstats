@@ -27,6 +27,8 @@ export function loadingMultiState(actionType) {
 }
 
 export class LoadingMultiState {
+    static states = {NEW, LOADING, LOADED, FAILED}
+
     constructor(actionType) {
         this.actionType = actionType
     }

@@ -1,4 +1,4 @@
-import * as selectors from './selectors'
+import * as selectors from '../../submission/core/selectors'
 
 describe('selectors', () => {
     describe('makeAccountabilitiesSelector', () => {

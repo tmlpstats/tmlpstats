@@ -19,10 +19,11 @@
     "eslint": "^3.17",
     "eslint-plugin-react": "^6.0.0",
     "gulp": "^3.9.1",
-    "jest": "^18.1.0",
+    "jest": "^19",
     "laravel-elixir": "^6.0.0-15",
     "laravel-elixir-browsersync-official": "^1.0.0",
-    "laravel-elixir-webpack-official": "^1.0.10"
+    "laravel-elixir-webpack-official": "^1.0.10",
+    "react-test-renderer": "^15.4.2"
   },
   "dependencies": {
     "array-find": "^1.0.0",
