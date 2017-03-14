@@ -308,10 +308,12 @@ class ApplicationTest extends FunctionalTestAbstract
                 $app2->id => Domain\TeamApplication::fromModel($app2ThisWeekData),
             ];
         }
-
+        foreach ($expectedResponse as &$o) {
+            $o->meta['fromReport'] = true;
+        }
         $expectedResponse = json_decode(json_encode($expectedResponse), true);
 
-        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
+        $this->json('POST', '/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
     }
 
     public function providerAllForCenter()

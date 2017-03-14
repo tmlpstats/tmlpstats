@@ -148,6 +148,6 @@ return [
     |
     */
 
-    'secure' => $app->environment('prod'), // require secure session cookies in prod
+    'secure' => (env('APP_ENV', 'production') == 'production'), // require secure session cookies in prod
 
 ];

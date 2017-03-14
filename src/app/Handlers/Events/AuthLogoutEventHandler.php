@@ -1,13 +1,12 @@
 <?php namespace TmlpStats\Handlers\Events;
 
-use TmlpStats\User;
-
+use Illuminate\Auth\Events as AuthEvents;
 use Log;
 use Session;
+use TmlpStats\User;
 
 class AuthLogoutEventHandler
 {
-
     /**
      * Create the event handler.
      */
@@ -21,8 +20,9 @@ class AuthLogoutEventHandler
      *
      * @param  User $user
      */
-    public function handle(User $user = null)
+    public function handle(AuthEvents\Logout $event)
     {
+        $user = $event->user;
         // We can only log it if the session hasn't already expired
         if ($user) {
             Log::info("User {$user->id} logged out");

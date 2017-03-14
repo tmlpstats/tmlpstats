@@ -110,7 +110,16 @@ class ValidationDataTest extends FunctionalTestAbstract
         $expectedResponse = [
             'success' => true,
             'valid' => true,
-            'messages' => [],
+            'messages' => [
+                'TeamApplication' => [],
+                'Course' => [],
+                'Scoreboard' => [],
+                'TeamMember' => [
+                    ['level' => 'warning'],
+                    ['level' => 'warning'],
+                    ['level' => 'warning'],
+                ],
+            ],
         ];
 
         $appData = [
