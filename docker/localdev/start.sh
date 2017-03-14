@@ -15,10 +15,11 @@ EOF
 fi
 
 composer_rerun() {
-    pushd /app/src
+    pushd /app/src >/dev/null
+    rm -f bootstrap/cache/*
     composer install --no-scripts
     composer install --no-autoloader
-    popd
+    popd >/dev/null
 }
 
 
@@ -30,12 +31,13 @@ if [[ ! -f "$OPTIONS_DIR/norefresh" && -d /app/.git ]]; then
     VENDORHASHES=/app/src/vendor/.hashes
     if [[ ! -f "$VENDORHASHES" || "$(cat $VENDORHASHES)" != "$HASHES" ]]; then
         echo "Overwriting vendor folder $(du -sh vendor)"
-        if [ ! -d /app/src/vendor ]; then
+        if [[ ! -d /app/src/vendor ]]; then
             mkdir /app/src/vendor
         else
             rm -rf /app/src/vendor/*
         fi
         cp -r vendor/* /app/src/vendor
+        echo "Re-running composer build"
         composer_rerun
         echo "$HASHES" > "$VENDORHASHES"
     else
@@ -71,10 +73,10 @@ fi
 
 if [ -f $OPTIONS_DIR/watch ]; then
     apache2-foreground &
-    BROWSERSYNC_TARGET=localhost gulp watch
+    BROWSERSYNC_TARGET=localhost npm run watch
 else
     if [ ! -f $OPTIONS_DIR/nogulp ]; then
-        gulp
+        npm run dev
     fi
     apache2-foreground
 fi

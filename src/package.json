@@ -52,7 +52,9 @@
     "reselect": "^2.5.3"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "watch": "rm -f public/js/commons.js public/js/main.js; gulp watch",
+    "dev": "gulp"
   },
   "jest": {
     "moduleFileExtensions": [
