@@ -5,10 +5,6 @@
 * [Installing/Setup](#installing)
 * [Code Walkthrough](https://github.com/pdarg/tmlpstats/wiki/Walkthrough)
 
-## Thank you:
-<!-- The following is added at the request of BrowserStack for providing free use of their tools for opensource projects -->
-Thank you to BrowserStack for providing us with tools to test in every browser.
-
 ## Installing:
 This repo includes a docker-compose file and docker images setup to streamline our development process. This is a relatively new feature but the intent is 
 
@@ -64,3 +60,10 @@ access token" for your laptop. Re run ```composer install``` and paste the token
 ## Next Steps
 
  * [Code Walkthrough](https://github.com/pdarg/tmlpstats/wiki/Walkthrough)
+
+## Thank you:
+<!-- The following is added at the request of BrowserStack for providing free use of their tools for opensource projects -->
+<div>
+<img src="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" width="200" height="105" />
+Thank you to BrowserStack for providing us with tools to test in every browser.
+</div>
