@@ -13,7 +13,7 @@ use TmlpStats\Domain;
  */
 class TeamMember extends AuthenticatedApiBase
 {
-    use Traits\UsesReportingDates;
+    use Traits\UsesReportDates;
 
     private static $omitGitwTdo = ['tdo' => true, 'gitw' => true];
 

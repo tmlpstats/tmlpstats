@@ -5,7 +5,7 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Encapsulations;
 
-trait UsesReportingDates
+trait UsesReportDates
 {
     protected $_crd = null;
 

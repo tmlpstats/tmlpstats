@@ -572,11 +572,6 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 false,
             ],
 
-
-
-
-
-
             // Xfer In not null with comment
             [
                 [
