@@ -237,7 +237,7 @@ class ApiCourseValidator extends ApiObjectsValidatorAbstract
                 ]);
             }
             if ($data->currentXfer < $data->quarterStartXfer
-                && (!$lastWeek || $lastWeek->currentTer >= $lastWeek->quarterStartXfer)
+                && (!$lastWeek || $lastWeek->currentXfer >= $lastWeek->quarterStartXfer)
             ) {
                 $this->addMessage('warning', [
                     'id' => 'COURSE_CURRENT_XFER_LESS_THAN_QSTART_XFER',

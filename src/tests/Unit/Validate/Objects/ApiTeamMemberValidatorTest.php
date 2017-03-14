@@ -448,12 +448,16 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
     /**
      * @dataProvider providerValidateTransfer
      */
-    public function testValidateTransfer($data, $expectedMessages, $expectedResult)
+    public function testValidateTransfer($data, $expectedMessages, $expectedResult, $pastWeeks = [])
     {
         $data = $this->getTeamMember($data);
 
+        if ($pastWeeks) {
+            $pastWeeks = [ $this->getTeamMember($pastWeeks) ];
+        }
+
         $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $result = $validator->run($data, $pastWeeks);
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -566,6 +570,86 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                     ]),
                 ],
                 false,
+            ],
+
+
+
+
+
+
+            // Xfer In not null with comment
+            [
+                [
+                    'atWeekend' => false,
+                    'xferIn' => true,
+                    'xferOut' => null,
+                    'comment' => 'something about the transfer',
+                ],
+                [],
+                true,
+                [
+                    'atWeekend' => false,
+                    'xferIn' => true,
+                    'xferOut' => null,
+                    'comment' => 'something about the transfer',
+                ],
+            ],
+            // Xfer In not null without comment
+            [
+                [
+                    'atWeekend' => false,
+                    'xferIn' => true,
+                    'xferOut' => null,
+                    'comment' => null,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_XFER_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+                [
+                    'atWeekend' => false,
+                    'xferIn' => true,
+                    'xferOut' => null,
+                    'comment' => null,
+                ],
+            ],
+            // Xfer Out not null with comment
+            [
+                [
+                    'xferIn' => null,
+                    'xferOut' => true,
+                    'comment' => 'something about the transfer',
+                ],
+                [],
+                true,
+                [
+                    'xferIn' => null,
+                    'xferOut' => true,
+                    'comment' => 'something about the transfer',
+                ],
+            ],
+            // Xfer Out not null without comment
+            [
+                [
+                    'xferIn' => null,
+                    'xferOut' => true,
+                    'comment' => null,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_XFER_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+                [
+                    'xferIn' => null,
+                    'xferOut' => true,
+                    'comment' => null,
+                ],
             ],
         ];
     }
