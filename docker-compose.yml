@@ -14,12 +14,10 @@ services:
       - DB_HOST=mysql
       - MEMCACHED_HOST=memcached
 
-  # The "localdev" docker image is a developer image
+  # The "localdev" docker image is a developer image for unixy systems & power users
   localdev:
     extends:
       service: localdevbase
-    volumes:
-      - "/app/src/vendor"
     links:
       - mysql
       - memcached
