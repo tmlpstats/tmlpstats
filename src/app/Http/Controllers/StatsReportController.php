@@ -42,7 +42,7 @@ class StatsReportController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Legacy ID-based URL: redirect to specified resource.
      *
      * @param  Request $request
      * @param  integer $id
@@ -52,6 +52,17 @@ class StatsReportController extends Controller
     {
         $statsReport = Models\StatsReport::findOrFail($id);
 
+        return redirect($statsReport->getUriLocalReport());
+    }
+
+    /**
+     * Do the actual work of showing, typically through ReportsController
+     * @param  Request            $request     [description]
+     * @param  Models\StatsReport $statsReport [description]
+     * @return [type]                          [description]
+     */
+    public function showReport(Request $request, Models\StatsReport $statsReport)
+    {
         $this->authorize('read', $statsReport);
 
         $this->context->setCenter($statsReport->center);

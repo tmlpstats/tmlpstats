@@ -270,7 +270,7 @@ class ReportsController extends Controller
 
         return $reportViewUpdate
             ? redirect($redirectUrl)
-            : App::make($controllerClass)->show($request, $report->id);
+            : App::make($controllerClass)->showReport($request, $report);
     }
 
     /**

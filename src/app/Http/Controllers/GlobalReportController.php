@@ -70,6 +70,16 @@ class GlobalReportController extends Controller
         $region = $this->getRegion($request, true);
         $globalReport = Models\GlobalReport::findOrFail($id);
 
+        return redirect(action('ReportsController@getRegionReport', [
+            'abbr' => $region->abbrLower(),
+            'date' => $globalReport->reportingDate->toDateString(),
+        ]));
+    }
+
+    public function showReport(Request $request, Models\GlobalReport $globalReport)
+    {
+        $region = $this->getRegion($request, true);
+
         return $this->showForRegion($request, $globalReport, $region);
     }
 
