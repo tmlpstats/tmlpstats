@@ -7,13 +7,11 @@ use TmlpStats\Encapsulations;
 
 trait UsesReportDates
 {
-    protected $_crd = null;
-
     protected function lastReportingDate(Models\Center $center, Carbon $reportingDate)
     {
-        $quarter = $this->getCenterReportingDate($center, $reportingDate)->getQuarter();
+        $cq = Encapsulations\CenterReportingDate::ensure($center, $reportingDate)->getCenterQuarter();
 
-        if ($reportingDate->eq($quarter->getFirstWeekDate())) {
+        if ($reportingDate->eq($cq->firstWeekDate)) {
             return null;
         }
 
@@ -22,22 +20,13 @@ trait UsesReportDates
 
     protected function relevantReport(Models\Center $center, Carbon $reportingDate)
     {
-        $quarter = $this->getCenterReportingDate($center, $reportingDate)->getQuarter();
+        $cq = Encapsulations\CenterReportingDate::ensure($center, $reportingDate)->getCenterQuarter();
 
         return Models\StatsReport::byCenter($center)
-            ->byQuarter($quarter)
+            ->byQuarter($cq->quarter)
             ->official()
             ->where('reporting_date', '<=', $reportingDate)
             ->orderBy('reporting_date', 'desc')
             ->first();
-    }
-
-    private function getCenterReportingDate(Models\Center $center, Carbon $reportingDate)
-    {
-        if (!$this->_crd) {
-            $this->_crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
-        }
-
-        return $this->_crd;
     }
 }
