@@ -61,8 +61,8 @@ class ValidationData extends AuthenticatedApiBase
 
     protected function validateSubmissionData(Models\StatsReport $report)
     {
-        $quarter = Encapsulations\CenterReportingDate::ensure($report->center, $report->reportingDate)->getQuarter();
-        $isFirstWeek = $report->reportingDate->eq($quarter->getFirstWeekDate());
+        $cq = Encapsulations\CenterReportingDate::ensure($report->center, $report->reportingDate)->getCenterQuarter();
+        $isFirstWeek = $report->reportingDate->eq($cq->quarter->getFirstWeekDate());
 
         $data = [];
         $pastWeeks = [];
