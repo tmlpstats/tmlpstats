@@ -345,24 +345,17 @@ class CourseTest extends FunctionalTestAbstract
         //      course3 is not included
         if ($reportingDate == '2016-04-08') {
             $expectedResponse = [
-                Domain\Course::fromModel($course1LastWeekData),
-                Domain\Course::fromModel($course2LastWeekData),
+                $this->course->id => Domain\Course::fromModel($course1LastWeekData),
+                $course2->id => Domain\Course::fromModel($course2LastWeekData),
             ];
         } else {
             $expectedResponse = [
-                Domain\Course::fromModel($this->courseData),
-                Domain\Course::fromModel($course2ThisWeekData),
+                $this->course->id => Domain\Course::fromModel($this->courseData),
+                $course2->id => Domain\Course::fromModel($course2ThisWeekData),
             ];
         }
 
         $expectedResponse = json_decode(json_encode($expectedResponse), true);
-
-        usort($expectedResponse, function ($a, $b) {
-            return strcmp(
-                $a['startDate'],
-                $b['startDate']
-            );
-        });
 
         $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
     }

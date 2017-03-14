@@ -154,13 +154,19 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
 
         if ($data->xferIn || $data->xferOut) {
 
-            // TODO: We probably don't need to show this every week. We need a better way to alert something for
-            //       the first week.
-            // Always display this message.
-            $this->addMessage('warning', [
-                'id' => 'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER',
-                'ref' => $data->getReference(['field' => $data->xferIn ? 'xferIn' : 'xferOut']),
-            ]);
+            $lastWeek = count($this->pastWeeks) ? $this->pastWeeks[0] : null;
+
+            if ($data->xferIn && (!$lastWeek || !$lastWeek->xferIn)) {
+                $this->addMessage('warning', [
+                    'id' => 'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER',
+                    'ref' => $data->getReference(['field' => 'xferIn']),
+                ]);
+            } else if ($data->xferOut && (!$lastWeek || !$lastWeek->xferOut)) {
+                $this->addMessage('warning', [
+                    'id' => 'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER',
+                    'ref' => $data->getReference(['field' => 'xferOut']),
+                ]);
+            }
 
             if (!$data->comment) {
                 $this->addMessage('error', [

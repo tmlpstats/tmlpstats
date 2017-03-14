@@ -5,30 +5,17 @@ use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
+use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
-use TmlpStats\Encapsulations;
 
 /**
  * TeamMembers
  */
 class TeamMember extends AuthenticatedApiBase
 {
+    use Traits\UsesReportDates;
+
     private static $omitGitwTdo = ['tdo' => true, 'gitw' => true];
-
-    private function relevantReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
-        $quarter = $crd->getQuarter();
-
-        // Get the last stats report in order to pre-populate the class list effectively
-
-        return Models\StatsReport::byCenter($center)
-            ->byQuarter($quarter)
-            ->official()
-            ->where('reporting_date', '<=', $reportingDate)
-            ->orderBy('reporting_date', 'desc')
-            ->first();
-    }
 
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
@@ -84,15 +71,19 @@ class TeamMember extends AuthenticatedApiBase
         $submissionData = App::make(SubmissionData::class);
         $teamMemberId = $submissionData->numericStorageId($data, 'id');
 
+        $pastWeeks = [];
+
         if ($teamMemberId !== null && $teamMemberId > 0) {
             $tm = Models\TeamMember::findOrFail($teamMemberId);
             $domain = Domain\TeamMember::fromModel(null, $tm);
             $domain->updateFromArray($data, ['incomingQuarter']);
+
+            $pastWeeks = $this->getPastWeeksData($center, $reportingDate, $tm);
         } else {
             $domain = Domain\TeamMember::fromArray($data, ['incomingQuarter', 'teamYear']);
         }
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
-        $validationResults = $this->validateObject($report, $domain, $teamMemberId);
+        $validationResults = $this->validateObject($report, $domain, $teamMemberId, $pastWeeks);
 
         if (!isset($data['_idGenerated']) || $validationResults['valid']) {
             $submissionData->store($center, $reportingDate, $domain);
@@ -163,9 +154,31 @@ class TeamMember extends AuthenticatedApiBase
         return $teamMemberData->load('teamMember.person', 'teamMember.incomingQuarter', 'statsReport', 'withdrawCode');
     }
 
-    public function getWeekSoFar(Models\Center $center, Carbon $reportingDate)
+    public function getWeekSoFar(Models\Center $center, Carbon $reportingDate, $includeInProgress = true)
     {
-        return $this->allForCenter($center, $reportingDate, true);
+        return $this->allForCenter($center, $reportingDate, $includeInProgress);
+    }
+
+    protected function getPastWeeksData(Models\Center $center, Carbon $reportingDate, Models\TeamMember $member)
+    {
+        $lastWeekReportingDate = $this->lastReportingDate($center, $reportingDate);
+        if (!$lastWeekReportingDate) {
+            return [];
+        }
+
+        $lastReport = $this->relevantReport($center, $lastWeekReportingDate);
+        if (!$lastReport) {
+            return [];
+        }
+
+        $lastWeekData = Models\TeamMemberData::byStatsReport($lastReport)->byTeamMember($member)->first();
+        if (!$lastWeekData) {
+            return [];
+        }
+
+        return [
+            Domain\TeamMember::fromModel($lastWeekData, $member),
+        ];
     }
 
     /**

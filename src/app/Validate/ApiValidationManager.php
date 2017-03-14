@@ -22,27 +22,28 @@ class ApiValidationManager
      *     'course'          => [...Array of course domain objects],
      * ];
      *
-     * @param  array  $data  Array of objects to validate
+     * @param  array  $data       Array of objects to validate
+     * @param  array  $pastWeeks  Array of objects from past reports
      * @return boolen
      */
-    public function run($data)
+    public function run($data, array $pastWeeks = [])
     {
         $isValid = true;
 
         foreach ($data as $type => $list) {
-            if (!$this->processDataList($type, $list)) {
+            if (!$this->processDataList($type, $list, $pastWeeks[$type])) {
                 $isValid = false;
             }
         }
 
         $validator = ValidatorFactory::build($this->statsReport, 'apiCenterGames');
-        if (!$validator->run($data)) {
+        if (!$validator->run($data, $pastWeeks)) {
             $isValid = false;
         }
         $this->mergeMessages($validator->getMessages(), 'Scoreboard');
 
         $validator = ValidatorFactory::build($this->statsReport, 'apiAccountability');
-        if (!$validator->run($data)) {
+        if (!$validator->run($data, $pastWeeks)) {
             $isValid = false;
         }
         $this->mergeMessages($validator->getMessages(), 'TeamMember');
@@ -50,7 +51,7 @@ class ApiValidationManager
         return $isValid;
     }
 
-    public function runOne($data, $id = null)
+    public function runOne($data, $id = null, array $pastWeeks = [])
     {
         $isValid = true;
 
@@ -58,7 +59,7 @@ class ApiValidationManager
         $apiType = 'api' . ucfirst($type);
 
         $validator = ValidatorFactory::build($this->statsReport, $apiType);
-        if (!$validator->run($data)) {
+        if (!$validator->run($data, $pastWeeks)) {
             $isValid = false;
         }
         $this->mergeMessages($validator->getMessages());
@@ -66,7 +67,7 @@ class ApiValidationManager
         return $isValid;
     }
 
-    protected function processDataList($type, $list)
+    protected function processDataList($type, $list, array $pastWeeks = [])
     {
         $isValid = true;
 
@@ -74,7 +75,12 @@ class ApiValidationManager
 
         foreach ($list as $id => $dataObj) {
             $validator = ValidatorFactory::build($this->statsReport, $apiType);
-            if (!$validator->run($dataObj)) {
+            $lastWeek = [];
+            if (isset($pastWeeks[$id])) {
+                // we currently only pull the last weeks data, so wrap it in an array for now
+                $lastWeek[] = $pastWeeks[$id];
+            }
+            if (!$validator->run($dataObj, $lastWeek)) {
                 $isValid = false;
             }
             $this->mergeMessages($validator->getMessages(), $type);

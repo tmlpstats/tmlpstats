@@ -68,6 +68,11 @@ class TeamMemberData extends Model
         return $query->whereStatsReportId($statsReport->id);
     }
 
+    public function scopeByTeamMember($query, TeamMember $member)
+    {
+        return $query->whereTeamMemberId($member->id);
+    }
+
     public function scopeWithdrawn($query)
     {
         return $query->whereNotNull('withdraw_code_id');

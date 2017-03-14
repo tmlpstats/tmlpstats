@@ -30,7 +30,7 @@ class Course extends ParserDomain
             'type' => 'string',
         ],
         'id' => [
-            'owner' => 'courseData',
+            'owner' => 'course',
             'type' => 'int',
         ],
         'quarterStartTer' => [

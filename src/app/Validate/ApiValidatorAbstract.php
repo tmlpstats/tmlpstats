@@ -8,6 +8,7 @@ abstract class ApiValidatorAbstract
     protected $statsReport = null;
     protected $isValid = true;
     protected $data = null;
+    protected $pastWeeks = [];
 
     protected $messages = [];
 
@@ -30,9 +31,10 @@ abstract class ApiValidatorAbstract
 
     abstract protected function validate($data);
 
-    public function run($data)
+    public function run($data, array $pastWeeks = [])
     {
         $this->data = $data;
+        $this->pastWeeks = $pastWeeks;
 
         if (!$this->validate($data)) {
             $this->isValid = false;

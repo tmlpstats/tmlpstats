@@ -298,14 +298,14 @@ class ApplicationTest extends FunctionalTestAbstract
         if ($reportingDate == '2016-04-08') {
             // Reporting Date provided
             $expectedResponse = [
-                Domain\TeamApplication::fromModel($app1LastWeekData),
-                Domain\TeamApplication::fromModel($app2LastWeekData),
+                $this->application->id => Domain\TeamApplication::fromModel($app1LastWeekData),
+                $app2->id => Domain\TeamApplication::fromModel($app2LastWeekData),
             ];
         } else {
             // Reporting Date not provided
             $expectedResponse = [
-                Domain\TeamApplication::fromModel($this->applicationData),
-                Domain\TeamApplication::fromModel($app2ThisWeekData),
+                $this->application->id => Domain\TeamApplication::fromModel($this->applicationData),
+                $app2->id => Domain\TeamApplication::fromModel($app2ThisWeekData),
             ];
         }
 
