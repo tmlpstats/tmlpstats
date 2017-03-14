@@ -204,28 +204,4 @@ class ApiBase
 
         return array_merge($arr1, $arr2);
     }
-
-    public function validateAll(Models\StatsReport $statsReport, array $data, array $pastWeeks = [])
-    {
-        $validator = new ApiValidationManager($statsReport);
-
-        $success = $validator->run($data, $pastWeeks);
-
-        return [
-            'valid' => $success,
-            'messages' => $validator->getMessages(),
-        ];
-    }
-
-    public function validateObject(Models\StatsReport $statsReport, $object, $id = null, array $pastWeeks = [])
-    {
-        $validator = new ApiValidationManager($statsReport);
-
-        $success = $validator->runOne($object, $id, $pastWeeks);
-
-        return [
-            'valid' => $success,
-            'messages' => $validator->getMessages(),
-        ];
-    }
 }
