@@ -5,6 +5,7 @@ use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
+use TmlpStats\Api\Traits;
 use TmlpStats\Contracts\Referenceable;
 use TmlpStats\Domain;
 use TmlpStats\Encapsulations;
@@ -14,6 +15,8 @@ use TmlpStats\Encapsulations;
  */
 class ValidationData extends AuthenticatedApiBase
 {
+    use Traits\ValidatesObjects;
+
     protected $dataTypesConf = [
         'Application' => [
             'apiClass' => Application::class,

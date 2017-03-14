@@ -14,7 +14,7 @@ use TmlpStats\Domain;
  */
 class Course extends ApiBase
 {
-    use Traits\UsesReportDates;
+    use Traits\UsesReportDates, Traits\ValidatesObjects;
 
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {

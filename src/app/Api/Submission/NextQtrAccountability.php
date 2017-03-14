@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Api\Exceptions;
+use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
 use TmlpStats\Encapsulations;
 
