@@ -5,30 +5,17 @@ use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
+use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
-use TmlpStats\Encapsulations;
 
 /**
  * TeamMembers
  */
 class TeamMember extends AuthenticatedApiBase
 {
+    use Traits\UsesReportingDates;
+
     private static $omitGitwTdo = ['tdo' => true, 'gitw' => true];
-
-    private function relevantReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
-        $quarter = $crd->getQuarter();
-
-        // Get the last stats report in order to pre-populate the class list effectively
-
-        return Models\StatsReport::byCenter($center)
-            ->byQuarter($quarter)
-            ->official()
-            ->where('reporting_date', '<=', $reportingDate)
-            ->orderBy('reporting_date', 'desc')
-            ->first();
-    }
 
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
@@ -174,7 +161,12 @@ class TeamMember extends AuthenticatedApiBase
 
     protected function getPastWeeksData(Models\Center $center, Carbon $reportingDate, Models\TeamMember $member)
     {
-        $lastReport = $this->relevantReport($center, $reportingDate);
+        $lastWeekReportingDate = $this->lastReportingDate($center, $reportingDate);
+        if (!$lastWeekReportingDate) {
+            return [];
+        }
+
+        $lastReport = $this->relevantReport($center, $lastWeekReportingDate);
         if (!$lastReport) {
             return [];
         }

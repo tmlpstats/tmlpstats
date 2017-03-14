@@ -6,26 +6,15 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\ApiBase;
 use TmlpStats\Api\Exceptions as ApiExceptions;
+use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
-use TmlpStats\Encapsulations;
 
 /**
  * Applications
  */
 class Application extends ApiBase
 {
-    private function relevantReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
-        $quarter = $crd->getQuarter();
-
-        return Models\StatsReport::byCenter($center)
-            ->byQuarter($quarter)
-            ->official()
-            ->where('reporting_date', '<=', $reportingDate)
-            ->orderBy('reporting_date', 'desc')
-            ->first();
-    }
+    use Traits\UsesReportingDates;
 
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
@@ -140,7 +129,12 @@ class Application extends ApiBase
 
     protected function getPastWeeksData(Models\Center $center, Carbon $reportingDate, Models\TmlpRegistration $app)
     {
-        $lastReport = $this->relevantReport($center, $reportingDate);
+        $lastWeekReportingDate = $this->lastReportingDate($center, $reportingDate);
+        if (!$lastWeekReportingDate) {
+            return [];
+        }
+
+        $lastReport = $this->relevantReport($center, $lastWeekReportingDate);
         if (!$lastReport) {
             return [];
         }

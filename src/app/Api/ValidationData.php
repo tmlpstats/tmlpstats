@@ -7,6 +7,7 @@ use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Contracts\Referenceable;
 use TmlpStats\Domain;
+use TmlpStats\Encapsulations;
 
 /**
  * Validation data
@@ -60,6 +61,9 @@ class ValidationData extends AuthenticatedApiBase
 
     protected function validateSubmissionData(Models\StatsReport $report)
     {
+        $quarter = Encapsulations\CenterReportingDate::ensure($report->center, $report->reportingDate)->getQuarter();
+        $isFirstWeek = $report->reportingDate->eq($quarter->getFirstWeekDate());
+
         $data = [];
         $pastWeeks = [];
         foreach ($this->dataTypesConf as $group => $conf) {
@@ -67,6 +71,12 @@ class ValidationData extends AuthenticatedApiBase
                 $report->center,
                 $report->reportingDate
             );
+
+            // We don't care about last week's data if this is the first week of the quarter
+            if ($isFirstWeek) {
+                continue;
+            }
+
             $pastWeeks[$conf['typeName']] = App::make($conf['apiClass'])->getWeekSoFar(
                 $report->center,
                 $report->reportingDate->copy()->subWeek(),
