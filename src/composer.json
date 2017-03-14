@@ -38,7 +38,10 @@
             "TmlpStats\\": "app/",
             "TmlpStats\\Seeders\\": "database/seeds/",
             "TmlpStats\\Tests\\": "tests/"
-        }
+        },
+        "files": [
+            "app/Providers/helpers.php"
+        ]
     },
     "autoload-dev": {
         "classmap": [

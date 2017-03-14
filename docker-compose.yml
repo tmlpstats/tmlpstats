@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 services:
   localdevbase:
     build:
@@ -6,6 +6,7 @@ services:
       dockerfile: docker/localdev/Dockerfile
     ports:
       - "8080:80"
+      - "8030:8030"
     volumes:
       - "./:/app"
     environment:
@@ -13,6 +14,7 @@ services:
       - APP_DEBUG=true
       - DB_HOST=mysql
       - MEMCACHED_HOST=memcached
+      - "LOCALDEV_WATCH=${LOCALDEV_WATCH-n}"
 
   # The "localdev" docker image is a developer image for unixy systems & power users
   localdev:

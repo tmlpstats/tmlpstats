@@ -20,5 +20,5 @@ ENV DB_DATABASE=tmlpstats_main \
     APP_DEBUG=true
 
 COPY docker/localdev/000-default.conf /etc/apache2/sites-available
-COPY docker/localdev/start.sh /usr/bin/
+COPY docker/localdev/start.sh docker/localdev/localdev-version.txt /usr/bin/
 CMD bash /usr/bin/start.sh

@@ -1,3 +1,6 @@
+// IMPORTANT - polyfill must happen before all imports
+require('./classic/tmlp-polyfill')
+
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'

@@ -43,18 +43,17 @@ WORKDIR /var/www/tmlpstats/src
 ##### Variant processes - Bake in as much as we can, make the module install much smaller later
 
 # Composer
-ADD src/composer.json src/composer.lock /var/www/tmlpstats/src/
-RUN composer install --no-autoloader --no-scripts
+ADD src/composer.json src/composer.lock src/bower.json /var/www/tmlpstats/src/
+RUN composer install --no-autoloader --no-scripts && \
+    bower install --allow-root && \
+    md5sum bower.json > bower_components/.hashes
 
-# Node Modules
-ADD src/package.json /var/www/tmlpstats/src/
-RUN npm set progress=false && npm install
+# Node Modules, Bower
+ADD src/package.json  /var/www/tmlpstats/src/
+RUN npm set progress=false && \
+    npm install && \
+    md5sum package.json > node_modules/.hashes
 
-# Bower
-ADD src/bower.json /var/www/tmlpstats/src
-RUN bower install --allow-root
-
-RUN md5sum package.json bower.json > hashes.install
 
 ADD docker/builder/symlink-farm.sh /tmp/
 RUN bash /tmp/symlink-farm.sh /var/www/tmlpstats /app

@@ -25,7 +25,7 @@ $reportingDate = $baseController->getReportingDate();
     <script src="{{ asset('vendor/js/response/dist/respond.min.js') }}"></script>
     <![endif]-->
 
-    <link href="{{ elixir('css/app.css') }}" rel="stylesheet">
+    <link href="{{ mix('build/css/app.css') }}" rel="stylesheet">
 
     @yield('headers')
 </head>
@@ -43,10 +43,10 @@ $reportingDate = $baseController->getReportingDate();
 
     @include('partials.settings')
 
-    <script src="{{ elixir('js/tmlp-polyfill.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('js/vendor.js') }}" type="text/javascript"></script>
-    <script src="{{ elixir('js/commons.js') }}" type="text/javascript"></script>
-    <script src="{{ elixir('js/main.js') }}" type="text/javascript"></script>
+    <script src="{{ mix('build/js/classic-vendor.js') }}" type="text/javascript"></script>
+    <script src="{{ mix('build/js/manifest.js') }}" type="text/javascript"></script>
+    <script src="{{ mix('build/js/vendor.js') }}" type="text/javascript"></script>
+    <script src="{{ mix('build/js/main.js') }}" type="text/javascript"></script>
 
     @if (Auth::check())
         <script type="text/javascript">

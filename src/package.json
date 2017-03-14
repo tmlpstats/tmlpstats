@@ -15,14 +15,12 @@
     "babel-plugin-transform-object-rest-spread": "^6.22.0",
     "babel-preset-es2015": "^6.22",
     "babel-preset-react": "^6.23",
-    "envify": "^3.4.0",
+    "cross-env": "^3.2.3",
     "eslint": "^3.17",
     "eslint-plugin-react": "^6.0.0",
-    "gulp": "^3.9.1",
     "jest": "^19",
-    "laravel-elixir": "^6.0.0-15",
-    "laravel-elixir-browsersync-official": "^1.0.0",
-    "laravel-elixir-webpack-official": "^1.0.10",
+    "laravel-mix": "^0.8.8",
+    "node-sass": "^4.5.0",
     "react-test-renderer": "^15.4.2"
   },
   "dependencies": {
@@ -53,8 +51,11 @@
   },
   "scripts": {
     "test": "jest",
-    "watch": "rm -f public/js/commons.js public/js/main.js; gulp watch",
-    "dev": "gulp"
+    "dev": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "watch": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --watch --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "watch-poll": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --watch --watch-poll --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "hot": "cross-env NODE_ENV=development node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
   },
   "jest": {
     "moduleFileExtensions": [
