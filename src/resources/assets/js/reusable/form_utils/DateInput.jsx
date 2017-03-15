@@ -1,7 +1,7 @@
 import moment from 'moment'
 import _ from 'lodash'
 import React, { PropTypes } from 'react'
-import { actions as formActions, utils as rrfUtils } from 'react-redux-form'
+import { actions as formActions, getField } from 'react-redux-form'
 import { SingleDatePicker } from 'react-dates'
 
 import { SimpleFormGroup } from './index'
@@ -22,8 +22,8 @@ const datePickerProps = Object.keys(sdpProps)
 export class DateInput extends React.Component {
     static mapStateToProps(state, props) {
         const modelValue = _.get(state, props.model)
-        const field = rrfUtils.getFieldFromState(state, props.model)
-        const focused = rrfUtils.isFocused(field)
+        const field = getField(state, props.model)
+        const focused = (field)? field.focus : false
         return {modelValue, focused}
     }
 

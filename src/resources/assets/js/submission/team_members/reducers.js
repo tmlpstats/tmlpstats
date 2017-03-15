@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { modelReducer } from 'react-redux-form'
+import { modelReducer, formReducer } from 'react-redux-form'
 
 import { objectAssign } from '../../reusable/ponyfill'
 import { weeklyReportingSave, weeklyReportingData, teamMembersData, messages } from './data'
@@ -28,6 +28,7 @@ function resortCheck(a, b, action) {
 }
 
 const teamMembersReducer = combineReducers({
+    forms: formReducer('submission.team_members'),
     currentMember: modelReducer(TEAM_MEMBER_FORM_KEY),
     teamMembers: teamMembersData.reducer({
         collection_reducer: modelReducer(TEAM_MEMBERS_COLLECTION_FORM_KEY),

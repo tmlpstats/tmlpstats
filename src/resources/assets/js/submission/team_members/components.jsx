@@ -36,6 +36,7 @@ class TeamMembersBase extends SubmissionBase {
     }
 }
 
+
 const STATE_UPDATING = 'Updating'
 const STATE_NOTHING = 'Nothing'
 const STATE_SAVED = 'Saved'
