@@ -81,7 +81,6 @@ class ApiValidatorTestAbstract extends ValidatorTestAbstract
             $dumper->dump($expected);
             $dumper->dump($actual);
         }
-
         $this->assertEquals(count($expected), count($actual), 'Number of messages do not match');
 
         foreach ($expected as $idx => $expectedMessage) {

@@ -34,15 +34,21 @@ class ApiValidationManager
             if (!$this->processDataList($type, $list, $pastWeeks[$type])) {
                 $isValid = false;
             }
+
+            if (($type == 'TeamApplication' || $type == 'Course')
+                && !$this->processDataList($type, $list, $pastWeeks[$type], "{$type}Change")
+            ) {
+                $isValid = false;
+            }
         }
 
-        $validator = ValidatorFactory::build($this->statsReport, 'apiCenterGames');
+        $validator = ApiValidatorFactory::build($this->statsReport, 'CenterGames');
         if (!$validator->run($data, $pastWeeks)) {
             $isValid = false;
         }
         $this->mergeMessages($validator->getMessages(), 'Scoreboard');
 
-        $validator = ValidatorFactory::build($this->statsReport, 'apiAccountability');
+        $validator = ApiValidatorFactory::build($this->statsReport, 'Accountability');
         if (!$validator->run($data, $pastWeeks)) {
             $isValid = false;
         }
@@ -56,9 +62,8 @@ class ApiValidationManager
         $isValid = true;
 
         $type = class_basename(get_class($data));
-        $apiType = 'api' . ucfirst($type);
 
-        $validator = ValidatorFactory::build($this->statsReport, $apiType);
+        $validator = ApiValidatorFactory::build($this->statsReport, $type);
         if (!$validator->run($data, $pastWeeks)) {
             $isValid = false;
         }
@@ -67,19 +72,22 @@ class ApiValidationManager
         return $isValid;
     }
 
-    protected function processDataList($type, $list, array $pastWeeks = [])
+    protected function processDataList($type, $list, array $pastWeeks = [], $validatorClass = null)
     {
         $isValid = true;
 
-        $apiType = 'api' . ucfirst($type);
+        if (!$validatorClass) {
+            $validatorClass = $type;
+        }
 
         foreach ($list as $id => $dataObj) {
-            $validator = ValidatorFactory::build($this->statsReport, $apiType);
+            $validator = ApiValidatorFactory::build($this->statsReport, $validatorClass);
             $lastWeek = [];
             if (isset($pastWeeks[$id])) {
                 // we currently only pull the last weeks data, so wrap it in an array for now
                 $lastWeek[] = $pastWeeks[$id];
             }
+
             if (!$validator->run($dataObj, $lastWeek)) {
                 $isValid = false;
             }
