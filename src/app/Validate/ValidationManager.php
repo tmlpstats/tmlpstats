@@ -46,7 +46,7 @@ class ValidationManager
             }
         }
 
-        // These need needs the class list to
+        // These need only need one data group
         $teamMemberExistsChecks = [
             'contactInfoTeamMember' => 'contactInfo',
             'committedTeamMember'   => 'tmlpRegistration',
@@ -57,7 +57,8 @@ class ValidationManager
             }
         }
 
-        foreach (['teamExpansion', 'centerGames', 'statsReport'] as $type) {
+        // These need only need all the data groups
+        foreach (['teamExpansion', 'centerGames', 'courseCompletion', 'statsReport'] as $type) {
             $validator = ValidatorFactory::build($this->statsReport, $type);
             if (!$validator->run($data)) {
                 $isValid = false;
