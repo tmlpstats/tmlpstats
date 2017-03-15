@@ -1,3 +1,6 @@
 *        text=auto
 *.cmd    eol=crlf
 *.sh     text eol=lf
+*.json   text eol=lf
+
+composer.lock text eol=lf

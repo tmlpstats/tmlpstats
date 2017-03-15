@@ -44,6 +44,14 @@ composer_rerun() {
     composer install --no-autoloader
 }
 
+# Shortcut to compare the hash file (if exists)
+# Param $1: the potential hashfile
+# Param $2: the string content to compare with (usually an md5sum)
+# Returns: success(code=0) if hash file both exists and equals the target
+_comparehashfile() {
+    [[ -f "$1" && "$(cat "$1")" = "$2" ]]
+}
+
 hashcheck() {
     local hashesfile="$1/.hashes"
     local tohash="$2"
@@ -52,9 +60,9 @@ hashcheck() {
     # don't quote $tohash to let it sum multiple files
     local HASHES=$(md5sum $tohash)
     # Running the pipeline as the last statement makes this the return value
-    if [[ ! -f "$hashesfile" || "$(cat "$hashesfile")" != "$HASHES" ]]; then
+    if ! _comparehashfile "$hashesfile" "$HASHES"; then
         echo "Hashes don't match... rebuilding ${pipeline_name}"
-        $handler
+        $handler "$HASHES"
         echo "> Done, updating hashes file"
         echo "$HASHES" > "$hashesfile"
     else
@@ -63,8 +71,9 @@ hashcheck() {
 }
 
 _rebuild_composer() {
+    local HASHES="$1"
     supposed_vendor="/var/www/tmlpstats/src/vendor"
-    if [[ -d "$supposed_vendor" ]]; then
+    if _comparehashfile "${supposed_vendor}/.hashes" "$HASHES"; then
         echo "Overwriting vendor folder $(du -sh "$supposed_vendor")"
         if [[ ! -d /app/src/vendor ]]; then
             mkdir /app/src/vendor
@@ -83,10 +92,10 @@ _rebuild_npm() {
         mkdir  /app/src/node_modules || true
     fi
     farmnode="${FARM_DIR}/node_modules"
-    if [[ -f "${farmnode}/.hashes" && "$(cat "${farmnode}/.hashes")" = "$(md5sum package.json)" ]]; then
+    if _comparehashfile "${farmnode}/.hashes" "$1"; then
         echo "Taking the shortcut of copying node_modules instead"
-        rm -rf /app/src/node_modules/* /app/src/node_modules/.bin || true
-        cp -r "${farmnode}"/* "${farmnode}/.bin" /app/src/node_modules/
+        rm -rf /app/src/node_modules || true
+        cp -r "${farmnode}" /app/src/node_modules
     else
         echo "Doing an npm install"
     fi

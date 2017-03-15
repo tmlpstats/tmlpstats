@@ -42,13 +42,14 @@ WORKDIR /var/www/tmlpstats/src
 
 ##### Variant processes - Bake in as much as we can, make the module install much smaller later
 
-# Composer
+# Composer, Bower
 ADD src/composer.json src/composer.lock src/bower.json /var/www/tmlpstats/src/
 RUN composer install --no-autoloader --no-scripts && \
+    md5sum composer.json composer.lock > vendor/.hashes && \
     bower install --allow-root && \
     md5sum bower.json > bower_components/.hashes
 
-# Node Modules, Bower
+# Node Modules
 ADD src/package.json  /var/www/tmlpstats/src/
 RUN npm set progress=false && \
     npm install && \
