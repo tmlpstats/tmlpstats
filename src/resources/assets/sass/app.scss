@@ -2,11 +2,11 @@
 
 @import 'node_modules/react-dates/css/variables.scss';
 @import 'node_modules/react-dates/css/styles.scss';
-@import 'bower_components/bootstrap-sass/assets/stylesheets/bootstrap';
+@import 'node_modules/bootstrap-sass/assets/stylesheets/bootstrap';
+@import 'node_modules/font-awesome/scss/font-awesome';
 
 // Legacy/addon CSS: Note we omit the '.css' extension so that sass will compile them in.
 @import 'bower_components/jquery-loading/dist/jquery.loading.min';
-@import 'bower_components/font-awesome/css/font-awesome.min';
 @import 'node_modules/react-bootstrap-typeahead/css/Typeahead';
 @import 'node_modules/react-bootstrap-typeahead/css/Token';
 @import 'bower_components/datatables/media/css/dataTables.bootstrap.min';

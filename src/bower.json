@@ -27,11 +27,9 @@
     "datatables": "~1.10.10",
     "jquery": "~2.1.4",
     "respond": "~1.4.2",
-    "font-awesome": "~4.4.0",
     "datatables.net": "~1.10.10",
     "datatables.net-bs": "~1.10.10",
-    "highcharts": "^4.2.3",
-    "bootstrap-sass": "^3.3.7"
+    "highcharts": "^4.2.3"
   },
   "devDependencies": {},
   "homepage": "https://github.com/pdarg/tmlpstats",

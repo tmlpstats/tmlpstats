@@ -6,7 +6,7 @@ mix
     .extract(['es6-promise', 'react', 'react-router', 'immutable', 'moment'])
     .sass('resources/assets/sass/app.scss', 'public/build/css')
     .scripts([
-        'bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js',
+        'node_modules/bootstrap-sass/assets/javascripts/bootstrap.min.js',
         'bower_components/datatables.net/js/jquery.dataTables.min.js',
         'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js',
         'bower_components/jquery-loading/dist/jquery.loading.min.js',
