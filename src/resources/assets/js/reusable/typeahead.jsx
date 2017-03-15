@@ -8,6 +8,7 @@
  */
 import React, { PureComponent, Component } from 'react'
 import {Typeahead as RTypeahead} from 'react-bootstrap-typeahead'
+import { defaultMemoize } from 'reselect'
 import _ from 'lodash'
 
 import { connectCustomField, formActions } from './form_utils'
@@ -33,9 +34,9 @@ export class SimpleTypeahead extends PureComponent {
 
     constructor(props) {
         super(props)
-        this.keyedItems = _.memoize(
+        this.keyedItems = defaultMemoize(
             (input, keyProp) => {
-                console.log('keyBy', input, keyProp)
+                console.log('keyBy:', input, keyProp)
                 return _.keyBy(input, keyProp)
             }
         )
