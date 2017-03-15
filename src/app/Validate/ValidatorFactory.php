@@ -17,10 +17,6 @@ class ValidatorFactory
             case 'commCourseInfo':
             case 'tmlpCourseInfo':
             case 'statsReport':
-            case 'apiCourse':
-            case 'apiScoreboard':
-            case 'apiTeamApplication':
-            case 'apiTeamMember':
                 $class = '\\TmlpStats\\Validate\\Objects\\' . ucfirst($type) . 'Validator';
                 break;
             case 'committedTeamMember':
@@ -29,8 +25,6 @@ class ValidatorFactory
             case 'duplicateTmlpRegistration':
             case 'teamExpansion':
             case 'centerGames':
-            case 'apiCenterGames':
-            case 'apiAccountability':
                 $class = '\\TmlpStats\\Validate\\Relationships\\' . ucfirst($type) . 'Validator';
                 break;
             case 'null':
