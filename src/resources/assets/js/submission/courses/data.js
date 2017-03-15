@@ -1,7 +1,10 @@
-import SortableCollection, { compositeKey } from '../../reusable/sortable_collection'
-import { LoadingMultiState, MessageManager } from '../../reusable/reducers'
+import Immutable from 'immutable'
 
-export const coursesSorts = [
+import { compositeKey, createSorters, SORT_BY } from '../../reusable/sort-helpers'
+import { LoadingMultiState, MessageManager } from '../../reusable/reducers'
+import SimpleReduxLoader from '../../reusable/redux_loader/simple'
+
+export const coursesSorts = createSorters([
     {
         key: 'type_startDate',
         label: 'Default',
@@ -12,13 +15,13 @@ export const coursesSorts = [
         label: 'Date, Type',
         comparator: compositeKey([['startDate', 'string'], ['type', 'string']])
     }
-]
+])
 
-export const coursesCollection = new SortableCollection({
-    name: 'submission.courses',
+export const coursesCollection = new SimpleReduxLoader({
+    prefix: 'submission.courses',
     key_prop: 'id',
-    sort_by: 'type_startDate',
-    sorts: coursesSorts
+    useMeta: true,
+    initialMeta: Immutable.Map().set(SORT_BY, 'type_startDate')
 })
 
 export const courseTypeMap = {

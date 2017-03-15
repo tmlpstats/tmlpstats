@@ -1,4 +1,6 @@
+import Immutable from 'immutable'
 import { combineReducers } from 'redux'
+
 import { LoadingMultiState, MessageManager } from '../reducers'
 import { delayDispatch } from '../dispatch'
 import { objectAssign } from '../ponyfill'
@@ -9,6 +11,7 @@ export const LOADER_DEFAULT_OPTS = {
     actions: {},
     setLoaded: false,
     messageManager: false,
+    initialMeta: Immutable.Map(),
     transformData: x => x,
     successHandler: (data, {loader}) =>{
         return loader.replaceCollection(data)
@@ -17,6 +20,8 @@ export const LOADER_DEFAULT_OPTS = {
         throw err
     }
 }
+
+const SET_METADATA = 'loader/setMetadata'
 
 /**
  * ReduxLoader is the combination of patterns of the things we most likely want/need around loading.
@@ -160,6 +165,9 @@ export class ReduxLoader {
         if (opts.messageManager) {
             reducerMap.messages = this.messages.reducer()
         }
+        if (opts.useMeta) {
+            reducerMap.meta = metaReducer(opts.prefix, opts.initialMeta)
+        }
         // add in all the LoadingMultiState reducers
         for (var k in this._lms) {
             reducerMap[k] = this._lms[k].reducer()
@@ -171,6 +179,11 @@ export class ReduxLoader {
     extraReducers() {
 
     }
+
+    setMeta(key, value) {
+        const { prefix } = this.opts
+        return {type: SET_METADATA, payload: { prefix, key, value }}
+    }
 }
 
 export function rebindActionCreators(actions, obj) {
@@ -179,4 +192,15 @@ export function rebindActionCreators(actions, obj) {
         actionCreators[key] = obj[key].bind(obj)
     })
     return actionCreators
+}
+
+
+function metaReducer(prefix, initialMeta) {
+    return (state=initialMeta, action) => {
+        if (action.type == SET_METADATA && action.payload.prefix == prefix) {
+            const { key, value } = action.payload
+            return state.set(key, value)
+        }
+        return state
+    }
 }

@@ -23,7 +23,7 @@ const reducer = combineReducers({
     admin: adminReducer,
     live_scoreboard: liveScoreboardReducer,
     reports: reportsReducer,
-    submission: submissionReducer
+    submission: submissionReducer,
 })
 
 const responsive = createResponsiveStoreEnhancer({performanceMode: true})

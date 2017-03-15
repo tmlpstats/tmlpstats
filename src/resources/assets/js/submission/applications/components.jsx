@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 
 import { Form, SimpleField, SimpleSelect, SimpleFormGroup, BooleanSelect, AddOneLink } from '../../reusable/form_utils'
 import { Promise, objectAssign } from '../../reusable/ponyfill'
+import { rebind } from '../../reusable/dispatch'
+import { collectionSortSelector } from '../../reusable/sort-helpers'
 import { ModeSelectButtons, LoadStateFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
 import { SubmissionBase, React } from '../base_components'
@@ -12,6 +14,8 @@ import { centerQuarterData } from '../core/data'
 import { getLabelTeamMember } from '../core/selectors'
 import { loadApplications, saveApplication, chooseApplication } from './actions'
 import AppStatus from './AppStatus'
+
+const getSortedApplications = collectionSortSelector(appsSorts)
 
 class ApplicationsBase extends SubmissionBase {
     componentDidMount() {
@@ -26,11 +30,16 @@ class ApplicationsBase extends SubmissionBase {
     }
 
     getAppById(appId) {
-        return this.props.applications.collection[appId]
+        return this.props.applications.data[appId]
     }
 }
 
 class ApplicationsIndexView extends ApplicationsBase {
+    constructor(props) {
+        super(props)
+        rebind(this, 'changeSort')
+    }
+
     renderWithdrawsTable(apps) {
         if (!apps.length) {
             return <div />
@@ -76,11 +85,13 @@ class ApplicationsIndexView extends ApplicationsBase {
         if (!this.props.loading.loaded) {
             return this.renderBasicLoading()
         }
-        var changeSort = (newSort) => this.props.dispatch(appsCollection.changeSortCriteria(newSort))
         var apps = []
         var withdraws = []
         var baseUri = this.baseUri()
-        appsCollection.iterItems(this.props.applications, (app, key) => {
+        const sortedApps = getSortedApplications(this.props.applications)
+
+        sortedApps.forEach((app) => {
+            const key = app.id
             const status = AppStatus.getStatusString(app)
             if (app.withdrawCode) {
                 withdraws.push(app)
@@ -101,8 +112,8 @@ class ApplicationsIndexView extends ApplicationsBase {
         return (
             <div>
                 <h3>Manage Registrations</h3>
-                <ModeSelectButtons items={appsSorts} current={this.props.applications.meta.sort_by}
-                                   onClick={changeSort} ariaGroupDesc="Sort Preferences" />
+                <ModeSelectButtons items={appsSorts} current={this.props.applications.meta.get('sort_by')}
+                                   onClick={this.changeSort} ariaGroupDesc="Sort Preferences" />
                 <table className="table">
                     <thead>
                         <tr>
@@ -119,6 +130,10 @@ class ApplicationsIndexView extends ApplicationsBase {
                 {this.renderWithdrawsTable(withdraws)}
             </div>
         )
+    }
+
+    changeSort(newSort) {
+        this.props.dispatch(appsCollection.setMeta('sort_by', newSort))
     }
 }
 

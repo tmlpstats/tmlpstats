@@ -21,7 +21,10 @@ export class ModeSelectButtons extends React.Component {
         getLabel: (v) => v.label
     }
     static propTypes = {
-        items: PropTypes.arrayOf(PropTypes.object).isRequired,
+        items: PropTypes.oneOfType([
+            PropTypes.object,
+            PropTypes.arrayOf(PropTypes.object),
+        ]).isRequired,
         current: PropTypes.oneOfType([
             PropTypes.string,
             PropTypes.number
