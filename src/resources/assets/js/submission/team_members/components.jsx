@@ -1,213 +1,35 @@
-import React, { PropTypes } from 'react'
-import { Link } from 'react-router'
-import { connect } from 'react-redux'
+import React from 'react'
 
-import { Form, CheckBox, SimpleField, BooleanSelect, BooleanSelectView, connectCustomField, SimpleSelect, SimpleFormGroup, AddOneLink } from '../../reusable/form_utils'
-import { objectAssign } from '../../reusable/ponyfill'
+import { Form, CheckBox, SimpleField, BooleanSelect, SimpleSelect, SimpleFormGroup } from '../../reusable/form_utils'
 import { ModeSelectButtons, SubmitFlip, Alert, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
-import { delayDispatch, rebind } from '../../reusable/dispatch'
+import { delayDispatch, connectRedux } from '../../reusable/dispatch'
 import { FormTypeahead } from '../../reusable/typeahead'
 
-import { SubmissionBase } from '../base_components'
 import { centerQuarterData } from '../core/data'
 import { makeAccountabilitiesSelector, makeQuartersSelector } from '../core/selectors'
-import { TEAM_MEMBERS_COLLECTION_FORM_KEY, TEAM_MEMBER_FORM_KEY } from './reducers'
-import { teamMembersSorts, teamMembersData } from './data'
+import { TEAM_MEMBER_FORM_KEY } from './reducers'
 import { EXIT_CHOICES, EXIT_CHOICES_HELP } from './exit_choice'
 import * as actions from './actions'
+import { TeamMembersBase, GITW_LABELS, TDO_LABELS } from './components-base'
 
-const GITW_LABELS = ['Ineffective', 'Effective']
-const TDO_LABELS = ['N', 'Y']
-
-class TeamMembersBase extends SubmissionBase {
-    teamMembersBaseUri() {
-        return this.baseUri() + '/team_members'
-    }
-
-    // Check the loading state of our initial data, and dispatch a loadTeamMembers if we never loaded
-    checkLoading() {
-        const { teamMembers: {loadState: loading}, dispatch } = this.props
-        if (loading.state == 'new') {
-            const { centerId, reportingDate } = this.props.params
-            dispatch(actions.loadTeamMembers(centerId, reportingDate))
-            return false
-        }
-        return (loading.state == 'loaded')
-    }
-}
+export { TeamMembersIndex } from './components-index'
 
 
-const STATE_UPDATING = 'Updating'
-const STATE_NOTHING = 'Nothing'
-const STATE_SAVED = 'Saved'
 
-class TeamMembersIndexView extends TeamMembersBase {
-    componentWillMount() {
-        rebind(this, 'saveWeeklyReporting', 'changeSort')
-    }
-    render() {
-        if (!this.checkLoading()) {
-            return this.renderBasicLoading()
-        }
+const getTeamAccountabilities = makeAccountabilitiesSelector('team')
+const getValidStartQuarters = makeQuartersSelector('validStartQuarters')
 
-        const baseUri = this.teamMembersBaseUri()
-        const { weeklySave, weeklyReporting: wr, teamMembers } = this.props
-        var teamMemberRows = []
-        var withdraws = []
-        teamMembersData.iterItems(teamMembers, (teamMember, key) => {
-            var updating = STATE_NOTHING
-            if (wr.changed[key]) {
-                updating = (weeklySave.loaded && wr.working && wr.working[key] >= wr.changed[key])? STATE_SAVED : STATE_UPDATING
-            }
 
-            let row = (
-                <TeamMemberIndexRow
-                        key={key} teamMember={teamMember} baseUri={baseUri}
-                        updating={updating} accountabilities={this.props.lookups.accountabilities}
-                        lookups={this.props.lookups} />
-            )
-
-            if (teamMember.withdrawCode || teamMember.xferOut) {
-                withdraws.push(row)
-            } else {
-                teamMemberRows.push(row)
-            }
-        })
-
-        let withdrawTable
-        if (withdraws.length) {
-            withdrawTable = (
-                <div>
-                <br/>
-                    <h4>Withdraws/Transfers</h4>
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Year</th>
-                                <th>Reason</th>
-                            </tr>
-                        </thead>
-                        <tbody>{withdraws}</tbody>
-                    </table>
-                </div>
-            )
-        }
-
-        return (
-            <Form model={TEAM_MEMBERS_COLLECTION_FORM_KEY} onSubmit={this.saveWeeklyReporting}>
-                <h3>Class List</h3>
-                <ModeSelectButtons items={teamMembersSorts} current={teamMembers.data.meta.sort_by}
-                                   onClick={this.changeSort} ariaGroupDesc="Sort Preferences" />
-                <Alert alert="info">
-                    Tip: you can use the "tab" key to quickly jump through the GITW/TDO.
-                    <p>Set each one with the keyboard using "E" "I" for GITW and "Y" "N" for TDO.
-                    You can quick-save the GITW/TDO by hitting the enter key.</p>
-                </Alert>
-                <table className="table submissionTeamMembers">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Year</th>
-                            <th>Accountability</th>
-                            <th>GITW</th>
-                            <th>TDO</th>
-                        </tr>
-                    </thead>
-                    <tbody>{teamMemberRows}</tbody>
-                    <tfoot>
-                        <tr>
-                            <td colSpan="4" style={{minWidth: '15em'}}>
-                                <SubmitFlip loadState={weeklySave} wrapGroup={false}>Save GITW/TDO changes</SubmitFlip>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
-                <br />
-                <AddOneLink link={`${baseUri}/add`} />
-                {withdrawTable}
-            </Form>
-        )
-    }
-
-    saveWeeklyReporting(data) {
-        if (this.props.weeklySave.state == 'new') {
-            const { centerId, reportingDate } = this.props.params
-            delayDispatch(this, actions.weeklyReportingSubmit(
-                centerId, reportingDate,
-                this.props.weeklyReporting, data
-            ))
-        }
-    }
-
-    changeSort(newSort) {
-        this.props.dispatch(teamMembersData.changeSortCriteria(newSort))
-    }
-}
-
-class GitwTdoLiveSelectView extends BooleanSelectView {
-    onChange(e) {
-        super.onChange(e)
-        let bits = this.props.model.split('.')
-        bits.reverse() // the model looks like path.<teamMemberid>.tdo so if we reverse it, we get the right answer
-        this.props.dispatch(actions.weeklyReportingUpdated(bits[1]))
-    }
-}
-const GitwTdoLiveSelect = connectCustomField(GitwTdoLiveSelectView)
-
-class TeamMemberIndexRow extends React.PureComponent {
-    static propTypes = {
-        baseUri: PropTypes.string.isRequired,
-        updating: PropTypes.string.isRequired,
-        teamMember: PropTypes.object.isRequired,
-        accountabilities: PropTypes.object
-    }
-
-    render() {
-        const { teamMember, updating, accountabilities, lookups } = this.props
-        const modelKey = `${TEAM_MEMBERS_COLLECTION_FORM_KEY}.${teamMember.id}`
-        var className, accountability
-        if (updating == STATE_SAVED) {
-            className = 'bg-success'
-        } else if (updating == STATE_UPDATING) {
-            className = 'bg-warning'
-        }
-        const acc = teamMember.accountabilities
-        if (acc && acc.length) {
-            accountability = acc.map((accId) => accountabilities[accId].display).join(', ')
-        }
-
-        if (teamMember.withdrawCode || teamMember.xferOut) {
-            let reason = 'Transfered to another team'
-            if (teamMember.withdrawCode) {
-                reason = lookups.withdraw_codes_by_id[teamMember.withdrawCode].display
-            }
-            return (
-                <tr className={className}>
-                    <td>
-                        <Link to={`${this.props.baseUri}/edit/${teamMember.id}`}>
-                            {teamMember.firstName} {teamMember.lastName}
-                        </Link>
-                    </td>
-                    <td>T{teamMember.teamYear} Q{teamMember.quarterNumber}</td>
-                    <td>{reason}</td>
-                </tr>
-            )
-        }
-
-        return (
-            <tr className={className}>
-                <td>
-                    <Link to={`${this.props.baseUri}/edit/${teamMember.id}`}>
-                        {teamMember.firstName} {teamMember.lastName}
-                    </Link>
-                </td>
-                <td>T{teamMember.teamYear} Q{teamMember.quarterNumber}</td>
-                <td>{accountability}</td>
-                <td className="gitw"><GitwTdoLiveSelect model={modelKey+'.gitw'} emptyChoice=" " labels={GITW_LABELS} /></td>
-                <td className="tdo"><GitwTdoLiveSelect model={modelKey+'.tdo'} emptyChoice=" " labels={TDO_LABELS} /></td>
-            </tr>
-        )
+// TODO split up the mapstate into a few functions based on what we actually use, and into a few modules
+const teamMembersMapState = (state) => {
+    const { centerQuarters, lookups } = state.submission.core
+    const teamAccountabilities = getTeamAccountabilities(state)
+    const validStartQuarters = getValidStartQuarters(state.submission.core)
+    return {
+        centerQuarters, lookups, teamAccountabilities,
+        validStartQuarters,
+        browser:state.browser,
+        ...state.submission.team_members
     }
 }
 
@@ -418,14 +240,15 @@ class _EditCreate extends TeamMembersBase {
 }
 
 // Detailed edit of class list
-class TeamMembersEditView extends _EditCreate {
+@connectRedux(teamMembersMapState)
+export class TeamMembersEdit extends _EditCreate {
     checkLoading() {
         if (!super.checkLoading()) {
             return false
         }
         const { currentMember, params, dispatch, teamMembers } = this.props
         if (!currentMember || currentMember.id != params.teamMemberId) {
-            const item = teamMembers.data.collection[params.teamMemberId]
+            const item = teamMembers.data[params.teamMemberId]
             if (item) {
                 if (item.exitChoice == 'wd' && !item.withdrawCode) {
                     item.exitChoice = ''
@@ -491,7 +314,8 @@ class TeamMembersEditView extends _EditCreate {
     }
 }
 
-class TeamMembersAddView extends _EditCreate {
+@connectRedux(teamMembersMapState)
+export class TeamMembersAdd extends _EditCreate {
     defaultTeamMember = {exitChoice: '', teamYear: '1', atWeekend: false}
     checkLoading() {
         if (!super.checkLoading()) {
@@ -546,19 +370,3 @@ class TeamMembersAddView extends _EditCreate {
         )
     }
 }
-
-const getTeamAccountabilities = makeAccountabilitiesSelector('team')
-const getValidStartQuarters = makeQuartersSelector('validStartQuarters')
-
-const mapStateToProps = (state) => {
-    const { centerQuarters, lookups } = state.submission.core
-    const teamAccountabilities = getTeamAccountabilities(state)
-    const validStartQuarters = getValidStartQuarters(state.submission.core)
-    const n = {centerQuarters, lookups, teamAccountabilities, validStartQuarters, browser:state.browser}
-    return objectAssign(n, state.submission.team_members)
-}
-const connector = connect(mapStateToProps)
-
-export const TeamMembersIndex = connector(TeamMembersIndexView)
-export const TeamMembersEdit = connector(TeamMembersEditView)
-export const TeamMembersAdd = connector(TeamMembersAddView)

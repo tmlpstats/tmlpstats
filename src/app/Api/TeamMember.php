@@ -111,7 +111,7 @@ class TeamMember extends AuthenticatedApiBase
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $messages = [];
         foreach ($updates as $item) {
-            $updatedDomain = Domain\TeamMember::fromArray($item, ['id', 'gitw', 'tdo']);
+            $updatedDomain = Domain\TeamMember::fromArray($item, ['id']);
             $existing = array_get($sourceData, $updatedDomain->id, null);
             $existing->gitw = $updatedDomain->gitw;
             $existing->tdo = $updatedDomain->tdo;

@@ -29,7 +29,8 @@ export function loadApplications(centerId, reportingDate) {
         }).then((data) => {
             dispatch(initializeApplications(data))
             return data
-        }).catch(() => {
+        }).catch((err) => {
+            console.log(err)
             dispatch(loadState('failed'))
         })
     }
@@ -67,7 +68,7 @@ export function saveApplication(center, reportingDate, data) {
             }
 
             let newData = objectAssign({}, data, {id: result.storedId})
-            dispatch(appsCollection.replaceItem(newData))
+            dispatch(appsCollection.replaceItem(newData.id, newData))
             dispatch(messages.replace(result.storedId, result.messages))
 
             // We successfully saved, reset any existing parser messages

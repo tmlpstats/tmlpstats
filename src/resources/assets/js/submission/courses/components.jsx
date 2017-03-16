@@ -9,11 +9,15 @@ import moment from 'moment'
 
 import { SubmissionBase, React } from '../base_components'
 import { Form, SimpleField, SimpleDateInput, AddOneLink } from '../../reusable/form_utils'
+import { collectionSortSelector, SORT_BY } from '../../reusable/sort-helpers'
 import { ModeSelectButtons, SubmitFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
 import { COURSES_FORM_KEY } from './reducers'
 import { coursesSorts, coursesCollection, courseTypeMap } from './data'
 import { loadCourses, saveCourse, chooseCourse } from './actions'
+
+const getSortedCourses = collectionSortSelector(coursesSorts)
+
 
 class CoursesBase extends SubmissionBase {
     componentDidMount() {
@@ -28,7 +32,7 @@ class CoursesBase extends SubmissionBase {
     }
 
     getCourseById(courseId) {
-        return this.props.courses.collection[courseId]
+        return this.props.courses.data[courseId]
     }
 
     getCourseLocation(course) {
@@ -91,12 +95,13 @@ class CoursesIndexView extends CoursesBase {
         if (!this.props.loading.loaded) {
             return this.renderBasicLoading()
         }
-        const changeSort = (newSort) => this.props.dispatch(coursesCollection.changeSortCriteria(newSort))
+        const changeSort = (newSort) => this.props.dispatch(coursesCollection.setMeta(SORT_BY, newSort))
         const courses = []
         const completed = []
         const baseUri = this.baseUri()
 
-        coursesCollection.iterItems(this.props.courses, (course, key) => {
+        getSortedCourses(this.props.courses).forEach((course) => {
+            const key = course.id
             const location = this.getCourseLocation(course)
             const startDate = moment(course.startDate)
             const qss = course.quarterStartStandardStarts || '-'
@@ -123,7 +128,7 @@ class CoursesIndexView extends CoursesBase {
         return (
             <div>
                 <h3>Manage Courses</h3>
-                <ModeSelectButtons items={coursesSorts} current={this.props.courses.meta.sort_by}
+                <ModeSelectButtons items={coursesSorts} current={this.props.courses.meta.get(SORT_BY)}
                                    onClick={changeSort} ariaGroupDesc="Sort Preferences" />
                 <table className="table">
                     <thead>

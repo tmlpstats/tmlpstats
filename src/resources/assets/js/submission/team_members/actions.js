@@ -29,7 +29,7 @@ function initializeTeamMembers(data) {
             teamMember.exitChoice = determineExitChoice(teamMember, state)
         })
         // Re-format the collection as a key-ordered collection
-        data = teamMembersData.ensureCollection(data)
+        data = _.keyBy(data, 'id')
 
         dispatch(formActions.load(TEAM_MEMBERS_COLLECTION_FORM_KEY, data))
         dispatch(teamMembersData.loadState('loaded'))
@@ -92,7 +92,7 @@ export function stashTeamMember(center, reportingDate, data) {
 
             const newData = objectAssign({}, data, {id: result.storedId, meta: result.meta})
             dispatch(messages.replace(newData.id, getMessages(result)))
-            dispatch(teamMembersData.replaceItem(newData))
+            dispatch(teamMembersData.replaceItem(newData.id, newData))
 
             // If this is a new entry, clear out any messages
             if (!data.id) {
