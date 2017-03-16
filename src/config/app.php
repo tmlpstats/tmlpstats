@@ -16,7 +16,7 @@ return [
     'debug' => env('APP_DEBUG'),
 
     /// ADDED FOR LARAVEL 5.2 UPGRADE
-    'env' => env('APP_ENV', 'production'),
+    'env' => env('APP_ENV', 'prod'),
 
     /*
     |--------------------------------------------------------------------------
