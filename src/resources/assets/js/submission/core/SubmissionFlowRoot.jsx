@@ -33,7 +33,7 @@ export default class SubmissionFlowRoot extends SubmissionBase {
                     <div id="swSidebar">{nav}</div>
                     <div id="swContent">
                         <div className="panel panel-default">
-                            <div className="panel-body">
+                            <div className="panel-body submission-content">
                                 {this.props.children}
                             </div>
                         </div>
@@ -46,7 +46,7 @@ export default class SubmissionFlowRoot extends SubmissionBase {
                 <div className="submission-layout">
                     {nav}
                     <div className="tab-content">
-                        <div className="tab-pane active">
+                        <div className="tab-pane active submission-content">
                             {this.props.children}
                         </div>
                     </div>

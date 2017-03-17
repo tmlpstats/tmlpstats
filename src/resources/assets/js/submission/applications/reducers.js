@@ -9,8 +9,8 @@ export const APPLICATIONS_FORM_KEY = 'submission.applications.currentApp'
 export const applicationReducer = combineReducers({
     loading: applicationsLoad.reducer(),
     applications: appsCollection.reducer(),
-    currentApp: modelReducer(APPLICATIONS_FORM_KEY, []),
-    currentAppForm: formReducer(APPLICATIONS_FORM_KEY, []),
+    currentApp: modelReducer(APPLICATIONS_FORM_KEY, null),
+    currentAppForm: formReducer(APPLICATIONS_FORM_KEY, null),
     saveApp: saveAppLoad.reducer(),
     messages: messages.reducer(),
 })
