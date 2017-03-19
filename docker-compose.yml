@@ -14,7 +14,7 @@ services:
       - APP_DEBUG=true
       - DB_HOST=mysql
       - MEMCACHED_HOST=memcached
-      - "LOCALDEV_WATCH=${LOCALDEV_WATCH-n}"
+      - "LOCALDEV_WATCH=${LOCALDEV_WATCH-y}"
 
   # The "localdev" docker image is a developer image for unixy systems & power users
   localdev:
