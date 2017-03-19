@@ -21,9 +21,21 @@ $reportingDate = $baseController->getReportingDate();
     {{-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries --}}
     {{-- WARNING: Respond.js doesn't work if you view the page via file:// --}}
     <!--[if lt IE 9]>
-    <script src="{{ asset('vendor/js/html5shiv/dist/html5shiv.min.js') }}"></script>
-    <script src="{{ asset('vendor/js/response/dist/respond.min.js') }}"></script>
+    <script src="{{ asset('vendor/js/html5shiv.min.js') }}"></script>
+    <script src="{{ asset('vendor/js/respond.min.js') }}"></script>
     <![endif]-->
+
+    {{-- The ES6 shim brings ES6 functions, but we're doing a detection, most browsers other than IE these days support this without a shim.--}}
+    <script type="text/javascript">
+        if (!Object.assign || !String.prototype.startsWith) {
+            (function(d) {
+                var s = d.createElement('script')
+                s.src = @json(asset('/vendor/js/shim.min.js'));
+                var firstScript = d.getElementsByTagName('script')[0]
+                firstScript.parentNode.insertBefore(s, firstScript)
+            })(document)
+        }
+    </script>
 
     <link href="{{ mix('build/css/app.css') }}" rel="stylesheet">
 

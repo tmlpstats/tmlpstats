@@ -11,13 +11,6 @@ const LoaderState = Immutable.Record({
     perLoad: 1
 })
 
-if (!String.prototype.startsWith) {
-    String.prototype.startsWith = function(searchString, position) {
-        position = position || 0
-        return this.substr(position, searchString.length) === searchString
-    }
-}
-
 export class TabbedReportManager extends ReduxLoader {
     constructor(opts) {
         super(opts)

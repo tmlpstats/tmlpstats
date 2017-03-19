@@ -29,7 +29,7 @@ export default class SubmissionFlowRoot extends SubmissionBase {
         var layout
         if (largeLayout) {
             layout = (
-                <div id="submissionWideLayout" className="row">
+                <div id="submissionWideLayout" className="row submission-layout">
                     <div id="swSidebar">{nav}</div>
                     <div id="swContent">
                         <div className="panel panel-default">
@@ -43,7 +43,7 @@ export default class SubmissionFlowRoot extends SubmissionBase {
             )
         } else {
             layout = (
-                <div>
+                <div className="submission-layout">
                     {nav}
                     <div className="tab-content">
                         <div className="tab-pane active">

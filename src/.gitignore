@@ -17,3 +17,4 @@ public/js/pack
 public/fonts
 public/mix-manifest.json
 public/components
+tests/browser/vars.js

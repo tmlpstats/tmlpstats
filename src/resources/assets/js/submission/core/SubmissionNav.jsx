@@ -28,13 +28,13 @@ export default class SubmissionNav extends SubmissionBase {
         }
         if (tabbed) {
             return (
-                <ul className="nav nav-tabs">
+                <ul className="nav nav-tabs submission-nav">
                     {steps}
                 </ul>
             )
         } else {
             return (
-                <div className="list-group">
+                <div className="list-group submission-nav">
                     {steps}
                 </div>
             )
