@@ -71,6 +71,9 @@ class ApiController extends ApiControllerBase
     protected $tokenAuthenticatedMethods = [
         "GlobalReport__getReportPages",
         "GlobalReport__getReportPagesByDate",
+        "LocalReport__getQuarterScoreboard",
+        "LocalReport__reportViewOptions",
+        "LocalReport__getReportPages",
     ];
 
     protected $unauthenticatedMethods = [

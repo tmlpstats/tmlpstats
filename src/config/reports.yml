@@ -251,6 +251,7 @@ api:
     children:
       getQuarterScoreboard:
         desc: Get scoreboard for all weeks within a quarter
+        access: token
         params:
           - name: localReport
             type: LocalReport
@@ -301,6 +302,7 @@ api:
 
       reportViewOptions:
         desc: View options for report
+        access: token
         params:
           - name: center
             type: Center
@@ -309,6 +311,7 @@ api:
 
       getReportPages:
         desc: Get report pages
+        access: token
         params:
           - name: center
             type: Center
