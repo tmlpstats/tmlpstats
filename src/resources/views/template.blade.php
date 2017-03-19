@@ -6,7 +6,7 @@ $baseController = App::make(TmlpStats\Http\Controllers\Controller::class);
 $center = $baseController->getCenter(Request::instance());
 $region = $baseController->getRegion(Request::instance());
 $reportingDate = $baseController->getReportingDate();
-
+$needs_shim = Session::get('needs_shim', '');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -25,18 +25,6 @@ $reportingDate = $baseController->getReportingDate();
     <script src="{{ asset('vendor/js/respond.min.js') }}"></script>
     <![endif]-->
 
-    {{-- The ES6 shim brings ES6 functions, but we're doing a detection, most browsers other than IE these days support this without a shim.--}}
-    <script type="text/javascript">
-        if (!Object.assign || !String.prototype.startsWith) {
-            (function(d) {
-                var s = d.createElement('script')
-                s.src = @json(asset('/vendor/js/shim.min.js'));
-                var firstScript = d.getElementsByTagName('script')[0]
-                firstScript.parentNode.insertBefore(s, firstScript)
-            })(document)
-        }
-    </script>
-
     <link href="{{ mix('build/css/app.css') }}" rel="stylesheet">
 
     @yield('headers')
@@ -54,6 +42,13 @@ $reportingDate = $baseController->getReportingDate();
     @endif
 
     @include('partials.settings')
+
+    {{-- The ES6 shim brings ES6 functions, but we're doing a detection, most browsers other than IE these days support this without a shim.--}}
+    @if ($needs_shim == 'y')
+        <script type="text/javascript" src="{{ asset('/vendor/js/shim.min.js') }}"></script>
+    @elseif ($needs_shim != 'n')
+        <script type="text/javascript" src="/js/detect-shim.js"></script>
+    @endif
 
     <script src="{{ mix('build/js/classic-vendor.js') }}" type="text/javascript"></script>
     <script src="{{ mix('build/js/manifest.js') }}" type="text/javascript"></script>

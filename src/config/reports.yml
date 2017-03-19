@@ -478,6 +478,12 @@ api:
             type: string
           - name: timezone
             type: string
+      needsShim:
+        access: any
+        desc: Tell the server we definitely need a shim
+        params:
+          - name: v
+            type: string
 
   ValidationData:
     type: namespace
