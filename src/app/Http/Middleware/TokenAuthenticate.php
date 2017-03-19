@@ -5,6 +5,7 @@ use Auth;
 use Closure;
 use Illuminate\Contracts\Auth\Guard;
 use Session;
+use TmlpStats as Models;
 use TmlpStats\ReportToken;
 
 class TokenAuthenticate
@@ -46,6 +47,15 @@ class TokenAuthenticate
                 $user->setReportToken($reportToken);
                 Auth::setUser($user);
 
+                if (!Session::has('timezone')) {
+                    $timezone = 'US/Eastern';
+                    if ($reportToken->ownerType == Models\Region::class) {
+                        //TODO region to timezone mapp
+                    } else if (($report = $reportToken->getReport()) instanceof Models\StatsReport) {
+                        $timezone = $report->center->timezone;
+                    }
+                    Session::set('timezone', $timezone);
+                }
                 Session::set('homePath', $reportToken->getReportPath());
             }
         }
