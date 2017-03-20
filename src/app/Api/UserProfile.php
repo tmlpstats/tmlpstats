@@ -10,7 +10,7 @@ class UserProfile
         $this->request = $request;
     }
 
-    public function setLocale($locale = "", $timezone = "")
+    public function setLocale($locale = '', $timezone = '')
     {
         // Save the user's timezone
         if ($timezone) {
@@ -22,5 +22,12 @@ class UserProfile
         }
 
         return ['success' => true];
+    }
+
+    public function needsShim($v = '')
+    {
+        Session::set('needs_shim', $v);
+
+        return [];
     }
 }

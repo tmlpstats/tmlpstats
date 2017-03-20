@@ -7,3 +7,7 @@ if (!window.console.log) {
         // does nothing
     }
 }
+
+if (!window.Promise) {
+    require('es6-promise').polyfill()
+}

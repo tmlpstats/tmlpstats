@@ -65,6 +65,7 @@ class ApiController extends ApiControllerBase
         "TeamMember.stash" => "TeamMember__stash",
         "TeamMember.bulkStashWeeklyReporting" => "TeamMember__bulkStashWeeklyReporting",
         "UserProfile.setLocale" => "UserProfile__setLocale",
+        "UserProfile.needsShim" => "UserProfile__needsShim",
         "ValidationData.validate" => "ValidationData__validate",
     ];
 
@@ -78,6 +79,7 @@ class ApiController extends ApiControllerBase
 
     protected $unauthenticatedMethods = [
         "LiveScoreboard__getCurrentScores",
+        "UserProfile__needsShim",
     ];
 
     protected function Admin__Region__getRegion($input)
@@ -417,6 +419,12 @@ class ApiController extends ApiControllerBase
         return App::make(Api\UserProfile::class)->setLocale(
             $this->parse($input, 'locale', 'string'),
             $this->parse($input, 'timezone', 'string')
+        );
+    }
+    protected function UserProfile__needsShim($input)
+    {
+        return App::make(Api\UserProfile::class)->needsShim(
+            $this->parse($input, 'v', 'string')
         );
     }
     protected function ValidationData__validate($input)

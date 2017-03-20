@@ -439,7 +439,14 @@ Api.UserProfile = {
       locale: string
       timezone: string
     */
-    setLocale: bac('UserProfile.setLocale')
+    setLocale: bac('UserProfile.setLocale'),
+
+    /*
+    Tell the server we definitely need a shim
+    Parameters:
+      v: string
+    */
+    needsShim: bac('UserProfile.needsShim')
 }
 
 Api.ValidationData = {
