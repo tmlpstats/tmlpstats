@@ -40,6 +40,8 @@ let browsers = {
         resolution: '1600x1200'
     },
     ipad: {
+        // ipad takes a very long time to boot up. This ensures we run it intentionally
+        _excludeDefault: true,
         browserName: 'iPad',
         platform: 'MAC',
         device: 'iPad Mini 4'
