@@ -136,8 +136,7 @@ class Course extends ApiBase
     {
         $isFirstWeek = Models\Quarter::isFirstWeek($center->region);
 
-        // TODO: fix this so we don't assume the course starts on a Saturday
-        $courseReportDate = $course->startDate->copy()->addDays(6);
+        $courseReportDate = $course->startDate->copy()->next(Carbon::FRIDAY);
         $isPastCourse = $reportingDate->gt($courseReportDate);
         $isCompletionWeek = $reportingDate->eq($courseReportDate);
 
