@@ -335,7 +335,74 @@ class SubmissionCore extends AuthenticatedApiBase
                     [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
             }
 
-            // Insert course data
+            // Only update the most recently stored PM/CL, ignore any other stashed rows
+            foreach (['programManager', 'classroomLeader'] as $accountabilityName) {
+                $result = DB::select('
+                    SELECT i.*
+                    FROM submission_data_program_leaders i
+                    LEFT OUTER JOIN people p ON p.id=i.stored_id
+                    WHERE i.center_id=? and i.reporting_date=? and i.accountability=?
+                    ORDER BY i.id DESC
+                    LIMIT 1
+                ', [$center->id, $reportingDate->toDateString(), $accountabilityName]);
+
+                if (!$result) {
+                    continue;
+                }
+
+                $r = $result[0];
+
+                if ($r->stored_id < 0) {
+                    // This is a new program leader, create the things
+                    DB::insert('
+                        INSERT INTO people
+                            (first_name, last_name, email, phone, center_id, created_at, updated_at)
+                        SELECT i.first_name, i.last_name, i.email, i.phone, i.center_id, sysdate(), sysdate()
+                        FROM submission_data_program_leaders i
+                        WHERE i.id=?
+                    ', [$r->id]);
+                    $person_id = DB::getPdo()->lastInsertId();
+
+                    // Update submission_data with new id so we don't overwrite if the report is resubmitted
+                    DB::update('UPDATE submission_data SET stored_id=?, data = JSON_SET(data, "$.id", ?) WHERE id=?', [$person_id, $person_id, $r->id]);
+                } else {
+                    // This is an existing program leader, update the things
+                    DB::update('
+                        UPDATE people p, submission_data_program_leaders sda
+                        SET p.updated_at=sysdate(),
+                            p.first_name=sda.first_name,
+                            p.last_name=sda.last_name,
+                            p.email=sda.email,
+                            p.phone=sda.phone,
+                            p.updated_at=sysdate()
+                        WHERE p.id=sda.stored_id
+                            AND sda.id=?
+                            AND (coalesce(p.first_name,\'\') != coalesce(sda.first_name,\'\')
+                                OR coalesce(p.last_name,\'\') != coalesce(sda.last_name,\'\')
+                                OR coalesce(p.email,\'\') != coalesce(sda.email,\'\')
+                                OR coalesce(p.phone,\'\') != coalesce(sda.phone,\'\')
+                            )
+                    ', [$r->id]);
+
+                    $person_id = $r->stored_id;
+                }
+
+                $person = Models\Person::find($person_id);
+                $accountability = Models\Accountability::name($r->accountability)->first();
+                if ($person && $accountability && !$person->hasAccountability($accountability, $reportNow)) {
+                    Log::error("Taking over accountability {$r->accountability} for person {$person->id}.");
+                    $person->takeoverAccountability($accountability, $reportNow, $quarterEndDate);
+                }
+
+                $field = ($accountabilityName == 'programManager') ? 'program_manager_attending_weekend' : 'classroom_leader_attending_weekend';
+                DB::update("
+                    UPDATE center_stats_data csd, submission_data_program_leaders sd
+                    SET csd.{$field} = sd.attending_weekend
+                    WHERE sd.id=? AND csd.stats_report_id=? AND csd.reporting_date=? AND csd.type='actual'
+                ", [$r->id, $statsReport->id, $reportingDate->toDateString()]);
+            } // end program leader processing
+
+            //Insert course data
             $result = DB::select('select i.* from submission_data_courses i
                                     where i.center_id=? and i.reporting_date=?',
                 [$center->id, $reportingDate->toDateString()]);

@@ -6,6 +6,7 @@ import coreReducer from './core/reducers'
 import teamMembersReducer from './team_members/reducers'
 import nqaReducer from './next_qtr_accountabilities/reducers'
 import reviewReducer from './review/reducers'
+import programLeadersReducer from './program_leaders/reducers'
 
 import clearWrapper from './core/clearWrapper'
 
@@ -17,7 +18,8 @@ const submissionReducerInternal = combineReducers({
     courses: courseReducer,
     scoreboard: scoreboardReducer,
     next_qtr_accountabilities: nqaReducer,
-    review: reviewReducer
+    review: reviewReducer,
+    program_leaders: programLeadersReducer
 })
 
 export const submissionReducer = clearWrapper(submissionReducerInternal, (state, action) => {

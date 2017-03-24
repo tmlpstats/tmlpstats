@@ -339,6 +339,29 @@ api:
           - name: region
             type: Region
 
+  ProgramLeader:
+    type: namespace
+    children:
+      allForCenter:
+        desc: Get program leaders data for a center-reportingDate, optionally including in-progress data
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+          - name: includeInProgress
+            type: bool
+            required: false
+      stash:
+        desc: Stash data for in-progress Team Member weekly
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+          - name: data
+            type: array
+
   Scoreboard:
     type: namespace
     children:

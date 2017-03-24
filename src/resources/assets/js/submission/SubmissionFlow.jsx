@@ -13,6 +13,8 @@ export default function SubmissionFlow() {
             <Route path="team_members" component={Pages.TeamMembersIndex} />
             <Route path="team_members/edit/:teamMemberId" component={Pages.TeamMembersEdit} />
             <Route path="team_members/add" component={Pages.TeamMembersAdd} />
+            <Route path="program_leaders/edit/:accountability" component={Pages.ProgramLeadersEdit} />
+            <Route path="program_leaders/add/:accountability" component={Pages.ProgramLeadersAdd} />
             <Route path="courses" component={Pages.CoursesIndex} />
             <Route path="courses/edit/:courseId" component={Pages.CoursesEdit} />
             <Route path="courses/add" component={Pages.CoursesAdd} />

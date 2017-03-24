@@ -1,4 +1,5 @@
 import { LoadingMultiState } from '../../reusable/reducers'
+import Api from '../../api'
 
 export const reportSubmitting = new LoadingMultiState('review/submitReport')
 export const displayFlow = new LoadingMultiState('review/displayFlow')

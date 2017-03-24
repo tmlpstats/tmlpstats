@@ -261,3 +261,24 @@ VIEW `submission_data_courses` AS
         `submission_data`
     WHERE
         (`submission_data`.`stored_type` = 'course');
+
+
+CREATE OR REPLACE
+VIEW `submission_data_program_leaders` AS
+    SELECT
+        `submission_data`.id,
+        `submission_data`.center_id,
+        `submission_data`.reporting_date,
+        `submission_data`.`stored_id` AS `stored_id`,
+        `submission_data`.`data`->> '$.firstName' AS `first_name`,
+        `submission_data`.`data`->> '$.lastName' AS `last_name`,
+        `submission_data`.`data`->> '$.email' AS `email`,
+        `submission_data`.`data`->> '$.phone' AS `phone`,
+        case when `submission_data`.`data`->> '$.attendingWeekend'='true' then 1
+             else 0 end AS `attending_weekend`,
+        `submission_data`.`data`->> '$.accountability' AS `accountability`
+    FROM
+        `submission_data` left outer join `people`
+              on `submission_data`.stored_id=`people`.id
+    WHERE
+        (`submission_data`.`stored_type` = 'program_leader');
