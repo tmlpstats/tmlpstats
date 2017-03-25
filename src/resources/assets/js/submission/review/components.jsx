@@ -144,19 +144,19 @@ export class ReviewCategory extends React.PureComponent {
 
         switch (config.className) {
         case 'TeamApplication':
-            refObject = pageData.applications.collection[id]
+            refObject = pageData.applications.data[id]
             if (refObject) {
                 displayValue = `${refObject.firstName} ${refObject.lastName}`
             }
             break
         case 'Course':
-            refObject = pageData.courses.collection[id]
+            refObject = pageData.courses.data[id]
             if (refObject) {
                 displayValue = refObject.type + ' on ' + moment(refObject.startDate).format('MMM D, YYYY')
             }
             break
         case 'TeamMember':
-            refObject = pageData.teamMembers.data.collection[id]
+            refObject = pageData.teamMembers.data[id]
             if (refObject) {
                 displayValue = `${refObject.firstName} ${refObject.lastName}`
             }
