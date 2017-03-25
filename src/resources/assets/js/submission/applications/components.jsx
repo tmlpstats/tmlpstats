@@ -2,9 +2,9 @@ import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
 
 import { Form, SimpleField, SimpleSelect, SimpleFormGroup, BooleanSelect, AddOneLink } from '../../reusable/form_utils'
-import { Promise, objectAssign } from '../../reusable/ponyfill'
-import { rebind } from '../../reusable/dispatch'
-import { collectionSortSelector } from '../../reusable/sort-helpers'
+import { objectAssign } from '../../reusable/ponyfill'
+import { rebind, delayDispatch } from '../../reusable/dispatch'
+import { collectionSortSelector, SORT_BY } from '../../reusable/sort-helpers'
 import { ModeSelectButtons, LoadStateFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
 import { SubmissionBase, React } from '../base_components'
@@ -17,16 +17,30 @@ import AppStatus from './AppStatus'
 
 const getSortedApplications = collectionSortSelector(appsSorts)
 
+const mapStateToProps = (state) => {
+    const s = state.submission
+    return {lookups: s.core.lookups, centerQuarters: s.core.centerQuarters, ...s.applications}
+}
+const connector = connect(mapStateToProps)
+
+
 class ApplicationsBase extends SubmissionBase {
-    componentDidMount() {
-        this.setupApplications()
+    constructor(props) {
+        super(props)
+        this.checkLoading()
     }
 
-    setupApplications() {
-        if (this.props.loading.state == 'new') {
-            return this.props.dispatch(loadApplications(this.props.params.centerId, this.reportingDateString()))
+    checkLoading() {
+        const { loading, params } = this.props
+        if (loading.state == 'new') {
+            const { centerId, reportingDate } = params
+            delayDispatch(this, loadApplications(centerId, reportingDate))
         }
-        return Promise.resolve(null)
+        return (loading.state == 'loaded')
+    }
+
+    appsBaseUri() {
+        return this.baseUri() + '/applications'
     }
 
     getAppById(appId) {
@@ -34,7 +48,8 @@ class ApplicationsBase extends SubmissionBase {
     }
 }
 
-class ApplicationsIndexView extends ApplicationsBase {
+@connector
+export class ApplicationsIndex extends ApplicationsBase {
     constructor(props) {
         super(props)
         rebind(this, 'changeSort')
@@ -45,14 +60,14 @@ class ApplicationsIndexView extends ApplicationsBase {
             return <div />
         }
 
-        const baseUri = this.baseUri()
+        const baseUri = this.appsBaseUri()
         const withdraws = []
 
         apps.forEach((app) => {
             let key = app.id
             withdraws.push(
                 <tr key={key}>
-                    <td><Link to={`${baseUri}/applications/edit/${key}`}>{app.firstName} {app.lastName}</Link></td>
+                    <td><Link to={`${baseUri}/edit/${key}`}>{app.firstName} {app.lastName}</Link></td>
                     <td>{app.teamYear}</td>
                     <td>{app.regDate}</td>
                     <td>{app.wdDate}</td>
@@ -82,13 +97,14 @@ class ApplicationsIndexView extends ApplicationsBase {
     }
 
     render() {
-        if (!this.props.loading.loaded) {
-            return this.renderBasicLoading()
+        if (!this.checkLoading()) {
+            return this.renderBasicLoading(this.props.loading)
         }
         var apps = []
         var withdraws = []
-        var baseUri = this.baseUri()
-        const sortedApps = getSortedApplications(this.props.applications)
+        const baseUri = this.appsBaseUri()
+        const { applications } = this.props
+        const sortedApps = getSortedApplications(applications)
 
         sortedApps.forEach((app) => {
             const key = app.id
@@ -100,7 +116,7 @@ class ApplicationsIndexView extends ApplicationsBase {
 
             apps.push(
                 <tr key={key}>
-                    <td><Link to={`${baseUri}/applications/edit/${key}`}>{app.firstName} {app.lastName}</Link></td>
+                    <td><Link to={`${baseUri}/edit/${key}`}>{app.firstName} {app.lastName}</Link></td>
                     <td>{app.teamYear}</td>
                     <td>{app.regDate}</td>
                     <td>{app.apprDate}</td>
@@ -112,7 +128,7 @@ class ApplicationsIndexView extends ApplicationsBase {
         return (
             <div>
                 <h3>Manage Registrations</h3>
-                <ModeSelectButtons items={appsSorts} current={this.props.applications.meta.get('sort_by')}
+                <ModeSelectButtons items={appsSorts} current={applications.meta.get(SORT_BY)}
                                    onClick={this.changeSort} ariaGroupDesc="Sort Preferences" />
                 <table className="table">
                     <thead>
@@ -126,7 +142,7 @@ class ApplicationsIndexView extends ApplicationsBase {
                     </thead>
                     <tbody>{apps}</tbody>
                 </table>
-                <AddOneLink link={`${baseUri}/applications/add`} />
+                <AddOneLink link={`${baseUri}/add`} />
                 {this.renderWithdrawsTable(withdraws)}
             </div>
         )
@@ -138,6 +154,14 @@ class ApplicationsIndexView extends ApplicationsBase {
 }
 
 class _EditCreate extends ApplicationsBase {
+    checkLoading() {
+        if (!super.checkLoading()) {
+            return false
+        }
+        const { lookups } = this.props
+        return (lookups.validRegQuarters && lookups.team_members)
+    }
+
     render() {
         const modelKey = APPLICATIONS_FORM_KEY
         const app = this.props.currentApp
@@ -248,7 +272,8 @@ class _EditCreate extends ApplicationsBase {
 
     // saveAppData for now is the same between edit and create flows
     saveAppData(data) {
-        this.props.dispatch(saveApplication(this.props.params.centerId, this.reportingDateString(), data)).then((result) => {
+        const { router, dispatch, params: {centerId, reportingDate} } = this.props
+        dispatch(saveApplication(centerId, reportingDate, data)).then((result) => {
             if (!result) {
                 return
             }
@@ -258,27 +283,32 @@ class _EditCreate extends ApplicationsBase {
 
                 // Redirect to edit view if there are warning messages
                 if (this.isNewApp() && result.valid) {
-                    this.props.router.push(this.baseUri() + '/applications/edit/' + result.storedId)
+                    router.push(`${this.appsBaseUri()}/edit/${result.storedId}`)
                 }
             } else if (result.valid) {
-                this.props.router.push(this.baseUri() + '/applications')
+                router.push(this.appsBaseUri())
             }
         })
     }
 }
 
-class ApplicationsEditView extends _EditCreate {
-    componentDidMount() {
-        super.setupApplications().then(() => {
-            var appId = this.props.params.appId
-            if (!this.props.currentApp || this.props.currentApp.id != appId) {
-                let app = this.getAppById(appId)
-                if (app){
-                    app = objectAssign({}, app, {committedTeamMember: app.committedTeamMember || ''})
-                    this.props.dispatch(chooseApplication(appId, app))
-                }
+@connector
+@withRouter
+export class ApplicationsEdit extends _EditCreate {
+    checkLoading() {
+        if (!super.checkLoading()) {
+            return false
+        }
+        const { currentApp, params: { appId } } = this.props
+        if (!currentApp || currentApp.id != appId) {
+            let app = this.getAppById(appId)
+            if (app) {
+                app = objectAssign({}, app, {committedTeamMember: app.committedTeamMember || ''})
+                delayDispatch(this, chooseApplication(appId, app))
             }
-        })
+            return false
+        }
+        return true
     }
 
     title() {
@@ -286,37 +316,34 @@ class ApplicationsEditView extends _EditCreate {
     }
 
     render() {
-        const appId = this.props.params.appId
-
-        if (!this.props.loading.loaded
-            || !this.props.currentApp
-            || this.props.currentApp.id != appId
-            || !this.props.lookups
-            || !this.props.lookups.validRegQuarters
-            || !this.props.lookups.team_members
-        ) {
-            return <div>{this.props.loading.state}...</div>
+        if (!this.checkLoading()) {
+            return this.renderBasicLoading(this.props.loading)
         }
         return super.render()
     }
 }
 
-class ApplicationsAddView extends _EditCreate {
-    componentDidMount() {
-        super.setupApplications().then(() => {
-            if (this.props.currentApp) {
-                const { centerQuarters } = this.getCenterQuarters()
-                const blankApp = {
-                    firstName: '',
-                    lastName: '',
-                    teamYear: 1,
-                    regDate: this.reportingDateString(),
-                    incomingQuarter: centerQuarters[0].quarterId,
-                    committedTeamMember: '',
-                }
-                this.props.dispatch(chooseApplication('', blankApp))
+@connector
+@withRouter
+export class ApplicationsAdd extends _EditCreate {
+    checkLoading() {
+        if (!super.checkLoading()) {
+            return false
+        }
+        if (!this.props.currentApp || this.props.currentApp.id) {
+            const { centerQuarters } = this.getCenterQuarters()
+            const blankApp = {
+                firstName: '',
+                lastName: '',
+                teamYear: 1,
+                regDate: this.reportingDateString(),
+                incomingQuarter: centerQuarters[0].quarterId,
+                committedTeamMember: '',
             }
-        })
+            delayDispatch(this, chooseApplication('', blankApp))
+            return false
+        }
+        return true
     }
 
     title() {
@@ -324,24 +351,10 @@ class ApplicationsAddView extends _EditCreate {
     }
 
     render() {
-        if (!this.props.loading.loaded
-            || !this.props.lookups
-            || !this.props.lookups.validRegQuarters
-            || !this.props.lookups.team_members
-        ) {
-            return <div>{this.props.loading.state}...</div>
+        if (!this.checkLoading()) {
+            return this.renderBasicLoading(this.props.loading)
         }
         return super.render()
     }
 
 }
-
-const mapStateToProps = (state) => {
-    const s = state.submission
-    return objectAssign({lookups: s.core.lookups, centerQuarters: s.core.centerQuarters}, s.applications)
-}
-const connector = connect(mapStateToProps)
-
-export const ApplicationsIndex = connector(ApplicationsIndexView)
-export const ApplicationsEdit = connector(withRouter(ApplicationsEditView))
-export const ApplicationsAdd = connector(withRouter(ApplicationsAddView))
