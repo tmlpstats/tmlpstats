@@ -2,10 +2,12 @@ import moment from 'moment'
 import _ from 'lodash'
 import { normalize } from 'normalizr'
 
-import { coreInit, centerQuarterData, cqResponse } from './data'
 import { objectAssign } from '../../reusable/ponyfill'
 import { delayDispatch } from '../../reusable/dispatch'
 import Api from '../../api'
+
+import { coreInit, centerQuarterData, cqResponse } from './data'
+import { getLabelTeamMember } from './selectors'
 
 export const initState = coreInit.actionCreator()
 
@@ -39,9 +41,10 @@ export function setSubmissionLookups(data, reportingDate) {
         lookups.orderedAccountabilities = c.accountabilities  // canonically sorted accountabilities
         dispatch(centerQuarterData.replaceItems(n.entities.quarters))
         lookups.pastClassroom = {}
-        lookups.withdraw_codes_by_id = _.keyBy(lookups.withdraw_codes, function(code) {
-            return code.id
-        })
+        lookups.withdraw_codes_by_id = _.keyBy(lookups.withdraw_codes, (code) => code.id)
+        if (lookups.team_members) {
+            lookups.team_members = lookups.team_members.sort((a, b) => getLabelTeamMember(a).localeCompare(getLabelTeamMember(b)))
+        }
 
         /// Precompute items like pastClassroom based on quarter dates.
         if (data.currentQuarter) {
