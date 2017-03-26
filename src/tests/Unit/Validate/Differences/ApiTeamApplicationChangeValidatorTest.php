@@ -25,7 +25,12 @@ class ApiTeamApplicationChangeValidatorTest extends ApiValidatorTestAbstract
 
         $this->statsReport->center->name = 'Atlanta';
 
-        $this->dataTemplate = [
+        $this->dataTemplate = $this->getDataTemplate();
+    }
+
+    public function getDataTemplate()
+    {
+        return [
             'firstName' => 'Keith',
             'lastName' => 'Stone',
             'email' => 'unit_test@tmlpstats.com',
@@ -56,7 +61,7 @@ class ApiTeamApplicationChangeValidatorTest extends ApiValidatorTestAbstract
         $data = $this->getTeamApplication($data);
 
         if ($pastWeeks) {
-            $pastWeeks = [ $this->getTeamApplication($pastWeeks) ];
+            $pastWeeks = [$this->getTeamApplication($pastWeeks)];
         }
 
         $validator = $this->getObjectMock();
@@ -96,7 +101,6 @@ class ApiTeamApplicationChangeValidatorTest extends ApiValidatorTestAbstract
                 ],
             ],
 
-
             // AppOut Date with no past weeks
             [
                 [],
@@ -123,7 +127,6 @@ class ApiTeamApplicationChangeValidatorTest extends ApiValidatorTestAbstract
                     'appOutDate' => '2016-08-27',
                 ],
             ],
-
 
             // AppIn Date with no past weeks
             [
@@ -152,7 +155,6 @@ class ApiTeamApplicationChangeValidatorTest extends ApiValidatorTestAbstract
                 ],
             ],
 
-
             // Appr Date with no past weeks
             [
                 [],
@@ -179,7 +181,6 @@ class ApiTeamApplicationChangeValidatorTest extends ApiValidatorTestAbstract
                     'apprDate' => '2016-08-27',
                 ],
             ],
-
 
             // Withdraw Date with no past weeks
             [
@@ -216,6 +217,47 @@ class ApiTeamApplicationChangeValidatorTest extends ApiValidatorTestAbstract
         ];
     }
 
+    /**
+     * @dataProvider providerValidateQuarterChanges
+     */
+    public function testValidateQuarterChanges($data, $expectedMessages, $pastWeeks = [])
+    {
+        $data = $this->getTeamApplication($data);
+
+        if ($pastWeeks) {
+            $pastWeeks = [$this->getTeamApplication($pastWeeks)];
+            $x = ($data->incomingQuarter === $pastWeeks[0]->incomingQuarter);
+        }
+
+        $validator = $this->getObjectMock();
+        $result = $validator->run($data, $pastWeeks);
+
+        $this->assertMessages($expectedMessages, $validator->getMessages());
+        $this->assertTrue($result);
+    }
+
+    public function providerValidateQuarterChanges()
+    {
+        return [
+            // Quarter to future quarter
+            [
+                [
+                    'incomingQuarter' => 'future',
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_INCOMING_QUARTER_CHANGED',
+                        'reference.field' => 'incomingQuarter',
+                    ]),
+                ],
+                [
+                    'incomingQuarter' => 'next',
+                ],
+            ],
+
+        ];
+    }
+
     public function getTeamApplication($data)
     {
         if (isset($data['__reportingDate'])) {
@@ -226,12 +268,13 @@ class ApiTeamApplicationChangeValidatorTest extends ApiValidatorTestAbstract
         if (isset($data['incomingQuarter'])) {
             if ($data['incomingQuarter'] == 'next') {
                 $data['incomingQuarter'] = $this->nextQuarter->id;
+
             } else if ($data['incomingQuarter'] == 'future') {
                 $data['incomingQuarter'] = $this->futureQuarter->id;
             }
         }
 
-        $data = array_merge($this->dataTemplate, $data);
+        $data = array_merge([], $this->getDataTemplate(), $data);
 
         return TeamApplication::fromArray($data);
     }

@@ -96,6 +96,7 @@ return [
     'TEAMAPP_APPOUT_DATE_CHANGED' => 'Application out date changed from :was to :now.',
     'TEAMAPP_APPIN_DATE_CHANGED' => 'Application in date changed from :was to :now.',
     'TEAMAPP_APPR_DATE_CHANGED' => 'Approval date changed from :was to :now.',
+    'TEAMAPP_INCOMING_QUARTER_CHANGED' => 'Applicant incoming quarter was :was, and is now :now. Ensure that applicant is within integrity of application process (only transferred to a future quarter once)',
     'TEAMAPP_WD_DATE_CHANGED' => 'Withdraw date changed from :was to :now.',
     'VALDATA_NOT_UPDATED' => ':type has not been updated since last week. Please confirm that no changes are needed.',
     'ZZZ_TEST_MESSAGE_0_PARAM' => 'This message has 0 params.',

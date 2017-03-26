@@ -39,6 +39,7 @@ class ParserDomain implements Arrayable, \JsonSerializable, Referenceable
     public function getKey()
     {
         $prop = $this->_refProp;
+
         return $this->$prop;
     }
 

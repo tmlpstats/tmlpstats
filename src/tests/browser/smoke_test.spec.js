@@ -9,7 +9,21 @@ const vars = require('./vars')
 
 const DEFAULT_WAIT = 10000
 
-describe('Smoke Test', function() {
+describe('Smoke Test', () => {
+    // After everything, capture logs and filter boring entries
+    if (browser.desiredCapabilities && browser.desiredCapabilities.browser == 'Chrome') {
+        after(function() {
+            const BORING_MESSAGES = /Download the React DevTools/
+
+            let log = browser.log('browser').value
+            let important = log.filter(entry => !BORING_MESSAGES.test(entry.message))
+            if (important.length) {
+                console.log(important)
+                throw important
+            }
+        })
+    }
+
     it('can perform login', () => {
         browser.windowHandleMaximize('current')
         browser.url('/auth/login')
@@ -35,5 +49,23 @@ describe('Smoke Test', function() {
     it('can switch to Courses Link', () => {
         $('.submission-nav').$('a=Courses').click()
         $('h3=Manage Courses').waitForExist(DEFAULT_WAIT)
+    })
+
+    it('can switch to Review page', () => {
+        $('.submission-nav').$('a=Review').click()
+        $('h3=Review').waitForExist(DEFAULT_WAIT)
+    })
+
+    it('can manage Team Expansion', () => {
+        $('.submission-nav').$('a=Team Expansion').click()
+        $('h3=Manage Registrations').waitForExist(DEFAULT_WAIT)
+        let expansionUrl = browser.getUrl()
+        // Clicking the first team registration means we have to have one in the database
+        $('table tbody').$('tr:nth-child(1)').$('a').click()
+        $('h3*=Edit Application').waitForExist(DEFAULT_WAIT)
+        expect(browser.getUrl()).not.toEqual(expansionUrl)
+        let form = $('.submission-content form')
+        form.$('[name*="email"]').setValue('hello@example.com')
+        form.$('button[type="submit"]').click()
     })
 })

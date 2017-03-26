@@ -15,7 +15,7 @@ trait MocksModel
      *
      * @return mixed
      */
-    protected function getModelMock($methods = [], $data = [])
+    protected function getModelMock($methods = [], $data = [], $baseClass = Model::class)
     {
         static $idOffset = 0;
 
@@ -25,9 +25,9 @@ trait MocksModel
 
         $methods = $this->mergeMockMethods($defaultMethods, $methods);
 
-        $model = $this->getMockBuilder(Model::class)
-            ->setMethods($methods)
-            ->getMock();
+        $model = $this->getMockBuilder($baseClass)
+                      ->setMethods($methods)
+                      ->getMock();
 
         static::$idOffset++;
         $model->id = static::$idOffset;
