@@ -5,6 +5,8 @@ import { getMessages } from '../../reusable/ajax_utils'
 import { objectAssign } from '../../reusable/ponyfill'
 import { scrollIntoView } from '../../reusable/ui_basic'
 import Api from '../../api'
+import { markStale } from '../review/actions'
+
 import { coursesCollection, coursesLoad, saveCourseLoad, messages } from './data'
 
 export const loadState = coursesLoad.actionCreator()
@@ -50,6 +52,7 @@ export function saveCourse(center, reportingDate, data) {
         return Api.Course.stash({
             center, reportingDate, data
         }).then((result) => {
+            dispatch(markStale())
             // Failed during validation
             if (!result.storedId) {
                 dispatch(messages.replace('create', result.messages))

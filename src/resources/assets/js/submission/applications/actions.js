@@ -7,6 +7,7 @@ import { scrollIntoView } from '../../reusable/ui_basic'
 import Api from '../../api'
 
 import { appsCollection, applicationsLoad, saveAppLoad, messages } from './data'
+import { markStale } from '../review/actions'
 
 export const loadState = applicationsLoad.actionCreator()
 export const saveAppState = saveAppLoad.actionCreator()
@@ -30,8 +31,7 @@ export function loadApplications(centerId, reportingDate) {
             dispatch(initializeApplications(data))
             return data
         }).catch((err) => {
-            console.log(err)
-            dispatch(loadState('failed'))
+            dispatch(loadState({error: err.error || 'error'}))
         })
     }
 }
@@ -60,6 +60,7 @@ export function saveApplication(center, reportingDate, data) {
         return Api.Application.stash({
             center, reportingDate, data
         }).then((result) => {
+            dispatch(markStale())
             // Failed during validation
             if (!result.storedId) {
                 dispatch(messages.replace('create', result.messages))

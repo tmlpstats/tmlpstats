@@ -1,24 +1,19 @@
 import { objectAssign } from './ponyfill'
 
-const
-    NEW = {state: 'new', loaded: false, available: true},
-    LOADING = {state: 'loading', loaded: false, available: false},
-    LOADED = {state: 'loaded', loaded: true, available: true},
-    FAILED = {state: 'failed', loaded: false, failed: true, available: false}
+const loadStates = {
+    new: {state: 'new', loaded: false, available: true},
+    loading: {state: 'loading', loaded: false, available: false},
+    loaded: {state: 'loaded', loaded: true, available: true},
+    failed: {state: 'failed', loaded: false, failed: true, available: false}
+}
 
 export function loadingMultiState(actionType) {
-    return function(state = NEW, action){
+    return function(state = loadStates['new'], action){
         if (action.type == actionType) {
-            switch (action.payload) {
-            case 'loading':
-                return LOADING
-            case 'loaded':
-                return LOADED
-            case 'failed':
-                return FAILED
-            case 'new':
-                return NEW
-            default:
+            // toUpperase check proves this is a string
+            if (action.payload.toUpperCase) {
+                return loadStates[action.payload]
+            } else {
                 return action.payload
             }
         }
@@ -27,7 +22,7 @@ export function loadingMultiState(actionType) {
 }
 
 export class LoadingMultiState {
-    static states = {NEW, LOADING, LOADED, FAILED}
+    static states = loadStates
 
     constructor(actionType) {
         this.actionType = actionType
@@ -35,9 +30,11 @@ export class LoadingMultiState {
 
     actionCreator() {
         const actionType = this.actionType
-        return (newState) => {
+        return (newState, extra) => {
             if (newState.error) {
-                newState = objectAssign({}, FAILED, newState)
+                newState = objectAssign({}, loadStates.failed, newState)
+            } else if (extra) {
+                newState = objectAssign({}, loadStates[newState], extra)
             }
             return {type: actionType, payload: newState}
         }

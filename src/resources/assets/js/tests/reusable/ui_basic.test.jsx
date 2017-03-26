@@ -28,7 +28,7 @@ test('LoadStateFlip', () => {
     const states = LoadingMultiState.states
 
     const tree = renderer.create(
-        <LoadStateFlip loadState={states.LOADING}>
+        <LoadStateFlip loadState={states.loading}>
             <div>Will never be seen</div>
         </LoadStateFlip>
     ).toJSON()
@@ -36,7 +36,7 @@ test('LoadStateFlip', () => {
     expect(tree.children[1]).toMatch(/spinner/)
 
     const tree2 = renderer.create(
-        <LoadStateFlip loadState={states.LOADED}>
+        <LoadStateFlip loadState={states.loaded}>
             <div className="foo">HELLO</div>
         </LoadStateFlip>
     ).toJSON()
