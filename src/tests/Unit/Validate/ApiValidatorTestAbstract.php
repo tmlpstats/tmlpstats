@@ -2,6 +2,7 @@
 namespace TmlpStats\Tests\Unit\Validate;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Debug\Dumper;
 use TmlpStats as Models;
 use TmlpStats\Api\Parsers;
@@ -30,8 +31,8 @@ class ApiValidatorTestAbstract extends ValidatorTestAbstract
     {
         parent::setUp();
 
-        $this->addModelParserMock(Parsers\CenterParser::class);
-        $this->addModelParserMock(Parsers\QuarterParser::class);
+        $this->addModelParserMock(Parsers\CenterParser::class, models\Center::class);
+        $this->addModelParserMock(Parsers\QuarterParser::class, Models\Quarter::class);
         $this->addModelParserMock(Parsers\WithdrawCodeParser::class);
         $this->addModelParserMock(Parsers\TeamMemberParser::class);
         $this->addModelParserMock(Parsers\ApplicationParser::class);
@@ -44,30 +45,36 @@ class ApiValidatorTestAbstract extends ValidatorTestAbstract
         $this->statsReport = new \stdClass();
         $this->statsReport->reportingDate = $this->reportingDate;
         $this->statsReport->center = new Models\Center();
-        $this->statsReport->quarter = $this->getQuarterMock([], [
+        $this->statsReport->center->regionId = 123;
+        $this->statsReport->center->region = new Models\Region(['id' => 123]);
+        $dates = [
             'startWeekendDate' => Carbon::parse('2016-08-19')->startOfDay(),
             'classroom1Date' => Carbon::parse('2016-09-09')->startOfDay(),
             'classroom2Date' => Carbon::parse('2016-09-30')->startOfDay(),
             'classroom3Date' => Carbon::parse('2016-10-28')->startOfDay(),
             'endWeekendDate' => Carbon::parse('2016-11-18')->startOfDay(),
-            'nextQuarter' => $this->nextQuarter,
-        ]);
+        ];
+        $this->statsReport->quarter = $this->getQuarterMock([], array_merge(['nextQuarter' => $this->nextQuarter], $dates));
+        $this->mockCenterQuarter();
+        $this->mockRegionQuarter($dates);
     }
 
-    protected function addModelParserMock($parserClass)
+    protected function addModelParserMock($parserClass, $modelClass = Model::class)
     {
-        $mock = $this->getModelMock();
 
+        $that = $this;
         $parser = $this->getMockBuilder($parserClass)
-            ->setMethods(['fetch'])
-            ->getMock();
+                       ->setMethods(['fetch'])
+                       ->getMock();
 
         $parser->expects($this->any())
-            ->method('fetch')
-            ->will($this->returnCallback(function ($class, $id) use ($mock) {
-                $mock->id = $id;
-                return $mock;
-            }));
+               ->method('fetch')
+               ->will($this->returnCallback(function ($class, $id) use ($that, $modelClass) {
+                    $mock = $that->getModelMock([], [], $modelClass);
+                    $mock->id = $id;
+
+                    return $mock;
+                }));
 
         $this->app->bind($parserClass, function ($app) use ($parser) {
             return $parser;
@@ -112,6 +119,7 @@ class ApiValidatorTestAbstract extends ValidatorTestAbstract
         // If there's nothing to mock, return a real object
         if (!$methods && !$this->defaultObjectMethods) {
             $report = $constructorArgs ? $constructorArgs[0] : $this->statsReport;
+
             return new $this->testClass($report);
         }
 

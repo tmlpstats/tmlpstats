@@ -27,6 +27,7 @@ class ValidationDataTest extends FunctionalTestAbstract
 
         $this->center = Models\Center::abbreviation('VAN')->first();
         $this->quarter = Models\Quarter::year(2016)->quarterNumber(1)->first();
+        $this->nextQuarter = Models\Quarter::year(2016)->quarterNumber(2)->first();
         $this->lastQuarter = Models\Quarter::year(2015)->quarterNumber(4)->first();
 
         $this->report = $this->getReport($reportingDateStr, ['submitted_at' => null]);
@@ -59,6 +60,7 @@ class ValidationDataTest extends FunctionalTestAbstract
             'tmlp_registration_id' => $this->application->id,
             'stats_report_id' => $this->lastReport->id,
             'reg_date' => $this->application->regDate,
+            'incoming_quarter_id' => $this->nextQuarter->id,
         ]);
 
         $this->lastWeekCourseData = Models\CourseData::firstOrCreate([
@@ -111,7 +113,9 @@ class ValidationDataTest extends FunctionalTestAbstract
             'success' => true,
             'valid' => true,
             'messages' => [
-                'TeamApplication' => [],
+                'TeamApplication' => [
+                    ['level' => 'warning', 'id' => 'TEAMAPP_INCOMING_QUARTER_CHANGED'],
+                ],
                 'Course' => [],
                 'Scoreboard' => [],
                 'TeamMember' => [

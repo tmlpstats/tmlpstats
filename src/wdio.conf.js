@@ -20,7 +20,10 @@ let browsers = {
         // So far, I haven't found a failing Chrome version, but we may have
         // to do similar to Safari in the future.
         browser: 'Chrome',
-        resolution: '1280x1024'
+        resolution: '1280x1024',
+        chromeOptions: {
+            args: [ '--disable-password-bubble' ]
+        }
     },
     safari_old: {
         // Oldest Safari we support right now is Safari 7 (OSX Mavericks).

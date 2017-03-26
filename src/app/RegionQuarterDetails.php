@@ -11,6 +11,7 @@ class RegionQuarterDetails extends Model
     use CamelCaseModel, CachedRelationships;
 
     protected $fillable = array(
+        'id',
         'quarter_id',
         'region_id',
         'location',
@@ -38,14 +39,14 @@ class RegionQuarterDetails extends Model
     {
         return $query->where(function ($query) use ($region) {
             $query->where('region_id', $region->id)
-                ->orWhere('region_id', $region->parentId);
+                  ->orWhere('region_id', $region->parentId);
         });
     }
 
     public function scopeDate($query, Carbon $date)
     {
         return $query->where('start_weekend_date', '<', $date->startOfDay())
-            ->where('end_weekend_date', '>=', $date->startOfDay());
+                     ->where('end_weekend_date', '>=', $date->startOfDay());
     }
 
     public function scopeCurrent($query)

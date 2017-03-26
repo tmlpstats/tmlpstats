@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats\Validate\Differences;
 
+use TmlpStats\Domain;
 use TmlpStats\Validate\ApiValidatorAbstract;
 
 class ApiTeamApplicationChangeValidator extends ApiValidatorAbstract
@@ -8,6 +9,10 @@ class ApiTeamApplicationChangeValidator extends ApiValidatorAbstract
     protected function validate($data)
     {
         if (!$this->validateDateChanges($data)) {
+            $this->isValid = false;
+        }
+
+        if (!$this->validateQuarterChanges($data)) {
             $this->isValid = false;
         }
 
@@ -79,5 +84,29 @@ class ApiTeamApplicationChangeValidator extends ApiValidatorAbstract
         }
 
         return $isValid;
+    }
+
+    public function validateQuarterChanges(Domain\TeamApplication $application)
+    {
+        if (!count($this->pastWeeks)) {
+            return true;
+        }
+        $lastWeek = $this->pastWeeks[0];
+        if ($application->incomingQuarterId != $lastWeek->incomingQuarterId) {
+            // No need to worry about caching these CQ's because the context caches them
+            $newCQ = Domain\CenterQuarter::ensure($application->center, $application->incomingQuarter);
+            $wasCQ = Domain\CenterQuarter::ensure($application->center, $lastWeek->incomingQuarter);
+
+            $this->addMessage('warning', [
+                'id' => 'TEAMAPP_INCOMING_QUARTER_CHANGED',
+                'ref' => $application->getReference(['field' => 'incomingQuarter']),
+                'params' => [
+                    'now' => $newCQ->displayString(),
+                    'was' => $wasCQ->displayString(),
+                ],
+            ]);
+        }
+
+        return true; // this validation only includes warnings
     }
 }
