@@ -8,7 +8,7 @@ import { Form } from '../../reusable/form_utils'
 import { Alert, ButtonStateFlip } from '../../reusable/ui_basic'
 import { SubmissionBase, React } from '../base_components'
 
-import { getValidationMessagesIfStale, displayState, submitReport, submitState, setSubmitData } from './actions'
+import { getValidationMessagesIfStale, displayState, submitReport, submitState } from './actions'
 import { DISPLAY_STATES } from './data'
 import { REVIEW_SUBMIT_FORM_KEY } from './reducers'
 
@@ -28,7 +28,6 @@ export default class Review extends SubmissionBase {
     constructor(props) {
         super(props)
         rebind(this, 'displayPreSubmitModal', 'hidePreSubmitModal', 'onSubmit', 'completeSubmission', 'failSubmission')
-        this.props.dispatch(setSubmitData({ comment: '' }))
         this.props.dispatch(displayState(DISPLAY_STATES.main))
         this.props.dispatch(submitState('new'))
         this.loadPairs = require('./loadPairs').default
@@ -68,7 +67,6 @@ export default class Review extends SubmissionBase {
 
     completeSubmission() {
         const { centerId, reportingDate } = this.props.params
-        this.props.dispatch(setSubmitData({ comment: '' }))
         this.props.dispatch(submitState('loading'))
         window.location.href = `/reports/centers/${centerId}/${reportingDate}`
     }

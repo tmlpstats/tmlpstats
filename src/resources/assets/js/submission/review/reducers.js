@@ -4,13 +4,6 @@ import { reportSubmitting, displayFlow, reviewLoaded } from './data'
 
 export const REVIEW_SUBMIT_FORM_KEY = 'submission.review.submitData'
 
-function messagesReducer(state=null, action) {
-    if (action.type == 'review/setMessages') {
-        state = action.payload
-    }
-    return state
-}
-
 function submitResultReducer(state=null, action) {
     if (action.type == 'review/setSubmitResults') {
         state = action.payload
@@ -19,7 +12,6 @@ function submitResultReducer(state=null, action) {
 }
 
 export default combineReducers({
-    oldMessages: messagesReducer,
     loaded: reviewLoaded.reducer(),
     submitData: modelReducer(REVIEW_SUBMIT_FORM_KEY),
     submitDataForm: formReducer(REVIEW_SUBMIT_FORM_KEY),
