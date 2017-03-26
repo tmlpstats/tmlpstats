@@ -1,6 +1,8 @@
 import { actions as formActions } from 'react-redux-form'
 
 import Api from '../../api'
+import { markStale } from '../review/actions'
+
 import { SCOREBOARDS_FORM_KEY, SCOREBOARD_SAVED, scoreboardLoad, scoreboardSave, annotateScoreboards, messages } from './data'
 
 export const loadState = scoreboardLoad.actionCreator()
@@ -44,6 +46,7 @@ export function saveScoreboards(centerId, reportingDate, toSaveItems, scoreboard
                 dispatch(scoreboardSaved(candidate))
                 dispatch(messages.replace(data.week, data.messages))
                 dispatch(saveState('loaded'))
+                dispatch(markStale())
             } else {
                 throw data
             }

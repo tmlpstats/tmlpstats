@@ -8,7 +8,7 @@ import { Form } from '../../reusable/form_utils'
 import { Alert, ButtonStateFlip } from '../../reusable/ui_basic'
 import { SubmissionBase, React } from '../base_components'
 
-import { getValidationMessages, displayState, submitReport, submitState, setSubmitData } from './actions'
+import { getValidationMessagesIfStale, displayState, submitReport, submitState, setSubmitData } from './actions'
 import { DISPLAY_STATES } from './data'
 import { REVIEW_SUBMIT_FORM_KEY } from './reducers'
 
@@ -22,7 +22,7 @@ export default class Review extends SubmissionBase {
 
     static onRouteEnter(nextState) {
         const { store } = require('../../store')
-        store.dispatch(getValidationMessages(nextState.params.centerId, nextState.params.reportingDate))
+        store.dispatch(getValidationMessagesIfStale(nextState.params.centerId, nextState.params.reportingDate))
     }
 
     constructor(props) {
@@ -84,7 +84,7 @@ export default class Review extends SubmissionBase {
             return this.renderBasicLoading()
         }
 
-        const { submitResults, displayFlow, reportSubmitting } = this.props.review
+        const { submitResults, displayFlow, reportSubmitting, loaded } = this.props.review
 
         if (displayFlow.state == DISPLAY_STATES.preSubmit) {
             return (
@@ -121,9 +121,15 @@ export default class Review extends SubmissionBase {
             }
         })
 
+        let fetching
+        if (loaded.state == 'loading') {
+            fetching = <p className="lead">Fetching updated messages....</p>
+        }
+
         return (
             <div>
                 <h3>Review</h3>
+                {fetching}
                 <ul>{categories}</ul>
                 <div>
                     <Alert alert="warning">&nbsp;Submission is new and we are still adding the finishing touches. Let us know using the "Feedback" tab on the left if anything doesn't look right.</Alert>
@@ -215,7 +221,7 @@ export class ReviewCategory extends React.PureComponent {
 
         return (
             <div>
-                <h3>{config.name}</h3>
+                <h4>{config.name}</h4>
                 <ul>{messages}</ul>
             </div>
         )

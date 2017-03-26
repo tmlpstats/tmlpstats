@@ -16,9 +16,7 @@ export const LOADER_DEFAULT_OPTS = {
     successHandler: (data, {loader}) =>{
         return loader.replaceCollection(data)
     },
-    failHandler: (err) =>{
-        throw err
-    }
+    failHandler: (err) => null
 }
 
 const SET_METADATA = 'loader/setMetadata'
@@ -123,7 +121,7 @@ export class ReduxLoader {
                     dispatch(result)
                 }
                 if (actionData.setLoaded && !actionData.inGroup) {
-                    dispatch(loadAction('loaded'))
+                    dispatch(loadAction(fixedErr))
                 }
             }
 

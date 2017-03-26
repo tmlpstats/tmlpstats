@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux'
 import { modelReducer, formReducer } from 'react-redux-form'
-import { reportSubmitting, displayFlow } from './data'
+import { reportSubmitting, displayFlow, reviewLoaded } from './data'
 
 export const REVIEW_SUBMIT_FORM_KEY = 'submission.review.submitData'
 
@@ -20,6 +20,7 @@ function submitResultReducer(state=null, action) {
 
 export default combineReducers({
     oldMessages: messagesReducer,
+    loaded: reviewLoaded.reducer(),
     submitData: modelReducer(REVIEW_SUBMIT_FORM_KEY),
     submitDataForm: formReducer(REVIEW_SUBMIT_FORM_KEY),
     submitResults: submitResultReducer,

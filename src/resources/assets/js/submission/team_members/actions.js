@@ -4,6 +4,7 @@ import { actions as formActions } from 'react-redux-form'
 import { getMessages } from '../../reusable/ajax_utils'
 import { objectAssign } from '../../reusable/ponyfill'
 import Api from '../../api'
+import { markStale } from '../review/actions'
 
 import { teamMembersData, weeklyReportingData, weeklyReportingSave, messages } from './data'
 import { TEAM_MEMBERS_COLLECTION_FORM_KEY, TEAM_MEMBER_FORM_KEY } from './reducers'
@@ -56,6 +57,7 @@ export function weeklyReportingSubmit(center, reportingDate, tracking, rawData) 
         dispatch(weeklySaveState('loading'))
 
         const success = (data) => {
+            dispatch(markStale())
             dispatch(weeklySaveState('loaded'))
             if (data && data.messages) {
                 dispatch(messages.replaceMany(data.messages))
@@ -82,6 +84,7 @@ export function setExitChoice(exitChoice) {
 export function stashTeamMember(center, reportingDate, data) {
     return teamMembersData.runNetworkAction('save', {center, reportingDate, data}, {
         successHandler(result, { dispatch }) {
+            dispatch(markStale())
             // The request failed before creating an id (parser error)
             if (!result.storedId) {
                 dispatch(teamMembersData.saveState({error: 'Validation Failed', messages: result.messages}))

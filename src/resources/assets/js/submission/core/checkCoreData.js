@@ -1,5 +1,5 @@
 import { delayDispatch } from '../../reusable/dispatch'
-import { getValidationMessages } from '../review/actions'
+import { getValidationMessagesIfStale } from '../review/actions'
 
 import * as actions from './actions'
 
@@ -10,7 +10,7 @@ export default function checkCoreData(centerId, reportingDate, core, dispatch) {
     } else if (core.coreInit.state == 'new') {
         delayDispatch(dispatch,
             actions.initSubmission(centerId, reportingDate),
-            getValidationMessages(centerId, reportingDate),
+            getValidationMessagesIfStale(centerId, reportingDate),
         )
         return false
     } else if (core.coreInit.state != 'loaded') {
