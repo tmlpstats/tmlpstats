@@ -43,7 +43,7 @@
     "react": "^15.4.0",
     "react-addons-shallow-compare": "^15.4.1",
     "react-bootstrap-typeahead": "^1.2",
-    "react-dates": "^4.0.0",
+    "react-dates": "^8.1.1",
     "react-dom": "^15.4.0",
     "react-redux": "^5.0.3",
     "react-redux-form": "^1.8.0",

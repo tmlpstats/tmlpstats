@@ -1,0 +1,21 @@
+//// DATE PICKER
+
+@import 'node_modules/react-dates/css/variables.scss';
+$react-dates-spacing-vertical-picker: 48px;
+@import 'node_modules/react-dates/css/styles.scss';
+
+/* Overrides from bootstrap */
+.DateInput {
+ 	font-size: $font-size-base;
+ 	padding: 0;
+ 	line-height: $line-height-base;
+}
+
+.DateInput__display-text {
+	@extend .form-control;
+ 	font-size: $font-size-base;
+}
+
+.SingleDatePickerInput {
+	border: 0
+}
