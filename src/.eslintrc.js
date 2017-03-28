@@ -5,7 +5,7 @@ module.exports = {
         "es6": true,
         "jest": true
     },
-    "extends": "eslint:recommended",
+    "extends": ["eslint:recommended", "plugin:react/recommended"],
     "installedESLint": true,
     "parser": "babel-eslint",
     "parserOptions": {
@@ -22,6 +22,10 @@ module.exports = {
     "rules": {
         "react/jsx-uses-vars": 1,
         "react/jsx-uses-react": [1],
+        "react/jsx-wrap-multilines": [1, {declaration: true, assignment: true, return: true}],
+        "react/jsx-equals-spacing": [2, "never"],
+        "react/prop-types": [2, {ignore: []}],
+        "react/prefer-stateless-function": [1, {ignorePureComponents: true}],
         "indent": [
             "error",
             4

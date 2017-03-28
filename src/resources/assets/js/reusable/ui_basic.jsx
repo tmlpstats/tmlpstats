@@ -88,9 +88,11 @@ export class SubmitFlip extends React.PureComponent {
         wrapGroup: true
     }
     static propTypes = {
+        buttonClasses: PropTypes.string,
         loadState: PropTypes.object.isRequired,
         offset: PropTypes.string,
-        wrapGroup: PropTypes.bool
+        wrapGroup: PropTypes.bool,
+        children: PropTypes.node
     }
 
     render() {
@@ -125,7 +127,10 @@ export class ButtonStateFlip extends React.PureComponent {
         onClick: () => { }
     }
     static propTypes = {
-        loadState: PropTypes.object.isRequired
+        loadState: PropTypes.object.isRequired,
+        buttonClass: PropTypes.string,
+        onClick: PropTypes.func,
+        children: PropTypes.node
     }
     render() {
         var { buttonClass, loadState, onClick } = this.props
@@ -143,7 +148,12 @@ export class ButtonStateFlip extends React.PureComponent {
  *
  * Use with error/warning messages
  */
-export class MessagesComponent extends React.Component {
+export class MessagesComponent extends React.PureComponent {
+    static propTypes = {
+        messages: PropTypes.arrayOf(PropTypes.object),
+        referenceString: PropTypes.string
+    }
+
     render() {
         const {messages, referenceString} = this.props
 

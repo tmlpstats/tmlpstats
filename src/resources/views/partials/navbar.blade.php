@@ -43,7 +43,7 @@ $reportingDateString = ($reportingDate != null) ? $reportingDate->toDateString()
 $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : false;
 ?>
 <nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
+    <div class="container-fluid">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
                     aria-expanded="false" aria-controls="navbar">
@@ -73,7 +73,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                         @endif
 
                         @can ('showNewSubmissionUi', $currentCenter)
-                        <li {!! Request::is('submission') ? 'class="active"' : '' !!}>
+                        <li {!! Request::is('center/*/submission/*') ? 'class="active"' : '' !!}>
                             <a href="{{ action('CenterController@submission', ['abbr' => $currentCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Submit Report (beta)</a>
                         </li>
                         @endcan

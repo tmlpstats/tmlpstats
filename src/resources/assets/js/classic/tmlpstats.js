@@ -229,19 +229,24 @@ window.Tmlp = (function(window, $) {
  */
 // Enable hover dropdowns in nav menu
 $(function () {
-    $('.dropdown').hover(
-        function () {
-            $('.dropdown-menu', this).stop(true, true).fadeIn("fast");
-            $(this).toggleClass('open');
-            $('b', this).toggleClass("caret caret-up");
-        },
-        function () {
-            $('.dropdown-menu', this).stop(true, true).fadeOut("fast");
-            $(this).toggleClass('open');
-            $('b', this).toggleClass("caret caret-up");
-        }
-    )
+    function isBreakpoint( alias ) {
+        return $('.device-' + alias).is(':visible');
+    }
+    if (!isBreakpoint('xs')) {
+        $('.dropdown').hover(
+            function () {
+                $('.dropdown-menu', this).stop(true, true).fadeIn("fast");
+                $(this).toggleClass('open');
+                $('b', this).toggleClass("caret caret-up");
+            },
+            function () {
+                $('.dropdown-menu', this).stop(true, true).fadeOut("fast");
+                $(this).toggleClass('open');
+                $('b', this).toggleClass("caret caret-up");
+            }
+        )
 
+    }
     const reportSelect = $('#reportSelect')
     if (reportSelect.hasClass('ajax-report-select')) {
         reportSelect.on('click', 'li.menu-option', function (e) {
