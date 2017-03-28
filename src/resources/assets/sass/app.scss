@@ -1,7 +1,3 @@
-//// DATE PICKER
-
-@import 'node_modules/react-dates/css/variables.scss';
-@import 'node_modules/react-dates/css/styles.scss';
 @import 'node_modules/bootstrap-sass/assets/stylesheets/bootstrap';
 @import 'node_modules/font-awesome/scss/font-awesome';
 
@@ -12,22 +8,9 @@
 @import 'bower_components/datatables/media/css/dataTables.bootstrap.min';
 
 
+// Custom CSS
+@import './datepicker';
 
-/* Overrides from bootstrap */
-.DateInput {
- 	font-size: $font-size-base;
- 	padding: 0;
- 	line-height: $line-height-base;
-}
-
-.DateInput__display-text {
-	@extend .form-control;
- 	font-size: $font-size-base;
-}
-
-.SingleDatePickerInput {
-	border: 0
-}
 
 #react-routed-flow  {
     padding-top: 10px;

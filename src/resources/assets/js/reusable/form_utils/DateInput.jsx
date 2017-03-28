@@ -5,12 +5,10 @@ import { actions as formActions, getField } from 'react-redux-form'
 import { SingleDatePicker } from 'react-dates'
 
 import { SimpleFormGroup } from './index'
-import { objectAssign } from '../ponyfill'
 import { rebind, connectRedux } from '../dispatch'
 
 const sdpProps = _.omit(SingleDatePicker.propTypes, ['id', 'onDateChange', 'focused', 'onFocusChange'])
 const datePickerProps = Object.keys(sdpProps)
-
 
 /**
  * Provide a calendar date picker based on react-dates and integrated with react-redux-form.
@@ -27,17 +25,19 @@ export class DateInput extends React.Component {
         return {modelValue, focused}
     }
 
-    static propTypes = objectAssign({
+    static propTypes = {
         model: PropTypes.string,
         modelValue: PropTypes.string,
-    }, sdpProps)
-
-    static defaultProps = {
-        simple: true,
-        focused: false
+        dispatch: PropTypes.func
     }
 
-    componentWillMount() {
+    static defaultProps = {
+        isOutsideRange: () => false,
+        displayFormat: 'YYYY-MM-DD'
+    }
+
+    constructor(props) {
+        super(props)
         rebind(this, 'onDateChange', 'onFocusChange')
     }
 
@@ -50,14 +50,14 @@ export class DateInput extends React.Component {
             date = defaultValue
         }
 
-        const id = 'dp-' + model.replace('.', '-')
+        const id = 'dp-' + model.replace(/\./g, '-')
         const pickerForwardProps = _.pick(this.props, datePickerProps)
         return (
             <SingleDatePicker
                     { ...pickerForwardProps}
                     id={id} date={date} onDateChange={this.onDateChange}
                     focused={focused} onFocusChange={this.onFocusChange}
-                    isOutsideRange={() => false} />
+                    />
         )
     }
 
@@ -71,15 +71,14 @@ export class DateInput extends React.Component {
 
     onFocusChange({focused}) {
         if (focused) {
-            this.props.dispatch(formActions.focus(this.props.model))
+            if (!this.props.focused) {
+                this.props.dispatch(formActions.focus(this.props.model))
+            }
         } else {
             this.props.dispatch(formActions.blur(this.props.model))
         }
     }
 }
-
-export default DateInput
-
 
 
 // DateInput wrapped in a SimpleFormGroup, for supreme laziness.
@@ -96,3 +95,5 @@ export class SimpleDateInput extends React.PureComponent {
         )
     }
 }
+
+export default DateInput
