@@ -485,7 +485,8 @@ const LocalReport = {
         "shortName": "Accountabilities",
         "requiredFlags": [
             "nextQtrAccountabilities"
-        ]
+        ],
+        "render": "react"
     },
     "_root": {
         "type": "grouping",

@@ -6,6 +6,7 @@ import { filterReportFlags, makeTwoTabParamsSelector } from '../tabbed_report/ut
 import ReportsMeta from '../meta'
 
 import * as actions from './actions'
+import * as pages from './pages'
 import { reportData, LocalKey } from './data'
 
 @connectRedux()
@@ -94,6 +95,10 @@ export class LocalReport extends Component {
 
     responsiveLabel(report) {
         return responsiveLabel(report)
+    }
+
+    pageComponent(report) {
+        return pages[report.id]
     }
 
     render() {

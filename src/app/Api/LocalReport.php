@@ -250,8 +250,6 @@ class LocalReport extends AuthenticatedApiBase
         $this->context->setDateSelectAction('ReportsController@getCenterReport', ['abbr' => $center->abbrLower()]);
         $this->assertCan('read', $report);
 
-        $ttl = Controllers\ReportDispatchAbstractController::CACHE_TTL;
-
         $output = [];
         $ckBase = "{$report->id}{$center->id}";
         $controller = App::make(Controllers\StatsReportController::class);
@@ -269,7 +267,7 @@ class LocalReport extends AuthenticatedApiBase
 
                 return $response;
             };
-            if ($controller->useCache($page)) {
+            if ($ttl = $controller->getPageCacheTime($page)) {
                 $response = Cache::tags(['reports'])->remember("{$ckBase}.{$page}", $ttl, $f);
             } else {
                 $response = $f();

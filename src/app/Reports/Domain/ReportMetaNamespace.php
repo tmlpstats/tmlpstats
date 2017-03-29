@@ -75,6 +75,9 @@ class ReportMetaNamespace
             if (count($report->requiredFlags)) {
                 $r['requiredFlags'] = $report->requiredFlags;
             }
+            if ($report->render) {
+                $r['render'] = $report->render;
+            }
             $items[$report->id] = $r;
         }
 
