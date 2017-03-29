@@ -5,7 +5,8 @@ import Api from '../../api'
 
 const _baseKey = Immutable.Record({
     centerId: '',
-    reportingDate: ''
+    reportingDate: '',
+    page: null
 })
 
 export class LocalKey extends _baseKey {

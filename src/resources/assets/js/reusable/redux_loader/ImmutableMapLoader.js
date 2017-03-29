@@ -24,7 +24,6 @@ export default class ImmutableMapLoader extends ReduxLoader {
             case this.replace_item_action:
                 return state.set(action.payload[0], action.payload[1])
             case this.replace_items_action:
-                if (action.payload.length)
                 return state.merge(action.payload)
             }
             return state

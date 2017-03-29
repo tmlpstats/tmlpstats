@@ -13,9 +13,9 @@ import { reportData, LocalKey } from './data'
 export class LocalReport extends Component {
     static mapStateToProps() {
         return (state) => {
-            const { local_report: local, reportConfig } = state.reports
+            const { local_report, reportConfig } = state.reports
             return {
-                pageData: local.reportData.data,
+                pageData: local_report.reportData.data,
                 config: reportConfig
             }
         }
@@ -49,13 +49,13 @@ export class LocalReport extends Component {
         } else if (config !== this.savedConfig) {
             const r = this.fullReport = filterReportFlags(ReportsMeta['Local'], config.flags)
             this.savedConfig = config
-            dispatch(reportData.init(r))
+            dispatch(reportData.init(r, this.storageKey))
         }
         return config
     }
 
-    reportUriBase() {
-        const { centerId, reportingDate } = this.props.params
+    reportUriBase(key) {
+        const { centerId, reportingDate } = (key || this.props.params)
         return `/reports/centers/${centerId}/${reportingDate}`
     }
 
@@ -75,7 +75,9 @@ export class LocalReport extends Component {
      * @return string|object     The data for the page content.
      */
     getContent(reportId) {
-        return this.props.pageData[reportId] || ''
+        const key = this.storageKey.set('page', reportId)
+        console.log('looking for', key.toJS())
+        return this.props.pageData.get(key)
     }
 
     // Dispatches an action on delay to prioritize/load a given report tab.
@@ -88,8 +90,7 @@ export class LocalReport extends Component {
         if (!report) {
             alert('Unknown report page: ' + reportId)
         } else if (report.type != 'grouping') {
-            const params = this.storageKey.queryParams()
-            delayDispatch(this, reportData.loadReport(reportId, params))
+            delayDispatch(this, reportData.loadReport(reportId, this.storageKey.queryParams(), this.storageKey))
         }
     }
 

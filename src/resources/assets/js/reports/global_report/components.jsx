@@ -53,7 +53,7 @@ export class GlobalReport extends Component {
     }
 
     getContent(reportId) {
-        return this.props.data[reportId] || ''
+        return this.props.data.get(reportId) || ''
     }
 
     responsiveLabel(report) {

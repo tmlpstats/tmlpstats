@@ -1,4 +1,4 @@
-import { ReduxLoader } from '../../reusable/redux_loader/base'
+import ImmutableMapLoader from '../../reusable/redux_loader/ImmutableMapLoader'
 import { objectAssign, Promise } from '../../reusable/ponyfill'
 import Immutable from 'immutable'
 
@@ -8,18 +8,17 @@ const LoaderState = Immutable.Record({
     queue: Immutable.OrderedSet(),
     inprogress: Immutable.Set(),
     done: Immutable.Set(),
+    baseKey: null,
     perLoad: 1
 })
 
-export class TabbedReportManager extends ReduxLoader {
+export class TabbedReportManager extends ImmutableMapLoader {
     constructor(opts) {
         super(opts)
         this.init_action = opts.prefix + '/init'
         this.queue_action = opts.prefix + '/queue'
         this.start_action = opts.prefix + '/start'
         this.finish_action = opts.prefix + '/finish'
-        this.replace_action = opts.prefix + '/replace'
-        this.replace_items_action = opts.prefix + '/replace_items'
     }
 
     extraReducers(opts) {
@@ -53,8 +52,12 @@ export class TabbedReportManager extends ReduxLoader {
                     }
                     state = state.merge(newData)
                 } else if (action.type == this.init_action) {
+                    const { reportRoot, baseKey } = action.payload
+                    if (baseKey !== state.baseKey) {
+                        state = state.set('baseKey', baseKey).delete('done')
+                    }
                     // On initialize, we want the original priorities to stay ahead, so we subtract and re-add them.
-                    let result = this._queueFromReport(action.payload)
+                    let result = this._queueFromReport(reportRoot)
                     result = result.subtract(state.inprogress).subtract(state.done).subtract(state.queue).union(state.queue)
                     state = state.set('queue', result)
                 }
@@ -73,21 +76,7 @@ export class TabbedReportManager extends ReduxLoader {
             .toOrderedSet()
     }
 
-    // Separated out because then it's a bit less boilerplate to manage.
-    dataReducer(opts) {
-        const { defaultState } = opts
-        return (state=defaultState, action) => {
-            switch (action.type) {
-            case this.replace_action:
-                return action.payload
-            case this.replace_items_action:
-                return objectAssign({}, state, action.payload)
-            }
-            return state
-        }
-    }
-
-    loadReport(reportId, params) {
+    loadReport(reportId, params, baseKey) {
         const { findRoot } = this.opts
 
         return (dispatch, getState) => {
@@ -96,11 +85,11 @@ export class TabbedReportManager extends ReduxLoader {
                 return Promise.resolve(null)
             }
             dispatch({type: this.queue_action, payload: reportId})
-            return this.runLoadFlow(dispatch, getState, params)
+            return this.runLoadFlow(dispatch, getState, params, baseKey)
         }
     }
 
-    runLoadFlow(dispatch, getState, globalParams) {
+    runLoadFlow(dispatch, getState, globalParams, baseKey) {
         const { findRoot } = this.opts
         let getData = () => findRoot(getState()).loader
 
@@ -113,11 +102,12 @@ export class TabbedReportManager extends ReduxLoader {
                 let params = objectAssign({pages: pages}, globalParams)
                 return dispatch(this.runNetworkAction('load', params, {
                     successHandler: (data) => {
-                        let toUpdate = {}
+                        let toUpdate = Immutable.Map()
                         pages.forEach((reportId) => {
-                            toUpdate[reportId] = data.pages[reportId]
+                            let key = (baseKey)? baseKey.set('page', reportId) : reportId
+                            toUpdate = toUpdate.set(key, data.pages[reportId])
                         })
-                        dispatch({type: this.replace_items_action, payload: toUpdate})
+                        dispatch(this.replaceItems(toUpdate))
                         dispatch({type: this.finish_action, payload: pages})
                         setTimeout(flow, 200)
                     }
@@ -127,20 +117,9 @@ export class TabbedReportManager extends ReduxLoader {
         return flow()
     }
 
+    // replaceCollection, replaceItem, replaceItems inherited from ImmutableMapLoader
 
-    replaceCollection(value) {
-        return {type: this.replace_action, payload: value}
-    }
-
-    replaceItem(key, value) {
-        return {type: this.replace_items_action, payload: {[key]: value}}
-    }
-
-    replaceItems(values) {
-        return {type: this.replace_items_action, payload: values}
-    }
-
-    init(reportRoot) {
-        return {type: this.init_action, payload: reportRoot}
+    init(reportRoot, baseKey) {
+        return {type: this.init_action, payload: {reportRoot, baseKey}}
     }
 }
