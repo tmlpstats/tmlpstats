@@ -77,7 +77,7 @@ class CenterReportingDate
 
     public function canShowNextQtrAccountabilities()
     {
-        $globalRegion = $this->context->getGlobalRegion();
+        $globalRegion = $this->center->getGlobalRegion();
         // TODO make this configurable in the future, but for this quarter, hard-coded to NA region
         if ($globalRegion === null || $globalRegion->abbreviation != 'NA') {
             return false;
