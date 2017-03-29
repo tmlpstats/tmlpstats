@@ -92,7 +92,12 @@ export class ScoreboardGame {
     }
 
     parseInput(input) {
-        this.actual = input.actual
+        // Ignore percentages in GITW.
+        if (this.key == 'gitw' && input.actual) {
+            this.actual = parseInt(input.actual, 10)   
+        } else {
+            this.actual = input.actual
+        }
         this.promise = input.promise
         this.original = input.original
         this.op = input.op || 'default'
