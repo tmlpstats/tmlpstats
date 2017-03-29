@@ -1093,13 +1093,26 @@ class StatsReportController extends Controller
         return view('statsreports.details.coursestransfersummary', compact('flagged', 'flaggedCount'));
     }
 
+    /**
+     * Get initial data for Next Quarter accountabilities
+     * @return array a JSON-friendly array
+     */
     protected function getNextQtrAccountabilities(Models\StatsReport $statsReport)
     {
-        $nqa = App::make(Api\Submission\NextQtrAccountability::class);
-        $nqAccountabilities = $nqa->allForCenter($this->context->getCenter(), $this->context->getReportingDate());
-        $crd = Encapsulations\CenterReportingDate::ensure();
+        $nqaApi = App::make(Api\Submission\NextQtrAccountability::class);
+        $nqAccountabilities = $nqaApi->allForCenter($this->context->getCenter(), $this->context->getReportingDate());
 
-        return view('statsreports.details.next_qtr_accountabilities', compact('nqAccountabilities'));
+        // Since we don't have an easy API for getting lookup tables for all users now
+        // (right now this is rolled into SubmissionCore) we're going to do the extra work
+        // of embedding the Models\Accountability object alongside the data for now.
+        $accountabilities = collect($nqAccountabilities)
+            ->map(function ($nqa) {
+                return array_merge($nqa->toArray(), ['accountability' => $nqa->getAccountability()]);
+            });
+
+        return [
+            'nqas' => $accountabilities,
+        ];
     }
 
     protected function coursesEqual($new, $old)

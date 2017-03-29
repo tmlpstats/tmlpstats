@@ -14,31 +14,47 @@ namespace TmlpStats\Http\Controllers\Traits;
 //
 ///////////////////////////////
 
-use App;
-use TmlpStats\Api;
-use TmlpStats\Http\Controllers\ApiControllerBase;
-trait {{ $namespace->id }}ReportDispatch {
-    public function newDispatch($action, {!! $fwp !!}) {
-        $funcName = $this->dispatchFuncName($action);
-        if (!$funcName) {
-            // TODO FAIL
+trait {{ $namespace->id }}ReportDispatch
+{
+    // NOTE these are lowercased for now to allow case insensitivity, may change soon.
+    protected $dispatchMap = [
+@foreach ($namespace->flatReports() as $report)
+        '{{ strtolower($report->id) }}' => [
+            'id' => '{{ $report->id }}',
+            'method' => '{{ $report->controllerFuncName() }}',
+@if ($report->cacheTime !== 'default')
+            'cacheTime' => @json($report->cacheTime),
+@endif
+        ],
+@endforeach
+    ];
+
+    public function getPageCacheTime($report)
+    {
+        $globalUseCache = env('REPORTS_USE_CACHE', true);
+        if (!$globalUseCache) {
+            return 0;
         }
+        $config = array_get($this->dispatchMap, strtolower($report), []);
+        $cacheTime = array_get($config, 'cacheTime', 60);
+
+        return $cacheTime;
+    }
+
+    public function newDispatch($report, {!! $fwp !!})
+    {
+        $config = array_get($this->dispatchMap, strtolower($report), null);
+        if (!$config) {
+            throw new \Exception("Could not find report $report");
+        }
+        $funcName = $config['method'];
+
         return $this->$funcName({!! $fwp !!});
     }
 
-    public function dispatchFuncName($action) {
-        switch ($action) {
-@foreach ($namespace->flatReports() as $report)
-            case '{{ $report->id }}':
-            case '{{ strtolower($report->id) }}':
-                return 'get{{ $report->controllerFuncName() }}';
-                break;
-@endforeach
-        }
-    }
 @foreach ($namespace->flatReports() as $report)
     // Get report {!! $report->name !!}
-    protected abstract function get{{ $report->id }}();
+    protected abstract function {{ $report->controllerFuncName() }}();
 
 @endforeach
 }

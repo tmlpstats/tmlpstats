@@ -62,7 +62,8 @@ export class ReportContent extends PureComponent {
     static propTypes = {
         reportContext: contextShape,
         path: PropTypes.arrayOf(PropTypes.string),
-
+        contentVec: PropTypes.instanceOf(Immutable.List),
+        level: PropTypes.number,
     }
     static defaultProps = {
         level: 1
@@ -106,12 +107,24 @@ export class ReportContent extends PureComponent {
                     <div>{content}</div>
                 </div>
             )
+        }
+
+        // This is not a grouping, let's render a content tab.
+        const pageContent = contentVec.get(level - 1)
+        if (report.render == 'react' && pageContent) {
+            // Render a modern component-based report. pageContent can be almost anything, but most likely is
+
+            // NOTE - PageComponent must be a CamelCase variable or else the react compiler thinks it's a
+            const PageComponent = reportContext.pageComponent(report)
+            return <PageComponent initialData={pageContent} reportContext={reportContext} />
         } else {
+            // Render a classic HTML report
+
             // yuck, jQuery legacy cruft
             const { $ } = window
             let divId = 'content-' + report.id
             console.log('rendering inner', report.id)
-            let rawHtml = contentVec.get(level - 1) || $('#loader').html()
+            let rawHtml = pageContent || $('#loader').html()
             let followScript
             if (/SCRIPTS_FOLLOW/.test(rawHtml)) {
                 let parts = rawHtml.split('<!-- SCRIPTS_FOLLOW -->')

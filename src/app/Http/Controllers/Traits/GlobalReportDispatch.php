@@ -11,170 +11,183 @@ namespace TmlpStats\Http\Controllers\Traits;
 //
 ///////////////////////////////
 
-use App;
-use TmlpStats\Api;
-use TmlpStats\Http\Controllers\ApiControllerBase;
-trait GlobalReportDispatch {
-    public function newDispatch($action, $globalReport, $region) {
-        $funcName = $this->dispatchFuncName($action);
-        if (!$funcName) {
-            // TODO FAIL
+trait GlobalReportDispatch
+{
+    // NOTE these are lowercased for now to allow case insensitivity, may change soon.
+    protected $dispatchMap = [
+        'ratingsummary' => [
+            'id' => 'RatingSummary',
+            'method' => 'getRatingSummary',
+        ],
+        'regionsummary' => [
+            'id' => 'RegionSummary',
+            'method' => 'getRegionSummary',
+        ],
+        'centerstatsreports' => [
+            'id' => 'CenterStatsReports',
+            'method' => 'getCenterStatsReports',
+        ],
+        'regionalstats' => [
+            'id' => 'RegionalStats',
+            'method' => 'getRegionalStats',
+        ],
+        'gamesbycenter' => [
+            'id' => 'GamesByCenter',
+            'method' => 'getGamesByCenter',
+        ],
+        'repromisesbycenter' => [
+            'id' => 'RepromisesByCenter',
+            'method' => 'getRepromisesByCenter',
+        ],
+        'regperparticipantweekly' => [
+            'id' => 'RegPerParticipantWeekly',
+            'method' => 'getRegPerParticipantWeekly',
+        ],
+        'gaps' => [
+            'id' => 'Gaps',
+            'method' => 'getGaps',
+        ],
+        'accesstopowereffectiveness' => [
+            'id' => 'AccessToPowerEffectiveness',
+            'method' => 'getAccessToPowerEffectiveness',
+        ],
+        'powertocreateeffectiveness' => [
+            'id' => 'PowerToCreateEffectiveness',
+            'method' => 'getPowerToCreateEffectiveness',
+        ],
+        'team1expansioneffectiveness' => [
+            'id' => 'Team1ExpansionEffectiveness',
+            'method' => 'getTeam1ExpansionEffectiveness',
+        ],
+        'team2expansioneffectiveness' => [
+            'id' => 'Team2ExpansionEffectiveness',
+            'method' => 'getTeam2ExpansionEffectiveness',
+        ],
+        'gameintheworldeffectiveness' => [
+            'id' => 'GameInTheWorldEffectiveness',
+            'method' => 'getGameInTheWorldEffectiveness',
+        ],
+        'landmarkforumeffectiveness' => [
+            'id' => 'LandmarkForumEffectiveness',
+            'method' => 'getLandmarkForumEffectiveness',
+        ],
+        'tmlpregistrationsoverview' => [
+            'id' => 'TmlpRegistrationsOverview',
+            'method' => 'getTmlpRegistrationsOverview',
+        ],
+        'tmlpregistrationsbystatus' => [
+            'id' => 'TmlpRegistrationsByStatus',
+            'method' => 'getTmlpRegistrationsByStatus',
+        ],
+        'tmlpregistrationsbycenter' => [
+            'id' => 'TmlpRegistrationsByCenter',
+            'method' => 'getTmlpRegistrationsByCenter',
+        ],
+        'team2registeredatweekend' => [
+            'id' => 'Team2RegisteredAtWeekend',
+            'method' => 'getTeam2RegisteredAtWeekend',
+        ],
+        'tmlpregistrationsoverdue' => [
+            'id' => 'TmlpRegistrationsOverdue',
+            'method' => 'getTmlpRegistrationsOverdue',
+        ],
+        'coursesthisweek' => [
+            'id' => 'CoursesThisWeek',
+            'method' => 'getCoursesThisWeek',
+        ],
+        'coursesnextmonth' => [
+            'id' => 'CoursesNextMonth',
+            'method' => 'getCoursesNextMonth',
+        ],
+        'coursesupcoming' => [
+            'id' => 'CoursesUpcoming',
+            'method' => 'getCoursesUpcoming',
+        ],
+        'coursescompleted' => [
+            'id' => 'CoursesCompleted',
+            'method' => 'getCoursesCompleted',
+        ],
+        'coursesguestgames' => [
+            'id' => 'CoursesGuestGames',
+            'method' => 'getCoursesGuestGames',
+        ],
+        'coursessummary' => [
+            'id' => 'CoursesSummary',
+            'method' => 'getCoursesSummary',
+        ],
+        'tdosummary' => [
+            'id' => 'TdoSummary',
+            'method' => 'getTdoSummary',
+        ],
+        'gitwsummary' => [
+            'id' => 'GitwSummary',
+            'method' => 'getGitwSummary',
+        ],
+        'teammemberstatusctw' => [
+            'id' => 'TeamMemberStatusCtw',
+            'method' => 'getTeamMemberStatusCtw',
+        ],
+        'teammemberstatustransfer' => [
+            'id' => 'TeamMemberStatusTransfer',
+            'method' => 'getTeamMemberStatusTransfer',
+        ],
+        'teammemberstatuswithdrawn' => [
+            'id' => 'TeamMemberStatusWithdrawn',
+            'method' => 'getTeamMemberStatusWithdrawn',
+        ],
+        'withdrawreport' => [
+            'id' => 'WithdrawReport',
+            'method' => 'getWithdrawReport',
+        ],
+        'team1summarygrid' => [
+            'id' => 'Team1SummaryGrid',
+            'method' => 'getTeam1SummaryGrid',
+        ],
+        'team2summarygrid' => [
+            'id' => 'Team2SummaryGrid',
+            'method' => 'getTeam2SummaryGrid',
+        ],
+        'travelreport' => [
+            'id' => 'TravelReport',
+            'method' => 'getTravelReport',
+        ],
+        'teammemberstatuspotentialsoverview' => [
+            'id' => 'TeamMemberStatusPotentialsOverview',
+            'method' => 'getTeamMemberStatusPotentialsOverview',
+        ],
+        'teammemberstatuspotentials' => [
+            'id' => 'TeamMemberStatusPotentials',
+            'method' => 'getTeamMemberStatusPotentials',
+        ],
+        'acknowledgementreport' => [
+            'id' => 'AcknowledgementReport',
+            'method' => 'getAcknowledgementReport',
+        ],
+    ];
+
+    public function getPageCacheTime($report)
+    {
+        $globalUseCache = env('REPORTS_USE_CACHE', true);
+        if (!$globalUseCache) {
+            return 0;
         }
+        $config = array_get($this->dispatchMap, strtolower($report), []);
+        $cacheTime = array_get($config, 'cacheTime', 60);
+
+        return $cacheTime;
+    }
+
+    public function newDispatch($report, $globalReport, $region)
+    {
+        $config = array_get($this->dispatchMap, strtolower($report), null);
+        if (!$config) {
+            throw new \Exception("Could not find report $report");
+        }
+        $funcName = $config['method'];
+
         return $this->$funcName($globalReport, $region);
     }
 
-    public function dispatchFuncName($action) {
-        switch ($action) {
-            case 'RatingSummary':
-            case 'ratingsummary':
-                return 'getRatingSummary';
-                break;
-            case 'RegionSummary':
-            case 'regionsummary':
-                return 'getRegionSummary';
-                break;
-            case 'CenterStatsReports':
-            case 'centerstatsreports':
-                return 'getCenterStatsReports';
-                break;
-            case 'RegionalStats':
-            case 'regionalstats':
-                return 'getRegionalStats';
-                break;
-            case 'GamesByCenter':
-            case 'gamesbycenter':
-                return 'getGamesByCenter';
-                break;
-            case 'RepromisesByCenter':
-            case 'repromisesbycenter':
-                return 'getRepromisesByCenter';
-                break;
-            case 'RegPerParticipantWeekly':
-            case 'regperparticipantweekly':
-                return 'getRegPerParticipantWeekly';
-                break;
-            case 'Gaps':
-            case 'gaps':
-                return 'getGaps';
-                break;
-            case 'AccessToPowerEffectiveness':
-            case 'accesstopowereffectiveness':
-                return 'getAccessToPowerEffectiveness';
-                break;
-            case 'PowerToCreateEffectiveness':
-            case 'powertocreateeffectiveness':
-                return 'getPowerToCreateEffectiveness';
-                break;
-            case 'Team1ExpansionEffectiveness':
-            case 'team1expansioneffectiveness':
-                return 'getTeam1ExpansionEffectiveness';
-                break;
-            case 'Team2ExpansionEffectiveness':
-            case 'team2expansioneffectiveness':
-                return 'getTeam2ExpansionEffectiveness';
-                break;
-            case 'GameInTheWorldEffectiveness':
-            case 'gameintheworldeffectiveness':
-                return 'getGameInTheWorldEffectiveness';
-                break;
-            case 'LandmarkForumEffectiveness':
-            case 'landmarkforumeffectiveness':
-                return 'getLandmarkForumEffectiveness';
-                break;
-            case 'TmlpRegistrationsOverview':
-            case 'tmlpregistrationsoverview':
-                return 'getTmlpRegistrationsOverview';
-                break;
-            case 'TmlpRegistrationsByStatus':
-            case 'tmlpregistrationsbystatus':
-                return 'getTmlpRegistrationsByStatus';
-                break;
-            case 'TmlpRegistrationsByCenter':
-            case 'tmlpregistrationsbycenter':
-                return 'getTmlpRegistrationsByCenter';
-                break;
-            case 'Team2RegisteredAtWeekend':
-            case 'team2registeredatweekend':
-                return 'getTeam2RegisteredAtWeekend';
-                break;
-            case 'TmlpRegistrationsOverdue':
-            case 'tmlpregistrationsoverdue':
-                return 'getTmlpRegistrationsOverdue';
-                break;
-            case 'CoursesThisWeek':
-            case 'coursesthisweek':
-                return 'getCoursesThisWeek';
-                break;
-            case 'CoursesNextMonth':
-            case 'coursesnextmonth':
-                return 'getCoursesNextMonth';
-                break;
-            case 'CoursesUpcoming':
-            case 'coursesupcoming':
-                return 'getCoursesUpcoming';
-                break;
-            case 'CoursesCompleted':
-            case 'coursescompleted':
-                return 'getCoursesCompleted';
-                break;
-            case 'CoursesGuestGames':
-            case 'coursesguestgames':
-                return 'getCoursesGuestGames';
-                break;
-            case 'CoursesSummary':
-            case 'coursessummary':
-                return 'getCoursesSummary';
-                break;
-            case 'TdoSummary':
-            case 'tdosummary':
-                return 'getTdoSummary';
-                break;
-            case 'GitwSummary':
-            case 'gitwsummary':
-                return 'getGitwSummary';
-                break;
-            case 'TeamMemberStatusCtw':
-            case 'teammemberstatusctw':
-                return 'getTeamMemberStatusCtw';
-                break;
-            case 'TeamMemberStatusTransfer':
-            case 'teammemberstatustransfer':
-                return 'getTeamMemberStatusTransfer';
-                break;
-            case 'TeamMemberStatusWithdrawn':
-            case 'teammemberstatuswithdrawn':
-                return 'getTeamMemberStatusWithdrawn';
-                break;
-            case 'WithdrawReport':
-            case 'withdrawreport':
-                return 'getWithdrawReport';
-                break;
-            case 'Team1SummaryGrid':
-            case 'team1summarygrid':
-                return 'getTeam1SummaryGrid';
-                break;
-            case 'Team2SummaryGrid':
-            case 'team2summarygrid':
-                return 'getTeam2SummaryGrid';
-                break;
-            case 'TravelReport':
-            case 'travelreport':
-                return 'getTravelReport';
-                break;
-            case 'TeamMemberStatusPotentialsOverview':
-            case 'teammemberstatuspotentialsoverview':
-                return 'getTeamMemberStatusPotentialsOverview';
-                break;
-            case 'TeamMemberStatusPotentials':
-            case 'teammemberstatuspotentials':
-                return 'getTeamMemberStatusPotentials';
-                break;
-            case 'AcknowledgementReport':
-            case 'acknowledgementreport':
-                return 'getAcknowledgementReport';
-                break;
-        }
-    }
     // Get report Ratings
     protected abstract function getRatingSummary();
 

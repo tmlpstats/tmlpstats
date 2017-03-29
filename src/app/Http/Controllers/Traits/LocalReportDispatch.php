@@ -11,82 +11,96 @@ namespace TmlpStats\Http\Controllers\Traits;
 //
 ///////////////////////////////
 
-use App;
-use TmlpStats\Api;
-use TmlpStats\Http\Controllers\ApiControllerBase;
-trait LocalReportDispatch {
-    public function newDispatch($action, $statsReport) {
-        $funcName = $this->dispatchFuncName($action);
-        if (!$funcName) {
-            // TODO FAIL
+trait LocalReportDispatch
+{
+    // NOTE these are lowercased for now to allow case insensitivity, may change soon.
+    protected $dispatchMap = [
+        'summary' => [
+            'id' => 'Summary',
+            'method' => 'getSummary',
+        ],
+        'overview' => [
+            'id' => 'Overview',
+            'method' => 'getOverview',
+        ],
+        'centerstats' => [
+            'id' => 'CenterStats',
+            'method' => 'getCenterStats',
+        ],
+        'classlist' => [
+            'id' => 'ClassList',
+            'method' => 'getClassList',
+        ],
+        'gitwsummary' => [
+            'id' => 'GitwSummary',
+            'method' => 'getGitwSummary',
+        ],
+        'tdosummary' => [
+            'id' => 'TdoSummary',
+            'method' => 'getTdoSummary',
+        ],
+        'tmlpregistrations' => [
+            'id' => 'TmlpRegistrations',
+            'method' => 'getTmlpRegistrations',
+        ],
+        'tmlpregistrationsbystatus' => [
+            'id' => 'TmlpRegistrationsByStatus',
+            'method' => 'getTmlpRegistrationsByStatus',
+        ],
+        'courses' => [
+            'id' => 'Courses',
+            'method' => 'getCourses',
+        ],
+        'contactinfo' => [
+            'id' => 'ContactInfo',
+            'method' => 'getContactInfo',
+        ],
+        'peopletransfersummary' => [
+            'id' => 'PeopleTransferSummary',
+            'method' => 'getPeopleTransferSummary',
+        ],
+        'coursestransfersummary' => [
+            'id' => 'CoursesTransferSummary',
+            'method' => 'getCoursesTransferSummary',
+        ],
+        'teamweekendsummary' => [
+            'id' => 'TeamWeekendSummary',
+            'method' => 'getTeamWeekendSummary',
+        ],
+        'teamtravelsummary' => [
+            'id' => 'TeamTravelSummary',
+            'method' => 'getTeamTravelSummary',
+        ],
+        'nextqtraccountabilities' => [
+            'id' => 'NextQtrAccountabilities',
+            'method' => 'getNextQtrAccountabilities',
+            'cacheTime' => 5,
+        ],
+    ];
+
+    public function getPageCacheTime($report)
+    {
+        $globalUseCache = env('REPORTS_USE_CACHE', true);
+        if (!$globalUseCache) {
+            return 0;
         }
+        $config = array_get($this->dispatchMap, strtolower($report), []);
+        $cacheTime = array_get($config, 'cacheTime', 60);
+
+        return $cacheTime;
+    }
+
+    public function newDispatch($report, $statsReport)
+    {
+        $config = array_get($this->dispatchMap, strtolower($report), null);
+        if (!$config) {
+            throw new \Exception("Could not find report $report");
+        }
+        $funcName = $config['method'];
+
         return $this->$funcName($statsReport);
     }
 
-    public function dispatchFuncName($action) {
-        switch ($action) {
-            case 'Summary':
-            case 'summary':
-                return 'getSummary';
-                break;
-            case 'Overview':
-            case 'overview':
-                return 'getOverview';
-                break;
-            case 'CenterStats':
-            case 'centerstats':
-                return 'getCenterStats';
-                break;
-            case 'ClassList':
-            case 'classlist':
-                return 'getClassList';
-                break;
-            case 'GitwSummary':
-            case 'gitwsummary':
-                return 'getGitwSummary';
-                break;
-            case 'TdoSummary':
-            case 'tdosummary':
-                return 'getTdoSummary';
-                break;
-            case 'TmlpRegistrations':
-            case 'tmlpregistrations':
-                return 'getTmlpRegistrations';
-                break;
-            case 'TmlpRegistrationsByStatus':
-            case 'tmlpregistrationsbystatus':
-                return 'getTmlpRegistrationsByStatus';
-                break;
-            case 'Courses':
-            case 'courses':
-                return 'getCourses';
-                break;
-            case 'ContactInfo':
-            case 'contactinfo':
-                return 'getContactInfo';
-                break;
-            case 'PeopleTransferSummary':
-            case 'peopletransfersummary':
-                return 'getPeopleTransferSummary';
-                break;
-            case 'CoursesTransferSummary':
-            case 'coursestransfersummary':
-                return 'getCoursesTransferSummary';
-                break;
-            case 'TeamWeekendSummary':
-            case 'teamweekendsummary':
-                return 'getTeamWeekendSummary';
-                break;
-            case 'TeamTravelSummary':
-            case 'teamtravelsummary':
-                return 'getTeamTravelSummary';
-                break;
-            case 'NextQtrAccountabilities':
-            case 'nextqtraccountabilities':
-                return 'getNextQtrAccountabilities';
-                break;
-        }
-    }
     // Get report Weekly Summary
     protected abstract function getSummary();
 
