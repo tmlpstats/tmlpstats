@@ -51,9 +51,12 @@ class SubmissionCore extends AuthenticatedApiBase
         $accountabilities = Models\Accountability::orderBy('name')->get();
         $centers = Models\Center::byRegion($center->getGlobalRegion())->active()->orderBy('name')->get();
 
+        $canSkipSubmitEmail = $this->context->can('skipSubmitEmail', $center);
+
         return [
             'success' => true,
             'id' => $center->id,
+            'user' => compact('canSkipSubmitEmail'),
             'validRegQuarters' => $validRegQuarters,
             'validStartQuarters' => $validStartQuarters,
             'lookups' => compact('withdraw_codes', 'team_members', 'center', 'centers'),
@@ -433,7 +436,12 @@ class SubmissionCore extends AuthenticatedApiBase
         $success = true;
         DB::commit();
 
-        $emailResults = $this->sendStatsSubmittedEmail($statsReport);
+        if (array_get($data, 'skipSubmitEmail', false) && $this->context->can('skipSubmitEmail', $center)) {
+            $emailResults = "<strong>Thank you.</strong> We received your statistics and did not send notification emails.";
+        } else {
+            $emailResults = $this->sendStatsSubmittedEmail($statsReport);
+        }
+
         $submittedAt = $statsReport->submittedAt->copy()->setTimezone($center->timezone);
 
         return [

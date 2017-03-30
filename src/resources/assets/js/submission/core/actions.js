@@ -46,6 +46,8 @@ export function setSubmissionLookups(data, reportingDate) {
             lookups.team_members = lookups.team_members.sort((a, b) => getLabelTeamMember(a).localeCompare(getLabelTeamMember(b)))
         }
 
+        lookups.user = c.user
+
         /// Precompute items like pastClassroom based on quarter dates.
         if (data.currentQuarter) {
             reportingDate = moment(reportingDate)

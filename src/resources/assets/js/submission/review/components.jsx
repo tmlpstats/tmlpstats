@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 import { PAGES_CONFIG } from '../core/data'
 import { connectRedux, rebind } from '../../reusable/dispatch'
 import { Field } from 'react-redux-form'
-import { Form } from '../../reusable/form_utils'
+import { CheckBox, Form } from '../../reusable/form_utils'
 import { Alert, ButtonStateFlip } from '../../reusable/ui_basic'
 import { SubmissionBase, React } from '../base_components'
 
@@ -88,7 +88,8 @@ export default class Review extends SubmissionBase {
             return (
                 <PreSubmitCard dismiss={this.hidePreSubmitModal}
                                onSubmit={this.onSubmit}
-                               loadState={reportSubmitting} />
+                               loadState={reportSubmitting}
+                               lookups={this.props.core.lookups} />
             )
         }
 
@@ -228,7 +229,13 @@ export class ReviewCategory extends React.PureComponent {
 
 class PreSubmitCard extends React.PureComponent {
     render() {
-        const { dismiss, onSubmit, loadState } = this.props
+        const { dismiss, onSubmit, loadState, lookups } = this.props
+        const modelKey = REVIEW_SUBMIT_FORM_KEY
+
+        let skipEmailCheckbox
+        if (lookups.user.canSkipSubmitEmail) {
+            skipEmailCheckbox = <CheckBox label="Don't send submission email" model={modelKey+'.skipSubmitEmail'} />
+        }
 
         return (
             <div>
@@ -245,8 +252,9 @@ class PreSubmitCard extends React.PureComponent {
                     </ul>
                     You can re-submit your stats before 7PM your local time on Friday.
                     <br/><br/>
-                    <Form model={REVIEW_SUBMIT_FORM_KEY} onSubmit={onSubmit}>
-                        <Field model={REVIEW_SUBMIT_FORM_KEY+'.comment'}>
+                    <Form model={modelKey} onSubmit={onSubmit}>
+                        {skipEmailCheckbox}
+                        <Field model={modelKey+'.comment'}>
                             <div className="form-group">
                                 <label htmlFor="comment" className="control-label">Comment:</label>
                                 <textarea name="comment" className="form-control" rows="10" />
