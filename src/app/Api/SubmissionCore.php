@@ -437,7 +437,7 @@ class SubmissionCore extends AuthenticatedApiBase
         DB::commit();
 
         $emailResults = "<strong>Thank you.</strong> We received your statistics and did not send notification emails.";
-        if (!array_get($data, 'skipSubmitEmail', false)) {
+        if (!array_get($data, 'skipSubmitEmail', false) || !$this->context->can('skipSubmitEmail', $center)) {
             $emailResults = $this->sendStatsSubmittedEmail($statsReport);
         }
         $submittedAt = $statsReport->submittedAt->copy()->setTimezone($center->timezone);
