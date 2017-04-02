@@ -23,7 +23,6 @@ class StatsReportController extends Controller
 {
     use LocalReportDispatch;
 
-    const CACHE_TTL = 7 * 24 * 60;
     protected $context;
 
     /**
@@ -34,11 +33,6 @@ class StatsReportController extends Controller
         $this->middleware('auth.token');
         $this->middleware('auth');
         $this->context = App::make(Api\Context::class);
-    }
-
-    public function useCache($report)
-    {
-        return env('REPORTS_USE_CACHE', true);
     }
 
     /**
@@ -246,18 +240,6 @@ class StatsReportController extends Controller
         } else {
             abort(404);
         }
-    }
-
-    public function getById($id)
-    {
-        return Models\StatsReport::findOrFail($id);
-    }
-
-    public function getCacheTags($model, $report)
-    {
-        $tags = parent::getCacheTags($model, $report);
-
-        return array_merge($tags, ["statsReport{$model->id}"]);
     }
 
     public function authorizeReport($statsReport, $report)

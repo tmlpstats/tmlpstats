@@ -41,24 +41,6 @@ class GlobalReportController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
-     */
-    public function create()
-    {
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @return Response
-     */
-    public function store()
-    {
-    }
-
-    /**
      * Display the specified resource.
      *
      * @param  int $id
@@ -115,41 +97,6 @@ class GlobalReportController extends Controller
         ));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int $id
-     *
-     * @return Response
-     */
-    public function edit($id)
-    {
-        return redirect("/globalreports/{$id}");
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  int $id
-     *
-     * @return Response
-     */
-    public function update($id)
-    {
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     *
-     * @return Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
-
     protected function getStatsReportsNotOnList(Models\GlobalReport $globalReport)
     {
         $statsReports = Models\StatsReport::reportingDate($globalReport->reportingDate)
@@ -171,32 +118,6 @@ class GlobalReportController extends Controller
         asort($centers);
 
         return $centers;
-    }
-
-    public function getById($id)
-    {
-        return Models\GlobalReport::findOrFail($id);
-    }
-
-    public function getCacheKey($model, $report)
-    {
-        $keyBase = parent::getCacheKey($model, $report);
-
-        $region = $this->context->getRegion(true);
-
-        return $region === null ? $keyBase : "{$keyBase}:region{$region->id}";
-    }
-
-    public function getCacheTags($model, $report)
-    {
-        $tags = parent::getCacheTags($model, $report);
-
-        return array_merge($tags, ["globalReport{$model->id}"]);
-    }
-
-    public function useCache($report)
-    {
-        return env('REPORTS_USE_CACHE', true);
     }
 
     protected function getRatingSummary(Models\GlobalReport $globalReport, Models\Region $region)

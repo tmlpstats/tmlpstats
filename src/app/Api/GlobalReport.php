@@ -239,13 +239,10 @@ class GlobalReport extends AuthenticatedApiBase
         $this->context->setDateSelectAction('ReportsController@getRegionReport', ['abbr' => $region->abbrLower()]);
         $this->assertCan('read', $report);
 
-        $ttl = Controllers\ReportDispatchAbstractController::CACHE_TTL;
-
         $output = [];
         $ckBase = "{$report->id}{$region->id}";
         $controller = App::make(Controllers\GlobalReportController::class);
         foreach ($pages as $page) {
-            // Yes I know, I've re-invented caching, but I'd rather do it here than tie into ReportDispatchAbstractController while we're working on this separately.
             $f = function () use ($page, $report, $region, $controller) {
                 $response = $controller->newDispatch($page, $report, $region);
                 if ($response instanceof View) {
@@ -254,7 +251,7 @@ class GlobalReport extends AuthenticatedApiBase
 
                 return $response;
             };
-            if ($controller->useCache($page)) {
+            if ($ttl = $controller->getPageCacheTime($page)) {
                 $response = Cache::tags(['reports'])->remember("{$ckBase}.{$page}", $ttl, $f);
             } else {
                 $response = $f();
