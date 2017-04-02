@@ -254,7 +254,6 @@ class LocalReport extends AuthenticatedApiBase
         $ckBase = "{$report->id}{$center->id}";
         $controller = App::make(Controllers\StatsReportController::class);
         foreach ($pages as $page) {
-            // Yes I know, I've re-invented caching, but I'd rather do it here than tie into ReportDispatchAbstractController while we're working on this separately.
             $f = function () use ($page, $report, $center, $controller) {
                 if (!$report->isValidated() && $page != 'Overview') {
                     return '<p>This report did not pass validation. See Report Details for more information.</p>';
