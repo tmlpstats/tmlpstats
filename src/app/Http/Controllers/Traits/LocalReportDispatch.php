@@ -22,6 +22,7 @@ trait LocalReportDispatch
         'overview' => [
             'id' => 'Overview',
             'method' => 'getOverview',
+            'cacheTime' => 0,
         ],
         'centerstats' => [
             'id' => 'CenterStats',

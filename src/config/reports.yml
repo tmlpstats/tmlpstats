@@ -635,6 +635,7 @@ reportMeta:
 
       Overview:
         name: Report Details
+        cacheTime: 0
 
       CenterStats:
         name: Center Games
