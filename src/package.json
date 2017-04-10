@@ -42,6 +42,7 @@
     "normalizr": "^2.2.1",
     "object-assign": "^4.1.0",
     "react": "^15.5",
+    "react-addons-shallow-compare": "^15.5.2",
     "react-bootstrap-typeahead": "^1.2",
     "react-dates": "^8.1.1",
     "react-dom": "^15.5",
