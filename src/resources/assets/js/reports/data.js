@@ -1,12 +1,5 @@
-import ImmutableMapLoader from '../reusable/redux_loader/ImmutableMapLoader'
-import Api from '../api'
+import { lookupsData } from '../lookups'
 
-export const reportConfig = new ImmutableMapLoader({
-    prefix: 'reports/ReportConfig',
-    actions: {
-        load: {
-            api: Api.LocalReport.reportViewOptions,
-            setLoaded: true
-        }
-    }
+export const reportConfigData = lookupsData.addScope({
+    scope: 'reportConfig'
 })

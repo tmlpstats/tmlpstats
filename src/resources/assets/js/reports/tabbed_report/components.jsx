@@ -113,8 +113,9 @@ export class ReportContent extends PureComponent {
         const pageContent = contentVec.get(level - 1)
         if (report.render == 'react' && pageContent) {
             // Render a modern component-based report. pageContent can be almost anything, but most likely is
+            // an object coming from JSON with properties befitting the report in question.
 
-            // NOTE - PageComponent must be a CamelCase variable or else the react compiler thinks it's a
+            // NOTE - PageComponent must be a CamelCase variable or else the react JSX compiler thinks it's a tag
             const PageComponent = reportContext.pageComponent(report)
             return <PageComponent initialData={pageContent} reportContext={reportContext} />
         } else {

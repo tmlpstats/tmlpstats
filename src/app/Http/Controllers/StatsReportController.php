@@ -117,6 +117,7 @@ class StatsReportController extends Controller
         return view("statsreports.{$template}", compact(
             'statsReport',
             'lastReport',
+            'globalRegion',
             'nextReport',
             'centerReportingDate',
             'globalReport',

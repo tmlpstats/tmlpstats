@@ -268,15 +268,21 @@ export class Modal extends React.PureComponent {
         footer: PropTypes.oneOfType([PropTypes.string, PropTypes.element, PropTypes.arrayOf(PropTypes.element)]),
         onClose: PropTypes.func
     }
+
+    constructor(props) {
+        super(props)
+        this._body = window.$('body')
+    }
+
     render() {
-        const { title, children, footer } = this.props
+        const { title, children, footer, onClose } = this.props
         const footerContent = footer? <div className="modal-footer">{footer}</div> : null
         return (
             <div className="modal fade in" tabIndex="-1" role="dialog" style={{display: 'block'}}>
                 <div className="modal-dialog" role="document">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <button type="button" className="close" aria-label="Close">
+                            <button type="button" className="close" aria-label="Close" onClick={onClose}>
                                 <span aria-hidden="true">x</span>
                             </button>
                             <h4 className="modal-title">{title}</h4>
@@ -289,6 +295,20 @@ export class Modal extends React.PureComponent {
                 </div>
             </div>
         )
+    }
+
+    componentDidMount() {
+        if (this._body) {
+            this._body.addClass('modal-open')
+            this._body.append('<div class="modal-backdrop fade in"></div>')
+        }
+    }
+
+    componentWillUnmount() {
+        if (this._body) {
+            this._body.removeClass('modal-open')
+            this._body.find('.modal-backdrop').remove()
+        }
     }
 }
 

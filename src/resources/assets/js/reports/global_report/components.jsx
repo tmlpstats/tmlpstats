@@ -1,29 +1,45 @@
-import React, { Component } from 'react'
-import { createSelector } from 'reselect'
-import ReportsMeta from '../meta'
-import { TabbedReport } from '../tabbed_report/components'
-import { filterReportFlags, makeTwoTabParamsSelector } from '../tabbed_report/util'
-import { reportData } from './data'
-import { connectRedux, delayDispatch } from '../../reusable/dispatch'
+import React, { Component, PropTypes } from 'react'
+import { defaultMemoize } from 'reselect'
 
-const DEFAULT_FLAGS = {afterClassroom2: false}
+import { TabbedReport } from '../tabbed_report/components'
+import { connectRedux, delayDispatch } from '../../reusable/dispatch'
+import { filterReportFlags, makeTwoTabParamsSelector } from '../tabbed_report/util'
+import { reportConfigData } from '../data'
+import ReportsMeta from '../meta'
+
+import { loadConfig } from './actions'
+import { reportData, GlobalReportKey } from './data'
+
+const DEFAULT_FLAGS = {afterClassroom2: true}
 
 @connectRedux()
 export class GlobalReport extends Component {
-    static mapStateToProps(state) {
-        return reportData.opts.findRoot(state)
+    static mapStateToProps() {
+        const getStorageKey = defaultMemoize(params => new GlobalReportKey(params))
+
+        return (state, ownProps) => {
+            const storageKey = getStorageKey(ownProps.params)
+            const reportConfig = reportConfigData.selector(state).get(storageKey)
+            const reportRoot = reportData.opts.findRoot(state)
+            return {
+                storageKey, reportConfig,
+                lookupsLoad: state.lookups.loadState,
+                pageData: reportRoot.data
+            }
+        }
+    }
+
+    static propTypes = {
+        storageKey: PropTypes.instanceOf(GlobalReportKey),
+        reportConfig: PropTypes.object,
+        lookupsLoad: PropTypes.object,
+        pageData: PropTypes.object
     }
 
     constructor(props) {
         super(props)
-
-        // XXX TODO deal with report flags actually changing after classroom 2
-        this.fullReport = filterReportFlags(ReportsMeta['Global'], DEFAULT_FLAGS)
         this.makeTabParams = makeTwoTabParamsSelector()
-        const { params } = props
-        if (params) {
-            this.showReport(params.tab2 || params.tab1)
-        }
+        this.componentWillReceiveProps(props)
     }
 
     reportUriBase() {
@@ -32,8 +48,17 @@ export class GlobalReport extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (nextProps.params !== this.props.params) {
+        const { storageKey, reportConfig, lookupsLoad, dispatch, params } = nextProps
+        if (params !== this.props.params || storageKey != this._savedKey) {
             this.showReport(nextProps.params.tab2 || nextProps.params.tab1)
+            this._savedKey = storageKey
+        }
+        if (!reportConfig) {
+            if (lookupsLoad.available) {
+                dispatch(loadConfig(storageKey))
+            }
+        } else if (reportConfig !== this.props.reportConfig) {
+            this.fullReport = filterReportFlags(ReportsMeta['Global'], DEFAULT_FLAGS)
         }
     }
 
@@ -43,6 +68,10 @@ export class GlobalReport extends Component {
     }
 
     showReport(reportId) {
+        if (!this.fullReport) {
+            setTimeout(() => this.showReport(reportId), 200)
+            return
+        }
         const report = this.fullReport[reportId]
         if (!report) {
             alert('Unknown report page: ' + reportId)
@@ -53,7 +82,7 @@ export class GlobalReport extends Component {
     }
 
     getContent(reportId) {
-        return this.props.data.get(reportId) || ''
+        return this.props.pageData.get(reportId) || ''
     }
 
     responsiveLabel(report) {
@@ -61,6 +90,9 @@ export class GlobalReport extends Component {
     }
 
     render() {
+        if (!this.fullReport) {
+            return <div>Loading...</div>
+        }
         const tabs = this.makeTabParams(this.props.params)
         return <TabbedReport tabs={tabs} fullReport={this.fullReport} reportContext={this} />
     }
