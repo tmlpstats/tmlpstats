@@ -23,6 +23,8 @@ class StatsReportController extends Controller
 {
     use LocalReportDispatch;
 
+    const CACHE_TTL = 7 * 24 * 60;
+
     protected $context;
 
     /**
