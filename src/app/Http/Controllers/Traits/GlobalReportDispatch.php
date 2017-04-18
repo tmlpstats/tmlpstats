@@ -203,7 +203,7 @@ trait GlobalReportDispatch
     // Get report By Center
     protected abstract function getGamesByCenter();
 
-    // Get report Repromises
+    // Get report New Promises
     protected abstract function getRepromisesByCenter();
 
     // Get report Reg. Per Participant

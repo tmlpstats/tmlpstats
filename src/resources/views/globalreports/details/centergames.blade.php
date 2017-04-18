@@ -42,7 +42,7 @@
                 @endif
                 <th class="data-point {{ $includeActual ? '' : 'border-right' }}">
                     @if ($includeOriginal)
-                        Repromise
+                        New Promise
                     @else
                         Promise
                     @endif
