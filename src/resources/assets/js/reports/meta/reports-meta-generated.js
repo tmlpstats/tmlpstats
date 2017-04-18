@@ -49,7 +49,7 @@ const GlobalReport = {
         "id": "RepromisesByCenter",
         "n": 6,
         "type": "report",
-        "name": "Repromises",
+        "name": "New Promises",
         "requiredFlags": [
             "afterClassroom2"
         ]

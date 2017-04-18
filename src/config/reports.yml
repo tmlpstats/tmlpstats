@@ -529,7 +529,7 @@ reportMeta:
           GamesByCenter:
             name: By Center
           RepromisesByCenter:
-            name: Repromises
+            name: New Promises
             requiredFlags: ['afterClassroom2']
           # RegPerParticipant:
           RegPerParticipantWeekly:
