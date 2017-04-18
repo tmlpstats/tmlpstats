@@ -38,6 +38,7 @@ class ApiController extends ApiControllerBase
         "GlobalReport.getCourseList" => "GlobalReport__getCourseList",
         "GlobalReport.getReportPages" => "GlobalReport__getReportPages",
         "GlobalReport.getReportPagesByDate" => "GlobalReport__getReportPagesByDate",
+        "GlobalReport.reportViewOptions" => "GlobalReport__reportViewOptions",
         "LiveScoreboard.getCurrentScores" => "LiveScoreboard__getCurrentScores",
         "LiveScoreboard.setScore" => "LiveScoreboard__setScore",
         "LocalReport.getQuarterScoreboard" => "LocalReport__getQuarterScoreboard",
@@ -49,6 +50,7 @@ class ApiController extends ApiControllerBase
         "LocalReport.getCenterQuarter" => "LocalReport__getCenterQuarter",
         "LocalReport.reportViewOptions" => "LocalReport__reportViewOptions",
         "LocalReport.getReportPages" => "LocalReport__getReportPages",
+        "Lookups.getRegionCenters" => "Lookups__getRegionCenters",
         "Scoreboard.allForCenter" => "Scoreboard__allForCenter",
         "Scoreboard.stash" => "Scoreboard__stash",
         "Scoreboard.getScoreboardLockQuarter" => "Scoreboard__getScoreboardLockQuarter",
@@ -72,6 +74,7 @@ class ApiController extends ApiControllerBase
     protected $tokenAuthenticatedMethods = [
         "GlobalReport__getReportPages",
         "GlobalReport__getReportPagesByDate",
+        "GlobalReport__reportViewOptions",
         "LocalReport__getQuarterScoreboard",
         "LocalReport__reportViewOptions",
         "LocalReport__getReportPages",
@@ -225,6 +228,13 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'pages', 'array')
         );
     }
+    protected function GlobalReport__reportViewOptions($input)
+    {
+        return App::make(Api\GlobalReport::class)->reportViewOptions(
+            $this->parse($input, 'region', 'Region'),
+            $this->parse($input, 'reportingDate', 'date')
+        );
+    }
     protected function LiveScoreboard__getCurrentScores($input)
     {
         return App::make(Api\LiveScoreboard::class)->getCurrentScores(
@@ -298,6 +308,12 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'pages', 'array')
+        );
+    }
+    protected function Lookups__getRegionCenters($input)
+    {
+        return App::make(Api\Lookups::class)->getRegionCenters(
+            $this->parse($input, 'region', 'Region')
         );
     }
     protected function Scoreboard__allForCenter($input)

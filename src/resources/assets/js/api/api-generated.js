@@ -189,7 +189,15 @@ Api.GlobalReport = {
       reportingDate: date
       pages: array
     */
-    getReportPagesByDate: bac('GlobalReport.getReportPagesByDate')
+    getReportPagesByDate: bac('GlobalReport.getReportPagesByDate'),
+
+    /*
+    View options for Global Report
+    Parameters:
+      region: Region
+      reportingDate: date
+    */
+    reportViewOptions: bac('GlobalReport.reportViewOptions')
 }
 
 Api.LiveScoreboard = {
@@ -282,6 +290,16 @@ Api.LocalReport = {
       pages: array
     */
     getReportPages: bac('LocalReport.getReportPages')
+}
+
+Api.Lookups = {
+
+    /*
+    Find centers in a region
+    Parameters:
+      region: Region
+    */
+    getRegionCenters: bac('Lookups.getRegionCenters')
 }
 
 Api.Scoreboard = {

@@ -44,4 +44,9 @@ class RegionReportingDate
     {
         return $this->quarter;
     }
+
+    public function getRegionQuarter()
+    {
+        return RegionQuarter::ensure($this->region, $this->getQuarter());
+    }
 }

@@ -74,6 +74,7 @@ class AppServiceProvider extends ServiceProvider
 
         Blade::directive('json_pretty', function ($expression) {
             $expression = substr($expression, 1, -1);
+
             return "<?php echo json_encode({$expression}, JSON_PRETTY_PRINT) ?>";
         });
     }

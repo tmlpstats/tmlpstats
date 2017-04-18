@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\View\View;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
+use TmlpStats\Encapsulations;
 use TmlpStats\Http\Controllers;
 use TmlpStats\Reports\Arrangements;
 
@@ -268,5 +269,25 @@ class GlobalReport extends AuthenticatedApiBase
         $report = Models\GlobalReport::reportingDate($reportingDate)->firstOrFail();
 
         return $this->getReportPages($report, $region, $pages);
+    }
+
+    public function reportViewOptions(Models\Region $region, Carbon $reportingDate)
+    {
+        $report = Models\GlobalReport::reportingDate($reportingDate)->firstOrFail();
+        $this->assertCan('read', $report);
+
+        $rrd = Encapsulations\RegionReportingDate::ensure($region, $reportingDate);
+        $rq = $rrd->getRegionQuarter();
+
+        return [
+            'globalReportId' => $report->id,
+            'flags' => [
+                'afterClassroom2' => $reportingDate->gte($rq->classroom2Date),
+                'lastWeek' => $reportingDate->gte($rq->endWeekendDate),
+            ],
+            'capabilities' => [
+                '_ignoreMe' => false,
+            ],
+        ];
     }
 }

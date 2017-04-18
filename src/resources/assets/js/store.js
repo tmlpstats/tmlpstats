@@ -7,6 +7,7 @@ import thunk from 'redux-thunk'
 import { submissionReducer } from './submission/reducers'
 import adminReducer from './admin/reducers'
 import liveScoreboardReducer from './live_scoreboard/reducers'
+import { lookupsData } from './lookups'
 import reportsReducer from './reports/reducers'
 
 const responsiveBreakpoints = {
@@ -22,6 +23,7 @@ const reducer = combineReducers({
     routing: routerReducer,
     admin: adminReducer,
     live_scoreboard: liveScoreboardReducer,
+    lookups: lookupsData.reducer(),
     reports: reportsReducer,
     submission: submissionReducer,
 })
@@ -38,3 +40,6 @@ if (process.env.NODE_ENV != 'production') {
 export const store = createStore(reducer, undefined, _enhancers)
 
 export const history = syncHistoryWithStore(browserHistory, store)
+
+// To prevent circular issues, set the store here
+require('./storeProxy').default.setStore(store)

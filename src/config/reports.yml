@@ -223,6 +223,16 @@ api:
           - name: pages
             type: array
 
+      reportViewOptions:
+        desc: View options for Global Report
+        access: token
+        params:
+          - name: region
+            type: Region
+          - name: reportingDate
+            type: date
+
+
   LiveScoreboard:
     type: namespace
     children:
@@ -319,6 +329,15 @@ api:
             type: date
           - name: pages
             type: array
+
+  Lookups:
+    type: namespace
+    children:
+      getRegionCenters:
+        desc: Find centers in a region
+        params:
+          - name: region
+            type: Region
 
   Scoreboard:
     type: namespace

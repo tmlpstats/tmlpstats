@@ -230,13 +230,27 @@ class LocalReport extends AuthenticatedApiBase
         $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
         $cq = $crd->getCenterQuarter();
         $statsReport = static::getOfficialReport($center, $reportingDate);
+        $globalRegion = $center->region->getParentGlobalRegion();
+        $canReportToken = $this->context->can('readLink', Models\ReportToken::class);
+        $reportToken = null;
+        if ($canReportToken) {
+            $globalReport = $statsReport->globalReports->last();
+            $reportToken = Models\ReportToken::get($globalReport, $center);
+        }
 
         return [
             'statsReportId' => $statsReport->id,
+            'globalRegionId' => $globalRegion->abbrLower(),
             'flags' => [
                 'canReadContactInfo' => $this->context->can('readContactInfo', $statsReport),
                 'firstWeek' => $cq->firstWeekDate->toDateString() == $reportingDate->toDateString(),
                 'nextQtrAccountabilities' => $crd->canShowNextQtrAccountabilities(),
+            ],
+            'centerInfo' => collect($center->toArray())->only(['id', 'name', 'abbreviation', 'teamName', 'regionId']),
+            'reportToken' => ($reportToken !== null) ? $reportToken->getUrl() : null,
+            'capabilities' => [
+                'reportToken' => $canReportToken,
+                'reportNavLinks' => $this->context->can('showReportNavLinks', Models\StatsReport::class),
             ],
         ];
     }
