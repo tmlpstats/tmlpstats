@@ -11,7 +11,7 @@ import { SubmissionBase, React } from '../base_components'
 import { Form, SimpleField, SimpleDateInput, AddOneLink } from '../../reusable/form_utils'
 import { collectionSortSelector, SORT_BY } from '../../reusable/sort-helpers'
 import { delayDispatch } from '../../reusable/dispatch'
-import { ModeSelectButtons, SubmitFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
+import { ModeSelectButtons, ButtonStateFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
 import { COURSES_FORM_KEY } from './reducers'
 import { coursesSorts, coursesCollection, courseTypeMap } from './data'
@@ -228,7 +228,7 @@ class _EditCreate extends CoursesBase {
 
                 {completionFields}
 
-                <SubmitFlip loadState={this.props.saveCourse} offset='col-sm-offset-2 col-sm-8'>Save</SubmitFlip>
+                <ButtonStateFlip loadState={this.props.saveCourse} offset='col-sm-offset-2 col-sm-8' wrapGroup={true}>Save</ButtonStateFlip>
                 </Form>
             </div>
         )

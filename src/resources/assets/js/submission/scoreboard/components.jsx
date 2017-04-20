@@ -7,7 +7,7 @@ import moment from 'moment'
 import { shallowArrayElementsEqual } from '../../reusable/compare'
 import { delayDispatch, rebind } from '../../reusable/dispatch'
 import Scoreboard, { GAME_KEYS } from '../../reusable/scoreboard'
-import { SubmitFlip, MessagesComponent } from '../../reusable/ui_basic'
+import { ButtonStateFlip, MessagesComponent } from '../../reusable/ui_basic'
 import { objectAssign } from '../../reusable/ponyfill'
 
 import { SubmissionBase } from '../base_components'
@@ -86,7 +86,7 @@ class SubmissionScoreboard extends SubmissionBase {
                 <h3>Scoreboard</h3>
                 <div style={{overflow: 'scroll', maxHeight: '14em'}}>{allMessages}</div>
                 <div>{rows}</div>
-                <SubmitFlip loadState={this.props.saving} offset='col-sm-12'>Save</SubmitFlip>
+                <ButtonStateFlip loadState={this.props.saving} offset='col-sm-12' wrapGroup={true}>Save</ButtonStateFlip>
             </Form>
         )
     }

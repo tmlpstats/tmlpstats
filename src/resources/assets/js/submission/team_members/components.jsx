@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { Form, CheckBox, SimpleField, BooleanSelect, SimpleSelect, SimpleFormGroup } from '../../reusable/form_utils'
-import { ModeSelectButtons, SubmitFlip, Alert, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
+import { ModeSelectButtons, ButtonStateFlip, Alert, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 import { delayDispatch, connectRedux } from '../../reusable/dispatch'
 import { FormTypeahead } from '../../reusable/typeahead'
 
@@ -72,7 +72,7 @@ class _EditCreate extends TeamMembersBase {
         return (
             <Form className="form-horizontal submissionTeamMembersEdit" model={modelKey} onSubmit={this.saveTeamMember.bind(this)}>
                 {this.renderContent(modelKey, options)}
-                <SubmitFlip loadState={this.props.teamMembers.saveState} offset='col-md-offset-1 col-md-8'>Save</SubmitFlip>
+                <ButtonStateFlip loadState={this.props.teamMembers.saveState} offset='col-md-offset-1 col-md-8' wrapGroup={true}>Save</ButtonStateFlip>
             </Form>
         )
     }

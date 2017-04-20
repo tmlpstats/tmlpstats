@@ -5,7 +5,7 @@ import { Form, SimpleField, SimpleSelect, SimpleFormGroup, BooleanSelect, AddOne
 import { objectAssign } from '../../reusable/ponyfill'
 import { rebind, delayDispatch } from '../../reusable/dispatch'
 import { collectionSortSelector, SORT_BY } from '../../reusable/sort-helpers'
-import { Alert, ModeSelectButtons, LoadStateFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
+import { Alert, ModeSelectButtons, ButtonStateFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
 import { SubmissionBase, React } from '../base_components'
 import { APPLICATIONS_FORM_KEY } from './reducers'
@@ -207,13 +207,7 @@ class _EditCreate extends ApplicationsBase {
                         </div>
                     </div>
                     {this.renderTravelRoom(modelKey)}
-                    <div className="form-group">
-                        <div className="col-sm-offset-2 col-sm-8">
-                            <LoadStateFlip loadState={this.props.saveApp}>
-                                <button className="btn btn-primary" type="submit">Save</button>
-                            </LoadStateFlip>
-                        </div>
-                    </div>
+                    <ButtonStateFlip loadState={this.props.saveApp} offset='col-sm-offset-2 col-sm-8' wrapGroup={true}>Save</ButtonStateFlip>
                 </Form>
             </div>
         )
