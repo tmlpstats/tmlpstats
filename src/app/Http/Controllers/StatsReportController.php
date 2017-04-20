@@ -434,6 +434,7 @@ class StatsReportController extends Controller
         $a = new Arrangements\GamesByMilestone([
             'weeks' => App::make(Api\LocalReport::class)->getQuarterScoreboard($statsReport),
             'quarter' => $statsReport->quarter,
+            'center' => $statsReport->center,
         ]);
         $data = $a->compose();
 
