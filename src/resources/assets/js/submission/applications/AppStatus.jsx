@@ -31,6 +31,12 @@ function inferStatus(app) {
     if (app.regDate) {
         return STATUS_REG
     }
+
+    // This is a new application, default to reg
+    if (!app.id) {
+        return STATUS_REG
+    }
+
     return STATUS_UNKNOWN
 }
 
