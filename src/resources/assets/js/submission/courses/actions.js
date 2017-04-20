@@ -8,6 +8,7 @@ import Api from '../../api'
 import { markStale } from '../review/actions'
 
 import { coursesCollection, coursesLoad, saveCourseLoad, messages } from './data'
+import { COURSES_FORM_KEY } from './reducers'
 
 export const loadState = coursesLoad.actionCreator()
 export const saveCourseState = saveCourseLoad.actionCreator()
@@ -40,8 +41,8 @@ export function initializeCourses(data) {
     }
 }
 
-export function chooseCourse(courseId, course) {
-    return formActions.change('submission.courses.currentCourse', course)
+export function chooseCourse(data) {
+    return formActions.load(COURSES_FORM_KEY, data)
 }
 
 export function saveCourse(center, reportingDate, data) {
