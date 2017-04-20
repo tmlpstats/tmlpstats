@@ -1,5 +1,5 @@
 // POLYFILL
-import { Promise, objectAssign } from '../../reusable/ponyfill'
+import { objectAssign } from '../../reusable/ponyfill'
 
 // NORMAL CODE
 import { Link, withRouter } from 'react-router'
@@ -10,6 +10,7 @@ import moment from 'moment'
 import { SubmissionBase, React } from '../base_components'
 import { Form, SimpleField, SimpleDateInput, AddOneLink } from '../../reusable/form_utils'
 import { collectionSortSelector, SORT_BY } from '../../reusable/sort-helpers'
+import { delayDispatch } from '../../reusable/dispatch'
 import { ModeSelectButtons, SubmitFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
 import { COURSES_FORM_KEY } from './reducers'
@@ -20,15 +21,18 @@ const getSortedCourses = collectionSortSelector(coursesSorts)
 
 
 class CoursesBase extends SubmissionBase {
-    componentDidMount() {
-        this.setupCourses()
+    constructor(props) {
+        super(props)
+        this.checkLoading()
     }
 
-    setupCourses() {
-        if (this.props.loading.state == 'new') {
-            return this.props.dispatch(loadCourses(this.props.params.centerId, this.reportingDateString()))
+    checkLoading() {
+        const { loading, params } = this.props
+        if (loading.state == 'new') {
+            const { centerId, reportingDate } = params
+            delayDispatch(this, loadCourses(centerId, reportingDate))
         }
-        return Promise.resolve(null)
+        return (loading.state == 'loaded')
     }
 
     getCourseById(courseId) {
@@ -92,8 +96,8 @@ class CoursesIndexView extends CoursesBase {
     }
 
     render() {
-        if (!this.props.loading.loaded) {
-            return this.renderBasicLoading()
+        if (!this.checkLoading()) {
+            return this.renderBasicLoading(this.props.loading)
         }
         const changeSort = (newSort) => this.props.dispatch(coursesCollection.setMeta(SORT_BY, newSort))
         const courses = []
@@ -152,6 +156,10 @@ class CoursesIndexView extends CoursesBase {
 
 class _EditCreate extends CoursesBase {
     render() {
+        if (!this.checkLoading()) {
+            return this.renderBasicLoading(this.props.loading)
+        }
+
         const modelKey = COURSES_FORM_KEY
 
         let currentState = 'visible'
@@ -243,7 +251,7 @@ class _EditCreate extends CoursesBase {
                 this.props.router.push(this.baseUri() + '/courses')
             }
 
-            this.props.dispatch(chooseCourse(result.storedId, this.getCourseById(result.storedId)))
+            this.props.dispatch(chooseCourse(this.getCourseById(result.storedId)))
         })
     }
 
@@ -364,54 +372,48 @@ class _EditCreate extends CoursesBase {
 }
 
 class CoursesEditView extends _EditCreate {
-    componentDidMount() {
-        super.setupCourses().then(() => {
-            const courseId = this.props.params.courseId
-            if (!this.props.currentCourse || this.props.currentCourse.id != courseId) {
-                let course = this.getCourseById(courseId)
-                if (course) {
-                    this.props.dispatch(chooseCourse(courseId, course))
-                }
+    checkLoading() {
+        if (!super.checkLoading()) {
+            return false
+        }
+        const { currentCourse, params: { courseId } } = this.props
+        if (!currentCourse || currentCourse.id != courseId) {
+            let course = this.getCourseById(courseId)
+            if (course) {
+                delayDispatch(this, chooseCourse(course))
+                return false
             }
-        })
+        }
+        return true
     }
 
     title() {
         return 'Edit Course'
     }
-
-    render() {
-        const courseId = this.props.params.courseId
-
-        if (!this.props.loading.loaded || !this.props.currentCourse || this.props.currentCourse.id != courseId) {
-            return <div>{this.props.loading.state}...</div>
-        }
-        return super.render()
-    }
-
 }
 
 class CoursesAddView extends _EditCreate {
-    componentDidMount() {
-        super.setupCourses().then(() => {
-            if (this.props.currentCourse) {
-                this.props.dispatch(chooseCourse('', {
-                    startDate: '',
-                    type: 'CAP',
-                    quarterStartTer: 0,
-                    quarterStartStandardStarts: 0,
-                    quarterStartXfer: 0
-                }))
+    checkLoading() {
+        if (!super.checkLoading()) {
+            return false
+        }
+        const { currentCourse } = this.props
+        if (!currentCourse || currentCourse.id) {
+            const blankCourse = {
+                startDate: '',
+                type: 'CAP',
+                quarterStartTer: 0,
+                quarterStartStandardStarts: 0,
+                quarterStartXfer: 0
             }
-        })
+            delayDispatch(this, chooseCourse(blankCourse))
+            return false
+        }
+        return true
     }
 
     title() {
         return 'Create Course'
-    }
-
-    render() {
-        return super.render()
     }
 }
 
