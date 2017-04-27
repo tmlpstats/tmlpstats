@@ -353,7 +353,8 @@ export class ApplicationsAdd extends _EditCreate {
         if (!super.checkLoading()) {
             return false
         }
-        if (!this.props.currentApp || this.props.currentApp.id) {
+        const { currentApp } = this.props
+        if (!currentApp || currentApp.id || !currentApp.teamYear) {
             const { centerQuarters } = this.getCenterQuarters()
             const blankApp = {
                 firstName: '',
