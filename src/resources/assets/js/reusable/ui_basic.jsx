@@ -124,21 +124,39 @@ export class SubmitFlip extends React.PureComponent {
 export class ButtonStateFlip extends React.PureComponent {
     static defaultProps = {
         buttonClass: 'btn btn-primary',
-        onClick: () => { }
+        offset: 'col-md-offset-2 col-md-8',
+        wrapGroup: false
     }
     static propTypes = {
         loadState: PropTypes.object.isRequired,
         buttonClass: PropTypes.string,
         onClick: PropTypes.func,
-        children: PropTypes.node
+        children: PropTypes.node,
+        offset: PropTypes.string,
+        wrapGroup: PropTypes.bool
     }
     render() {
-        var { buttonClass, loadState, onClick } = this.props
+        var { buttonClass, children, loadState, onClick, offset, wrapGroup } = this.props
 
+        let button
         if (loadState.state == 'loading') {
-            return <button className={buttonClass + ' m-progress'}>{this.props.children}</button>
+            button = <button className={buttonClass + ' m-progress'}>{children}</button>
+        } else if (onClick) {
+            button = <button className={buttonClass} onClick={onClick}>{children}</button>
         } else {
-            return <button className={buttonClass} onClick={onClick}>{this.props.children}</button>
+            button = <button className={buttonClass} type="submit">{children}</button>
+        }
+
+        if (wrapGroup) {
+            return (
+                <div className="form-group">
+                    <div className={offset}>
+                        {button}
+                    </div>
+                </div>
+            )
+        } else {
+            return button
         }
     }
 }

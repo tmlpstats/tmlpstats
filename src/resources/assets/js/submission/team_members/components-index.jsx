@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 import { defaultMemoize } from 'reselect'
 
 import { Form, BooleanSelectView, connectCustomField, AddOneLink } from '../../reusable/form_utils'
-import { ModeSelectButtons, SubmitFlip, Alert } from '../../reusable/ui_basic'
+import { ModeSelectButtons, ButtonStateFlip, Alert } from '../../reusable/ui_basic'
 import { delayDispatch, rebind, connectRedux } from '../../reusable/dispatch'
 import { collectionSortSelector } from '../../reusable/sort-helpers'
 
@@ -114,7 +114,7 @@ export class TeamMembersIndex extends TeamMembersBase {
                     <tfoot>
                         <tr>
                             <td colSpan="4" style={{minWidth: '15em'}}>
-                                <SubmitFlip loadState={weeklySave} wrapGroup={false}>Save GITW/TDO changes</SubmitFlip>
+                                <ButtonStateFlip loadState={weeklySave}>Save GITW/TDO changes</ButtonStateFlip>
                             </td>
                         </tr>
                     </tfoot>
