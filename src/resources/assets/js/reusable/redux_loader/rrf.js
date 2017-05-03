@@ -10,7 +10,7 @@ export default class FormReduxLoader extends ReduxLoader {
 
     extraReducers(opts) {
         if (opts.formReducer) {
-            return {dataForm: formReducer(opts.model)}
+            return {forms: formReducer(opts.model)}
         }
     }
 
