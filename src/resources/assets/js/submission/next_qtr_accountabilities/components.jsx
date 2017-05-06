@@ -219,8 +219,9 @@ class QuarterAccountabilitiesRow extends PureComponent {
         }
 
         if (name.customOption) {
+            console.log('custom entry', name)
             // In this case, it's a custom entry.
-            toUpdate.name = name.name
+            toUpdate.name = name.label || name.name
         } else {
             const { nameToKey, team_members, applications: {collection: appsCollection} } = this.props.people
             const key = nameToKey[name]
