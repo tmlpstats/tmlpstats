@@ -2,7 +2,7 @@ import _ from 'lodash'
 import React, { Component, PureComponent, PropTypes } from 'react'
 
 import { Typeahead } from '../../reusable/typeahead'
-import { Form, Field, formActions, SimpleFormGroup } from '../../reusable/form_utils'
+import { Form, formActions, SimpleFormGroup, NullableTextControl } from '../../reusable/form_utils'
 import { Alert, Panel, SubmitFlip } from '../../reusable/ui_basic'
 import { rebind, connectRedux, delayDispatch } from '../../reusable/dispatch'
 
@@ -166,9 +166,9 @@ class QuarterAccountabilitiesRow extends PureComponent {
         const tmSelectField = (
             <PersonInput people={this.props.people} onChange={this.onNameChange} name={this.props.entry.name} />
         )
-        const emailField = <Field model={model+'.email'}><input type="text" className="form-control nqEmail" /></Field>
-        const phoneField = <Field model={model+'.phone'}><input type="text" className="form-control nqPhone" /></Field>
-        const notesField = <Field model={model+'.notes'}><input type="text" className="form-control nqNotes" /></Field>
+        const emailField = <NullableTextControl model={model+'.email'} className="form-control nqEmail" />
+        const phoneField = <NullableTextControl model={model+'.phone'} className="form-control nqPhone" />
+        const notesField = <NullableTextControl model={model+'.notes'} className="form-control nqNotes" />
         const isRequired = _.includes(requiredAccountabilities, acc.name)
 
         if (tabular) {

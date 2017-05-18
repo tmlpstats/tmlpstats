@@ -1,13 +1,25 @@
 import React, { PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Form, Field, actions as formActions } from 'react-redux-form'
+import { Control, Form, Field, actions as formActions } from 'react-redux-form'
 import _ from 'lodash'
 import { Link } from 'react-router'
 
-export { Form, Field, formActions }
+import { objectAssign } from '../ponyfill'
+
+export { Control, Form, Field, formActions }
 export { DateInput, SimpleDateInput } from './DateInput'
 
 export class SimpleField extends React.Component {
+    static propTypes = {
+        customField: PropTypes.bool,
+        controlProps: PropTypes.object,
+        model: PropTypes.string,
+        disabled: PropTypes.bool,
+        children: PropTypes.node,
+        required: PropTypes.bool,
+        labelClass: PropTypes.string,
+        divClass: PropTypes.string
+    }
     static defaultProps = {
         labelClass: 'col-md-2',
         divClass: 'col-md-8',
@@ -16,11 +28,13 @@ export class SimpleField extends React.Component {
     render() {
         var field
         if (this.props.customField) {
-            field = this.props.children
-        } else if (this.props.disabled) {
-            field = <input type="text" className="form-control" disabled={this.props.disabled} />
+            field = <Field model={this.props.model}>{this.props.children}</Field>
         } else {
-            field = <input type="text" className="form-control" />
+            let controlProps = this.props.controlProps || {}
+            if (this.props.disabled) {
+                controlProps = objectAssign({}, controlProps, {disabled: this.props.disabled})
+            }
+            field = <NullableTextControl model={this.props.model} controlProps={controlProps} />
         }
 
         const { labelClass, divClass, required } = this.props
@@ -92,13 +106,16 @@ export class SimpleSelect extends React.PureComponent {
         required: false
     }
     static propTypes = {
+        model: PropTypes.string,
         items: PropTypes.arrayOf(PropTypes.object).isRequired,
         keyProp: PropTypes.string,
         getKey: PropTypes.func,
         labelProp: PropTypes.string,
         getLabel: PropTypes.func,
+        emptyChoice: PropTypes.node,
         selectClasses: PropTypes.string,
         multiple: PropTypes.bool,
+        required: PropTypes.bool,
         rows: PropTypes.number
     }
     render() {
@@ -207,13 +224,19 @@ export const BooleanSelect = connectCustomField(BooleanSelectView)
  * when a field is disabled, showing appropriate hover cursor on it.
  */
 export class CheckBox extends React.PureComponent {
+    static propTypes = {
+        model: PropTypes.string.isRequired,
+        disabled: PropTypes.bool,
+        label: PropTypes.string,
+        children: PropTypes.node
+    }
     render() {
         const { disabled, label, children, model } = this.props
         const className = (disabled)? 'checkbox disabled' : 'checkbox'
         return (
             <div className={className}>
                 <label>
-                    <Field model={model} disabled={disabled}><input type="checkbox" /></Field>
+                    <Control.checkbox model={model} disabled={disabled} />
                     {label || children}
                 </label>
             </div>
@@ -221,3 +244,44 @@ export class CheckBox extends React.PureComponent {
     }
 }
 
+// Return props.value as empty string if null or undefined, return unchanged otherwise.
+function filterNullValue(props) {
+    console.log('filterNullValue', props)
+    const value = props.viewValue
+    return (value === null || value === undefined) ? '' : props.value
+}
+
+const mapPropsFilterNull = {value: filterNullValue}
+
+
+export class NullableTextControl extends React.Component {
+    static propTypes = {
+        model: PropTypes.string.isRequired,
+        className: PropTypes.string
+    };
+    static defaultProps = {
+        type: 'text',
+        className: 'form-control',
+        mapProps: mapPropsFilterNull
+    }
+
+    render() {
+        return <Control.text {...this.props} />
+    }
+}
+
+
+export class NullableTextAreaControl extends React.PureComponent {
+    static propTypes = {
+        model: PropTypes.string.isRequired,
+        className: PropTypes.string
+    };
+    static defaultProps = {
+        className: 'form-control',
+        mapProps: mapPropsFilterNull
+    }
+
+    render() {
+        return <Control.textarea {...this.props} />
+    }
+}

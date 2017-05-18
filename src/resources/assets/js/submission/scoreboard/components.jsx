@@ -1,11 +1,12 @@
 import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
-import { Form, Field } from 'react-redux-form'
+import { Form, Control } from 'react-redux-form'
 import moment from 'moment'
 
 import { shallowArrayElementsEqual } from '../../reusable/compare'
 import { delayDispatch, rebind } from '../../reusable/dispatch'
+import { NullableTextControl } from '../../reusable/form_utils'
 import Scoreboard, { GAME_KEYS } from '../../reusable/scoreboard'
 import { ButtonStateFlip, MessagesComponent } from '../../reusable/ui_basic'
 import { objectAssign } from '../../reusable/ponyfill'
@@ -152,15 +153,15 @@ class ScoreboardRow extends SubmissionBase {
                 const modelKey = scoreboard.meta.modelKey + `.games.${gameKey}`
 
                 const promiseVal = (
-                    <Field model={modelKey+'.promise'}>
-                        <input type="text" disabled={!scoreboard.meta.canEditPromise} className="form-field" autoComplete="off" />
-                    </Field>
+                    <NullableTextControl
+                        model={modelKey+'.promise'} disabled={!scoreboard.meta.canEditPromise}
+                        className=" " controlProps={{autoComplete: 'off'}} />
                 )
 
                 const actualVal = (
-                    <Field model={modelKey+'.actual'}>
-                        <input type="text" disabled={!scoreboard.meta.canEditActual} className="form-field" autoComplete="off" />
-                    </Field>
+                    <NullableTextControl
+                        model={modelKey+'.actual'} disabled={!scoreboard.meta.canEditActual}
+                        className=" " controlProps={{autoComplete: 'off', }} />
                 )
 
                 values.push(

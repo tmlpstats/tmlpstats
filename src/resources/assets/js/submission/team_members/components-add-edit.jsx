@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Form, CheckBox, SimpleField, BooleanSelect, SimpleSelect, SimpleFormGroup } from '../../reusable/form_utils'
+import { Form, CheckBox, SimpleField, BooleanSelect, SimpleSelect, SimpleFormGroup, NullableTextAreaControl } from '../../reusable/form_utils'
 import { ModeSelectButtons, ButtonStateFlip, Alert, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 import { delayDispatch, connectRedux } from '../../reusable/dispatch'
 import { FormTypeahead } from '../../reusable/typeahead'
@@ -79,9 +79,7 @@ class _EditCreate extends TeamMembersBase {
             <div>
                 <SimpleField label="First Name" model={modelKey+'.firstName'} divClass="col-md-6" disabled={disableBasicInfo} required={!disableBasicInfo} />
                 <SimpleField label="Last Name" model={modelKey+'.lastName'} divClass="col-md-6" disabled={disableBasicInfo} required={!disableBasicInfo} />
-                <SimpleField label="Email" model={modelKey+'.email'} divClass="col-md-8" customField={true}>
-                    <input type="email" className="form-control" />
-                </SimpleField>
+                <SimpleField label="Email" model={modelKey+'.email'} divClass="col-md-8" controlProps={{type: 'email'}} />
                 <SimpleField label="Phone" model={modelKey+'.phone'} divClass="col-md-6" disabled={disableBasicInfo} />
                 <SimpleFormGroup label="Accountabilities">
                     <FormTypeahead
@@ -127,9 +125,9 @@ class _EditCreate extends TeamMembersBase {
                     <CheckBox model={modelKey+'.atWeekend'} label="On team at weekend" />
                     <CheckBox model={modelKey+'.xferIn'} label="Transfer In" />
                 </SimpleFormGroup>
-                <SimpleField label="Comment" model={modelKey+'.comment'} divClass="col-md-8" customField={true}>
-                    <textarea className="form-control" />
-                </SimpleField>
+                <SimpleFormGroup label="Comment" divClass="col-md-8">
+                    <NullableTextAreaControl model={modelKey+'.comment'} />
+                </SimpleFormGroup>
                 <SimpleFormGroup label="Team Status">
                     {this.renderWithdrawGroup(modelKey, options)}
                 </SimpleFormGroup>
