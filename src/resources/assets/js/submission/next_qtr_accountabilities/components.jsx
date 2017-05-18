@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import React, { Component, PureComponent, PropTypes } from 'react'
 
-import { objectAssign } from '../../reusable/ponyfill'
 import { Typeahead } from '../../reusable/typeahead'
 import { Form, Field, formActions, SimpleFormGroup } from '../../reusable/form_utils'
 import { Alert, Panel, SubmitFlip } from '../../reusable/ui_basic'
@@ -219,7 +218,6 @@ class QuarterAccountabilitiesRow extends PureComponent {
         }
 
         if (name.customOption) {
-            console.log('custom entry', name)
             // In this case, it's a custom entry.
             toUpdate.name = name.label || name.name
         } else {
