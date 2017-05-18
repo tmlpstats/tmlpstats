@@ -1,7 +1,7 @@
 import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
 
-import { Form, SimpleField, SimpleSelect, SimpleFormGroup, BooleanSelect, AddOneLink, formActions } from '../../reusable/form_utils'
+import { Control, Form, SimpleField, SimpleSelect, SimpleFormGroup, BooleanSelect, AddOneLink, formActions } from '../../reusable/form_utils'
 import { objectAssign } from '../../reusable/ponyfill'
 import { rebind, delayDispatch } from '../../reusable/dispatch'
 import { collectionSortSelector, SORT_BY } from '../../reusable/sort-helpers'
@@ -182,12 +182,12 @@ class _EditCreate extends ApplicationsBase {
                     {this.renderStartingQuarter(modelKey)}
                     <SimpleField label="First Name" model={modelKey+'.firstName'} divClass="col-md-6" required={true} />
                     <SimpleField label="Last Name" model={modelKey+'.lastName'} divClass="col-md-6" required={true} />
-                    <SimpleField label="Team Year" model={modelKey+'.teamYear'} divClass="col-md-1" required={true} customField={true}>
-                        <select className="form-control">
+                    <SimpleFormGroup label="Team Year" divClass="col-md-4" required={true}>
+                        <Control.select model={modelKey+'.teamYear'} className="form-control" style={{maxWidth: '10em'}}>
                             <option value="1">Team 1</option>
                             <option value="2">Team 2</option>
-                        </select>
-                    </SimpleField>
+                        </Control.select>
+                    </SimpleFormGroup>
                     <SimpleField label="Email" model={modelKey+'.email'} divClass="col-md-6" />
                     <SimpleField label="Comment" model={modelKey+'.comment'} divClass="col-md-6" customField={true}>
                         <textarea className="form-control" rows="3"></textarea>
@@ -238,18 +238,19 @@ class _EditCreate extends ApplicationsBase {
         } else {
             const clickHandler = () => {
                 this.props.dispatch(formActions.change(`${modelKey}.${CHANGING_QUARTER_KEY}`, true))
+                return false; // prevent navigation to hash URL
             }
             const cq = cqData[currentApp.incomingQuarter]
             const label = (cq)? centerQuarterData.getLabel(cq) : 'Unknown'
             body = (
-                <span>
-                    {label}
+                <p className="form-control-static">
+                    {label}&nbsp;
                     <a href="#" onClick={clickHandler}>Change Starting Quarter</a>
-                </span>
+                </p>
             )
         }
 
-        if (currentApp._changingQuarter) {
+        if (currentApp[CHANGING_QUARTER_KEY]) {
             body = (
                 <div>
                     <Alert alert="info">

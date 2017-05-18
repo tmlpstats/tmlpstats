@@ -244,11 +244,10 @@ export class CheckBox extends React.PureComponent {
     }
 }
 
-// Return props.value as empty string if null or undefined, return unchanged otherwise.
+// Return props.viewValue as empty string if null or undefined, return unchanged otherwise.
 function filterNullValue(props) {
-    console.log('filterNullValue', props)
-    const value = props.viewValue
-    return (value === null || value === undefined) ? '' : props.value
+    const viewValue = props.viewValue
+    return (viewValue === null || viewValue === undefined) ? '' : viewValue
 }
 
 const mapPropsFilterNull = {value: filterNullValue}
