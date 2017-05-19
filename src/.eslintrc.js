@@ -24,7 +24,7 @@ module.exports = {
         "react/jsx-uses-react": [1],
         "react/jsx-wrap-multilines": [1, {declaration: true, assignment: true, return: true}],
         "react/jsx-equals-spacing": [2, "never"],
-        "react/prop-types": [2, {ignore: ['params', 'dispatch', 'router']}],
+        "react/prop-types": [1, {ignore: ['params', 'dispatch', 'router']}],
         "react/prefer-stateless-function": [1, {ignorePureComponents: true}],
         "indent": [
             "error",

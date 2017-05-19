@@ -4,11 +4,8 @@ import { syncHistoryWithStore, routerReducer } from 'react-router-redux'
 import { createResponsiveStateReducer, createResponsiveStoreEnhancer } from 'redux-responsive'
 import thunk from 'redux-thunk'
 
-import { submissionReducer } from './submission/reducers'
-import adminReducer from './admin/reducers'
-import liveScoreboardReducer from './live_scoreboard/reducers'
-import { lookupsData } from './lookups'
-import reportsReducer from './reports/reducers'
+import { objectAssign } from './reusable/ponyfill'
+import baseReducers from './storeBaseReducers'
 
 const responsiveBreakpoints = {
     extraSmall: 480,
@@ -18,15 +15,15 @@ const responsiveBreakpoints = {
     huge: 1600
 }
 
-const reducer = combineReducers({
-    browser: createResponsiveStateReducer(responsiveBreakpoints),
-    routing: routerReducer,
-    admin: adminReducer,
-    live_scoreboard: liveScoreboardReducer,
-    lookups: lookupsData.reducer(),
-    reports: reportsReducer,
-    submission: submissionReducer,
-})
+
+
+const reducer = combineReducers(objectAssign(
+    {
+        browser: createResponsiveStateReducer(responsiveBreakpoints),
+        routing: routerReducer
+    },
+    baseReducers
+))
 
 const responsive = createResponsiveStoreEnhancer({performanceMode: true})
 

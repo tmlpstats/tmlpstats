@@ -1,12 +1,13 @@
-import React, { PropTypes } from 'react'
+import PropTypes from 'prop-types'
+import React from 'react'
 import { connect } from 'react-redux'
-import { Control, Form, Field, actions as formActions } from 'react-redux-form'
+import { Control as FormControl, Form, Field, actions as formActions } from 'react-redux-form'
 import _ from 'lodash'
 import { Link } from 'react-router'
 
 import { objectAssign } from '../ponyfill'
 
-export { Control, Form, Field, formActions }
+export { Form, Field, formActions }
 export { DateInput, SimpleDateInput } from './DateInput'
 
 export class SimpleField extends React.Component {
@@ -116,7 +117,8 @@ export class SimpleSelect extends React.PureComponent {
         selectClasses: PropTypes.string,
         multiple: PropTypes.bool,
         required: PropTypes.bool,
-        rows: PropTypes.number
+        rows: PropTypes.number,
+        changeAction: PropTypes.func
     }
     render() {
         const items = this.props.items
@@ -168,6 +170,12 @@ export const connectCustomField = connect(customFieldMSP)
  * value is set.
  */
 export class BooleanSelectView extends React.Component {
+    static propTypes = {
+        model: PropTypes.string.isRequired,
+        modelValue: PropTypes.any,
+        emptyChoice: PropTypes.node,
+        labels: PropTypes.arrayOf(PropTypes.string)
+    };
     static defaultProps = {
         labels: ['N', 'Y'],
         className: 'form-control'
@@ -284,3 +292,32 @@ export class NullableTextAreaControl extends React.PureComponent {
         return <Control.textarea {...this.props} />
     }
 }
+
+
+let Control = FormControl
+
+// For Unit tests: Wrap the control element.
+// This code block will be compiled out in tests anyway.
+if (process.env.NODE_ENV == 'test') {
+    function makeInputFake(inputType) {
+        function inputFake(props) {
+            const className = 'testing-control ' + (props.className || '')
+            return (
+                <input
+                    type={inputType} value={props.modelValue}
+                    name={props.model} className={className} />
+            )
+        }
+        return connectCustomField(inputFake)
+    }
+
+    function textareaFake(props) {
+        return <textarea name={props.model} value={props.modelValue} className='testing-control' />
+    }
+
+    Control = makeInputFake('text')
+    Control.checkbox = makeInputFake('checkbox')
+    Control.text = makeInputFake('text')
+    Control.textarea = connectCustomField(textareaFake)
+}
+export { Control }

@@ -20,7 +20,7 @@ import { getValidationMessagesIfStale } from '../review/actions'
 /**
  * SubmissionScoreboard is the root component for rendering the scoreboard view.
  */
-class SubmissionScoreboard extends SubmissionBase {
+class SubmissionScoreboardView extends SubmissionBase {
     static onRouteEnter(nextState) {
         const { store } = require('../../store')
         store.dispatch(getValidationMessagesIfStale(nextState.params.centerId, nextState.params.reportingDate))
@@ -100,7 +100,7 @@ class SubmissionScoreboard extends SubmissionBase {
  *
  * Typically, what is meant by "entire row" is a group of weeks leading up to a classroom or weekend date.
  */
-class ScoreboardRow extends SubmissionBase {
+export class ScoreboardRow extends SubmissionBase {
 
     // Normally, we don't have to implement shouldComponentUpdate because connect handles a lot of this for us.
     // However, the week grouping causes props mismatches and this results in a full re-render of all four week boxes
@@ -241,4 +241,4 @@ const mapStateToProps = (state) => {
     return objectAssign({}, state.submission.scoreboard, {scoreboardsForm: null})
 }
 
-export default connect(mapStateToProps)(SubmissionScoreboard)
+export default connect(mapStateToProps)(SubmissionScoreboardView)
