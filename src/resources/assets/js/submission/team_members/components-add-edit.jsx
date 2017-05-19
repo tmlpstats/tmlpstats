@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Form, CheckBox, SimpleField, BooleanSelect, SimpleSelect, SimpleFormGroup, NullableTextAreaControl } from '../../reusable/form_utils'
+import { Control, Form, CheckBox, SimpleField, BooleanSelect, SimpleSelect, SimpleFormGroup, NullableTextAreaControl } from '../../reusable/form_utils'
 import { ModeSelectButtons, ButtonStateFlip, Alert, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 import { delayDispatch, connectRedux } from '../../reusable/dispatch'
 import { FormTypeahead } from '../../reusable/typeahead'
@@ -111,12 +111,12 @@ class _EditCreate extends TeamMembersBase {
 
         return (
             <div>
-                <SimpleField label="Team Year" model={modelKey+'.teamYear'} divClass="col-md-4" customField={true} required={!disableYearQuarter}>
-                    <select disabled={disableYearQuarter} className="form-control">
+                <SimpleFormGroup label="Team Year" divClass="col-md-4" required={!disableYearQuarter}>
+                    <Control.select model={modelKey+'.teamYear'} disabled={disableYearQuarter} className="form-control">
                         <option value="1">Team 1</option>
                         <option value="2">Team 2</option>
-                    </select>
-                </SimpleField>
+                    </Control.select>
+                </SimpleFormGroup>
                 <SimpleFormGroup label="Starting Quarter" required={!disableYearQuarter}>
                     {yearQuarter}
                 </SimpleFormGroup>
