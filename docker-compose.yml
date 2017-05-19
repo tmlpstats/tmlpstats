@@ -43,3 +43,12 @@ services:
 
   memcached:
     image: memcached:1.4-alpine
+
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.251.0/24
+          gateway: 172.18.251.1
