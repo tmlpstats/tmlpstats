@@ -4,6 +4,7 @@
 vendor
 _ide_helper*
 bower_components
+coverage/
 node_modules
 public/**/*.map
 public/build/
