@@ -1,16 +1,13 @@
-// POLYFILL
-import { objectAssign } from '../../reusable/ponyfill'
-
-// NORMAL CODE
 import { Link, withRouter } from 'react-router'
 import { connect } from 'react-redux'
 import { Field } from 'react-redux-form'
 import moment from 'moment'
 
 import { SubmissionBase, React } from '../base_components'
-import { Form, SimpleField, SimpleDateInput, AddOneLink } from '../../reusable/form_utils'
+import { Control, Form, SimpleField, SimpleFormGroup, SimpleDateInput, AddOneLink } from '../../reusable/form_utils'
 import { collectionSortSelector, SORT_BY } from '../../reusable/sort-helpers'
-import { delayDispatch } from '../../reusable/dispatch'
+import { delayDispatch, rebind } from '../../reusable/dispatch'
+import { objectAssign } from '../../reusable/ponyfill'
 import { ModeSelectButtons, ButtonStateFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
 import { COURSES_FORM_KEY } from './reducers'
@@ -155,6 +152,11 @@ class CoursesIndexView extends CoursesBase {
 }
 
 class _EditCreate extends CoursesBase {
+    constructor(props) {
+        super(props)
+        rebind(this, 'saveCourseData')
+    }
+
     render() {
         if (!this.checkLoading()) {
             return this.renderBasicLoading(this.props.loading)
@@ -207,16 +209,16 @@ class _EditCreate extends CoursesBase {
 
                 <MessagesComponent messages={messages} />
 
-                <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourseData.bind(this)}>
+                <Form className="form-horizontal" model={modelKey} onSubmit={this.saveCourseData}>
 
                 <div className="row">
                 <div className="col-md-12">
-                    <SimpleField label="Type" model={modelKey+'.type'} customField={true} labelClass="col-md-2" divClass="col-md-4" required={true} >
-                        <select className="form-control">
+                    <SimpleFormGroup label="Type" labelClass="col-md-2" divClass="col-md-4" required={true} >
+                        <Control.select model={modelKey+'.type'} className="form-control">
                             <option value="CAP">{courseTypeMap['CAP']}</option>
                             <option value="CPC">{courseTypeMap['CPC']}</option>
-                        </select>
-                    </SimpleField>
+                        </Control.select>
+                    </SimpleFormGroup>
                     <SimpleDateInput label="Start Date" model={modelKey+'.startDate'} labelClass="col-md-2" divClass="col-md-4" required={true} />
                     <SimpleField label="Location" model={modelKey+'.location'} labelClass="col-md-2" divClass="col-md-4"/>
                 </div>
