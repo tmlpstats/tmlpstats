@@ -42,7 +42,14 @@ class ApiProgramLeaderValidator extends ApiObjectsValidatorAbstract
         $emails = explode(',', $bouncedEmails);
         if (in_array($data->email, $emails)) {
             $accountability = $this->accountabilityMap[$data->accountability] ?? $data->accountability;
-            $this->addMessage('PROGRAMLEADER_BOUNCED_EMAIL', $accountability, $data->email);
+            $this->addMessage('warning', [
+                'id' => 'PROGRAMLEADER_BOUNCED_EMAIL',
+                'ref' => $data->getReference(['field' => 'email']),
+                'params' => [
+                    'accountability' => $accountability,
+                    'email' => $data->email,
+                ],
+            ]);
         }
 
         return true;
