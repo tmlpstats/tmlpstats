@@ -67,6 +67,7 @@ return [
     'CENTERGAME_GITW_ACTUAL_INCORRECT' => 'You reported :reported for the GITW actual, but the percentage of team members reported as effective is :calculated.',
     'CENTERGAME_T1X_ACTUAL_INCORRECT' => 'You reported :reported for the T1 actual, but the net number of T1 incoming approved this quarter is :calculated.',
     'CENTERGAME_T2X_ACTUAL_INCORRECT' => 'You reported :reported for the T2 actual, but the net number of T2 incoming approved this quarter is :calculated.',
+    'PROGRAMLEADER_BOUNCED_EMAIL' => 'The email provided for :accountability (:email) is not reachable. Please correct it.',
     'TEAMAPP_APPIN_DATE_MISSING' => 'Missing App In date.',
     'TEAMAPP_APPOUT_DATE_MISSING' => 'Missing App Out date.',
     'TEAMAPP_REVIEWER_TEAM1' => 'Only Team 2 can review. Please check that the team year and reviewer status are correct.',

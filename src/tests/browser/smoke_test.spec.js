@@ -13,7 +13,7 @@ describe('Smoke Test', () => {
     // After everything, capture logs and filter boring entries
     if (browser.desiredCapabilities && browser.desiredCapabilities.browser == 'Chrome') {
         after(function() {
-            const BORING_MESSAGES = /Download the React DevTools/
+            const BORING_MESSAGES = /Download the React DevTools|is not a valid email address/
 
             let log = browser.log('browser').value
             let important = log.filter(entry => !BORING_MESSAGES.test(entry.message))
@@ -65,7 +65,14 @@ describe('Smoke Test', () => {
         $('h3*=Edit Application').waitForExist(DEFAULT_WAIT)
         expect(browser.getUrl()).not.toEqual(expansionUrl)
         let form = $('.submission-content form')
+        form.$('[name*="email"]').click()
         form.$('[name*="email"]').setValue('hello@example.com')
         form.$('button[type="submit"]').click()
+    })
+
+    it('can switch to Class List', () => {
+        $('.submission-nav').$('a=Class List').click()
+        $('h3=Class List').waitForExist(DEFAULT_WAIT * 3)
+        $('h3=Program Leaders').waitForExist(DEFAULT_WAIT)
     })
 })

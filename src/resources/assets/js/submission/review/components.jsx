@@ -154,6 +154,12 @@ export class ReviewCategory extends React.PureComponent {
                 displayValue = `${refObject.firstName} ${refObject.lastName}`
             }
             break
+        case 'ProgramLeader':
+            refObject = pageData.programLeaders.data[id]
+            if (refObject) {
+                displayValue = `${refObject.firstName} ${refObject.lastName}`
+            }
+            break
         case 'Course':
             refObject = pageData.courses.data[id]
             if (refObject) {
@@ -174,6 +180,29 @@ export class ReviewCategory extends React.PureComponent {
         return displayValue
     }
 
+    getLinkUri(id, pageData, config, baseUri) {
+        let uri
+
+        switch (config.className) {
+        case 'ProgramLeader':
+            let refObject = pageData.programLeaders.data[id]
+            if (refObject) {
+                uri = `${baseUri}/${config.key}/edit/${refObject.accountability}`
+            }
+            break
+        case 'TeamApplication':
+        case 'Course':
+        case 'TeamMember':
+            uri = `${baseUri}/${config.key}/edit/${id}`
+            break
+        case 'Scoreboard':
+            uri = `${baseUri}/${config.key}`
+            break
+        }
+
+        return uri
+    }
+
     render() {
         const { config, baseUri, pageData } = this.props
         // Loop each message to create an entry
@@ -191,10 +220,7 @@ export class ReviewCategory extends React.PureComponent {
             const firstMessage = itemMessages[0]
             let uri
             if (firstMessage.reference && firstMessage.reference.id) {
-                uri = `${baseUri}/${config.key}`
-                if (config.key != 'scoreboard') {
-                    uri += `/edit/${firstMessage.reference.id}`
-                }
+                uri = this.getLinkUri(firstMessage.reference.id, pageData, config, baseUri)
             }
             const info = itemMessages.map((message, idx) => {
                 return (

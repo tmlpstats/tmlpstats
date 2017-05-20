@@ -41,6 +41,11 @@ class SubmissionData extends AuthenticatedApiBase
             'class' => Domain\NextQtrAccountability::class,
             'idAttr' => 'id',
         ],
+        [
+            'key' => 'program_leader',
+            'class' => Domain\ProgramLeader::class,
+            'idAttr' => 'id',
+        ],
     ];
 
     protected $keyTypeMapping = [];

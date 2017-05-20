@@ -9,7 +9,7 @@ import checkCoreData from './checkCoreData'
 import SubmissionNav from './SubmissionNav'
 import { PAGES_CONFIG } from './data'
 
-const steps = PAGES_CONFIG
+const steps = _.reject(PAGES_CONFIG, {hide_nav: true})
 const stepsBeforeCr3 = _.reject(steps, {key: 'next_qtr_accountabilities'})
 
 @connectRedux()

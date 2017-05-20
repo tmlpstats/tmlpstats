@@ -7,6 +7,7 @@ import { Form, BooleanSelectView, connectCustomField, AddOneLink } from '../../r
 import { ModeSelectButtons, ButtonStateFlip, Alert } from '../../reusable/ui_basic'
 import { delayDispatch, rebind, connectRedux } from '../../reusable/dispatch'
 import { collectionSortSelector } from '../../reusable/sort-helpers'
+import { ProgramLeadersIndex } from '../program_leaders/components'
 
 import { TEAM_MEMBERS_COLLECTION_FORM_KEY } from './reducers'
 import { teamMembersData, teamMembersSorts } from './data'
@@ -122,6 +123,8 @@ export class TeamMembersIndex extends TeamMembersBase {
                 <br />
                 <AddOneLink link={`${baseUri}/add`} />
                 {withdrawTable}
+                <br />
+                <ProgramLeadersIndex params={this.props.params} />
             </Form>
         )
     }

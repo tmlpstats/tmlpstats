@@ -12,7 +12,8 @@ export const PAGES_CONFIG = [
     {key: 'team_members', name: 'Class List', className: 'TeamMember'},
     {key: 'courses', name: 'Courses', className: 'Course'},
     {key: 'next_qtr_accountabilities', name: 'Accountabilities', className: 'NextQtrAccountability'},
-    {key: 'review', name: 'Review'}
+    {key: 'program_leaders', name: 'Program Leaders', className: 'ProgramLeader', hide_nav: true},
+    {key: 'review', name: 'Review'},
 ]
 
 export const SET_REPORTING_DATE = 'submission.setReportingDate'

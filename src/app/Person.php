@@ -267,7 +267,9 @@ class Person extends Model
     public function scopeByAccountability($query, Accountability $accountability, Carbon $when = null)
     {
         if ($when == null) {
-            $when = Util::now();
+            return $query->whereHas('accountabilities', function ($query) use ($accountability) {
+                $query->whereName($accountability->name);
+            });
         }
 
         return $query->whereHas('accountabilities', function ($query) use ($accountability, $when) {

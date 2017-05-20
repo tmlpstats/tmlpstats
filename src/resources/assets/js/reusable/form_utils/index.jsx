@@ -187,7 +187,7 @@ export class BooleanSelectView extends React.Component {
     }
 
     render() {
-        const { modelValue, emptyChoice, labels } = this.props
+        const { modelValue, model, emptyChoice, labels } = this.props
         const rest = _.omit(this.props, this._renderOmit)
         const sValue = this.selectValue(modelValue)
 
@@ -197,7 +197,7 @@ export class BooleanSelectView extends React.Component {
         }
 
         return (
-            <select value={sValue} onChange={this.onChange} {...rest}>
+            <select name={model} value={sValue} onChange={this.onChange} {...rest}>
                 {empty}
                 <option value="0">{labels[0]}</option>
                 <option value="1">{labels[1]}</option>

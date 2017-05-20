@@ -51,6 +51,8 @@ class ApiController extends ApiControllerBase
         "LocalReport.reportViewOptions" => "LocalReport__reportViewOptions",
         "LocalReport.getReportPages" => "LocalReport__getReportPages",
         "Lookups.getRegionCenters" => "Lookups__getRegionCenters",
+        "ProgramLeader.allForCenter" => "ProgramLeader__allForCenter",
+        "ProgramLeader.stash" => "ProgramLeader__stash",
         "Scoreboard.allForCenter" => "Scoreboard__allForCenter",
         "Scoreboard.stash" => "Scoreboard__stash",
         "Scoreboard.getScoreboardLockQuarter" => "Scoreboard__getScoreboardLockQuarter",
@@ -314,6 +316,22 @@ class ApiController extends ApiControllerBase
     {
         return App::make(Api\Lookups::class)->getRegionCenters(
             $this->parse($input, 'region', 'Region')
+        );
+    }
+    protected function ProgramLeader__allForCenter($input)
+    {
+        return App::make(Api\ProgramLeader::class)->allForCenter(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'includeInProgress', 'bool', false)
+        );
+    }
+    protected function ProgramLeader__stash($input)
+    {
+        return App::make(Api\ProgramLeader::class)->stash(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'data', 'array')
         );
     }
     protected function Scoreboard__allForCenter($input)

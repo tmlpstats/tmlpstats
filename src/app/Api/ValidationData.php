@@ -34,6 +34,10 @@ class ValidationData extends AuthenticatedApiBase
             'apiClass' => Scoreboard::class,
             'typeName' => 'Scoreboard',
         ],
+        'ProgramLeader' => [
+            'apiClass' => ProgramLeader::class,
+            'typeName' => 'ProgramLeader',
+        ],
     ];
 
     public function validate(Models\Center $center, Carbon $reportingDate)

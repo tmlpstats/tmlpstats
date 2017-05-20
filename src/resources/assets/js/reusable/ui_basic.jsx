@@ -124,15 +124,16 @@ export class SubmitFlip extends React.PureComponent {
 export class ButtonStateFlip extends React.PureComponent {
     static defaultProps = {
         buttonClass: 'btn btn-primary',
+        onClick: () => { },
         offset: 'col-md-offset-2 col-md-8',
         wrapGroup: false
     }
     static propTypes = {
-        loadState: PropTypes.object.isRequired,
         buttonClass: PropTypes.string,
-        onClick: PropTypes.func,
         children: PropTypes.node,
+        loadState: PropTypes.object.isRequired,
         offset: PropTypes.string,
+        onClick: PropTypes.func,
         wrapGroup: PropTypes.bool
     }
     render() {

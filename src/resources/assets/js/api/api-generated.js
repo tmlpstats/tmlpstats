@@ -302,6 +302,27 @@ Api.Lookups = {
     getRegionCenters: bac('Lookups.getRegionCenters')
 }
 
+Api.ProgramLeader = {
+
+    /*
+    Get program leaders data for a center-reportingDate, optionally including in-progress data
+    Parameters:
+      center: Center
+      reportingDate: date
+      includeInProgress: bool
+    */
+    allForCenter: bac('ProgramLeader.allForCenter'),
+
+    /*
+    Stash data for in-progress Team Member weekly
+    Parameters:
+      center: Center
+      reportingDate: date
+      data: array
+    */
+    stash: bac('ProgramLeader.stash')
+}
+
 Api.Scoreboard = {
 
     /*

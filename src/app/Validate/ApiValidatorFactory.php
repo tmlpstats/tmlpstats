@@ -7,6 +7,7 @@ class ApiValidatorFactory
     {
         switch ($type) {
             case 'Course':
+            case 'ProgramLeader':
             case 'Scoreboard':
             case 'TeamApplication':
             case 'TeamMember':
