@@ -182,6 +182,8 @@ VIEW `submission_data_team_members` AS
              else 0 end AS `xfer_out`,
         case when `submission_data`.`data`->> '$.ctw'='true' then 1
              else 0 end AS `ctw`,
+        case when `submission_data`.`data`->> '$.wbo'='true' then 1
+             else 0 end AS `wbo`,
         case when `submission_data`.`data`->> '$.rereg'='true' then 1
              else 0 end AS `rereg`,
         `submission_data`.`data`->> '$.except' AS `except`,

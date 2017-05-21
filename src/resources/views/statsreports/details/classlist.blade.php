@@ -26,7 +26,12 @@
                         <tr>
                             <td>{{ $memberData->firstName }}</td>
                             <td>{{ $memberData->lastName }}</td>
-                            <td class="data-point">{{ $quarterNumber }}</td>
+                            <td class="data-point">
+                                @if ($group == 'withdrawn')
+                                    T{{ $memberData->teamYear }}
+                                @endif
+                                {{ $quarterNumber }}
+                            </td>
                             <td><?php
                                 $accountabilities = $memberData->teamMember->accountabilities;
 
@@ -71,6 +76,9 @@
                                 }
                                 if ($memberData->xferIn) {
                                     $special[] = "Xfer In";
+                                }
+                                if ($memberData->wbo) {
+                                    $special[] = "WBO";
                                 }
                                 if ($memberData->ctw) {
                                     $special[] = "CTW";

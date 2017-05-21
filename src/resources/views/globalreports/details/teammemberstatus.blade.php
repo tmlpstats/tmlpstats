@@ -6,6 +6,8 @@
                 Transfers In
             @elseif ($group == 'xferOut')
                 Transfers Out
+            @elseif ($group == 'wbo')
+                Well-Being Out
             @elseif ($group == 'ctw')
                 Conversations to Withdraw
             @elseif ($group == 'withdrawn')

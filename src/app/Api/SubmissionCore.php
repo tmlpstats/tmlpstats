@@ -304,9 +304,9 @@ class SubmissionCore extends AuthenticatedApiBase
 
                     // Create team member data row
                     DB::insert('insert into team_members_data
-                                    (team_member_id, at_weekend, xfer_out, xfer_in, ctw, withdraw_code_id, travel, room, comment,
+                                    (team_member_id, at_weekend, xfer_out, xfer_in, wbo, ctw, withdraw_code_id, travel, room, comment,
                                     gitw, tdo, stats_report_id, created_at, updated_at)
-                                select ?, atWeekend, xfer_in, xfer_out, ctw, withdrawCode, travel, room, comment,
+                                select ?, atWeekend, xfer_in, xfer_out, wbo, ctw, withdrawCode, travel, room, comment,
                                     gitw, tdo, ?, sysdate(), sysdate()
                                 from submission_data_team_members
                                 where center_id=? and reporting_date=? and team_member_id=?',
@@ -319,9 +319,9 @@ class SubmissionCore extends AuthenticatedApiBase
             // Insert data rows for any team members that have withdrawn and weren't updated this week
             if (!$isFirstWeek) {
                 DB::insert('INSERT INTO team_members_data
-                        (team_member_id, at_weekend, xfer_out, xfer_in, ctw, withdraw_code_id,
+                        (team_member_id, at_weekend, xfer_out, xfer_in, wbo, ctw, withdraw_code_id,
                         travel, room, comment, gitw, tdo, stats_report_id, created_at, updated_at)
-                    SELECT  tmd.team_member_id, tmd.at_weekend, tmd.xfer_out, tmd.xfer_in, tmd.ctw,
+                    SELECT  tmd.team_member_id, tmd.at_weekend, tmd.xfer_out, tmd.xfer_in, tmd.wbo, tmd.ctw,
                             tmd.withdraw_code_id, tmd.travel, tmd.room, tmd.comment, tmd.gitw, tmd.tdo,
                             ?, sysdate(), sysdate()
                     FROM team_members_data tmd

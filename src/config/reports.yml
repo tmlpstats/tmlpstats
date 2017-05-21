@@ -642,6 +642,8 @@ reportMeta:
             shortName: GITW
           TeamMemberStatusCtw:
             name: CTW
+          TeamMemberStatusWbo:
+            name: WBO
           TeamMemberStatusTransfer:
             name: Transfers
           TeamMemberStatusWithdrawn:

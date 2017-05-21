@@ -9,13 +9,16 @@ class TeamMembersByStatus extends BaseArrangement
         $reportData = [
             'xferIn'      => [],
             'xferOut'     => [],
+            'wbo'         => [],
             'ctw'         => [],
             'withdrawn'   => [],
             't2Potential' => [],
         ];
         foreach ($teamMembersData as $data) {
-            if ($data->withdrawCodeId !== null || $data->wbo) {
+            if ($data->withdrawCodeId !== null) {
                 $reportData['withdrawn'][] = $data;
+            } else if ($data->wbo) {
+                $reportData['wbo'][] = $data;
             } else if ($data->ctw) {
                 $reportData['ctw'][] = $data;
             } else if ($data->xferIn) {

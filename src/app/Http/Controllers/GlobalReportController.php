@@ -688,7 +688,12 @@ class GlobalReportController extends Controller
     protected function getTeamMemberStatusCtw(Models\GlobalReport $globalReport, Models\Region $region)
     {
         return $this->teamMembersData($globalReport, $region)->getOne('TeamMemberStatusCtw');
+    }
 
+    // Get report WBO
+    protected function getTeamMemberStatusWbo(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->teamMembersData($globalReport, $region)->getOne('TeamMemberStatusWbo');
     }
 
     // Get report Transfers
