@@ -1,7 +1,3 @@
-import { createSelector } from 'reselect'
-import { arrayFind } from '../../reusable/ponyfill'
-import { store } from '../../store'
-
 const EC_ONTEAM = ''
 const EC_XFER_OUT = 'xferOut'
 const EC_WBO = 'wbo'
@@ -31,11 +27,9 @@ export const EXIT_CHOICES_HELP = {
  */
 export function determineExitChoice(teamMember, _state) {
     if (teamMember.withdrawCode) {
-        if (teamMember.withdrawCode == wellBeingCode(_state || store.getState())) {
-            return EC_WBO
-        } else {
-            return EC_WD
-        }
+        return EC_WD
+    } else if (teamMember.wbo) {
+        return EC_WBO
     } else if (teamMember.xferOut) {
         return EC_XFER_OUT
     } else if (teamMember.ctw) {
@@ -51,14 +45,12 @@ export function determineExitChoice(teamMember, _state) {
  * @return {[type]}            [description]
  */
 export function exitChoiceMerges(exitChoice) {
-    var merges = {withdrawCode: null, xferOut: false, ctw: false, exitChoice}
+    var merges = {withdrawCode: null, xferOut: false, ctw: false, wbo: false, exitChoice}
     switch (exitChoice) {
     case EC_WD:
         delete merges.withdrawCode
         break
     case EC_WBO:
-        merges.withdrawCode = wellBeingCode(store.getState())
-        break
     case EC_XFER_OUT:
     case EC_CTW:
         // We can abuse the fact that the property name == the choice constant for these four
@@ -67,10 +59,3 @@ export function exitChoiceMerges(exitChoice) {
     }
     return merges
 }
-
-const wellBeingCode = createSelector(
-    state => state.submission.core.lookups.withdraw_codes,
-    (withdrawCodes) => {
-        return arrayFind(withdrawCodes, w => w.code == 'WB').id
-    }
-)

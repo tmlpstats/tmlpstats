@@ -25,7 +25,7 @@ return [
     'TEAMAPP_ROOM_COMMENT_REVIEW' => 'Rooming is not booked. Make sure the comment provides a specific promise for when rooming will be complete.',
 
     // Complete
-    'CLASSLIST_CTW_COMMENT_MISSING' => 'Add a comment with the issue/concern.',
+    'CLASSLIST_CTW_WBO_COMMENT_MISSING' => 'Add a comment with the issue/concern.',
     'CLASSLIST_GITW_MISSING' => 'GITW was not provided.',
     'CLASSLIST_TDO_MISSING' => 'TDO was not provided.',
     'CLASSLIST_WD_COMMENT_MISSING' => 'Add a comment with the date of withdraw.',

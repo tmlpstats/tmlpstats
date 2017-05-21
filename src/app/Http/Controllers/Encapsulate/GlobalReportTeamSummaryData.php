@@ -160,12 +160,12 @@ class GlobalReportTeamSummaryData
             }
 
              if ($member->withdrawCode !== null) {
-                if ($member->withdrawCode->code == 'WB') {
-                    $reportData[$centerName]['wbo']++;
-                } else {
-                    $reportData[$centerName]['withdraws']['q' . $member->quarterNumber]++;
-                    $reportData[$centerName]['withdraws']['all']++;
-                }
+                $reportData[$centerName]['withdraws']['q' . $member->quarterNumber]++;
+                $reportData[$centerName]['withdraws']['all']++;
+            }
+
+            if ($member->wbo) {
+                $reportData[$centerName]['wbo']++;
             }
 
             if ($member->ctw) {

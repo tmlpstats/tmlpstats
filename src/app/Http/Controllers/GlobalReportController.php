@@ -965,7 +965,7 @@ class GlobalReportController extends Controller
             }
 
             $reportData[$centerName][$team]['totalCount']++;
-            if ($memberData->withdrawCodeId !== null && $memberData->withdrawCode->code !== 'WB') {
+            if ($memberData->withdrawCodeId !== null) {
                 $reportData[$centerName][$team]['withdrawCount']++;
             }
         }

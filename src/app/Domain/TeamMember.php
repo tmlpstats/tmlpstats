@@ -61,6 +61,10 @@ class TeamMember extends ParserDomain
             'owner' => 'teamMemberData',
             'type' => 'bool',
         ],
+        'wbo' => [
+            'owner' => 'teamMemberData',
+            'type' => 'bool',
+        ],
         'ctw' => [
             'owner' => 'teamMemberData',
             'type' => 'bool',

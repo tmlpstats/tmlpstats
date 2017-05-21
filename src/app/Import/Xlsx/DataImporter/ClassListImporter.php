@@ -169,9 +169,6 @@ class ClassListImporter extends DataImporterAbstract
                 // TODO: Handle error gracefully
                 $withdrawCode = Models\WithdrawCode::code(substr($memberInput['wd'], 2))->first();
                 $memberInput['withdraw_code_id'] = $withdrawCode->id;
-            } else if ($memberInput['wbo']) {
-                $withdrawCode = Models\WithdrawCode::code('WB')->first();
-                $memberInput['withdraw_code_id'] = $withdrawCode->id;
             }
 
             if ($memberInput['wknd']) {
@@ -180,6 +177,7 @@ class ClassListImporter extends DataImporterAbstract
 
             $memberInput['xferOut'] = $memberInput['xferOut'] ? true : false;
             $memberInput['xferIn'] = $memberInput['xferIn'] ? true : false;
+            $memberInput['wbo'] = $memberInput['wbo'] ? true : false;
             $memberInput['ctw'] = $memberInput['ctw'] ? true : false;
             $memberInput['rereg'] = $memberInput['rereg'] ? true : false;
             $memberInput['excep'] = $memberInput['excep'] ? true : false;
@@ -198,14 +196,13 @@ class ClassListImporter extends DataImporterAbstract
             unset($memberInput['completionQuarter']);
             unset($memberInput['offset']);
             unset($memberInput['accountability']);
-            unset($memberInput['wbo']);
             unset($memberInput['wd']);
             unset($memberInput['wknd']);
 
             $memberData = $this->setValues($memberData, $memberInput);
             $memberData->save();
 
-            if ($memberData->withdrawCodeId || $memberData->xferOut) {
+            if (!$memberData->isActiveMember()) {
                 continue;
             }
 
