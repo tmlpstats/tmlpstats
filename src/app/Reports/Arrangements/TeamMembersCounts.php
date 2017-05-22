@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Reports\Arrangements;
+<?php
+namespace TmlpStats\Reports\Arrangements;
 
 class TeamMembersCounts extends BaseArrangement
 {
@@ -36,6 +37,7 @@ class TeamMembersCounts extends BaseArrangement
             'team2' => 0,
             'total' => 0,
             'ctw'   => 0,
+            'wbo'   => 0,
             'codes' => [],
         ];
 
@@ -74,6 +76,8 @@ class TeamMembersCounts extends BaseArrangement
                 }
             } else if ($data->ctw) {
                 $withdraws['ctw']++;
+            } else if ($data->wbo) {
+                $withdraws['wbo']++;
             }
         }
 

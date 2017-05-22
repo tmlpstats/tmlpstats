@@ -19,6 +19,7 @@ class TeamMemberData extends Model
         'xfer_in',
         'ctw',
         'withdraw_code_id',
+        'wbo',
         'rereg',
         'excep',
         'travel',
@@ -33,6 +34,7 @@ class TeamMemberData extends Model
         'xfer_out'   => 'boolean',
         'xfer_in'    => 'boolean',
         'ctw'        => 'boolean',
+        'wbo'        => 'boolean',
         'rereg'      => 'boolean',
         'excep'      => 'boolean',
         'travel'     => 'boolean',
@@ -60,7 +62,7 @@ class TeamMemberData extends Model
 
     public function isActiveMember()
     {
-        return ($this->withdrawCodeId === null && !$this->xferOut);
+        return ($this->withdrawCodeId === null && !$this->wbo && !$this->xferOut);
     }
 
     public function scopeByStatsReport($query, StatsReport $statsReport)
@@ -81,7 +83,8 @@ class TeamMemberData extends Model
     public function scopeActive($query)
     {
         return $query->whereNull('withdraw_code_id')
-                     ->where('xfer_out', 0);
+                     ->where('xfer_out', 0)
+                     ->where('wbo', 0);
     }
 
     public function statsReport()

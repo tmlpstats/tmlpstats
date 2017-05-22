@@ -55,7 +55,7 @@ export class TeamMembersIndex extends TeamMembersBase {
                 updating = (weeklySave.loaded && wr.working && wr.working[key] >= wr.changed[key])? STATE_SAVED : STATE_UPDATING
             }
 
-            if (teamMember.withdrawCode || teamMember.xferOut) {
+            if (teamMember.withdrawCode || teamMember.wbo || teamMember.xferOut) {
                 withdraws.push(
                     <TeamMemberWithdrawnRow
                         key={key} teamMember={teamMember} baseUri={baseUri}
@@ -156,6 +156,8 @@ class TeamMemberWithdrawnRow extends React.PureComponent {
         let reason = 'Transfered to another team'
         if (teamMember.withdrawCode) {
             reason = lookups.withdraw_codes_by_id[teamMember.withdrawCode].display
+        } else if (teamMember.wbo) {
+            reason = 'Well-being Out'
         }
         return (
             <tr>

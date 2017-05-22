@@ -25,6 +25,7 @@ class GlobalReportTeamMembersData
         $statusTypes = [
             'teammemberstatuswithdrawn',
             'teammemberstatusctw',
+            'teammemberstatuswbo',
             'teammemberstatustransfer',
         ];
 
@@ -73,6 +74,10 @@ class GlobalReportTeamMembersData
             case 'teammemberstatusctw':
                 $viewData = $this->getTeamMemberStatusCtw($data, $globalReport, $region);
                 break;
+            case 'TeamMemberStatusWbo':
+            case 'teammemberstatuswbo':
+                $viewData = $this->getTeamMemberStatusWbo($data, $globalReport, $region);
+                break;
             case 'TeamMemberStatusTransfer':
             case 'teammemberstatustransfer':
                 $viewData = $this->getTeamMemberStatusTransfer($data, $globalReport, $region);
@@ -116,6 +121,11 @@ class GlobalReportTeamMembersData
     protected function getTeamMemberStatusCtw($data, Models\GlobalReport $globalReport, Models\Region $region)
     {
         return $data ? array_merge($data, ['types' => ['ctw']]) : null;
+    }
+
+    protected function getTeamMemberStatusWbo($data, Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $data ? array_merge($data, ['types' => ['wbo']]) : null;
     }
 
     protected function getTeamMemberStatusTransfer($data, Models\GlobalReport $globalReport, Models\Region $region)

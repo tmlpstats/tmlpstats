@@ -21,6 +21,7 @@ class TeamMembersByQuarter extends BaseArrangement
             $index = "team{$memberData->teamMember->teamYear}";
             if ($memberData->withdrawCodeId !== null
                 || ($includeXferAsWithdrawn && $memberData->xferOut)
+                || $memberData->wbo
             ) {
                 $index = 'withdrawn';
             }

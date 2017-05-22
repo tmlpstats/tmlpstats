@@ -127,6 +127,10 @@ trait GlobalReportDispatch
             'id' => 'TeamMemberStatusCtw',
             'method' => 'getTeamMemberStatusCtw',
         ],
+        'teammemberstatuswbo' => [
+            'id' => 'TeamMemberStatusWbo',
+            'method' => 'getTeamMemberStatusWbo',
+        ],
         'teammemberstatustransfer' => [
             'id' => 'TeamMemberStatusTransfer',
             'method' => 'getTeamMemberStatusTransfer',
@@ -271,6 +275,9 @@ trait GlobalReportDispatch
 
     // Get report CTW
     protected abstract function getTeamMemberStatusCtw();
+
+    // Get report WBO
+    protected abstract function getTeamMemberStatusWbo();
 
     // Get report Transfers
     protected abstract function getTeamMemberStatusTransfer();

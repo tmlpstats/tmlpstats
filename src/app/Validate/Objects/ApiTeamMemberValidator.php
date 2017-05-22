@@ -27,6 +27,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
         $this->dataValidators['isReviewer'] = $boolOrNullValidator;
         $this->dataValidators['xferOut']    = $boolOrNullValidator;
         $this->dataValidators['xferIn']     = $boolOrNullValidator;
+        $this->dataValidators['wbo']        = $boolOrNullValidator;
         $this->dataValidators['ctw']        = $boolOrNullValidator;
         $this->dataValidators['rereg']      = $boolOrNullValidator;
         $this->dataValidators['excep']      = $boolOrNullValidator;
@@ -68,7 +69,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
     {
         $isValid = true;
 
-        if ($data->xferOut || !is_null($data->withdrawCodeId)) {
+        if ($data->xferOut || !is_null($data->withdrawCodeId) || $data->wbo) {
             return $isValid; // Not required if withdrawn
         }
 
@@ -87,7 +88,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
     {
         $isValid = true;
 
-        if ($data->xferOut || !is_null($data->withdrawCodeId)) {
+        if ($data->xferOut || !is_null($data->withdrawCodeId) || $data->wbo) {
             return $isValid; // Not required if withdrawn
         }
 
@@ -184,7 +185,10 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
     {
         $isValid = true;
 
-        if (!is_null($data->withdrawCodeId) && $data->ctw) {
+        if ((!is_null($data->withdrawCodeId) && $data->wbo)
+            || (!is_null($data->withdrawCodeId) && $data->ctw)
+            || ($data->wbo && $data->ctw)
+        ) {
             $this->addMessage('error', [
                 'id' => 'CLASSLIST_WD_CTW_ONLY_ONE',
                 'ref' => $data->getReference(['field' => 'ctw']),
@@ -200,10 +204,10 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
                 ]);
                 $isValid = false;
             }
-        } else if ($data->ctw) {
+        } else if ($data->ctw || $data->wbo) {
             if (!$data->comment) {
                 $this->addMessage('error', [
-                    'id' => 'CLASSLIST_CTW_COMMENT_MISSING',
+                    'id' => 'CLASSLIST_CTW_WBO_COMMENT_MISSING',
                     'ref' => $data->getReference(['field' => 'comment']),
                 ]);
                 $isValid = false;
@@ -217,7 +221,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
     {
         $isValid = true;
 
-        if (!is_null($data->withdrawCodeId) || $data->xferOut) {
+        if (!is_null($data->withdrawCodeId) || $data->xferOut || $data->wbo) {
             return $isValid; // Not required if withdrawn
         }
 
@@ -266,7 +270,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
             return true;
         }
 
-        if (!is_null($data->withdrawCodeId) || $data->xferOut) {
+        if (!is_null($data->withdrawCodeId) || $data->xferOut || $data->wbo) {
             $this->addMessage('error', [
                 'id' => 'CLASSLIST_ACCOUNTABLE_AND_WITHDRAWN',
                 'ref' => $data->getReference(['field' => 'accountabilities']),

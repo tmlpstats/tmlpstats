@@ -55,6 +55,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             'isReviewer' => false,
             'xferOut' => null,
             'xferIn' => null,
+            'wbo' => null,
             'ctw' => null,
             'rereg' => null,
             'excep' => null,
@@ -101,6 +102,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                     'isReviewer' => null,
                     'xferOut' => null,
                     'xferIn' => null,
+                    'wbo' => null,
                     'ctw' => null,
                     'rereg' => null,
                     'excep' => null,
@@ -228,6 +230,32 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 [],
                 true,
             ],
+            // Passes WBO does not have GITW set
+            [
+                [
+                    'gitw' => null,
+                    'wbo' => true,
+                    'comment' => 'something about the withdraw',
+                ],
+                [],
+                true,
+            ],
+            // Passes xferOut does not have GITW set
+            [
+                [
+                    'gitw' => null,
+                    'xferOut' => true,
+                    'comment' => 'something about the withdraw',
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER',
+                        'reference.field' => 'xferOut',
+                        'level' => 'warning',
+                    ]),
+                ],
+                true,
+            ],
 
             // Passes GITW true
             [
@@ -302,6 +330,32 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                     'comment' => 'something about the withdraw',
                 ],
                 [],
+                true,
+            ],
+            // Passes WBO does not have GITW set
+            [
+                [
+                    'tdo' => null,
+                    'wbo' => true,
+                    'comment' => 'something about the withdraw',
+                ],
+                [],
+                true,
+            ],
+            // Passes xferOut does not have GITW set
+            [
+                [
+                    'tdo' => null,
+                    'xferOut' => true,
+                    'comment' => 'something about the withdraw',
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER',
+                        'reference.field' => 'xferOut',
+                        'level' => 'warning',
+                    ]),
+                ],
                 true,
             ],
 
@@ -671,6 +725,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 [
                     'withdrawCode' => null,
                     'ctw' => null,
+                    'wbo' => null,
                     'comment' => null,
                 ],
                 [],
@@ -695,6 +750,16 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 [],
                 true,
             ],
+            // WBO set with comment
+            [
+                [
+                    'wbo' => true,
+                    'comment' => 'something about the ctw',
+                ],
+                [],
+                true,
+            ],
+
             // Wd & CTW set
             [
                 [
@@ -710,6 +775,37 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 ],
                 false,
             ],
+            // Wd & WBO set
+            [
+                [
+                    'withdrawCode' => 1234,
+                    'wbo' => true,
+                    'comment' => 'something about the wd',
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_WD_CTW_ONLY_ONE',
+                        'reference.field' => 'ctw',
+                    ]),
+                ],
+                false,
+            ],
+            // WBO & CTW set
+            [
+                [
+                    'wbo' => true,
+                    'ctw' => true,
+                    'comment' => 'something about the wd',
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_WD_CTW_ONLY_ONE',
+                        'reference.field' => 'ctw',
+                    ]),
+                ],
+                false,
+            ],
+
             // Wd set without comment
             [
                 [
@@ -724,15 +820,6 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 ],
                 false,
             ],
-            // Ctw set with comment
-            [
-                [
-                    'ctw' => true,
-                    'comment' => 'something about the ctw',
-                ],
-                [],
-                true,
-            ],
             // Ctw set without comment
             [
                 [
@@ -741,7 +828,21 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
-                        'id' => 'CLASSLIST_CTW_COMMENT_MISSING',
+                        'id' => 'CLASSLIST_CTW_WBO_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+            ],
+            // WBO set without comment
+            [
+                [
+                    'wbo' => true,
+                    'comment' => null,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_CTW_WBO_COMMENT_MISSING',
                         'reference.field' => 'comment',
                     ]),
                 ],
@@ -838,6 +939,18 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                         'level' => 'warning',
                     ]),
                 ],
+                true,
+            ],
+            // validateTravel Ignored When WBO Set
+            [
+                [
+                    'travel' => null,
+                    'room' => null,
+                    'wbo' => true,
+                    'comment' => 'something about the wd',
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
+                ],
+                [],
                 true,
             ],
             // ValidateTravel Fails When Missing Travel
@@ -1199,6 +1312,24 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                         'reference.field' => 'xferOut',
                         'level' => 'warning',
                     ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_AND_WITHDRAWN',
+                        'reference.field' => 'accountabilities',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            // Has wbo, ignores contact info and throws error to remove accountabilities
+            [
+                [
+                    'wbo' => true,
+                    'comment' => 'withdraw message',
+                    'accountabilities' => [
+                        4
+                    ],
+                ],
+                [
                     $this->getMessageData($this->messageTemplate, [
                         'id' => 'CLASSLIST_ACCOUNTABLE_AND_WITHDRAWN',
                         'reference.field' => 'accountabilities',

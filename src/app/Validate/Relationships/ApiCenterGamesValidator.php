@@ -106,7 +106,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         $effectiveCount = 0;
 
         foreach ($teamMemberData as $member) {
-            if ($member->withdrawCodeId || $member->xferOut) {
+            if ($member->withdrawCodeId || $member->xferOut || $member->wbo) {
                 continue;
             }
 

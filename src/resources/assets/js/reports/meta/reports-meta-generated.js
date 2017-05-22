@@ -244,45 +244,52 @@ const GlobalReport = {
         "type": "report",
         "name": "CTW"
     },
+    "TeamMemberStatusWbo": {
+        "id": "TeamMemberStatusWbo",
+        "n": 33,
+        "type": "report",
+        "name": "WBO"
+    },
     "TeamMemberStatusTransfer": {
         "id": "TeamMemberStatusTransfer",
-        "n": 33,
+        "n": 34,
         "type": "report",
         "name": "Transfers"
     },
     "TeamMemberStatusWithdrawn": {
         "id": "TeamMemberStatusWithdrawn",
-        "n": 34,
+        "n": 35,
         "type": "report",
         "name": "Withdrawn"
     },
     "WithdrawReport": {
         "id": "WithdrawReport",
-        "n": 35,
+        "n": 36,
         "type": "report",
         "name": "Withdraw Compliance"
     },
     "Team1SummaryGrid": {
         "id": "Team1SummaryGrid",
-        "n": 36,
+        "n": 37,
         "type": "report",
         "name": "Team 1 Summary Grid"
     },
     "Team2SummaryGrid": {
         "id": "Team2SummaryGrid",
-        "n": 37,
+        "n": 38,
         "type": "report",
         "name": "Team 2 Summary Grid"
     },
     "TeamMemberStatusGroup": {
         "id": "TeamMemberStatusGroup",
-        "n": 38,
+        "n": 39,
         "type": "grouping",
         "name": "Team Members",
         "children": [
             "TdoSummary",
             "GitwSummary",
             "TeamMemberStatusCtw",
+            "TeamMemberStatusWbo",
             "TeamMemberStatusTransfer",
             "TeamMemberStatusWithdrawn",
             "WithdrawReport",
@@ -292,25 +299,25 @@ const GlobalReport = {
     },
     "TravelReport": {
         "id": "TravelReport",
-        "n": 39,
+        "n": 40,
         "type": "report",
         "name": "Travel Summary"
     },
     "TeamMemberStatusPotentialsOverview": {
         "id": "TeamMemberStatusPotentialsOverview",
-        "n": 40,
+        "n": 41,
         "type": "report",
         "name": "Potentials Overview"
     },
     "TeamMemberStatusPotentials": {
         "id": "TeamMemberStatusPotentials",
-        "n": 41,
+        "n": 42,
         "type": "report",
         "name": "Potentials Details"
     },
     "AcknowledgementReport": {
         "id": "AcknowledgementReport",
-        "n": 42,
+        "n": 43,
         "type": "report",
         "name": "Acknowledgement Report",
         "requiredFlags": [
@@ -319,7 +326,7 @@ const GlobalReport = {
     },
     "WeekendGroup": {
         "id": "WeekendGroup",
-        "n": 43,
+        "n": 44,
         "type": "grouping",
         "name": "Weekend",
         "children": [

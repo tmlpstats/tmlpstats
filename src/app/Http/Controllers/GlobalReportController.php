@@ -688,7 +688,12 @@ class GlobalReportController extends Controller
     protected function getTeamMemberStatusCtw(Models\GlobalReport $globalReport, Models\Region $region)
     {
         return $this->teamMembersData($globalReport, $region)->getOne('TeamMemberStatusCtw');
+    }
 
+    // Get report WBO
+    protected function getTeamMemberStatusWbo(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->teamMembersData($globalReport, $region)->getOne('TeamMemberStatusWbo');
     }
 
     // Get report Transfers
@@ -965,7 +970,7 @@ class GlobalReportController extends Controller
             }
 
             $reportData[$centerName][$team]['totalCount']++;
-            if ($memberData->withdrawCodeId !== null && $memberData->withdrawCode->code !== 'WB') {
+            if ($memberData->withdrawCodeId !== null) {
                 $reportData[$centerName][$team]['withdrawCount']++;
             }
         }
