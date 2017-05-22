@@ -5,5 +5,8 @@ module.exports = {
     login: {
         email: 'email@example.com',
         password: 'password_here'
+    },
+    scoreboard: {
+        week: '12'  // May 12, 2017
     }
 }

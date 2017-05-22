@@ -48,3 +48,11 @@ Also, take a look at the top of `wdio.conf.js`, you'll see browser profiles. You
 ```
 SELECTED_BROWSERS=ie,chrome npm run browsertest
 ```
+
+```
+SELECTED_BROWSERS=firefox npm run browsertest -- --spec ./tests/browser/smoke_test.spec.js 
+```
+
+## Resources
+
+http://webdriver.io/
