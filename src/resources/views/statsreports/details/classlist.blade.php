@@ -3,7 +3,7 @@
         @if (isset($reportData[$group]))
             <br/>
             <h4>{{ ucwords($group) }}</h4>
-            <table class="table table-condensed table-striped table-hover classListTable">
+            <table class="table table-condensed table-striped table-hover classListTable want-datatable">
                 <thead>
                 <tr>
                     <th>First Name</th>
@@ -26,7 +26,12 @@
                         <tr>
                             <td>{{ $memberData->firstName }}</td>
                             <td>{{ $memberData->lastName }}</td>
-                            <td class="data-point">{{ $quarterNumber }}</td>
+                            <td class="data-point">
+                                @if ($group == 'withdrawn')
+                                    T{{ $memberData->teamYear }}
+                                @endif
+                                {{ $quarterNumber }}
+                            </td>
                             <td><?php
                                 $accountabilities = $memberData->teamMember->accountabilities;
 
@@ -72,6 +77,9 @@
                                 if ($memberData->xferIn) {
                                     $special[] = "Xfer In";
                                 }
+                                if ($memberData->wbo) {
+                                    $special[] = "WBO";
+                                }
                                 if ($memberData->ctw) {
                                     $special[] = "CTW";
                                 }
@@ -91,12 +99,3 @@
         @endif
     @endforeach
 </div>
-
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('table.classListTable').dataTable({
-            "paging": false,
-            "searching": false
-        });
-    });
-</script>

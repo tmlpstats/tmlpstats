@@ -51,15 +51,11 @@ class ReportsCodegen extends Command
         $apiProvider = view('api.codegen.api_provider_output', compact('packageNames'))->render();
         $this->writeFile('app/Providers/ApiProvider.php', $apiProvider);
 
-        // Write a javascript API. PROTOTYPE
-        $script = view('api.codegen.js_output', compact('namespacesFlat'))->render();
-        $this->writeFile('public/js/api.js', $this->stripLine($script));
-
         $es6 = view('api.codegen.es6_output', compact('namespacesFlat'))->render();
         $this->writeFile('resources/assets/js/api/api-generated.js', $this->stripLine($es6));
 
         $script = view('api.codegen.reportmeta_es6_output', compact('reportMeta'))->render();
-        $this->writeFile('resources/assets/js/classic/reports-generated.js', $this->stripLine($script));
+        $this->writeFile('resources/assets/js/reports/meta/reports-meta-generated.js', $this->stripLine($script));
         foreach ($reportMeta as $k => $namespace) {
             $source = view('api.codegen.reportmeta_dispatch_trait', compact('reportMeta', 'namespace'))->render();
             $this->writeFile("app/Http/Controllers/Traits/{$k}ReportDispatch.php", $source);

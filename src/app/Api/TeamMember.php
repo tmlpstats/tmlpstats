@@ -1,9 +1,11 @@
-<?php namespace TmlpStats\Api;
+<?php
+namespace TmlpStats\Api;
 
 use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
+use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
 use TmlpStats\Traits;
 
@@ -12,26 +14,13 @@ use TmlpStats\Traits;
  */
 class TeamMember extends AuthenticatedApiBase
 {
-    use Traits\SanitizesLastNames;
+    use Traits\UsesReportDates, Traits\ValidatesObjects, Traits\SanitizesLastNames;
 
     private static $omitGitwTdo = ['tdo' => true, 'gitw' => true];
 
-    private function relevantReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
-
-        // Get the last stats report in order to pre-populate the class list effectively
-
-        return Models\StatsReport::byCenter($center)
-            ->byQuarter($quarter)
-            ->official()
-            ->where('reporting_date', '<=', $reportingDate)
-            ->orderBy('reporting_date', 'desc')
-            ->first();
-    }
-
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $allTeamMembers = [];
 
@@ -76,22 +65,36 @@ class TeamMember extends AuthenticatedApiBase
      */
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+
         $this->assertCan('submitStats', $center);
 
         $submissionData = App::make(SubmissionData::class);
         $teamMemberId = $submissionData->numericStorageId($data, 'id');
 
+        $pastWeeks = [];
+
         if ($teamMemberId !== null && $teamMemberId > 0) {
             $tm = Models\TeamMember::findOrFail($teamMemberId);
             $domain = Domain\TeamMember::fromModel(null, $tm);
             $domain->updateFromArray($data, ['incomingQuarter']);
-        } else {
-            $domain = Domain\TeamMember::fromArray($data);
-        }
-        $submissionData->store($center, $reportingDate, $domain);
 
+            $pastWeeks = $this->getPastWeeksData($center, $reportingDate, $tm);
+        } else {
+            $domain = Domain\TeamMember::fromArray($data, ['incomingQuarter', 'teamYear']);
+        }
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
-        $validationResults = $this->validateObject($report, $domain, $teamMemberId);
+        $validationResults = $this->validateObject($report, $domain, $teamMemberId, $pastWeeks);
+
+        if (!isset($data['_idGenerated']) || $validationResults['valid']) {
+            $submissionData->store($center, $reportingDate, $domain);
+        } else {
+            return [
+                'success' => false,
+                'valid' => $validationResults['valid'],
+                'messages' => $validationResults['messages'],
+            ];
+        }
 
         return [
             'success' => true,
@@ -106,60 +109,19 @@ class TeamMember extends AuthenticatedApiBase
         $this->assertCan('submitStats', $center);
         $submissionData = App::make(SubmissionData::class);
         $sourceData = $this->allForCenter($center, $reportingDate, true);
+        $report = LocalReport::ensureStatsReport($center, $reportingDate);
+        $messages = [];
         foreach ($updates as $item) {
-            $updatedDomain = Domain\TeamMember::fromArray($item, ['id', 'gitw', 'tdo']);
+            $updatedDomain = Domain\TeamMember::fromArray($item, ['id']);
             $existing = array_get($sourceData, $updatedDomain->id, null);
             $existing->gitw = $updatedDomain->gitw;
             $existing->tdo = $updatedDomain->tdo;
             $submissionData->store($center, $reportingDate, $existing);
+            $validationResults = $this->validateObject($report, $existing, $existing->id);
+            $messages[$updatedDomain->id] = $validationResults['messages'];
         }
 
-        return [];
-    }
-
-    public function create(array $data)
-    {
-        $domain = Domain\TeamMember::fromArray($data, ['firstName', 'lastName', 'center', 'teamYear', 'incomingQuarter']);
-        $this->assertAuthz($this->context->can('submitStats', $domain->center));
-
-        $memberQuarterNumber = Models\TeamMember::getQuarterNumber($domain->incomingQuarter, $domain->center->region);
-
-        $teamMember = Models\TeamMember::firstOrNew([
-            'first_name' => $domain->firstName,
-            'last_name' => $domain->lastName,
-            'center_id' => $domain->center->id,
-            'team_year' => $domain->teamYear,
-            'incoming_quarter_id' => $domain->incomingQuarter->id,
-            'team_quarter' => $memberQuarterNumber,
-        ]);
-
-        $teamMember->person->email = $domain->email;
-        $teamMember->person->phone = $domain->phone;
-        $teamMember->isReviewer = $domain->isReviewer ?: false;
-
-        if ($teamMember->person->isDirty()) {
-            $teamMember->person->save();
-        }
-        $teamMember->save();
-
-        return $teamMember->load('person');
-    }
-
-    public function update(Models\TeamMember $teamMember, array $data)
-    {
-        $domain = Domain\TeamMember::fromArray($data);
-        $this->assertAuthz($this->context->can('submitStats', $teamMember->center));
-
-        $domain->fillModel(null, $teamMember, true);
-
-        if ($teamMember->person->isDirty()) {
-            $teamMember->person->save();
-        }
-        if ($teamMember->isDirty()) {
-            $teamMember->save();
-        }
-
-        return $teamMember->load('person');
+        return ['messages' => $messages];
     }
 
     public function setWeekData(Models\TeamMember $teamMember, Carbon $reportingDate, array $data)
@@ -193,23 +155,64 @@ class TeamMember extends AuthenticatedApiBase
         return $teamMemberData->load('teamMember.person', 'teamMember.incomingQuarter', 'statsReport', 'withdrawCode');
     }
 
-    public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
+    public function getWeekSoFar(Models\Center $center, Carbon $reportingDate, $includeInProgress = true)
     {
-        $results = [];
-
-        $allData = $this->allForCenter($center, $reportingDate, true);
-        foreach ($allData as $dataObject) {
-            if (!array_get($dataObject->meta, 'localChanges', false)) {
-                $results[] = $dataObject;
-            }
-        }
-
-        return $results;
+        return $this->allForCenter($center, $reportingDate, $includeInProgress);
     }
 
-    public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
+    protected function getPastWeeksData(Models\Center $center, Carbon $reportingDate, Models\TeamMember $member)
     {
-        $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\TeamMember::class);
-        return array_flatten($collection->getDictionary());
+        $lastWeekReportingDate = $this->lastReportingDate($center, $reportingDate);
+        if (!$lastWeekReportingDate) {
+            return [];
+        }
+
+        $lastReport = $this->relevantReport($center, $lastWeekReportingDate);
+        if (!$lastReport) {
+            return [];
+        }
+
+        $lastWeekData = Models\TeamMemberData::byStatsReport($lastReport)->byTeamMember($member)->first();
+        if (!$lastWeekData) {
+            return [];
+        }
+
+        return [
+            Domain\TeamMember::fromModel($lastWeekData, $member),
+        ];
+    }
+
+    /**
+     * Return a list of valid CenterQuarters that someone can use as a starting quarter.
+     * @param  Models\Center  $center        The center we care about
+     * @param  Carbon         $reportingDate The current reporting date to use as reference.
+     * @param  Models\Quarter $startQuarter  If provided, a reference start quarter to help prevent lookups.
+     * @return array<Domain\CenterQuarter>
+     */
+    public function validStartQuarters(Models\Center $center, Carbon $reportingDate, Models\Quarter $currentQuarter = null)
+    {
+        if ($currentQuarter == null) {
+            $currentQuarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
+        }
+
+        // Get 1 year of prior quarters in a single shot, save extra queries.
+        // If right now is Q3 2015, this executes the query similar to:
+        //   WHERE (year = 2014 AND quarter >= 3) OR (year=2015 AND quarter < 3)
+        $result = Models\Quarter::where(function ($query) use ($currentQuarter) {
+            $query->where('year', $currentQuarter->year - 1)
+                  ->where('quarter_number', '>=', $currentQuarter->quarterNumber);
+        })->orWhere(function ($query) use ($currentQuarter) {
+            $query->where('year', $currentQuarter->year)
+                  ->where('quarter_number', '<', $currentQuarter->quarterNumber);
+        })->get();
+
+        // Now we have 5 quarters when including the current one.
+        $result->push($currentQuarter);
+
+        // Return each one as a CenterQuarter. Make use of the collection features of laravel.
+
+        return $result->map(function ($q) use ($center) {
+            return Domain\CenterQuarter::ensure($center, $q);
+        });
     }
 }

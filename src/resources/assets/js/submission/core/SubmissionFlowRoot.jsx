@@ -1,18 +1,23 @@
 import _ from 'lodash'
 import React from 'react'
-import { connect } from 'react-redux'
 
+import { connectRedux } from '../../reusable/dispatch'
 import { objectAssign } from '../../reusable/ponyfill'
 import { SubmissionBase } from '../base_components'
-import { getValidationMessages } from '../review/actions'
+
+import checkCoreData from './checkCoreData'
 import SubmissionNav from './SubmissionNav'
-import * as actions from './actions'
 import { PAGES_CONFIG } from './data'
 
-const steps = PAGES_CONFIG
-const stepsBeforeCr3 = _.reject(steps, {key: 'qtr_accountabilities'})
+const steps = _.reject(PAGES_CONFIG, {hide_nav: true})
+const stepsBeforeCr3 = _.reject(steps, {key: 'next_qtr_accountabilities'})
 
-class SubmissionFlowComponent extends SubmissionBase {
+@connectRedux()
+export default class SubmissionFlowRoot extends SubmissionBase {
+    static mapStateToProps(state) {
+        return objectAssign({browser: state.browser}, state.submission.core)
+    }
+
     render() {
         if (!this.checkReportingDate()) {
             return this.renderBasicLoading(this.props.coreInit)
@@ -24,11 +29,11 @@ class SubmissionFlowComponent extends SubmissionBase {
         var layout
         if (largeLayout) {
             layout = (
-                <div id="submissionWideLayout" className="row">
+                <div id="submissionWideLayout" className="row submission-layout">
                     <div id="swSidebar">{nav}</div>
                     <div id="swContent">
                         <div className="panel panel-default">
-                            <div className="panel-body">
+                            <div className="panel-body submission-content">
                                 {this.props.children}
                             </div>
                         </div>
@@ -38,10 +43,10 @@ class SubmissionFlowComponent extends SubmissionBase {
             )
         } else {
             layout = (
-                <div>
+                <div className="submission-layout">
                     {nav}
                     <div className="tab-content">
-                        <div className="tab-pane active">
+                        <div className="tab-pane active submission-content">
                             {this.props.children}
                         </div>
                     </div>
@@ -50,11 +55,6 @@ class SubmissionFlowComponent extends SubmissionBase {
         }
         return (
             <div>
-                <div className="row">
-                    <div className="col-md-12">
-                        <h4>This page is a work in progress. Please don't submit anything, but feel free to look around. Currently, this is only visible for the Regional team and site administrators.</h4>
-                    </div>
-                </div>
                 {layout}
             </div>
         )
@@ -65,26 +65,3 @@ class SubmissionFlowComponent extends SubmissionBase {
         return checkCoreData(centerId, reportingDate, this.props, this.props.dispatch)
     }
 }
-
-export function checkCoreData(centerId, reportingDate, core, dispatch) {
-    if (reportingDate != core.reportingDate) {
-        dispatch(actions.setReportingDate(reportingDate))
-        return false
-    } else if (core.coreInit.state == 'new') {
-        setTimeout(() => {
-            dispatch(actions.initSubmission(centerId, reportingDate))
-            dispatch(getValidationMessages(centerId, reportingDate))
-        })
-        return false
-    } else if (core.coreInit.state != 'loaded') {
-        return false
-    }
-    return true
-}
-
-const mapStateToProps = (state) => {
-    return objectAssign({browser: state.browser}, state.submission.core)
-}
-
-const SubmissionFlowRoot = connect(mapStateToProps)(SubmissionFlowComponent)
-export default SubmissionFlowRoot

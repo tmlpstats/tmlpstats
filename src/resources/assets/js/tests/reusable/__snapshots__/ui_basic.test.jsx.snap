@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoadStateFlip 1`] = `
+<div>
+  <span
+    className="glyphicon glyphicon-send"
+  />
+  TODO spinner here...
+</div>
+`;
+
+exports[`LoadStateFlip 2`] = `
+<div>
+  <span
+    className="glyphicon glyphicon-send"
+  />
+  TODO spinner here...
+</div>
+`;
+
+exports[`ModeSelectButtons 1`] = `
+<div
+  aria-label={undefined}
+  className="btn-group"
+  role="group"
+>
+  <button
+    className="btn btn-default active"
+    onClick={[Function]}
+    type="button"
+  >
+    Hello
+  </button>
+  <button
+    className="btn btn-default"
+    onClick={[Function]}
+    type="button"
+  >
+    Bar
+  </button>
+</div>
+`;

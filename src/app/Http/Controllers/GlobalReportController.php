@@ -7,12 +7,12 @@ use Illuminate\Http\Request;
 use Response;
 use TmlpStats as Models;
 use TmlpStats\Api;
-use TmlpStats\Domain\Scoreboard;
+use TmlpStats\Domain;
 use TmlpStats\Http\Controllers\Encapsulate;
 use TmlpStats\Http\Controllers\Traits\GlobalReportDispatch;
 use TmlpStats\Reports\Arrangements;
 
-class GlobalReportController extends ReportDispatchAbstractController
+class GlobalReportController extends Controller
 {
     use GlobalReportDispatch;
 
@@ -41,24 +41,6 @@ class GlobalReportController extends ReportDispatchAbstractController
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
-     */
-    public function create()
-    {
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @return Response
-     */
-    public function store()
-    {
-    }
-
-    /**
      * Display the specified resource.
      *
      * @param  int $id
@@ -69,6 +51,16 @@ class GlobalReportController extends ReportDispatchAbstractController
     {
         $region = $this->getRegion($request, true);
         $globalReport = Models\GlobalReport::findOrFail($id);
+
+        return redirect(action('ReportsController@getRegionReport', [
+            'abbr' => $region->abbrLower(),
+            'date' => $globalReport->reportingDate->toDateString(),
+        ]));
+    }
+
+    public function showReport(Request $request, Models\GlobalReport $globalReport)
+    {
+        $region = $this->getRegion($request, true);
 
         return $this->showForRegion($request, $globalReport, $region);
     }
@@ -86,15 +78,14 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         $showNavCenterSelect = true;
 
-        $vmode = $request->has('viewmode') ? $request->input('viewmode') : env('GLOBAL_REPORT_VIEW_MODE', 'html');
+        $defaultVmode = env('GLOBAL_REPORT_VIEW_MODE', 'react');
+        $vmode = $request->has('viewmode') ? $request->input('viewmode') : $defaultVmode;
 
         switch (strtolower($vmode)) {
-            case 'jq':
-                $template = 'show_jquery';
-                break;
-            case 'html':
+            case 'react':
             default:
-                $template = 'show';
+                $template = 'show_react';
+                break;
         }
 
         return view("globalreports.{$template}", compact(
@@ -104,41 +95,6 @@ class GlobalReportController extends ReportDispatchAbstractController
             'quarter',
             'showNavCenterSelect'
         ));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int $id
-     *
-     * @return Response
-     */
-    public function edit($id)
-    {
-        return redirect("/globalreports/{$id}");
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  int $id
-     *
-     * @return Response
-     */
-    public function update($id)
-    {
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     *
-     * @return Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 
     protected function getStatsReportsNotOnList(Models\GlobalReport $globalReport)
@@ -162,130 +118,6 @@ class GlobalReportController extends ReportDispatchAbstractController
         asort($centers);
 
         return $centers;
-    }
-
-    public function getById($id)
-    {
-        return Models\GlobalReport::findOrFail($id);
-    }
-
-    public function getCacheKey($model, $report)
-    {
-        $keyBase = parent::getCacheKey($model, $report);
-
-        $region = $this->context->getRegion(true);
-
-        return $region === null ? $keyBase : "{$keyBase}:region{$region->id}";
-    }
-
-    public function getCacheTags($model, $report)
-    {
-        $tags = parent::getCacheTags($model, $report);
-
-        return array_merge($tags, ["globalReport{$model->id}"]);
-    }
-
-    public function dispatchReport(Request $request, $id, $report, $regionAbbr = null)
-    {
-        $extra = [];
-        if ($regionAbbr) {
-            $region = Models\Region::abbreviation($regionAbbr)->firstOrFail();
-            $this->context->setRegion($region);
-            $extra['region'] = $region;
-        }
-
-        return parent::dispatchReport($request, $id, $report, $extra);
-    }
-
-    public function runDispatcher(Request $request, $globalReport, $report, $extra)
-    {
-        $region = array_get($extra, 'region', $this->context->getRegion(true));
-        $this->context->setRegion($region);
-        $this->context->setReportingDate($globalReport->reportingDate);
-        $this->setReportingDate($globalReport->reportingDate);
-
-        $response = null;
-        switch ($report) {
-            case 'ratingsummary':
-                $response = $this->getRatingSummary($globalReport, $region);
-                break;
-            case 'regionsummary':
-                $response = $this->getRegionSummary($globalReport, $region);
-                break;
-            case 'regionalstats':
-                $response = $this->getRegionalStats($globalReport, $region);
-                break;
-            case 'gamesbycenter':
-                $response = $this->getGamesByCenter($globalReport, $region);
-                break;
-            case 'repromisesbycenter':
-                $response = $this->getRepromisesByCenter($globalReport, $region);
-                break;
-            case 'statsreports':
-                $response = $this->getCenterStatsReports($globalReport, $region);
-                break;
-            case 'applicationsbystatus':
-                $response = $this->getTmlpRegistrationsByStatus($globalReport, $region);
-                break;
-            case 'applicationsoverdue':
-                $response = $this->getTmlpRegistrationsOverdue($globalReport, $region);
-                break;
-            case 'applicationsbycenter':
-                $response = $this->getTmlpRegistrationsByCenter($globalReport, $region);
-                break;
-            case 'applicationsoverview':
-                $response = $this->getTmlpRegistrationsOverview($globalReport, $region);
-                break;
-            case 'traveloverview':
-                $response = $this->getTravelReport($globalReport, $region);
-                break;
-            case 'coursesthisweek':
-            case 'coursesnextmonth':
-            case 'coursesupcoming':
-            case 'coursescompleted':
-            case 'coursesguestgames':
-            case 'coursessummary':
-                $response = $this->coursesData($globalReport, $region)->getOne($report);
-                break;
-            case 'coursesall':
-                $response = $this->coursesData($globalReport, $region)->getCoursesAllClassic($globalReport, $region);
-                break;
-            case 'teammemberstatuswithdrawn':
-            case 'teammemberstatusctw':
-            case 'teammemberstatustransfer':
-            case 'potentialsdetails':
-            case 'potentialsoverview':
-                $response = $this->teamMembersData($globalReport, $region)->getOne($report);
-                break;
-            case 'teammemberstatusall':
-                $response = $this->teamMembersData($globalReport, $region)->getTeamMemberStatusAllClassic();
-                break;
-            case 'accesstopowereffectiveness':
-            case 'powertocreateeffectiveness':
-            case 'gameintheworldeffectiveness':
-            case 'team1expansioneffectiveness':
-            case 'team2expansioneffectiveness':
-            case 'landmarkforumeffectiveness':
-                $response = $this->centersGamesData($globalReport, $region)->getOne($report);
-                break;
-            case 'applicationst2fromweekend':
-                $response = $this->getTeam2RegisteredAtWeekend($globalReport, $region);
-                break;
-            case 'tdosummary':
-                $response = $this->getTdoSummary($globalReport, $region);
-                break;
-            case 'regperparticipant':
-                $response = $this->getRegPerParticipant($globalReport, $region);
-                break;
-            case 'gaps':
-                $response = $this->getGaps($globalReport, $region);
-                break;
-            case 'withdrawreport':
-                $response = $this->getWithdrawReport($globalReport, $region);
-                break;
-        }
-
-        return $response;
     }
 
     protected function getRatingSummary(Models\GlobalReport $globalReport, Models\Region $region)
@@ -360,7 +192,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             if ($nextMilestone->ne($globalReport->reportingDate)) {
                 $promiseData = App::make(Api\GlobalReport::class)->getWeekScoreboard($globalReport, $childRegion, $nextMilestone);
 
-                $scoreboard = Scoreboard::blank();
+                $scoreboard = Domain\Scoreboard::blank();
 
                 $promises = isset($promiseData['promise']) ? $promiseData['promise'] : 0;
                 $actuals = isset($regionsData[$childRegion->abbreviation]['actual']) ? $regionsData[$childRegion->abbreviation]['actual'] : 0;
@@ -395,7 +227,7 @@ class GlobalReportController extends ReportDispatchAbstractController
         return view('reports.centergames.milestones', $data);
     }
 
-    protected function getGamesByCenter(Models\GlobalReport $globalReport, Models\Region $region)
+    protected function getGamesByCenter(Models\GlobalReport $globalReport, Models\Region $region, $rawData = false)
     {
         $reportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region);
         if (!$reportData) {
@@ -430,6 +262,10 @@ class GlobalReportController extends ReportDispatchAbstractController
         $totals['gitw']['promise'] = round($totals['gitw']['promise'] / count($reportData));
         if (isset($centerData['actual'])) {
             $totals['gitw']['actual'] = round($totals['gitw']['actual'] / count($reportData));
+        }
+
+        if ($rawData) {
+            return compact('reportData', 'totals');
         }
 
         $includeActual = true;
@@ -506,6 +342,11 @@ class GlobalReportController extends ReportDispatchAbstractController
                     if (isset($centerData['actual'])) {
                         $totals[$game]['actual'] = 0;
                     }
+                }
+
+                if (!isset($centerData['original'][$game])) {
+                    $centerData['original'][$game] = 0;
+                    $reportData[$centerName]['original'][$game] = 0;
                 }
 
                 $totals[$game]['original'] += $centerData['original'][$game];
@@ -706,8 +547,17 @@ class GlobalReportController extends ReportDispatchAbstractController
 
         return view('globalreports.details.traveloverview', compact('reportData', 'statsReports'));
     }
+    protected function getGitwSummary(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->getTeamMemberGameSummary($globalReport, $region, 'gitw');
+    }
 
     protected function getTdoSummary(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->getTeamMemberGameSummary($globalReport, $region, 'tdo');
+    }
+
+    protected function getTeamMemberGameSummary(Models\GlobalReport $globalReport, Models\Region $region, $game)
     {
         $teamMembers = App::make(Api\GlobalReport::class)->getClassListByCenter($globalReport, $region);
         if (!$teamMembers) {
@@ -756,7 +606,8 @@ class GlobalReportController extends ReportDispatchAbstractController
                 $reportData[$centerName][$team]['total']++;
                 $totals[$team]['total']++;
                 $totals['total']['total']++;
-                if ($memberData->tdo) {
+
+                if ($memberData->$game) {
                     $reportData[$centerName][$team]['attended']++;
                     $totals[$team]['attended']++;
                     $totals['total']['attended']++;
@@ -795,7 +646,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             }
         }
 
-        return view('globalreports.details.tdosummary', compact('reportData', 'totals', 'statsReports'));
+        return view('globalreports.details.tdogitwsummary', compact('reportData', 'totals', 'statsReports'));
     }
 
     protected function getTeam2RegisteredAtWeekend(Models\GlobalReport $globalReport, Models\Region $region)
@@ -828,67 +679,6 @@ class GlobalReportController extends ReportDispatchAbstractController
         ]);
     }
 
-    protected function getRegPerParticipant(Models\GlobalReport $globalReport, Models\Region $region)
-    {
-        $reportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region);
-        if (!$reportData) {
-            return null;
-        }
-
-        $lastGlobalReport = Models\GlobalReport::reportingDate($globalReport->reportingDate->copy()->subWeek())
-            ->first();
-        if (!$lastGlobalReport) {
-            return null;
-        }
-
-        $lastWeekReportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($lastGlobalReport, $region);
-
-        $statsReportsAll = $this->getStatsReports($globalReport, $region);
-
-        $statsReports = [];
-        foreach ($statsReportsAll as $report) {
-            $centerName = $report->center->name;
-            $statsReports[$centerName] = $report;
-        }
-
-        $games = ['cap', 'cpc', 'lf'];
-        foreach ($reportData as $centerName => $centerData) {
-            $reportData[$centerName]['statsReport'] = $statsReports[$centerName];
-        }
-        ksort($reportData);
-
-        foreach ($reportData as $centerName => $centerData) {
-            $participantCount = Models\TeamMemberData::byStatsReport($statsReports[$centerName])
-                ->active()
-                ->count();
-            $totalWeekly = 0;
-            $totalQuarterly = 0;
-            foreach ($games as $game) {
-                $change = 0;
-                $rppWeekly = 0;
-                $rppQuarterly = 0;
-                if (isset($centerData['actual'])) {
-                    $actual = $centerData['actual'][$game];
-                    $totalQuarterly += $actual;
-                    $rppQuarterly = $actual / $participantCount;
-
-                    if (isset($lastWeekReportData[$centerName]['actual'])) {
-                        $change = $actual - $lastWeekReportData[$centerName]['actual'][$game];
-                        $totalWeekly += $change;
-                        $rppWeekly = $change / $participantCount;
-                    }
-                }
-                $reportData[$centerName]['change'][$game] = $change;
-                $reportData[$centerName]['rpp']['week'][$game] = round($rppWeekly, 1);
-                $reportData[$centerName]['rpp']['quarter'][$game] = round($rppQuarterly, 1);
-            }
-            $reportData[$centerName]['rpp']['week']['total'] = round($totalWeekly / $participantCount, 1);
-            $reportData[$centerName]['rpp']['quarter']['total'] = round($totalQuarterly / $participantCount, 1);
-        }
-
-        return view('globalreports.details.regperparticipant', compact('reportData', 'games'));
-    }
-
     protected function teamMembersData(Models\GlobalReport $globalReport, Models\Region $region)
     {
         return $this->context->getEncapsulation(Encapsulate\GlobalReportTeamMembersData::class, compact('globalReport', 'region'));
@@ -898,7 +688,12 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getTeamMemberStatusCtw(Models\GlobalReport $globalReport, Models\Region $region)
     {
         return $this->teamMembersData($globalReport, $region)->getOne('TeamMemberStatusCtw');
+    }
 
+    // Get report WBO
+    protected function getTeamMemberStatusWbo(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->teamMembersData($globalReport, $region)->getOne('TeamMemberStatusWbo');
     }
 
     // Get report Transfers
@@ -920,6 +715,77 @@ class GlobalReportController extends ReportDispatchAbstractController
     protected function getTeamMemberStatusPotentials(Models\GlobalReport $globalReport, Models\Region $region)
     {
         return $this->teamMembersData($globalReport, $region)->getOne('Potentials');
+    }
+
+    protected function getAcknowledgementReport(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        $template = [
+            'effectiveness' => '',
+            'centers' => [
+                'Powerful' => [],
+                'High Performing' => [],
+                'Effective' => [],
+                'Marginally Effective' => [],
+                'Ineffective' => [],
+            ],
+        ];
+
+        $reportData = [
+            'quarterString' => $globalReport->reportingDate->format('F Y'),
+            'regions' => [],
+            '100pctGames' => [
+                'cap' => [],
+                'cpc' => [],
+                't1x' => [],
+                't2x' => [],
+                'gitw' => [],
+                'lf' => [],
+                '4+' => [],
+            ],
+        ];
+
+        $regions = $region->getChildRegions();
+        if (!$regions || $regions->isEmpty()) {
+            $regions = [$region];
+        }
+
+        foreach ($regions as $reportRegion) {
+            $regionName = $reportRegion->name;
+            if (!isset($reportData['regions'][$regionName])) {
+                $reportData['regions'][$regionName] = $template;
+            }
+
+            $gameData = $this->getGamesByCenter($globalReport, $reportRegion, true);
+            if (!$gameData) {
+                continue;
+            }
+
+            $scoreboard = Domain\Scoreboard::fromArray([
+                'week' => $globalReport->reportingDate->toDateString(),
+                'games' => $gameData['totals'],
+            ]);
+
+            $reportData['regions'][$regionName]['effectiveness'] = $scoreboard->rating();
+
+            foreach ($gameData['reportData'] as $centerName => $scoreboard) {
+                $reportData['regions'][$regionName]['centers'][$scoreboard['rating']][] = $centerName;
+
+                $gameCount = 0;
+                foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
+                    if ($scoreboard['percent'][$game] >= 100) {
+                        $reportData['100pctGames'][$game][] = $centerName;
+                        $gameCount++;
+                    }
+                }
+
+                if ($gameCount >= 4) {
+                    $reportData['100pctGames']['4+'][] = $centerName;
+                }
+            }
+        }
+        ksort($reportData['regions']);
+
+        return view('globalreports.details.acknowledgementreport', compact('reportData'));
     }
 
     protected function getCenterStatsReports(Models\GlobalReport $globalReport, Models\Region $region)
@@ -1104,7 +970,7 @@ class GlobalReportController extends ReportDispatchAbstractController
             }
 
             $reportData[$centerName][$team]['totalCount']++;
-            if ($memberData->withdrawCodeId !== null && $memberData->withdrawCode->code !== 'WB') {
+            if ($memberData->withdrawCodeId !== null) {
                 $reportData[$centerName][$team]['withdrawCount']++;
             }
         }
@@ -1148,6 +1014,36 @@ class GlobalReportController extends ReportDispatchAbstractController
         }
 
         return view('globalreports.details.withdrawreport', compact('reportData', 'almostOutOfCompliance'));
+    }
+
+    protected function rppData($globalReport, $region)
+    {
+        return $this->context->getEncapsulation(Encapsulate\GlobalReportRegPerParticipantData::class, compact('globalReport', 'region'));
+    }
+
+    protected function getRegPerParticipant(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->rppData($globalReport, $region)->getOne('RegPerParticipant');
+    }
+
+    protected function getRegPerParticipantWeekly(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->rppData($globalReport, $region)->getOne('RegPerParticipantWeekly');
+    }
+
+    protected function teamSummaryData(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->context->getEncapsulation(Encapsulate\GlobalReportTeamSummaryData::class, compact('globalReport', 'region'));
+    }
+
+    public function getTeam1SummaryGrid(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->teamSummaryData($globalReport, $region)->getOne('Team1SummaryGrid');
+    }
+
+    public function getTeam2SummaryGrid(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->teamSummaryData($globalReport, $region)->getOne('Team2SummaryGrid');
     }
 
     public static function getUrl(Models\GlobalReport $globalReport, Models\Region $region)

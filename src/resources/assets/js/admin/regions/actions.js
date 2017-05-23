@@ -1,6 +1,8 @@
 import { delayDispatch } from '../../reusable/dispatch'
 import { objectAssign } from '../../reusable/ponyfill'
 import { normalize } from 'normalizr'
+
+import Api from '../../api'
 import { regionsData, centersData, scoreboardLockData, regionSchema } from './data'
 
 export function loadRegionsData(region) {
@@ -11,10 +13,12 @@ export function loadRegionsData(region) {
     })
 }
 
-function initializeRegionsData(region, data) {
+function initializeRegionsData(regionAbbr, data) {
     return (dispatch) => {
         const n = normalize(data, regionSchema)
-        dispatch(regionsData.replaceItem(region, n.entities.regions[n.result]))
+        const region = n.entities.regions[n.result]
+        region.regionQuarters = n.entities.regionQuarters
+        dispatch(regionsData.replaceItem(regionAbbr, region))
         dispatch(centersData.replaceItems(n.entities.centers))
         dispatch(regionsData.loadState('loaded'))
     }
@@ -39,9 +43,9 @@ function initializeScoreboardLockData(centerId, quarterId, data) {
 }
 
 export function saveScoreboardLocks(center, quarter, data, clear) {
-    return (dispatch, _, { Api }) => {
+    return (dispatch) => {
         dispatch(scoreboardLockData.saveState('loading'))
-        return Api.Scoreboard.setScoreboardLockQuarter({center, quarter, data}).done(() => {
+        return Api.Scoreboard.setScoreboardLockQuarter({center, quarter, data}).then(() => {
             dispatch(scoreboardLockData.saveState('loaded'))
             if (clear) {
                 // Typically, we want to get rid of the data

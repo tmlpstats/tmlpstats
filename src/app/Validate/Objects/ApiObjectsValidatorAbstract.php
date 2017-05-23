@@ -11,10 +11,11 @@ abstract class ApiObjectsValidatorAbstract extends ApiValidatorAbstract
     protected $reader = null;
     protected $skipped = false;
 
-    public function run($data)
+    public function run($data, array $pastWeeks = [])
     {
         $this->data = $data;
         $this->populateValidators($data);
+        $this->pastWeeks = $pastWeeks;
 
         if ($this->skipped) {
             return $this->isValid;

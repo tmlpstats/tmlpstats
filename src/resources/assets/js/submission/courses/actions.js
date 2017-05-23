@@ -2,9 +2,13 @@
 import { actions as formActions } from 'react-redux-form'
 
 import { getMessages } from '../../reusable/ajax_utils'
+import { objectAssign } from '../../reusable/ponyfill'
 import { scrollIntoView } from '../../reusable/ui_basic'
 import Api from '../../api'
+import { markStale } from '../review/actions'
+
 import { coursesCollection, coursesLoad, saveCourseLoad, messages } from './data'
+import { COURSES_FORM_KEY } from './reducers'
 
 export const loadState = coursesLoad.actionCreator()
 export const saveCourseState = saveCourseLoad.actionCreator()
@@ -37,8 +41,8 @@ export function initializeCourses(data) {
     }
 }
 
-export function chooseCourse(courseId, course) {
-    return formActions.change('submission.courses.currentCourse', course)
+export function chooseCourse(data) {
+    return formActions.load(COURSES_FORM_KEY, data)
 }
 
 export function saveCourse(center, reportingDate, data) {
@@ -49,12 +53,31 @@ export function saveCourse(center, reportingDate, data) {
         return Api.Course.stash({
             center, reportingDate, data
         }).then((result) => {
+            dispatch(markStale())
+            // Failed during validation
+            if (!result.storedId) {
+                dispatch(messages.replace('create', result.messages))
+                reset()
+                return result
+            }
+
+            let newData = objectAssign({}, data, {id: result.storedId, meta: result.meta})
+            dispatch(coursesCollection.replaceItem(newData.id, newData))
+            dispatch(messages.replace(newData.id, result.messages))
+
+            // We successfully saved, reset any existing parser messages
+            if (!data.id) {
+                dispatch(messages.replace('create', []))
+            }
             reset()
             return result
         }).catch((err) => {
-            dispatch(messages.replace(data.id, getMessages(err)))
+            // If this is a parser error, we won't have an ID yet, use 'create'
+            const id = data.id ? data.id : 'create'
+            dispatch(messages.replace(id, getMessages(err)))
+
             reset()
-            scrollIntoView('submission-flow')
+            scrollIntoView('react-routed-flow')
         })
     }
 }

@@ -8,19 +8,23 @@ use Carbon\Carbon;
 use Exception;
 use Gate;
 use Illuminate\Http\Request;
-use Input;
 use Log;
 use Response;
 use TmlpStats as Models;
 use TmlpStats\Api;
+use TmlpStats\Encapsulations;
+use TmlpStats\Http\Controllers\Traits\LocalReportDispatch;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\Import\Xlsx\XlsxImporter;
 use TmlpStats\Reports\Arrangements;
 
-class StatsReportController extends ReportDispatchAbstractController
+class StatsReportController extends Controller
 {
+    use LocalReportDispatch;
+
     const CACHE_TTL = 7 * 24 * 60;
+
     protected $context;
 
     /**
@@ -34,142 +38,67 @@ class StatsReportController extends ReportDispatchAbstractController
     }
 
     /**
-     * Display a listing of the resource.
+     * Legacy ID-based URL: redirect to specified resource.
      *
-     * @return Response
-     */
-    public function index(Request $request)
-    {
-        $this->authorize('index', Models\StatsReport::class);
-
-        $selectedRegion = $this->getRegion($request);
-
-        $allReports = Models\StatsReport::currentQuarter($selectedRegion)
-            ->groupBy('reporting_date')
-            ->orderBy('reporting_date', 'desc')
-            ->get();
-        if ($allReports->isEmpty()) {
-            $allReports = Models\StatsReport::lastQuarter($selectedRegion)
-                ->groupBy('reporting_date')
-                ->orderBy('reporting_date', 'desc')
-                ->get();
-        }
-
-        $today = Carbon::now();
-        $reportingDates = [];
-
-        if ($today->dayOfWeek == Carbon::FRIDAY) {
-            $reportingDates[$today->toDateString()] = $today->format('F j, Y');
-        }
-        foreach ($allReports as $report) {
-            $dateString = $report->reportingDate->toDateString();
-            $reportingDates[$dateString] = $report->reportingDate->format('F j, Y');
-        }
-
-        $reportingDate = null;
-        $reportingDateString = Input::get('stats_report', '');
-
-        if ($reportingDateString && isset($reportingDates[$reportingDateString])) {
-            $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
-        } else if ($today->dayOfWeek == Carbon::FRIDAY) {
-            $reportingDate = $today;
-        } else if (!$reportingDate && $reportingDates) {
-            $reportingDate = $allReports[0]->reportingDate;
-        } else {
-            $reportingDate = ImportManager::getExpectedReportDate();
-        }
-
-        $centers = Models\Center::active()
-            ->byRegion($selectedRegion)
-            ->orderBy('name', 'asc')
-            ->get();
-
-        $statsReportList = [];
-        foreach ($centers as $center) {
-            $report = Models\StatsReport::reportingDate($reportingDate)
-                ->byCenter($center)
-                ->orderBy('submitted_at', 'desc')
-                ->first();
-            $statsReportList[$center->name] = [
-                'center' => $center,
-                'report' => $report,
-                'viewable' => $this->authorize('read', $report),
-            ];
-        }
-
-        return view('statsreports.index', compact(
-            'statsReportList',
-            'reportingDates',
-            'reportingDate',
-            'selectedRegion'
-        ));
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int $id
-     *
+     * @param  Request $request
+     * @param  integer $id
      * @return Response
      */
     public function show(Request $request, $id)
     {
         $statsReport = Models\StatsReport::findOrFail($id);
+
+        return redirect($statsReport->getUriLocalReport());
+    }
+
+    /**
+     * Do the actual work of showing, typically through ReportsController
+     * @param  Request            $request     [description]
+     * @param  Models\StatsReport $statsReport [description]
+     * @return [type]                          [description]
+     */
+    public function showReport(Request $request, Models\StatsReport $statsReport)
+    {
+        $this->authorize('read', $statsReport);
+
         $this->context->setCenter($statsReport->center);
         $this->context->setReportingDate($statsReport->reportingDate);
+        $centerReportingDate = Encapsulations\CenterReportingDate::ensure();
         $this->context->setDateSelectAction('ReportsController@getCenterReport', [
             'abbr' => $statsReport->center->abbrLower(),
         ]);
-        $this->authorize('read', $statsReport);
 
-        $sheetUrl = '';
-        $globalReport = null;
+        list($sheetPath, $sheetUrl) = $this->getSheetPathUrl($statsReport);
+
         $center = $statsReport->center;
-
-        $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
-
-        if ($sheetPath) {
-            $sheetUrl = $sheetPath ? url("/statsreports/{$statsReport->id}/download") : null;
-        }
-
-        $quarterStartDate = $statsReport->quarter->getQuarterStartDate($center);
-        $quarterEndDate = $statsReport->quarter->getQuarterEndDate($center);
-
-        // Other Stats Reports
-        $otherStatsReports = [];
-        $searchWeek = $quarterEndDate->copy();
-
-        while ($searchWeek->gte($quarterStartDate)) {
-            $globalReport = Models\GlobalReport::reportingDate($searchWeek)->first();
-            if ($globalReport) {
-                $report = $globalReport->statsReports()->byCenter($center)->first();
-                if ($report) {
-                    $otherStatsReports[$report->id] = $report->reportingDate->format('M d, Y');
-                }
-            }
-            $searchWeek->subWeek();
-        }
-
-        // Only show last quarter's completion report on the first week
-        if ($statsReport->reportingDate->diffInWeeks($quarterStartDate) > 1) {
-            array_pop($otherStatsReports);
-        }
-
-        // When showing last quarter's data, make sure we also show this week's report
-        if ($quarterEndDate->lt(Carbon::now())) {
-            $firstWeek = $quarterEndDate->copy();
-            $firstWeek->addWeek();
-
-            $globalReport = Models\GlobalReport::reportingDate($firstWeek)->first();
-            if ($globalReport) {
-                $report = $globalReport->statsReports()->byCenter($center)->first();
-                if ($report) {
-                    $otherStatsReports = [$report->id => $report->reportingDate->format('M d, Y')] + $otherStatsReports;
-                }
-            }
-        }
-
         $globalReport = Models\GlobalReport::reportingDate($statsReport->reportingDate)->first();
+        $globalRegion = $center->region->getParentGlobalRegion();
+
+        $nextCenter = Models\Center::active()
+            ->byRegion($globalRegion)
+            ->where('name', '>', $center->name)
+            ->orderBy('name')
+            ->first();
+
+        $lastCenter = Models\Center::active()
+            ->byRegion($globalRegion)
+            ->where('name', '<', $center->name)
+            ->orderBy('name')
+            ->first();
+
+        $lastReport = null;
+        if ($lastCenter && Gate::allows('showReportNavLinks', Models\StatsReport::class)) {
+            $lastReport = $globalReport->statsReports()
+                                       ->byCenter($lastCenter)
+                                       ->first();
+        }
+
+        $nextReport = null;
+        if ($nextCenter && Gate::allows('showReportNavLinks', Models\StatsReport::class)) {
+            $nextReport = $globalReport->statsReports()
+                                       ->byCenter($nextCenter)
+                                       ->first();
+        }
 
         $reportToken = null;
         if (Gate::allows('readLink', Models\ReportToken::class)) {
@@ -177,15 +106,39 @@ class StatsReportController extends ReportDispatchAbstractController
         }
 
         $showNavCenterSelect = true;
+        $defaultVmode = env('LOCAL_REPORT_VIEW_MODE', 'html');
+        $vmode = $request->has('viewmode') ? $request->input('viewmode') : $defaultVmode;
 
-        return view('statsreports.show', compact(
+        switch (strtolower($vmode)) {
+            case 'react':
+            default:
+                $template = 'show_react';
+                break;
+        }
+
+        return view("statsreports.{$template}", compact(
             'statsReport',
+            'lastReport',
+            'globalRegion',
+            'nextReport',
+            'centerReportingDate',
             'globalReport',
-            'otherStatsReports',
             'sheetUrl',
             'reportToken',
             'showNavCenterSelect'
         ));
+    }
+
+    protected function getSheetPathUrl($statsReport)
+    {
+        $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+
+        $sheetUrl = '';
+        if ($sheetPath) {
+            $sheetUrl = $sheetPath ? url("/statsreports/{$statsReport->id}/download") : null;
+        }
+
+        return [$sheetPath, $sheetUrl];
     }
 
     /**
@@ -197,7 +150,7 @@ class StatsReportController extends ReportDispatchAbstractController
      *
      * @return Response
      */
-    public function submit($id)
+    public function submit(Request $request, $id)
     {
         $statsReport = Models\StatsReport::findOrFail($id);
 
@@ -210,7 +163,7 @@ class StatsReportController extends ReportDispatchAbstractController
             'message' => '',
         ];
 
-        $action = Input::get('function', null);
+        $action = $request->get('function', null);
         if ($action === 'submit') {
 
             $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
@@ -233,7 +186,7 @@ class StatsReportController extends ReportDispatchAbstractController
                 $sheet = $importer->getResults();
 
                 $statsReport->submittedAt = Carbon::now();
-                $statsReport->submitComment = Input::get('comment', null);
+                $statsReport->submitComment = $request->get('comment', null);
                 $statsReport->locked = true;
             } catch (Exception $e) {
                 Log::error('Error validating sheet: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
@@ -292,18 +245,6 @@ class StatsReportController extends ReportDispatchAbstractController
         }
     }
 
-    public function getById($id)
-    {
-        return Models\StatsReport::findOrFail($id);
-    }
-
-    public function getCacheTags($model, $report)
-    {
-        $tags = parent::getCacheTags($model, $report);
-
-        return array_merge($tags, ["statsReport{$model->id}"]);
-    }
-
     public function authorizeReport($statsReport, $report)
     {
         switch ($report) {
@@ -312,68 +253,6 @@ class StatsReportController extends ReportDispatchAbstractController
             default:
                 parent::authorizeReport($statsReport, $report);
         }
-    }
-
-    public function runDispatcher(Request $request, $statsReport, $report, $extra = null)
-    {
-        $this->setCenter($statsReport->center);
-        $this->context->setCenter($statsReport->center);
-        $this->setReportingDate($statsReport->reportingDate);
-        $this->context->setReportingDate($statsReport->reportingDate);
-
-        if (!$statsReport->isValidated() && $report != 'results') {
-            return '<p>This report did not pass validation. See Report Details for more information.</p>';
-        }
-
-        $response = null;
-        switch ($report) {
-            case 'summary':
-                $response = $this->getSummary($statsReport);
-                break;
-            case 'results':
-                $response = $this->getResults($statsReport);
-                break;
-            case 'centerstats':
-                $response = $this->getCenterStats($statsReport);
-                break;
-            case 'classlist':
-                $response = $this->getClassList($statsReport);
-                break;
-            case 'tmlpregistrations':
-                $response = $this->getTmlpRegistrations($statsReport);
-                break;
-            case 'tmlpregistrationsbystatus':
-                $response = $this->getTmlpRegistrationsByStatus($statsReport);
-                break;
-            case 'courses':
-                $response = $this->getCourses($statsReport);
-                break;
-            case 'contactinfo':
-                $response = $this->getContactInfo($statsReport);
-                break;
-            case 'gitwsummary':
-                $response = $this->getGitwSummary($statsReport);
-                break;
-            case 'tdosummary':
-                $response = $this->getTdoSummary($statsReport);
-                break;
-            case 'peopletransfersummary':
-                $response = $this->getPeopleTransferSummary($statsReport);
-                break;
-            case 'coursestransfersummary':
-                $response = $this->getCoursesTransferSummary($statsReport);
-                break;
-            case 'teamsummary':
-                $response = $this->getTeamWeekendSummary($statsReport);
-                break;
-            case 'travel':
-                $response = $this->getTeamTravelSummary($statsReport);
-                break;
-            case 'mobile_summary':
-                $response = $this->getMobileSummary($statsReport);
-        }
-
-        return $response;
     }
 
     public function getCoursesSummary(Models\StatsReport $statsReport)
@@ -541,7 +420,7 @@ class StatsReportController extends ReportDispatchAbstractController
         return view('statsreports.details.summary', $data);
     }
 
-    protected function getMobileSummary(Models\StatsReport $statsReport)
+    public function getMobileSummary(Models\StatsReport $statsReport)
     {
         $data = $this->getSummaryPageData($statsReport, true);
         $data['skip_navbar'] = true;
@@ -555,6 +434,7 @@ class StatsReportController extends ReportDispatchAbstractController
         $a = new Arrangements\GamesByMilestone([
             'weeks' => App::make(Api\LocalReport::class)->getQuarterScoreboard($statsReport),
             'quarter' => $statsReport->quarter,
+            'center' => $statsReport->center,
         ]);
         $data = $a->compose();
 
@@ -617,9 +497,12 @@ class StatsReportController extends ReportDispatchAbstractController
             'statistician',
             'statisticianApprentice',
         ];
+
+        $reportNow = $statsReport->reportingDate->copy()->setTime(15, 0, 0);
+
         foreach ($accountabilities as $accountability) {
             $accountabilityObj = Models\Accountability::name($accountability)->first();
-            $contacts[$accountabilityObj->display] = $statsReport->center->getAccountable($accountability);
+            $contacts[$accountabilityObj->display] = $statsReport->center->getAccountable($accountability, $reportNow);
         }
         if (!$contacts) {
             return null;
@@ -678,12 +561,55 @@ class StatsReportController extends ReportDispatchAbstractController
         return view('statsreports.details.teammembersweekly', $data);
     }
 
+    public function compileApiReportMessages(Models\StatsReport $statsReport)
+    {
+        if ($statsReport->version !== 'api') {
+            return [];
+        }
+
+        $storedMessages = $statsReport->validationMessages ?: [];
+
+        $reportMessages = [];
+        foreach ($storedMessages as $group => $groupMessages) {
+            foreach ($groupMessages as $msg) {
+                $display = array_get($msg, 'reference.flattened', '');
+                $reportMessages[$group][$display][] = $msg;
+            }
+        }
+
+        return $reportMessages;
+    }
+
+    protected function getOverview(Models\StatsReport $statsReport)
+    {
+        list($sheetPath, $sheetUrl) = $this->getSheetPathUrl($statsReport);
+
+        return view('statsreports.details.overview_combined', [
+            'statsReport' => $statsReport,
+            'sheetUrl' => $sheetUrl,
+            'results' => $this->getResults($statsReport),
+        ]);
+    }
+
     protected function getResults(Models\StatsReport $statsReport)
     {
+        if ($statsReport->version === 'api') {
+            $reportMessages = $this->compileApiReportMessages($statsReport);
+
+            $centerName = $statsReport->center->name;
+            $reportingDate = $statsReport->reportingDate;
+
+            return view('import.apiresults', compact(
+                'centerName',
+                'reportingDate',
+                'reportMessages'
+            ));
+        }
+
         $sheet = [];
         $sheetUrl = '';
 
-        $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
+        list($sheetPath, $sheetUrl) = $this->getSheetPathUrl($statsReport);
 
         if ($sheetPath) {
             try {
@@ -694,7 +620,6 @@ class StatsReportController extends ReportDispatchAbstractController
                 Log::error('Error validating sheet: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             }
 
-            $sheetUrl = $sheetPath ? url("/statsreports/{$statsReport->id}/download") : null;
         }
 
         if (!$sheetUrl) {
@@ -732,7 +657,10 @@ class StatsReportController extends ReportDispatchAbstractController
             }
         }
 
-        $a = new Arrangements\TeamMembersByQuarter(['teamMembersData' => $teamMembers]);
+        $a = new Arrangements\TeamMembersByQuarter([
+            'teamMembersData' => $teamMembers,
+            'includeXferAsWithdrawn' => true,
+        ]);
         $teamMembers = $a->compose();
         $teamMembers = $teamMembers['reportData'];
 
@@ -895,7 +823,10 @@ class StatsReportController extends ReportDispatchAbstractController
         $teamThisWeekByQuarter = $a->compose();
         $teamThisWeekByQuarter = $teamThisWeekByQuarter['reportData'];
 
-        $a = new Arrangements\TeamMembersByQuarter(['teamMembersData' => $teamMemberDataLastWeek]);
+        $a = new Arrangements\TeamMembersByQuarter([
+            'teamMembersData' => $teamMemberDataLastWeek,
+            'includeXferAsWithdrawn' => true, // we don't want to deal with people that transfered last quarter
+        ]);
         $teamLastWeekByQuarter = $a->compose();
         $teamLastWeekByQuarter = $teamLastWeekByQuarter['reportData'];
 
@@ -962,6 +893,7 @@ class StatsReportController extends ReportDispatchAbstractController
 
         $teamMemberSummary = [
             'new' => [],
+            'changed' => [],
             'missing' => [],
         ];
 
@@ -973,17 +905,23 @@ class StatsReportController extends ReportDispatchAbstractController
                     continue;
                 }
 
-                foreach ($quarterData as $lasWeekData) {
+                foreach ($quarterData as $lastWeekData) {
                     list($field, $idx, $data) = $this->hasPerson([
                         'Q2',
                         'Q3',
                         'Q4',
-                    ], $lasWeekData, $teamThisWeekByQuarter[$team]);
+                    ], $lastWeekData, $teamThisWeekByQuarter[$team]);
                     if ($field !== null) {
+                        // Make sure they were put in the correct section by making sure the incoming quarter didn't change
+                        $thisWeekData = $teamThisWeekByQuarter[$team][$field][$idx];
+                        if ($thisWeekData->incomingQuarter->id != $lastWeekData->incomingQuarter->id) {
+                            $teamMemberSummary['changed'][] = [$thisWeekData, $lastWeekData];
+                        }
+
                         // We found it! remove it from the search list
                         unset($teamThisWeekByQuarter[$team][$field][$idx]);
                     } else {
-                        $teamMemberSummary['missing'][] = [null, $lasWeekData];
+                        $teamMemberSummary['missing'][] = [null, $lastWeekData];
                     }
                 }
             }
@@ -1021,6 +959,40 @@ class StatsReportController extends ReportDispatchAbstractController
                     }
                     if (!$matched) {
                         $teamMemberSummary['new'][] = [$thisWeekData, $lastWeekData];
+                    }
+                }
+            }
+        }
+
+        // Go through everyone that withdrew this week, and remove them from the missing lists
+        foreach ($teamThisWeekByQuarter['withdrawn'] as $quarterNumber => $quarterData) {
+            foreach ($quarterData as $thisWeekData) {
+                if ($quarterNumber == 'Q1') {
+                    // check for missing applications
+                    foreach ($incomingSummary['missing'] as $idx => $missingData) {
+                        if ($this->objectsAreEqual($missingData[1], $thisWeekData)) {
+                            unset($incomingSummary['missing'][$idx]);
+                            break;
+                        }
+                    }
+                } else {
+                    // check for missing applications
+                    foreach ($teamMemberSummary['missing'] as $idx => $missingData) {
+                        if ($this->objectsAreEqual($missingData[1], $thisWeekData)) {
+                            unset($teamMemberSummary['missing'][$idx]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        foreach ($incomingThisWeekByQuarter['withdrawn'] as $quarterNumber => $quarterData) {
+            foreach ($quarterData as $thisWeekData) {
+                // check for missing applications
+                foreach ($incomingSummary['missing'] as $idx => $missingData) {
+                    if ($this->objectsAreEqual($missingData[1], $thisWeekData)) {
+                        unset($incomingSummary['missing'][$idx]);
+                        break;
                     }
                 }
             }
@@ -1105,6 +1077,28 @@ class StatsReportController extends ReportDispatchAbstractController
         }
 
         return view('statsreports.details.coursestransfersummary', compact('flagged', 'flaggedCount'));
+    }
+
+    /**
+     * Get initial data for Next Quarter accountabilities
+     * @return array a JSON-friendly array
+     */
+    protected function getNextQtrAccountabilities(Models\StatsReport $statsReport)
+    {
+        $nqaApi = App::make(Api\Submission\NextQtrAccountability::class);
+        $nqAccountabilities = $nqaApi->allForCenter($this->context->getCenter(), $this->context->getReportingDate());
+
+        // Since we don't have an easy API for getting lookup tables for all users now
+        // (right now this is rolled into SubmissionCore) we're going to do the extra work
+        // of embedding the Models\Accountability object alongside the data for now.
+        $accountabilities = collect($nqAccountabilities)
+            ->map(function ($nqa) {
+                return array_merge($nqa->toArray(), ['accountability' => $nqa->getAccountability()]);
+            });
+
+        return [
+            'nqas' => $accountabilities,
+        ];
     }
 
     protected function coursesEqual($new, $old)

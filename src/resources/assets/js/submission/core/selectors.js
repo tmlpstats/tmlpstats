@@ -12,6 +12,9 @@ export function makeAccountabilitiesSelector(context) {
     return createSelector(
         [orderedAccountabilitiesSelector, accountabilitiesSelector],
         (ids, allAccountabilities) => {
+            if (!ids) {
+                return []
+            }
             var accountabilities = ids.map(id => allAccountabilities[id])
             if (context) {
                 accountabilities = accountabilities.filter(acc => acc.context == context)
@@ -25,4 +28,17 @@ export function makeAccountabilitiesSelector(context) {
 export const getLabelTeamMember = (item) => {
     const p = item.teamMember.person
     return p.firstName + ' ' + p.lastName
+}
+
+export function makeQuartersSelector(prop) {
+    return createSelector(
+        (core) => core.centerQuarters.data,
+        (core) => core.lookups[prop],
+        (cqData, ids) => {
+            if (!ids) {
+                return []
+            }
+            return ids.map(id => cqData[id])
+        }
+    )
 }

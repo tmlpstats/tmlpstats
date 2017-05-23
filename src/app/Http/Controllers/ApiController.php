@@ -19,6 +19,7 @@ class ApiController extends ApiControllerBase
 {
     protected $methods = [
         "Admin.Region.getRegion" => "Admin__Region__getRegion",
+        "Admin.Quarter.filter" => "Admin__Quarter__filter",
         "Application.create" => "Application__create",
         "Application.allForCenter" => "Application__allForCenter",
         "Application.stash" => "Application__stash",
@@ -36,6 +37,8 @@ class ApiController extends ApiControllerBase
         "GlobalReport.getClassListByCenter" => "GlobalReport__getClassListByCenter",
         "GlobalReport.getCourseList" => "GlobalReport__getCourseList",
         "GlobalReport.getReportPages" => "GlobalReport__getReportPages",
+        "GlobalReport.getReportPagesByDate" => "GlobalReport__getReportPagesByDate",
+        "GlobalReport.reportViewOptions" => "GlobalReport__reportViewOptions",
         "LiveScoreboard.getCurrentScores" => "LiveScoreboard__getCurrentScores",
         "LiveScoreboard.setScore" => "LiveScoreboard__setScore",
         "LocalReport.getQuarterScoreboard" => "LocalReport__getQuarterScoreboard",
@@ -45,11 +48,19 @@ class ApiController extends ApiControllerBase
         "LocalReport.getClassListByQuarter" => "LocalReport__getClassListByQuarter",
         "LocalReport.getCourseList" => "LocalReport__getCourseList",
         "LocalReport.getCenterQuarter" => "LocalReport__getCenterQuarter",
+        "LocalReport.reportViewOptions" => "LocalReport__reportViewOptions",
+        "LocalReport.getReportPages" => "LocalReport__getReportPages",
+        "Lookups.getRegionCenters" => "Lookups__getRegionCenters",
+        "ProgramLeader.allForCenter" => "ProgramLeader__allForCenter",
+        "ProgramLeader.stash" => "ProgramLeader__stash",
         "Scoreboard.allForCenter" => "Scoreboard__allForCenter",
         "Scoreboard.stash" => "Scoreboard__stash",
         "Scoreboard.getScoreboardLockQuarter" => "Scoreboard__getScoreboardLockQuarter",
         "Scoreboard.setScoreboardLockQuarter" => "Scoreboard__setScoreboardLockQuarter",
+        "Submission.NextQtrAccountability.allForCenter" => "Submission__NextQtrAccountability__allForCenter",
+        "Submission.NextQtrAccountability.stash" => "Submission__NextQtrAccountability__stash",
         "SubmissionCore.initSubmission" => "SubmissionCore__initSubmission",
+        "SubmissionCore.completeSubmission" => "SubmissionCore__completeSubmission",
         "SubmissionData.ignoreMe" => "SubmissionData__ignoreMe",
         "TeamMember.create" => "TeamMember__create",
         "TeamMember.update" => "TeamMember__update",
@@ -58,17 +69,33 @@ class ApiController extends ApiControllerBase
         "TeamMember.stash" => "TeamMember__stash",
         "TeamMember.bulkStashWeeklyReporting" => "TeamMember__bulkStashWeeklyReporting",
         "UserProfile.setLocale" => "UserProfile__setLocale",
+        "UserProfile.needsShim" => "UserProfile__needsShim",
         "ValidationData.validate" => "ValidationData__validate",
+    ];
+
+    protected $tokenAuthenticatedMethods = [
+        "GlobalReport__getReportPages",
+        "GlobalReport__getReportPagesByDate",
+        "GlobalReport__reportViewOptions",
+        "LocalReport__getQuarterScoreboard",
+        "LocalReport__reportViewOptions",
+        "LocalReport__getReportPages",
     ];
 
     protected $unauthenticatedMethods = [
         "LiveScoreboard__getCurrentScores",
+        "UserProfile__needsShim",
     ];
 
     protected function Admin__Region__getRegion($input)
     {
         return App::make(Api\Admin\Region::class)->getRegion(
             $this->parse($input, 'region', 'Region')
+        );
+    }
+    protected function Admin__Quarter__filter($input)
+    {
+        return App::make(Api\Admin\Quarter::class)->filter(
         );
     }
     protected function Application__create($input)
@@ -195,6 +222,21 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'pages', 'array')
         );
     }
+    protected function GlobalReport__getReportPagesByDate($input)
+    {
+        return App::make(Api\GlobalReport::class)->getReportPagesByDate(
+            $this->parse($input, 'region', 'Region'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'pages', 'array')
+        );
+    }
+    protected function GlobalReport__reportViewOptions($input)
+    {
+        return App::make(Api\GlobalReport::class)->reportViewOptions(
+            $this->parse($input, 'region', 'Region'),
+            $this->parse($input, 'reportingDate', 'date')
+        );
+    }
     protected function LiveScoreboard__getCurrentScores($input)
     {
         return App::make(Api\LiveScoreboard::class)->getCurrentScores(
@@ -255,6 +297,43 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'quarter', 'Quarter')
         );
     }
+    protected function LocalReport__reportViewOptions($input)
+    {
+        return App::make(Api\LocalReport::class)->reportViewOptions(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date')
+        );
+    }
+    protected function LocalReport__getReportPages($input)
+    {
+        return App::make(Api\LocalReport::class)->getReportPages(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'pages', 'array')
+        );
+    }
+    protected function Lookups__getRegionCenters($input)
+    {
+        return App::make(Api\Lookups::class)->getRegionCenters(
+            $this->parse($input, 'region', 'Region')
+        );
+    }
+    protected function ProgramLeader__allForCenter($input)
+    {
+        return App::make(Api\ProgramLeader::class)->allForCenter(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'includeInProgress', 'bool', false)
+        );
+    }
+    protected function ProgramLeader__stash($input)
+    {
+        return App::make(Api\ProgramLeader::class)->stash(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'data', 'array')
+        );
+    }
     protected function Scoreboard__allForCenter($input)
     {
         return App::make(Api\Scoreboard::class)->allForCenter(
@@ -286,11 +365,35 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'data', 'array')
         );
     }
+    protected function Submission__NextQtrAccountability__allForCenter($input)
+    {
+        return App::make(Api\Submission\NextQtrAccountability::class)->allForCenter(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'includeInProgress', 'bool', false)
+        );
+    }
+    protected function Submission__NextQtrAccountability__stash($input)
+    {
+        return App::make(Api\Submission\NextQtrAccountability::class)->stash(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'data', 'array')
+        );
+    }
     protected function SubmissionCore__initSubmission($input)
     {
         return App::make(Api\SubmissionCore::class)->initSubmission(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date')
+        );
+    }
+    protected function SubmissionCore__completeSubmission($input)
+    {
+        return App::make(Api\SubmissionCore::class)->completeSubmission(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'reportingDate', 'date'),
+            $this->parse($input, 'data', 'array')
         );
     }
     protected function SubmissionData__ignoreMe($input)
@@ -350,6 +453,12 @@ class ApiController extends ApiControllerBase
         return App::make(Api\UserProfile::class)->setLocale(
             $this->parse($input, 'locale', 'string'),
             $this->parse($input, 'timezone', 'string')
+        );
+    }
+    protected function UserProfile__needsShim($input)
+    {
+        return App::make(Api\UserProfile::class)->needsShim(
+            $this->parse($input, 'v', 'string')
         );
     }
     protected function ValidationData__validate($input)

@@ -26,13 +26,17 @@ class ApiProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(Api\Admin\Region::class);
+        $this->app->singleton(Api\Admin\Quarter::class);
         $this->app->singleton(Api\Application::class);
         $this->app->singleton(Api\Context::class);
         $this->app->singleton(Api\Course::class);
         $this->app->singleton(Api\GlobalReport::class);
         $this->app->singleton(Api\LiveScoreboard::class);
         $this->app->singleton(Api\LocalReport::class);
+        $this->app->singleton(Api\Lookups::class);
+        $this->app->singleton(Api\ProgramLeader::class);
         $this->app->singleton(Api\Scoreboard::class);
+        $this->app->singleton(Api\Submission\NextQtrAccountability::class);
         $this->app->singleton(Api\SubmissionCore::class);
         $this->app->singleton(Api\SubmissionData::class);
         $this->app->singleton(Api\TeamMember::class);
@@ -44,13 +48,17 @@ class ApiProvider extends ServiceProvider
     {
         return [
             'TmlpStats\Api\Admin\Region',
+            'TmlpStats\Api\Admin\Quarter',
             'TmlpStats\Api\Application',
             'TmlpStats\Api\Context',
             'TmlpStats\Api\Course',
             'TmlpStats\Api\GlobalReport',
             'TmlpStats\Api\LiveScoreboard',
             'TmlpStats\Api\LocalReport',
+            'TmlpStats\Api\Lookups',
+            'TmlpStats\Api\ProgramLeader',
             'TmlpStats\Api\Scoreboard',
+            'TmlpStats\Api\Submission\NextQtrAccountability',
             'TmlpStats\Api\SubmissionCore',
             'TmlpStats\Api\SubmissionData',
             'TmlpStats\Api\TeamMember',

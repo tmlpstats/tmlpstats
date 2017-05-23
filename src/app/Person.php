@@ -138,7 +138,7 @@ class Person extends Model
             ->where(function ($query) use ($when) {
                 $query->whereNull('ends_at')
                       ->orWhere('ends_at', '>', $when);
-            })->lists('accountability_id');
+            })->pluck('accountability_id');
 
         return $items;
     }
@@ -150,9 +150,13 @@ class Person extends Model
      *
      * @return bool
      */
-    public function hasAccountability(Accountability $accountability)
+    public function hasAccountability(Accountability $accountability, Carbon $when = null)
     {
-        $accountabilities = $this->getAccountabilities();
+        if ($when == null) {
+            $when = Util::now();
+        }
+
+        $accountabilities = $this->getAccountabilities($when);
         foreach ($accountabilities as $myAccountability) {
             if ($myAccountability->id == $accountability->id) {
                 return true;
@@ -182,14 +186,40 @@ class Person extends Model
      *
      * @param Accountability $accountability
      */
-    public function removeAccountability(Accountability $accountability)
+    public function removeAccountability(Accountability $accountability, Carbon $when = null)
     {
+        if ($when == null) {
+            $when = Util::now()->copy()->subSecond();
+        }
+
         if ($this->hasAccountability($accountability)) {
             DB::table('accountability_person')
                 ->where('person_id', $this->id)
                 ->where('accountability_id', $accountability->id)
-                ->update(['ends_at' => Util::now()->copy()->subSecond()]);
+                ->update(['ends_at' => $when]);
         }
+    }
+
+    public function takeoverAccountability(Accountability $accountability, Carbon $starts = null, Carbon $ends = null)
+    {
+        if ($starts == null) {
+            $starts = Util::now();
+        }
+
+        // Remove accountability from any existing holders
+        DB::update('
+            UPDATE  accountability_person ap
+            INNER JOIN people p ON p.id = ap.person_id
+            SET ap.ends_at = ?
+            WHERE
+                ap.accountability_id = ?
+                AND p.center_id = ?
+                AND (ap.ends_at IS NULL OR ap.ends_at > ?)',
+            [$starts->copy()->subSecond(), $accountability->id, $this->center->id, $starts]
+        );
+
+        // Add accountability
+        $this->addAccountability($accountability, $starts, $ends);
     }
 
     /**
@@ -234,13 +264,19 @@ class Person extends Model
         return $query->whereCenterId($center->id);
     }
 
-    public function scopeByAccountability($query, $accountability)
+    public function scopeByAccountability($query, Accountability $accountability, Carbon $when = null)
     {
-        return $query->whereHas('accountabilities', function ($query) use ($accountability) {
+        if ($when == null) {
+            return $query->whereHas('accountabilities', function ($query) use ($accountability) {
+                $query->whereName($accountability->name);
+            });
+        }
+
+        return $query->whereHas('accountabilities', function ($query) use ($accountability, $when) {
             $query->whereName($accountability->name)
-                  ->where('starts_at', '<=', Util::now())
-                  ->where(function ($query) {
-                      $query->where('ends_at', '>', Util::now())
+                  ->where('starts_at', '<=', $when)
+                  ->where(function ($query) use ($when) {
+                      $query->where('ends_at', '>', $when)
                             ->orWhereNull('ends_at');
                   });
         });

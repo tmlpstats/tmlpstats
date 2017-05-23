@@ -64,7 +64,9 @@ class ScoreboardGame
             return 0;
         }
 
-        return round(static::calculatePercent($this->promise, $this->actual));
+        $percent = static::calculatePercent($this->promise, $this->actual);
+
+        return static::normalizePercent($percent);
     }
 
     public function points()
@@ -141,14 +143,7 @@ class ScoreboardGame
             throw new \Exception("Unknown game {$game}");
         }
 
-        // The spreadsheet rounds using a formula that looks like this:
-        // =IF(Z22=""," ",IF(Z22>0.745,IF(Z22>0.795,IF(Z22>0.895,IF(Z22>0.995,4,3),2),1),0))
-        //
-        // Decoded, this rounds up from .5, but is slightly off in that 74.50000...00 is rounded down to 74
-        // but 74.50000...01 is rounded up.
-        //
-        // Here, round() does the right thing with a slight difference in behavior.
-        $percent = round($percent);
+        $percent = static::normalizePercent($percent);
 
         foreach (static::$pointsByPercent as $gamePercent => $gamePoints) {
             if ($percent >= $gamePercent) {
@@ -185,5 +180,29 @@ class ScoreboardGame
         }
 
         return static::$ratingsByPoints[static::MIN_POINTS];
+    }
+
+    /**
+     * Normalize percent for use to calculate points
+     *
+     * Round on half value, except between 99.5 and 100
+     *
+     * @param  float $percent
+     * @return integer
+     */
+    protected static function normalizePercent($percent)
+    {
+        if ($percent >= 99.5 && $percent < 100) {
+            return 99;
+        }
+
+        // The spreadsheet rounds using a formula that looks like this:
+        // =IF(Z22=""," ",IF(Z22>0.745,IF(Z22>0.795,IF(Z22>0.895,IF(Z22>0.995,4,3),2),1),0))
+        //
+        // Decoded, this rounds up from .5, but is slightly off in that 74.50000...00 is rounded down to 74
+        // but 74.50000...01 is rounded up.
+        //
+        // Here, round() does the right thing with a slight difference in behavior.
+        return round($percent);
     }
 }

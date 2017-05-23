@@ -424,12 +424,16 @@ class ApiCourseValidatorTest extends ApiValidatorTestAbstract
     /**
      * @dataProvider providerValidateCourseStartDate
      */
-    public function testValidateCourseStartDate($data, $expectedMessages, $expectedResult)
+    public function testValidateCourseStartDate($data, $expectedMessages, $expectedResult, $pastWeeks = [])
     {
         $data = $this->getCourse($data);
 
+        if ($pastWeeks) {
+            $pastWeeks = [ $this->getCourse($pastWeeks) ];
+        }
+
         $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $result = $validator->run($data, $pastWeeks);
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -440,8 +444,7 @@ class ApiCourseValidatorTest extends ApiValidatorTestAbstract
         return [
             // Start Date during quarter
             [
-                [
-                ],
+                [],
                 [],
                 true,
             ],
@@ -472,18 +475,33 @@ class ApiCourseValidatorTest extends ApiValidatorTestAbstract
                 ],
                 true,
             ],
+            // Start Date not Saturday for existing course
+            [
+                [
+                    'startDate' => '2016-08-28',
+                ],
+                [],
+                true,
+                [
+                    'startDate' => '2016-08-28',
+                ],
+            ],
         ];
     }
 
     /**
      * @dataProvider providerValidateCourseBalance
      */
-    public function testValidateCourseBalance($data, $expectedMessages, $expectedResult)
+    public function testValidateCourseBalance($data, $expectedMessages, $expectedResult, $pastWeeks = [])
     {
         $data = $this->getCourse($data);
 
+        if ($pastWeeks) {
+            $pastWeeks = [ $this->getCourse($pastWeeks) ];
+        }
+
         $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $result = $validator->run($data, $pastWeeks);
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -633,6 +651,39 @@ class ApiCourseValidatorTest extends ApiValidatorTestAbstract
                 ],
                 true,
             ],
+            // Current TER less than QStart TER with past data
+            [
+                [
+                    'quarterStartTer' => 40,
+                    'currentTer' => 39,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_CURRENT_TER_LESS_THAN_QSTART_TER',
+                        'reference.field' => 'currentTer',
+                        'level' => 'warning',
+                    ]),
+                ],
+                true,
+                [
+                    'quarterStartTer' => 40,
+                    'currentTer' => 40,
+                ],
+            ],
+            // Current TER less than QStart TER but no message because this is not the first week
+            [
+                [
+                    'quarterStartTer' => 40,
+                    'currentTer' => 39,
+                ],
+                [],
+                true,
+                [
+                    'quarterStartTer' => 40,
+                    'currentTer' => 39,
+                ],
+            ],
+
             // Current Xfer less than QStart Xfer
             [
                 [
@@ -647,6 +698,38 @@ class ApiCourseValidatorTest extends ApiValidatorTestAbstract
                     ]),
                 ],
                 true,
+            ],
+            // Current Xfer less than QStart Xfer with past data
+            [
+                [
+                    'quarterStartXfer' => 2,
+                    'currentXfer' => 0,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_CURRENT_XFER_LESS_THAN_QSTART_XFER',
+                        'reference.field' => 'currentXfer',
+                        'level' => 'warning',
+                    ]),
+                ],
+                true,
+                [
+                    'quarterStartXfer' => 2,
+                    'currentXfer' => 2,
+                ],
+            ],
+            // Current Xfer less than QStart Xfer but no message because this is not the first week
+            [
+                [
+                    'quarterStartXfer' => 2,
+                    'currentXfer' => 0,
+                ],
+                [],
+                true,
+                [
+                    'quarterStartXfer' => 2,
+                    'currentXfer' => 0,
+                ],
             ],
         ];
     }

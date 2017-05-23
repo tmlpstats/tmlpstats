@@ -21,6 +21,15 @@ Api.Admin.Region = {
     getRegion: bac('Admin.Region.getRegion')
 }
 
+Api.Admin.Quarter = {
+
+    /*
+    Filter/list all quarters
+    Parameters:
+    */
+    filter: bac('Admin.Quarter.filter')
+}
+
 Api.Application = {
 
     /*
@@ -171,7 +180,24 @@ Api.GlobalReport = {
       region: Region
       pages: array
     */
-    getReportPages: bac('GlobalReport.getReportPages')
+    getReportPages: bac('GlobalReport.getReportPages'),
+
+    /*
+    Get the global report page(s) named
+    Parameters:
+      region: Region
+      reportingDate: date
+      pages: array
+    */
+    getReportPagesByDate: bac('GlobalReport.getReportPagesByDate'),
+
+    /*
+    View options for Global Report
+    Parameters:
+      region: Region
+      reportingDate: date
+    */
+    reportViewOptions: bac('GlobalReport.reportViewOptions')
 }
 
 Api.LiveScoreboard = {
@@ -246,7 +272,55 @@ Api.LocalReport = {
       center: Center
       quarter: Quarter
     */
-    getCenterQuarter: bac('LocalReport.getCenterQuarter')
+    getCenterQuarter: bac('LocalReport.getCenterQuarter'),
+
+    /*
+    View options for report
+    Parameters:
+      center: Center
+      reportingDate: date
+    */
+    reportViewOptions: bac('LocalReport.reportViewOptions'),
+
+    /*
+    Get report pages
+    Parameters:
+      center: Center
+      reportingDate: date
+      pages: array
+    */
+    getReportPages: bac('LocalReport.getReportPages')
+}
+
+Api.Lookups = {
+
+    /*
+    Find centers in a region
+    Parameters:
+      region: Region
+    */
+    getRegionCenters: bac('Lookups.getRegionCenters')
+}
+
+Api.ProgramLeader = {
+
+    /*
+    Get program leaders data for a center-reportingDate, optionally including in-progress data
+    Parameters:
+      center: Center
+      reportingDate: date
+      includeInProgress: bool
+    */
+    allForCenter: bac('ProgramLeader.allForCenter'),
+
+    /*
+    Stash data for in-progress Team Member weekly
+    Parameters:
+      center: Center
+      reportingDate: date
+      data: array
+    */
+    stash: bac('ProgramLeader.stash')
 }
 
 Api.Scoreboard = {
@@ -287,6 +361,30 @@ Api.Scoreboard = {
     setScoreboardLockQuarter: bac('Scoreboard.setScoreboardLockQuarter')
 }
 
+Api.Submission = {
+}
+
+Api.Submission.NextQtrAccountability = {
+
+    /*
+    Get team member data for a center-reportingDate, optionally including in-progress data
+    Parameters:
+      center: Center
+      reportingDate: date
+      includeInProgress: bool
+    */
+    allForCenter: bac('Submission.NextQtrAccountability.allForCenter'),
+
+    /*
+    Stash data for in-progress Team Member weekly
+    Parameters:
+      center: Center
+      reportingDate: date
+      data: array
+    */
+    stash: bac('Submission.NextQtrAccountability.stash')
+}
+
 Api.SubmissionCore = {
 
     /*
@@ -295,7 +393,16 @@ Api.SubmissionCore = {
       center: Center
       reportingDate: date
     */
-    initSubmission: bac('SubmissionCore.initSubmission')
+    initSubmission: bac('SubmissionCore.initSubmission'),
+
+    /*
+    Finalizes Submission. Validates and creates new db objects for report details
+    Parameters:
+      center: Center
+      reportingDate: date
+      data: array
+    */
+    completeSubmission: bac('SubmissionCore.completeSubmission')
 }
 
 Api.SubmissionData = {
@@ -371,7 +478,14 @@ Api.UserProfile = {
       locale: string
       timezone: string
     */
-    setLocale: bac('UserProfile.setLocale')
+    setLocale: bac('UserProfile.setLocale'),
+
+    /*
+    Tell the server we definitely need a shim
+    Parameters:
+      v: string
+    */
+    needsShim: bac('UserProfile.needsShim')
 }
 
 Api.ValidationData = {

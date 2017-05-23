@@ -8,10 +8,10 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
         @if (isset($liveScoreboard) && $liveScoreboard && $context->getSetting('editableLiveScoreboard'))
             <div class="data-api panel panel-info">
                 <div class="panel-heading">
-                    <h3 class="panel-title"><span class="glyphicon glyphicon-info-sign"></span> Live Scoreboard</h3>
+                    <h3 class="panel-title"><span class="glyphicon glyphicon-info-sign"></span> Temporary Scoreboard</h3>
                 </div>
                 <div class="panel-body">
-                    <p>This is a "live scoreboard" that allows you to update your team's actuals often as you want throughout the week. The updates are saved and visible to the rest of your team. Click the button below to get the shareable link.</p>
+                    <p>This tool allows you to update your team's actuals often as you want throughout the week. The updates are saved and visible to the rest of your team when you hit enter. Click the button below for more info and to get the shareable link.</p>
 
                     <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#liveScoreboardHelp" aria-expanded="false" aria-controls="liveScoreboardHelp">Click for help</button>
                     @include('statsreports.details.live_scoreboard_help')
@@ -100,6 +100,10 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
                         <dd>{{ $teamWithdraws['team2'] }}</dd>
                         <dt>Total:</dt>
                         <dd>{{ $teamWithdraws['total'] }}</dd>
+                        @if ($teamWithdraws['wbo'])
+                            <dt>Well-Being Out:</dt>
+                            <dd>{{ $teamWithdraws['wbo'] }}</dd>
+                        @endif
                         @if ($teamWithdraws['ctw'])
                             <dt>In Conversation:</dt>
                             <dd>{{ $teamWithdraws['ctw'] }}</dd>
@@ -158,6 +162,7 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
     @include('reports.charts.ratings.chart')
 </div>
 
+<!-- SCRIPTS_FOLLOW -->
 @include('reports.charts.ratings.setup')
 
 <script>

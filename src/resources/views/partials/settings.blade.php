@@ -1,6 +1,8 @@
 @inject('context', 'TmlpStats\Api\Context')
 <?php
 $currentUser = Auth::user();
+$center = $context->getCenter(true);
+$region = $context->getRegion(true);
 ?>
 <script type="text/javascript">
     var settings = {
@@ -8,7 +10,10 @@ $currentUser = Auth::user();
             viewCenterId: @json(Session::get('viewCenterId')),
             viewRegionId: @json(Session::get('viewRegionId')),
             viewReportingDate: @json(Session::get('viewReportingDate')),
+            csrfToken: @json(csrf_token()),
         },
+
+        feedbackUrl: @json(url('/feedback'), JSON_UNESCAPED_SLASHES),
 
         @if ($currentUser)
         user: {

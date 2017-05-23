@@ -2,13 +2,23 @@
 import { actions as formActions } from 'react-redux-form'
 
 import { getMessages } from '../../reusable/ajax_utils'
+import { objectAssign } from '../../reusable/ponyfill'
 import { scrollIntoView } from '../../reusable/ui_basic'
 import Api from '../../api'
 
 import { appsCollection, applicationsLoad, saveAppLoad, messages } from './data'
+import { markStale } from '../review/actions'
 
 export const loadState = applicationsLoad.actionCreator()
 export const saveAppState = saveAppLoad.actionCreator()
+
+export function conditionalLoadApplications(centerId, reportingDate) {
+    return (dispatch, getState) => {
+        if (getState().submission.applications.loading.state == 'new') {
+            return dispatch(loadApplications(centerId, reportingDate))
+        }
+    }
+}
 
 export function loadApplications(centerId, reportingDate) {
     return (dispatch) => {
@@ -20,8 +30,8 @@ export function loadApplications(centerId, reportingDate) {
         }).then((data) => {
             dispatch(initializeApplications(data))
             return data
-        }).catch(() => {
-            dispatch(loadState('failed'))
+        }).catch((err) => {
+            dispatch(loadState({error: err.error || 'error'}))
         })
     }
 }
@@ -42,16 +52,39 @@ export function saveApplication(center, reportingDate, data) {
     return (dispatch) => {
         const reset = () => dispatch(saveAppState('new'))
 
+        if (data.committedTeamMember == '') {
+            data = objectAssign({}, data, {committedTeamMember: undefined})
+        }
+
         dispatch(saveAppState('loading'))
         return Api.Application.stash({
             center, reportingDate, data
         }).then((result) => {
+            dispatch(markStale())
+            // Failed during validation
+            if (!result.storedId) {
+                dispatch(messages.replace('create', result.messages))
+                reset()
+                return result
+            }
+
+            let newData = objectAssign({}, data, {id: result.storedId})
+            dispatch(appsCollection.replaceItem(newData.id, newData))
+            dispatch(messages.replace(result.storedId, result.messages))
+
+            // We successfully saved, reset any existing parser messages
+            if (!data.id) {
+                dispatch(messages.replace('create', []))
+            }
             reset()
             return result // Because it's a Promise is you have to return results to continue the chain.
         }).catch((err) => {
-            dispatch(messages.replace(data.id, getMessages(err)))
+            // If this is a parser error, we won't have an ID yet, use 'create'
+            const id = data.id ? data.id : 'create'
+            dispatch(messages.replace(id, getMessages(err)))
+
             reset()
-            scrollIntoView('submission-flow')
+            scrollIntoView('react-routed-flow')
         })
     }
 }

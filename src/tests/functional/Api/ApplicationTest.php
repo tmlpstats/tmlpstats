@@ -47,71 +47,10 @@ class ApplicationTest extends FunctionalTestAbstract
             'tmlp_registration_id' => $this->application->id,
             'stats_report_id' => $this->report->id,
             'reg_date' => $this->application->regDate,
+            'comment' => 'This week',
         ]);
 
         $this->headers = ['Accept' => 'application/json'];
-    }
-
-    /**
-     * @dataProvider providerCreate
-     */
-    public function testCreate($parameterUpdates, $expectedResponseUpdates)
-    {
-        $parameters = [
-            'method' => 'Application.create',
-            'data' => [
-                'firstName' => $this->faker->firstName(),
-                'lastName' => $this->faker->lastName(),
-                'center' => $this->center->id,
-                'teamYear' => 2,
-                'regDate' => '2016-04-15',
-            ],
-        ];
-
-        $lastPersonId = Models\Person::count();
-        $lastApplicationId = Models\TmlpRegistration::count();
-
-        $expectedResponse = [
-            'id' => $lastApplicationId + 1,
-            'regDate' => "{$parameters['data']['regDate']} 00:00:00",
-            'teamYear' => $parameters['data']['teamYear'],
-            'personId' => $lastPersonId + 1,
-            'isReviewer' => false,
-            'person' => [
-                'id' => $lastPersonId + 1,
-                'firstName' => $parameters['data']['firstName'],
-                'lastName' => $parameters['data']['lastName'],
-                'phone' => null,
-                'email' => null,
-                'centerId' => $this->center->id,
-            ],
-        ];
-
-        $parameters = $this->replaceInto($parameters, $parameterUpdates);
-        $expectedResponse = $this->replaceInto($expectedResponse, $expectedResponseUpdates);
-
-        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
-    }
-
-    public function providerCreate()
-    {
-        return [
-            // Required Parameters Only
-            [[], []],
-            // Additional Parameters
-            [
-                [ // Request
-                    'data.isReviewer' => true,
-                    'data.phone' => '555-555-1234',
-                    'data.email' => 'peter.tests.a.lot@tmlpstats.com',
-                ],
-                [ // Response
-                    'isReviewer' => true,
-                    'person.phone' => '555-555-1234',
-                    'person.email' => 'peter.tests.a.lot@tmlpstats.com',
-                ],
-            ],
-        ];
     }
 
     /**
@@ -173,6 +112,8 @@ class ApplicationTest extends FunctionalTestAbstract
      */
     public function testStashFailsValidation($id)
     {
+        $isNew = $id === null;
+
         $reportingDate = '2016-04-15';
 
         $parameters = [
@@ -190,7 +131,7 @@ class ApplicationTest extends FunctionalTestAbstract
             ],
         ];
 
-        if ($id) {
+        if (!$isNew) {
             $parameters['data']['id'] = $this->application->id;
         }
 
@@ -198,18 +139,20 @@ class ApplicationTest extends FunctionalTestAbstract
         $applicationDataId = $this->applicationData->id;
 
         $expectedResponse = [
-            'success' => true,
+            'success' => !$isNew,
             'valid' => false,
         ];
 
         $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
         $result1 = App::make(Api\SubmissionData::class)->allForType($this->center, new Carbon($reportingDate), Domain\TeamApplication::class);
 
-        $this->assertEquals(1, count($result1));
-        $result = $result1[0];
-        $this->assertEquals('2016-04-09', $result->appOutDate->toDateString());
-        $this->assertEquals('2016-04-10', $result->appInDate->toDateString());
-        $this->assertEquals('2016-04-08', $result->apprDate->toDateString());
+        $this->assertEquals($isNew ? 0 : 1, count($result1));
+        if (!$isNew) {
+            $result = $result1[0];
+            $this->assertEquals('2016-04-09', $result->appOutDate->toDateString());
+            $this->assertEquals('2016-04-10', $result->appInDate->toDateString());
+            $this->assertEquals('2016-04-08', $result->apprDate->toDateString());
+        }
     }
 
     public function providerStashFailsValidation()
@@ -245,19 +188,14 @@ class ApplicationTest extends FunctionalTestAbstract
     /**
      * @dataProvider providerAllForCenter
      */
-    public function testAllForCenter($reportingDate = null)
+    public function testAllForCenter($reportingDate)
     {
-        if (!$reportingDate) {
-            Carbon::setTestNow(Carbon::create(2016, 05, 20));
-        }
         $parameters = [
             'method' => 'Application.allForCenter',
             'center' => $this->center->id,
+            'reportingDate' => $reportingDate,
             'includeInProgress' => false,
         ];
-        if ($reportingDate) {
-            $parameters['reportingDate'] = $reportingDate;
-        }
 
         //
         // Last Week's Report
@@ -299,6 +237,13 @@ class ApplicationTest extends FunctionalTestAbstract
         // This Week's Report
         //
         $this->report->submittedAt = '2016-04-15 18:55:00';
+
+        $app2ThisWeekData = Models\TmlpRegistrationData::create([
+            'tmlp_registration_id' => $app2->id,
+            'stats_report_id' => $this->report->id,
+            'reg_date' => $app2->regDate,
+            'comment' => 'This week',
+        ]);
 
         $thisWeeksGlobalReport = Models\GlobalReport::firstOrCreate([
             'reporting_date' => '2016-04-15',
@@ -342,46 +287,40 @@ class ApplicationTest extends FunctionalTestAbstract
 
         $nextWeeksGlobalReport->addCenterReport($nextWeeksReport);
 
-        // When a reporting date is provided, we get
-        //      app1 with this week's data
+        // When last reporting date is provided, we get
+        //      app1 with last week's data
         //      app2 with last week's data
         //
-        // When no reporting date is provided, we get
-        //      app1 with 'next' week's data
+        // When this reporting date is provided, we get
+        //      app1 with this week's data
         //      app2 with last week's data
-        //      app3 with 'next' week's data
-        if ($reportingDate) {
+        //      app3 not included
+        if ($reportingDate == '2016-04-08') {
             // Reporting Date provided
             $expectedResponse = [
-                Domain\TeamApplication::fromModel($this->applicationData),
-                Domain\TeamApplication::fromModel($app2LastWeekData),
+                $this->application->id => Domain\TeamApplication::fromModel($app1LastWeekData),
+                $app2->id => Domain\TeamApplication::fromModel($app2LastWeekData),
             ];
         } else {
             // Reporting Date not provided
             $expectedResponse = [
-                Domain\TeamApplication::fromModel($app1NextWeekData),
-                Domain\TeamApplication::fromModel($app2LastWeekData),
-                Domain\TeamApplication::fromModel($app3NextWeekData),
+                $this->application->id => Domain\TeamApplication::fromModel($this->applicationData),
+                $app2->id => Domain\TeamApplication::fromModel($app2ThisWeekData),
             ];
         }
-
+        foreach ($expectedResponse as &$o) {
+            $o->meta['fromReport'] = true;
+        }
         $expectedResponse = json_decode(json_encode($expectedResponse), true);
 
-        usort($expectedResponse, function ($a, $b) {
-            return strcmp(
-                $a['firstName'],
-                $b['firstName']
-            );
-        });
-
-        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
+        $this->json('POST', '/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
     }
 
     public function providerAllForCenter()
     {
         return [
-            ['2016-04-15'], // Existing report
-            [null], // No report
+            ['2016-04-08'],
+            ['2016-04-15'],
         ];
     }
 

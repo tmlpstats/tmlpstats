@@ -4,9 +4,8 @@ import { syncHistoryWithStore, routerReducer } from 'react-router-redux'
 import { createResponsiveStateReducer, createResponsiveStoreEnhancer } from 'redux-responsive'
 import thunk from 'redux-thunk'
 
-import { submissionReducer } from './submission/reducers'
-import adminReducer from './admin/reducers'
-import liveScoreboardReducer from './live_scoreboard/reducers'
+import { objectAssign } from './reusable/ponyfill'
+import baseReducers from './storeBaseReducers'
 
 const responsiveBreakpoints = {
     extraSmall: 480,
@@ -16,13 +15,15 @@ const responsiveBreakpoints = {
     huge: 1600
 }
 
-const reducer = combineReducers({
-    browser: createResponsiveStateReducer(responsiveBreakpoints),
-    routing: routerReducer,
-    admin: adminReducer,
-    live_scoreboard: liveScoreboardReducer,
-    submission: submissionReducer
-})
+
+
+const reducer = combineReducers(objectAssign(
+    {
+        browser: createResponsiveStateReducer(responsiveBreakpoints),
+        routing: routerReducer
+    },
+    baseReducers
+))
 
 const responsive = createResponsiveStoreEnhancer({performanceMode: true})
 
@@ -36,3 +37,6 @@ if (process.env.NODE_ENV != 'production') {
 export const store = createStore(reducer, undefined, _enhancers)
 
 export const history = syncHistoryWithStore(browserHistory, store)
+
+// To prevent circular issues, set the store here
+require('./storeProxy').default.setStore(store)

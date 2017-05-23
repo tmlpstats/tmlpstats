@@ -1,14 +1,14 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
-use Illuminate\Http\Request;
-use TmlpStats\Center;
-use TmlpStats\Region;
-use TmlpStats\Http\Requests;
-use TmlpStats\Http\Requests\CenterRequest;
-
+use Carbon\Carbon;
 use DateTimeZone;
+use Illuminate\Http\Request;
 use Log;
+use Redirect;
+use TmlpStats as Models;
+use TmlpStats\Http\Requests\CenterRequest;
+use Validator;
 
 class AdminCenterController extends Controller
 {
@@ -28,9 +28,9 @@ class AdminCenterController extends Controller
      */
     public function index()
     {
-        $this->authorize('index', Center::class);
+        $this->authorize('index', Models\Center::class);
 
-        $centers = Center::orderBy('name', 'asc')->get();
+        $centers = Models\Center::orderBy('name', 'asc')->get();
 
         return view('admin.centers.index', compact('centers'));
     }
@@ -42,7 +42,7 @@ class AdminCenterController extends Controller
      */
     public function create(Request $request)
     {
-        $this->authorize('create', Center::class);
+        $this->authorize('create', Models\Center::class);
 
         $selectedRegion = $this->getRegion($request);
 
@@ -54,16 +54,18 @@ class AdminCenterController extends Controller
     /**
      * Store a newly created resource in storage.
      *
+     * Input validation provided by CenterRequest
+     *
      * @return \Illuminate\Http\Response
      */
     public function store(CenterRequest $request)
     {
-        $this->authorize('store', Center::class);
+        $this->authorize('store', Models\Center::class);
 
         $input = $request->all();
 
         if ($request->has('region')) {
-            $region = Region::abbreviation($request->get('region'))->first();
+            $region = Models\Region::abbreviation($request->get('region'))->first();
             if ($region) {
                 $input['region_id'] = $region->id;
             }
@@ -76,7 +78,14 @@ class AdminCenterController extends Controller
             }
         }
 
-        Center::create($input);
+        $center = Models\Center::create($input);
+
+        if ($request->has('mailing_list')) {
+            $quarter = Models\Quarter::getQuarterByDate(Carbon::now(), $center->region);
+            if (!$this->saveMailingList($request, $center, $quarter)) {
+                return redirect('admin/centers/create')->withInput();
+            }
+        }
 
         return redirect('admin/centers');
     }
@@ -89,11 +98,13 @@ class AdminCenterController extends Controller
      */
     public function show($id)
     {
-        $center = Center::where('abbreviation', '=', $id)->firstOrFail();
+        $center = Models\Center::abbreviation($id)->firstOrFail();
 
         $this->authorize($center);
 
-        return view('admin.centers.show', compact('center'));
+        $quarter = Models\Quarter::getQuarterByDate(Carbon::now(), $center->region);
+
+        return view('admin.centers.show', compact('center', 'quarter'));
     }
 
     /**
@@ -104,10 +115,11 @@ class AdminCenterController extends Controller
      */
     public function edit($id)
     {
-        $center = Center::where('abbreviation', '=', $id)->firstOrFail();
+        $center = Models\Center::abbreviation($id)->firstOrFail();
 
         $this->authorize($center);
 
+        $quarter = Models\Quarter::getQuarterByDate(Carbon::now(), $center->region);
         $timezones = DateTimeZone::listIdentifiers();
         $selectedTimezone = array_search($center->timezone, $timezones);
 
@@ -115,18 +127,20 @@ class AdminCenterController extends Controller
             $selectedTimezone = null;
         }
 
-        return view('admin.centers.edit', compact('center', 'timezones', 'selectedTimezone'));
+        return view('admin.centers.edit', compact('center', 'quarter', 'timezones', 'selectedTimezone'));
     }
 
     /**
      * Update the specified resource in storage.
+     *
+     * Input validation provided by CenterRequest
      *
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function update(CenterRequest $request, $id)
     {
-        $center = Center::where('abbreviation', '=', $id)->firstOrFail();
+        $center = Models\Center::abbreviation($id)->firstOrFail();
 
         $this->authorize($center);
 
@@ -137,7 +151,7 @@ class AdminCenterController extends Controller
         }
 
         if ($request->has('region')) {
-            $region = Region::abbreviation($request->get('region'))->first();
+            $region = Models\Region::abbreviation($request->get('region'))->first();
             if ($region) {
                 $input['region_id'] = $region->id;
             }
@@ -150,7 +164,14 @@ class AdminCenterController extends Controller
             }
         }
 
+        // Save what we have so far. Mailing lists saved separately
         $center->update($input);
+
+        // Don't check if there is a value first so we can remove existing lists
+        $quarter = Models\Quarter::getQuarterByDate(Carbon::now(), $center->region);
+        if (!$this->saveMailingList($request, $center, $quarter)) {
+            return redirect("admin/centers/{$center->abbreviation}/edit")->withInput();
+        }
 
         $redirect = "admin/centers";
         if ($request->has('previous_url')) {
@@ -159,27 +180,90 @@ class AdminCenterController extends Controller
         return redirect($redirect);
     }
 
+    protected function saveMailingList(Request $request, Models\Center $center, Models\Quarter $quarter)
+    {
+        $mailingList = $request->get('mailing_list');
+        $mailingList = explode(',', $mailingList);
+        $mailingList = array_unique($mailingList);
+        sort($mailingList);
+
+        $list = [];
+        $invalid = [];
+
+        // Validate list
+        foreach ($mailingList as $email) {
+            $email = trim($email);
+
+            if (!$email) {
+                continue;
+            }
+
+            $validator = Validator::make(compact('email'), ['email' => 'required|email']);
+            if ($validator->fails()) {
+                $invalid[] = $email;
+                Log::warning("Failed to include email '{$email}' in {$center->name}'s mailing list because it was not valid.");
+                continue;
+            }
+
+            $list[] = $email;
+        }
+
+        // Set error message
+        if ($invalid) {
+            $this->pushResponse($request, false, 'The following emails were not added to the mailing list '
+                . 'because they are not valid: '
+                . implode(', ', $invalid));
+        }
+
+        return $center->setMailingList($quarter, $list) && !$invalid;
+    }
+
     public function batchUpdate(Request $request)
     {
-        if ($request->has('sheetVersion') && $request->has('centerIds')) {
-            $centerIds = $request->get('centerIds');
-            if ($centerIds) {
-                $sheetVersion = $request->get('sheetVersion');
-                if (!preg_match("/\d+\.\d+\.\d+/", $sheetVersion)) {
-                    Log::warn("Invalid sheet version {$sheetVersion}.");
-                    return;
-                }
-                foreach ($centerIds as $id) {
-                    $center = Center::find($id);
-                    if (!$center) {
-                        Log::warn("Unable to update center {$id}. Center not found.");
-                        continue;
-                    }
-                    $center->sheetVersion = $sheetVersion;
-                    $center->save();
-                }
+        if (!$request->has('centerIds') || !$request->get('centerIds')) {
+            $this->pushResponse($request, false, 'No centers selected.');
+            return;
+        }
+
+        $centerIds = $request->get('centerIds');
+
+        // Update sheet version
+        if ($request->has('sheetVersion')) {
+            $sheetVersion = $request->get('sheetVersion');
+
+            if (!preg_match("/\d+\.\d+\.\d+/", $sheetVersion)) {
+                $this->pushResponse($request, false, 'Version provided is not valid. Please use format 1.2.3.');
+                return;
+            }
+
+            if ($this->updateSheetVersion($centerIds, $sheetVersion)) {
+                $this->pushResponse($request, true, 'Version updated successfully.');
+            } else {
+                $this->pushResponse($request, false, 'There was a problem updating one or more centers. Please try again.');
             }
         }
+
+        // Update password
+        if ($request->has('newPassword') && $request->has('confirmPassword')) {
+            $password = $request->get('newPassword');
+
+            if ($password !== $request->get('confirmPassword')) {
+                $this->pushResponse($request, false, 'Passwords do not match. Please make sure to use the same password for both fields.');
+                return;
+            }
+
+            if ($this->updatePassword($centerIds, $password)) {
+                $this->pushResponse($request, true, 'Passwords updated successfully.');
+            } else {
+                $this->pushResponse($request, false, 'There was a problem updating one or more passwords. Please try again.');
+            }
+        }
+    }
+
+    public function pushResponse(Request $request, $success, $message)
+    {
+        $request->session()->flash('success', $success);
+        $request->session()->flash('message', $message);
     }
 
     /**
@@ -191,5 +275,62 @@ class AdminCenterController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    protected function updateSheetVersion($centerIds, $sheetVersion)
+    {
+        $success = true;
+
+        foreach ($centerIds as $id) {
+            $center = Models\Center::find($id);
+            if (!$center) {
+                Log::error("Failed to update version for center {$id}. Center not found.");
+                $success = false;
+                continue;
+            }
+            $center->sheetVersion = $sheetVersion;
+            if (!$center->save()) {
+                Log::error("Failed to update version for center {$center->name}.");
+                $success = false;
+                continue;
+            }
+
+            Log::info("Updated version for {$center->name} to {$sheetVersion}.");
+        }
+
+        return $success;
+    }
+
+    protected function updatePassword($centerIds, $password)
+    {
+        $success = true;
+
+        foreach ($centerIds as $id) {
+            $center = Models\Center::find($id);
+            if (!$center) {
+                Log::error("Failed to update account password for center {$id}. Center not found.");
+                $success = false;
+                continue;
+            }
+
+            $user = Models\User::email($center->statsEmail)->first();
+            if (!$user) {
+                Log::error("Failed to update account password for center {$center->name}. Center stats user not found.");
+                $success = false;
+                continue;
+            }
+
+            $user->password = bcrypt($password);
+            $user->rememberToken = null;
+            if (!$user->save()) {
+                Log::error("Failed to update password for {$user->email}.");
+                $success = false;
+                continue;
+            }
+
+            Log::info("Updated password for {$user->email}.");
+        }
+
+        return $success;
     }
 }

@@ -34,7 +34,7 @@ abstract class TeamMemberWeeklyValue extends BaseArrangement
                     $member['member'] = $data->teamMember;
                     $member['withdrawn'] = false;
                 }
-                if ($data->withdrawCodeId !== null) {
+                if ($data->withdrawCodeId !== null || $data->wbo) {
                     $member['withdrawn'] = true;
                 } else {
                     // We need this to allow for team members that were withdrawn then

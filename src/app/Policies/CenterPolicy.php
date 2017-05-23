@@ -3,10 +3,21 @@
 namespace TmlpStats\Policies;
 
 use TmlpStats\Center;
+use TmlpStats\Setting;
 use TmlpStats\User;
 
 class CenterPolicy extends Policy
 {
+    public function showNewSubmissionUi(User $user, Center $center)
+    {
+        $setting = Setting::get('showNewSubmissionUi', $center);
+        if ($setting) {
+            return true;
+        }
+
+        return false; // Only used to trigger the link, and only global statisticians will have it.
+    }
+
     /**
      * Can $user view new submission UI?
      *
@@ -16,8 +27,8 @@ class CenterPolicy extends Policy
      */
     public function viewSubmissionUi(User $user, Center $center)
     {
-        // administrators are handled by "before" in the base policy
-        return ($user->hasRole('globalStatistician'));
+        // currently identical to submitStats
+        return $this->submitStats($user, $center);
     }
 
     /**
@@ -37,6 +48,11 @@ class CenterPolicy extends Policy
         }
 
         return false;
+    }
+
+    public function skipSubmitEmail(User $user, Center $center)
+    {
+        return $user->hasRole('globalStatistician');
     }
 
     public function adminScoreboard(User $user, Center $center)

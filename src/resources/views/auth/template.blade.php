@@ -7,7 +7,6 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <a href="{{ url('/auth/login') }}" class="btn btn-lg {{ Request::is('auth/login') ? 'btn-success' : '' }}" role="button">Login</a>
-                    <a href="{{ url('/auth/register') }}" class="btn btn-default btn-lg {{ Request::is('auth/register') ? 'btn-primary' : '' }}" role="button">Register</a>
                 </div>
                 <div class="panel-body">
                     @include('errors.list')

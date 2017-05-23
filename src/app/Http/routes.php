@@ -17,16 +17,12 @@ Route::post('api', 'ApiController@apiCall');
 Route::post('api/{method}', 'ApiController@apiCall');
 
 Route::group(['prefix' => 'admin'], function () {
-    Route::match(['get', 'post'], 'dashboard', 'AdminController@index');
-    Route::get('status', 'AdminController@status');
-    Route::get('peoplereport', 'AdminController@getPeopleReport');
-
     Route::resource('centers', 'AdminCenterController');
     Route::post('centers', 'AdminCenterController@batchUpdate');
 
     Route::resource('users', 'UserController');
 
-    Route::get('regions/{regionAbbr}/{page?}/{irrelevant?}/{irrelevant2?}', 'ManageController@region');
+    Route::get('regions/{regionAbbr}/{page?}/{tab1?}/{tab2?}/{irrelevant3?}/{irrelevant4?}', 'ManageController@region');
 });
 
 // Invites
@@ -36,13 +32,14 @@ Route::get('invites/{token}', 'InviteController@viewInvite');
 Route::post('invites/{token}', 'InviteController@acceptInvite');
 
 // Stats Reports
-Route::resource('statsreports', 'StatsReportController');
 Route::post('statsreports/{id}/submit', 'StatsReportController@submit');
 Route::get('statsreports/{id}/download', 'StatsReportController@downloadSheet');
 Route::get('statsreports/{id}/{report}', 'StatsReportController@dispatchReport');
+Route::get('statsreports/{id}', 'StatsReportController@show');
 
 // Global Reports
-Route::resource('globalreports', 'GlobalReportController');
+Route::get('globalreports', 'GlobalReportController@index');
+Route::get('globalreports/{id}', 'GlobalReportController@show');
 Route::get('globalreports/{id}/{report}/{regionAbbr?}', 'GlobalReportController@dispatchReport');
 
 // Report Tokens
@@ -50,8 +47,8 @@ Route::resource('reporttokens', 'ReportTokenController');
 
 // Reports
 Route::get('report/{token}', 'ReportsController@getByToken');
-Route::get('reports/centers/{abbr?}/{date?}', 'ReportsController@getCenterReport');
-Route::get('reports/regions/{abbr?}/{date?}', 'ReportsController@getRegionReport');
+Route::get('reports/centers/{abbr?}/{date?}/{tab1?}/{tab2?}', 'ReportsController@getCenterReport');
+Route::get('reports/regions/{abbr?}/{date?}/{tab1?}/{tab2?}', 'ReportsController@getRegionReport');
 
 Route::post('reports/centers/setActive', 'ReportsController@setActiveCenter');
 Route::post('reports/regions/setActive', 'ReportsController@setActiveRegion');
@@ -60,6 +57,7 @@ Route::get('m/{abbr}', 'ReportsController@mobileDash');
 
 // Center Info
 Route::get('center/{abbr}', 'CenterController@dashboard');
+Route::get('center/{abbr}/next_qtr_accountabilities', 'CenterController@nextQtrAccountabilities');
 Route::get('center/{abbr}/submission/{reportingDate?}/{page?}/{irrelevant?}/{irrelevant2?}', 'CenterController@submission');
 
 // Regions
@@ -80,7 +78,19 @@ Route::get('/', 'WelcomeController@index');
 
 Route::post('feedback', 'ContactController@processFeedback');
 
-Route::controllers([
-    'auth' => 'Auth\AuthController',
-    'password' => 'Auth\PasswordController',
-]);
+// Authentication routes...
+Route::get('auth/login', 'Auth\AuthController@getLogin');
+Route::post('auth/login', 'Auth\AuthController@postLogin');
+Route::get('auth/logout', 'Auth\AuthController@getLogout');
+
+// Registration routes...
+Route::get('auth/register', 'Auth\AuthController@getRegister');
+Route::post('auth/register', 'Auth\AuthController@postRegister');
+
+// Password reset link request routes...
+Route::get('password/email', 'Auth\PasswordController@getEmail');
+Route::post('password/email', 'Auth\PasswordController@postEmail');
+
+// Password reset routes...
+Route::get('password/reset/{token}', 'Auth\PasswordController@getReset');
+Route::post('password/reset', 'Auth\PasswordController@postReset');

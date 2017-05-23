@@ -1,22 +1,29 @@
-//// DATE PICKER 
+@import 'node_modules/bootstrap-sass/assets/stylesheets/bootstrap';
+@import 'node_modules/font-awesome/scss/font-awesome';
 
-@import 'node_modules/react-dates/css/variables.scss';
-@import 'node_modules/react-dates/css/styles.scss';
+// Legacy/addon CSS: Note we omit the '.css' extension so that sass will compile them in.
+@import 'bower_components/jquery-loading/dist/jquery.loading.min';
+@import 'node_modules/react-bootstrap-typeahead/css/Typeahead';
+@import 'node_modules/react-bootstrap-typeahead/css/Token';
+@import 'bower_components/datatables/media/css/dataTables.bootstrap.min';
 
 
-@import 'bower_components/bootstrap-sass/assets/stylesheets/bootstrap';
+// Custom CSS
+@import './datepicker';
 
-.DateInput {
- 	font-size: $font-size-base;
- 	padding: 0;
- 	line-height: $line-height-base;
+
+#react-routed-flow  {
+    padding-top: 10px;
 }
 
-.DateInput__display-text {
-	@extend .form-control;
- 	font-size: $font-size-base;
+.date-title {
+    font-size: smaller;
 }
 
-.SingleDatePickerInput {
-	border: 0
+.already-submitted {
+    font-size: smaller;
+    color: red;
 }
+
+// TODO let's integrate this
+@import 'public/css/tmlpstats';

@@ -22,38 +22,49 @@ class ApiValidationManager
      *     'course'          => [...Array of course domain objects],
      * ];
      *
-     * @param  array  $data  Array of objects to validate
+     * @param  array  $data       Array of objects to validate
+     * @param  array  $pastWeeks  Array of objects from past reports
      * @return boolen
      */
-    public function run($data)
+    public function run($data, array $pastWeeks = [])
     {
         $isValid = true;
 
         foreach ($data as $type => $list) {
-            $apiType = 'api' . ucfirst($type);
-            if (!$this->processDataList($apiType, $list)) {
+            if (!$this->processDataList($type, $list, $pastWeeks[$type])) {
+                $isValid = false;
+            }
+
+            if (($type == 'TeamApplication' || $type == 'Course')
+                && !$this->processDataList($type, $list, $pastWeeks[$type], "{$type}Change")
+            ) {
                 $isValid = false;
             }
         }
 
-        $validator = ValidatorFactory::build($this->statsReport, 'apiCenterGames');
-        if (!$validator->run($data)) {
+        $validator = ApiValidatorFactory::build($this->statsReport, 'CenterGames');
+        if (!$validator->run($data, $pastWeeks)) {
             $isValid = false;
         }
-        $this->mergeMessages($validator->getMessages());
+        $this->mergeMessages($validator->getMessages(), 'Scoreboard');
+
+        $validator = ApiValidatorFactory::build($this->statsReport, 'Accountability');
+        if (!$validator->run($data, $pastWeeks)) {
+            $isValid = false;
+        }
+        $this->mergeMessages($validator->getMessages(), 'TeamMember');
 
         return $isValid;
     }
 
-    public function runOne($data, $id = null)
+    public function runOne($data, $id = null, array $pastWeeks = [])
     {
         $isValid = true;
 
         $type = class_basename(get_class($data));
-        $apiType = 'api' . ucfirst($type);
 
-        $validator = ValidatorFactory::build($this->statsReport, $apiType);
-        if (!$validator->run($data)) {
+        $validator = ApiValidatorFactory::build($this->statsReport, $type);
+        if (!$validator->run($data, $pastWeeks)) {
             $isValid = false;
         }
         $this->mergeMessages($validator->getMessages());
@@ -61,15 +72,26 @@ class ApiValidationManager
         return $isValid;
     }
 
-    protected function processDataList($type, $list)
+    protected function processDataList($type, $list, array $pastWeeks = [], $validatorClass = null)
     {
         $isValid = true;
+
+        if (!$validatorClass) {
+            $validatorClass = $type;
+        }
+
         foreach ($list as $id => $dataObj) {
-            $validator = ValidatorFactory::build($this->statsReport, $type);
-            if (!$validator->run($dataObj)) {
+            $validator = ApiValidatorFactory::build($this->statsReport, $validatorClass);
+            $lastWeek = [];
+            if (isset($pastWeeks[$id])) {
+                // we currently only pull the last weeks data, so wrap it in an array for now
+                $lastWeek[] = $pastWeeks[$id];
+            }
+
+            if (!$validator->run($dataObj, $lastWeek)) {
                 $isValid = false;
             }
-            $this->mergeMessages($validator->getMessages());
+            $this->mergeMessages($validator->getMessages(), $type);
         }
 
         return $isValid;
@@ -80,8 +102,17 @@ class ApiValidationManager
         return $this->messages;
     }
 
-    protected function mergeMessages($messages)
+    protected function mergeMessages($messages, $type = null)
     {
-        $this->messages = array_merge($this->messages, $messages);
+        if (!$type) {
+            $this->messages = array_merge($this->messages, $messages);
+            return;
+        }
+
+        if (!isset($this->messages[$type])) {
+            $this->messages[$type] = [];
+        }
+
+        $this->messages[$type] = array_merge($this->messages[$type], $messages);
     }
 }

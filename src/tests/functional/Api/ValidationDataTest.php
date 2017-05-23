@@ -27,6 +27,7 @@ class ValidationDataTest extends FunctionalTestAbstract
 
         $this->center = Models\Center::abbreviation('VAN')->first();
         $this->quarter = Models\Quarter::year(2016)->quarterNumber(1)->first();
+        $this->nextQuarter = Models\Quarter::year(2016)->quarterNumber(2)->first();
         $this->lastQuarter = Models\Quarter::year(2015)->quarterNumber(4)->first();
 
         $this->report = $this->getReport($reportingDateStr, ['submitted_at' => null]);
@@ -59,6 +60,7 @@ class ValidationDataTest extends FunctionalTestAbstract
             'tmlp_registration_id' => $this->application->id,
             'stats_report_id' => $this->lastReport->id,
             'reg_date' => $this->application->regDate,
+            'incoming_quarter_id' => $this->nextQuarter->id,
         ]);
 
         $this->lastWeekCourseData = Models\CourseData::firstOrCreate([
@@ -110,7 +112,18 @@ class ValidationDataTest extends FunctionalTestAbstract
         $expectedResponse = [
             'success' => true,
             'valid' => true,
-            'messages' => [],
+            'messages' => [
+                'TeamApplication' => [
+                    ['level' => 'warning', 'id' => 'TEAMAPP_INCOMING_QUARTER_CHANGED'],
+                ],
+                'Course' => [],
+                'Scoreboard' => [],
+                'TeamMember' => [
+                    ['level' => 'warning'],
+                    ['level' => 'warning'],
+                    ['level' => 'warning'],
+                ],
+            ],
         ];
 
         $appData = [
@@ -158,11 +171,11 @@ class ValidationDataTest extends FunctionalTestAbstract
                 'lf' => 5,
             ],
             'actual' => [
-                'cap' => 0,
+                'cap' => 41,
                 'cpc' => 0,
-                't1x' => 1,
-                't2x' => 2,
-                'gitw' => 3,
+                't1x' => (int) ($this->application->teamYear == 1),
+                't2x' => (int) ($this->application->teamYear == 2),
+                'gitw' => 0,
                 'lf' => 4,
             ],
         ];
@@ -256,11 +269,11 @@ class ValidationDataTest extends FunctionalTestAbstract
                 'lf' => 5,
             ],
             'actual' => [
-                'cap' => 0,
+                'cap' => 41,
                 'cpc' => 0,
-                't1x' => 1,
-                't2x' => 2,
-                'gitw' => 3,
+                't1x' => (int) ($this->application->teamYear == 1),
+                't2x' => (int) ($this->application->teamYear == 2),
+                'gitw' => 0,
                 // LF is missing
             ],
         ];
@@ -269,85 +282,6 @@ class ValidationDataTest extends FunctionalTestAbstract
         App::make(Api\Course::class)->stash($this->center, $reportingDate, $courseData);
         App::make(Api\Course::class)->stash($this->center, $reportingDate, $courseData2);
         App::make(Api\Scoreboard::class)->stash($this->center, $reportingDate, $scoreboardData);
-
-        $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
-    }
-
-    public function testValidateFailsForStaleData()
-    {
-        $reportingDate = $this->report->reportingDate;
-        $parameters = [
-            'method' => 'ValidationData.validate',
-            'center' => $this->center->id,
-            'reportingDate' => $reportingDate,
-        ];
-
-        $expectedResponse = [
-            'success' => true,
-            'valid' => false,
-            'messages' => [
-                'Scoreboard' => [
-                    ['id' => 'GENERAL_MISSING_VALUE'], // Missing Promises
-                    ['id' => 'GENERAL_MISSING_VALUE'],
-                    ['id' => 'GENERAL_MISSING_VALUE'],
-                    ['id' => 'GENERAL_MISSING_VALUE'],
-                    ['id' => 'GENERAL_MISSING_VALUE'],
-                    ['id' => 'GENERAL_MISSING_VALUE'],
-                    ['id' => 'GENERAL_MISSING_VALUE'], // Missing Actuals
-                    ['id' => 'GENERAL_MISSING_VALUE'],
-                    ['id' => 'GENERAL_MISSING_VALUE'],
-                    ['id' => 'GENERAL_MISSING_VALUE'],
-                    ['id' => 'GENERAL_MISSING_VALUE'],
-                    ['id' => 'GENERAL_MISSING_VALUE'],
-                    [
-                        'id' => 'VALDATA_NOT_UPDATED',
-                        'level' => 'error',
-                        'reference' => [
-                            'id' => $reportingDate->toDateString(),
-                            'type' => 'Scoreboard',
-                        ],
-                    ],
-                ],
-            ],
-        ];
-
-        $appData = [
-            'id' => $this->application->id,
-            'regDate' => $this->application->regDate,
-            'appOutDate' => '2016-04-02',
-            'appInDate' => '2016-04-03',
-            'apprDate' => '2016-04-11',
-            'committedTeamMember' => $this->teamMember->id,
-            'incomingQuarter' => $this->quarter->id,
-        ];
-
-        $courseData = [
-            'id' => $this->course->id,
-            'startDate' => $this->course->startDate,
-            'type' => $this->course->type,
-            'quarterStartTer' => 8,
-            'quarterStartStandardStarts' => 6,
-            'quarterStartXfer' => 1,
-            'currentTer' => 28,
-            'currentStandardStarts' => 22,
-            'currentXfer' => 2,
-        ];
-
-        $courseData2 = [
-            'id' => $this->course2->id,
-            'startDate' => $this->course2->startDate,
-            'type' => $this->course2->type,
-            'quarterStartTer' => 0,
-            'quarterStartStandardStarts' => 0,
-            'quarterStartXfer' => 0,
-            'currentTer' => 17,
-            'currentStandardStarts' => 17,
-            'currentXfer' => 2,
-        ];
-
-        App::make(Api\Application::class)->stash($this->center, $reportingDate, $appData);
-        App::make(Api\Course::class)->stash($this->center, $reportingDate, $courseData);
-        App::make(Api\Course::class)->stash($this->center, $reportingDate, $courseData2);
 
         $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
     }

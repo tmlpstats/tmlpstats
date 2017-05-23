@@ -39,10 +39,10 @@ class CenterQuarter implements Arrayable, \JsonSerializable
         $this->quarter = $quarter;
 
         // TODO consider removing this.
-        $quarter->setRegion($center->region);
+        //$quarter->setRegion($center->region);
 
         // TODO consider moving RegionQuarterOverride logic into this class
-        $overriddenDates = RegionQuarterOverride::get($center, $quarter);
+        $overriddenDates = $this->overriddenDates($center, $quarter);
         $regionQuarter = RegionQuarter::ensure($center->region, $quarter);
 
         foreach (QuarterDates::SIMPLE_DATE_FIELDS as $field) {
@@ -53,6 +53,11 @@ class CenterQuarter implements Arrayable, \JsonSerializable
             $this->$field = $d;
         }
         $this->firstWeekDate = $this->startWeekendDate->copy()->addWeek();
+    }
+
+    protected function overriddenDates($center, $quarter)
+    {
+        return RegionQuarterOverride::get($center, $quarter);
     }
 
     public static function ensure(Models\Center $center, Models\Quarter $quarter)
@@ -126,7 +131,7 @@ class CenterQuarter implements Arrayable, \JsonSerializable
         return $this->repromiseDate;
     }
 
-        /**
+    /**
      * Is provided date the week to accept repromises?
      *
      * Will check for a setting override, otherwise uses the classroom2 date
@@ -141,6 +146,17 @@ class CenterQuarter implements Arrayable, \JsonSerializable
         $repromiseDate = $this->getRepromiseDate();
 
         return $date->eq($repromiseDate);
+    }
+
+    /**
+     * Get a display string for this quarter.
+     * @return string
+     */
+    public function displayString()
+    {
+        $startDate = $this->startWeekendDate->toDateString();
+
+        return "{$this->quarter->t1Distinction} {$this->quarter->year} (begins {$startDate})";
     }
 
 }

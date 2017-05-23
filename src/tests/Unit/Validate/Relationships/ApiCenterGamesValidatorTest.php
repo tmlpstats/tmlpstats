@@ -139,6 +139,8 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
             ]),
         ];
 
+        $this->centerQuarterDates = ['startWeekendDate' => '2016-08-19'];
+
         $this->scoreboardData = [
             [
                 'week' => '2016-08-26',
@@ -345,19 +347,19 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
             'teamMember' => [],
         ];
 
-        $this->qStartApps = [];
+        $this->qStartApprCount = ['t1x' => 0, 't2x' => 0];
 
         foreach ($this->courseData as $course) {
-            $this->data['course'][] = Domain\Course::fromArray($course);
+            $this->data['Course'][] = Domain\Course::fromArray($course);
         }
 
         foreach ($this->teamMemberData as $teamMember) {
-            $this->data['teamMember'][] = Domain\TeamMember::fromArray($teamMember);
+            $this->data['TeamMember'][] = Domain\TeamMember::fromArray($teamMember);
         }
 
         foreach ($this->teamApplicationData as $app) {
             $appDomain = Domain\TeamApplication::fromArray($app);
-            $this->data['teamApplication'][] = $appDomain;
+            $this->data['TeamApplication'][] = $appDomain;
 
             // Create a list of quarter starting approved applications for function mock
             if ($appDomain->apprDate && $appDomain->apprDate->lte(Carbon::parse('2016-08-19'))) {
@@ -370,7 +372,7 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
                     $appModel->$field = $value;
                 }
 
-                $this->qStartApps[] = $appModel;
+                $this->qStartApprCount["t{$appModel->teamYear}x"]++;
             }
         }
     }
@@ -387,13 +389,13 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
                 }
             }
 
-            $this->data['scoreboard'][] = Domain\Scoreboard::fromArray($scoreboard);
+            $this->data['Scoreboard'][] = Domain\Scoreboard::fromArray($scoreboard);
         }
 
-        $validator = $this->getObjectMock();
+        $validator = $this->getObjectMock(['getCenterQuarterDates']);
         $validator->expects($this->once())
-                  ->method('getQuarterStartingApprovedApplications')
-                  ->willReturn($this->qStartApps);
+                  ->method('getCenterQuarterDates')
+                  ->willReturn($this->centerQuarterDates);
 
         $result = $validator->run($this->data);
 
@@ -511,12 +513,12 @@ class ApiCenterGamesValidatorTest extends ApiValidatorTestAbstract
                 continue;
             }
 
-            $this->data['scoreboard'][] = Domain\Scoreboard::fromArray($scoreboard);
+            $this->data['Scoreboard'][] = Domain\Scoreboard::fromArray($scoreboard);
         }
 
-        $validator = $this->getObjectMock();
+        $validator = $this->getObjectMock(['getQuarterStartingApprovedCounts']);
         $validator->expects($this->never())
-                  ->method('getQuarterStartingApprovedApplications');
+                  ->method('getQuarterStartingApprovedCounts');
 
         $result = $validator->run($this->data);
 

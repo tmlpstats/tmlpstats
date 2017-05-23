@@ -5,18 +5,19 @@ use App;
 use Auth;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Session\TokenMismatchException;
+use Illuminate\Validation\ValidationException;
 use Log;
 use Mail;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use TmlpStats\Api\Exceptions as ApiExceptions;
 
-class Handler extends ExceptionHandler {
-
+class Handler extends ExceptionHandler
+{
     /**
      * A list of the exception types that should not be reported.
      *
@@ -26,6 +27,8 @@ class Handler extends ExceptionHandler {
         HttpException::class,
         ModelNotFoundException::class,
         TokenMismatchException::class,
+        AuthorizationException::class,
+        ValidationException::class,
     ];
 
     /**
@@ -56,7 +59,7 @@ class Handler extends ExceptionHandler {
                     $message->to(env('ADMIN_EMAIL'))->subject("Exception processing sheet for {$center} center in " . strtoupper(env('APP_ENV')));
                 });
             } catch (Exception $ex) {
-                Log::error("Exception caught sending error email: " . $ex->getMessage());
+                Log::error('Exception caught sending error email: ' . $ex->getMessage());
             }
         }
         parent::report($e);
@@ -77,19 +80,7 @@ class Handler extends ExceptionHandler {
                 $statusCode = $e->getStatusCode();
             }
 
-            if ($e instanceof Arrayable) {
-                $error = $e->toArray();
-            } else {
-                $error = [
-                    'code' => $e->getCode(),
-                    'message' => $e->getMessage(),
-                ];
-            }
-
-            $json = [
-                'success' => false,
-                'error' => $error,
-            ];
+            $json = static::exceptionAsArray($e);
 
             return response()->json($json, $statusCode);
         }
@@ -98,10 +89,27 @@ class Handler extends ExceptionHandler {
             $e = new NotFoundHttpException($e->getMessage(), $e);
         } else if ($e instanceof TokenMismatchException) {
             // Probably a session expiration. Redirect to login
-            return redirect('auth/login')->with('message','Your session has expired. Please try logging in again.');
+            return redirect('auth/login')->with('message', 'Your session has expired. Please try logging in again.');
         }
 
         return parent::render($request, $e);
+    }
+
+    public static function exceptionAsArray(Exception $e)
+    {
+        if ($e instanceof Arrayable) {
+            $error = $e->toArray();
+        } else {
+            $error = [
+                'code' => $e->getCode(),
+                'message' => $e->getMessage(),
+            ];
+        }
+
+        return [
+            'success' => false,
+            'error' => $error,
+        ];
     }
 
 }

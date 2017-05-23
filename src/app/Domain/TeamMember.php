@@ -61,6 +61,10 @@ class TeamMember extends ParserDomain
             'owner' => 'teamMemberData',
             'type' => 'bool',
         ],
+        'wbo' => [
+            'owner' => 'teamMemberData',
+            'type' => 'bool',
+        ],
         'ctw' => [
             'owner' => 'teamMemberData',
             'type' => 'bool',
@@ -101,6 +105,10 @@ class TeamMember extends ParserDomain
         'accountabilities' => [
             'owner' => '__Accountability', // Marking a specialty object owner
             'type' => 'array',
+        ],
+        'quarterNumber' => [
+            'owner' => 'teamMember',
+            'type' => 'int',
         ],
     ];
 
@@ -167,6 +175,14 @@ class TeamMember extends ParserDomain
                 $this->copyTarget($target, $k, $v, $conf);
             }
         }
+    }
+
+    public function getFlattenedReference(array $supplemental = [])
+    {
+        $firstName = $this->firstName ?: 'unknown';
+        $lastName = $this->lastName ?: 'unknown';
+
+        return "{$firstName} {$lastName}";
     }
 
     public function toArray()

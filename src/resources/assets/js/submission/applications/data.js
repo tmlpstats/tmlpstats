@@ -1,7 +1,9 @@
-import SortableCollection, { compositeKey } from '../../reusable/sortable_collection'
+import Immutable from 'immutable'
+import { compositeKey, createSorters, SORT_BY } from '../../reusable/sort-helpers'
 import { LoadingMultiState, MessageManager } from '../../reusable/reducers'
+import SimpleReduxLoader from '../../reusable/redux_loader/simple'
 
-export const appsSorts = [
+export const appsSorts = createSorters([
     {
         key: 'teamYear_first_last',
         label: 'Default',
@@ -12,13 +14,12 @@ export const appsSorts = [
         label: 'First, Last',
         comparator: compositeKey([['firstName', 'string'], ['lastName', 'string']])
     }
-]
+])
 
-export const appsCollection = new SortableCollection({
-    name: 'submission.applications',
-    key_prop: 'id',
-    sort_by: 'teamYear_first_last',
-    sorts: appsSorts
+export const appsCollection = new SimpleReduxLoader({
+    prefix: 'submission.applications',
+    useMeta: true,
+    initialMeta: Immutable.Map().set(SORT_BY, 'teamYear_first_last'),
 })
 
 export const applicationsLoad = new LoadingMultiState('applications/initialLoadState')

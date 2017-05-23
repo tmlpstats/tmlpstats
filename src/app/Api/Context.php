@@ -54,6 +54,10 @@ class Context
      */
     public function can($priv, $target)
     {
+        if (!$this->getUser()) {
+            return false;
+        }
+
         return $this->getUser()->can($priv, $target);
     }
 
@@ -175,12 +179,34 @@ class Context
      */
     public function getReportingDate()
     {
-        $reportingDate = $this->reportingDate;
-        if (!$reportingDate) {
-            $reportingDate = App::make(Controller::class)->getReportingDate($this->request);
+        if ($this->reportingDate) {
+            return $this->reportingDate;
         }
 
-        return $reportingDate;
+        return App::make(Controller::class)->getReportingDate();
+    }
+
+    public function getSubmissionReportingDate()
+    {
+        $reportingDate = null;
+
+        switch (Carbon::now()->dayOfWeek) {
+            case Carbon::SATURDAY:
+                $reportingDate = new Carbon('last friday');
+                break;
+            case Carbon::SUNDAY:
+            case Carbon::MONDAY:
+            case Carbon::TUESDAY:
+            case Carbon::WEDNESDAY:
+            case Carbon::THURSDAY:
+                $reportingDate = new Carbon('next friday');
+                break;
+            case Carbon::FRIDAY:
+                $reportingDate = Carbon::now();
+                break;
+        }
+
+        return $reportingDate->startOfDay();
     }
 
     /**
@@ -238,7 +264,11 @@ class Context
         ksort($ctx);
         $eKey = "${className}";
         foreach ($ctx as $k => $v) {
-            $eKey .= ":{$k}={$v->id}";
+            if ($v instanceof Carbon) {
+                $eKey .= ":{$k}={$v->toDateString()}";
+            } else {
+                $eKey .= ":{$k}={$v->id}";
+            }
         }
 
         if (($obj = array_get($this->encapsulations, $eKey, null)) == null) {

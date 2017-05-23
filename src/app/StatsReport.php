@@ -34,6 +34,7 @@ class StatsReport extends Model
     protected $casts = [
         'validated' => 'boolean',
         'locked' => 'boolean',
+        'validation_messages' => 'json',
     ];
 
     public function __get($name)
@@ -284,5 +285,20 @@ class StatsReport extends Model
     public function centerStatsData()
     {
         return $this->hasMany('TmlpStats\CenterStatsData');
+    }
+
+    public function getUriLocalReport()
+    {
+        $reportingDate = $this->reportingDate;
+        if ($reportingDate instanceof Carbon) {
+            $reportingDate = $reportingDate->toDateString();
+        }
+
+        return action('ReportsController@getCenterReport',
+            [
+                'abbr' => $this->center->abbrLower(),
+                'reportingDate' => $reportingDate,
+            ]
+        );
     }
 }

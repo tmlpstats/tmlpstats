@@ -135,6 +135,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     $this->getMessageData($this->messageTemplate, [
                         'id' => 'TEAMAPP_NO_COMMITTED_TEAM_MEMBER',
                         'reference.field' => 'committedTeamMemberId',
+                        'level' => 'warning',
                     ]),
                 ],
                 false,
@@ -385,9 +386,10 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     $this->getMessageData($this->messageTemplate, [
                         'id' => 'TEAMAPP_NO_COMMITTED_TEAM_MEMBER',
                         'reference.field' => 'committedTeamMemberId',
+                        'level' => 'warning',
                     ]),
                 ],
-                false,
+                true,
             ],
         ];
     }
@@ -969,12 +971,50 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                 ],
                 false,
             ],
+            // ValidateTravel Fails When Missing Travel and comment is an empty string
+            [
+                [
+                    'travel' => null,
+                    'room' => true,
+                    'comment' => '',
+                    'wdDate' => null,
+                    'withdrawCode' => null,
+                    'incomingQuarter' => 'next',
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_TRAVEL_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+            ],
             // ValidateTravel Fails When Missing Room
             [
                 [
                     'travel' => true,
                     'room' => null,
                     'comment' => null,
+                    'wdDate' => null,
+                    'withdrawCode' => null,
+                    'incomingQuarter' => 'next',
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_ROOM_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+            ],
+            // ValidateTravel Fails When Missing Room and comment is an empty string
+            [
+                [
+                    'travel' => true,
+                    'room' => null,
+                    'comment' => '',
                     'wdDate' => null,
                     'withdrawCode' => null,
                     'incomingQuarter' => 'next',

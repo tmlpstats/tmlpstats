@@ -3,14 +3,19 @@ namespace TmlpStats\Api;
 
 // This is an API servicer. All API methods are simple static methods
 // that take typed input and return array responses.
+use App;
+use Cache;
 use Carbon\Carbon;
+use Illuminate\View\View;
 use TmlpStats as Models;
-use TmlpStats\Api\Base\ApiBase;
+use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Domain;
+use TmlpStats\Encapsulations;
+use TmlpStats\Http\Controllers;
 use TmlpStats\Reports\Arrangements;
 
-class LocalReport extends ApiBase
+class LocalReport extends AuthenticatedApiBase
 {
     public function getQuarterScoreboard(Models\StatsReport $statsReport, $options = [])
     {
@@ -217,7 +222,82 @@ class LocalReport extends ApiBase
     {
         $quarter->setRegion($center->region);
 
-        return Domain\CenterQuarter::fromModel($center, $quarter);
+        return Domain\CenterQuarter::ensure($center, $quarter);
+    }
+
+    public function reportViewOptions(Models\Center $center, Carbon $reportingDate)
+    {
+        $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
+        $cq = $crd->getCenterQuarter();
+        $statsReport = static::getOfficialReport($center, $reportingDate);
+        $globalRegion = $center->region->getParentGlobalRegion();
+        $canReportToken = $this->context->can('readLink', Models\ReportToken::class);
+        $reportToken = null;
+        if ($canReportToken) {
+            $globalReport = $statsReport->globalReports->last();
+            $reportToken = Models\ReportToken::get($globalReport, $center);
+        }
+
+        return [
+            'statsReportId' => $statsReport->id,
+            'globalRegionId' => $globalRegion->abbrLower(),
+            'flags' => [
+                'canReadContactInfo' => $this->context->can('readContactInfo', $statsReport),
+                'firstWeek' => $cq->firstWeekDate->toDateString() == $reportingDate->toDateString(),
+                'nextQtrAccountabilities' => $crd->canShowNextQtrAccountabilities(),
+            ],
+            'centerInfo' => collect($center->toArray())->only(['id', 'name', 'abbreviation', 'teamName', 'regionId']),
+            'reportToken' => ($reportToken !== null) ? $reportToken->getUrl() : null,
+            'capabilities' => [
+                'reportToken' => $canReportToken,
+                'reportNavLinks' => $this->context->can('showReportNavLinks', Models\StatsReport::class),
+            ],
+        ];
+    }
+
+    public function getReportPages(Models\Center $center, Carbon $reportingDate, $pages)
+    {
+        $report = static::getOfficialReport($center, $reportingDate);
+        // Unsure if these are all needed, but we're going to do them, for king and country.
+        $this->context->setCenter($center);
+        $this->context->setReportingDate($reportingDate);
+        $this->context->setDateSelectAction('ReportsController@getCenterReport', ['abbr' => $center->abbrLower()]);
+        $this->assertCan('read', $report);
+
+        $output = [];
+        $ckBase = "{$report->id}{$center->id}";
+        $controller = App::make(Controllers\StatsReportController::class);
+        foreach ($pages as $page) {
+            $f = function () use ($page, $report, $center, $controller) {
+                if (!$report->isValidated() && $page != 'Overview') {
+                    return '<p>This report did not pass validation. See Report Details for more information.</p>';
+                }
+
+                $response = $controller->newDispatch($page, $report, $center);
+                if ($response instanceof View) {
+                    $response = $response->render();
+                }
+
+                return $response;
+            };
+            if ($ttl = $controller->getPageCacheTime($page)) {
+                $response = Cache::tags(['reports'])->remember("{$ckBase}.{$page}", $ttl, $f);
+            } else {
+                $response = $f();
+            }
+
+            $output[$page] = $response;
+        }
+
+        return ['pages' => $output];
+    }
+
+    public static function getOfficialReport(Models\Center $center, Carbon $reportingDate)
+    {
+        return Models\StatsReport::byCenter($center)
+            ->reportingDate($reportingDate)
+            ->official()
+            ->firstOrFail();
     }
 
     public static function quarterForCenterDate(Models\Center $center, Carbon $reportingDate)

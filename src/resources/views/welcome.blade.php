@@ -13,7 +13,6 @@
 <div class="content">
     <p>You found the home of the Team, Managment, and Leadership Programs Statistics! Here you will find tools for checking your work,
         submitting, and viewing your team's statistics.</p>
-    <p>If you already have an account, go ahead and <a href="{{ url('/auth/login') }}" class="btn btn-success">Login</a>.
-        If you are new, please <a href="{{ url('/auth/register') }}" class="btn btn-primary">Register</a> for an account now.</p>
+    <p>If you already have an account, go ahead and <a href="{{ url('/auth/login') }}" class="btn btn-success">Login</a></p>
 </div>
 @endsection

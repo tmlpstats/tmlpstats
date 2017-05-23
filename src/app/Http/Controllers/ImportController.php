@@ -3,8 +3,10 @@ namespace TmlpStats\Http\Controllers;
 
 use App;
 use Auth;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use TmlpStats\Api;
+use TmlpStats\Encapsulations;
 use TmlpStats\Import\ImportManager;
 use TmlpStats\StatsReport;
 
@@ -32,13 +34,14 @@ class ImportController extends Controller
         $this->context->setRegion(Auth::user()->homeRegion());
         $this->context->setCenter(Auth::user()->center);
         $this->authorize('validate', StatsReport::class);
+        $expectedDate = ImportManager::getExpectedReportDate();
 
         return view('import.index')->with([
             'submitReport' => false, // Controls whether or not to show Submit button
             'showUploadForm' => true,
             'showReportCheckSettings' => true,
-            'showAccountabilities' => $request->get('showAccountabilities', false),
-            'expectedDate' => ImportManager::getExpectedReportDate()->toDateString(),
+            'showAccountabilities' => $this->canShowAccountabilities($request, $expectedDate),
+            'expectedDate' => $expectedDate->toDateString(),
         ]);
     }
 
@@ -66,15 +69,29 @@ class ImportController extends Controller
         $results = $manager->getResults();
 
         $request->flashOnly('expectedReportDate', 'ignoreReportDate', 'ignoreVersion');
+        $expectedDate = ImportManager::getExpectedReportDate();
 
         return view('import.index')->with([
             'submitReport' => isset($results['sheets'][0]['statsReportId']),
             'showUploadForm' => true,
             'showReportCheckSettings' => true,
-            'expectedDate' => ImportManager::getExpectedReportDate()->toDateString(),
-            'showAccountabilities' => $request->get('showAccountabilities', false),
+            'expectedDate' => $expectedDate->toDateString(),
+            'showAccountabilities' => $this->canShowAccountabilities($request, $expectedDate),
             'results' => $results,
         ]);
+    }
+
+    public function canShowAccountabilities(Request $request, Carbon $reportingDate)
+    {
+        if ($request->get('showAccountabilities', false)) {
+            return true;
+        } else {
+            $crd = Encapsulations\CenterReportingDate::ensure(Auth::user()->center, $reportingDate);
+
+            return $crd->canShowNextQtrAccountabilities();
+        }
+
+        return false;
     }
 
     /**

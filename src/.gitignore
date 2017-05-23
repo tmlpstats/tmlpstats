@@ -1,8 +1,10 @@
 .DS_STORE
 .env
+.localdev
 vendor
 _ide_helper*
 bower_components
+coverage/
 node_modules
 public/**/*.map
 public/build/
@@ -11,4 +13,9 @@ public/css/main.css
 public/js/bundle.js
 public/js/main.js
 public/js/vendor.js
+public/js/commons.js
+public/js/pack
+public/fonts
+public/mix-manifest.json
 public/components
+tests/browser/vars.js

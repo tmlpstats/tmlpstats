@@ -22,6 +22,22 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
         ],
     ];
 
+    protected $accountabilities = [
+        4 => 'Statistician',
+        5 => 'Statistician Apprentice',
+        6 => 'Team 1 Team Leader',
+        7 => 'Team 2 Team Leader',
+        8 => 'Program Manager',
+        9 => 'Classroom Leader',
+        11 => 'Access to Power',
+        12 => 'Power to Create',
+        13 => 'T1 Expansion',
+        14 => 'T2 Expansion',
+        15 => 'Game in the World',
+        16 => 'Landmark Forum',
+        17 => 'Logistics',
+    ];
+
     public function setUp()
     {
         parent::setUp();
@@ -39,6 +55,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             'isReviewer' => false,
             'xferOut' => null,
             'xferIn' => null,
+            'wbo' => null,
             'ctw' => null,
             'rereg' => null,
             'excep' => null,
@@ -85,6 +102,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                     'isReviewer' => null,
                     'xferOut' => null,
                     'xferIn' => null,
+                    'wbo' => null,
                     'ctw' => null,
                     'rereg' => null,
                     'excep' => null,
@@ -212,6 +230,32 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 [],
                 true,
             ],
+            // Passes WBO does not have GITW set
+            [
+                [
+                    'gitw' => null,
+                    'wbo' => true,
+                    'comment' => 'something about the withdraw',
+                ],
+                [],
+                true,
+            ],
+            // Passes xferOut does not have GITW set
+            [
+                [
+                    'gitw' => null,
+                    'xferOut' => true,
+                    'comment' => 'something about the withdraw',
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER',
+                        'reference.field' => 'xferOut',
+                        'level' => 'warning',
+                    ]),
+                ],
+                true,
+            ],
 
             // Passes GITW true
             [
@@ -286,6 +330,32 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                     'comment' => 'something about the withdraw',
                 ],
                 [],
+                true,
+            ],
+            // Passes WBO does not have GITW set
+            [
+                [
+                    'tdo' => null,
+                    'wbo' => true,
+                    'comment' => 'something about the withdraw',
+                ],
+                [],
+                true,
+            ],
+            // Passes xferOut does not have GITW set
+            [
+                [
+                    'tdo' => null,
+                    'xferOut' => true,
+                    'comment' => 'something about the withdraw',
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER',
+                        'reference.field' => 'xferOut',
+                        'level' => 'warning',
+                    ]),
+                ],
                 true,
             ],
 
@@ -432,12 +502,16 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
     /**
      * @dataProvider providerValidateTransfer
      */
-    public function testValidateTransfer($data, $expectedMessages, $expectedResult)
+    public function testValidateTransfer($data, $expectedMessages, $expectedResult, $pastWeeks = [])
     {
         $data = $this->getTeamMember($data);
 
+        if ($pastWeeks) {
+            $pastWeeks = [ $this->getTeamMember($pastWeeks) ];
+        }
+
         $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $result = $validator->run($data, $pastWeeks);
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -551,6 +625,81 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 ],
                 false,
             ],
+
+            // Xfer In not null with comment
+            [
+                [
+                    'atWeekend' => false,
+                    'xferIn' => true,
+                    'xferOut' => null,
+                    'comment' => 'something about the transfer',
+                ],
+                [],
+                true,
+                [
+                    'atWeekend' => false,
+                    'xferIn' => true,
+                    'xferOut' => null,
+                    'comment' => 'something about the transfer',
+                ],
+            ],
+            // Xfer In not null without comment
+            [
+                [
+                    'atWeekend' => false,
+                    'xferIn' => true,
+                    'xferOut' => null,
+                    'comment' => null,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_XFER_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+                [
+                    'atWeekend' => false,
+                    'xferIn' => true,
+                    'xferOut' => null,
+                    'comment' => null,
+                ],
+            ],
+            // Xfer Out not null with comment
+            [
+                [
+                    'xferIn' => null,
+                    'xferOut' => true,
+                    'comment' => 'something about the transfer',
+                ],
+                [],
+                true,
+                [
+                    'xferIn' => null,
+                    'xferOut' => true,
+                    'comment' => 'something about the transfer',
+                ],
+            ],
+            // Xfer Out not null without comment
+            [
+                [
+                    'xferIn' => null,
+                    'xferOut' => true,
+                    'comment' => null,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_XFER_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+                [
+                    'xferIn' => null,
+                    'xferOut' => true,
+                    'comment' => null,
+                ],
+            ],
         ];
     }
 
@@ -576,6 +725,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 [
                     'withdrawCode' => null,
                     'ctw' => null,
+                    'wbo' => null,
                     'comment' => null,
                 ],
                 [],
@@ -600,6 +750,16 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 [],
                 true,
             ],
+            // WBO set with comment
+            [
+                [
+                    'wbo' => true,
+                    'comment' => 'something about the ctw',
+                ],
+                [],
+                true,
+            ],
+
             // Wd & CTW set
             [
                 [
@@ -615,6 +775,37 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 ],
                 false,
             ],
+            // Wd & WBO set
+            [
+                [
+                    'withdrawCode' => 1234,
+                    'wbo' => true,
+                    'comment' => 'something about the wd',
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_WD_CTW_ONLY_ONE',
+                        'reference.field' => 'ctw',
+                    ]),
+                ],
+                false,
+            ],
+            // WBO & CTW set
+            [
+                [
+                    'wbo' => true,
+                    'ctw' => true,
+                    'comment' => 'something about the wd',
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_WD_CTW_ONLY_ONE',
+                        'reference.field' => 'ctw',
+                    ]),
+                ],
+                false,
+            ],
+
             // Wd set without comment
             [
                 [
@@ -629,15 +820,6 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 ],
                 false,
             ],
-            // Ctw set with comment
-            [
-                [
-                    'ctw' => true,
-                    'comment' => 'something about the ctw',
-                ],
-                [],
-                true,
-            ],
             // Ctw set without comment
             [
                 [
@@ -646,7 +828,21 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
-                        'id' => 'CLASSLIST_CTW_COMMENT_MISSING',
+                        'id' => 'CLASSLIST_CTW_WBO_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+            ],
+            // WBO set without comment
+            [
+                [
+                    'wbo' => true,
+                    'comment' => null,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_CTW_WBO_COMMENT_MISSING',
                         'reference.field' => 'comment',
                     ]),
                 ],
@@ -745,12 +941,40 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 ],
                 true,
             ],
+            // validateTravel Ignored When WBO Set
+            [
+                [
+                    'travel' => null,
+                    'room' => null,
+                    'wbo' => true,
+                    'comment' => 'something about the wd',
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
+                ],
+                [],
+                true,
+            ],
             // ValidateTravel Fails When Missing Travel
             [
                 [
                     'travel' => null,
                     'room' => true,
                     'comment' => null,
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_TRAVEL_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+            ],
+            // ValidateTravel Fails When Missing Travel and comment is an empty string
+            [
+                [
+                    'travel' => null,
+                    'room' => true,
+                    'comment' => '',
                     '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
                 [
@@ -773,6 +997,389 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                     $this->getMessageData($this->messageTemplate, [
                         'id' => 'CLASSLIST_ROOM_COMMENT_MISSING',
                         'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+            ],
+            // ValidateTravel Fails When Missing Room and comment is an empty string
+            [
+                [
+                    'travel' => true,
+                    'room' => null,
+                    'comment' => '',
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ROOM_COMMENT_MISSING',
+                        'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerValidateAccountablilities
+     */
+    public function testValidateAccountablilities($data, $expectedMessages, $expectedResult)
+    {
+        $data = $this->getTeamMember($data);
+
+        $validator = $this->getObjectMock(['getAccountability']);
+        $validator->expects($this->any())
+            ->method('getAccountability')
+            ->will($this->returnCallback(function($id) {
+                if (!isset($this->accountabilities[$id])) {
+                    return null;
+                }
+
+                $accountability = new \stdClass();
+                $accountability->display = $this->accountabilities[$id];
+                return $accountability;
+            }));
+
+        $result = $validator->run($data);
+
+        $this->assertMessages($expectedMessages, $validator->getMessages());
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    public function providerValidateAccountablilities()
+    {
+        return [
+            // Validate no accountabilities
+            [
+                [],
+                [],
+                true,
+            ],
+            [
+                [
+                    'accountabilities' => null,
+                ],
+                [],
+                true,
+            ],
+            [
+                [
+                    'accountabilities' => [],
+                ],
+                [],
+                true,
+            ],
+            // Validate accountabilities not listed are ignored
+            [
+                [
+                    'accountabilities' => [
+                        11, 12, 13, 14, 15, 16, 17
+                    ],
+                ],
+                [],
+                true,
+            ],
+            // Has accountability and has contact info
+            [
+                [
+                    'phone' => '555-555-5555',
+                    'email' => 'test@tmlpstats.com',
+                    'accountabilities' => [
+                        4,
+                    ],
+                ],
+                [],
+                true,
+            ],
+            // Has accountability and missing email
+            [
+                [
+                    'phone' => '555-555-5555',
+                    'accountabilities' => [
+                        4,
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_EMAIL_MISSING',
+                        'reference.field' => 'email',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            [
+                [
+                    'phone' => '555-555-5555',
+                    'email' => null,
+                    'accountabilities' => [
+                        5,
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_EMAIL_MISSING',
+                        'reference.field' => 'email',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            [
+                [
+                    'phone' => '555-555-5555',
+                    'email' => '',
+                    'accountabilities' => [
+                        6,
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_EMAIL_MISSING',
+                        'reference.field' => 'email',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            // Has accountability and missing phone
+            [
+                [
+                    'email' => 'test@tmlpstats.com',
+                    'accountabilities' => [
+                        7,
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_PHONE_MISSING',
+                        'reference.field' => 'phone',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            [
+                [
+                    'phone' => null,
+                    'email' => 'test@tmlpstats.com',
+                    'accountabilities' => [
+                        8,
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_PHONE_MISSING',
+                        'reference.field' => 'phone',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            [
+                [
+                    'phone' => '',
+                    'email' => 'test@tmlpstats.com',
+                    'accountabilities' => [
+                        9,
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_PHONE_MISSING',
+                        'reference.field' => 'phone',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            // Has accountability and missing both
+            [
+                [
+                    'accountabilities' => [
+                        4,
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_PHONE_MISSING',
+                        'reference.field' => 'phone',
+                        'level' => 'error',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_EMAIL_MISSING',
+                        'reference.field' => 'email',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            [
+                [
+                    'phone' => null,
+                    'email' => null,
+                    'accountabilities' => [
+                        4,
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_PHONE_MISSING',
+                        'reference.field' => 'phone',
+                        'level' => 'error',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_EMAIL_MISSING',
+                        'reference.field' => 'email',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            [
+                [
+                    'phone' => '',
+                    'email' => '',
+                    'accountabilities' => [
+                        4,
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_PHONE_MISSING',
+                        'reference.field' => 'phone',
+                        'level' => 'error',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_EMAIL_MISSING',
+                        'reference.field' => 'email',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            // Has multiple accountabilities and only reports errors once
+            [
+                [
+                    'accountabilities' => [
+                        4, 5,
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_PHONE_MISSING',
+                        'reference.field' => 'phone',
+                        'level' => 'error',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_EMAIL_MISSING',
+                        'reference.field' => 'email',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            // Has withdrawn, ignores contact info and throws error to remove accountabilities
+            [
+                [
+                    'withdrawCode' => 1,
+                    'comment' => 'withdraw message',
+                    'accountabilities' => [
+                        4
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_AND_WITHDRAWN',
+                        'reference.field' => 'accountabilities',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            // Has transfered, ignores contact info and throws error to remove accountabilities
+            [
+                [
+                    'xferOut' => true,
+                    'comment' => 'xfer message',
+                    'accountabilities' => [
+                        4
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_XFER_CHECK_WITH_OTHER_CENTER',
+                        'reference.field' => 'xferOut',
+                        'level' => 'warning',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_AND_WITHDRAWN',
+                        'reference.field' => 'accountabilities',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            // Has wbo, ignores contact info and throws error to remove accountabilities
+            [
+                [
+                    'wbo' => true,
+                    'comment' => 'withdraw message',
+                    'accountabilities' => [
+                        4
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_ACCOUNTABLE_AND_WITHDRAWN',
+                        'reference.field' => 'accountabilities',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            // Invalid accountability
+            [
+                [
+                    'accountabilities' => [
+                        1
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_UNKNOWN_ACCOUNTABILITY',
+                        'reference.field' => 'accountability',
+                        'level' => 'error',
+                    ]),
+                ],
+                false,
+            ],
+            [
+                [
+                    'accountabilities' => [
+                        1, 2, 3, 18
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_UNKNOWN_ACCOUNTABILITY',
+                        'reference.field' => 'accountability',
+                        'level' => 'error',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_UNKNOWN_ACCOUNTABILITY',
+                        'reference.field' => 'accountability',
+                        'level' => 'error',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_UNKNOWN_ACCOUNTABILITY',
+                        'reference.field' => 'accountability',
+                        'level' => 'error',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_UNKNOWN_ACCOUNTABILITY',
+                        'reference.field' => 'accountability',
+                        'level' => 'error',
                     ]),
                 ],
                 false,

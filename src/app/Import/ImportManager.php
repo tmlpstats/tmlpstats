@@ -109,6 +109,13 @@ class ImportManager
                     throw new Exception("There was a problem uploading '$fileName'. Please try again.");
                 }
 
+                $fileSize = round($file->getClientSize() / 1024);
+                if ($fileSize >= 300) {
+                    Log::error("Error uploading '{$fileName}': File is {$fileSize} KB. It is likely corrupt");
+                    $file = null;
+                    throw new Exception("The file you uploaded, '{$fileName}', looks like it's corrupt. Please contact your regional statistician for information on what to do.");
+                }
+
                 try {
                     $importer = new Xlsx\XlsxImporter($file->getRealPath(), $fileName, $this->expectedDate, $this->enforceVersion);
                     $importer->import();
@@ -258,6 +265,7 @@ class ImportManager
         $quarter = $statsReport->quarter;
         $center  = $statsReport->center;
         $region  = $center->region;
+        $reportingDate = $statsReport->reportingDate;
 
         $submittedAt = $statsReport->submittedAt->copy()->setTimezone($center->timezone);
 
@@ -266,12 +274,14 @@ class ImportManager
 
         $isLate = $submittedAt->gt($due);
 
-        $programManager         = $center->getProgramManager($quarter);
-        $classroomLeader        = $center->getClassroomLeader($quarter);
-        $t1TeamLeader           = $center->getT1TeamLeader($quarter);
-        $t2TeamLeader           = $center->getT2TeamLeader($quarter);
-        $statistician           = $center->getStatistician($quarter);
-        $statisticianApprentice = $center->getStatisticianApprentice($quarter);
+        $reportNow = $reportingDate->copy()->setTime(15, 0, 0);
+
+        $programManager         = $center->getProgramManager($reportNow);
+        $classroomLeader        = $center->getClassroomLeader($reportNow);
+        $t1TeamLeader           = $center->getT1TeamLeader($reportNow);
+        $t2TeamLeader           = $center->getT2TeamLeader($reportNow);
+        $statistician           = $center->getStatistician($reportNow);
+        $statisticianApprentice = $center->getStatisticianApprentice($reportNow);
 
         $emailMap = [
             'center'                 => $center->statsEmail,
@@ -284,7 +294,7 @@ class ImportManager
             'statisticianApprentice' => static::getEmail($statisticianApprentice),
         ];
 
-        $emailMap['to'] = $emailMap['center'] ?: $emailMap['statistician'];
+        $emailTo = $emailMap['center'] ?: $emailMap['statistician'];
 
         // If this is the first week and the report didn't validate, we also didn't import any of the
         // new accountables. Don't send the email to last quarters accountables, and instead just send it to the
@@ -300,9 +310,7 @@ class ImportManager
             $accountablesCopied = false;
         }
 
-        $mailingList = Setting::name('centerReportMailingList')
-                              ->with($center, $quarter)
-                              ->get();
+        $mailingList = $center->getMailingList($quarter);
 
         if ($mailingList) {
             $emailMap['mailingList'] = $mailingList;
@@ -311,17 +319,18 @@ class ImportManager
         $emails = [];
         foreach ($emailMap as $accountability => $email) {
 
-            if (!$email || $accountability == 'center') {
+            if (!$email || $email == $emailTo) {
                 continue;
             }
 
-            if (strpos($email, ',') !== false) {
-                $emails = array_merge($emails, explode(',', $email));
+            if (is_array($email)) {
+                $emails = array_merge($emails, $email);
             } else {
                 $emails[] = $email;
             }
         }
         $emails = array_unique($emails);
+        natcasesort($emails);
 
         // Don't dump HTML into the logs
         if (env('MAIL_DRIVER') === 'log') {
@@ -345,14 +354,14 @@ class ImportManager
         $sheetName     = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
         $centerName    = $center->name;
         $comment       = $statsReport->submitComment;
-        $reportingDate = $statsReport->reportingDate;
         try {
             Mail::send('emails.statssubmitted',
-                compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'isResubmitted', 'due', 'comment', 'respondByDateTime', 'reportUrl', 'mobileDashUrl', 'reportingDate', 'accountablesCopied'),
-                function ($message) use ($emails, $emailMap, $centerName, $sheetPath, $sheetName) {
+                compact('user', 'centerName', 'submittedAt', 'sheet', 'isLate', 'isResubmitted', 'due', 'comment',
+                    'respondByDateTime', 'reportUrl', 'mobileDashUrl', 'reportingDate', 'accountablesCopied'),
+                function ($message) use ($emailTo, $emails, $emailMap, $centerName, $sheetPath, $sheetName) {
                     // Only send email to centers in production
                     if (env('APP_ENV') === 'prod') {
-                        $message->to($emailMap['to']);
+                        $message->to($emailTo);
                         foreach ($emails as $email) {
                             $message->cc($email);
                         }
@@ -375,7 +384,7 @@ class ImportManager
                 }
             );
             $successMessage = "<strong>Thank you.</strong> We received your statistics and have sent a copy to the following emails"
-                . "<ul><li>{$emailMap['to']}</li><li>" . implode('</li><li>', array_values($emails)) . "</li></ul>"
+                . "<ul><li>{$emailTo}</li><li>" . implode('</li><li>', $emails) . "</li></ul>"
                 . " Please reply-all to that email if there is anything you need to communicate.";
 
             if (env('APP_ENV') === 'prod') {

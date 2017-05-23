@@ -22,6 +22,8 @@ class FunctionalTestAbstract extends TestAbstract
         $this->faker = Factory::create();
         $this->user = factory(Models\User::class)->create();
         $this->be($this->user);
+
+        Models\ModelCache::create()->flush();
     }
 
     /**
@@ -67,7 +69,7 @@ class FunctionalTestAbstract extends TestAbstract
 
         $expected = array_dot($expected);
         foreach ($expected as $key => $value) {
-            $this->assertEquals($value, array_get($actual, $key), "Unable to find JSON fragment actual[{$key}] = {$value} within [" . print_r($actual, true) . "].");
+            $this->assertEquals($value, array_get($actual, $key), "Unable to find JSON fragment actual[{$key}] = " . print_r($value, true) . ' within [' . print_r($actual, true) . '].');
         }
 
         return $this;
@@ -76,10 +78,10 @@ class FunctionalTestAbstract extends TestAbstract
     public function getReport($reportingDate, $data = [])
     {
         if (!isset($this->center)) {
-            throw new Exception("\$this->center must be set.");
+            throw new Exception('$this->center must be set.');
         }
         if (!isset($this->quarter)) {
-            throw new Exception("\$this->quarter must be set.");
+            throw new Exception('$this->quarter must be set.');
         }
 
         $reportData = array_merge([
@@ -96,10 +98,10 @@ class FunctionalTestAbstract extends TestAbstract
     public function getGlobalReport($reportingDate, $reports = [])
     {
         if (!isset($this->center)) {
-            throw new Exception("\$this->center must be set.");
+            throw new Exception('$this->center must be set.');
         }
         if (!isset($this->user)) {
-            throw new Exception("\$this->user must be set.");
+            throw new Exception('$this->user must be set.');
         }
 
         $globalReport = Models\GlobalReport::firstOrCreate([

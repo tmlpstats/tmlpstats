@@ -5,7 +5,7 @@ export const GAME_KEYS = ['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf']
 const MAX_POINTS = 28
 const MIN_POINTS = 0
 
-var ratingsByPoints = initRatingsByPoints()
+const ratingsByPoints = initRatingsByPoints()
 
 const pointsByPercent = [
     [100, 4],
@@ -57,6 +57,15 @@ export class Scoreboard {
         return total
     }
 
+    percent() {
+        var total = 0
+        // NOTE a for..in loop does not guarantee property ordering. This is fine for percent()
+        for(var name in this.games) {
+            total += Math.max(Math.min(this.games[name].percent(), 100), 0)
+        }
+        return Math.round(total / Object.keys(this.games).length)
+    }
+
     rating() {
         return ratingsByPoints[this.points()]
     }
@@ -64,6 +73,17 @@ export class Scoreboard {
     key(suffix) {
         return this.week + (suffix || '')
     }
+
+    hasActuals() {
+        for (let i = 0; i < GAME_KEYS.length; i++) {
+            const actual = this.games[GAME_KEYS[i]].actual
+            if (actual !== null && actual !== '') {
+                return true
+            }
+        }
+        return false
+    }
+
 }
 
 export class ScoreboardGame {
@@ -72,7 +92,12 @@ export class ScoreboardGame {
     }
 
     parseInput(input) {
-        this.actual = input.actual
+        // Ignore percentages in GITW.
+        if (this.key == 'gitw' && input.actual) {
+            this.actual = parseInt(input.actual, 10)   
+        } else {
+            this.actual = input.actual
+        }
         this.promise = input.promise
         this.original = input.original
         this.op = input.op || 'default'
@@ -83,7 +108,13 @@ export class ScoreboardGame {
             return 0
         }
 
-        return Math.round(calculatePercent(this.promise, this.actual))
+        const percent = Math.round(calculatePercent(this.promise, this.actual))
+
+        if (percent == 100 && this.actual < this.promise) {
+            return 99
+        }
+
+        return percent
     }
 
     points() {

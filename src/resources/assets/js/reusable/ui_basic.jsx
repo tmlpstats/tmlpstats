@@ -21,7 +21,10 @@ export class ModeSelectButtons extends React.Component {
         getLabel: (v) => v.label
     }
     static propTypes = {
-        items: PropTypes.arrayOf(PropTypes.object).isRequired,
+        items: PropTypes.oneOfType([
+            PropTypes.object,
+            PropTypes.arrayOf(PropTypes.object),
+        ]).isRequired,
         current: PropTypes.oneOfType([
             PropTypes.string,
             PropTypes.number
@@ -57,6 +60,11 @@ export class ModeSelectButtons extends React.Component {
  * This should
  */
 export class LoadStateFlip extends React.PureComponent {
+    static propTypes = {
+        loadState: PropTypes.shape({
+            state: PropTypes.string.isRequired
+        }).isRequired
+    }
     render() {
         var loadState = this.props.loadState
         if (loadState.state == 'loading') {
@@ -80,9 +88,11 @@ export class SubmitFlip extends React.PureComponent {
         wrapGroup: true
     }
     static propTypes = {
+        buttonClasses: PropTypes.string,
         loadState: PropTypes.object.isRequired,
         offset: PropTypes.string,
-        wrapGroup: PropTypes.bool
+        wrapGroup: PropTypes.bool,
+        children: PropTypes.node
     }
 
     render() {
@@ -109,11 +119,60 @@ export class SubmitFlip extends React.PureComponent {
 }
 
 /**
+ * Display a button with a loading effect. Controlled by LoadingMultiState result
+ */
+export class ButtonStateFlip extends React.PureComponent {
+    static defaultProps = {
+        buttonClass: 'btn btn-primary',
+        onClick: () => { },
+        offset: 'col-md-offset-2 col-md-8',
+        wrapGroup: false
+    }
+    static propTypes = {
+        buttonClass: PropTypes.string,
+        children: PropTypes.node,
+        loadState: PropTypes.object.isRequired,
+        offset: PropTypes.string,
+        onClick: PropTypes.func,
+        wrapGroup: PropTypes.bool
+    }
+    render() {
+        var { buttonClass, children, loadState, onClick, offset, wrapGroup } = this.props
+
+        let button
+        if (loadState.state == 'loading') {
+            button = <button className={buttonClass + ' m-progress'}>{children}</button>
+        } else if (onClick) {
+            button = <button className={buttonClass} onClick={onClick}>{children}</button>
+        } else {
+            button = <button className={buttonClass} type="submit">{children}</button>
+        }
+
+        if (wrapGroup) {
+            return (
+                <div className="form-group">
+                    <div className={offset}>
+                        {button}
+                    </div>
+                </div>
+            )
+        } else {
+            return button
+        }
+    }
+}
+
+/**
  * MessagesComponent formats an array of messages for display.
  *
  * Use with error/warning messages
  */
-export class MessagesComponent extends React.Component {
+export class MessagesComponent extends React.PureComponent {
+    static propTypes = {
+        messages: PropTypes.arrayOf(PropTypes.object),
+        referenceString: PropTypes.string
+    }
+
     render() {
         const {messages, referenceString} = this.props
 
@@ -186,6 +245,16 @@ export class Alert extends React.PureComponent {
     }
 }
 
+export class Glyphicon extends React.PureComponent {
+    static propTypes = {
+        icon: PropTypes.string
+    }
+
+    render() {
+        return <span className={'glyphicon glyphicon-' + this.props.icon} aria-hidden="true"></span>
+    }
+}
+
 export class Panel extends React.PureComponent {
     static defaultProps = {
         color: 'default',
@@ -218,15 +287,21 @@ export class Modal extends React.PureComponent {
         footer: PropTypes.oneOfType([PropTypes.string, PropTypes.element, PropTypes.arrayOf(PropTypes.element)]),
         onClose: PropTypes.func
     }
+
+    constructor(props) {
+        super(props)
+        this._body = window.$('body')
+    }
+
     render() {
-        const { title, children, footer } = this.props
+        const { title, children, footer, onClose } = this.props
         const footerContent = footer? <div className="modal-footer">{footer}</div> : null
         return (
             <div className="modal fade in" tabIndex="-1" role="dialog" style={{display: 'block'}}>
                 <div className="modal-dialog" role="document">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <button type="button" className="close" aria-label="Close">
+                            <button type="button" className="close" aria-label="Close" onClick={onClose}>
                                 <span aria-hidden="true">x</span>
                             </button>
                             <h4 className="modal-title">{title}</h4>
@@ -240,9 +315,27 @@ export class Modal extends React.PureComponent {
             </div>
         )
     }
+
+    componentDidMount() {
+        if (this._body) {
+            this._body.addClass('modal-open')
+            this._body.append('<div class="modal-backdrop fade in"></div>')
+        }
+    }
+
+    componentWillUnmount() {
+        if (this._body) {
+            this._body.removeClass('modal-open')
+            this._body.find('.modal-backdrop').remove()
+        }
+    }
 }
 
-export function scrollIntoView(id) {
+export function scrollIntoView(id, after=null) {
+    if (after) {
+        setTimeout(() => scrollIntoView(id), after)
+        return
+    }
     if (window && window.document) {
         const elem = window.document.getElementById(id)
         if (elem && elem.scrollIntoView) {

@@ -1,0 +1,54 @@
+version: '2.1'
+services:
+  localdevbase:
+    build:
+      context: .
+      dockerfile: docker/localdev/Dockerfile
+    ports:
+      - "8080:80"
+      - "8030:8030"
+    volumes:
+      - "./:/app"
+    environment:
+      - VHOSTNAME=vagrant.tmlpstats.com
+      - APP_DEBUG=true
+      - DB_HOST=mysql
+      - MEMCACHED_HOST=memcached
+      - "LOCALDEV_WATCH=${LOCALDEV_WATCH-y}"
+
+  # The "localdev" docker image is a developer image for unixy systems & power users
+  localdev:
+    extends:
+      service: localdevbase
+    links:
+      - mysql
+      - memcached
+
+  # The "local" docker image is a much faster PHP executor because it makes vendor a volume.
+  local:
+    extends:
+      service: localdevbase
+    volumes:
+      - "/app/src/vendor"
+    links:
+      - mysql
+      - memcached
+
+
+  mysql:
+    build:
+      context: docker/mysql
+    ports:
+      - "3306:3306"
+
+  memcached:
+    image: memcached:1.4-alpine
+
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.251.0/24
+          gateway: 172.18.251.1

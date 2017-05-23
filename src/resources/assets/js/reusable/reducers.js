@@ -1,24 +1,19 @@
 import { objectAssign } from './ponyfill'
 
-const
-    NEW = {state: 'new', loaded: false, available: true},
-    LOADING = {state: 'loading', loaded: false, available: false},
-    LOADED = {state: 'loaded', loaded: true, available: true},
-    FAILED = {state: 'failed', loaded: false, failed: true, available: false}
+const loadStates = {
+    new: {state: 'new', loaded: false, available: true},
+    loading: {state: 'loading', loaded: false, available: false},
+    loaded: {state: 'loaded', loaded: true, available: true},
+    failed: {state: 'failed', loaded: false, failed: true, available: false}
+}
 
 export function loadingMultiState(actionType) {
-    return function(state = NEW, action){
+    return function(state = loadStates['new'], action){
         if (action.type == actionType) {
-            switch (action.payload) {
-            case 'loading':
-                return LOADING
-            case 'loaded':
-                return LOADED
-            case 'failed':
-                return FAILED
-            case 'new':
-                return NEW
-            default:
+            // toUpperase check proves this is a string
+            if (action.payload.toUpperCase) {
+                return loadStates[action.payload]
+            } else {
                 return action.payload
             }
         }
@@ -27,15 +22,19 @@ export function loadingMultiState(actionType) {
 }
 
 export class LoadingMultiState {
+    static states = loadStates
+
     constructor(actionType) {
         this.actionType = actionType
     }
 
     actionCreator() {
         const actionType = this.actionType
-        return (newState) => {
+        return (newState, extra) => {
             if (newState.error) {
-                newState = objectAssign({}, FAILED, newState)
+                newState = objectAssign({}, loadStates.failed, newState)
+            } else if (extra) {
+                newState = objectAssign({}, loadStates[newState], extra)
             }
             return {type: actionType, payload: newState}
         }
@@ -59,7 +58,7 @@ export class MessageManager {
             if (action.payload && action.payload.namespace && action.payload.namespace == this.namespace) {
                 switch (action.type) {
                 case REPLACE_MESSAGES:
-                    return objectAssign({}, state, {[action.payload.pk]: action.payload.messages})
+                    return objectAssign({}, state, action.payload.messages)
                 case REPLACE_ALL_MESSAGES:
                     return action.payload.messages
                 }
@@ -72,8 +71,12 @@ export class MessageManager {
         return {type: REPLACE_ALL_MESSAGES, payload: {messages, namespace: namespace || this.namespace}}
     }
 
+    replaceMany(messageMap) {
+        return {type: REPLACE_MESSAGES, payload: {messages: messageMap, namespace: this.namespace}}
+    }
+
     replace(pk, messages) {
-        return {type: REPLACE_MESSAGES, payload: {pk, messages, namespace: this.namespace}}
+        return this.replaceMany({[pk]: messages})
     }
 
     reset() {

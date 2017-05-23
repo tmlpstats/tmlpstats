@@ -72,8 +72,26 @@ class ReportMetaNamespace
             if ($childrenIds = $report->childrenIds()) {
                 $r['children'] = $childrenIds;
             }
+            if (count($report->requiredFlags)) {
+                $r['requiredFlags'] = $report->requiredFlags;
+            }
+            if ($report->render) {
+                $r['render'] = $report->render;
+            }
             $items[$report->id] = $r;
         }
+
+        return $items;
+    }
+
+    public function flatEs6ArrayWithVirtualRoot()
+    {
+        $items = $this->flatEs6Array();
+        $items['_root'] = [
+            'type' => 'grouping',
+            'name' => 'Fake Root',
+            'children' => $this->childrenIds(),
+        ];
 
         return $items;
     }

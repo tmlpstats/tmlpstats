@@ -28,15 +28,15 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         if (Auth::user()->hasRole('localStatistician')) {
-            $centerAbbr = strtolower(Auth::user()->center->abbreviation);
+            $centerAbbr = Auth::user()->center->abbrLower();
             return redirect("center/{$centerAbbr}");
-        } else {
-            $region = $this->getRegion($request);
-            if ($region != null) {
-                return redirect(action('HomeController@home', [
-                    'abbr' => $region->abbrLower(),
-                ]));
-            }
+        }
+
+        $region = $this->getRegion($request);
+        if ($region) {
+            return redirect(action('HomeController@home', [
+                'abbr' => $region->abbrLower(),
+            ]));
         }
     }
 
@@ -93,7 +93,19 @@ class HomeController extends Controller
             $reportingDates[$dateString] = $report->reportingDate->format('F j, Y');
         }
 
-        $reportingDate = $this->getReportingDate($request, array_keys($reportingDates));
+        // Find the best reportingDate
+        $reportingDateString = '';
+        if (Session::has('viewReportingDate')) {
+            $reportingDateString = Session::get('viewReportingDate');
+        }
+
+        if (!$reportingDateString || !isset($reportingDates[$reportingDateString])) {
+            $dateStrings = array_keys($reportingDates);
+            $reportingDateString = $dateStrings[0];
+        }
+
+        $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString)->startOfDay();
+
         $centers = Center::active()
             ->byRegion($region)
             ->orderBy('name', 'asc')

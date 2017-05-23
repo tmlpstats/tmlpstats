@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\ApiBase;
 use TmlpStats\Api\Exceptions as ApiExceptions;
+use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
 use TmlpStats\Traits;
 
@@ -14,101 +15,43 @@ use TmlpStats\Traits;
  */
 class Application extends ApiBase
 {
-    use Traits\SanitizesLastNames;
+    use Traits\UsesReportDates, Traits\ValidatesObjects, Traits\SanitizesLastNames;
 
-    public function create(array $data)
+    public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
-        $input = Domain\TeamApplication::fromArray($data, ['firstName', 'lastName', 'center', 'teamYear', 'regDate']);
-
-        $application = Models\TmlpRegistration::firstOrNew([
-            'first_name' => $input->firstName,
-            'last_name' => $input->lastName,
-            'center_id' => $input->center->id,
-            'team_year' => $input->teamYear,
-            'reg_date' => $input->regDate,
-        ]);
-
-        // Create only creates
-        if ($application->exists) {
-            throw new ApiExceptions\BadRequestException('Application already exists');
-        }
-
-        if ($input->has('email')) {
-            $application->person->email = $input->email;
-        }
-        if ($input->has('phone')) {
-            $application->person->phone = $input->phone;
-        }
-        if ($input->has('isReviewer')) {
-            $application->isReviewer = $input->isReviewer;
-        }
-
-        $application->person->save();
-        $application->save();
-
-        return $application->load('person');
-    }
-
-    public function allForCenter(Models\Center $center, Carbon $reportingDate = null, $includeInProgress = false)
-    {
-        if ($reportingDate === null) {
-            $reportingDate = LocalReport::getReportingDate($center);
-        } else {
-            App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
-        }
-
-        $quarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
-
-        $reports = Models\StatsReport::byCenter($center)
-            ->byQuarter($quarter)
-            ->official()
-            ->where('reporting_date', '<=', $reportingDate)
-            ->orderBy('reporting_date', 'asc')
-            ->with('tmlpRegistrationData')
-            ->get();
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $allApplications = [];
-
-        foreach ($reports as $report) {
-            foreach ($report->tmlpRegistrationData as $app) {
-                // Store indexed here so we end up with only the most recent one for each application
-                $allApplications[$app->tmlpRegistrationId] = Domain\TeamApplication::fromModel($app);
-            }
-        }
-
-        // Pick up any applications that are new this week
-        $thisReport = LocalReport::ensureStatsReport($center, $reportingDate, true);
-        foreach ($thisReport->tmlpRegistrationData() as $app) {
-            if (isset($allApplications[$app->tmlpRegistrationId])) {
-                continue;
-            }
-
-            $allApplications[$app->tmlpRegistrationId] = Domain\TeamApplication::fromModel($app);
-        }
-
         if ($includeInProgress) {
             $submissionData = App::make(SubmissionData::class);
             $found = $submissionData->allForType($center, $reportingDate, Domain\TeamApplication::class);
-            foreach ($found as $app) {
-                $app->meta['localChanges'] = true;
-                $allApplications[$app->id] = $app;
+            foreach ($found as $domain) {
+                $allApplications[$domain->id] = $domain;
+                $domain->meta['localChanges'] = true;
             }
         }
 
-        usort($allApplications, function ($a, $b) {
-            if ($a->firstName === $b->firstName) {
-                return strcmp($a->lastName, $b->lastName);
-            }
+        $lastReport = $this->relevantReport($center, $reportingDate);
+        if ($lastReport) {
+            $applications = App::make(LocalReport::class)->getApplicationsList($lastReport, ['returnUnprocessed' => true]);
+            foreach ($applications as $appData) {
+                // it's a small optimization, but prevent creating domain if we have an existing SubmissionData version
+                if (isset($allApplications[$appData->tmlpRegistrationId])) {
+                    continue;
+                }
 
-            return strcmp($a->firstName, $b->firstName);
-        });
+                $domain = Domain\TeamApplication::fromModel($appData, $appData->tmlpRegistration);
+                $domain->meta['fromReport'] = true;
+                $allApplications[$domain->id] = $domain;
+            }
+        }
 
         return $this->sanitizeNames(array_values($allApplications));
     }
 
     /**
      * Stash information about a registration (combined name data and application progress data) to be used for later validation.
-     * @param  Center  $center         The courses's center
+     * @param  Center  $center         The app's center
      * @param  Carbon  $reportingDate  Reporting date
      * @param  array   $data           Information to use to construct a TeamApplication.
      */
@@ -117,26 +60,31 @@ class Application extends ApiBase
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $submissionData = App::make(SubmissionData::class);
-        $appId = array_get($data, 'id', null);
-        if (is_numeric($appId)) {
-            $appId = intval($appId);
-        }
+        $appId = $submissionData->numericStorageId($data, 'id');
+
+        $pastWeeks = [];
 
         if ($appId !== null && $appId > 0) {
             $application = Models\TmlpRegistration::findOrFail($appId);
             $teamApp = Domain\TeamApplication::fromModel(null, $application);
             $teamApp->updateFromArray($data, ['incomingQuarter']);
+
+            $pastWeeks = $this->getPastWeeksData($center, $reportingDate, $application);
         } else {
-            if (!$appId) {
-                $appId = $submissionData->generateId();
-                $data['id'] = $appId;
-            }
             $teamApp = Domain\TeamApplication::fromArray($data);
         }
-        $submissionData->store($center, $reportingDate, $teamApp);
-
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
-        $validationResults = $this->validateObject($report, $teamApp, $appId);
+        $validationResults = $this->validateObject($report, $teamApp, $appId, $pastWeeks);
+
+        if (!isset($data['_idGenerated']) || $validationResults['valid']) {
+            $submissionData->store($center, $reportingDate, $teamApp);
+        } else {
+            return [
+                'success' => false,
+                'valid' => $validationResults['valid'],
+                'messages' => $validationResults['messages'],
+            ];
+        }
 
         return [
             'success' => true,
@@ -144,31 +92,6 @@ class Application extends ApiBase
             'valid' => $validationResults['valid'],
             'messages' => $validationResults['messages'],
         ];
-    }
-
-    /**
-     * Commit week data to the database. Will be performed during validation to write the domain object into the DB
-     * @param  Models\TmlpRegistration $application   The application we are working with.
-     * @param  Carbon                  $reportingDate [description]
-     * @param  Domain\TeamApplication  $data          [description]
-     */
-    public function commitStashedApp(Models\TmlpRegistration $application, Carbon $reportingDate, Domain\TeamApplication $data)
-    {
-        $report = LocalReport::ensureStatsReport($application->center, $reportingDate);
-
-        $applicationData = Models\TmlpRegistrationData::firstOrCreate([
-            'tmlp_registration_id' => $application->id,
-            'stats_report_id' => $report->id,
-        ]);
-
-        // TODO any domain specific validation?
-
-        $teamApp->fillModel($applicationData, $application);
-
-        $applicationData->save();
-        $application->save();
-
-        return $teamApp;
     }
 
     /**
@@ -193,37 +116,42 @@ class Application extends ApiBase
         $next2 = $next1->getNextQuarter();
 
         $quarters = [
-            Domain\CenterQuarter::fromModel($center, $next1),
-            Domain\CenterQuarter::fromModel($center, $next2),
+            Domain\CenterQuarter::ensure($center, $next1),
+            Domain\CenterQuarter::ensure($center, $next2),
         ];
 
         // In the last 2 weeks of the quarter, we can also register into the next-next quarter.
         if ($startQuarter->getQuarterEndDate($center)->copy()->subWeeks(2)->lt($reportingDate)) {
-            $quarters[] = Domain\CenterQuarter::fromModel($center, $next2->getNextQuarter());
+            $quarters[] = Domain\CenterQuarter::ensure($center, $next2->getNextQuarter());
         }
 
         return $quarters;
     }
 
-    public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
+    protected function getPastWeeksData(Models\Center $center, Carbon $reportingDate, Models\TmlpRegistration $app)
     {
-        $results = [];
-
-        $allData = $this->allForCenter($center, $reportingDate, true);
-        foreach ($allData as $dataObject) {
-            if (!array_get($dataObject->meta, 'localChanges', false)) {
-                $results[] = $dataObject;
-            }
+        $lastWeekReportingDate = $this->lastReportingDate($center, $reportingDate);
+        if (!$lastWeekReportingDate) {
+            return [];
         }
 
-        return $results;
+        $lastReport = $this->relevantReport($center, $lastWeekReportingDate);
+        if (!$lastReport) {
+            return [];
+        }
+
+        $lastWeekData = Models\TmlpRegistrationData::byStatsReport($lastReport)->byRegistration($app)->first();
+        if (!$lastWeekData) {
+            return [];
+        }
+
+        return [
+            Domain\TeamApplication::fromModel($lastWeekData, $app),
+        ];
     }
 
-    public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
+    public function getWeekSoFar(Models\Center $center, Carbon $reportingDate, $includeInProgress = true)
     {
-        $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\TeamApplication::class);
-
-        return array_flatten($collection->getDictionary());
+        return $this->allForCenter($center, $reportingDate, $includeInProgress);
     }
-
 }

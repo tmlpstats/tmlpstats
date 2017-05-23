@@ -1,6 +1,7 @@
 @inject('context', 'TmlpStats\Api\Context')
 <?php
-$currentUser = Auth::user();
+$currentUser = $context->getUser();
+$homeRegion = $currentUser ? $currentUser->homeRegion(true) : null;
 $homeUrl = Session::get('homePath', '/');
 if (!isset($regionSelectAction)) {
     $regionSelectAction = 'ReportsController@getRegionReport';
@@ -11,26 +12,38 @@ $reportingDate = $context->getReportingDate();
 $regions = TmlpStats\Region::isGlobal()->get();
 $currentRegion = $context->getGlobalRegion(false);
 $currentCenter = $context->getCenter(true);
+
+// This has to be a separate variable because the submission reporting date and the reports reporting date use
+// different logic to determine the best value. Submission needs to default to the next week
+$submissionReportingDate = $context->getSubmissionReportingDate();
+
+$crd = null;
+$showNextQtrAccountabilities = false;
+if ($currentCenter !== null && $reportingDate != null) {
+    $crd = TmlpStats\Encapsulations\CenterReportingDate::ensure($currentCenter, $reportingDate);
+    $showNextQtrAccountabilities = $crd->canShowNextQtrAccountabilities();
+}
+
 $reports = null;
 $centers = [];
 if ($currentRegion != null) {
-    $quarter = TmlpStats\Quarter::getQuarterByDate($reportingDate, $currentRegion);
+    $quarter = $crd? $crd->getQuarter() : TmlpStats\Quarter::getQuarterByDate($reportingDate, $currentRegion);
 
-    $reports = TmlpStats\GlobalReport::between($quarter->getQuarterStartDate($currentCenter), $quarter->getQuarterEndDate($currentCenter))
-                                 ->orderBy('reporting_date', 'desc')
-                                 ->get();
+    // Add a week before and after so we can switch between quarters
+    $startDate = $quarter->getQuarterStartDate($currentCenter);
+    $endDate = $quarter->getQuarterEndDate($currentCenter)->addWeek();
+
+    $reports = TmlpStats\GlobalReport::between($startDate, $endDate)
+        ->orderBy('reporting_date', 'desc')
+        ->get();
     $centers = TmlpStats\Center::byRegion($currentRegion)->orderBy('name')->get();
-
 }
 
-
 $reportingDateString = ($reportingDate != null) ? $reportingDate->toDateString() : null;
-
-
 $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : false;
 ?>
 <nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
+    <div class="container-fluid">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
                     aria-expanded="false" aria-controls="navbar">
@@ -53,9 +66,15 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                         </li>
                         @endcan
 
+                        @if ($showNextQtrAccountabilities)
+                            <li>
+                                <a href="{{ action('CenterController@nextQtrAccountabilities', ['abbr' => $currentCenter->abbrLower()]) }}">Accountabilities</a>
+                            </li>
+                        @endif
+
                         @can ('showNewSubmissionUi', $currentCenter)
-                        <li {!! Request::is('submission') ? 'class="active"' : '' !!}>
-                            <a href="{{ action('CenterController@submission', ['abbr' => $currentCenter->abbrLower(), 'reportingDate' => $reportingDateString]) }}">Submit Report (beta)</a>
+                        <li {!! Request::is('center/*/submission/*') ? 'class="active"' : '' !!}>
+                            <a href="{{ action('CenterController@submission', ['abbr' => $currentCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Submit Report (beta)</a>
                         </li>
                         @endcan
 
@@ -70,7 +89,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                                     <li><a href="{{ url('/admin/users') }}">Users</a></li>
                                     <li><a href="{{ url('/users/invites') }}">Invites</a></li>
                                     <li><a href="{{ url('/admin/centers') }}">Centers</a></li>
-                                    <li><a href="{{ url('/regions') }}">Regions</a></li>
+                                    <li><a href="{{ url($homeRegion ? "/regions/{$homeRegion->id}" : '/regions') }}">Regions</a></li>
                                     <li><a href="{{ url('/globalreports') }}">Global Reports</a></li>
                                     <li><a href="{{ url('/import') }}">Import Sheets</a></li>
                                 </ul>
@@ -93,27 +112,31 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                                     Report <span class="caret"></span>
                                 @endif
                             </a>
-                            <ul id="reportSelect" class="dropdown-menu" role="menu">
-                                @foreach ($reports as $report)
-                                    @if ($dateSelectAction)
+                            @if ($dateSelectAction)
+                                <ul id="reportSelect" class="dropdown-menu" role="menu">
+                                    @foreach ($reports as $report)
                                         <li class="menu-option">
                                             <a href="{{ $context->dateSelectAction($report->reportingDate) }}">{{ $report->reportingDate->format('M j, Y')}}</a>
                                         </li>
-                                    @else
-                                    <li class="menu-option" data-url="{{ url("/reports/dates/setActive") }}"
-                                        data-value="{{ $report->reportingDate->toDateString() }}">
-                                        <a href="#">
-                                            @if ($reportingDate && $report->reportingDate->eq($reportingDate))
-                                                <span class="glyphicon glyphicon-ok"></span>
-                                            @else
-                                                <span class="glyphicon">&nbsp;</span>
-                                            @endif
-                                            {{ $report->reportingDate->format('M j, Y')}}
-                                        </a>
-                                    </li>
-                                    @endif
-                                @endforeach
-                            </ul>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <ul id="reportSelect" class="dropdown-menu ajax-report-select" role="menu">
+                                    @foreach ($reports as $report)
+                                        <li class="menu-option" data-url="{{ url("/reports/dates/setActive") }}"
+                                            data-value="{{ $report->reportingDate->toDateString() }}">
+                                            <a href="#">
+                                                @if ($reportingDate && $report->reportingDate->eq($reportingDate))
+                                                    <span class="glyphicon glyphicon-ok"></span>
+                                                @else
+                                                    <span class="glyphicon">&nbsp;</span>
+                                                @endif
+                                                {{ $report->reportingDate->format('M j, Y')}}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
                         </li>
 
                         {{-- Region report button shows when you're not in a regional report --}}
@@ -188,43 +211,3 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
         </div>
     </div>
 </nav>
-
-<script type="text/javascript">
-    // Enable hover dropdowns in nav menu
-    $(function () {
-        $(".dropdown").hover(
-            function () {
-                $('.dropdown-menu', this).stop(true, true).fadeIn("fast");
-                $(this).toggleClass('open');
-                $('b', this).toggleClass("caret caret-up");
-            },
-            function () {
-                $('.dropdown-menu', this).stop(true, true).fadeOut("fast");
-                $(this).toggleClass('open');
-                $('b', this).toggleClass("caret caret-up");
-            }
-        );
-
-        @if (!$dateSelectAction)
-        $("#reportSelect").on("click", "li.menu-option", function (e) {
-            var url = $(this).attr('data-url');
-            var data = {};
-            data.date = $(this).attr('data-value');
-
-            $.ajax({
-                type: "POST",
-                url: url,
-                beforeSend: function (request) {
-                    request.setRequestHeader("X-CSRF-TOKEN", "{{ csrf_token() }}");
-                },
-                data: $.param(data),
-                success: function (response) {
-                    if (response.success) {
-                        location.reload();
-                    }
-                }
-            });
-        });
-        @endif
-    });
-</script>

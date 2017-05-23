@@ -1,12 +1,21 @@
 import { combineReducers } from 'redux'
+import { modelReducer, formReducer } from 'react-redux-form'
+import { reportSubmitting, displayFlow, reviewLoaded } from './data'
 
-function messagesReducer(state=null, action) {
-    if (action.type == 'review/setMessages') {
+export const REVIEW_SUBMIT_FORM_KEY = 'submission.review.submitData'
+
+function submitResultReducer(state=null, action) {
+    if (action.type == 'review/setSubmitResults') {
         state = action.payload
     }
     return state
 }
 
 export default combineReducers({
-    oldMessages: messagesReducer
+    loaded: reviewLoaded.reducer(),
+    submitData: modelReducer(REVIEW_SUBMIT_FORM_KEY),
+    submitDataForm: formReducer(REVIEW_SUBMIT_FORM_KEY),
+    submitResults: submitResultReducer,
+    reportSubmitting: reportSubmitting.reducer(),
+    displayFlow: displayFlow.reducer(),
 })

@@ -4,6 +4,7 @@ import { actions as formActions } from 'react-redux-form'
 import { getMessages } from '../../reusable/ajax_utils'
 import { objectAssign } from '../../reusable/ponyfill'
 import Api from '../../api'
+import { markStale } from '../review/actions'
 
 import { teamMembersData, weeklyReportingData, weeklyReportingSave, messages } from './data'
 import { TEAM_MEMBERS_COLLECTION_FORM_KEY, TEAM_MEMBER_FORM_KEY } from './reducers'
@@ -29,7 +30,7 @@ function initializeTeamMembers(data) {
             teamMember.exitChoice = determineExitChoice(teamMember, state)
         })
         // Re-format the collection as a key-ordered collection
-        data = teamMembersData.ensureCollection(data)
+        data = _.keyBy(data, 'id')
 
         dispatch(formActions.load(TEAM_MEMBERS_COLLECTION_FORM_KEY, data))
         dispatch(teamMembersData.loadState('loaded'))
@@ -56,7 +57,11 @@ export function weeklyReportingSubmit(center, reportingDate, tracking, rawData) 
         dispatch(weeklySaveState('loading'))
 
         const success = (data) => {
+            dispatch(markStale())
             dispatch(weeklySaveState('loaded'))
+            if (data && data.messages) {
+                dispatch(messages.replaceMany(data.messages))
+            }
             setTimeout(() => {
                 dispatch(weeklyReportingData.endWork())
                 dispatch(weeklySaveState('new'))
@@ -77,24 +82,31 @@ export function setExitChoice(exitChoice) {
 }
 
 export function stashTeamMember(center, reportingDate, data) {
-    return (dispatch) => {
-        dispatch(teamMembersData.saveState('loading'))
-
-        return Api.TeamMember.stash({center, reportingDate, data}).then(
-            (result) => {
-                if (!result.storedId) {
-                    throw new Error('Expected storedId in result')
-                }
-                dispatch(teamMembersData.saveState('loaded'))
-                const newData = objectAssign({}, data, {id: result.storedId, meta: result.meta})
-                dispatch(messages.replace(newData.id, result.messages))
-                dispatch(teamMembersData.replaceItem(newData))
-                return result
-            },
-            (err) => {
-                dispatch(teamMembersData.saveState({error: err.error || err}))
-                dispatch(messages.replace(data.id, getMessages(err)))
+    return teamMembersData.runNetworkAction('save', {center, reportingDate, data}, {
+        successHandler(result, { dispatch }) {
+            dispatch(markStale())
+            // The request failed before creating an id (parser error)
+            if (!result.storedId) {
+                dispatch(teamMembersData.saveState({error: 'Validation Failed', messages: result.messages}))
+                setTimeout(() => { dispatch(teamMembersData.saveState('new')) }, 3000)
+                dispatch(messages.replace('create', result.messages))
+                return
             }
-        )
-    }
+
+            const newData = objectAssign({}, data, {id: result.storedId, meta: result.meta})
+            dispatch(messages.replace(newData.id, getMessages(result)))
+            dispatch(teamMembersData.replaceItem(newData.id, newData))
+
+            // If this is a new entry, clear out any messages
+            if (!data.id) {
+                dispatch(messages.replace('create', []))
+            }
+        },
+
+        failHandler(err, { dispatch }) {
+            // If this is a parser error, we won't have an ID yet, use 'create'
+            const id = data.id ? data.id : 'create'
+            dispatch(messages.replace(id, getMessages(err)))
+        }
+    })
 }

@@ -41,7 +41,7 @@ class TeamApplication extends ParserDomain
             'type' => 'bool',
         ],
         'id' => [
-            'owner' => 'applicationData',
+            'owner' => 'application',
             'type' => 'int',
         ],
         'appOutDate' => [
@@ -156,6 +156,14 @@ class TeamApplication extends ParserDomain
             }
             $this->copyTarget($target, $k, $v, $conf);
         }
+    }
+
+    public function getFlattenedReference(array $supplemental = [])
+    {
+        $firstName = $this->firstName ?: 'unknown';
+        $lastName = $this->lastName ?: 'unknown';
+
+        return "{$firstName} {$lastName}";
     }
 
     public function toArray()

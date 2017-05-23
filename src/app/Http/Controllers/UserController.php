@@ -35,14 +35,16 @@ class UserController extends Controller
     {
         $this->authorize('index', User::class);
 
-        $users = User::active()
-            ->select('users.*', 'people.first_name', 'people.last_name', 'people.phone', 'people.email')
-            ->join('people', 'people.id', '=', 'users.person_id')
-            ->orderby('people.first_name')
-            ->orderby('people.last_name')
+        $activeUsers = User::active()
+            ->where('id', '>', 0) // hide reports user
+            ->with('person')
             ->get();
 
-        return view('users.index', compact('users'));
+        $inactiveUsers = User::active(false)
+            ->with('person')
+            ->get();
+
+        return view('users.index', compact('activeUsers', 'inactiveUsers'));
     }
 
     /**

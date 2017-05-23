@@ -8,11 +8,12 @@ import Api from '../../api'
 // The steps key lists the steps in the submission flow, used for building navigation
 export const PAGES_CONFIG = [
     {key: 'scoreboard', name: 'Scoreboard', className: 'Scoreboard'},
-    {key: 'applications', name: 'Team Expansion', className: 'Application'},
+    {key: 'applications', name: 'Team Expansion', className: 'TeamApplication'},
     {key: 'team_members', name: 'Class List', className: 'TeamMember'},
     {key: 'courses', name: 'Courses', className: 'Course'},
-    {key: 'qtr_accountabilities', name: 'Accountabilities', className: 'Accountability'},
-    {key: 'review', name: 'Review'}
+    {key: 'next_qtr_accountabilities', name: 'Accountabilities', className: 'NextQtrAccountability'},
+    {key: 'program_leaders', name: 'Program Leaders', className: 'ProgramLeader', hide_nav: true},
+    {key: 'review', name: 'Review'},
 ]
 
 export const SET_REPORTING_DATE = 'submission.setReportingDate'
@@ -49,6 +50,7 @@ const Accountability = new Schema('accountabilities')
 export const cqResponse = new Schema('c')
 cqResponse.define({
     validRegQuarters: arrayOf(CenterQuarter),
+    validStartQuarters: arrayOf(CenterQuarter),
     accountabilities: arrayOf(Accountability),
     currentQuarter: CenterQuarter
 })

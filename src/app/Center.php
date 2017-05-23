@@ -1,9 +1,11 @@
 <?php
 namespace TmlpStats;
 
+use App;
 use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Api;
 use TmlpStats\Traits\CachedRelationships;
 
 class Center extends Model
@@ -26,37 +28,37 @@ class Center extends Model
         'active' => 'bool',
     );
 
-    public function getProgramManager()
+    public function getProgramManager(Carbon $date = null)
     {
-        return $this->getAccountable('programManager');
+        return $this->getAccountable('programManager', $date);
     }
 
-    public function getClassroomLeader()
+    public function getClassroomLeader(Carbon $date = null)
     {
-        return $this->getAccountable('classroomLeader');
+        return $this->getAccountable('classroomLeader', $date);
     }
 
-    public function getT1TeamLeader()
+    public function getT1TeamLeader(Carbon $date = null)
     {
-        return $this->getAccountable('t1tl');
+        return $this->getAccountable('t1tl', $date);
     }
 
-    public function getT2TeamLeader()
+    public function getT2TeamLeader(Carbon $date = null)
     {
-        return $this->getAccountable('t2tl');
+        return $this->getAccountable('t2tl', $date);
     }
 
-    public function getStatistician()
+    public function getStatistician(Carbon $date = null)
     {
-        return $this->getAccountable('statistician');
+        return $this->getAccountable('statistician', $date);
     }
 
-    public function getStatisticianApprentice()
+    public function getStatisticianApprentice(Carbon $date = null)
     {
-        return $this->getAccountable('statisticianApprentice');
+        return $this->getAccountable('statisticianApprentice', $date);
     }
 
-    public function getAccountable($accountabilityName)
+    public function getAccountable($accountabilityName, Carbon $date = null)
     {
         $accountability = Accountability::name($accountabilityName)->first();
 
@@ -64,7 +66,7 @@ class Center extends Model
             return null;
         }
 
-        return Person::byAccountability($accountability)
+        return Person::byAccountability($accountability, $date)
             ->byCenter($this)
             ->first();
     }
@@ -117,6 +119,38 @@ class Center extends Model
         $time->setTimezone($this->timezone);
 
         return $time;
+    }
+
+    public function getMailingList(Quarter $quarter)
+    {
+        $list = App::make(Api\Context::class)->getSetting('centerReportMailingList', $this, $quarter);
+        return $list ?: [];
+    }
+
+    public function setMailingList(Quarter $quarter, array $list)
+    {
+        $setting = Setting::firstOrNew([
+            'center_id' => $this->id,
+            'quarter_id' => $quarter->id,
+            'name' => 'centerReportMailingList',
+        ]);
+
+        // No list and no existing setting. Nothing to do
+        if (!$list && !$setting->exists) {
+            return true;
+        }
+
+        // If the list is empty, remove the setting if it exists and abort
+        if (!$list) {
+            return $setting->delete();
+        }
+
+        // Canonicalize list
+        $list = array_unique($list);
+        sort($list);
+
+        $setting->value = json_encode($list);
+        return $setting->save();
     }
 
     public function inRegion(Region $region)

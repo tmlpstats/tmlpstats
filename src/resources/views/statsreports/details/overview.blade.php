@@ -36,10 +36,17 @@
                 }
                 ?></td>
         </tr>
+        @if ($statsReport->version == 'api')
+        <tr>
+            <th>Submitted Report Version:</th>
+            <td>Online Submission (beta)</td>
+        </tr>
+        @else
         <tr>
             <th>Submitted Sheet Version:</th>
             <td>{{ $statsReport->version }}</td>
         </tr>
+        @endif
         <tr>
             <th>Rating:</th>
             <td>
@@ -50,7 +57,7 @@
                 @endif
             </td>
         </tr>
-
+        @if ($statsReport->version != 'api')
         <tr>
             <th>Spreadsheet:</th>
             <td>
@@ -65,6 +72,7 @@
                 @endcan
             </td>
         </tr>
+        @endif
         <tr>
             <th>Submission Comment:</th>
             <td>{!! nl2br(e($statsReport->submitComment)) !!}</td>

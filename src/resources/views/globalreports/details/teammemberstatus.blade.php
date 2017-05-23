@@ -6,6 +6,8 @@
                 Transfers In
             @elseif ($group == 'xferOut')
                 Transfers Out
+            @elseif ($group == 'wbo')
+                Well-Being Out
             @elseif ($group == 'ctw')
                 Conversations to Withdraw
             @elseif ($group == 'withdrawn')
@@ -65,7 +67,30 @@
                                 @endif
                             </td>
                         @endif
-                        <td>{{ is_numeric($memberData->comment) ? TmlpStats\Util::getExcelDate($memberData->comment)->format('F') : $memberData->comment }}</td>
+                        <td>
+                        <?php
+                            $comment = '';
+                            if (is_numeric($memberData->comment)) {
+                                $comment .= TmlpStats\Util::getExcelDate($memberData->comment)->format('F');
+                            } else {
+                                $comment .= trim($memberData->comment);
+                            }
+
+                            if (isset($registrations[$memberData->teamMember->personId])) {
+                                if ($comment) {
+                                    $comment .= ', ';
+                                }
+
+                                $app = $registrations[$memberData->teamMember->personId];
+                                if (is_numeric($app->comment)) {
+                                    $comment .= TmlpStats\Util::getExcelDate($app->comment)->format('F');
+                                } else {
+                                    $comment .= trim($app->comment);
+                                }
+                            }
+                        ?>
+                        {{ $comment }}
+                        </td>
                     </tr>
                 @endforeach
                 </tbody>

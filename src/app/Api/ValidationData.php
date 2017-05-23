@@ -5,51 +5,49 @@ use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
+use TmlpStats\Api\Traits;
 use TmlpStats\Contracts\Referenceable;
 use TmlpStats\Domain;
+use TmlpStats\Encapsulations;
 
 /**
  * Validation data
  */
 class ValidationData extends AuthenticatedApiBase
 {
-    // updateRequired: Not all objects require updates every week, but some do. For those that do,
-    //                 if no update is needed, they'll need to take some action to confirm the
-    //                 data is the same. That "confirmation" will create a submissionData entry
+    use Traits\ValidatesObjects;
+
     protected $dataTypesConf = [
         'Application' => [
             'apiClass' => Application::class,
             'typeName' => 'TeamApplication',
-            'updateRequired' => false,
         ],
         'TeamMember' => [
             'apiClass' => TeamMember::class,
             'typeName' => 'TeamMember',
-            'updateRequired' => true,
         ],
         'Course' => [
             'apiClass' => Course::class,
             'typeName' => 'Course',
-            'updateRequired' => false,
         ],
         'Scoreboard' => [
             'apiClass' => Scoreboard::class,
             'typeName' => 'Scoreboard',
-            'updateRequired' => true,
+        ],
+        'ProgramLeader' => [
+            'apiClass' => ProgramLeader::class,
+            'typeName' => 'ProgramLeader',
         ],
     ];
 
     public function validate(Models\Center $center, Carbon $reportingDate)
     {
-        $this->assertAuthz($this->context->can('viewSubmissionUi', $center));
+        $this->assertAuthz($this->context->can('submitStats', $center) || $this->context->can('viewSubmissionUi', $center));
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
 
-        $results = array_merge_recursive(
-            $this->validateSubmissionData($report),
-            $this->validateStaleData($report)
-        );
+        $results = $this->validateSubmissionData($report);
         $isValid = true;
 
         foreach ($results as $group => $groupData) {
@@ -70,68 +68,33 @@ class ValidationData extends AuthenticatedApiBase
 
     protected function validateSubmissionData(Models\StatsReport $report)
     {
+        $cq = Encapsulations\CenterReportingDate::ensure($report->center, $report->reportingDate)->getCenterQuarter();
+        $isFirstWeek = $report->reportingDate->eq($cq->firstWeekDate);
+
         $data = [];
+        $pastWeeks = [];
         foreach ($this->dataTypesConf as $group => $conf) {
-            $data[$group] = App::make($conf['apiClass'])->getChangedFromLastReport(
+            $data[$conf['typeName']] = App::make($conf['apiClass'])->getWeekSoFar(
                 $report->center,
                 $report->reportingDate
+            );
+
+            // We don't care about last week's data if this is the first week of the quarter
+            if ($isFirstWeek) {
+                continue;
+            }
+
+            $pastWeeks[$conf['typeName']] = App::make($conf['apiClass'])->getWeekSoFar(
+                $report->center,
+                $report->reportingDate->copy()->subWeek(),
+                false
             );
         }
 
         $results = [];
-        foreach ($data as $group => $groupData) {
-            if (!isset($results[$group])) {
-                $results[$group] = [];
-            }
-            foreach ($groupData as $object) {
-                $id = $object->getKey();
-                $validationResults = $this->validateObject($report, $object, $id);
-
-                if ($validationResults['messages']) {
-                    $results[$group] = array_merge($results[$group], $validationResults['messages']);
-                }
-            }
-        }
-
-        return $results;
-    }
-
-    protected function validateStaleData(Models\StatsReport $report)
-    {
-        $data = [];
-        foreach ($this->dataTypesConf as $group => $conf) {
-            $data[$group] = App::make($conf['apiClass'])->getUnchangedFromLastReport(
-                $report->center,
-                $report->reportingDate
-            );
-        }
-
-        $results = [];
-        foreach ($data as $group => $groupData) {
-            $conf = $this->dataTypesConf[$group];
-            foreach ($groupData as $object) {
-                $id = null;
-                if ($object instanceof Referenceable) {
-                    $id = $object->getKey();
-                }
-                $validationResults = $this->validateObject($report, $object, $id);
-
-                if ($conf['updateRequired']) {
-                    $validationResults['valid'] = false;
-                    $validationResults['messages'][] = Domain\ValidationMessage::error([
-                        'id' => 'VALDATA_NOT_UPDATED',
-                        'ref' => $object,
-                        'params' => ['type' => $conf['typeName']],
-                    ]);
-                }
-
-                if ($validationResults['messages']) {
-                    if (!isset($results[$group])) {
-                        $results[$group] = [];
-                    }
-                    $results[$group] = array_merge($results[$group], $validationResults['messages']);
-                }
-            }
+        $validationResults = $this->validateAll($report, $data, $pastWeeks);
+        if ($validationResults['messages']) {
+            $results = $validationResults['messages'];
         }
 
         return $results;

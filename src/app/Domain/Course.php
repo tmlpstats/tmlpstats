@@ -30,7 +30,7 @@ class Course extends ParserDomain
             'type' => 'string',
         ],
         'id' => [
-            'owner' => 'courseData',
+            'owner' => 'course',
             'type' => 'int',
         ],
         'quarterStartTer' => [
@@ -170,6 +170,15 @@ class Course extends ParserDomain
 
             $this->copyTarget($target, $k, $v, $conf);
         }
+    }
+
+    public function getFlattenedReference(array $supplemental = [])
+    {
+        $location = $this->location ?: 'unknown';
+        $type = $this->type ?: 'unknown';
+        $startDate = $this->startDate ? $this->startDate->toDateString() : 'unknown';
+
+        return "{$location} {$type} {$startDate}";
     }
 
     public function toArray()

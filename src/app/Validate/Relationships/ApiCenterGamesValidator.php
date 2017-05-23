@@ -13,7 +13,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         $reportedActuals = null;
         $ref = null;
 
-        foreach ($data['scoreboard'] as $scoreboard) {
+        foreach ($data['Scoreboard'] as $scoreboard) {
             if ($scoreboard->week->eq($this->reportingDate)) {
                 $weekData = $scoreboard->toArray();
 
@@ -65,7 +65,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
     {
         $isValid = true;
 
-        $calculated = $this->calculateCourseRegistrations($data['course']);
+        $calculated = $this->calculateCourseRegistrations($data['Course']);
 
         foreach (['cap', 'cpc'] as $game) {
             if (!$this->validateGame($game, $reportedActuals[$game], $calculated[$game], $ref)) {
@@ -80,7 +80,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
     {
         $isValid = true;
 
-        $calculated = $this->calculateTeamApplicationApprovals($data['teamApplication']);
+        $calculated = $this->calculateTeamApplicationApprovals($data['TeamApplication']);
 
         foreach (['t1x', 't2x'] as $game) {
             if (!$this->validateGame($game, $reportedActuals[$game], $calculated[$game], $ref)) {
@@ -95,7 +95,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
     {
         $isValid = true;
 
-        $calculated = $this->calculateGitw($data['teamMember']);
+        $calculated = $this->calculateGitw($data['TeamMember']);
 
         return $this->validateGame('gitw', $reportedActuals['gitw'], $calculated, $ref);
     }
@@ -106,7 +106,7 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
         $effectiveCount = 0;
 
         foreach ($teamMemberData as $member) {
-            if ($member->withdrawCodeId || $member->xferOut) {
+            if ($member->withdrawCodeId || $member->xferOut || $member->wbo) {
                 continue;
             }
 
@@ -151,8 +151,6 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
     {
         $t1CurrentApproved = 0;
         $t2CurrentApproved = 0;
-        $t1QStartApproved = 0;
-        $t2QStartApproved = 0;
 
         foreach ($teamApplicationData as $app) {
             if ($app->withdrawCodeId !== null
@@ -169,35 +167,38 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
             }
         }
 
-        $applicationData = $this->getQuarterStartingApprovedApplications();
-        foreach ($applicationData as $app) {
-            // TODO: How should withdrawn at the weekend be reported?
-            if ($app->registration->teamYear == 1) {
-                $t1QStartApproved++;
-            } else {
-                $t2QStartApproved++;
-            }
-        }
+        $approvedCounts = $this->getQuarterStartingApprovedCounts($teamApplicationData);
 
         return [
-            't1x' => $t1CurrentApproved - $t1QStartApproved,
-            't2x' => $t2CurrentApproved - $t2QStartApproved,
+            't1x' => $t1CurrentApproved - $approvedCounts['t1x'],
+            't2x' => $t2CurrentApproved - $approvedCounts['t2x'],
         ];
     }
 
-    protected function getQuarterStartingApprovedApplications()
+    protected function getQuarterStartingApprovedCounts($teamApplicationData)
     {
-        // toArray is done here to deal with an interesting issue with parsing dates before 1900
-        $centerQuarter = Domain\CenterQuarter::ensure($this->center, $this->quarter)->toArray();
+        $centerQuarter = $this->getCenterQuarterDates();
+
+        $counts = ['t1x' => 0, 't2x' => 0];
 
         $startWeekendDate = Carbon::parse($centerQuarter['startWeekendDate']);
 
-        $firstReport = Models\StatsReport::byCenter($this->center)
-            ->reportingDate($startWeekendDate)
-            ->where('apprDate', '<=', $startWeekendDate)
-            ->official()
-            ->first();
+        $items = collect($teamApplicationData)->filter(function ($teamApp) use ($startWeekendDate) {
+            return $teamApp->apprDate !== null && $teamApp->apprDate->lte($startWeekendDate);
+        })->map(function ($teamApp) {
+            return $teamApp->teamYear;
+        });
 
-        return $firstReport ? $firstReport->tmlpRegistrationData() : [];
+        foreach ($items->all() as $teamYear) {
+            $counts["t${teamYear}x"] += 1;
+        }
+
+        return $counts;
+    }
+
+    protected function getCenterQuarterDates()
+    {
+        // toArray is done here to deal with an interesting issue with parsing dates before 1900
+        return Domain\CenterQuarter::ensure($this->center, $this->quarter)->toArray();
     }
 }

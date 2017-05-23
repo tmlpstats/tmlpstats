@@ -140,4 +140,9 @@ class StatsReportPolicy extends Policy
 
         return true;
     }
+
+    public function showReportNavLinks(User $user)
+    {
+        return $user->hasRole('globalStatistician');
+    }
 }

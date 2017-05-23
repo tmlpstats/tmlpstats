@@ -5,6 +5,7 @@ access_levels:
     TBD: [TBD, global]
     regional_up: [regional, global, global_leader]
     any: __any__
+    token: __token__
 
 scopes:
   local:
@@ -46,6 +47,12 @@ api:
             params:
               - name: region
                 type: Region
+      Quarter:
+        type: namespace
+        children:
+          filter:
+            desc: Filter/list all quarters
+            params: []
 
   Application:
     type: namespace
@@ -196,6 +203,7 @@ api:
 
       getReportPages:
         desc: Get the global report page(s) named
+        access: token
         params:
           - name: globalReport
             type: GlobalReport
@@ -203,6 +211,27 @@ api:
             type: Region
           - name: pages
             type: array
+
+      getReportPagesByDate:
+        desc: Get the global report page(s) named
+        access: token
+        params:
+          - name: region
+            type: Region
+          - name: reportingDate
+            type: date
+          - name: pages
+            type: array
+
+      reportViewOptions:
+        desc: View options for Global Report
+        access: token
+        params:
+          - name: region
+            type: Region
+          - name: reportingDate
+            type: date
+
 
   LiveScoreboard:
     type: namespace
@@ -232,6 +261,7 @@ api:
     children:
       getQuarterScoreboard:
         desc: Get scoreboard for all weeks within a quarter
+        access: token
         params:
           - name: localReport
             type: LocalReport
@@ -280,6 +310,58 @@ api:
           - name: quarter
             type: Quarter
 
+      reportViewOptions:
+        desc: View options for report
+        access: token
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+
+      getReportPages:
+        desc: Get report pages
+        access: token
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+          - name: pages
+            type: array
+
+  Lookups:
+    type: namespace
+    children:
+      getRegionCenters:
+        desc: Find centers in a region
+        params:
+          - name: region
+            type: Region
+
+  ProgramLeader:
+    type: namespace
+    children:
+      allForCenter:
+        desc: Get program leaders data for a center-reportingDate, optionally including in-progress data
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+          - name: includeInProgress
+            type: bool
+            required: false
+      stash:
+        desc: Stash data for in-progress Team Member weekly
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+          - name: data
+            type: array
+
   Scoreboard:
     type: namespace
     children:
@@ -319,6 +401,33 @@ api:
           - name: data
             type: array
 
+  # Submission is a namespace of namespaces... iow a grouping.
+  Submission:
+    type: namespace
+    children:
+      NextQtrAccountability:
+        type: namespace
+        children:
+          allForCenter:
+            desc: Get team member data for a center-reportingDate, optionally including in-progress data
+            params:
+              - name: center
+                type: Center
+              - name: reportingDate
+                type: date
+              - name: includeInProgress
+                type: bool
+                required: false
+          stash:
+            desc: Stash data for in-progress Team Member weekly
+            params:
+              - name: center
+                type: Center
+              - name: reportingDate
+                type: date
+              - name: data
+                type: array
+
   SubmissionCore:
     type: namespace
     children:
@@ -329,6 +438,15 @@ api:
             type: Center
           - name: reportingDate
             type: date
+      completeSubmission:
+        desc: Finalizes Submission. Validates and creates new db objects for report details
+        params:
+          - name: center
+            type: Center
+          - name: reportingDate
+            type: date
+          - name: data
+            type: array
 
   SubmissionData:
     type: namespace
@@ -405,6 +523,12 @@ api:
             type: string
           - name: timezone
             type: string
+      needsShim:
+        access: any
+        desc: Tell the server we definitely need a shim
+        params:
+          - name: v
+            type: string
 
   ValidationData:
     type: namespace
@@ -419,6 +543,7 @@ api:
 
 
 reportMeta:
+  # ------------ GLOBAL REPORT
   Global:
     controller: GlobalReportController
     forwardParams: ['$globalReport', '$region']
@@ -433,6 +558,8 @@ reportMeta:
             name: Ratings
           RegionSummary:
             name: At A Glance
+          CenterStatsReports:
+            name: Center Reports
 
       RegionalStatsGroup:
         type: grouping
@@ -444,8 +571,10 @@ reportMeta:
           GamesByCenter:
             name: By Center
           RepromisesByCenter:
-            name: Repromises
-          RegPerParticipant:
+            name: New Promises
+            requiredFlags: ['afterClassroom2']
+          # RegPerParticipant:
+          RegPerParticipantWeekly:
             name: Reg. Per Participant
           Gaps:
             name: Gaps
@@ -468,10 +597,6 @@ reportMeta:
           LandmarkForumEffectiveness:
             name: LF
 
-      CenterStatsReports:
-        name: Center Reports
-        shortName: Centers
-
       ApplicationsGroup:
         type: grouping
         name: Applications
@@ -487,10 +612,6 @@ reportMeta:
             desc: Shows Team 2 that registered at the previous TMLP weekend and their current status
           TmlpRegistrationsOverdue:
             name: Overdue
-
-      TravelReport:
-        name: Travel Summary
-        shortName: Travel
 
       CoursesGroup:
         type: grouping
@@ -513,223 +634,110 @@ reportMeta:
         type: grouping
         name: Team Members
         children:
+          TdoSummary:
+            name: Training & Development
+            shortName: TDO
+          GitwSummary:
+            name: GITW
+            shortName: GITW
           TeamMemberStatusCtw:
             name: CTW
+          TeamMemberStatusWbo:
+            name: WBO
           TeamMemberStatusTransfer:
             name: Transfers
           TeamMemberStatusWithdrawn:
             name: Withdrawn
+          WithdrawReport:
+            name: Withdraw Compliance
+          Team1SummaryGrid:
+            name: Team 1 Summary Grid
+          Team2SummaryGrid:
+            name: Team 2 Summary Grid
 
-      TdoSummary:
-        name: Training & Development
-        shortName: TDO
-
-      PotentialsGroup:
+      WeekendGroup:
         type: grouping
-        name: Potentials
+        name: Weekend
         children:
+          TravelReport:
+            name: Travel Summary
           TeamMemberStatusPotentialsOverview:
-            name: Overview
+            name: Potentials Overview
           TeamMemberStatusPotentials:
-            name: Details
+            name: Potentials Details
+          AcknowledgementReport:
+            name: Acknowledgement Report
+            requiredFlags: ['lastWeek']
 
-      WithdrawReport:
-        name: Withdraws
+  # ------------ LOCAL REPORT
+  Local:
+    controller: StatsReportController
+    forwardParams: ['$statsReport']
+    children:
+      Summary:
+        name: Weekly Summary
+
+      Overview:
+        name: Report Details
+        cacheTime: 0
+
+      CenterStats:
+        name: Center Games
+
+      TeamMembers:
+        name: Team Members
+        type: grouping
+        children:
+          ClassList:
+            name: Summary
+          GitwSummary:
+            name: GITW
+          TdoSummary:
+            name: TDO
+
+      TeamExpansion:
+        name: Team Expansion
+        type: grouping
+        children:
+          TmlpRegistrations:
+            name: By Team Year
+          TmlpRegistrationsByStatus:
+            name: By Status
+
+      Courses:
+        name: Courses
+
+      ContactInfo:
+        name: Contact Info
+        shortName: Contacts
+        requiredFlags: ['canReadContactInfo']
+
+      TransferCheck:
+        name: Transfer Check
+        type: grouping
+        requiredFlags: ['firstWeek']
+        children:
+          PeopleTransferSummary:
+            name: People
+          CoursesTransferSummary:
+            name: Courses
+
+      Weekend:
+        name: Weekend Information
+        shortName: Weekend
+        type: grouping
+        children:
+          TeamWeekendSummary:
+            name: Team Summary
+          TeamTravelSummary:
+            name: Travel / Room
+
+      NextQtrAccountabilities:
+        name: Next Quarter Accountabilities
+        shortName: Accountabilities
+        requiredFlags: ['nextQtrAccountabilities']
+        cacheTime: 5
+        render: react
 
 
-
-reports:
-  # --- Local Statistician
-
-  LocalScoreboard:
-    name: Stats Game by Game for quarter
-    scope: local
-    access: [all]
-    ticket: 32
-    desc: >
-      Local scoreboard is the "bread and butter" report that most team
-      members will look at. It contains the status of the six major
-      games, broken down by week for the whole quarter.
-
-      Look at any stats sheet to get the games for this.
-
-  LocalTeamExpansion:
-    name: Application Status - detailed
-    scope: local
-    access: [all]
-    ticket: 34
-    desc: >
-      Application status is the breakdown of every current T1X and T2X
-      applicants and where they are in their application process.
-
-  LocalGITWByName:
-    name: GITW list by name
-    scope: local
-    access: [local]
-    ticket: 35
-    questions:
-      - Is there any reason to have this sheet separate from the local list with GITW and TDO provided?
-    desc: >
-      From Kyle in response to my question - No, just extract it from the source and display it as needed.
-      The more detail in this area is crucial.
-
-  LocalTDOByName:
-    name: TDO list by name
-    scope: local
-    access: [local]
-    ticket: 36
-    questions:
-      - Is there any reason to have this sheet separate from the accountabilities?
-
-  LocalAccountability:
-    name: Accountability List with GITW and TDO provided
-    scope: local
-    access: [all]
-    ticket: 37
-
-  # --- Global Leader
-
-  RegionScoreboard:
-    name: Summary % of promise week by week
-    scope: regional
-    access: [global, global_leader]
-    ticket: 38
-    questions:
-      - is this report the north america sheet - scoreboard tab?
-    desc: >
-      This scoreboard shows the current quarter for the region for the
-      six major games; broken up by week and each column pair shows
-      promise/actual for a week within the quarter.
-
-      Effectively, it is almost exactly the local scoreboard except
-      the promise/actual is the summation of the totals for the region.
-
-  RegionRegEffectiveness:
-    name: Summary Registration Effectiveness - % of closed courses
-    scope: regional
-    access: [global, global_leader, program_manager]
-    questions:
-      - Is this report the same as `North America Sheet -> Registration Fulfillment`?
-    desc: >
-      For courses upcoming and closed courses, for this quarter, each city in
-      its own row, this report shows the registration fulfillment effectiveness
-      of CAP courses and the percentage of courses above and below the 80% reg
-      fulfillment mark.
-
-      In addition, the existing report shows outstanding apps and apps that
-      have not moved for T1X and T2x
-
-  RegionCAPRegVsTDO:
-    name: Summary % of TDO against the number of CAP registrations for the week.
-    scope: regional
-    access: [global, global_leader]
-    desc: >
-      From Kyle: Yes this will be combined in the existing report.
-      It is all around the participants.  For each team, how many registrations were
-      made for those attending TDO for the week.
-
-      It should look something like
-      Team    | Total T1 | T1 Attending | Total T2 | T2 Attending | Total CAP Reg | CAP Reg / TDO% |
-      Seattle |       19 |          14  |    12    |          11  |           3   |     12%        |
-
-  RegionT1XSummary:
-    name: Summary of T1/T2 totals
-    scope: regional
-    access: [global, global_leader]
-    questions:
-      - Is this the same report as `North America Sheet -> Team 1 Summary` ?
-    desc: >
-      This report shows for each city the team 1 expansion progress summarized
-      by the number of applicants at each step in the application process,
-      including withdraws.
-
-  GlobalAppStatus:
-    name: Summary of application status
-    scope: regional
-    access: [regional_up]
-    desc: >
-      North america sheet -> Team1 / Team 2
-
-      From Kyle - Have this at the north america scope.
-      Also, from the team 1 / team 2 report, make a summary without all the detail.
-
-  GlobalConvWithdraw:
-    name: Summary of WDs by Applications/Team/Conversations to WD
-    scope: regional
-    access: [regional_up]
-    desc: >
-      New report.
-
-      From Kyle -  This is a new look at the same data. This summary report will take
-      each WD section and sort them by reason for WD. We will also track the number of
-      CTW that become WD.
-      - Withdrawals of Applications before the process is complete.
-      - Withdrawal after approval to the weekend.
-      - Transfers from one weekend to another, when during the quarter, and how many never make it.
-      - Withdrawals from team.
-
-  TBDGlobalCR2Repromise:
-    name: Summary of Original to repromise at Classroom 2.
-    scope: unknown # regional?
-    access: [TBD]
-    desc: >
-      From Kyle - Kyle] this is ONLY done the week after the second classroom, and Laura
-      has the data for how she does this.
-
-  # --- Program Managers
-
-  TBDProgMgrTDO:
-    name: TDO
-    scope: unknown
-    access: [program_manager]
-    questions:
-      - Is this a similar view to the local statisticians TDO stats?
-
-  TBDProgMgrAppStats:
-    name: Stat of Applications
-    scope: local
-    access: [program_manager]
-    questions:
-      - "Is this report the same as the local TeamExpansion stats? If not, how does it differ?"
-    desc: |
-      I suspect this is actually the same as the local TeamExpansion stats.
-      Get more information on what this is actually about.
-
-  TBDProgMgrGITW:
-    name: GITW %
-    scope: unknown
-    access: [program_manager, TBD]
-    questions:
-      - What should this chart be?
-
-  ProgMgrWD:
-    name: Overall List of WDs by Applications/Team/Conversation to WD
-    scope: local
-    access: [program_manager, TBD]
-    dev_notes: >
-      My Question: What should this chart be? Is there an existing equivalent?
-      Kyle wrote: "Detail".
-
-      What I am taking this to mean is that this is a detailed version of the
-      global conversation to withdraw chart. We can discuss this later later
-
-  # --- Classroom Leaders
-
-  LocalGitwClassroom:
-    name: GITW report with actual names of team
-    scope: local
-    access: [classroom_leader]
-    ticket: 39
-    questions:
-      - Is this the same as the local statisticians GITW report?
-    desc: >
-      Unsure what this report is exactly. Is it the same as the other local GITW report?
-
-  LocalGameByGame:
-    name: Stats Game by Game for current week
-    scope: local
-    access: [classroom_leader]
-    questions:
-      - Is this the same as the local statisticians GITW report?
-    desc: >
-      (James) I'm not sure what this is exactly. Is it any different from the local version?
+reports: {}

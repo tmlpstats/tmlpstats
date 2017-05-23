@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Log;
 use Session;
+use TmlpStats\Api;
 use TmlpStats\Center;
 use TmlpStats\GlobalReport;
 use TmlpStats\Region;
@@ -237,7 +238,7 @@ class ReportsController extends Controller
         // even if there hasn't been a report created yet
         $globalReport = null;
         if (!$reportingDate) {
-            $reportingDate = $this->getReportingDate($request);
+            $reportingDate = $this->getReportingDate();
 
             $globalReport = GlobalReport::reportingDate($reportingDate)->first();
             if (!$globalReport) {
@@ -269,7 +270,7 @@ class ReportsController extends Controller
 
         return $reportViewUpdate
             ? redirect($redirectUrl)
-            : App::make($controllerClass)->show($request, $report->id);
+            : App::make($controllerClass)->showReport($request, $report);
     }
 
     /**
@@ -279,7 +280,7 @@ class ReportsController extends Controller
     public function mobileDash(Request $request, $abbr)
     {
         $center = Center::abbreviation($abbr)->firstOrFail();
-        $reportingDate = $this->getReportingDate($request);
+        $reportingDate = $this->getReportingDate();
 
         $this->setCenter($center);
 
@@ -288,6 +289,10 @@ class ReportsController extends Controller
             $report = StatsReport::byCenter($center)->official()->orderBy('reporting_date', 'desc')->first();
         }
 
-        return App::make(StatsReportController::class)->runDispatcher($request, $report, 'mobile_summary');
+        $context = App::make(Api\Context::class);
+        $context->setCenter($center);
+        $context->setReportingDate($report->reportingDate);
+
+        return App::make(StatsReportController::class)->getMobileSummary($report);
     }
 }

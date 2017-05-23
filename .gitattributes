@@ -1,1 +1,9 @@
-* text=auto
+*        text=auto
+*.cmd    text eol=crlf
+*.sh     text eol=lf
+*.json   text eol=lf
+*.php    text eol=lf
+*.js     text eol=lf
+*.jsx    text eol=lf
+
+composer.lock text eol=lf

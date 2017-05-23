@@ -3,10 +3,10 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Live Scoreboard Help</h4>
+        <h4 class="modal-title">Temporary Scoreboard Help</h4>
       </div>
       <div class="modal-body">
-        <p>The live scoreboard is a tool that lets statisticians update their team's actuals throughout the week.</p>
+        <p>The temporary scoreboard is a tool that lets statisticians update their team's actuals during the week. This can be used as a &quot;weather report&quot; and/or providing updates for your accountables.</p>
 
         <h4>How to use</h4>
         <p>The statistician goes and edits the scoreboard however often they want. They can then send the scoreboard to their team by sending them the link to this mobile friendly dashboard:</p>
@@ -17,7 +17,7 @@
         <ul>
           <li>The scoreboard shows the promises for the <b>upcoming</b> Friday</li>
           <li>As often as the statistician wants, they can edit the "actuals" during the week</li>
-          <li>When a new stats report is submitted, the scoreboard is reset to whatever was on the new sheet</li>
+          <li>When a new excel sheet is submitted, the scoreboard is reset to whatever was on the new sheet</li>
         </ul>
 
 

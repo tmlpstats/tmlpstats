@@ -98,5 +98,6 @@ if (!function_exists('getPercentClass')) {
     @include('reports.charts.percentages.chart', ['divId' => 'percent-container'])
 </div>
 
+<!-- SCRIPTS_FOLLOW -->
 @include('reports.charts.ratings.setup')
 @include('reports.charts.percentages.setup', ['divId' => 'percent-container'])

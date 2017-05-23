@@ -2,6 +2,7 @@
 namespace TmlpStats\Tests\Unit;
 
 use stdClass;
+use Symfony\Component\Yaml\Yaml;
 use TmlpStats\Domain\Scoreboard;
 use TmlpStats\Domain\ScoreboardGame;
 use TmlpStats\Import\Xlsx\DataImporter\CenterStatsImporter;
@@ -11,6 +12,12 @@ use TmlpStats\Util;
 class ScoreboardTest extends TestAbstract
 {
     protected $testClass = Scoreboard::class;
+
+    protected function yamlProvider()
+    {
+        // Get the data for this test from a YAML file we can share between the JS and PHP tests
+        return Yaml::parse(file_get_contents(__DIR__ . '/../inputs/scoreboard.yml'));
+    }
 
     /**
      * @dataProvider providerCalculatePoints
@@ -24,68 +31,15 @@ class ScoreboardTest extends TestAbstract
 
     public function providerCalculatePoints()
     {
-        return [
-            // 0% => 0 points
-            [
-                Util::arrayToObject([
-                    'cap' => '100',
-                    'cpc' => '100',
-                    't1x' => '100',
-                    't2x' => '100',
-                    'gitw' => '100',
-                    'lf' => '100',
-                ]),
-                Util::arrayToObject([
-                    'cap' => '0',
-                    'cpc' => '0',
-                    't1x' => '0',
-                    't2x' => '0',
-                    'gitw' => '0',
-                    'lf' => '0',
-                ]),
-                0,
-            ],
-            // 100% => 28 points
-            [
-                Util::arrayToObject([
-                    'cap' => '100',
-                    'cpc' => '100',
-                    't1x' => '100',
-                    't2x' => '100',
-                    'gitw' => '100',
-                    'lf' => '100',
-                ]),
-                Util::arrayToObject([
-                    'cap' => '100',
-                    'cpc' => '100',
-                    't1x' => '100',
-                    't2x' => '100',
-                    'gitw' => '100',
-                    'lf' => '100',
-                ]),
-                28,
-            ],
-            // Calculates total based on all games
-            [
-                Util::arrayToObject([
-                    'cap' => '100',
-                    'cpc' => '100',
-                    't1x' => '100',
-                    't2x' => '100',
-                    'gitw' => '100',
-                    'lf' => '100',
-                ]),
-                Util::arrayToObject([
-                    'cap' => '75', // 2 points
-                    'cpc' => '80', // 2 points
-                    't1x' => '90', // 3 points
-                    't2x' => '100', // 4 points
-                    'gitw' => '75', // 1 points
-                    'lf' => '70', // 0 points
-                ]),
-                12,
-            ],
-        ];
+        return collect($this->yamlProvider()['scoreboards_classic'])
+            ->map(function ($item) {
+                return [
+                    Util::arrayToObject($item['promise']),
+                    Util::arrayToObject($item['actual']),
+                    $item['points'],
+                ];
+            })
+            ->all();
     }
 
     /**
@@ -104,6 +58,40 @@ class ScoreboardTest extends TestAbstract
             [null, new stdClass()],
             [new stdClass(), null],
         ];
+    }
+
+    /**
+     * @dataProvider providerPercent
+     */
+    public function testPercent($promise, $actual, $expectedResult)
+    {
+        $game = new ScoreboardGame('cap');
+        $game->setPromise($promise);
+        $game->setActual($actual);
+
+        $this->assertEquals($expectedResult, $game->percent());
+    }
+
+    public function providerPercent()
+    {
+        return $this->yamlProvider()['percent'];
+    }
+
+    /**
+     * @dataProvider providerPoints
+     */
+    public function testPoints($promise, $actual, $gameKey, $expectedResult)
+    {
+        $game = new ScoreboardGame($gameKey);
+        $game->setPromise($promise);
+        $game->setActual($actual);
+
+        $this->assertEquals($expectedResult, $game->points());
+    }
+
+    public function providerPoints()
+    {
+        return $this->yamlProvider()['points'];
     }
 
     /**
@@ -501,6 +489,24 @@ class ScoreboardTest extends TestAbstract
                 'cap',
                 6,
             ],
+            // Float percent rounds up correctly (99.5000 => 99)
+            [
+                (float) ((1 / 2) + 99),
+                'cap',
+                6,
+            ],
+            // Float percent rounds up correctly (99.7500 => 99)
+            [
+                (float) ((3 / 4) + 99),
+                'cap',
+                6,
+            ],
+            // Float percent rounds up correctly (100.250 => 100)
+            [
+                (float) ((1 / 4) + 100),
+                'cap',
+                8,
+            ],
             // Over 100% returns max points
             [
                 110,
@@ -529,124 +535,7 @@ class ScoreboardTest extends TestAbstract
 
     public function providerGetRating()
     {
-        return [
-            [
-                28,
-                'Powerful',
-            ],
-            [
-                27,
-                'High Performing',
-            ],
-            [
-                26,
-                'High Performing',
-            ],
-            [
-                25,
-                'High Performing',
-            ],
-            [
-                24,
-                'High Performing',
-            ],
-            [
-                23,
-                'High Performing',
-            ],
-            [
-                22,
-                'High Performing',
-            ],
-            [
-                21,
-                'Effective',
-            ],
-            [
-                20,
-                'Effective',
-            ],
-            [
-                19,
-                'Effective',
-            ],
-            [
-                18,
-                'Effective',
-            ],
-            [
-                17,
-                'Effective',
-            ],
-            [
-                16,
-                'Effective',
-            ],
-            [
-                15,
-                'Marginally Effective',
-            ],
-            [
-                14,
-                'Marginally Effective',
-            ],
-            [
-                13,
-                'Marginally Effective',
-            ],
-            [
-                12,
-                'Marginally Effective',
-            ],
-            [
-                11,
-                'Marginally Effective',
-            ],
-            [
-                10,
-                'Marginally Effective',
-            ],
-            [
-                9,
-                'Marginally Effective',
-            ],
-            [
-                8,
-                'Ineffective',
-            ],
-            [
-                7,
-                'Ineffective',
-            ],
-            [
-                6,
-                'Ineffective',
-            ],
-            [
-                5,
-                'Ineffective',
-            ],
-            [
-                4,
-                'Ineffective',
-            ],
-            [
-                3,
-                'Ineffective',
-            ],
-            [
-                2,
-                'Ineffective',
-            ],
-            [
-                1,
-                'Ineffective',
-            ],
-            [
-                0,
-                'Ineffective',
-            ],
-        ];
+        return $this->yamlProvider()['ratings'];
     }
 
     /**

@@ -1,4 +1,4 @@
-import { modelReducer, actions as formActions } from 'react-redux-form'
+import { modelReducer, formReducer, actions as formActions } from 'react-redux-form'
 import { ReduxLoader } from './base'
 
 export default class FormReduxLoader extends ReduxLoader {
@@ -6,6 +6,12 @@ export default class FormReduxLoader extends ReduxLoader {
         super(opts)
         this.replace_action = opts.prefix + '/replace'
         this.replace_items_action = opts.prefix + '/replace_items'
+    }
+
+    extraReducers(opts) {
+        if (opts.formReducer) {
+            return {forms: formReducer(opts.model)}
+        }
     }
 
     dataReducer(opts) {
@@ -17,6 +23,8 @@ export default class FormReduxLoader extends ReduxLoader {
     }
 
     replaceItem(key, value) {
-        return formActions.load(`${this.opts.model}.${this.opts.key}`, value)
+        return formActions.load(`${this.opts.model}.${key}`, value)
     }
 }
+
+

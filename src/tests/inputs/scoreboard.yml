@@ -1,0 +1,233 @@
+points:
+  # Promise,  Actual,  game,  <expected points>
+  - [100, 100, "cpc", 4]
+  - [100, 99, "cpc", 3]
+  - [100, 90, "cpc", 3]
+  - [100, 89, "cpc", 2]
+  - [100, 80, "cpc", 2]
+  - [100, 79, "cpc", 1]
+  - [100, 75, "cpc", 1]
+  - [100, 74, "cpc", 0]
+  - [100, 0, "cpc", 0]
+  - [100, 100, "t1x", 4]
+  - [100, 99, "t1x", 3]
+  - [100, 90, "t1x", 3]
+  - [100, 89, "t1x", 2]
+  - [100, 80, "t1x", 2]
+  - [100, 79, "t1x", 1]
+  - [100, 75, "t1x", 1]
+  - [100, 74, "t1x", 0]
+  - [100, 0, "t1x", 0]
+  - [100, 100, "t2x", 4]
+  - [100, 99, "t2x", 3]
+  - [100, 90, "t2x", 3]
+  - [100, 89, "t2x", 2]
+  - [100, 80, "t2x", 2]
+  - [100, 79, "t2x", 1]
+  - [100, 75, "t2x", 1]
+  - [100, 74, "t2x", 0]
+  - [100, 0, "t2x", 0]
+  - [100, 100, "gitw", 4]
+  - [100, 99, "gitw", 3]
+  - [100, 90, "gitw", 3]
+  - [100, 89, "gitw", 2]
+  - [100, 80, "gitw", 2]
+  - [100, 79, "gitw", 1]
+  - [100, 75, "gitw", 1]
+  - [100, 74, "gitw", 0]
+  - [100, 0, "gitw", 0]
+  - [100, 100, "lf", 4]
+  - [100, 99, "lf", 3]
+  - [100, 90, "lf", 3]
+  - [100, 89, "lf", 2]
+  - [100, 80, "lf", 2]
+  - [100, 79, "lf", 1]
+  - [100, 75, "lf", 1]
+  - [100, 74, "lf", 0]
+  - [100, 0, "lf", 0]
+
+  # CAP (applies multiplier)
+  - [100, 100, "cap", 8]
+  - [100, 99, "cap", 6]
+  - [100, 90, "cap", 6]
+  - [100, 89, "cap", 4]
+  - [100, 80, "cap", 4]
+  - [100, 79, "cap", 2]
+  - [100, 75, "cap", 2]
+  - [100, 74, "cap", 0]
+  - [100, 0, "cap", 0]
+  - [100, 75, "CAP", 2]   # Capitalized game returns correct result
+  - [400, 297, "cap", 0]  # Float percent rounds down correctly (74.25 => 74)
+  - [200, 159, "cap", 4]  # Float percent rounds up correctly (79.5000 => 80)
+  - [200, 179, "cap", 6]  # Float percent rounds up correctly (89.5000 => 90)
+  - [100, 110, "cap", 8]  # Over 100% returns max points
+  - [400, 399, "cap", 6]  # > 99.5 rounds to 99
+  - [400, 401, "cap", 8]  # 100.25 rounds to 100
+
+percent:
+  # Promise, actual, <expected percent>
+  - [100,100,100]   # 100%
+  - [100,0,0]       # 0%
+  - [100,87,87]     # simple percent
+  - [100,110,110]   # over 100% returns over 100%
+  - [100,-10,0]     # less than 0% returns 0%
+  - [4,3,75]        # simple %
+  - [3,2,67]        # returns float
+  - [3,1,33]
+  - [8,1,13]
+  - [0,5,0]         # promise 0 always 0
+  - [-5,5,0]        # promise <0 always 0
+  - [400,399,99]    # > 99.5 rounds to 99
+  - [400,401,100]   # < 100.25 rounds to 100
+
+
+ratings:
+  - [28,"Powerful"]
+  - [27,"High Performing"]
+  - [26,"High Performing"]
+  - [25,"High Performing"]
+  - [24,"High Performing"]
+  - [23,"High Performing"]
+  - [22,"High Performing"]
+  - [21,"Effective"]
+  - [20,"Effective"]
+  - [19,"Effective"]
+  - [18,"Effective"]
+  - [17,"Effective"]
+  - [16,"Effective"]
+  - [15,"Marginally Effective"]
+  - [14,"Marginally Effective"]
+  - [13,"Marginally Effective"]
+  - [12,"Marginally Effective"]
+  - [11,"Marginally Effective"]
+  - [10,"Marginally Effective"]
+  - [9,"Marginally Effective"]
+  - [8,"Ineffective"]
+  - [7,"Ineffective"]
+  - [6,"Ineffective"]
+  - [5,"Ineffective"]
+  - [4,"Ineffective"]
+  - [3,"Ineffective"]
+  - [2,"Ineffective"]
+  - [1,"Ineffective"]
+  - [0,"Ineffective"]
+
+
+scoreboards_classic:
+  - promise:
+      cap: 100
+      cpc: 100
+      t1x: 100
+      t2x: 100
+      gitw: 100
+      lf: 100
+    actual:
+      cap: 0
+      cpc: 0
+      t1x: 0
+      t2x: 0
+      gitw: 0
+      lf: 0
+    points: 0
+
+  # 100% = 28 points
+  - promise:
+      cap: '100'
+      cpc: '100'
+      t1x: '100'
+      t2x: '100'
+      gitw: '100'
+      lf: '100'
+    actual:
+      cap: '100'
+      cpc: '100'
+      t1x: '100'
+      t2x: '100'
+      gitw: '100'
+      lf: '100'
+    points: 28
+
+  # Calculates total based on all games
+  - promise:
+      cap: '100'
+      cpc: '100'
+      t1x: '100'
+      t2x: '100'
+      gitw: '100'
+      lf: '100'
+    actual:
+      cap: '75' # 2 points
+      cpc: '80' # 2 points
+      t1x: '90' # 3 points
+      t2x: '100' # 4 points
+      gitw: '75' # 1 points
+      lf: '70' # 0 points
+    points: 12
+
+  # Calculates total based on all games
+  - promise:
+      cap: '100'
+      cpc: '100'
+      t1x: '100'
+      t2x: '100'
+      gitw: '100'
+      lf: '100'
+    actual:
+      cap: '74' # 0 points
+      cpc: '74' # 0 points
+      t1x: '74' # 0 points
+      t2x: '74' # 0 points
+      gitw: '74' # 0 points
+      lf: '74' # 0 points
+    points: 0
+
+  # Calculates total based on all games
+  - promise:
+      cap: '100'
+      cpc: '100'
+      t1x: '100'
+      t2x: '100'
+      gitw: '100'
+      lf: '100'
+    actual:
+      cap: '75' # 2 points
+      cpc: '75' # 1 points
+      t1x: '75' # 1 points
+      t2x: '75' # 1 points
+      gitw: '75' # 1 points
+      lf: '75' # 1 points
+    points: 7
+
+  # Calculates total based on all games
+  - promise:
+      cap: '100'
+      cpc: '100'
+      t1x: '100'
+      t2x: '100'
+      gitw: '100'
+      lf: '100'
+    actual:
+      cap: '80' # 4 points
+      cpc: '80' # 2 points
+      t1x: '80' # 2 points
+      t2x: '80' # 2 points
+      gitw: '80' # 2 points
+      lf: '80' # 2 points
+    points: 14
+
+  # Calculates total based on all games
+  - promise:
+      cap: '100'
+      cpc: '100'
+      t1x: '100'
+      t2x: '100'
+      gitw: '100'
+      lf: '100'
+    actual:
+      cap: '90' # 6 points
+      cpc: '90' # 3 points
+      t1x: '90' # 3 points
+      t2x: '90' # 3 points
+      gitw: '90' # 3 points
+      lf: '90' # 3 points
+    points: 21

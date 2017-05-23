@@ -9,7 +9,9 @@ class ReportMetaItem
     public $uriSlug = '';
     public $name = '';
     public $shortName = null;
-
+    public $requiredFlags = [];
+    public $cacheTime = 'default';
+    public $render = '';
 
     /**
      * All the child methods and namespaces of this namespace.
@@ -25,6 +27,9 @@ class ReportMetaItem
         $this->shortName = array_get($body, 'shortName', null);
         $this->type = array_get($body, 'type', 'report');
         $this->children = array_get($body, 'children', []);
+        $this->requiredFlags = array_get($body, 'requiredFlags', []);
+        $this->cacheTime = array_get($body, 'cacheTime', 'default');
+        $this->render = array_get($body, 'render', '');
     }
 
     /**
@@ -54,6 +59,6 @@ class ReportMetaItem
 
     public function controllerFuncName()
     {
-        return $this->id;
+        return 'get' . $this->id;
     }
 }

@@ -5,28 +5,30 @@
     "license": "MIT",
     "type": "project",
     "require": {
-        "laravel/framework": "5.1.*",
-        "laravelcollective/html": "~5.1",
-        "kris/laravel-form-builder": "~1.6",
-        "kirkbushell/eloquence": "~1.3",
-        "nesbot/carbon": "~1.0",
-        "respect/validation": "~1.0",
-        "phpoffice/phpexcel": "~1.8",
-        "doctrine/dbal": "^2.5",
+        "barryvdh/laravel-debugbar": "^2.0",
         "barryvdh/laravel-ide-helper": "^2.1",
+        "doctrine/dbal": "^2.5",
+        "fideloper/proxy": "^3.2",
+        "geoip/geoip": "^1.15",
         "guzzlehttp/guzzle": "^6.1",
         "intouch/laravel-newrelic": "^2.0",
-        "barryvdh/laravel-debugbar": "^2.0",
-        "pragmarx/tracker": "^1.0",
-        "geoip/geoip": "^1.15"
+        "kirkbushell/eloquence": "~1.3",
+        "kris/laravel-form-builder": "~1.6",
+        "laravel/framework": "5.2.*",
+        "laravelcollective/html": "~5.2",
+        "nesbot/carbon": "~1.0",
+        "phpoffice/phpexcel": "~1.8",
+        "respect/validation": "~1.0"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.5",
-        "phpunit/phpunit": "~5.0",
-        "phpspec/phpspec": "~2.1",
         "mockery/mockery": "~0.9",
+        "phpspec/phpspec": "~2.1",
+        "phpunit/phpunit": "~5.0",
+        "satooshi/php-coveralls": "^1.0",
         "symfony/yaml": "^2.7",
-        "satooshi/php-coveralls": "^1.0"
+        "symfony/dom-crawler": "~3.0",
+        "symfony/css-selector": "~3.0"
     },
     "autoload": {
         "classmap": [
@@ -36,7 +38,10 @@
             "TmlpStats\\": "app/",
             "TmlpStats\\Seeders\\": "database/seeds/",
             "TmlpStats\\Tests\\": "tests/"
-        }
+        },
+        "files": [
+            "app/Providers/helpers.php"
+        ]
     },
     "autoload-dev": {
         "classmap": [

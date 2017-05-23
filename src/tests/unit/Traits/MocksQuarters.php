@@ -1,6 +1,10 @@
 <?php
 namespace TmlpStats\Tests\Unit\Traits;
 
+use App;
+use TmlpStats as Models;
+use TmlpStats\Domain\CenterQuarter;
+use TmlpStats\Encapsulations\RegionQuarter;
 use TmlpStats\Quarter;
 
 trait MocksQuarters
@@ -95,14 +99,56 @@ trait MocksQuarters
 
         $quarter->method('getQuarterDate')
                 ->will($this->returnCallback(function ($field) use ($data) {
-                    return isset($data[$field])
-                        ? $data[$field]
-                        : null;
-                }));
+                  return isset($data[$field])
+                      ? $data[$field]
+                      : null;
+              }));
 
         $quarter->method('getNextQuarter')
                 ->willReturn($nextQuarter);
 
         return $quarter;
+    }
+
+    protected function mockCenterQuarter()
+    {
+        App::bind(CenterQuarter::class, SimpleCenterQuarter::class);
+    }
+
+    protected function mockRegionQuarter($dates)
+    {
+        SimpleRegionQuarter::$cachedDates = $dates;
+        App::bind(RegionQuarter::class, SimpleRegionQuarter::class);
+    }
+}
+
+class SimpleCenterQuarter extends CenterQuarter
+{
+    protected function overriddenDates($center, $quarter)
+    {
+        if (!$center->regionId) {
+            $center->regionId = 123;
+            $center->setRelation('region', new Models\Region(['id' => 123]));
+        }
+
+        return [];
+    }
+}
+
+class SimpleRegionQuarter extends RegionQuarter
+{
+    public static $cachedDates = [];
+    public function __construct(Models\Region $region, Models\Quarter $quarter, Models\RegionQuarterDetails $rqd = null)
+    {
+
+        if ($rqd === null || !$rqd->id) {
+            $props = ['id' => 123, 'quarter_id' => $quarter->id, 'region_id' => $region->id];
+            $rqd = new Models\RegionQuarterDetails(array_merge($props, static::$cachedDates));
+            foreach (static::$cachedDates as $k => $v) {
+                $rqd->$k = $v;
+            }
+        }
+
+        return parent::__construct($region, $quarter, $rqd);
     }
 }

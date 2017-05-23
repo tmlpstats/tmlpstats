@@ -8,6 +8,7 @@ class TeamMembersByQuarter extends BaseArrangement
     public function build($data)
     {
         $teamMembersData = $data['teamMembersData'];
+        $includeXferAsWithdrawn = array_get($data, 'includeXferAsWithdrawn', false);
 
         $reportData = [
             'team1'     => [],
@@ -15,13 +16,17 @@ class TeamMembersByQuarter extends BaseArrangement
             'withdrawn' => [],
         ];
 
-        foreach ($teamMembersData as $data) {
+        foreach ($teamMembersData as $memberData) {
 
-            $index = $data->withdrawCodeId !== null
-                ? 'withdrawn'
-                : "team{$data->teamMember->teamYear}";
+            $index = "team{$memberData->teamMember->teamYear}";
+            if ($memberData->withdrawCodeId !== null
+                || ($includeXferAsWithdrawn && $memberData->xferOut)
+                || $memberData->wbo
+            ) {
+                $index = 'withdrawn';
+            }
 
-            $reportData[$index]["Q{$data->teamMember->quarterNumber}"][] = $data;
+            $reportData[$index]["Q{$memberData->teamMember->quarterNumber}"][] = $memberData;
         }
 
         return compact('reportData');

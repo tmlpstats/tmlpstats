@@ -4,6 +4,7 @@ We received the following feedback about tmlpstats.com!<br>
 <br>
 From: {{ $senderName }}<br>
 Email: {{ $senderEmail }}<br>
-<br>
+URL: {{ $url }}
+<br><br>
 Message:<br>
 {{ $feedback }}

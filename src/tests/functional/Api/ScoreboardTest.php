@@ -72,7 +72,7 @@ class ScoreboardTest extends FunctionalTestAbstract
 
         $expectedResponse = [
             'success' => true,
-            'valid' => true,
+            'valid' => false, // false because we don't bother to create the necessary objects to make scores accurate
         ];
 
         $this->post('/api', $parameters)->seeJsonHas($expectedResponse);

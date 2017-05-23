@@ -85,12 +85,23 @@ class Scoreboard extends AuthenticatedApiBase
         $submissionData->store($center, $reportingDate, $scoreboard);
 
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
-        $validationResults = $this->validateObject($report, $scoreboard, $reportingDate->toDateString());
+        $validationResults = App::make(ValidationData::class)->validate($center, $reportingDate);
+
+        $messages = [];
+        if (isset($validationResults['messages']['Scoreboard'])) {
+            $weekString = $scoreboard->week->toDateString();
+            foreach ($validationResults['messages']['Scoreboard'] as $message) {
+                if ($message->reference()['id'] == $weekString) {
+                    $messages[] = $message;
+                }
+            }
+        }
 
         return [
             'success' => true,
             'valid' => $validationResults['valid'],
-            'messages' => $validationResults['messages'],
+            'messages' => $messages,
+            'week' => $scoreboard->week->toDateString(),
         ];
     }
 
@@ -120,29 +131,20 @@ class Scoreboard extends AuthenticatedApiBase
         ]);
     }
 
-    public function getUnchangedFromLastReport(Models\Center $center, Carbon $reportingDate)
+    public function getWeekSoFar(Models\Center $center, Carbon $reportingDate, $includeInProgress = true)
     {
         $results = [];
 
-        $allData = $this->allForCenter($center, $reportingDate, true);
+        $allData = $this->allForCenter($center, $reportingDate, $includeInProgress);
         foreach ($allData as $dataArr) {
             $meta = array_get($dataArr, 'meta', []);
             $dataObject = Domain\Scoreboard::fromArray($dataArr);
 
-            if ((array_get($meta, 'canEditPromise', false) || array_get($meta, 'canEditActual', false))
-                && !array_get($meta, 'localChanges', false)
-            ) {
+            if (array_get($meta, 'canEditPromise', false) || array_get($meta, 'canEditActual', false)) {
                 $results[] = $dataObject;
             }
         }
 
         return $results;
-    }
-
-    public function getChangedFromLastReport(Models\Center $center, Carbon $reportingDate)
-    {
-        $collection = App::make(SubmissionData::class)->allForType($center, $reportingDate, Domain\Scoreboard::class);
-
-        return array_flatten($collection->getDictionary());
     }
 }

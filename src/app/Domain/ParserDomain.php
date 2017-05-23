@@ -39,6 +39,7 @@ class ParserDomain implements Arrayable, \JsonSerializable, Referenceable
     public function getKey()
     {
         $prop = $this->_refProp;
+
         return $this->$prop;
     }
 
@@ -53,7 +54,13 @@ class ParserDomain implements Arrayable, \JsonSerializable, Referenceable
         return array_merge([
             'id' => $this->getKey(),
             'type' => class_basename($this),
+            'flattened' => $this->getFlattenedReference($supplemental),
         ], $supplemental);
+    }
+
+    protected function getFlattenedReference(array $supplemental = [])
+    {
+        return $this->getKey();
     }
 
     /**
@@ -106,7 +113,7 @@ class ParserDomain implements Arrayable, \JsonSerializable, Referenceable
     public static function fromArray($input, $requiredParams = [])
     {
         $obj = new static();
-        $obj->updateFromArray($input);
+        $obj->updateFromArray($input, $requiredParams);
 
         return $obj;
     }

@@ -5,93 +5,66 @@
 * [Installing/Setup](#installing)
 * [Code Walkthrough](https://github.com/pdarg/tmlpstats/wiki/Walkthrough)
 
-
 ## Installing:
-This repo includes a Vagrant configuration to make development easier. These instructions are written for OSX/Linux. You can find
-instructions for setting up and installing on windows on google.
-
-Please read all of these instructions first.
+This repo includes a docker-compose file and docker images setup to streamline our development process. This is a relatively new feature but the intent is 
 
 ### Clone Repo
+If using a command-line:
 ```
 $ cd ~/dev
 $ git clone https://github.com/tmlpstats/tmlpstats
 ```
-
-### Download and install Vagrant
-Vagrant uses VirtualBox to run its virtual machines. Download and install VirtualBox:
-`https://www.virtualbox.org/`
-
-After installing VirtualBox, download and install vagrant:
-`https://www.vagrantup.com/`
-
-### Start Your dev VM
-Now that vagrant is installed, from the command line, change directory into the git repo you cloned earlier and run vagrant up.
-```
-$ cd ~/dev/tmlpstats
-$ vagrant up
-```
-Wait for the scripts to complete. This will take a while the first time since Vagrant has to download the base image. The scripts
-will download and install all of the packages needed to run the TMLP Stats project locally.
-
-If you need to see paths or default passwords, check inside the `ansible/playbook.yml`.
-
-Your VM should now be ready to go.
-
-You can add an entry to your hosts file for ease of testing:
-```
-$ echo '192.168.56.102  vagrant.tmlpstats.com' | sudo tee -a /etc/hosts"
-```
-
-View the application in your browser. Visit: `http://vagrant.tmlpstats.com/`
-
-If you see a web page with a message about setting your hosts file, double check that there is an entry for the vagrant.tmlpstats.com domain.
+You can also use a GUI client to clone the repo like [Github Desktop](https://desktop.github.com/)
 
 ### Setup for Database Seeding
-If you have an export of the database, the provisioning will import the database for you. Grab the latest dev export and copy the file
-to `~/dev/tmlpstats/export/tmlpstats_vagrant_export.sql`.
+If you have an export of the database, pace it at the location 
+`<tmlpstats folder>/docker/mysql/sql/030-dump.sql`.
+This will be used
 
-You can also snap the database after provisioning using the mysql import:
-```
-$ vagrant ssh
-<inside vagrant VM>
-$ mysql -u root vagrant_dev_tmlpstats < /vagrant/export/tmlpstats_vagrant_export.sql
-```
 
-Provisioning should setup a default admin account so you can login if you don't already have an account setup. You can
-also run this after provisioning using Laravel's artisan migrate command:
-```
-$ vagrant ssh
-<inside vagrant VM>
-$ cd /vagrant/src
-$ php artisan db:seed --class=DefaultAdminSeeder
-```
+### Download and install Docker
 
-See the DefaultAdminSeeder source code for the credentials.
+#### Mac
+All you should have to do is [Install Docker For Mac](https://docs.docker.com/docker-for-mac/install/)
+The default configuration should be good enough to get you started. You will need to be somewhat familiar with the terminal
 
-### Installing Dependencies
-The web application uses a bunch of third-party libraries. The vagrant box provisioner will install them all for you, but
-if you ever need to install them manually, you can use the following
-```
-$ vagrant ssh
-<inside vagrant VM>
-$ cd /vagrant/src
-$ composer install
-$ npm install
-$ bower install
-```
+1. open a Terminal and go to your git checkout folder.. e.g. `cd ~/dev/tmlpstats`
 
-- Composer is a php package manager and will install all of the php dependancies.
-- NPM is the node.js package manager. It just installs bower.
-- Bower is the package manager for our third-party javscript and css.
+#### Windows
+(prerequisite): to use Docker for Windows you need Windows 10 Professional/Enterprise (Home will not work!)
 
-You can run these in the vagrant box, or on your local machine in the src directory. Just make sure you have the right versions
-of php, composer and nodejs installed if you do it locally.
+1. [Install Docker For Windows](https://docs.docker.com/docker-for-windows/install/) (Make sure only to get the Stable Channel)
+2. Docker Icon -> Preferences -> Shared Drives ; share the drive that you have your git files checked out on (Usually C: drive, but it could be)
+3. Open up a command prompt window and go to the correct folder. If you checked out your files into your My Documents folder, `cd Documents\GitHub\tmlpstats`
+
+### After docker install (all OSes)
+
+1. Run the command `docker-compose up local` . The first time you do this, it is going to download and build a few things. This can take 10-20 minutes on a typical broadband.
+2. When you see the line like `Command line: 'apache2 -D FOREGROUND'` you know the service is ready.
+3. Open your favorite web browser (We recommend Chrome for the good developer tools) and go to the URL http://localhost:8080 - This should now show you a website login.
+
+
+### Usage Tips
+
+* using `ctrl-c` on your terminal will stop the running container.
+* The command `docker-compose stop` will stop the background containers too, like MySQL.
+  * The command `docker-compose rm --force` will also remove the container's state. We don't recommend this unless you are trying to chase down a specific issue.
+  * By default, your database will reset to its original state every time you stop the containers or your docker machine, so stopping your MySQL container can be problematic.
+
+## Troubleshooting issues
 
 Sometimes ```composer install``` will fail or not complete, asking for an oauth token. Github has rate-limiting for
 unauthenticated cloning. You can get around this by going to your github account settings and generating a new "Personal
 access token" for your laptop. Re run ```composer install``` and paste the token when asked. 
 
-### Next Steps
+## Next Steps
 
  * [Code Walkthrough](https://github.com/pdarg/tmlpstats/wiki/Walkthrough)
+
+## Thank you:
+<!-- The following is added at the request of BrowserStack for providing free use of their tools for opensource projects -->
+
+<img src="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" width="200" height="105" />
+<div>
+Thank you to BrowserStack for providing us with tools to test in every browser.
+</div>

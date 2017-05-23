@@ -4,10 +4,8 @@ namespace TmlpStats\Providers;
 use Illuminate\Contracts\Events\Dispatcher as DispatcherContract;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
-use Carbon\Carbon;
-
-class EventServiceProvider extends ServiceProvider {
-
+class EventServiceProvider extends ServiceProvider
+{
     /**
      * The event handler mappings for the application.
      *
@@ -17,13 +15,13 @@ class EventServiceProvider extends ServiceProvider {
         'event.name' => [
             'EventListener',
         ],
-        'auth.login' => [
+        'Illuminate\Auth\Events\Login' => [
             'TmlpStats\Handlers\Events\AuthLoginEventHandler',
         ],
-        'auth.logout' => [
+        'Illuminate\Auth\Events\Logout' => [
             'TmlpStats\Handlers\Events\AuthLogoutEventHandler',
         ],
-        'auth.attempt' => [
+        'Illuminate\Auth\Events\Attempting' => [
             'TmlpStats\Handlers\Events\AuthLoginAttemptEventHandler',
         ],
     ];

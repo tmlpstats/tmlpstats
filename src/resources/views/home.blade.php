@@ -15,12 +15,10 @@
                     <thead>
                     <tr>
                         <th>Center</th>
-                        <th style="text-align: center">Region</th>
                         <th style="text-align: center">Submitted</th>
                         <th>Rating</th>
                         <th>Submitted</th>
                         <th>Submitted By</th>
-                        <th>&nbsp;</th>
                         <th>&nbsp;</th>
                     </tr>
                     </thead>
@@ -36,20 +34,12 @@
                                     {{ $center['name'] }}
                                 @endif
                             </td>
-                            <td style="text-align: center">{{ $center['localRegion'] ?: '' }}</td>
                             <td style="text-align: center">
                                 <span class="glyphicon {{ $center['submitted'] ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span>
                             </td>
                             <td>{{ $center['rating'] }}</td>
                             <td>{{ $center['updatedAt'] }}</td>
                             <td>{{ $center['updatedBy'] }}</td>
-                            <td style="text-align: center">
-                                @if ($center['reportUrl'])
-                                    <a href="{{ $center['reportUrl'] }}" class="view" title="View" style="color: black">
-                                        <span class="glyphicon glyphicon-eye-open"></span>
-                                    </a>
-                                @endif
-                            </td>
                             <td style="text-align: center">
                                 @if ($center['sheet'])
                                     <a href="{{ $center['sheet'] }}" title="Download" style="color: black">

@@ -44,7 +44,10 @@ class TravelRoomingByTeamYear extends BaseArrangement
         $nextQuarter = $thisQuarter->getNextQuarter();
 
         foreach ($registrationDataList as $registrationData) {
-            if ($registrationData->withdrawCodeId || $registrationData->incomingQuarterId != $nextQuarter->id) {
+            if ($registrationData->withdrawCodeId
+                || $registrationData->xferOut
+                || $registrationData->incomingQuarterId != $nextQuarter->id
+            ) {
                 continue;
             }
 

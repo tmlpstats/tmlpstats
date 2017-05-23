@@ -1,11 +1,13 @@
 <?php
 namespace TmlpStats;
 
+use App;
 use Cache;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use Exception;
+use Log;
 use Session;
+use TmlpStats\Api;
 use stdClass;
 
 class Util
@@ -140,20 +142,13 @@ class Util
     }
 
     /**
-     * Assumed report date
-     *
-     * @var null|Carbon
-     */
-    protected static $reportDate = null;
-
-    /**
      * Set the report date
      *
      * @param Carbon $date
      */
     public static function setReportDate(Carbon $date)
     {
-        static::$reportDate = $date;
+        App::make(Api\Context::class)->setReportingDate($date);
     }
 
     /**
@@ -163,7 +158,7 @@ class Util
      */
     public static function getReportDate()
     {
-        return static::$reportDate ?: Carbon::now()->startOfDay();
+        return App::make(Api\Context::class)->getReportingDate();
     }
 
     /**

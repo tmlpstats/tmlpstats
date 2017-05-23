@@ -120,7 +120,8 @@
                 <?php
                 $requestJson = "{localReport: {$statsReport->id}}";
                 ?>
-                Api.LocalReport.getQuarterScoreboard({!! $requestJson !!}, function (reportData) {
+                console.log('about to hit up local report API')
+                Tmlp.Api.LocalReport.getQuarterScoreboard({!! $requestJson !!}).then(function (reportData) {
                     updateChart(reportData, "{{ $statsReport->center->name }}");
                 });
             @endif
@@ -134,7 +135,7 @@
                     <?php
                     $requestJson = "{globalReport: {$globalReport->id}, region: {$region->id}}";
                     ?>
-                    Api.GlobalReport.getQuarterScoreboard({!! $requestJson !!}, function (reportData) {
+                    Tmlp.Api.GlobalReport.getQuarterScoreboard({!! $requestJson !!}).then(function (reportData) {
                         updateChart(reportData, @json($region->name));
                     });
                 @endif
