@@ -127,7 +127,7 @@ class Scoreboard extends AuthenticatedApiBase
             'name' => static::LOCK_SETTING_KEY,
             'center' => $center,
             'quarter' => $quarter,
-            'value' => json_encode($locks->toArray()),
+            'value' => $locks->toArray(),
         ]);
     }
 

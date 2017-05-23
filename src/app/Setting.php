@@ -70,6 +70,7 @@ class Setting extends Model
 
     public static function upsert($data)
     {
+        $data['value'] = json_encode($data['value']);
         $name = $data['name'];
         if (($center = array_pull($data, 'center')) != null) {
             $data['center_id'] = $center->id;

@@ -8,8 +8,8 @@ use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Domain\Logic\QuarterDates;
 use TmlpStats\Encapsulations\RegionQuarter;
-use TmlpStats\Settings\RegionQuarterOverride;
 use TmlpStats\Settings\Setting;
+use TmlpStats\Traits\ParsesQuarterDates;
 
 /**
  * Represents a quarter for a specific center.
@@ -20,6 +20,8 @@ use TmlpStats\Settings\Setting;
  */
 class CenterQuarter implements Arrayable, \JsonSerializable
 {
+    use ParsesQuarterDates;
+
     public $center = null;
     public $quarter = null;
     public $firstWeekDate = null;
@@ -31,22 +33,22 @@ class CenterQuarter implements Arrayable, \JsonSerializable
     public $classroom3Date = null;
     protected $repromiseDate = null;
 
+    protected $context = null;
+
     const QUARTER_COPY_FIELDS = ['t1Distinction', 'year', 'id'];
 
-    public function __construct(Models\Center $center, Models\Quarter $quarter)
+    public function __construct(Models\Center $center, Models\Quarter $quarter, Api\Context $context = null)
     {
         $this->center = $center;
         $this->quarter = $quarter;
+        $this->context = $context ?: App::make(Api\Context::class);
 
-        // TODO consider removing this.
-        //$quarter->setRegion($center->region);
-
-        // TODO consider moving RegionQuarterOverride logic into this class
         $overriddenDates = $this->overriddenDates($center, $quarter);
         $regionQuarter = RegionQuarter::ensure($center->region, $quarter);
 
         foreach (QuarterDates::SIMPLE_DATE_FIELDS as $field) {
             $d = isset($overriddenDates[$field]) ? QuarterDates::fixDateInput($overriddenDates[$field]) : null;
+
             if ($d === null) {
                 $d = QuarterDates::fixDateInput($regionQuarter->$field);
             }
@@ -57,7 +59,16 @@ class CenterQuarter implements Arrayable, \JsonSerializable
 
     protected function overriddenDates($center, $quarter)
     {
-        return RegionQuarterOverride::get($center, $quarter);
+        $dates = $this->getSetting('regionQuarterOverride');
+        if ($dates === null) {
+            return [];
+        }
+
+        foreach ($dates as $k => &$v) {
+            $v = Carbon::parse($v);
+        }
+
+        return $dates;
     }
 
     public static function ensure(Models\Center $center, Models\Quarter $quarter)
@@ -122,10 +133,8 @@ class CenterQuarter implements Arrayable, \JsonSerializable
     public function getRepromiseDate()
     {
         if ($this->repromiseDate === null) {
-            $setting = Setting::name('repromiseDate')
-                ->with($this->center, $this->quarter)
-                ->get();
-            $this->repromiseDate = $setting ?: $this->classroom2Date;
+            $setting = $this->getSetting('repromiseDate');
+            $this->repromiseDate = $setting ? Carbon::parse($setting) : $this->classroom2Date;
         }
 
         return $this->repromiseDate;
@@ -146,6 +155,25 @@ class CenterQuarter implements Arrayable, \JsonSerializable
         $repromiseDate = $this->getRepromiseDate();
 
         return $date->eq($repromiseDate);
+    }
+
+    /**
+     * Get the date by which travel/room information is due.
+     *
+     * Will check for setting override, otherwise uses classroom 3 date
+     *
+     * @return Carbon
+     */
+    public function getTravelDueByDate()
+    {
+        $setting = $this->getSetting('travelDueByDate');
+
+        return ($setting) ? $this->parseQuarterDate($setting) : $this->classroom2Date;
+    }
+
+    private function getSetting($name)
+    {
+        return $this->context->getSetting($name, $this->center, $this->quarter);
     }
 
     /**
