@@ -259,11 +259,19 @@ class ReportsController extends Controller
                 return App::make($controllerClass)->showForRegion($request, $report, $reportTarget);
             }
         } else {
+            $controller = App::make(StatsReportController::class);
+
             $report = StatsReport::byCenter($reportTarget)
                 ->reportingDate($reportingDate)
                 ->official()
-                ->firstOrFail();
-            $redirectUrl = App::make(StatsReportController::class)->getUrl($report);
+                ->first();
+
+            // Find a report from a previous week
+            if ($report === null) {
+                return $controller->showReportChooser($request, $reportTarget, $reportingDate);
+            }
+
+            $redirectUrl = $report->getUriLocalReport();
 
             $this->setCenter($report->center);
         }
