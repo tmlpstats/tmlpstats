@@ -67,4 +67,9 @@ class MockContext extends Context
             return parent::can($priv, $target);
         }
     }
+
+    public function clearEncapsulations()
+    {
+        $this->encapsulations = [];
+    }
 }

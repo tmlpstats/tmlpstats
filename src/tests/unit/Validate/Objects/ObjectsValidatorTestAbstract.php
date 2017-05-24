@@ -8,6 +8,7 @@ class ObjectsValidatorTestAbstract extends ValidatorTestAbstract
 {
     protected $dataFields = [];
     protected $validateMethods = [];
+    protected $instantiateApp = true;
 
     //
     // populateValidators()
@@ -15,7 +16,7 @@ class ObjectsValidatorTestAbstract extends ValidatorTestAbstract
     public function testPopulateValidatorsSetsValidatorsForEachInput($data = null)
     {
         if ($data === null) {
-            $data = new stdClass;
+            $data = new stdClass();
         }
 
         $validator = $this->getObjectMock();

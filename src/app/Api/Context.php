@@ -156,12 +156,14 @@ class Context
         $value = $this->getRawSetting($name, $center, $quarter);
         if ($value === null) {
             return null;
-        } else if ($value === 'false') {
-            return false;
-        } else if ($value === 'true') {
-            return true;
         } else {
-            return json_decode($value, true);
+            $decoded = json_decode($value, true);
+            // For now, we treat non-parseable JSON as a string value. This may change once we've transitioned all settings to using getSetting.
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $value = $decoded;
+            }
+
+            return $value;
         }
     }
 
@@ -276,5 +278,10 @@ class Context
         }
 
         return $obj;
+    }
+
+    public static function ensure()
+    {
+        return App::make(self::class);
     }
 }

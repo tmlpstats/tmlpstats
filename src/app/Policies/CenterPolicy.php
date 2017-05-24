@@ -2,17 +2,17 @@
 
 namespace TmlpStats\Policies;
 
+use TmlpStats\Api;
 use TmlpStats\Center;
-use TmlpStats\Setting;
 use TmlpStats\User;
 
 class CenterPolicy extends Policy
 {
     public function showNewSubmissionUi(User $user, Center $center)
     {
-        $setting = Setting::get('showNewSubmissionUi', $center);
-        if ($setting) {
-            return true;
+        $setting = Api\Context::ensure()->getSetting('showNewSubmissionUi', $center);
+        if ($setting !== null) {
+            return (bool) $setting;
         }
 
         return false; // Only used to trigger the link, and only global statisticians will have it.
