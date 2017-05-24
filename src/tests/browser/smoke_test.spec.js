@@ -67,7 +67,8 @@ describe('Smoke Test', () => {
         let form = $('.submission-content form')
         form.$('[name*="email"]').click()
         form.$('[name*="email"]').setValue('hello@example.com')
-        form.$('button[type="submit"]').click()
+        form.$('button=Save').click()
+        browser.pause(1000)
     })
 
     it('can switch to Class List', () => {

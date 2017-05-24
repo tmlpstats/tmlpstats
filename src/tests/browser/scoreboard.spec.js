@@ -7,19 +7,6 @@ const vars = require('./vars')
 const DEFAULT_WAIT = 10000
 
 describe('Scoreboard', () => {
-    // After everything, capture logs and filter boring entries.
-    if (browser.desiredCapabilities && browser.desiredCapabilities.browser == 'Chrome') {
-        after(function() {
-            const BORING_MESSAGES = /Download the React DevTools/
-
-            let log = browser.log('browser').value
-            let important = log.filter(entry => !BORING_MESSAGES.test(entry.message))
-            if (important.length) {
-                console.log(important)
-                throw important
-            }
-        })
-    }
 
     it('can perform login', () => {
         browser.url('/auth/login')
@@ -44,8 +31,22 @@ describe('Scoreboard', () => {
 
     it('can enter in numbers for week', () => {
         //let form = $('form')
-        let formweek = vars.scoreboard.week - 1 // Decrement because week is off by 1.
-        
+        let formweek = vars.scoreboard.week - 1 // not likely needed anymore
+        let allcapInputs = $$('input[name*="cap.actual"]')
+
+        // Find the first non-disabled cap input and grok out the selector ID
+        // This makes us more resilient to changing weeks
+        for (let i = 0; i < allcapInputs.length; i++) {
+            let capField = allcapInputs[i]
+            if (!capField.getAttribute('disabled')) {
+                let name = capField.getAttribute('name')
+                let match = /\[(.*)\]/.exec(name)
+                console.log(`found formweek ${match[1]} in name ${name}`)
+                formweek = match[1]
+                break
+            }
+        }
+
         // Get week elements.
         let cap = $('[name="submission.scoreboard.scoreboards['+formweek+'].games.cap.actual"]')
         let cpc = $('[name="submission.scoreboard.scoreboards['+formweek+'].games.cpc.actual"]')
@@ -53,7 +54,7 @@ describe('Scoreboard', () => {
         let t2x = $('[name="submission.scoreboard.scoreboards['+formweek+'].games.t2x.actual"]')
         let gitw = $('[name="submission.scoreboard.scoreboards['+formweek+'].games.gitw.actual"]')
         let lf = $('[name="submission.scoreboard.scoreboards['+formweek+'].games.lf.actual"]')
-        
+
         // Set values for week.
         cap.setValue(60)
         cpc.setValue(20)
@@ -61,11 +62,15 @@ describe('Scoreboard', () => {
         t2x.setValue(2)
         gitw.setValue('90%') // Give percent, should still work.
         lf.setValue(30)
-        
-        // The scoreboard is saved automatically.
-        
-        // Now verify that changes persists.
+
+        // The scoreboard is saved automatically typically, but let's wait for a button.
+        let save = $('button=Save')
+        save.waitForExist(DEFAULT_WAIT)
+        save.click()
+
+        // Now verify that changes persisted.
         browser.refresh()
+        cap.waitForExist(DEFAULT_WAIT)
         expect(cap.getValue()).toEqual('60')
         expect(cpc.getValue()).toEqual('20')
         expect(t1x.getValue()).toEqual('10')
