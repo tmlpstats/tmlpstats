@@ -92,8 +92,10 @@ export class EditScoreboardLock extends RegionBase {
             )
         })
 
-        var acWarn
-        if (sbl.applyCenter.length != 1 || sbl.applyCenter[0] != centerId) {
+        const otherCenter = sbl.applyCenter.length != 1 || sbl.applyCenter[0] != centerId
+
+        let acWarn
+        if (otherCenter) {
             acWarn = (
                 <div className="col-md-5">
                 <Alert alert="warning" icon="warning-sign">
@@ -107,7 +109,7 @@ export class EditScoreboardLock extends RegionBase {
 
         return (
             <Form model={MODEL} onSubmit={this.onSubmit.bind(this)}>
-                <h2>Edit Scoreboard Locks - {center.name}</h2>
+                <h2>Edit Scoreboard Locks - {otherCenter? 'Multiple Centers' : center.name}</h2>
                 <div className="row">
                     {weeksInfo}
                 </div>
