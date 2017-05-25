@@ -1,4 +1,4 @@
-import { createSelector } from 'reselect'
+import { createSelector, defaultMemoize } from 'reselect'
 
 import { objectAssign } from '../../reusable/ponyfill'
 
@@ -20,3 +20,11 @@ export const joinedRegionQuarters = createSelector(
         })
     }
 )
+
+export const getQuarterTransitions = defaultMemoize((regionQuarter) => {
+    return {
+        [regionQuarter.classroom1Date]: true,
+        [regionQuarter.classroom2Date]: true,
+        [regionQuarter.classroom3Date]: true
+    }
+})

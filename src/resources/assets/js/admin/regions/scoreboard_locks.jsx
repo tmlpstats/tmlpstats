@@ -1,13 +1,19 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+
 import { Link, withRouter } from 'react-router'
-import { delayDispatch, connectRedux } from '../../reusable/dispatch'
-import { Form, Field, SimpleSelect } from '../../reusable/form_utils'
-import { SubmitFlip } from '../../reusable/ui_basic'
+
+import { delayDispatch, connectRedux, rebind } from '../../reusable/dispatch'
+import { Form, formActions } from '../../reusable/form_utils'
+import { FormTypeahead } from '../../reusable/typeahead'
+import { SubmitFlip, Panel, Alert } from '../../reusable/ui_basic'
 
 import RegionBase from './RegionBase'
 import * as actions from './actions'
+import { getQuarterTransitions } from './selectors'
 
 const mapStateToProps = (state) => state.admin.regions
+const MODEL = 'admin.regions.scoreboardLock.data'
 
 @connectRedux(mapStateToProps)
 export class RegionScoreboards extends RegionBase {
@@ -34,6 +40,10 @@ export class RegionScoreboards extends RegionBase {
 @withRouter
 @connectRedux(mapStateToProps)
 export class EditScoreboardLock extends RegionBase {
+    constructor(props) {
+        super(props)
+        rebind(this, 'onSubmit', 'onSelectAll')
+    }
     checkLock() {
         const { centerId, quarterId } = this.props.params
         const { data, loadState } = this.props.scoreboardLock
@@ -51,30 +61,46 @@ export class EditScoreboardLock extends RegionBase {
         if (!this.checkRegions() || !this.checkLock()) {
             return <div>Loading...</div>
         }
-        const { centerId } = this.props.params
-        const { centers: otherCenters } = this.regionCenters()
+        const { params, dispatch } = this.props
+        const { centerId } = params
+        const { centers: otherCenters, regionQuarter } = this.regionCenters()
         const center = this.props.centers.data[centerId]
         const sbl = this.props.scoreboardLock.data
+        const transitionDates = getQuarterTransitions(regionQuarter)
 
-        const MODEL = 'admin.regions.scoreboardLock.data'
+        let currentRow = []
+        let outerRows = []
+        outerRows.push(<div key={0}>{currentRow}</div>)
+        sbl.weeks.forEach((weekData, idx) => {
+            currentRow.push(
+                <div key={idx} className="btn-toolbar">
+                    <div className="btn-group"><h4>{weekData.week}</h4></div>
+                    <LockButtons value={weekData.editPromise} week={idx} dispatch={dispatch} />
+                </div>
+            )
+            if (transitionDates[weekData.week]) {
+                currentRow = []
+                outerRows.push(<div key={idx}>{currentRow}</div>)
+            }
+        })
 
-        const weeksInfo = sbl.weeks.map((weekData, idx) => {
-            const modelPrefix = `${MODEL}.weeks[${idx}]`
+        const weeksInfo = outerRows.map((v, idx) => {
             return (
-                <div key={idx}>
-                    <h4>{weekData.week}</h4>
-                    <Field model={modelPrefix + '.editPromise'}>
-                        <label><input type="checkbox" /> Edit Promise</label>
-                    </Field>
+                <div key={idx} className="col-md-8 col-lg-6">
+                    <Panel>{v}</Panel>
                 </div>
             )
         })
+
         var acWarn
-        if (centerId != sbl.applyCenter) {
+        if (sbl.applyCenter.length != 1 || sbl.applyCenter[0] != centerId) {
             acWarn = (
-                <div className="col-md-6 bg-warning">
-                    Applying to a different center copies these locks to that center.
-                    It will not save back to the center it came from.
+                <div className="col-md-5">
+                <Alert alert="warning" icon="warning-sign">
+                    Applying to a different center or more than one center
+                    copies these locks to those center(s), overwriting
+                    what was there.
+                </Alert>
                 </div>
             )
         }
@@ -82,27 +108,95 @@ export class EditScoreboardLock extends RegionBase {
         return (
             <Form model={MODEL} onSubmit={this.onSubmit.bind(this)}>
                 <h2>Edit Scoreboard Locks - {center.name}</h2>
-                {weeksInfo}
-                <br />
-                <div className="form-group">
-                    <label className="col-md-2">Apply to center</label>
-                    <div className="col-md-4">
-                        <SimpleSelect
-                                model={MODEL+'.applyCenter'} items={otherCenters}
-                                keyProp="abbreviation" labelProp="name" />
-                    </div>
-                    {acWarn}
+                <div className="row">
+                    {weeksInfo}
                 </div>
-                <SubmitFlip loadState={this.props.scoreboardLock.saveState}>
+
+                <div className="row">
+                    <div className="form-group">
+                        <div className="col-md-2">
+                            <label>Apply to center(s)</label>
+                            <br />
+                            <button type="button" className="btn btn-default" onClick={this.onSelectAll}>Select All Centers</button>
+                        </div>
+                        <div className="col-md-5">
+                            <FormTypeahead
+                                    model={MODEL+'.applyCenter'} items={otherCenters}
+                                    keyProp="abbreviation" labelProp="name"
+                                    multiple={true} rows={8} />
+                        </div>
+                        {acWarn}
+                    </div>
+                </div>
+                <SubmitFlip buttonClasses="btn btn-primary btn-lg" loadState={this.props.scoreboardLock.saveState}>
                     Save
                 </SubmitFlip>
+                <div style={{paddingTop: '20em'}}>&nbsp;</div>
             </Form>
         )
     }
 
+    onSelectAll() {
+        this.props.dispatch(formActions.change(`${MODEL}.applyCenter`, this.regionCenters().centers.map(x => x.abbreviation)))
+    }
+
     onSubmit(data) {
-        this.props.dispatch(actions.saveScoreboardLocks(data.applyCenter, data.quarterId, data)).then(() => {
-            this.props.router.push(this.regionQuarterBaseUri() + '/manage_scoreboards')
+        this.props.dispatch(actions.saveScoreboardLocks(data.applyCenter[0], data.quarterId, data)).then(() => {
+            const applyCenter = data.applyCenter.slice(1)
+            if (applyCenter.length > 0) {
+                this.props.dispatch(formActions.change(`${MODEL}.applyCenter`, applyCenter))
+                setTimeout(() => { this.onSubmit({...data, applyCenter}) }, 200)
+            } else {
+                this.props.router.push(this.regionQuarterBaseUri() + '/manage_scoreboards')
+            }
         })
     }
+}
+
+
+class LockButtons extends React.PureComponent {
+    static propTypes = {
+        week: PropTypes.number.isRequired,
+        value: PropTypes.bool
+    }
+
+    constructor(props) {
+        super(props)
+        rebind(this, 'onLock', 'onUnlock')
+    }
+
+    render() {
+        const { props } = this
+        const p1 = props.value? buttonOffProps : buttonChosenProps
+        const p2 = props.value? buttonChosenProps : buttonOffProps
+        return (
+            <div className="btn-group" role="radiogroup">
+                <button role="radio" onClick={this.onLock} {...p1}><span className="glyphicon glyphicon-lock"></span> Lock Promise</button>
+                <button role="radio" onClick={this.onUnlock} {...p2}>Editable</button>
+            </div>
+        )
+    }
+
+    setValue(v) {
+        this.props.dispatch(formActions.change(`${MODEL}.weeks[${this.props.week}].editPromise`, v))
+        return false
+    }
+
+    onLock() {
+        return this.setValue(false)
+    }
+
+    onUnlock() {
+        return this.setValue(true)
+    }
+}
+const buttonChosenProps = {
+    className: 'btn btn-default active',
+    'aria-checked': 'true',
+    type: 'button'
+}
+const buttonOffProps = {
+    className: 'btn btn-default',
+    'aria-checked': 'false',
+    type: 'button'
 }

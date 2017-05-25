@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 
 import { getErrMessage } from './ajax_utils'
 
@@ -261,18 +262,33 @@ export class Panel extends React.PureComponent {
         headingLevel: 'h3'
     }
 
+    static propTypes = {
+        color: PropTypes.string,
+        heading: PropTypes.string,
+        headingLevel: PropTypes.string,
+        children: PropTypes.node
+    }
+
     render() {
         const { color, heading, headingLevel, children } = this.props
 
-        // doing an <h3 is simply syntactic sugar for react.createElement('h3', {propName:propVal, ...}, ...children)
-        // So by directly using react.createElement we can create any heading from h1 to h6.
-        const panelHeading = React.createElement(headingLevel, {className: 'panel-title'}, heading)
+        let panelHeading
+        if (heading) {
+            // doing an <h3 is simply syntactic sugar for react.createElement('h3', {propName:propVal, ...}, ...children)
+            // So by directly using react.createElement we can create any heading from h1 to h6.
+            const panelHeadingElement = React.createElement(headingLevel, {className: 'panel-title'}, heading)
+
+            panelHeading = (
+                <div className="panel-heading">
+                    {panelHeadingElement}
+                </div>
+            )
+        }
+
 
         return (
             <div className={'panel panel-' + color}>
-                <div className="panel-heading">
-                    {panelHeading}
-                </div>
+                {panelHeading}
                 <div className="panel-body">
                     {children}
                 </div>
