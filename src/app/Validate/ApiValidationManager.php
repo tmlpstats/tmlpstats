@@ -31,12 +31,13 @@ class ApiValidationManager
         $isValid = true;
 
         foreach ($data as $type => $list) {
-            if (!$this->processDataList($type, $list, $pastWeeks[$type])) {
+            $pastData = array_get($pastWeeks, $type, []);
+            if (!$this->processDataList($type, $list, $pastData)) {
                 $isValid = false;
             }
 
             if (($type == 'TeamApplication' || $type == 'Course')
-                && !$this->processDataList($type, $list, $pastWeeks[$type], "{$type}Change")
+                && !$this->processDataList($type, $list, $pastData, "{$type}Change")
             ) {
                 $isValid = false;
             }
@@ -106,6 +107,7 @@ class ApiValidationManager
     {
         if (!$type) {
             $this->messages = array_merge($this->messages, $messages);
+
             return;
         }
 
