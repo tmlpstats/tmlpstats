@@ -7,6 +7,7 @@
  * to work with react-redux-form.
  */
 import React, { PureComponent, Component } from 'react'
+import PropTypes from 'prop-types'
 import {Typeahead as RTypeahead} from 'react-bootstrap-typeahead'
 import { defaultMemoize } from 'reselect'
 import _ from 'lodash'
@@ -32,11 +33,18 @@ export class SimpleTypeahead extends PureComponent {
         labelProp: 'label'
     }
 
+    static propTypes = {
+        value: PropTypes.any,
+        items: PropTypes.array,
+        keyProp: PropTypes.string,
+        labelProp: PropTypes.string
+    }
+
     constructor(props) {
         super(props)
         this.keyedItems = defaultMemoize(
             (input, keyProp) => {
-                console.log('keyBy:', input, keyProp)
+                //console.log('keyBy:', input, keyProp)
                 return _.keyBy(input, keyProp)
             }
         )

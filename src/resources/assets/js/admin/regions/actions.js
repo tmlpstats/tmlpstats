@@ -35,7 +35,7 @@ export function loadScoreboardLockData(center, quarter) {
 
 function initializeScoreboardLockData(centerId, quarterId, data) {
     return (dispatch) => {
-        data = objectAssign({}, data, {centerId, quarterId, applyCenter: centerId})
+        data = objectAssign({}, data, {centerId, quarterId, applyCenter: [centerId]})
         // TODO decide on center / quarter info being part of the key
         dispatch(scoreboardLockData.replaceCollection(data))
         dispatch(scoreboardLockData.loadState('loaded'))
