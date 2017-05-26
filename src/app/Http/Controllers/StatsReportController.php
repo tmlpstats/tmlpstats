@@ -129,6 +129,33 @@ class StatsReportController extends Controller
         ));
     }
 
+    public function showReportChooser(Request $request, Models\Center $center, Carbon $reportingDate)
+    {
+
+        $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
+        $cq = $crd->getCenterQuarter();
+
+        // candidates are reporting dates in reverse, but only those which are before this reporting date.
+        $dates = collect($cq->listReportingDates())->reverse()->filter(function ($d) use ($reportingDate) {
+            return $d->lt($reportingDate);
+        });
+
+        foreach ($dates as $d) {
+            $maybeReport = Models\StatsReport::byCenter($center)
+                ->reportingDate($d)
+                ->official()
+                ->first();
+            if ($maybeReport !== null) {
+                break;
+            }
+        }
+
+        return view('statsreports.report_chooser', compact(
+            'reportingDate',
+            'maybeReport'
+        ));
+    }
+
     protected function getSheetPathUrl($statsReport)
     {
         $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
