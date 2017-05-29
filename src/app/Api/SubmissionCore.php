@@ -3,7 +3,6 @@ namespace TmlpStats\Api;
 
 use App;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Log;
 use Mail;
@@ -219,7 +218,7 @@ class SubmissionCore extends AuthenticatedApiBase
                     $trd_id = DB::getPdo()->lastInsertId();
                     $debug_message .= ' trd_id=' . $trd_id;
                 }
-            }// end application processing
+            } // end application processing
 
             // Insert data rows for any applications that weren't updated this week
             if (!$isFirstWeek) {
@@ -310,11 +309,11 @@ class SubmissionCore extends AuthenticatedApiBase
                                     gitw, tdo, ?, sysdate(), sysdate()
                                 from submission_data_team_members
                                 where center_id=? and reporting_date=? and team_member_id=?',
-                            [$tm_id, $statsReport->id, $center->id, $reportingDate->toDateString(), $tm_id]);
+                        [$tm_id, $statsReport->id, $center->id, $reportingDate->toDateString(), $tm_id]);
                     $tmd_id = DB::getPdo()->lastInsertId();
                     $debug_message .= ' last_tmd_id=' . $tmd_id;
                 }
-            }// end team member processing
+            } // end team member processing
 
             // Insert data rows for any team members that have withdrawn and weren't updated this week
             if (!$isFirstWeek) {
@@ -452,7 +451,7 @@ class SubmissionCore extends AuthenticatedApiBase
                         [$statsReport->id, $center->id, $reportingDate->toDateString(), $c_id]);
                     $debug_message .= ' upd_courses_rows=' . $affected;
                 }
-            }// end course processing
+            } // end course processing
 
             if (!$isFirstWeek) {
                 $affected = DB::insert(
@@ -477,7 +476,7 @@ class SubmissionCore extends AuthenticatedApiBase
                                     (select course_id from submission_data_courses
                                         where center_id=? and reporting_date=?)',
                     [$statsReport->id, $lastStatsReportDate->toDateString(), $center->id,
-                      $center->id, $reportingDate->toDateString()]);
+                        $center->id, $reportingDate->toDateString()]);
             }
 
             // Add/update all accountability holders
@@ -495,14 +494,14 @@ class SubmissionCore extends AuthenticatedApiBase
             foreach ($allAccountabilities as $accountability) {
                 if (!isset($result[$accountability->id])) {
                     // No one is listed as accountable, remove any existing accountables
-                    DB::update("
+                    DB::update('
                         UPDATE  accountability_person ap
                         INNER JOIN people p ON p.id = ap.person_id
                         SET ap.ends_at = ?, ap.updated_at = sysdate()
                         WHERE
                             ap.accountability_id = ?
                             AND p.center_id = ?
-                            AND (ap.ends_at IS NULL OR ap.ends_at > ?)",
+                            AND (ap.ends_at IS NULL OR ap.ends_at > ?)',
                         [$reportNow->copy()->subSecond(), $accountability->id, $center->id, $reportNow]
                     );
                     continue;
@@ -527,6 +526,7 @@ class SubmissionCore extends AuthenticatedApiBase
             $globalReport->addCenterReport($statsReport);
         } catch (\Exception $e) {
             DB::rollback();
+
             return [
                 'success' => false,
                 'id' => $center->id,
@@ -539,7 +539,7 @@ class SubmissionCore extends AuthenticatedApiBase
         DB::commit();
 
         if (array_get($data, 'skipSubmitEmail', false) && $this->context->can('skipSubmitEmail', $center)) {
-            $emailResults = "<strong>Thank you.</strong> We received your statistics and did not send notification emails.";
+            $emailResults = '<strong>Thank you.</strong> We received your statistics and did not send notification emails.';
         } else {
             $emailResults = $this->sendStatsSubmittedEmail($statsReport);
         }
@@ -593,36 +593,36 @@ class SubmissionCore extends AuthenticatedApiBase
     {
         $result = [];
 
-        $user    = ucfirst($this->context->getUser()->firstName);
+        $user = ucfirst($this->context->getUser()->firstName);
         $quarter = $statsReport->quarter;
-        $center  = $statsReport->center;
-        $region  = $center->region;
+        $center = $statsReport->center;
+        $region = $center->region;
         $reportingDate = $statsReport->reportingDate;
 
         $submittedAt = $statsReport->submittedAt->copy()->setTimezone($center->timezone);
 
-        $due               = $statsReport->due();
+        $due = $statsReport->due();
         $respondByDateTime = $statsReport->responseDue();
 
         $isLate = $submittedAt->gt($due);
 
         $reportNow = $reportingDate->copy()->setTime(15, 0, 0);
 
-        $programManager         = $center->getProgramManager($reportNow);
-        $classroomLeader        = $center->getClassroomLeader($reportNow);
-        $t1TeamLeader           = $center->getT1TeamLeader($reportNow);
-        $t2TeamLeader           = $center->getT2TeamLeader($reportNow);
-        $statistician           = $center->getStatistician($reportNow);
+        $programManager = $center->getProgramManager($reportNow);
+        $classroomLeader = $center->getClassroomLeader($reportNow);
+        $t1TeamLeader = $center->getT1TeamLeader($reportNow);
+        $t2TeamLeader = $center->getT2TeamLeader($reportNow);
+        $statistician = $center->getStatistician($reportNow);
         $statisticianApprentice = $center->getStatisticianApprentice($reportNow);
 
         $emailMap = [
-            'center'                 => $center->statsEmail,
-            'regional'               => $region->email,
-            'programManager'         => $this->getEmail($programManager),
-            'classroomLeader'        => $this->getEmail($classroomLeader),
-            't1TeamLeader'           => $this->getEmail($t1TeamLeader),
-            't2TeamLeader'           => $this->getEmail($t2TeamLeader),
-            'statistician'           => $this->getEmail($statistician),
+            'center' => $center->statsEmail,
+            'regional' => $region->email,
+            'programManager' => $this->getEmail($programManager),
+            'classroomLeader' => $this->getEmail($classroomLeader),
+            't1TeamLeader' => $this->getEmail($t1TeamLeader),
+            't2TeamLeader' => $this->getEmail($t2TeamLeader),
+            'statistician' => $this->getEmail($statistician),
             'statisticianApprentice' => $this->getEmail($statisticianApprentice),
         ];
 
@@ -653,14 +653,14 @@ class SubmissionCore extends AuthenticatedApiBase
         $globalReport = Models\GlobalReport::reportingDate($statsReport->reportingDate)->first();
 
         $reportToken = Models\ReportToken::get($globalReport, $center);
-        $reportUrl   = url("/report/{$reportToken->token}");
+        $reportUrl = url("/report/{$reportToken->token}");
 
-        $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($center->abbreviation);
+        $mobileDashUrl = 'https://tmlpstats.com/m/' . strtolower($center->abbreviation);
 
         $submittedCount = Models\StatsReport::byCenter($center)
-                                     ->reportingDate($statsReport->reportingDate)
-                                     ->submitted()
-                                     ->count();
+            ->reportingDate($statsReport->reportingDate)
+            ->submitted()
+            ->count();
         $isResubmitted = ($submittedCount > 1);
 
         $centerName = $center->name;
@@ -688,23 +688,23 @@ class SubmissionCore extends AuthenticatedApiBase
                     $message->subject("Team {$centerName} Statistics Submitted");
                 }
             );
-            $successMessage = "<strong>Thank you.</strong> We received your statistics and notified the following emails"
-                . " <ul><li>{$emailTo}</li><li>" . implode('</li><li>', $emails) . "</li></ul>"
-                . " Please reply-all to that email if there is anything you need to communicate.";
+            $successMessage = '<strong>Thank you.</strong> We received your statistics and notified the following emails'
+            . " <ul><li>{$emailTo}</li><li>" . implode('</li><li>', $emails) . '</li></ul>'
+                . ' Please reply-all to that email if there is anything you need to communicate.';
 
             if (env('APP_ENV') === 'prod') {
                 Log::info("Sent emails to the following people with team {$centerName}'s report: " . implode(', ', $emails));
             } else {
                 Log::info("Sent emails to the following people with team {$centerName}'s report: " . env('ADMIN_EMAIL'));
-                $successMessage .= "<br/><br/><strong>Since this is development, we sent it to "
-                    . env('ADMIN_EMAIL') . " instead.</strong>";
+                $successMessage .= '<br/><br/><strong>Since this is development, we sent it to '
+                . env('ADMIN_EMAIL') . ' instead.</strong>';
             }
 
             return $successMessage;
         } catch (\Exception $e) {
-            Log::error("Exception caught sending error email: " . $e->getMessage());
+            Log::error('Exception caught sending error email: ' . $e->getMessage());
 
-            return  "There was a problem emailing everyone about your stats. Please contact your"
+            return 'There was a problem emailing everyone about your stats. Please contact your'
                 . " Regional Statistician ({$emailMap['regional']}) using your center stats email"
                 . " ({$emailMap['center']}) letting them know.";
         }
