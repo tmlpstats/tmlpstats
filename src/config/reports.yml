@@ -448,6 +448,14 @@ api:
           - name: data
             type: array
 
+      initFirstWeekData:
+        desc: Initialize first week data.
+        params:
+          - name: center
+            type: Center
+          - name: quarter
+            type: Quarter
+
   SubmissionData:
     type: namespace
     children:

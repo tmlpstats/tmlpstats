@@ -1,28 +1,31 @@
 import { Link, withRouter } from 'react-router'
-import { connect } from 'react-redux'
+import { defaultMemoize } from 'reselect'
 
 import { Control, Form, SimpleField, SimpleSelect, SimpleFormGroup, BooleanSelect, AddOneLink, formActions } from '../../reusable/form_utils'
 import { objectAssign } from '../../reusable/ponyfill'
-import { rebind, delayDispatch } from '../../reusable/dispatch'
+import { rebind, delayDispatch, connectRedux } from '../../reusable/dispatch'
 import { collectionSortSelector, SORT_BY } from '../../reusable/sort-helpers'
 import { Alert, ModeSelectButtons, ButtonStateFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
+import { loadTeamMembers } from '../team_members/actions'
+import { teamMembersData } from '../team_members/data'
 import { SubmissionBase, React } from '../base_components'
 import { APPLICATIONS_FORM_KEY } from './reducers'
 import { appsSorts, appsCollection } from './data'
 import { centerQuarterData } from '../core/data'
-import { getLabelTeamMember } from '../core/selectors'
 import { loadApplications, saveApplication, chooseApplication } from './actions'
 import AppStatus from './AppStatus'
 
 const getSortedApplications = collectionSortSelector(appsSorts)
 
-const mapStateToProps = (state) => {
-    const s = state.submission
-    return {lookups: s.core.lookups, centerQuarters: s.core.centerQuarters, ...s.applications}
+const sharedMapState = (state) => {
+    const submission = state.submission
+    return {
+        lookups: submission.core.lookups,
+        centerQuarters: submission.core.centerQuarters,
+        ...submission.applications
+    }
 }
-const connector = connect(mapStateToProps)
-
 
 class ApplicationsBase extends SubmissionBase {
     constructor(props) {
@@ -48,7 +51,7 @@ class ApplicationsBase extends SubmissionBase {
     }
 }
 
-@connector
+@connectRedux(sharedMapState)
 export class ApplicationsIndex extends ApplicationsBase {
     constructor(props) {
         super(props)
@@ -153,12 +156,38 @@ export class ApplicationsIndex extends ApplicationsBase {
     }
 }
 
+function editCreateMapState(state) {
+    let mapping = sharedMapState(state)
+    mapping.teamMembers = state.submission.team_members.teamMembers
+    return mapping
+}
+
+const connector = connectRedux(editCreateMapState)
+
 class _EditCreate extends ApplicationsBase {
+    constructor(props) {
+        super(props)
+        this.selectableMembers = defaultMemoize((teamMembers) => {
+            const tmp = teamMembersData.opts.getSortedMembers(teamMembers)
+            return tmp.filter(tm => tm.id && parseInt(tm.id) > 0)
+        })
+    }
     checkLoading() {
         if (!super.checkLoading()) {
             return false
         }
-        const { lookups } = this.props
+
+        const { lookups, teamMembers } = this.props
+        if (!teamMembers.loadState.loaded) {
+            if (teamMembers.loadState.available) {
+                // XXX even with this check for availability, we still sometimes double-load.
+                // For now, this may be un-fixable without going a bit further with a thunk.
+                const { centerId, reportingDate } = this.props.params
+                delayDispatch(this, loadTeamMembers(centerId, reportingDate))
+            }
+            return false
+        }
+
         return (lookups.validRegQuarters && lookups.team_members)
     }
 
@@ -171,6 +200,8 @@ class _EditCreate extends ApplicationsBase {
         } else if (this.isNewApp() && this.props.messages['create']) {
             messages = this.props.messages['create']
         }
+
+        const selectableMembers = this.selectableMembers(this.props.teamMembers)
 
         return (
             <div>
@@ -196,8 +227,8 @@ class _EditCreate extends ApplicationsBase {
                         <label className="col-md-2 control-label">Committed Team Member</label>
                         <div className="col-md-6">
                             <SimpleSelect
-                                    model={modelKey+'.committedTeamMember'} items={this.props.lookups.team_members}
-                                    keyProp="teamMemberId" getLabel={getLabelTeamMember} emptyChoice="Choose One" />
+                                    model={modelKey+'.committedTeamMember'} items={selectableMembers}
+                                    keyProp="id" getLabel={teamMembersData.opts.getLabel} emptyChoice="Choose One" />
                         </div>
                     </div>
                     <div className="form-group">
@@ -310,8 +341,8 @@ class _EditCreate extends ApplicationsBase {
     }
 }
 
-@connector
 @withRouter
+@connector
 export class ApplicationsEdit extends _EditCreate {
     checkLoading() {
         if (!super.checkLoading()) {
@@ -341,8 +372,8 @@ export class ApplicationsEdit extends _EditCreate {
     }
 }
 
-@connector
 @withRouter
+@connector
 export class ApplicationsAdd extends _EditCreate {
     checkLoading() {
         if (!super.checkLoading()) {

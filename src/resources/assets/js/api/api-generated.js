@@ -402,7 +402,15 @@ Api.SubmissionCore = {
       reportingDate: date
       data: array
     */
-    completeSubmission: bac('SubmissionCore.completeSubmission')
+    completeSubmission: bac('SubmissionCore.completeSubmission'),
+
+    /*
+    Initialize first week data.
+    Parameters:
+      center: Center
+      quarter: Quarter
+    */
+    initFirstWeekData: bac('SubmissionCore.initFirstWeekData')
 }
 
 Api.SubmissionData = {

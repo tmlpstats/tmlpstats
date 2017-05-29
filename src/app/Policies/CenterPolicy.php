@@ -59,4 +59,9 @@ class CenterPolicy extends Policy
     {
         return ($user->hasRole('globalStatistician'));
     }
+
+    public function copyQuarterData(User $user, Center $center)
+    {
+        return $user->hasRole('globalStatistician');
+    }
 }

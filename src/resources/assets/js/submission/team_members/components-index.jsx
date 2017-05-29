@@ -1,20 +1,15 @@
-import _ from 'lodash'
 import React, { PropTypes } from 'react'
 import { Link } from 'react-router'
-import { defaultMemoize } from 'reselect'
 
 import { Form, BooleanSelectView, connectCustomField, AddOneLink } from '../../reusable/form_utils'
 import { ModeSelectButtons, ButtonStateFlip, Alert } from '../../reusable/ui_basic'
 import { delayDispatch, rebind, connectRedux } from '../../reusable/dispatch'
-import { collectionSortSelector } from '../../reusable/sort-helpers'
 import { ProgramLeadersIndex } from '../program_leaders/components'
 
 import { TEAM_MEMBERS_COLLECTION_FORM_KEY } from './reducers'
 import { teamMembersData, teamMembersSorts } from './data'
 import * as actions from './actions'
 import { TeamMembersBase, GITW_LABELS, TDO_LABELS } from './components-base'
-
-const getSortedMembers = collectionSortSelector(teamMembersSorts)
 
 
 const STATE_UPDATING = 'Updating'
@@ -28,7 +23,7 @@ export class TeamMembersIndex extends TeamMembersBase {
             const submission = state.submission
             const { weeklySave, weeklyReporting, teamMembers } = submission.team_members
             const { lookups } = state.submission.core
-            const sortedMembers = getSortedMembers(teamMembers)
+            const sortedMembers = teamMembersData.opts.getSortedMembers(teamMembers)
             return { weeklySave, weeklyReporting, teamMembers, lookups, sortedMembers }
         }
     }

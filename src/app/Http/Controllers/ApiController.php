@@ -61,6 +61,7 @@ class ApiController extends ApiControllerBase
         "Submission.NextQtrAccountability.stash" => "Submission__NextQtrAccountability__stash",
         "SubmissionCore.initSubmission" => "SubmissionCore__initSubmission",
         "SubmissionCore.completeSubmission" => "SubmissionCore__completeSubmission",
+        "SubmissionCore.initFirstWeekData" => "SubmissionCore__initFirstWeekData",
         "SubmissionData.ignoreMe" => "SubmissionData__ignoreMe",
         "TeamMember.create" => "TeamMember__create",
         "TeamMember.update" => "TeamMember__update",
@@ -394,6 +395,13 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'data', 'array')
+        );
+    }
+    protected function SubmissionCore__initFirstWeekData($input)
+    {
+        return App::make(Api\SubmissionCore::class)->initFirstWeekData(
+            $this->parse($input, 'center', 'Center'),
+            $this->parse($input, 'quarter', 'Quarter')
         );
     }
     protected function SubmissionData__ignoreMe($input)

@@ -199,7 +199,7 @@ class TeamMember extends AuthenticatedApiBase
         //   WHERE (year = 2014 AND quarter >= 3) OR (year=2015 AND quarter < 3)
         $result = Models\Quarter::where(function ($query) use ($currentQuarter) {
             $query->where('year', $currentQuarter->year - 1)
-                  ->where('quarter_number', '>=', $currentQuarter->quarterNumber);
+                  ->where('quarter_number', '>', $currentQuarter->quarterNumber);
         })->orWhere(function ($query) use ($currentQuarter) {
             $query->where('year', $currentQuarter->year)
                   ->where('quarter_number', '<', $currentQuarter->quarterNumber);
