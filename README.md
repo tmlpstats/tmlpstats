@@ -3,7 +3,7 @@
 **Table Of Contents**
 
 * [Installing/Setup](#installing)
-* [Code Walkthrough](https://github.com/pdarg/tmlpstats/wiki/Walkthrough)
+* [Code Walkthrough](https://github.com/tmlpstats/tmlpstats/wiki/Walkthrough)
 
 ## Installing:
 This repo includes a docker-compose file and docker images setup to streamline our development process. This is a relatively new feature but the intent is 
@@ -18,15 +18,15 @@ You can also use a GUI client to clone the repo like [Github Desktop](https://de
 
 ### Setup for Database Seeding
 If you have an export of the database, pace it at the location 
-`<tmlpstats folder>/docker/mysql/sql/030-dump.sql`.
-This will be used
+`<tmlpstats folder>/docker/mysql/sql/030-dump.sql.gz`. (or `030-dump.sql` if it's not a `.gz` file)
+This will be used later when building your local mysql image.
 
 
 ### Download and install Docker
 
 #### Mac
 All you should have to do is [Install Docker For Mac](https://docs.docker.com/docker-for-mac/install/)
-The default configuration should be good enough to get you started. You will need to be somewhat familiar with the terminal
+The default configuration should be good enough to get you started. You will need to be somewhat familiar with the Terminal to use the commands.
 
 1. open a Terminal and go to your git checkout folder.. e.g. `cd ~/dev/tmlpstats`
 
@@ -34,7 +34,7 @@ The default configuration should be good enough to get you started. You will nee
 (prerequisite): to use Docker for Windows you need Windows 10 Professional/Enterprise (Home will not work!)
 
 1. [Install Docker For Windows](https://docs.docker.com/docker-for-windows/install/) (Make sure only to get the Stable Channel)
-2. Docker Icon -> Preferences -> Shared Drives ; share the drive that you have your git files checked out on (Usually C: drive, but it could be)
+2. Docker Icon -> Preferences -> Shared Drives ; share the drive that you have your git files checked out on (Usually C: drive, but it could be different if you have multiple drives and put your code somewhere else.)
 3. Open up a command prompt window and go to the correct folder. If you checked out your files into your My Documents folder, `cd Documents\GitHub\tmlpstats`
 
 ### After docker install (all OSes)
@@ -49,7 +49,7 @@ The default configuration should be good enough to get you started. You will nee
 * using `ctrl-c` on your terminal will stop the running container.
 * The command `docker-compose stop` will stop the background containers too, like MySQL.
   * The command `docker-compose rm --force` will also remove the container's state. We don't recommend this unless you are trying to chase down a specific issue.
-  * By default, your database will reset to its original state every time you stop the containers or your docker machine, so stopping your MySQL container can be problematic.
+  * By default, your database will reset to its original state every time you `docker-compose rm` the container, so consider that if you have made extensive local changes. Of course, this can be used to your advantage when testing new features to reset to a known state.
 
 ## Troubleshooting issues
 
@@ -59,7 +59,7 @@ access token" for your laptop. Re run ```composer install``` and paste the token
 
 ## Next Steps
 
- * [Code Walkthrough](https://github.com/pdarg/tmlpstats/wiki/Walkthrough)
+ * [Code Walkthrough](https://github.com/tmlpstats/tmlpstats/wiki/Walkthrough)
 
 ## Thank you:
 <!-- The following is added at the request of BrowserStack for providing free use of their tools for opensource projects -->
