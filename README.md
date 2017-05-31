@@ -40,8 +40,8 @@ The default configuration should be good enough to get you started. You will nee
 ### After docker install (all OSes)
 
 1. Run the command `docker-compose up local` . The first time you do this, it is going to download and build a few things. This can take 10-20 minutes on a typical broadband.
-2. When you see the line like `Command line: 'apache2 -D FOREGROUND'` you know the service is ready.
-3. Open your favorite web browser (We recommend Chrome for the good developer tools) and go to the URL http://localhost:8080 - This should now show you a website login.
+2. When you see the line like `[BS] Watching files...` you know the service is ready.
+3. Open your favorite web browser (We recommend Chrome for the good developer tools) and go to the URL http://localhost:8030 - This should now show you a website login.
 
 
 ### Usage Tips
