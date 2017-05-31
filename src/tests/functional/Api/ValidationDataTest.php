@@ -67,7 +67,7 @@ class ValidationDataTest extends FunctionalTestAbstract
             'course_id' => $this->course->id,
             'stats_report_id' => $this->lastReport->id,
             'quarter_start_ter' => 8,
-            'quarter_start_standardStarts' => 6,
+            'quarter_start_standard_starts' => 6,
             'quarter_start_xfer' => 0,
             'current_ter' => 28,
             'current_standard_starts' => 22,
@@ -116,7 +116,9 @@ class ValidationDataTest extends FunctionalTestAbstract
                 'TeamApplication' => [
                     ['level' => 'warning', 'id' => 'TEAMAPP_INCOMING_QUARTER_CHANGED'],
                 ],
-                'Course' => [],
+                'Course' => [ // changed from 0 -> 1
+                    ['level' => 'warning', 'id' => 'COURSE_QSTART_XFER_CHANGED'],
+                ],
                 'Scoreboard' => [],
                 'TeamMember' => [
                     ['level' => 'warning'],

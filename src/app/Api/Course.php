@@ -113,7 +113,7 @@ class Course extends ApiBase
 
     protected function getPastWeeksData(Models\Center $center, Carbon $reportingDate, Models\Course $course)
     {
-        $lastWeekReportingDate = $this->lastReportingDate($center, $reportingDate);
+        $lastWeekReportingDate = $this->lastReportingDate($center, $reportingDate, true);
         if (!$lastWeekReportingDate) {
             return [];
         }

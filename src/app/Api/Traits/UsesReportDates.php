@@ -7,11 +7,11 @@ use TmlpStats\Encapsulations;
 
 trait UsesReportDates
 {
-    protected function lastReportingDate(Models\Center $center, Carbon $reportingDate)
+    protected function lastReportingDate(Models\Center $center, Carbon $reportingDate, $includePastQuarter = false)
     {
         $cq = Encapsulations\CenterReportingDate::ensure($center, $reportingDate)->getCenterQuarter();
 
-        if ($reportingDate->eq($cq->firstWeekDate)) {
+        if (!$includePastQuarter && $reportingDate->eq($cq->firstWeekDate)) {
             return null;
         }
 
