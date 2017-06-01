@@ -176,7 +176,7 @@ trait GlobalReportDispatch
             return 0;
         }
         $config = array_get($this->dispatchMap, strtolower($report), []);
-        $cacheTime = array_get($config, 'cacheTime', 60);
+        $cacheTime = array_get($config, 'cacheTime', 60*24*7);
 
         return $cacheTime;
     }
