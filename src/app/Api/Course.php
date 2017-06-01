@@ -8,6 +8,7 @@ use TmlpStats\Api\Base\ApiBase;
 use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
+use TmlpStats\Encapsulations;
 
 /**
  * Courses
@@ -112,7 +113,7 @@ class Course extends ApiBase
 
     protected function getPastWeeksData(Models\Center $center, Carbon $reportingDate, Models\Course $course)
     {
-        $lastWeekReportingDate = $this->lastReportingDate($center, $reportingDate);
+        $lastWeekReportingDate = $this->lastReportingDate($center, $reportingDate, true);
         if (!$lastWeekReportingDate) {
             return [];
         }
@@ -134,8 +135,9 @@ class Course extends ApiBase
 
     protected function getCourseMeta(Domain\Course $course, Models\Center $center, Carbon $reportingDate)
     {
-        $isFirstWeek = Models\Quarter::isFirstWeek($center->region);
+        $cq = Encapsulations\CenterReportingDate::ensure($center, $reportingDate)->getCenterQuarter();
 
+        $isFirstWeek = $reportingDate->eq($cq->firstWeekDate);
         $courseReportDate = $course->startDate->copy()->next(Carbon::FRIDAY);
         $isPastCourse = $reportingDate->gt($courseReportDate);
         $isCompletionWeek = $reportingDate->eq($courseReportDate);

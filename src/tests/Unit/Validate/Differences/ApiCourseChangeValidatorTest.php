@@ -55,7 +55,11 @@ class ApiCourseChangeValidatorTest extends ApiValidatorTestAbstract
             $pastWeeks = [ $this->getCourse($pastWeeks) ];
         }
 
-        $validator = $this->getObjectMock();
+        $validator = $this->getObjectMock(['isFirstWeek']);
+        $validator->expects($this->any())
+                  ->method('isFirstWeek')
+                  ->willReturn(false);
+
         $result = $validator->run($data, $pastWeeks);
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
@@ -89,6 +93,218 @@ class ApiCourseChangeValidatorTest extends ApiValidatorTestAbstract
                 ],
                 [
                     'startDate' => '2016-09-06',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerValidateCourseQuarterStart
+     */
+    public function testValidateCourseQuarterStart($data, $expectedMessages, $pastWeeks = [])
+    {
+        $isFirstWeek = false;
+        if (isset($data['_isFirstWeek'])) {
+            $isFirstWeek = $data['_isFirstWeek'];
+            unset($data['_isFirstWeek']);
+        }
+
+        $data = $this->getCourse($data);
+
+        if ($pastWeeks) {
+            $pastWeeks = [ $this->getCourse($pastWeeks) ];
+        }
+
+        $validator = $this->getObjectMock(['isFirstWeek']);
+        $validator->expects($pastWeeks ? $this->once() : $this->never())
+                  ->method('isFirstWeek')
+                  ->willReturn($isFirstWeek);
+
+        $result = $validator->run($data, $pastWeeks);
+
+        $this->assertMessages($expectedMessages, $validator->getMessages());
+        $this->assertTrue($result);
+    }
+
+    public function providerValidateCourseQuarterStart()
+    {
+        return [
+            // No past weeks
+            [
+                [],
+                [],
+            ],
+
+            // First Week, QStart values did not change
+            [
+                [
+                    '_isFirstWeek' => true,
+                ],
+                [],
+                [
+                    'currentTer' => '15',
+                    'currentStandardStarts' => 14,
+                    'currentXfer' => 0,
+                ],
+            ],
+            // First Week, quarterStartTer doesn't match
+            [
+                [
+                    '_isFirstWeek' => true,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_QSTART_TER_DOES_NOT_MATCH_QEND',
+                        'reference.field' => 'quarterStartTer',
+                    ]),
+                ],
+                [
+                    'currentTer' => '20',
+                    'currentStandardStarts' => 14,
+                    'currentXfer' => 0,
+                ],
+            ],
+            // First Week, quarterStartStandardStarts doesn't match
+            [
+                [
+                    '_isFirstWeek' => true,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_QSTART_SS_DOES_NOT_MATCH_QEND',
+                        'reference.field' => 'quarterStartStandardStarts',
+                    ]),
+                ],
+                [
+                    'currentTer' => '15',
+                    'currentStandardStarts' => 15,
+                    'currentXfer' => 0,
+                ],
+            ],
+            // First Week, quarterStartXfer doesn't match
+            [
+                [
+                    '_isFirstWeek' => true,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_QSTART_XFER_DOES_NOT_MATCH_QEND',
+                        'reference.field' => 'quarterStartXfer',
+                    ]),
+                ],
+                [
+                    'currentTer' => '15',
+                    'currentStandardStarts' => 14,
+                    'currentXfer' => 2,
+                ],
+            ],
+            // First Week, QStart values doesn't match
+            [
+                [
+                    '_isFirstWeek' => true,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_QSTART_TER_DOES_NOT_MATCH_QEND',
+                        'reference.field' => 'quarterStartTer',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_QSTART_SS_DOES_NOT_MATCH_QEND',
+                        'reference.field' => 'quarterStartStandardStarts',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_QSTART_XFER_DOES_NOT_MATCH_QEND',
+                        'reference.field' => 'quarterStartXfer',
+                    ]),
+                ],
+                [
+                    'currentTer' => '20',
+                    'currentStandardStarts' => 19,
+                    'currentXfer' => 2,
+                ],
+            ],
+
+
+
+
+
+
+            // Later Week, QStart values did not change
+            [
+                [],
+                [],
+                [
+                    'quarterStartTer' => '15',
+                    'quarterStartStandardStarts' => 14,
+                    'quarterStartXfer' => 0,
+                ],
+            ],
+            // Later Week, quarterStartTer changed
+            [
+                [],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_QSTART_TER_CHANGED',
+                        'reference.field' => 'quarterStartTer',
+                    ]),
+                ],
+                [
+                    'quarterStartTer' => '20',
+                    'quarterStartStandardStarts' => 14,
+                    'quarterStartXfer' => 0,
+                ],
+            ],
+            // Later Week, quarterStartStandardStarts changed
+            [
+                [],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_QSTART_SS_CHANGED',
+                        'reference.field' => 'quarterStartStandardStarts',
+                    ]),
+                ],
+                [
+                    'quarterStartTer' => '15',
+                    'quarterStartStandardStarts' => 15,
+                    'quarterStartXfer' => 0,
+                ],
+            ],
+            // Later Week, quarterStartXfer changed
+            [
+                [],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_QSTART_XFER_CHANGED',
+                        'reference.field' => 'quarterStartXfer',
+                    ]),
+                ],
+                [
+                    'quarterStartTer' => '15',
+                    'quarterStartStandardStarts' => 14,
+                    'quarterStartXfer' => 2,
+                ],
+            ],
+            // Later Week, QStart values changed
+            [
+                [],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_QSTART_TER_CHANGED',
+                        'reference.field' => 'quarterStartTer',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_QSTART_SS_CHANGED',
+                        'reference.field' => 'quarterStartStandardStarts',
+                    ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'COURSE_QSTART_XFER_CHANGED',
+                        'reference.field' => 'quarterStartXfer',
+                    ]),
+                ],
+                [
+                    'quarterStartTer' => '20',
+                    'quarterStartStandardStarts' => 19,
+                    'quarterStartXfer' => 2,
                 ],
             ],
         ];

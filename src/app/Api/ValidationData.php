@@ -15,7 +15,7 @@ use TmlpStats\Encapsulations;
  */
 class ValidationData extends AuthenticatedApiBase
 {
-    use Traits\ValidatesObjects;
+    use Traits\ValidatesObjects, Traits\UsesReportDates;
 
     protected $dataTypesConf = [
         'Application' => [
@@ -68,9 +68,6 @@ class ValidationData extends AuthenticatedApiBase
 
     protected function validateSubmissionData(Models\StatsReport $report)
     {
-        $cq = Encapsulations\CenterReportingDate::ensure($report->center, $report->reportingDate)->getCenterQuarter();
-        $isFirstWeek = $report->reportingDate->eq($cq->firstWeekDate);
-
         $data = [];
         $pastWeeks = [];
         foreach ($this->dataTypesConf as $group => $conf) {
@@ -79,14 +76,15 @@ class ValidationData extends AuthenticatedApiBase
                 $report->reportingDate
             );
 
-            // We don't care about last week's data if this is the first week of the quarter
-            if ($isFirstWeek) {
+            // We don't care about last week's data if this is the first week of the quarter, unless this is a Course
+            $lastReportingDate = $this->lastReportingDate($report->center, $report->reportingDate, ($conf['typeName'] === 'Course'));
+            if (!$lastReportingDate) {
                 continue;
             }
 
             $pastWeeks[$conf['typeName']] = App::make($conf['apiClass'])->getWeekSoFar(
                 $report->center,
-                $report->reportingDate->copy()->subWeek(),
+                $lastReportingDate,
                 false
             );
         }
