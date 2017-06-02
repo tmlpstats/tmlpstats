@@ -27,9 +27,7 @@ class TeamMembersByStatus extends BaseArrangement
                 $reportData['xferOut'][] = $data;
             }
 
-            if ($data->teamYear == 1 && $data->quarterNumber == 4
-                && $data->withdrawCodeId === null && !$data->ctw && !$data->xferOut && !$data->wbo
-            ) {
+            if ($data->teamYear == 1 && $data->quarterNumber == 4 && $data->isActiveMember()) {
                 $reportData['t2Potential'][] = $data;
             }
         }
