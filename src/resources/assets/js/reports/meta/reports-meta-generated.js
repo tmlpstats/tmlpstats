@@ -248,7 +248,7 @@ const GlobalReport = {
         "id": "TeamMemberStatusWbo",
         "n": 33,
         "type": "report",
-        "name": "WBO"
+        "name": "WBI"
     },
     "TeamMemberStatusTransfer": {
         "id": "TeamMemberStatusTransfer",

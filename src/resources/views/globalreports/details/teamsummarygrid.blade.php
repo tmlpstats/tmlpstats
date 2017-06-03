@@ -289,7 +289,7 @@
             <th colspan="1" class="data-point border-right">Xfer Out</th>
             <th colspan="1" class="data-point border-right">Xfer In</th>
             <th colspan="5" class="data-point border-right">Withdraws</th>
-            <th colspan="1" class="data-point border-right">Well Being Out</th>
+            <th colspan="1" class="data-point border-right">Well Being Issue</th>
             <th colspan="1" class="data-point border-right">Conv. To Withdraw</th>
             <th colspan="1" class="data-point border-right">Reregisterd</th>
             <th colspan="1" class="data-point border-right">Currently On Team</th>

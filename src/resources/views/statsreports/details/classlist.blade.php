@@ -78,7 +78,7 @@
                                     $special[] = "Xfer In";
                                 }
                                 if ($memberData->wbo) {
-                                    $special[] = "WBO";
+                                    $special[] = "WBI";
                                 }
                                 if ($memberData->ctw) {
                                     $special[] = "CTW";

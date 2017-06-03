@@ -487,12 +487,12 @@ class Message
         ],
         'CLASSLIST_WD_WBO_ONLY_ONE' => [
             'type' => Message::ERROR,
-            'format' => 'Both WD and WBO are set. Only one should be set.',
+            'format' => 'Both WD and WBI are set. Only one should be set.',
             'arguments' => [],
         ],
         'CLASSLIST_WD_CTW_ONLY_ONE' => [
             'type' => Message::ERROR,
-            'format' => 'Both WD/WBO and CTW are set. CTW should not be set after the team member has withdrawn.',
+            'format' => 'Both WD/WBI and CTW are set. CTW should not be set after the team member has withdrawn.',
             'arguments' => [],
         ],
         'CLASSLIST_WD_DOESNT_MATCH_YEAR' => [
