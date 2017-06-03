@@ -29,7 +29,7 @@ return [
     'CLASSLIST_GITW_MISSING' => 'GITW was not provided.',
     'CLASSLIST_TDO_MISSING' => 'TDO was not provided.',
     'CLASSLIST_WD_COMMENT_MISSING' => 'Add a comment with the date of withdraw.',
-    'CLASSLIST_WD_CTW_ONLY_ONE' => 'Both WD/WBO and CTW are set. CTW should not be set after the team member has withdrawn.',
+    'CLASSLIST_WD_CTW_ONLY_ONE' => 'Both WD/WBI and CTW are set. CTW should not be set after the team member has withdrawn.',
     'CLASSLIST_WKND_MISSING' => 'Was team member at the weekend, or did they transfer in? Please select one.',
     'CLASSLIST_WKND_XIN_REREG_ONLY_ONE' => 'Was team member at the weekend, or did they transfer in? Please select only one.',
     'CLASSLIST_XFER_COMMENT_MISSING' => 'Add a comment specifying the date of transfer and the center they transferred to/from.',

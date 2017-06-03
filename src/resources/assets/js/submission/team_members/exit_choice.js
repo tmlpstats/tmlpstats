@@ -7,14 +7,14 @@ const EC_WD = 'wd'
 export const EXIT_CHOICES = [
     {key: EC_ONTEAM, label: 'On Team'},
     {key: EC_XFER_OUT, label: 'Transfer Out'},
-    {key: EC_WBO, label: 'Well-Being Out'},
+    {key: EC_WBO, label: 'Well-Being Issue'},
     {key: EC_CTW, label: 'Conversation to Withdraw'},
     {key: EC_WD, label: 'Withdrawn'}
 ]
 
 export const EXIT_CHOICES_HELP = {
     xferOut: 'Choose this option to mark that a team has transferred to another team this quarter. Provide the team they are transferring to in the comment field.',
-    wbo: 'Choosing this option indicates that this participant (a current team member) has a well-being issue and is taking time away from the team. 4 to 6 week maximum. Time longer than this must be approved by Jerry Baden.',
+    wbo: 'Choosing this option indicates that this participant (a current team member) has a well-being issue and is taking time away from the team. 4 to 6 week maximum. Time longer than this must be approved by Jerry Baden. Please add a comment with who approved and the date when they will return.',
     ctw: 'Choose this option to indicate this current team member is in the conversation to withdraw from the team.  To actually be withdrawn the person must be approved by the Program Manager.',
     wd:  'Choose this option to indicate that this team member has withdrawn. You must select a withdraw reason below.'
 }

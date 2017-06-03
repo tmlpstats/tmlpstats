@@ -101,7 +101,7 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
                         <dt>Total:</dt>
                         <dd>{{ $teamWithdraws['total'] }}</dd>
                         @if ($teamWithdraws['wbo'])
-                            <dt>Well-Being Out:</dt>
+                            <dt>Well-Being Issue:</dt>
                             <dd>{{ $teamWithdraws['wbo'] }}</dd>
                         @endif
                         @if ($teamWithdraws['ctw'])

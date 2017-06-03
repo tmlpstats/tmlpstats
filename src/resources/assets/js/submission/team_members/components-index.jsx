@@ -157,7 +157,7 @@ class TeamMemberWithdrawnRow extends React.PureComponent {
         if (teamMember.withdrawCode) {
             reason = lookups.withdraw_codes_by_id[teamMember.withdrawCode].display
         } else if (teamMember.wbo) {
-            reason = 'Well-being Out'
+            reason = 'Well-being Issue'
         }
         return (
             <tr>

@@ -276,7 +276,7 @@ trait GlobalReportDispatch
     // Get report CTW
     protected abstract function getTeamMemberStatusCtw();
 
-    // Get report WBO
+    // Get report WBI
     protected abstract function getTeamMemberStatusWbo();
 
     // Get report Transfers
