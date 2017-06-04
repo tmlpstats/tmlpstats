@@ -1,6 +1,6 @@
 import Immutable from 'immutable'
 
-import { compositeKey, createSorters } from '../../reusable/sort-helpers'
+import { compositeKey, createSorters, collectionSortSelector } from '../../reusable/sort-helpers'
 import FormReduxLoader from '../../reusable/redux_loader/rrf'
 import { LoadingMultiState, InlineBulkWork, MessageManager } from '../../reusable/reducers'
 import Api from '../../api'
@@ -8,7 +8,7 @@ import Api from '../../api'
 export const teamMembersSorts = createSorters([
     {
         key: 'teamYear_quarter_first_last',
-        label: 'Default',
+        label: 'Year, Quarter',
         comparator: compositeKey([['teamYear', 'number'], ['quarterNumber', 'number'], ['firstName', 'string'], ['lastName', 'string']])
     },
     {
@@ -38,7 +38,11 @@ export const teamMembersData = new FormReduxLoader({
         }
     },
     useMeta: true,
-    initialMeta: Immutable.Map({sort_by: 'teamYear_quarter_first_last'})
+    initialMeta: Immutable.Map({sort_by: 'first_last'}),
+    getSortedMembers: collectionSortSelector(teamMembersSorts),
+    getLabel(tm) {
+        return `${tm.firstName} ${tm.lastName} (T${tm.teamYear}Q${tm.quarterNumber})`
+    }
 })
 
 export const weeklyReportingSave = new LoadingMultiState('team_members/saveWeeklyReporting')

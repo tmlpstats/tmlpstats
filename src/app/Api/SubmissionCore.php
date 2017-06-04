@@ -11,6 +11,7 @@ use TmlpStats\Api;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Api\Exceptions;
 use TmlpStats\Domain;
+use TmlpStats\Encapsulations;
 use TmlpStats\Http\Controllers;
 
 class SubmissionCore extends AuthenticatedApiBase
@@ -713,4 +714,111 @@ class SubmissionCore extends AuthenticatedApiBase
 
         return $person->email;
     }
+
+    public function initFirstWeekData(Models\Center $center, Models\Quarter $quarter)
+    {
+        $this->assertCan('copyQuarterData', $center);
+
+        $cq = Domain\CenterQuarter::ensure($center, $quarter);
+        // The start weekend is actually in the previous quarter, so we can use that to grab the previous quarter
+        $lastWeek = Encapsulations\CenterReportingDate::ensure($center, $cq->startWeekendDate);
+        $lastQuarter = $lastWeek->getQuarter();
+        $report = [];
+
+        $initData = $this->initSubmission($center, $cq->firstWeekDate);
+
+        // ends up being a map of quarter ID -> random index value which doesn't matter much
+        $validStartQids = $initData['validStartQuarters']
+            ->map(function ($cq) {return $cq->quarter->id;})
+            ->flip();
+
+        // Build a map of team members to next quarter accountabilities
+        $nqas = App::make(Api\Submission\NextQtrAccountability::class)->allForCenter($center, $lastWeek->reportingDate);
+
+        $teamNqas = [];
+        foreach ($nqas as $nqa) {
+            if ($nqa->teamMemberId !== null) {
+                $teamNqas[$nqa->teamMemberId][] = $nqa->id;
+            }
+        }
+
+        // Phase 1: Copy non-completing Team Members
+        $goodTeamMembers = [];
+        $tmApi = App::make(Api\TeamMember::class);
+        $members = $tmApi->allForCenter($center, $lastWeek->reportingDate, true);
+        foreach ($members as $id => $member) {
+            if ($validStartQids->has($member->incomingQuarterId)
+                && $member->withdrawCode == null
+                && !$member->xferOut && !$member->wbo) {
+
+                $copy = 'Copied';
+                $data = $member->toArray();
+                unset($data['tdo'], $data['gitw']);
+                $data = array_merge($data, [
+                    'xferIn' => false, 'ctw' => false,
+                    'travel' => false, 'room' => false,
+                    'comment' => '',
+                    'quarterNumber' => array_get($data, 'quarterNumber', 0) + 1,
+                    'accountabilities' => array_get($teamNqas, $id, []),
+                ]);
+                $goodTeamMembers[$id] = true;
+
+                $result = $tmApi->stash($center, $cq->firstWeekDate, $data);
+                if ($result['success']) {
+                    $copy .= ' And stashed';
+                }
+            } else {
+                $copy = 'SKIPPED';
+            }
+
+            $report[] = "{$copy} Team Member {$member->id}: {$member->firstName} {$member->lastName}";
+        }
+
+        // Phase 2: Copy non-starting Team Expansion
+        $appsApi = App::make(Api\Application::class);
+        $applications = $appsApi->allForCenter($center, $lastWeek->reportingDate, true);
+
+        foreach ($applications as $id => $app) {
+            $personInfo = "{$app->firstName} {$app->lastName} ({$app->id})";
+            if ($app->withdrawCode === null) {
+                $data = collect($app->toArray())->except(['travel', 'room']);
+                if ($app->apprDate !== null && $app->incomingQuarterId == $quarter->id) {
+                    // TODO copy applicants to stashed negative ID team members
+                    $report[] = "Applicant {$personInfo} should be turned into a team member";
+                } else {
+                    $data = $data->all(); // ->all() on a collection returns the underlying array
+                    if (!array_key_exists($app->committedTeamMemberId, $goodTeamMembers)) {
+                        $ctm = $app->committedTeamMember->person;
+                        $personInfo .= " NOTE: Had committed team member {$ctm->firstName} {$ctm->lastName} who completed.";
+                        unset($data['committedTeamMember']);
+                        $data['comment'] = "AUTOMATED NOTE FROM SYSTEM:\napplicant was copied over from previous quarter's stats. Committed team member {$ctm->firstName} {$ctm->lastName} has completed team. Please pick new committed team member, and then clear this note.";
+                    }
+
+                    $appsApi->stash($center, $cq->firstWeekDate, $data);
+
+                    $report[] = "Applicant copied: $personInfo";
+                }
+            } else {
+                $report[] = "SKIPPED withdrawn applicant {$personInfo}";
+            }
+        }
+
+        // Phase 3: Copy non-completed courses
+        $coursesApi = App::make(Api\Course::class);
+        $courses = $coursesApi->allForCenter($center, $lastWeek->reportingDate, true);
+        foreach ($courses as $id => $course) {
+            if (intval($id) > 0 && $course->startDate->gt($lastWeek->reportingDate)) {
+                $report[] = "Going to copy course {$course->type} {$course->startDate}";
+                $data = array_merge($course->toArray(), [
+                    'quarterStartTer' => $course->currentTer,
+                    'quarterStartStandardStarts' => $course->currentStandardStarts,
+                    'quarterStartXfer' => $course->currentXfer,
+                ]);
+                $coursesApi->stash($center, $cq->firstWeekDate, $data);
+            }
+        }
+
+        return compact('report', 'validStartQids');
+    }
+
 }
