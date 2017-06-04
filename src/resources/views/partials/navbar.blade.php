@@ -59,11 +59,17 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
             @if (Auth::check())
                 <div class="navbar-left">
                     <ul class="nav navbar-nav">
-                        {{-- Validate Stats --}}
+
                         @can ('validate', TmlpStats\StatsReport::class)
-                        <li {!! Request::is('validate') ? 'class="active"' : '' !!}>
-                            <a href="{{ route('validate') }}">Validate</a>
-                        </li>
+                            @can ('showNewSubmissionUi', $currentCenter)
+                            <li {!! Request::is('center/*/submission/*') ? 'class="active"' : '' !!}>
+                                <a href="{{ action('CenterController@submission', ['abbr' => $currentCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Submit Report</a>
+                            </li>
+                            @else
+                            <li {!! Request::is('validate') ? 'class="active"' : '' !!}>
+                                <a href="{{ route('validate') }}">Validate</a>
+                            </li>
+                            @endcan
                         @endcan
 
                         @if ($showNextQtrAccountabilities)
@@ -71,12 +77,6 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                                 <a href="{{ action('CenterController@nextQtrAccountabilities', ['abbr' => $currentCenter->abbrLower()]) }}">Accountabilities</a>
                             </li>
                         @endif
-
-                        @can ('showNewSubmissionUi', $currentCenter)
-                        <li {!! Request::is('center/*/submission/*') ? 'class="active"' : '' !!}>
-                            <a href="{{ action('CenterController@submission', ['abbr' => $currentCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Submit Report (beta)</a>
-                        </li>
-                        @endcan
 
                         {{-- Admin --}}
                         @if (Auth::user()->hasRole('administrator'))
