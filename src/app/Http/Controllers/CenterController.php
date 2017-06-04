@@ -52,6 +52,8 @@ class CenterController extends Controller
             'liveScoreboard'
         );
 
+        return redirect($statsReport->getUriLocalReport());
+
         return view('centers.dashboard')->with(array_merge($data, $weekData));
     }
 
