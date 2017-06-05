@@ -32,7 +32,9 @@ class GlobalReportRegionGamesData
         $weeksData = [];
         foreach ($reports as $weekReport) {
             $dateStr = $weekReport->reportingDate->toDateString();
-            $weeksData[$dateStr] = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($weekReport, $region);
+            $week = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($weekReport, $region);
+            ksort($week);
+            $weeksData[$dateStr] = $week;
         }
 
         return $weeksData;
