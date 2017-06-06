@@ -78,7 +78,6 @@ class ProgramLeader extends AuthenticatedApiBase
         return $programLeaders;
     }
 
-
     /**
      * Stash an in-progress weekly program leader data.
      * @param  Models\Center $center        The center of this report submission
@@ -88,7 +87,7 @@ class ProgramLeader extends AuthenticatedApiBase
      */
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
-        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate, ['write']);
 
         $this->assertCan('submitStats', $center);
 
@@ -128,6 +127,7 @@ class ProgramLeader extends AuthenticatedApiBase
     {
         $data = $this->allForCenter($center, $reportingDate, $includeInProgress);
         unset($data['meta']);
+
         return $data;
     }
 }

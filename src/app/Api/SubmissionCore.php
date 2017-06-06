@@ -69,7 +69,7 @@ class SubmissionCore extends AuthenticatedApiBase
      */
     public function completeSubmission(Models\Center $center, Carbon $reportingDate, array $data)
     {
-        $this->checkCenterDate($center, $reportingDate);
+        $this->checkCenterDate($center, $reportingDate, ['write']);
 
         $this->assertAuthz($this->context->can('submitStats', $center));
 
@@ -551,13 +551,25 @@ class SubmissionCore extends AuthenticatedApiBase
         ];
     }
 
-    public function checkCenterDate(Models\Center $center, Carbon $reportingDate)
+    public function checkCenterDate(Models\Center $center, Carbon $reportingDate, $flags = [])
     {
         if ($reportingDate->dayOfWeek !== Carbon::FRIDAY) {
             throw new Exceptions\BadRequestException('Reporting date must be a Friday.');
         }
 
-        // TODO check reporting date is in this center's quarter and so on.
+        if (!$center->active) {
+            throw new Exceptions\BadRequestException('Center is not Active');
+        }
+
+        if (in_array('write', $flags)) {
+
+            if ($center->getGlobalRegion()->abbrLower() == 'na' && !$this->context->can('submitOldStats', $center)) {
+                if ($reportingDate->lte(Carbon::parse('2017-06-02'))) {
+                    // TODO come up with a cleaner solution to this
+                    throw new Exceptions\BadRequestException('Cannot do online submission prior to June');
+                }
+            }
+        }
 
         return ['success' => true];
     }

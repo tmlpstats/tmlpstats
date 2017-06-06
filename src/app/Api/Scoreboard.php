@@ -78,7 +78,7 @@ class Scoreboard extends AuthenticatedApiBase
     public function stash(Models\Center $center, Carbon $reportingDate, $data)
     {
         $this->assertAuthz($this->context->can('submitStats', $center), 'User not allowed access to submit this report');
-        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate, ['write']);
 
         $scoreboard = Domain\Scoreboard::fromArray($data);
         $submissionData = App::make(SubmissionData::class);
