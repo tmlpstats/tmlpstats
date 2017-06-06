@@ -64,7 +64,7 @@ class TeamMember extends AuthenticatedApiBase
      */
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
-        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate, ['write']);
 
         $this->assertCan('submitStats', $center);
 

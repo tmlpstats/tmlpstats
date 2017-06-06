@@ -5,7 +5,6 @@ use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\ApiBase;
-use TmlpStats\Api\Exceptions as ApiExceptions;
 use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
 
@@ -56,7 +55,7 @@ class Application extends ApiBase
      */
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
-        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate, ['write']);
 
         $submissionData = App::make(SubmissionData::class);
         $appId = $submissionData->numericStorageId($data, 'id');

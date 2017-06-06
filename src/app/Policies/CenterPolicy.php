@@ -50,6 +50,11 @@ class CenterPolicy extends Policy
         return false;
     }
 
+    public function submitOldStats(User $user, Center $center)
+    {
+        return $user->hasRole('globalStatistician');
+    }
+
     public function skipSubmitEmail(User $user, Center $center)
     {
         return $user->hasRole('globalStatistician');

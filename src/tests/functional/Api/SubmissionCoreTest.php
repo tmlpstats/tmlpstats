@@ -40,8 +40,8 @@ class SubmissionCoreTest extends FunctionalTestAbstract
     {
         $this->expectException(Api\Exceptions\UnauthorizedException::class);
 
-        $this->context->withOverrideCan(function($priv, $center) {
-            return false;
+        $this->context->withOverrideCan(function ($priv, $center) {
+            return ($priv === 'submitOldStats' && $center->id == $this->center->id);
         })->install();
 
         $this->api->completeSubmission($this->center, $this->reportingDate, ['comment' => 'great success']);
@@ -52,8 +52,8 @@ class SubmissionCoreTest extends FunctionalTestAbstract
      */
     public function testCompleteSubmissionSucceeds($validationResults, $expectedResults)
     {
-        $this->context->withOverrideCan(function($priv, $center) {
-            return ($priv === 'submitStats' && $center->id == $this->center->id);
+        $this->context->withOverrideCan(function ($priv, $center) {
+            return (($priv === 'submitStats' || $priv === 'submitOldStats') && $center->id == $this->center->id);
         })->install();
 
         $validateApi = $this->getMockBuilder(Api\ValidationData::class)
@@ -100,7 +100,7 @@ class SubmissionCoreTest extends FunctionalTestAbstract
                 [
                     'success' => false,
                     'id' => $this->centerId,
-                    'message' => 'Validation failed. Please correct issues indicated on the Review page and try again.'
+                    'message' => 'Validation failed. Please correct issues indicated on the Review page and try again.',
                 ],
             ],
         ];
