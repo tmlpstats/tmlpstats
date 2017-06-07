@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
-import { Form, Control } from 'react-redux-form'
+import { Form, actions as formActions } from 'react-redux-form'
 import moment from 'moment'
 
 import { shallowArrayElementsEqual } from '../../reusable/compare'
@@ -113,6 +113,11 @@ export class ScoreboardRow extends SubmissionBase {
         return true
     }
 
+    changeGameValue(model, value) {
+        value = (value || '').replace(/%/, '')
+        return formActions.change(model, value)
+    }
+
     render() {
         const { currentWeek, weeks } = this.props
         let headingsA = []
@@ -155,13 +160,15 @@ export class ScoreboardRow extends SubmissionBase {
                 const promiseVal = (
                     <NullableTextControl
                         model={modelKey+'.promise'} disabled={!scoreboard.meta.canEditPromise}
-                        className=" " controlProps={{autoComplete: 'off'}} />
+                        className=" " controlProps={{autoComplete: 'off'}}
+                        changeAction={this.changeGameValue} />
                 )
 
                 const actualVal = (
                     <NullableTextControl
                         model={modelKey+'.actual'} disabled={!scoreboard.meta.canEditActual}
-                        className=" " controlProps={{autoComplete: 'off', }} />
+                        className=" " controlProps={{autoComplete: 'off', }}
+                        changeAction={this.changeGameValue} />
                 )
 
                 values.push(
