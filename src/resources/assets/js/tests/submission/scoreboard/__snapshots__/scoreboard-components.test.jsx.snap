@@ -3574,7 +3574,7 @@ exports[`SubmissionScoreboard Should Render As Snapshot 1`] = `
     >
       <button
         className="btn btn-primary"
-        type="submit"
+        onClick={[Function]}
       >
         Save
       </button>
