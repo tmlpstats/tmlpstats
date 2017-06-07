@@ -258,6 +258,14 @@ function filterNullValue(props) {
     return (viewValue === null || viewValue === undefined) ? '' : viewValue
 }
 
+/**
+ * Control changeAction for removing '%' character from inputs
+ */
+export function changeRemovePercent(model, value) {
+    value = (value || '').replace(/%/, '')
+    return formActions.change(model, value)
+}
+
 const mapPropsFilterNull = {value: filterNullValue}
 
 
