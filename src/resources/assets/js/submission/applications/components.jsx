@@ -49,6 +49,13 @@ class ApplicationsBase extends SubmissionBase {
     getAppById(appId) {
         return this.props.applications.data[appId]
     }
+
+    getCenterQuarters() {
+        const cqData = this.props.centerQuarters.data
+        const centerQuarters = this.props.lookups.validRegQuarters.map(id => cqData[id])
+
+        return { cqData, centerQuarters }
+    }
 }
 
 @connectRedux(sharedMapState)
@@ -65,13 +72,19 @@ export class ApplicationsIndex extends ApplicationsBase {
 
         const baseUri = this.appsBaseUri()
         const withdraws = []
+        const { cqData } = this.getCenterQuarters()
 
         apps.forEach((app) => {
             let key = app.id
+
+            const cq = cqData[app.incomingQuarter]
+            const quarterLabel = (cq) ? centerQuarterData.getMonthDistinctionLabel(cq) : 'Unknown'
+
             withdraws.push(
                 <tr key={key}>
                     <td><Link to={`${baseUri}/edit/${key}`}>{app.firstName} {app.lastName}</Link></td>
                     <td>{app.teamYear}</td>
+                    <td>{quarterLabel}</td>
                     <td>{app.regDate}</td>
                     <td>{app.wdDate}</td>
                     <td>{this.props.lookups.withdraw_codes_by_id[app.withdrawCode].display}</td>
@@ -88,6 +101,7 @@ export class ApplicationsIndex extends ApplicationsBase {
                         <tr>
                             <th>Name</th>
                             <th>Year</th>
+                            <th>Weekend</th>
                             <th>Registered</th>
                             <th>Withdrawn</th>
                             <th>Reason</th>
@@ -108,6 +122,7 @@ export class ApplicationsIndex extends ApplicationsBase {
         const baseUri = this.appsBaseUri()
         const { applications } = this.props
         const sortedApps = getSortedApplications(applications)
+        const { cqData } = this.getCenterQuarters()
 
         sortedApps.forEach((app) => {
             const key = app.id
@@ -117,10 +132,14 @@ export class ApplicationsIndex extends ApplicationsBase {
                 return
             }
 
+            const cq = cqData[app.incomingQuarter]
+            const quarterLabel = (cq) ? centerQuarterData.getMonthDistinctionLabel(cq) : 'Unknown'
+
             apps.push(
                 <tr key={key}>
                     <td><Link to={`${baseUri}/edit/${key}`}>{app.firstName} {app.lastName}</Link></td>
                     <td>{app.teamYear}</td>
+                    <td>{quarterLabel}</td>
                     <td>{app.regDate}</td>
                     <td>{app.apprDate}</td>
                     <td>{status}</td>
@@ -138,6 +157,7 @@ export class ApplicationsIndex extends ApplicationsBase {
                         <tr>
                             <th>Name</th>
                             <th>Year</th>
+                            <th>Weekend</th>
                             <th>Registered</th>
                             <th>Approved</th>
                             <th>Status</th>
@@ -248,13 +268,6 @@ class _EditCreate extends ApplicationsBase {
     isNewApp() {
         const { currentApp } = this.props
         return (!currentApp.id || parseInt(currentApp.id) < 0)
-    }
-
-    getCenterQuarters() {
-        const cqData = this.props.centerQuarters.data
-        const centerQuarters = this.props.lookups.validRegQuarters.map(id => cqData[id])
-
-        return { cqData, centerQuarters }
     }
 
     renderStartingQuarter(modelKey) {
