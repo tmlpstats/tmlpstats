@@ -97,11 +97,13 @@ export class ScoreboardGame {
 
         // Ignore percentages in GITW.
         if (this.key == 'gitw') {
-            if (input.actual) {
-                this.actual = input.actual.replace(/%/g,'')
+            if (typeof input.actual === 'string') {
+                this.actual = this.actual.replace(/%/g,'')
+                this.actual = parseInt(this.actual, 10)
             }
-            if (input.promise) {
-                this.promise = input.promise.replace(/%/g,'')
+            if (typeof input.promise === 'string') {
+                this.promise = this.promise.replace(/%/g,'')
+                this.promise = parseInt(this.promise, 10)
             }
         }
 
