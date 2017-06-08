@@ -140,6 +140,7 @@ class StatsReportController extends Controller
             return $d->lt($reportingDate);
         });
 
+        $maybeReport = null;
         foreach ($dates as $d) {
             $maybeReport = Models\StatsReport::byCenter($center)
                 ->reportingDate($d)
