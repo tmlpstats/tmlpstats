@@ -177,6 +177,22 @@ class TeamMember extends ParserDomain
         }
     }
 
+    public static function fromArray($input, $requiredParams = [])
+    {
+        $member = parent::fromArray($input, $requiredParams);
+
+        if ($member->quarterNumber) {
+            return $member;
+        }
+
+        if (!$member->incomingQuarter || !$member->center) {
+            return $member;
+        }
+
+        $member->quarterNumber = Models\TeamMember::getQuarterNumber($member->incomingQuarter, $member->center->region);
+        return $member;
+    }
+
     public function getFlattenedReference(array $supplemental = [])
     {
         $firstName = $this->firstName ?: 'unknown';
