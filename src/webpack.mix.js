@@ -1,5 +1,12 @@
 let mix = require('laravel-mix')
 
+/// NOTE this hack is required due to an issue in WebpackChunkHash plugin not versioning properly.
+/// See https://github.com/JeffreyWay/laravel-mix/issues/665
+let WebpackChunkHash = function () {};
+WebpackChunkHash.prototype.apply = () => {};
+// Replace WebpackChunkHashPlugin with an empty function
+mix.plugins.WebpackChunkHashPlugin = WebpackChunkHash;
+
 
 mix
     .react('resources/assets/js/main.jsx', 'public/build/js')

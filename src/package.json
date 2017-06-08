@@ -20,7 +20,7 @@
     "eslint": "^3.17",
     "eslint-plugin-react": "^6.0.0",
     "jest": "^19",
-    "laravel-mix": "^0.8.8",
+    "laravel-mix": "^0.12.1",
     "node-sass": "^4.5.0",
     "react-test-renderer": "^15.5",
     "wdio-browserstack-service": "^0.1.4",
