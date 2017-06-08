@@ -83,6 +83,14 @@ class CenterReportingDate
             return false;
         }
         $cq = $this->getCenterQuarter();
+
+        // If the current time is more than 3 days past quarter end, ignore this,
+        // even if reportingDate might indicate otherwise.
+        if (Carbon::now()->gt($cq->endWeekendDate->copy()->addDays(3))) {
+            return false;
+        }
+
+        // If we're pass the CR3 date, then let's do this.
         if ($this->reportingDate->toDateString() == $cq->classroom3Date->toDateString() || $this->reportingDate->gt($cq->classroom3Date)) {
             return true;
         }
