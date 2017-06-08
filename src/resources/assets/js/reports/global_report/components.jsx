@@ -58,7 +58,7 @@ export class GlobalReport extends Component {
                 dispatch(loadConfig(storageKey))
             }
         } else if (reportConfig !== this.props.reportConfig) {
-            this.fullReport = filterReportFlags(ReportsMeta['Global'], DEFAULT_FLAGS)
+            this.fullReport = filterReportFlags(ReportsMeta['Global'], reportConfig.flags)
         }
     }
 
