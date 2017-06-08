@@ -111,7 +111,9 @@ class SubmissionData extends AuthenticatedApiBase
         $className = $conf['class'];
 
         return $result->map(function ($row) use ($className) {
-            return $className::fromArray($row->data);
+            $data = $row->data;
+            $data['center'] = $row->centerId;
+            return $className::fromArray($data);
         });
     }
 
