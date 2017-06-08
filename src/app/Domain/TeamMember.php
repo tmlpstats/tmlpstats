@@ -181,15 +181,10 @@ class TeamMember extends ParserDomain
     {
         $member = parent::fromArray($input, $requiredParams);
 
-        if ($member->quarterNumber) {
-            return $member;
+        if (!$member->quarterNumber && $member->incomingQuarter && $member->center) {
+            $member->quarterNumber = Models\TeamMember::getQuarterNumber($member->incomingQuarter, $member->center->region);
         }
 
-        if (!$member->incomingQuarter || !$member->center) {
-            return $member;
-        }
-
-        $member->quarterNumber = Models\TeamMember::getQuarterNumber($member->incomingQuarter, $member->center->region);
         return $member;
     }
 
