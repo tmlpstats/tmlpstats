@@ -92,13 +92,21 @@ export class ScoreboardGame {
     }
 
     parseInput(input) {
-        // Ignore percentages in GITW.
-        if (this.key == 'gitw' && input.actual) {
-            this.actual = parseInt(input.actual, 10)   
-        } else {
-            this.actual = input.actual
-        }
+        this.actual = input.actual
         this.promise = input.promise
+
+        // Ignore percentages in GITW.
+        if (this.key == 'gitw') {
+            if (typeof input.actual === 'string') {
+                this.actual = this.actual.replace(/%/g,'')
+                this.actual = parseInt(this.actual, 10)
+            }
+            if (typeof input.promise === 'string') {
+                this.promise = this.promise.replace(/%/g,'')
+                this.promise = parseInt(this.promise, 10)
+            }
+        }
+
         this.original = input.original
         this.op = input.op || 'default'
     }

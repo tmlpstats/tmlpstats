@@ -1,12 +1,12 @@
 import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
-import { Form, Control } from 'react-redux-form'
+import { Form } from 'react-redux-form'
 import moment from 'moment'
 
 import { shallowArrayElementsEqual } from '../../reusable/compare'
 import { delayDispatch, rebind } from '../../reusable/dispatch'
-import { NullableTextControl } from '../../reusable/form_utils'
+import { NullableTextControl, changeRemovePercent } from '../../reusable/form_utils'
 import Scoreboard, { GAME_KEYS } from '../../reusable/scoreboard'
 import { ButtonStateFlip, MessagesComponent } from '../../reusable/ui_basic'
 import { objectAssign } from '../../reusable/ponyfill'
@@ -155,13 +155,15 @@ export class ScoreboardRow extends SubmissionBase {
                 const promiseVal = (
                     <NullableTextControl
                         model={modelKey+'.promise'} disabled={!scoreboard.meta.canEditPromise}
-                        className=" " controlProps={{autoComplete: 'off'}} />
+                        className=" " controlProps={{autoComplete: 'off'}}
+                        changeAction={changeRemovePercent} />
                 )
 
                 const actualVal = (
                     <NullableTextControl
                         model={modelKey+'.actual'} disabled={!scoreboard.meta.canEditActual}
-                        className=" " controlProps={{autoComplete: 'off', }} />
+                        className=" " controlProps={{autoComplete: 'off', }}
+                        changeAction={changeRemovePercent} />
                 )
 
                 values.push(

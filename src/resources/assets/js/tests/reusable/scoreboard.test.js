@@ -6,6 +6,27 @@ import { Scoreboard, ScoreboardGame, GAME_KEYS } from '../../reusable/scoreboard
 const input = yaml.safeLoad(fs.readFileSync(`${__dirname}/../../../../../tests/inputs/scoreboard.yml`, 'utf8'))
 
 describe('ScoreboardGame', () => {
+    describe('ParseInput', () => {
+        input.points.forEach((fields) => {
+            let [promise, actual, game] = fields
+            test(`inputs for p=${promise}% a=${actual}% (${game})`, () => {
+
+                let originalPromise = promise
+                let originalActual = actual
+                if (game == 'gitw') {
+                    promise = `${promise}%`
+                    actual = `${actual}%`
+                }
+
+                const sg = new ScoreboardGame(game.toLowerCase())
+                sg.parseInput({promise, actual})
+                expect(sg.promise).toBe(originalPromise)
+                expect(sg.actual).toBe(originalActual)
+            })
+
+        })
+    })
+
     describe('Points', () => {
         input.points.forEach((fields) => {
             const [promise, actual, game, points] = fields
