@@ -1,4 +1,5 @@
 import { Schema, arrayOf } from 'normalizr'
+import moment from 'moment'
 
 import { LoadingMultiState } from '../../reusable/reducers'
 import SimpleReduxLoader from '../../reusable/redux_loader/simple'
@@ -35,6 +36,11 @@ class CenterQuarterData extends SimpleReduxLoader {
 
     getLabel(cq) {
         return `${cq.quarter.t1Distinction} ${cq.quarter.year} (starting ${cq.startWeekendDate})`
+    }
+
+    getMonthDistinctionLabel(cq) {
+        let month = moment(cq.startWeekendDate).format('MMMM')
+        return `${month} - ${cq.quarter.t1Distinction} Quarter`
     }
 }
 
