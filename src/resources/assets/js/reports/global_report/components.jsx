@@ -10,8 +10,6 @@ import ReportsMeta from '../meta'
 import { loadConfig } from './actions'
 import { reportData, GlobalReportKey } from './data'
 
-const DEFAULT_FLAGS = {afterClassroom2: true, lastWeek: true}
-
 @connectRedux()
 export class GlobalReport extends Component {
     static mapStateToProps() {
