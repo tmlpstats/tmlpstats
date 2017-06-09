@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux'
 import { modelReducer, formReducer } from 'react-redux-form'
 
-import { coursesCollection, coursesLoad, saveCourseLoad, messages } from './data'
+import { coursesCollection, coursesLoad, saveCourseLoad, messages, BLANK_COURSE } from './data'
 
 const COURSES_BASE_KEY = 'submission.courses'
 export const COURSES_FORM_KEY = COURSES_BASE_KEY + '.currentCourse'
@@ -10,8 +10,8 @@ export const COURSES_FORM_KEY = COURSES_BASE_KEY + '.currentCourse'
 export const courseReducer = combineReducers({
     loading: coursesLoad.reducer(),
     courses: coursesCollection.reducer(),
-    currentCourse: modelReducer(COURSES_FORM_KEY, []),
-    forms: formReducer(COURSES_BASE_KEY, []),
+    currentCourse: modelReducer(COURSES_FORM_KEY, BLANK_COURSE),
+    forms: formReducer(COURSES_BASE_KEY, {currentCourse: BLANK_COURSE}),
     saveCourse: saveCourseLoad.reducer(),
     messages: messages.reducer(),
 })
