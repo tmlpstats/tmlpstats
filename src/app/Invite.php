@@ -22,6 +22,11 @@ class Invite extends Model
         'email_sent_at',
     ];
 
+    public function formatPhone()
+    {
+        return Util::formatPhone($this->phone);
+    }
+
     public function scopeToken($query, $token)
     {
         return $query->whereToken($token);
