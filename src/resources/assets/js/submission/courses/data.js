@@ -33,3 +33,11 @@ export const coursesLoad = new LoadingMultiState('courses/initialLoadState')
 export const saveCourseLoad = new LoadingMultiState('courses/saveCourseState')
 
 export const messages = new MessageManager('courses')
+
+export const BLANK_COURSE = {
+    startDate: '',
+    type: 'CAP',
+    quarterStartTer: 0,
+    quarterStartStandardStarts: 0,
+    quarterStartXfer: 0
+}

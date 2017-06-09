@@ -11,7 +11,7 @@ import { objectAssign } from '../../reusable/ponyfill'
 import { ModeSelectButtons, ButtonStateFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
 import { COURSES_FORM_KEY } from './reducers'
-import { coursesSorts, coursesCollection, courseTypeMap } from './data'
+import { coursesSorts, coursesCollection, courseTypeMap, BLANK_COURSE } from './data'
 import { loadCourses, saveCourse, chooseCourse } from './actions'
 
 const getSortedCourses = collectionSortSelector(coursesSorts)
@@ -401,14 +401,8 @@ class CoursesAddView extends _EditCreate {
         }
         const { currentCourse } = this.props
         if (!currentCourse || currentCourse.id) {
-            const blankCourse = {
-                startDate: '',
-                type: 'CAP',
-                quarterStartTer: 0,
-                quarterStartStandardStarts: 0,
-                quarterStartXfer: 0
-            }
-            delayDispatch(this, chooseCourse(blankCourse))
+
+            delayDispatch(this, chooseCourse(BLANK_COURSE))
             return false
         }
         return true
