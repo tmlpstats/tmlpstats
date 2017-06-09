@@ -241,12 +241,7 @@ class Person extends Model
      */
     public function formatPhone()
     {
-        // TODO: This handles the standard 10 digit North American phone number. Update to handle international formats
-        if (isset($this->phone) && preg_match('/^(\d\d\d)[\s\.\-]?(\d\d\d)[\s\.\-]?(\d\d\d\d)$/', $this->phone, $matches)) {
-            return "({$matches[1]}) {$matches[2]}-{$matches[3]}";
-        }
-
-        return $this->phone;
+        return Util::formatPhone($this->phone);
     }
 
     public function scopeFirstName($query, $name)

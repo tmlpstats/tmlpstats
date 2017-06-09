@@ -86,6 +86,16 @@ class Util
         return $new;
     }
 
+    public static function formatPhone($phone)
+    {
+        // TODO: This handles the standard 10 digit North American phone number. Update to handle international formats
+        if ($phone && preg_match('/^(\d\d\d)[\s\.\-]?(\d\d\d)[\s\.\-]?(\d\d\d\d)$/', $phone, $matches)) {
+            return "({$matches[1]}) {$matches[2]}-{$matches[3]}";
+        }
+
+        return $phone;
+    }
+
     /**
      * Convert an Excel date integer into a Carbon datetime object
      *

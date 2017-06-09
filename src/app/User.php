@@ -287,12 +287,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
             return;
         }
 
-        // TODO: This handles the standard 10 digit North American phone number. Update to handle international formats
-        if (isset($this->person->phone) && preg_match('/^(\d\d\d)[\s\.\-]?(\d\d\d)[\s\.\-]?(\d\d\d\d)$/', $this->person->phone, $matches)) {
-            return "({$matches[1]}) {$matches[2]}-{$matches[3]}";
-        }
-
-        return $this->person->phone;
+        return $this->person->formatPhone();
     }
 
     public function scopeActive($query, $active = true)

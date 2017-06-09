@@ -15,7 +15,7 @@
                 <td>{{ $accountability }}</td>
                 <td>{{ $contact ? $contact->firstName : 'N/A' }}</td>
                 <td>{{ $contact ? $contact->lastName : 'N/A' }}</td>
-                <td>{{ $contact ? $contact->phone : 'N/A' }}</td>
+                <td>{{ $contact ? $contact->formatPhone() : 'N/A' }}</td>
                 <td>{{ $contact ? $contact->email : 'N/A' }}</td>
             </tr>
         @endforeach
