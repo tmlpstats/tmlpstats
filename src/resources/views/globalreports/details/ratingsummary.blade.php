@@ -57,10 +57,10 @@ $ratingColors = [
                         <?php $count++; ?>
                         <td class="data-point" rowspan="{{ count($rows[$rating]) }}">{{ $rating }}</td>
                     @endif
-                    <td class="data-point" style="background-color: {{ $ratingColors[$report->getPoints()] }}; font-weight: bold;">
+                    <td class="data-point" style="background-color: {{ $ratingColors[(int) $report->getPoints()] }}; font-weight: bold;">
                         @statsReportLink($report)
                             <div class="{{ $meterClass }}">
-                                <span style="width: {{ $meterWidth }}%">{{ $report->getPoints() }}</span>
+                                <span style="width: {{ $meterWidth }}%">{{ (int) $report->getPoints() }}</span>
                             </div>
                         @endStatsReportLink
                     </td>
