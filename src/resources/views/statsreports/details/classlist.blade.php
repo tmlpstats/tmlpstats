@@ -1,3 +1,4 @@
+@inject('context', 'TmlpStats\Api\Context')
 <div class="table-responsive">
     @foreach (['team1', 'team2', 'withdrawn'] as $group)
         @if (isset($reportData[$group]))
@@ -33,8 +34,7 @@
                                 {{ $quarterNumber }}
                             </td>
                             <td><?php
-                                $accountabilities = $memberData->teamMember->accountabilities;
-
+                                $accountabilities = $memberData->teamMember->getAccountabilities($context->getReportingDate()->setTime(15,0,0));
                                 if ($accountabilities) {
                                     $accountabilityNames = array();
                                     foreach ($accountabilities as $accountability) {

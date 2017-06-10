@@ -30,7 +30,7 @@ class Accountability extends Model
     public function people()
     {
         return $this->belongsToMany('TmlpStats\Person', 'accountability_person', 'accountability_id', 'person_id')
-                    ->withPivot(['stats_at', 'ends_at'])
+                    ->withPivot(['starts_at', 'ends_at'])
                     ->withTimestamps();
     }
 }

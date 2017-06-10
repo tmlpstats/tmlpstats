@@ -25,15 +25,6 @@ class Person extends Model
         'unsubscribed' => 'boolean',
     ];
 
-    public function __get($name)
-    {
-        if ($name == 'accountabilities') {
-            return $this->getAccountabilities();
-        } else {
-            return parent::__get($name);
-        }
-    }
-
     /**
      * Find a person by their first and last name, and center.
      *
@@ -95,12 +86,8 @@ class Person extends Model
      * @param Carbon $when  Reference date/time for getting accountability.
      * @return array
      */
-    public function getAccountabilities(Carbon $when = null)
+    public function getAccountabilities(Carbon $when)
     {
-        if ($when == null) {
-            $when = Util::now();
-        }
-
         $allAccountabilities = $this->accountabilities()->get();
 
         $accountabilities = [];
@@ -123,15 +110,11 @@ class Person extends Model
 
     /**
      * Get just the IDs of associated accountabilities. Many of the times we don't need ORM models anyway.
-     * @param  Carbon|null $when [description]
-     * @return [type]            [description]
+     * @param  Carbon $when  Reference date/time for getting accountability.
+     * @return array
      */
-    public function getAccountabilityIds(Carbon $when = null)
+    public function getAccountabilityIds(Carbon $when)
     {
-        if ($when == null) {
-            $when = Util::now();
-        }
-
         $items = DB::table('accountability_person')
             ->where('person_id', $this->id)
             ->where('starts_at', '<=', $when)
@@ -146,16 +129,12 @@ class Person extends Model
     /**
      * Does person hold provided accountability
      *
-     * @param Accountability $accountability
-     *
-     * @return bool
+     * @param  Accountability $accountability
+     * @param  Carbon         $when  Reference date/time for getting accountability.
+     * @return boolean
      */
-    public function hasAccountability(Accountability $accountability, Carbon $when = null)
+    public function hasAccountability(Accountability $accountability, Carbon $when)
     {
-        if ($when == null) {
-            $when = Util::now();
-        }
-
         $accountabilities = $this->getAccountabilities($when);
         foreach ($accountabilities as $myAccountability) {
             if ($myAccountability->id == $accountability->id) {
@@ -170,13 +149,12 @@ class Person extends Model
      * Add accountability for person
      *
      * @param Accountability $accountability
-     * @param Carbon|null    $starts
-     * @param Carbon|null    $ends
+     * @param Carbon         $starts
+     * @param Carbon         $ends
      */
-    public function addAccountability(Accountability $accountability, Carbon $starts = null, Carbon $ends = null)
+    public function addAccountability(Accountability $accountability, Carbon $starts, Carbon $ends)
     {
-        if (!$this->hasAccountability($accountability)) {
-            $starts = $starts ?: Util::now();
+        if (!$this->hasAccountability($accountability, $starts)) {
             $this->accountabilities()->attach($accountability->id, ['starts_at' => $starts, 'ends_at' => $ends]);
         }
     }
@@ -184,15 +162,12 @@ class Person extends Model
     /**
      * Remove accountability from person
      *
-     * @param Accountability $accountability
+     * @param  Accountability $accountability
+     * @param  Carbon         $when  Reference date/time for getting accountability.
      */
-    public function removeAccountability(Accountability $accountability, Carbon $when = null)
+    public function removeAccountability(Accountability $accountability, Carbon $when)
     {
-        if ($when == null) {
-            $when = Util::now()->copy()->subSecond();
-        }
-
-        if ($this->hasAccountability($accountability)) {
+        if ($this->hasAccountability($accountability, $when)) {
             DB::table('accountability_person')
                 ->where('person_id', $this->id)
                 ->where('accountability_id', $accountability->id)
@@ -200,12 +175,17 @@ class Person extends Model
         }
     }
 
-    public function takeoverAccountability(Accountability $accountability, Carbon $starts = null, Carbon $ends = null)
+    /**
+     * Takeover an accountability within person's center.
+     *
+     * Remove accountability from any existing holders first
+     *
+     * @param  Accountability $accountability
+     * @param  Carbon         $starts
+     * @param  Carbon         $ends
+     */
+    public function takeoverAccountability(Accountability $accountability, Carbon $starts, Carbon $ends)
     {
-        if ($starts == null) {
-            $starts = Util::now();
-        }
-
         // Remove accountability from any existing holders
         DB::update('
             UPDATE  accountability_person ap

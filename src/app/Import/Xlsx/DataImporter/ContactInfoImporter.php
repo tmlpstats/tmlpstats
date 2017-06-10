@@ -86,26 +86,33 @@ class ContactInfoImporter extends DataImporterAbstract
                 continue;
             }
 
+            $reportingDate = $this->statsReport->reportingDate;
+            $beforeReportingDate = $reportingDate->copy()->subSecond();
+
             $accountability = Accountability::name($this->mapAccountabilities($leader['accountability']))->first();
 
             if ($leader['name'] === null || strtoupper($leader['name']) == 'NA' || strtoupper($leader['name']) == 'N/A') {
 
                 $currentAccountable = $this->statsReport->center->getAccountable($accountability);
                 if ($currentAccountable) {
-                    $currentAccountable->removeAccountability($accountability);
+                    $currentAccountable->removeAccountability($accountability, $beforeReportingDate);
                 }
                 continue;
             }
 
             $member = $this->getPerson($leader);
 
-            if ($accountability && !$member->hasAccountability($accountability)) {
+            if ($accountability && !$member->hasAccountability($accountability, $reportingDate)) {
 
                 $currentAccountable = $this->statsReport->center->getAccountable($accountability->name);
                 if ($currentAccountable) {
-                    $currentAccountable->removeAccountability($accountability);
+                    $currentAccountable->removeAccountability($accountability, $beforeReportingDate);
                 }
-                $member->addAccountability($accountability);
+                $member->addAccountability(
+                    $accountability,
+                    $reportingDate,
+                    $this->statsReport->quarter->getQuarterEndDate()
+                );
             } else if (!$accountability) {
                 Log::error("Unable to find accountability '{$leader['accountability']}' for center {$this->statsReport->center->id}");
             }
