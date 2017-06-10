@@ -237,51 +237,6 @@ class Util
     }
 
     /**
-     * Get the current active sessions from memcache. Careful using this in production.
-     *
-     * @return array
-     */
-    public static function getMemcacheSessions()
-    {
-        $sessions = [];
-
-        try {
-            $memcache = new \Memcache;
-            $memcache->connect('127.0.0.1', 11211) or die ("Could not connect to memcache server");
-            $allSlabs = $memcache->getExtendedStats('slabs');
-            foreach ($allSlabs as $server => $slabs) {
-                foreach ($slabs AS $slabId => $slabMeta) {
-                    $cdump = $memcache->getExtendedStats('cachedump', (int)$slabId);
-                    foreach ($cdump AS $keys => $arrVal) {
-                        if (!is_array($arrVal)) continue;
-                        foreach ($arrVal AS $k => $v) {
-                            if (preg_match('/^laravel:([^:]+)$/', $k, $matches)) {
-                                $sessions[$matches[1]] = unserialize(Cache::get($matches[1]));
-                            }
-                        }
-                    }
-                    usleep(20000);// 20ms between lookups
-                }
-            }
-        } catch (\Exception $e) { }
-
-        return $sessions;
-    }
-
-    /**
-     * Get the base classname of an object.
-     *   e.g.
-     *      \TmlpStats\StatsReport => StatsReport
-     *
-     * @param $object
-     * @return string
-     */
-    public static function getClassBasename($object)
-    {
-        return substr(strrchr(get_class($object), '\\'), 1);
-    }
-
-    /**
      * Get the date formatted using the locale
      * e.g.
      *      en-US => 12/25/2015
