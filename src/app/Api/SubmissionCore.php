@@ -301,7 +301,7 @@ class SubmissionCore extends AuthenticatedApiBase
                     DB::insert('insert into team_members_data
                                     (team_member_id, at_weekend, xfer_out, xfer_in, wbo, ctw, withdraw_code_id, travel, room, comment,
                                     gitw, tdo, stats_report_id, created_at, updated_at)
-                                select ?, atWeekend, xfer_in, xfer_out, wbo, ctw, withdrawCode, travel, room, comment,
+                                select ?, atWeekend, xfer_out, xfer_in, wbo, ctw, withdrawCode, travel, room, comment,
                                     gitw, tdo, ?, sysdate(), sysdate()
                                 from submission_data_team_members
                                 where center_id=? and reporting_date=? and team_member_id=?',
