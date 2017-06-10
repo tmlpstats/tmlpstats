@@ -281,7 +281,7 @@ class LocalReport extends AuthenticatedApiBase
                 return $response;
             };
             if ($ttl = $controller->getPageCacheTime($page)) {
-                $response = Cache::tags(['reports'])->remember("{$ckBase}.{$page}", $ttl, $f);
+                $response = Cache::tags(['reports', "statsReport{$report->id}"])->remember("{$ckBase}.{$page}", $ttl, $f);
             } else {
                 $response = $f();
             }
