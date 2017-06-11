@@ -43,7 +43,9 @@ class ContactController extends Controller
         $ccSender = $request->has('copySender');
         $feedback = $request->get('message');
 
-        Mail::send('emails.feedback', compact('feedback', 'sender', 'senderName', 'senderEmail', 'url'),
+        $userAgent = $request->header('User-Agent');
+
+        Mail::send('emails.feedback', compact('feedback', 'sender', 'senderName', 'senderEmail', 'url', 'userAgent'),
             function($message) use ($sender, $senderEmail, $ccSender) {
 
             $message->to(env('ADMIN_EMAIL'));
