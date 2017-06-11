@@ -37,7 +37,9 @@ function inferStatus(app) {
         return STATUS_REG
     }
 
-    return STATUS_UNKNOWN
+    // Default to reg if something isn't right
+    console.log(`Unknown application status for ${app.id}`)
+    return STATUS_REG
 }
 
 function inferWithdrawn(app) {
@@ -61,7 +63,7 @@ export function getStatusString(app) {
         return o.status == statusCode
     })
 
-    return status.title
+    return status ? status.title : 'Invalid'
 }
 
 export default class AppStatus extends Component {
