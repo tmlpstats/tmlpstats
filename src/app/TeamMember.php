@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats;
 
+use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Model;
 use TmlpStats\Traits\CachedRelationships;
@@ -42,6 +43,11 @@ class TeamMember extends Model
             default:
                 return parent::__get($name);
         }
+    }
+
+    public function getAccountabilities(Carbon $when)
+    {
+        return $this->person->getAccountabilities($when);
     }
 
     public static function getQuarterNumber(Quarter $incomingQuarter, Region $region)

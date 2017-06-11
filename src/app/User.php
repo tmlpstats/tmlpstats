@@ -1,6 +1,7 @@
 <?php
 namespace TmlpStats;
 
+use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\Passwords\CanResetPassword;
@@ -140,7 +141,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     public function hasAccountability($name)
     {
         return $this->person
-            ? $this->person->hasAccountability($name)
+            ? $this->person->hasAccountability($name, Carbon::now())
             : false;
     }
 
