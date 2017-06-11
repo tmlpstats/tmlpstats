@@ -104,8 +104,11 @@ class SubmissionCore extends AuthenticatedApiBase
 
             $lastStatsReportDate = $reportingDate->copy()->subWeek();
 
+            // Report is as of 3PM on Friday (technically this should be center time)
             $reportNow = $reportingDate->copy()->setTime(15, 0, 0);
-            $quarterEndDate = $statsReport->quarter->getQuarterEndDate($statsReport->center)->setTime(14, 59, 59);
+            // Quarter is over (for accountables) at 12pm on Saturday at the weekend
+            // It's not Friday at 3pm because we want people to still appear as accountable on the final report
+            $quarterEndDate = $statsReport->quarter->getQuarterEndDate($statsReport->center)->addDay()->setTime(12, 00, 00);
 
             $isFirstWeek = $statsReport->reportingDate->eq($statsReport->quarter->getFirstWeekDate($statsReport->center));
 
