@@ -36,7 +36,11 @@ class TeamMember extends AuthenticatedApiBase
         if ($lastReport) {
             // If the last report happens to be the same week as this week, we can include GITW/TDO.
             $includeData = ($lastReport->reportingDate->eq($reportingDate));
-            $options = ['ignore' => ($includeData) ? false : self::$omitGitwTdo, 'accountabilitiesFor' => $reportingDate];
+            $options = [
+                'ignore' => ($includeData) ? false : self::$omitGitwTdo,
+                // setting time explicitly here to make sure we display accountabiles up to the time this report is active
+                'accountabilitiesFor' => $reportingDate->copy()->setTime(15,0,0),
+            ];
             foreach (App::make(LocalReport::class)->getClassList($lastReport) as $tmd) {
                 // it's a small optimization, but prevent creating domain if we have an existing SubmissionData version
                 if (!array_key_exists($tmd->teamMemberId, $allTeamMembers)) {

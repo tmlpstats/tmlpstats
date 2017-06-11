@@ -195,7 +195,7 @@ class Person extends Model
                 ap.accountability_id = ?
                 AND p.center_id = ?
                 AND (ap.ends_at IS NULL OR ap.ends_at > ?)',
-            [$starts->copy()->subSecond(), $accountability->id, $this->center->id, $starts]
+            [$starts, $accountability->id, $this->center->id, $starts]
         );
 
         // Add accountability
