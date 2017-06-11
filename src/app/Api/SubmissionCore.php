@@ -510,9 +510,8 @@ class SubmissionCore extends AuthenticatedApiBase
                 }
 
                 // If the person doesn't already have this accountability, add it and remove previous holder
-                if (!$person->hasAccountability($accountability, $reportNow)) {
-                    $person->takeoverAccountability($accountability, $reportNow, $quarterEndDate);
-                }
+                // Always call takeover to cleanup any stragglers (leftover from spreadsheet migration)
+                $person->takeoverAccountability($accountability, $reportNow, $quarterEndDate);
             }
 
             // Mark stats report as 'official'
