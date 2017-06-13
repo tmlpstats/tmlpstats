@@ -40,12 +40,8 @@ class HomeController extends Controller
         }
     }
 
-    public function home(Request $request, $abbr, $date = null)
+    public function home(Request $request, $abbr)
     {
-        if ($date) {
-            // yuck, going back and forth on date, but we'll deal for now.
-            $this->setReportingDate(Carbon::parse($date));
-        }
         $region = Region::abbreviation($abbr)->firstorFail();
         return $this->regionOverview($request, $region);
     }
