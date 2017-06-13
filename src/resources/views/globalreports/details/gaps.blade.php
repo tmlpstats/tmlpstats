@@ -24,7 +24,7 @@
                         <?php
                             $promise = isset($data['promise'][$game]) ? $data['promise'][$game] : '-';
                             $actual = isset($data['actual'][$game]) ? $data['actual'][$game] : '-';
-                            if ($promise == '-' || $actual == '-') {
+                            if ($promise === '-' || $actual === '-') {
                                 $gap = '-';
                                 $suffix = '';
                             } else {
