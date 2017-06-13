@@ -28,11 +28,6 @@ const sharedMapState = (state) => {
 }
 
 class ApplicationsBase extends SubmissionBase {
-    constructor(props) {
-        super(props)
-        this.checkLoading()
-    }
-
     checkLoading() {
         const { loading, params } = this.props
         if (loading.state == 'new') {
@@ -282,7 +277,7 @@ class _EditCreate extends ApplicationsBase {
         } else {
             const clickHandler = () => {
                 this.props.dispatch(formActions.change(`${modelKey}.${CHANGING_QUARTER_KEY}`, true))
-                return false; // prevent navigation to hash URL
+                return false // prevent navigation to hash URL
             }
             const cq = cqData[currentApp.incomingQuarter]
             const label = (cq)? centerQuarterData.getLabel(cq) : 'Unknown'
