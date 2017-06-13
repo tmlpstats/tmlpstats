@@ -3,13 +3,13 @@
         @if (isset($reportData[$group]) && count($reportData[$group]))
             <br/>
             <h4>{{ ucwords($group) }}</h4>
-                <?php
-                foreach (['next', 'future'] as $quarterName) {
-                    if (!isset($reportData[$group][$quarterName])) {
-                        continue;
-                    }
-                    $quarterRegistrations = $reportData[$group][$quarterName];
-                ?>
+            <?php
+            foreach (['next', 'future'] as $quarterName) {
+                if (!isset($reportData[$group][$quarterName])) {
+                    continue;
+                }
+                $quarterRegistrations = $reportData[$group][$quarterName];
+            ?>
                 <table class="table table-condensed table-striped table-hover want-datatable">
                     <thead>
                     @if ($group != 'withdrawn')
