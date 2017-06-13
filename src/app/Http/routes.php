@@ -72,7 +72,7 @@ Route::get('import', 'ImportController@indexImportSheet');
 Route::post('import', 'ImportController@importSheet');
 
 Route::match(['get', 'post'], 'home', 'HomeController@index');
-Route::match(['get', 'post'], 'home/{abbr}/{date?}', 'HomeController@home');
+Route::match(['get', 'post'], 'home/{abbr}', 'HomeController@home');
 
 Route::get('/', 'WelcomeController@index');
 
