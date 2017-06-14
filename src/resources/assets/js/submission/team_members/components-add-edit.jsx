@@ -1,8 +1,8 @@
 import React from 'react'
 
-import { Control, Form, CheckBox, SimpleField, BooleanSelect, SimpleSelect, SimpleFormGroup, NullableTextAreaControl } from '../../reusable/form_utils'
+import { Control, Form, CheckBox, SimpleField, BooleanSelect, SimpleSelect, SimpleFormGroup, NullableTextAreaControl, formActions } from '../../reusable/form_utils'
 import { ModeSelectButtons, ButtonStateFlip, Alert, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
-import { delayDispatch, connectRedux } from '../../reusable/dispatch'
+import { delayDispatch, connectRedux, rebind } from '../../reusable/dispatch'
 import { FormTypeahead } from '../../reusable/typeahead'
 
 import { centerQuarterData } from '../core/data'
@@ -13,6 +13,7 @@ import * as actions from './actions'
 import { TeamMembersBase, GITW_LABELS, TDO_LABELS } from './components-base'
 
 
+const CHANGING_QUARTER_KEY = '_changingQuarter'
 const getTeamAccountabilities = makeAccountabilitiesSelector('team')
 const getValidStartQuarters = makeQuartersSelector('validStartQuarters')
 
@@ -31,6 +32,10 @@ const teamMembersMapState = (state) => {
 }
 
 class _EditCreate extends TeamMembersBase {
+    constructor(props) {
+        super(props)
+        rebind(this, 'enableYearQuarterChange', 'setExitChoice')
+    }
     getCenterQuarter(quarterId) {
         const { currentMember, centerQuarters } = this.props
         if (!quarterId) {
@@ -91,35 +96,15 @@ class _EditCreate extends TeamMembersBase {
     }
 
     renderRegPrefs(modelKey, options) {
-        const { disableYearQuarter } = options
-        const incomingQuarter = this.getCenterQuarter()
-        var yearQuarter
-        if (disableYearQuarter) {
-            yearQuarter = <p className="form-control-static">{centerQuarterData.getLabel(incomingQuarter)}</p>
-        } else {
-            yearQuarter = (
-                <SimpleSelect
-                        model={modelKey+'.incomingQuarter'} items={this.props.validStartQuarters} emptyChoice=" "
-                        keyProp="quarterId" getLabel={centerQuarterData.getLabel} />
-            )
-        }
-
+        const teamMember = this.props.currentMember
         let reviewerCheckbox
-        if (!this.props.currentMember || this.props.currentMember.teamYear != 1) {
+        if (!teamMember || teamMember.teamYear != 1) {
             reviewerCheckbox = <CheckBox model={modelKey+'.isReviewer'} label="Is Reviewer" />
         }
 
         return (
             <div>
-                <SimpleFormGroup label="Team Year" divClass="col-md-4" required={!disableYearQuarter}>
-                    <Control.select model={modelKey+'.teamYear'} disabled={disableYearQuarter} className="form-control">
-                        <option value="1">Team 1</option>
-                        <option value="2">Team 2</option>
-                    </Control.select>
-                </SimpleFormGroup>
-                <SimpleFormGroup label="Starting Quarter" required={!disableYearQuarter}>
-                    {yearQuarter}
-                </SimpleFormGroup>
+                {this.renderYearQuarter(modelKey, options)}
                 <SimpleFormGroup label="Settings" required={true}>
                     {reviewerCheckbox}
                     <CheckBox model={modelKey+'.atWeekend'} label="On team at weekend" />
@@ -135,9 +120,73 @@ class _EditCreate extends TeamMembersBase {
         )
     }
 
+    enableYearQuarterChange(e) {
+        this.props.dispatch(formActions.change(`${TEAM_MEMBER_FORM_KEY}.${CHANGING_QUARTER_KEY}`, true))
+        e.preventDefault()
+    }
+
+    renderYearQuarter(modelKey, options) {
+        const teamMember = this.props.currentMember
+
+        const incomingQuarter = this.getCenterQuarter()
+        let quarterSelect, yearSelect
+        let output = []
+
+        const { disableYearQuarter } = options
+        if (disableYearQuarter) {
+            quarterSelect = (
+                <p className="form-control-static">
+                    {centerQuarterData.getLabel(incomingQuarter)}&nbsp;
+                    <a href="#" onClick={this.enableYearQuarterChange}>Change Year/Quarter</a>
+                </p>
+            )
+            yearSelect = (
+                <p className="form-control-static">Team {teamMember.teamYear}</p>
+            )
+        } else {
+            if (teamMember[CHANGING_QUARTER_KEY]) {
+                output.push(
+                    <Alert key="a" alert="warning">
+                        Changing team member's starting quarter is a very uncommon action, please check with your
+                        Regional Statistician to ensure you are taking the right action.
+                    </Alert>
+                )
+            }
+            quarterSelect = (
+                <SimpleSelect
+                        model={modelKey+'.incomingQuarter'} items={this.props.validStartQuarters}
+                        emptyChoice={teamMember.incomingQuarter? undefined : ' '}
+                        keyProp="quarterId" getLabel={centerQuarterData.getLabel} />
+            )
+
+            yearSelect = (
+                <Control.select model={modelKey+'.teamYear'} disabled={disableYearQuarter} className="form-control">
+                    <option value="1">Team 1</option>
+                    <option value="2">Team 2</option>
+                </Control.select>
+            )
+        }
+
+        output.push(
+            <SimpleFormGroup key="b" label="Starting Quarter" required={!disableYearQuarter}>
+                {quarterSelect}
+            </SimpleFormGroup>
+        )
+
+        output.push(
+            <SimpleFormGroup key="c" label="Team Year" divClass="col-md-4" required={!disableYearQuarter}>
+                {yearSelect}
+            </SimpleFormGroup>
+        )
+        return output
+    }
+
+    setExitChoice(c) {
+        this.props.dispatch(actions.setExitChoice(c))
+    }
+
     renderWithdrawGroup(modelKey, options) {
         const { currentMember } = this.props
-        const setExitChoice = (c) => {this.props.dispatch(actions.setExitChoice(c))}
         var content
         switch (currentMember.exitChoice) {
         case 'xferOut':
@@ -175,7 +224,7 @@ class _EditCreate extends TeamMembersBase {
         return (
             <div>
                 <ModeSelectButtons items={EXIT_CHOICES} current={currentMember.exitChoice} activeClasses="btn btn-primary active"
-                                   onClick={setExitChoice} ariaGroupDesc="Sort Preferences" />
+                                   onClick={this.setExitChoice} ariaGroupDesc="Sort Preferences" />
                 {content}
             </div>
         )
@@ -256,7 +305,7 @@ export class TeamMembersEdit extends _EditCreate {
     }
 
     getRenderOptions() {
-        return { disableYearQuarter: true }
+        return { disableYearQuarter: !this.props.currentMember[CHANGING_QUARTER_KEY] }
     }
 
     render() {
