@@ -167,6 +167,10 @@ trait GlobalReportDispatch
             'id' => 'AcknowledgementReport',
             'method' => 'getAcknowledgementReport',
         ],
+        'programsupervisor' => [
+            'id' => 'ProgramSupervisor',
+            'method' => 'getProgramSupervisor',
+        ],
     ];
 
     public function getPageCacheTime($report)
@@ -305,5 +309,8 @@ trait GlobalReportDispatch
 
     // Get report Acknowledgement Report
     protected abstract function getAcknowledgementReport();
+
+    // Get report Program Supervisor
+    protected abstract function getProgramSupervisor();
 
 }
