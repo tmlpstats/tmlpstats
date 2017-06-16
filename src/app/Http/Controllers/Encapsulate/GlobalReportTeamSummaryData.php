@@ -244,6 +244,59 @@ class GlobalReportTeamSummaryData
         return compact('reportData', 'totals', 'regFulfill', 'teamYear');
     }
 
+    public function getProgramSupervisor(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        $reports = $globalReport->statsReports()
+                      ->official()
+                      ->byRegion($region)
+                      ->get();
+
+        $team1 = $this->getTeamSummaryGrid($globalReport, $region, 1);
+        $team2 = $this->getTeamSummaryGrid($globalReport, $region, 2);
+
+        $team1 = $team1['reportData'];
+        $team2 = $team2['reportData'];
+
+        $reportData = [];
+        $totals = [];
+        foreach ($reports as $report) {
+            $centerName = $report->center->name;
+
+            if (!isset($team1[$centerName]) || !isset($team2[$centerName])) {
+                dd($team1);
+                continue;
+            }
+
+            $csd = $report->centerStatsData()->first();
+
+            $row = [];
+            $row['pmAttending'] = $csd->programManagerAttendingWeekend;
+            $row['clAttending'] = $csd->classroomLeaderAttendingWeekend;
+            $row['team1Current'] = $team1[$centerName]['currentOnTeam'];
+            $row['team1Incoming'] = $team1[$centerName]['appStatusNext']['appr'];
+            $row['team1Completing'] = $team1[$centerName]['completing'];
+            $row['team2Current'] = $team2[$centerName]['currentOnTeam'];
+            $row['team2Incoming'] = $team2[$centerName]['appStatusNext']['appr'];
+            $row['team2Completing'] = $team2[$centerName]['completing'];
+            $row['team2Room'] = $row['team2Current'] + $row['team2Incoming'] + $row['pmAttending'] + $row['clAttending'];
+            $row['team2RegistrationEvent'] = $row['team2Current'] + $row['team2Incoming'] + $row['pmAttending'] + $row['team1Completing'];
+
+            $row['generalSession'] = $row['team1Current'] + $row['team1Incoming'] + $row['team2Current'] + $row['team2Incoming'] + $row['pmAttending'] + $row['clAttending'];
+
+            foreach ($row as $key => $value) {
+                if (!isset($totals[$key])) {
+                    $totals[$key] = 0;
+                }
+                $totals[$key] += $value;
+            }
+
+            $reportData[$centerName] = $row;
+        }
+        ksort($reportData);
+
+        return compact('reportData', 'totals');
+    }
+
     public function getOne($page)
     {
         $globalReport = $this->globalReport;
@@ -257,6 +310,9 @@ class GlobalReportTeamSummaryData
             case 'team2summarygrid':
                 $viewData = $this->getTeamSummaryGrid($globalReport, $region, 2);
                 break;
+            case 'programsupervisor':
+                $viewData = $this->getProgramSupervisor($globalReport, $region);
+                return view('globalreports.details.programsupervisors', $viewData);
             default:
                 throw new \Exception("Unknown page $page");
         }

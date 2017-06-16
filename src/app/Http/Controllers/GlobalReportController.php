@@ -1046,6 +1046,11 @@ class GlobalReportController extends Controller
         return $this->teamSummaryData($globalReport, $region)->getOne('Team2SummaryGrid');
     }
 
+    public function getProgramSupervisor(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->teamSummaryData($globalReport, $region)->getOne('ProgramSupervisor');
+    }
+
     public static function getUrl(Models\GlobalReport $globalReport, Models\Region $region)
     {
         $abbr = strtolower($region->abbreviation);

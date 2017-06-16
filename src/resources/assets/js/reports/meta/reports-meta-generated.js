@@ -324,16 +324,23 @@ const GlobalReport = {
             "lastWeek"
         ]
     },
+    "ProgramSupervisor": {
+        "id": "ProgramSupervisor",
+        "n": 44,
+        "type": "report",
+        "name": "Program Supervisor"
+    },
     "WeekendGroup": {
         "id": "WeekendGroup",
-        "n": 44,
+        "n": 45,
         "type": "grouping",
         "name": "Weekend",
         "children": [
             "TravelReport",
             "TeamMemberStatusPotentialsOverview",
             "TeamMemberStatusPotentials",
-            "AcknowledgementReport"
+            "AcknowledgementReport",
+            "ProgramSupervisor"
         ]
     },
     "_root": {

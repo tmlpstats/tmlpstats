@@ -676,6 +676,8 @@ reportMeta:
           AcknowledgementReport:
             name: Acknowledgement Report
             requiredFlags: ['lastWeek']
+          ProgramSupervisor:
+            name: Program Supervisor
 
   # ------------ LOCAL REPORT
   Local:
