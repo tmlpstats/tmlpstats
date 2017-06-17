@@ -91,7 +91,7 @@ class AuthController extends Controller
         // Don't allow inactive users to login
         Auth::logout();
 
-        return redirect($this->loginPath())
+        return redirect(url('auth/login'))
             ->withInput($request->only($this->loginUsername(), 'remember'))
             ->withErrors([
                 $this->loginUsername() => Lang::get('auth.inactive'),
