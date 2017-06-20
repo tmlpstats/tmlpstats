@@ -83,7 +83,7 @@ class _EditCreate extends TeamMembersBase {
         return (
             <div>
                 <SimpleField label="First Name" model={modelKey+'.firstName'} divClass="col-md-6" disabled={disableBasicInfo} required={!disableBasicInfo} />
-                <SimpleField label="Last Name" model={modelKey+'.lastName'} divClass="col-md-6" disabled={disableBasicInfo} required={!disableBasicInfo} />
+                <SimpleField label="Last Initial" model={modelKey+'.lastName'} divClass="col-md-6" disabled={disableBasicInfo} required={!disableBasicInfo} />
                 <SimpleField label="Email" model={modelKey+'.email'} divClass="col-md-8" controlProps={{type: 'email'}} />
                 <SimpleField label="Phone" model={modelKey+'.phone'} divClass="col-md-6" disabled={disableBasicInfo} />
                 <SimpleFormGroup label="Accountabilities">
