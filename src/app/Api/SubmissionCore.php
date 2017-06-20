@@ -184,8 +184,8 @@ class SubmissionCore extends AuthenticatedApiBase
                                         p.updated_at=sysdate()
                                     where p.id=sda.person_id
                                           and sda.id=?
-                                          and (coalesce(p.first_name,\'\') != coalesce(sda.first_name,\'\')
-                                                or coalesce(p.last_name,\'\') != coalesce(sda.last_name,\'\')
+                                          and (coalesce(p.first_name,\'\') != BINARY coalesce(sda.first_name,\'\')
+                                                or coalesce(p.last_name,\'\') != BINARY coalesce(sda.last_name,\'\')
                                                 or coalesce(p.email,\'\') != coalesce(sda.email,\'\')
                                           )',
                             [$r->id]);
@@ -278,8 +278,8 @@ class SubmissionCore extends AuthenticatedApiBase
                                         p.updated_at=sysdate()
                                     where p.id=sda.person_id
                                           and sda.id=?
-                                          and (coalesce(p.first_name,\'\') != coalesce(sda.first_name,\'\')
-                                                or coalesce(p.last_name,\'\') != coalesce(sda.last_name,\'\')
+                                          and (coalesce(p.first_name,\'\') != BINARY coalesce(sda.first_name,\'\')
+                                                or coalesce(p.last_name,\'\') != BINARY coalesce(sda.last_name,\'\')
                                                 or coalesce(p.email,\'\') != coalesce(sda.email,\'\')
                                                 or coalesce(p.phone,\'\') != coalesce(sda.phone,\'\')
                                           )',
