@@ -227,7 +227,7 @@ class _EditCreate extends ApplicationsBase {
                 <Form className="form-horizontal" model={modelKey} onSubmit={this.saveAppData.bind(this)}>
                     {this.renderStartingQuarter(modelKey)}
                     <SimpleField label="First Name" model={modelKey+'.firstName'} divClass="col-md-6" required={true} />
-                    <SimpleField label="Last Name" model={modelKey+'.lastName'} divClass="col-md-6" required={true} />
+                    <SimpleField label="Last Initial" model={modelKey+'.lastName'} divClass="col-md-6" required={true} />
                     <SimpleFormGroup label="Team Year" divClass="col-md-4" required={true}>
                         <Control.select model={modelKey+'.teamYear'} className="form-control" style={{maxWidth: '10em'}}>
                             <option value="1">Team 1</option>
