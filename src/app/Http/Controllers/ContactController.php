@@ -3,8 +3,8 @@
 namespace TmlpStats\Http\Controllers;
 
 use Auth;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-
 use Mail;
 use TmlpStats\Http\Requests;
 
@@ -46,11 +46,11 @@ class ContactController extends Controller
         $userAgent = $request->header('User-Agent');
 
         Mail::send('emails.feedback', compact('feedback', 'sender', 'senderName', 'senderEmail', 'url', 'userAgent'),
-            function($message) use ($sender, $senderEmail, $ccSender) {
+            function($message) use ($sender, $senderName, $senderEmail, $ccSender) {
 
             $message->to(env('ADMIN_EMAIL'));
             $message->replyTo($senderEmail);
-            $message->subject('Feedback Submitted');
+            $message->subject("Feedback Submitted - {$senderName} on " . Carbon::now()->toDateTimeString());
 
             if ($ccSender) {
                 $message->cc($senderEmail);
