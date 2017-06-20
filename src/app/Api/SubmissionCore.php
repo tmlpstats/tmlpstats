@@ -805,7 +805,7 @@ class SubmissionCore extends AuthenticatedApiBase
                         $ctm = $app->committedTeamMember->person;
                         $personInfo .= " NOTE: Had committed team member {$ctm->firstName} {$ctm->lastName} who completed.";
                         unset($data['committedTeamMember']);
-                        $data['comment'] = "AUTOMATED NOTE FROM SYSTEM:\napplicant was copied over from previous quarter's stats. Committed team member {$ctm->firstName} {$ctm->lastName} has completed team. Please pick new committed team member, and then clear this note.";
+                        // $data['comment'] = "AUTOMATED NOTE FROM SYSTEM:\napplicant was copied over from previous quarter's stats. Committed team member {$ctm->firstName} {$ctm->lastName} has completed team. Please pick new committed team member, and then clear this note.";
                     }
 
                     $appsApi->stash($center, $cq->firstWeekDate, $data);
