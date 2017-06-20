@@ -51,20 +51,21 @@ class AppServiceProvider extends ServiceProvider
 
             $href = "<?php echo \\TmlpStats\\Http\\Controllers\\StatsReportController::getUrl({$data}) . '{$query}'; ?>";
 
+            $returnPhp = '';
             // Build php scripts. Have to break it down since {{ }} notation creates additional php tags
-            $returnPhp = "<?php \$condition = Gate::allows('read', {$data}); ?>";
-            $returnPhp .= '<?php if ($condition): ?>';
+            /* $returnPhp = "<?php \$condition = Gate::allows('read', {$data}); ?>";*/
+            /* $returnPhp .= '<?php if ($condition): ?>';*/
             $returnPhp .= "<a href='{$href}'>";
-            $returnPhp .= '<?php endif; ?>';
+            /* $returnPhp .= '<?php endif; ?>';*/
 
             return $returnPhp;
         });
 
         Blade::directive('endStatsReportLink', function () {
+            return '</a>';
 
-            $tag = "'</a>'";
-
-            return "<?php if (\$condition) { echo {$tag}; } ?>";
+            /* $tag = "'</a>'";
+            return "<?php if (\$condition) { echo {$tag}; } ?>";*/
         });
 
         // Using @json($foo) works out to the equivalent of {!! json_encode($foo) !!}
