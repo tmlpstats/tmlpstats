@@ -181,7 +181,8 @@ class TeamMember extends ParserDomain
     {
         $member = parent::fromArray($input, $requiredParams);
 
-        if (!$member->quarterNumber && $member->incomingQuarter && $member->center) {
+        if ($member->incomingQuarter && $member->center) {
+            // Ignore what we stashed, this is an ephemeral convenience value
             $member->quarterNumber = Models\TeamMember::getQuarterNumber($member->incomingQuarter, $member->center->region);
         }
 
