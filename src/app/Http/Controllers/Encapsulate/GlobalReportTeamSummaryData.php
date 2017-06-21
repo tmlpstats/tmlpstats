@@ -257,13 +257,25 @@ class GlobalReportTeamSummaryData
         $team1 = $team1['reportData'];
         $team2 = $team2['reportData'];
 
+        $totals = [
+            'pmAttending' => 0,
+            'clAttending' => 0,
+            'team1Current' => 0,
+            'team1Incoming' => 0,
+            'team1Completing' => 0,
+            'team2Current' => 0,
+            'team2Incoming' => 0,
+            'team2Completing' => 0,
+            'team2Room' => 0,
+            'team2RegistrationEvent' => 0,
+            'generalSession' => 0,
+        ];
+
         $reportData = [];
-        $totals = [];
         foreach ($reports as $report) {
             $centerName = $report->center->name;
 
             if (!isset($team1[$centerName]) || !isset($team2[$centerName])) {
-                dd($team1);
                 continue;
             }
 
@@ -284,9 +296,6 @@ class GlobalReportTeamSummaryData
             $row['generalSession'] = $row['team1Current'] + $row['team1Incoming'] + $row['team2Current'] + $row['team2Incoming'] + $row['pmAttending'] + $row['clAttending'];
 
             foreach ($row as $key => $value) {
-                if (!isset($totals[$key])) {
-                    $totals[$key] = 0;
-                }
                 $totals[$key] += $value;
             }
 

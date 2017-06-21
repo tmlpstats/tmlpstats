@@ -319,10 +319,7 @@ const GlobalReport = {
         "id": "AcknowledgementReport",
         "n": 43,
         "type": "report",
-        "name": "Acknowledgement Report",
-        "requiredFlags": [
-            "lastWeek"
-        ]
+        "name": "Acknowledgement Report"
     },
     "ProgramSupervisor": {
         "id": "ProgramSupervisor",
