@@ -243,6 +243,7 @@ class GlobalReport extends AuthenticatedApiBase
         $output = [];
         $ckBase = "{$report->id}{$region->id}";
         $controller = App::make(Controllers\GlobalReportController::class);
+        $begin = time();
         foreach ($pages as $page) {
             $f = function () use ($page, $report, $region, $controller) {
                 $response = $controller->newDispatch($page, $report, $region);
@@ -259,6 +260,11 @@ class GlobalReport extends AuthenticatedApiBase
             }
 
             $output[$page] = $response;
+            // If we exceed 8 seconds, return what we have so far to the user.
+            // This allows better responsiveness to tab switching.
+            if ((time() - $begin) >= 8) {
+                break;
+            }
         }
 
         return ['pages' => $output];
