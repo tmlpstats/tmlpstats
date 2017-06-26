@@ -103,12 +103,19 @@ export class TabbedReportManager extends ImmutableMapLoader {
                 return dispatch(this.runNetworkAction('load', params, {
                     successHandler: (data) => {
                         let toUpdate = Immutable.Map()
+                        let finishedPages = Immutable.Set()
                         pages.forEach((reportId) => {
-                            let key = (baseKey)? baseKey.set('page', reportId) : reportId
-                            toUpdate = toUpdate.set(key, data.pages[reportId])
+                            let pageData = data.pages[reportId]
+                            if (pageData !== undefined) {
+                                let key = (baseKey)? baseKey.set('page', reportId) : reportId
+                                toUpdate = toUpdate.set(key, pageData)
+                                finishedPages = finishedPages.add(reportId)
+                            }
                         })
-                        dispatch(this.replaceItems(toUpdate))
-                        dispatch({type: this.finish_action, payload: pages})
+                        if (toUpdate.size) {
+                            dispatch(this.replaceItems(toUpdate))
+                            dispatch({type: this.finish_action, payload: finishedPages})
+                        }
                         setTimeout(flow, 200)
                     }
                 }))
