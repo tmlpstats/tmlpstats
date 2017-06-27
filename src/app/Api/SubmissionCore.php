@@ -91,6 +91,9 @@ class SubmissionCore extends AuthenticatedApiBase
         $person_id = -1;
         $reg_id = -1;
 
+        $teamMemberApi = App::make(Api\TeamMember::class);
+        $programLeaderApi = App::make(Api\ProgramLeader::class);
+
         try {
             // Create stats_report record and get id
             $statsReport = LocalReport::ensureStatsReport($center, $reportingDate);
@@ -114,31 +117,44 @@ class SubmissionCore extends AuthenticatedApiBase
 
             $debug_message .= ' sr_id=' . $statsReport->id;
 
-            // Insert Actuals
-            DB::insert('insert into center_stats_data
-                        (id, reporting_date, type, tdo, cap, cpc, t1x, t2x, gitw, lf, points,
-                            program_manager_attending_weekend, classroom_leader_attending_weekend,
-                            stats_report_id, created_at, updated_at)
-                        select null, stored_id, type, tdo, cap, cpc, t1x, t2x, gitw, lf, points,
-                            null, null, ?, sysdate(), sysdate()
-                        from submission_data_scoreboard
-                        where center_id = ? and reporting_date = ? and stored_id = ?',
-                [$statsReport->id, $center->id, $reportingDate->toDateString(), $reportingDate->toDateTimeString()]);
-            $cs_id = DB::getPdo()->lastInsertId();
-            $debug_message .= ' csa_id=' . $cs_id;
+            // Process scoreboards:
+            // Loop through scoreboard weeks and handle appropriately.
+            $sbWeeks = App::make(Api\Scoreboard::class)->allForCenter($center, $reportingDate, true, true);
 
-            // Insert Promises
-            DB::insert('insert into center_stats_data
-                        (id, reporting_date, type, tdo, cap, cpc, t1x, t2x, gitw, lf,
-                            program_manager_attending_weekend, classroom_leader_attending_weekend,
-                            stats_report_id, created_at, updated_at)
-                        select null, promise_date, type, 100,  cap, cpc, t1x, t2x, gitw, lf,
-                            null, null, ?, sysdate(), sysdate()
-                        from submission_data_promises
-                        where center_id = ? and reporting_date = ?',
-                [$statsReport->id, $center->id, $reportingDate->toDateString()]);
-            $csp_id = DB::getPdo()->lastInsertId();
-            $debug_message .= ' csp_id=' . $csp_id;
+            foreach ($sbWeeks->sortedValues() as $scoreboard) {
+                if (!array_get($scoreboard->meta, 'localChanges', false)) {
+                    continue;
+                }
+                foreach (['promise', 'actual'] as $type) {
+                    if ($scoreboard->meta['canEdit' . ucfirst($type)]) {
+                        $csd = new Models\CenterStatsData([
+                            // reporting date in this context is not the date we're doing the report, but the week of the scoreboard in question.
+                            'reporting_date' => $scoreboard->week,
+                            'stats_report_id' => $statsReport->id,
+                            'type' => $type,
+                            'points' => $scoreboard->points(),
+                        ]);
+
+                        if ($type == 'actual') {
+                            list($pmAttending, $clAttending) = $this->calculateProgramLeaderAttending($center, $scoreboard->week);
+                            $people = $teamMemberApi->allForCenter($center, $scoreboard->week, true);
+                            $csd->programManagerAttendingWeekend = $pmAttending;
+                            $csd->classroomLeaderAttendingWeekend = $clAttending;
+                            $csd->tdo = $this->calculateTdoFromStashes($people);
+                        } else {
+                            $csd->tdo = 100;
+                        }
+
+                        // loop through to handle handle the 6-games (cap, cpc, etc)
+                        foreach ($scoreboard->games() as $gameKey => $game) {
+                            $csd->$gameKey = $game->$type(); // metaprogramming: e.g. $csd->cap = $game->promise()
+                        }
+
+                        $csd->save();
+                        $debug_message .= " csd{$type}={$csd->id}";
+                    }
+                }
+            }
 
             // Process applications
             // Loop through all applications in submission data and do the following:
@@ -551,6 +567,41 @@ class SubmissionCore extends AuthenticatedApiBase
             'message' => $emailResults,
             'debug_message' => $debug_message,
         ];
+    }
+
+    protected function calculateTdoFromStashes($teamMembers)
+    {
+        $totalMembers = 0;
+        $completed = 0;
+        foreach ($teamMembers as $tm) {
+            if ($tm->xferOut || $tm->withdrawCode !== null || $tm->wbo) {
+                continue;
+            }
+            $totalMembers++;
+            $completed += ($tm->tdo) ? 1 : 0;
+        }
+        if (!$totalMembers) {return 0;}
+
+        return round((100.0 * $completed) / ((float) $totalMembers));
+    }
+
+    protected function calculateProgramLeaderAttending(Models\Center $center, Carbon $reportingDate)
+    {
+        $leaders = App::make(Api\ProgramLeader::class)->allForCenter($center, $reportingDate, true);
+        $pmAttending = 0;
+        $clAttending = 0;
+
+        // This is done due to the limitations of our current storage method.
+        // In the future, we should move towards a place we can loop people, allowing situations like multiple classroom leaders (where one's an apprentice or specifically during a weekend of a CL change)
+        if (($pmId = $leaders['meta']['programManager']) !== null) {
+            $pmAttending += ($leaders[$pmId]->attendingWeekend) ? 1 : 0;
+        }
+
+        if (($clId = $leaders['meta']['classroomLeader']) !== null && $clId != $pmId) {
+            $clAttending += ($leaders[$clId]->attendingWeekend) ? 1 : 0;
+        }
+
+        return [$pmAttending, $clAttending];
     }
 
     public function checkCenterDate(Models\Center $center, Carbon $reportingDate, $flags = [])
