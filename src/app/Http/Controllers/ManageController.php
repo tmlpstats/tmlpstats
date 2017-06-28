@@ -17,4 +17,12 @@ class ManageController extends Controller
 
         return view('admin.region', compact('region'));
     }
+
+    public function system()
+    {
+        $region = Region::abbreviation('na')->firstOrFail();
+
+        return view('admin.region', compact('region'));
+
+    }
 }

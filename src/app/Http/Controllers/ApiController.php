@@ -20,6 +20,8 @@ class ApiController extends ApiControllerBase
     protected $methods = [
         "Admin.Region.getRegion" => "Admin__Region__getRegion",
         "Admin.Quarter.filter" => "Admin__Quarter__filter",
+        "Admin.System.allSystemMessages" => "Admin__System__allSystemMessages",
+        "Admin.System.writeSystemMessage" => "Admin__System__writeSystemMessage",
         "Application.create" => "Application__create",
         "Application.allForCenter" => "Application__allForCenter",
         "Application.stash" => "Application__stash",
@@ -97,6 +99,17 @@ class ApiController extends ApiControllerBase
     protected function Admin__Quarter__filter($input)
     {
         return App::make(Api\Admin\Quarter::class)->filter(
+        );
+    }
+    protected function Admin__System__allSystemMessages($input)
+    {
+        return App::make(Api\Admin\System::class)->allSystemMessages(
+        );
+    }
+    protected function Admin__System__writeSystemMessage($input)
+    {
+        return App::make(Api\Admin\System::class)->writeSystemMessage(
+            $this->parse($input, 'data', 'array')
         );
     }
     protected function Application__create($input)
