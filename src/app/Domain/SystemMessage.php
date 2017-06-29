@@ -19,7 +19,7 @@ class SystemMessage extends ParserDomain
         ],
         'region' => [
             'owner' => 'message',
-            'type' => 'Center',
+            'type' => 'Region',
             'assignId' => true,
         ],
         'center' => [
