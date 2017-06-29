@@ -21,9 +21,10 @@ export class SystemMessages extends PureComponent {
 
         let items = messages.map((message, i) => {
             const parsed = SimpleMarkdown.defaultBlockParse(message.content)
+            const title = (message.updatedAt)? `Updated at ${message.updatedAt}` : undefined
             return (
                 <Alert key={i} alert={message.level || 'info'}>
-                    &nbsp;<b>{message.title || 'System Message'}</b> at {message.createdAt}
+                    &nbsp;<b title={title}>{message.title || 'System Message'}</b>
                     {SimpleMarkdown.defaultOutput(parsed)}
                 </Alert>
             )
