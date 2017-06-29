@@ -11,7 +11,7 @@ class Scoreboard extends AuthenticatedApiBase
 {
     const LOCK_SETTING_KEY = 'scoreboardLock';
 
-    public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
+    public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false, $returnObject = false)
     {
         $this->assertAuthz($this->context->can('viewSubmissionUi', $center));
         $submissionCore = App::make(SubmissionCore::class);
@@ -65,6 +65,10 @@ class Scoreboard extends AuthenticatedApiBase
             $weekLock = $locks->getWeekDefault($week);
             $scoreboard->meta['canEditPromise'] = $weekLock->editPromise;
             $scoreboard->meta['canEditActual'] = $weekLock->editActual || ($week->toDateString() == $reportingDate->toDateString());
+        }
+
+        if ($returnObject) {
+            return $weeks;
         }
 
         $output = [];
