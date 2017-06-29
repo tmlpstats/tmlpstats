@@ -91,7 +91,6 @@ class SubmissionCore extends AuthenticatedApiBase
         $person_id = -1;
         $reg_id = -1;
 
-        $teamMemberApi = App::make(Api\TeamMember::class);
         $programLeaderApi = App::make(Api\ProgramLeader::class);
 
         try {
@@ -117,44 +116,8 @@ class SubmissionCore extends AuthenticatedApiBase
 
             $debug_message .= ' sr_id=' . $statsReport->id;
 
-            // Process scoreboards:
-            // Loop through scoreboard weeks and handle appropriately.
-            $sbWeeks = App::make(Api\Scoreboard::class)->allForCenter($center, $reportingDate, true, true);
-
-            foreach ($sbWeeks->sortedValues() as $scoreboard) {
-                if (!array_get($scoreboard->meta, 'localChanges', false)) {
-                    continue;
-                }
-                foreach (['promise', 'actual'] as $type) {
-                    if ($scoreboard->meta['canEdit' . ucfirst($type)]) {
-                        $csd = new Models\CenterStatsData([
-                            // reporting date in this context is not the date we're doing the report, but the week of the scoreboard in question.
-                            'reporting_date' => $scoreboard->week,
-                            'stats_report_id' => $statsReport->id,
-                            'type' => $type,
-                            'points' => $scoreboard->points(),
-                        ]);
-
-                        if ($type == 'actual') {
-                            list($pmAttending, $clAttending) = $this->calculateProgramLeaderAttending($center, $scoreboard->week);
-                            $people = $teamMemberApi->allForCenter($center, $scoreboard->week, true);
-                            $csd->programManagerAttendingWeekend = $pmAttending;
-                            $csd->classroomLeaderAttendingWeekend = $clAttending;
-                            $csd->tdo = $this->calculateTdoFromStashes($people);
-                        } else {
-                            $csd->tdo = 100;
-                        }
-
-                        // loop through to handle handle the 6-games (cap, cpc, etc)
-                        foreach ($scoreboard->games() as $gameKey => $game) {
-                            $csd->$gameKey = $game->$type(); // metaprogramming: e.g. $csd->cap = $game->promise()
-                        }
-
-                        $csd->save();
-                        $debug_message .= " csd{$type}={$csd->id}";
-                    }
-                }
-            }
+            // Process scoreboard weeks (promises and actuals) and also totals of program leaders
+            $debug_message .= $this->submitCenterStatsData($center, $reportingDate, $statsReport);
 
             // Process applications
             // Loop through all applications in submission data and do the following:
@@ -569,6 +532,52 @@ class SubmissionCore extends AuthenticatedApiBase
         ];
     }
 
+    protected function submitCenterStatsData($center, $reportingDate, $statsReport)
+    {
+        $debug_message = '';
+        // Process scoreboards:
+        // Loop through scoreboard weeks and handle appropriately.
+        $sbWeeks = App::make(Api\Scoreboard::class)->allForCenter($center, $reportingDate, true, true);
+        $teamMemberApi = App::make(Api\TeamMember::class);
+
+        foreach ($sbWeeks->sortedValues() as $scoreboard) {
+            if (!array_get($scoreboard->meta, 'localChanges', false)) {
+                continue;
+            }
+            foreach (['promise', 'actual'] as $type) {
+                if ($scoreboard->meta['canEdit' . ucfirst($type)]) {
+                    $csd = new Models\CenterStatsData([
+                        // reporting date in this context is not the date we're doing the report, but the week of the scoreboard in question.
+                        'reporting_date' => $scoreboard->week,
+                        'stats_report_id' => $statsReport->id,
+                        'type' => $type,
+                        'points' => $scoreboard->points(),
+                    ]);
+
+                    if ($type == 'actual') {
+                        list($pmAttending, $clAttending) = $this->calculateProgramLeaderAttending($center, $scoreboard->week);
+                        $people = $teamMemberApi->allForCenter($center, $scoreboard->week, true);
+                        $csd->programManagerAttendingWeekend = $pmAttending;
+                        $csd->classroomLeaderAttendingWeekend = $clAttending;
+                        $csd->tdo = $this->calculateTdoFromStashes($people);
+                    } else {
+                        $csd->tdo = 100;
+                    }
+
+                    // loop through to handle handle the 6-games (cap, cpc, etc)
+                    foreach ($scoreboard->games() as $gameKey => $game) {
+                        $csd->$gameKey = $game->$type(); // metaprogramming: e.g. $csd->cap = $game->promise()
+                    }
+
+                    $csd->save();
+                    $debug_message .= " csd{$type}={$csd->id}";
+                }
+            }
+        }
+
+        return $debug_message;
+    }
+
     protected function calculateTdoFromStashes($teamMembers)
     {
         $totalMembers = 0;
@@ -585,7 +594,7 @@ class SubmissionCore extends AuthenticatedApiBase
         return round((100.0 * $completed) / ((float) $totalMembers));
     }
 
-    protected function calculateProgramLeaderAttending(Models\Center $center, Carbon $reportingDate)
+    public function calculateProgramLeaderAttending(Models\Center $center, Carbon $reportingDate)
     {
         $leaders = App::make(Api\ProgramLeader::class)->allForCenter($center, $reportingDate, true);
         $pmAttending = 0;
