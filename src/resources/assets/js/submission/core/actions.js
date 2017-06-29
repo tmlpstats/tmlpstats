@@ -2,6 +2,7 @@ import moment from 'moment'
 import _ from 'lodash'
 import { normalize } from 'normalizr'
 
+import { systemMessagesData } from '../../lookups/lookups-system-messages'
 import { objectAssign } from '../../reusable/ponyfill'
 import { delayDispatch } from '../../reusable/dispatch'
 import Api from '../../api'
@@ -55,6 +56,10 @@ export function setSubmissionLookups(data, reportingDate) {
                 const crdate = moment(data.currentQuarter[`classroom${i}Date`])
                 lookups.pastClassroom[i] = !crdate.isAfter(reportingDate)
             }
+        }
+
+        if (c.systemMessages) {
+            dispatch(systemMessagesData.replaceItem('submission', c.systemMessages))
         }
 
         dispatch({

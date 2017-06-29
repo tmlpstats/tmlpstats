@@ -127,5 +127,6 @@ export class ScopedLookup {
 }
 
 export const lookupsData = new LookupManager({
-    prefix: 'lookups'
+    prefix: 'lookups',
+    extraLMS: ['saveState']
 })

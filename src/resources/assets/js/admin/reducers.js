@@ -2,6 +2,7 @@ import { combineReducers } from 'redux'
 
 import { quartersData } from './data'
 import regionsReducer from './regions/reducers'
+import systemReducer from './system/reducers'
 
 const lookupsReducer = combineReducers({
     quarters: quartersData.reducer()
@@ -9,7 +10,8 @@ const lookupsReducer = combineReducers({
 
 const adminReducer = combineReducers({
     regions: regionsReducer,
-    lookups: lookupsReducer
+    lookups: lookupsReducer,
+    system: systemReducer
 })
 
 export default adminReducer

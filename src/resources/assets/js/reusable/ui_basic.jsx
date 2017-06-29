@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import React from 'react'
 import PropTypes from 'prop-types'
 
@@ -229,17 +230,26 @@ export class MessagesComponent extends React.PureComponent {
     }
 }
 
+export const ALERT_TYPES = [
+    {key: 'info', label: 'Info', icon: 'info-sign'},
+    {key: 'warning', label: 'Warning', icon: 'warning-sign'},
+    {key: 'danger', label: 'Danger', icon: 'exclamation-sign'},
+    {key: 'success', label: 'Success', icon: 'ok-sign'}
+]
+
+const alertsByKey = _.keyBy(ALERT_TYPES, 'key')
+
 export class Alert extends React.PureComponent {
     static defaultProps = {
         alert: 'info',
-        icon: 'info-sign'
+        icon: ''
     }
     render() {
         const { alert, icon, children } = this.props
-
+        let chosenIcon = icon? icon : alertsByKey[alert].icon
         return (
             <div className={'alert alert-' + alert}>
-                <span className={'glyphicon glyphicon-' + icon} aria-hidden="true"></span>
+                <span className={'glyphicon glyphicon-' + chosenIcon} aria-hidden="true"></span>
                 {children}
             </div>
         )

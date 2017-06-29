@@ -17,7 +17,7 @@ use TmlpStats\Http\Controllers;
 class SubmissionCore extends AuthenticatedApiBase
 {
     /**
-     * Initialize a submission, checking if parameters are valid.
+     * Initialize a submission UI, checking if parameters are valid and returning useful lookups.
      * @param  Models\Center $center
      * @param  Carbon        $reportingDate
      * @return array
@@ -57,6 +57,7 @@ class SubmissionCore extends AuthenticatedApiBase
             'lookups' => compact('withdraw_codes', 'team_members', 'center', 'centers'),
             'accountabilities' => $accountabilities,
             'currentQuarter' => $centerQuarter,
+            'systemMessages' => Models\SystemMessage::centerActiveMessages('submission', $center)->get(),
         ];
     }
 

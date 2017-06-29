@@ -54,6 +54,19 @@ api:
             desc: Filter/list all quarters
             params: []
 
+      System:
+        type: namespace
+        children:
+          allSystemMessages:
+            desc: Get all system messages
+            params: []
+
+          writeSystemMessage:
+            desc: Upsert a system message
+            params:
+              - name: data
+                type: array
+
   Application:
     type: namespace
     children:

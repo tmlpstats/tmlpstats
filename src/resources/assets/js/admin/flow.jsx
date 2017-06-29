@@ -3,6 +3,7 @@ import { Route, IndexRoute } from 'react-router'
 
 import AdminRoot from './AdminRoot'
 import * as regionComponents from './regions/components'
+import * as systemComponents from './system/components'
 
 function EmptyWrapper(props) {
     return <div>{props.children}</div>
@@ -19,6 +20,9 @@ export default function AdminFlow() {
                     <Route path="manage_scoreboards/from/:centerId" component={regionComponents.EditScoreboardLock} />
                     <Route path="accountability_rosters" component={regionComponents.AccountabilityRosters} />
                 </Route>
+            </Route>
+            <Route path="system">
+                <Route path="system_messages" component={systemComponents.AdminSystemMessages} />
             </Route>
         </Route>
     )

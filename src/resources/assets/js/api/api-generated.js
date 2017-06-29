@@ -30,6 +30,22 @@ Api.Admin.Quarter = {
     filter: bac('Admin.Quarter.filter')
 }
 
+Api.Admin.System = {
+
+    /*
+    Get all system messages
+    Parameters:
+    */
+    allSystemMessages: bac('Admin.System.allSystemMessages'),
+
+    /*
+    Upsert a system message
+    Parameters:
+      data: array
+    */
+    writeSystemMessage: bac('Admin.System.writeSystemMessage')
+}
+
 Api.Application = {
 
     /*

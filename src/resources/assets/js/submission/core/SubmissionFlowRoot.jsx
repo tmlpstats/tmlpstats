@@ -1,8 +1,9 @@
 import _ from 'lodash'
 import React from 'react'
 
+import { systemMessagesData } from '../../lookups/lookups-system-messages'
 import { connectRedux } from '../../reusable/dispatch'
-import { objectAssign } from '../../reusable/ponyfill'
+import { SystemMessages } from '../../reusable/system-messages'
 import { SubmissionBase } from '../base_components'
 
 import checkCoreData from './checkCoreData'
@@ -15,17 +16,22 @@ const stepsBeforeCr3 = _.reject(steps, {key: 'next_qtr_accountabilities'})
 @connectRedux()
 export default class SubmissionFlowRoot extends SubmissionBase {
     static mapStateToProps(state) {
-        return objectAssign({browser: state.browser}, state.submission.core)
+        return {
+            browser: state.browser,
+            core:state.submission.core,
+            systemMessages: systemMessagesData.getMessages(state, 'submission')
+        }
     }
 
     render() {
+        const { core, browser, params, location, systemMessages } = this.props
         if (!this.checkReportingDate()) {
             return this.renderBasicLoading(this.props.coreInit)
         }
-        const navSteps = (this.props.lookups.pastClassroom[3]) ? steps : stepsBeforeCr3
-        const largeLayout = this.props.browser.greaterThan.large
+        const navSteps = (core.lookups.pastClassroom[3]) ? steps : stepsBeforeCr3
+        const largeLayout = browser.greaterThan.large
 
-        const nav = <SubmissionNav params={this.props.params} steps={navSteps} location={this.props.location} tabbed={!largeLayout} />
+        const nav = <SubmissionNav params={params} steps={navSteps} location={location} tabbed={!largeLayout} />
         var layout
         if (largeLayout) {
             layout = (
@@ -55,6 +61,7 @@ export default class SubmissionFlowRoot extends SubmissionBase {
         }
         return (
             <div>
+                <SystemMessages messages={systemMessages} />
                 {layout}
             </div>
         )
@@ -62,6 +69,6 @@ export default class SubmissionFlowRoot extends SubmissionBase {
 
     checkReportingDate() {
         const { centerId, reportingDate } = this.props.params
-        return checkCoreData(centerId, reportingDate, this.props, this.props.dispatch)
+        return checkCoreData(centerId, reportingDate, this.props.core, this.props.dispatch)
     }
 }
