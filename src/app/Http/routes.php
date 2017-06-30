@@ -51,6 +51,9 @@ Route::get('report/{token}', 'ReportsController@getByToken');
 Route::get('reports/centers/{abbr?}/{date?}/{tab1?}/{tab2?}', 'ReportsController@getCenterReport');
 Route::get('reports/regions/{abbr?}/{date?}/{tab1?}/{tab2?}', 'ReportsController@getRegionReport');
 
+// Downloads
+Route::get('downloads/regions/{abbr}/{date}/{report}', 'GlobalReportController@generateApplicationsOverdueCsv');
+
 Route::post('reports/centers/setActive', 'ReportsController@setActiveCenter');
 Route::post('reports/regions/setActive', 'ReportsController@setActiveRegion');
 Route::post('reports/dates/setActive', 'ReportsController@setActiveReportingDate');

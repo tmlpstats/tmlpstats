@@ -1,4 +1,6 @@
 <div class="table-responsive">
+    <br />
+    <a href="{!! $csvUrl !!}">Download CSV</a>
     @foreach (['notSent', 'out', 'waiting'] as $group)
         @if ($reportData[$group])
             <br/>
@@ -33,8 +35,17 @@
                 </thead>
                 <tbody>
                 @foreach ($reportData[$group] as $registrationData)
-                    <tr title="{{ ($group == 'notSent') ? 'Due within 2 days of registration' : 'Due within 14 days of registration' }}">
-
+                    <?php
+                        $title = '';
+                        if ($group == 'notSent') {
+                            $title = 'Due within 3 days of registration.';
+                        } else if ($group == 'out') {
+                            $title = 'Due within 7 days of sending out.';
+                        } else if ($group == 'waiting') {
+                            $title = 'Due within 7 days of receiving.';
+                        }
+                    ?>
+                    <tr title="{{ $title }}">
                         <td>
                             @statsReportLink($registrationData->statsReport)
                                 {{ $registrationData->center->name }}

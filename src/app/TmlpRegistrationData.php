@@ -72,11 +72,12 @@ class TmlpRegistrationData extends Model
             return null;
         }
 
-        $regDate = clone $this->regDate;
-        if ($this->appInDate || $this->appOutDate) {
-            return $regDate->addDays(14);
+        if ($this->appInDate) {
+            return $this->appInDate->copy()->addDays(7);
+        } else if ($this->appOutDate) {
+            return $this->appOutDate->copy()->addDays(7);
         } else {
-            return $regDate->addDays(2);
+            return $this->regDate->copy()->addDays(3);
         }
     }
 

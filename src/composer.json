@@ -18,7 +18,8 @@
         "laravelcollective/html": "~5.2",
         "nesbot/carbon": "~1.0",
         "phpoffice/phpexcel": "~1.8",
-        "respect/validation": "~1.0"
+        "respect/validation": "~1.0",
+        "league/csv": "^8.0"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.5",
