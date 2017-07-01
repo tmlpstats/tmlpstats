@@ -1,12 +1,13 @@
 <?php
 namespace TmlpStats;
 
+use App;
+use Cache;
+use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Api;
 use TmlpStats\Traits\CachedRelationships;
-
-use Carbon\Carbon;
-use Cache;
 
 class GlobalReport extends Model
 {
@@ -36,6 +37,7 @@ class GlobalReport extends Model
         $this->statsReports()->attach($report->id);
 
         Cache::tags(["globalReport{$this->id}"])->flush();
+        App::make(Api\GlobalReport::class)->clearCache();
     }
 
     public function getStatsReportByCenter(Center $center)

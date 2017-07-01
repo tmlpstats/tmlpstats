@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Api;
+<?php
+namespace TmlpStats\Api;
 
 // This is an API servicer. All API methods are simple methods
 // that take typed input and return array responses.
@@ -6,6 +7,7 @@ use App;
 use Cache;
 use Carbon\Carbon;
 use Illuminate\View\View;
+use Storage;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Encapsulations;
@@ -14,11 +16,30 @@ use TmlpStats\Reports\Arrangements;
 
 class GlobalReport extends AuthenticatedApiBase
 {
+    protected function getCacheDir(Models\GlobalReport $report, Models\Region $region)
+    {
+        return "cache/{$report->reportingDate->toDateString()}/globalReport/{$region->abbreviation}";
+    }
+
+    public function clearCache(Models\GlobalReport $report, Models\Region $region)
+    {
+        // clear cache
+        Cache::tags(["globalReport{$report->id}"])->flush();
+
+        // rm saved report files
+        $dir = $this->getCacheDir($report, $region);
+        foreach(glob("{$dir}/*") as $file) {
+            if(is_file($file)) {
+                unlink($file);
+            }
+        }
+    }
+
     public function getRating(Models\GlobalReport $report, Models\Region $region)
     {
-        $cached = $this->checkCache(compact('report', 'region'));
-        if ($cached) {
-            return $cached;
+        $cacheKey = $this->getCacheDir($report, $region) . '/ratings.json';
+        if (Storage::exists($cacheKey) && $contents = Storage::get($cacheKey)) {
+            return json_decode($contents, true);
         }
 
         $statsReports = $this->getStatsReports($report, $region);
@@ -35,7 +56,7 @@ class GlobalReport extends AuthenticatedApiBase
         $data['summary']['points'] = $weeklyData[$dateString]['points']['total'];
         $data['summary']['rating'] = $weeklyData[$dateString]['rating'];
 
-        $this->putCache($data);
+        Storage::put($cacheKey, json_encode($data));
 
         return $data;
     }
