@@ -1387,6 +1387,55 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
         ];
     }
 
+    /**
+     * @dataProvider providerValidateComment
+     */
+    public function testValidateComment($data, $expectedMessages, $expectedResult)
+    {
+        $data = $this->getTeamMember($data);
+
+        $validator = $this->getObjectMock();
+        $result = $validator->run($data);
+
+        $this->assertMessages($expectedMessages, $validator->getMessages());
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    public function providerValidateComment()
+    {
+        return [
+            // No comment
+            [
+                [
+                    'comment' => null,
+                ],
+                [],
+                true,
+            ],
+            // Short comment
+            [
+                [
+                    'comment' => 'This is a great comment',
+                ],
+                [],
+                true,
+            ],
+            // Long comment
+            [
+                [
+                    'comment' => '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789',
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'GENERAL_COMMENT_TOO_LONG',
+                        'reference.field' => 'comment',
+                    ]),
+                ],
+                false,
+            ],
+        ];
+    }
+
     public function getTeamMember($data)
     {
         if (isset($data['__reportingDate'])) {
