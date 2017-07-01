@@ -2,8 +2,10 @@
 namespace TmlpStats\Http\Controllers;
 
 use App;
+use Carbon\Carbon;
 use Gate;
 use Illuminate\Http\Request;
+use League\Csv\Writer;
 use Response;
 use TmlpStats as Models;
 use TmlpStats\Api;
@@ -397,6 +399,21 @@ class GlobalReportController extends Controller
 
     protected function getTmlpRegistrationsOverdue(Models\GlobalReport $globalReport, Models\Region $region)
     {
+        $data = $this->getOverdueApplications($globalReport, $region);
+
+        return view('globalreports.details.applicationsoverdue', [
+            'reportData' => $data['reportData'],
+            'reportingDate' => $globalReport->reportingDate,
+            'csvUrl' => action('GlobalReportController@generateApplicationsOverdueCsv', [
+                'abbr' => strtolower($region->abbreviation),
+                'date' => $globalReport->reportingDate->toDateString(),
+                'report' => 'applicationsoverdue',
+            ])
+        ]);
+    }
+
+    protected function getOverdueApplications(Models\GlobalReport $globalReport, Models\Region $region)
+    {
         $registrations = App::make(Api\GlobalReport::class)->getApplicationsListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
@@ -408,11 +425,53 @@ class GlobalReportController extends Controller
         $statusData = $a->compose();
 
         $a = new Arrangements\TmlpRegistrationsByOverdue(['registrationsData' => $statusData['reportData']]);
-        $data = $a->compose();
+        return $a->compose();
+    }
 
-        return view('globalreports.details.applicationsoverdue', [
-            'reportData' => $data['reportData'],
-            'reportingDate' => $globalReport->reportingDate,
+    // TODO: This probably belongs in a new 'downloads' own controller?
+    protected function generateApplicationsOverdueCsv(Request $request, $abbr, $date, $report)
+    {
+        $globalReport = Models\GlobalReport::reportingDate(Carbon::parse($date))->firstOrFail();
+        $region = Models\Region::abbreviation($abbr)->firstOrFail();
+
+        $data = $this->getOverdueApplications($globalReport, $region);
+        $path = storage_path("app/overdue_{$abbr}_{$date}.csv");
+
+        $headers = [
+            'Team Name',
+            'Team Year',
+            'Applicant First Name',
+            'Applicant Last Name Initial',
+            'Registration Date',
+            'Application Out Date',
+            'Application In Date',
+            'Approved Date',
+            'Committed Listener',
+            'Comment',
+        ];
+
+        $csv = Writer::createFromPath($path, 'w');
+        $csv->insertOne($headers);
+
+        foreach (['notSent', 'out', 'waiting'] as $group) {
+            foreach ($data['reportData'][$group] as $app) {
+                $csv->insertOne([
+                    $app->center->name,
+                    $app->teamYear,
+                    $app->firstName,
+                    $app->lastName,
+                    $app->regDate ? $app->regDate->toDateString() : '',
+                    $app->appOutDate ? $app->appOutDate->toDateString() : '',
+                    $app->appInDate ? $app->appInDate->toDateString() : '',
+                    $app->apprDate ? $app->apprDate->toDateString() : '',
+                    $app->committedTeamMember ? "{$app->committedTeamMember->firstName} {$app->committedTeamMember->lastName}" : '',
+                    $app->comment,
+                ]);
+            }
+        }
+
+        return Response::download($path, basename($path), [
+            'Content-Length: ' . filesize($path),
         ]);
     }
 

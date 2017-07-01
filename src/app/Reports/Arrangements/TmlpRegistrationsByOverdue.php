@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Reports\Arrangements;
+<?php
+namespace TmlpStats\Reports\Arrangements;
 
 class TmlpRegistrationsByOverdue extends BaseArrangement
 {
@@ -25,7 +26,7 @@ class TmlpRegistrationsByOverdue extends BaseArrangement
             foreach ($statusData as $data) {
 
                 $due = $data->due();
-                if (!$due || $data->statsReport->reportingDate->lt($due)) {
+                if (!$due || $data->statsReport->reportingDate->lte($due)) {
                     continue;
                 }
 
