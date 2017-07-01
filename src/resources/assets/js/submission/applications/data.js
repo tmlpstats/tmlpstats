@@ -13,6 +13,11 @@ export const appsSorts = createSorters([
         key: 'first_last',
         label: 'First, Last',
         comparator: compositeKey([['firstName', 'string'], ['lastName', 'string']])
+    },
+    {
+        key: 'weekend',
+        label: 'Weekend',
+        comparator: compositeKey([['incomingQuarter', 'number'], ['teamYear', 'number'], ['firstName', 'string'], ['lastName', 'string']])
     }
 ])
 
