@@ -27,7 +27,7 @@ script:
   - >
     if [[ $TRAVIS_PHP_VERSION =~ ^7 ]]; then
       npm test -- --coverage &&
-      phpdbg -qrr -d memory_limit="1G" vendor/bin/phpunit --coverage-clover build/logs/clover.xml;
+      phpdbg -qrr -dmemory_limit="1G" vendor/bin/phpunit --coverage-clover build/logs/clover.xml;
     else
       php -d max_execution_time="1800" -d memory_limit="1G" vendor/bin/phpunit;
     fi
