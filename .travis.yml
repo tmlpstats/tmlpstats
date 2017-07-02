@@ -11,10 +11,11 @@ cache:
 
 before_install:
   - phpenv config-rm xdebug.ini
+  - phpenv config-add travis.php.ini
 
 before_script:
   - cd src/
-  - find app resources tests -name "*.php" ! -path '*/_ide_helper.php' -print0 | xargs -0 -n1 -P8 php -l
+  - find app resources tests -name "*.php" -print0 | xargs -0 -n1 -P8 php -l
   - >
     if [[ $TRAVIS_PHP_VERSION =~ ^7 ]]; then
       bash ../bin/travis-node-setup.sh
@@ -27,7 +28,7 @@ script:
   - >
     if [[ $TRAVIS_PHP_VERSION =~ ^7 ]]; then
       npm test -- --coverage &&
-      phpdbg -qrr -dmemory_limit="1G" vendor/bin/phpunit --coverage-clover build/logs/clover.xml;
+      phpdbg -qrr vendor/bin/phpunit --coverage-clover build/logs/clover.xml;
     else
       php -d max_execution_time="1800" -d memory_limit="1G" vendor/bin/phpunit;
     fi
