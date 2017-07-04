@@ -240,10 +240,17 @@ export const ALERT_TYPES = [
 const alertsByKey = _.keyBy(ALERT_TYPES, 'key')
 
 export class Alert extends React.PureComponent {
+    static propTypes = {
+        alert: PropTypes.string.isRequired,
+        icon: PropTypes.string,
+        children: PropTypes.node
+    }
+
     static defaultProps = {
         alert: 'info',
         icon: ''
     }
+
     render() {
         const { alert, icon, children } = this.props
         let chosenIcon = icon? icon : alertsByKey[alert].icon
@@ -311,7 +318,8 @@ export class Modal extends React.PureComponent {
     static propTypes = {
         title: PropTypes.string,
         footer: PropTypes.oneOfType([PropTypes.string, PropTypes.element, PropTypes.arrayOf(PropTypes.element)]),
-        onClose: PropTypes.func
+        onClose: PropTypes.func,
+        children: PropTypes.node
     }
 
     constructor(props) {

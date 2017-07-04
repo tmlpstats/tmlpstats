@@ -1,6 +1,84 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`LoadStateFlip 1`] = `
+exports[`Alert 1`] = `
+<div
+  className="alert alert-info"
+>
+  <span
+    aria-hidden="true"
+    className="glyphicon glyphicon-info-sign"
+  />
+  Content Here
+</div>
+`;
+
+exports[`ButtonStateFlip Loaded 1`] = `
+<div
+  className="form-group"
+>
+  <div
+    className="col-md-offset-2 col-md-8"
+  >
+    <button
+      className="btn btn-primary"
+      onClick={[Function]}
+    >
+      Submit
+    </button>
+  </div>
+</div>
+`;
+
+exports[`ButtonStateFlip Loading 1`] = `
+<div
+  className="form-group"
+>
+  <div
+    className="col-md-offset-2 col-md-8"
+  >
+    <button
+      className="btn btn-primary m-progress"
+    >
+      Submit
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Glyphicon 1`] = `
+<span
+  aria-hidden="true"
+  className="glyphicon glyphicon-ok-sign"
+/>
+`;
+
+exports[`LoadStateFlip Failed with additional error message 1`] = `
+<div
+  className="bg-danger"
+>
+  FAILED Message here.
+</div>
+`;
+
+exports[`LoadStateFlip Failed with no additional message 1`] = `
+<div
+  className="bg-danger"
+>
+  FAILED 
+</div>
+`;
+
+exports[`LoadStateFlip Loaded 1`] = `
+<div>
+  <div
+    className="foo"
+  >
+    HELLO
+  </div>
+</div>
+`;
+
+exports[`LoadStateFlip Loading 1`] = `
 <div>
   <span
     className="glyphicon glyphicon-send"
@@ -9,12 +87,141 @@ exports[`LoadStateFlip 1`] = `
 </div>
 `;
 
-exports[`LoadStateFlip 2`] = `
+exports[`MessagesComponent Both Errors and Warnings 1`] = `
 <div>
-  <span
-    className="glyphicon glyphicon-send"
-  />
-  TODO spinner here...
+  <div>
+    <h5
+      className="error"
+    >
+      Errors
+      :
+    </h5>
+    <ul>
+      <li
+        className="error"
+      >
+        Error 1
+      </li>
+    </ul>
+  </div>
+  <div>
+    <h5
+      className="warning"
+    >
+      Warnings
+      :
+    </h5>
+    <ul>
+      <li
+        className="warning"
+      >
+        Hello W1
+      </li>
+      <li
+        className="warning"
+      >
+        Warning 2
+      </li>
+    </ul>
+  </div>
+</div>
+`;
+
+exports[`MessagesComponent Empty Messages 1`] = `<div />`;
+
+exports[`MessagesComponent With custom reference string 1`] = `
+<div>
+  <div>
+    <h5
+      className="error"
+    >
+      Errors Things
+      :
+    </h5>
+    <ul>
+      <li
+        className="error"
+      >
+        Error 1
+      </li>
+    </ul>
+  </div>
+  <div>
+    <h5
+      className="warning"
+    >
+      Warnings Things
+      :
+    </h5>
+    <ul>
+      <li
+        className="warning"
+      >
+        Hello W1
+      </li>
+      <li
+        className="warning"
+      >
+        Warning 2
+      </li>
+    </ul>
+  </div>
+</div>
+`;
+
+exports[`Modal 1`] = `
+<div
+  className="modal fade in"
+  role="dialog"
+  style={
+    Object {
+      "display": "block",
+    }
+  }
+  tabIndex="-1"
+>
+  <div
+    className="modal-dialog"
+    role="document"
+  >
+    <div
+      className="modal-content"
+    >
+      <div
+        className="modal-header"
+      >
+        <button
+          aria-label="Close"
+          className="close"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+          >
+            x
+          </span>
+        </button>
+        <h4
+          className="modal-title"
+        >
+          Modal Title
+        </h4>
+      </div>
+      <div
+        className="modal-body"
+      >
+        Modal body
+      </div>
+      <div
+        className="modal-footer"
+      >
+        <div>
+          Modal Footer
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 `;
 
@@ -38,5 +245,74 @@ exports[`ModeSelectButtons 1`] = `
   >
     Bar
   </button>
+</div>
+`;
+
+exports[`Panel No Heading 1`] = `
+<div
+  className="panel panel-default"
+>
+  <div
+    className="panel-body"
+  >
+    Simple Panel body
+  </div>
+</div>
+`;
+
+exports[`Panel With Heading 1`] = `
+<div
+  className="panel panel-default"
+>
+  <div
+    className="panel-heading"
+  >
+    <h4
+      className="panel-title"
+    >
+      Heading Text
+    </h4>
+  </div>
+  <div
+    className="panel-body"
+  >
+    Panel body
+  </div>
+</div>
+`;
+
+exports[`SubmitFlip 1`] = `
+<div
+  className="form-group"
+>
+  <div
+    className="col-md-offset-2 col-md-8"
+  >
+    <div>
+      <span
+        className="glyphicon glyphicon-send"
+      />
+      TODO spinner here...
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SubmitFlip 2`] = `
+<div
+  className="form-group"
+>
+  <div
+    className="col-md-offset-2 col-md-8"
+  >
+    <div>
+      <button
+        className="btn btn-primary"
+        type="submit"
+      >
+        Submit
+      </button>
+    </div>
+  </div>
 </div>
 `;
