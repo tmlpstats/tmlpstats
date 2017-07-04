@@ -459,43 +459,8 @@ class SubmissionCore extends AuthenticatedApiBase
             }
 
             // Add/update all accountability holders
-            $result = collect(DB::select(
-                'select i.* from submission_data_accountabilities i
-                    where i.center_id=? and i.reporting_date=?',
-                [$center->id, $reportingDate->toDateString()]
-            ))->keyBy(function ($item) {
-                return $item->accountability_id;
-            });
-
-            // Skip program managers and classroom leaders for now
-            // TODO: we'll need to import them at some point
-            $allAccountabilities = Models\Accountability::context('team')->whereNotIn('id', [8, 9])->get();
-            foreach ($allAccountabilities as $accountability) {
-                if (!isset($result[$accountability->id])) {
-                    // No one is listed as accountable, remove any existing accountables
-                    DB::update('
-                        UPDATE  accountability_person ap
-                        INNER JOIN people p ON p.id = ap.person_id
-                        SET ap.ends_at = ?, ap.updated_at = sysdate()
-                        WHERE
-                            ap.accountability_id = ?
-                            AND p.center_id = ?
-                            AND (ap.ends_at IS NULL OR ap.ends_at > ?)',
-                        [$reportNow->copy()->subSecond(), $accountability->id, $center->id, $reportNow]
-                    );
-                    continue;
-                }
-
-                $person = Models\Person::find($result[$accountability->id]->person_id);
-                if (!$person) {
-                    Log::error("Person {$result[$accountability->id]->person_id} was submitted in accountability_person but doesn't exist.");
-                    continue;
-                }
-
-                // If the person doesn't already have this accountability, add it and remove previous holder
-                // Always call takeover to cleanup any stragglers (leftover from spreadsheet migration)
-                $person->takeoverAccountability($accountability, $reportNow, $quarterEndDate);
-            }
+            $teamMembers = App::make(Api\TeamMember::class)->allForCenter($center, $reportingDate, true);
+            $this->submitTeamAccountabilities($center, $reportingDate, $reportNow, $quarterEndDate, $teamMembers);
 
             // Mark stats report as 'official'
             $globalReport = Models\GlobalReport::firstOrCreate([
@@ -612,6 +577,40 @@ class SubmissionCore extends AuthenticatedApiBase
         }
 
         return [$pmAttending, $clAttending];
+    }
+
+    public function submitTeamAccountabilities(Models\Center $center, Carbon $reportingDate, Carbon $reportNow, Carbon $quarterEndDate, $teamMembers)
+    {
+        // Phase 1: make a map of accountability ID -> person
+        $result = [];
+        foreach ($teamMembers as $k => $tm) {
+            // no idea why we'd have a negative ID at this point, but let's just be safe.
+            if ($tm->id > 0 && count($tm->accountabilities)) {
+                try {
+                    $person = $tm->getAssociatedPerson();
+                } catch (\Exception $e) {
+                    // TODO send email
+                }
+                foreach ($tm->accountabilities as $accId) {
+                    $result[$accId] = $person;
+                }
+            }
+        }
+        // Phase 2: Loop accountabilities (Skip program managers and classroom leaders for now)
+        $allAccountabilities = Models\Accountability::context('team')->whereNotIn('id', [8, 9])->get();
+        foreach ($allAccountabilities as $accountability) {
+            if (!isset($result[$accountability->id])) {
+                // No one is listed as accountable, remove any existing accountables
+                Models\Accountability::removeAccountabilityFromCenter($accountability->id, $center->id, $reportNow);
+            } else {
+                $person = $result[$accountability->id];
+
+                // If the person doesn't already have this accountability, add it and remove previous holder
+                // Always call takeover to cleanup any stragglers (leftover from spreadsheet migration)
+                $person->takeoverAccountability($accountability, $reportNow, $quarterEndDate);
+            }
+        }
+
     }
 
     public function checkCenterDate(Models\Center $center, Carbon $reportingDate, $flags = [])

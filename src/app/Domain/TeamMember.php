@@ -205,4 +205,29 @@ class TeamMember extends ParserDomain
         return $output;
     }
 
+    /**
+     * Fetch the person associated with this TeamMember object.
+     *
+     * Will throw an exception if the person could not be found.
+     *
+     * @return Models\Person The person associated with this TeamMember domain.
+     */
+    public function getAssociatedPerson()
+    {
+        if (($personId = array_get($this->meta, 'personId', null)) !== null) {
+            $person = Models\Person::find($personId);
+            if ($person === null) {
+                throw new \Exception("Unexpected: Could not find person with ID {$personId}");
+            }
+        } else {
+            $teamMember = Models\TeamMember::find($this->id);
+            if ($teamMember === null) {
+                throw new \Exception("Unexpected: could not find team member with ID {$tm->id}");
+            }
+            $person = $teamMember->person;
+        }
+
+        return $person;
+    }
+
 }
