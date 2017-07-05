@@ -77,6 +77,7 @@ class TeamMembersCounts extends BaseArrangement
             } else if ($data->ctw) {
                 $withdraws['ctw']++;
             } else if ($data->wbo) {
+                $withdraws[$team]++;
                 $withdraws['wbo']++;
             }
         }
