@@ -178,7 +178,8 @@ class Person extends Model
     /**
      * Takeover an accountability within person's center.
      *
-     * Remove accountability from any existing holders first
+     * Remove accountability from any existing holders effective the start date,
+     * except if we are the holder.
      *
      * @param  Accountability $accountability
      * @param  Carbon         $starts
@@ -186,17 +187,8 @@ class Person extends Model
      */
     public function takeoverAccountability(Accountability $accountability, Carbon $starts, Carbon $ends)
     {
-        // Remove accountability from any existing holders
-        DB::update('
-            UPDATE  accountability_person ap
-            INNER JOIN people p ON p.id = ap.person_id
-            SET ap.ends_at = ?
-            WHERE
-                ap.accountability_id = ?
-                AND p.center_id = ?
-                AND (ap.ends_at IS NULL OR ap.ends_at > ?)',
-            [$starts, $accountability->id, $this->center->id, $starts]
-        );
+        // Remove accountability from any existing holders, EXCEPT the given person
+        Accountability::removeAccountabilityFromCenter($accountability->id, $this->center->id, $starts, $this->id);
 
         // Add accountability
         $this->addAccountability($accountability, $starts, $ends);

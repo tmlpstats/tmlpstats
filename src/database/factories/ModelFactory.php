@@ -57,6 +57,13 @@ $factory->define(TmlpStats\TeamMember::class, function (Faker\Generator $faker) 
     ];
 });
 
+$factory->defineAs(TmlpStats\TeamMember::class, 'noPerson', function(Faker\Generator $faker) {
+    return [
+        'team_year'           => $faker->numberBetween(1,2),
+        'incoming_quarter_id' => 1,
+    ];
+});
+
 $factory->define(TmlpStats\Course::class, function (Faker\Generator $faker) {
     return [
         'center_id'  => $faker->numberBetween(1, 24),

@@ -2,12 +2,22 @@ language: php
 php:
   - 7.0
 
+env:
+  matrix:
+    - PHP_COVERAGE_ON=
+    - PHP_COVERAGE_ON=y
+
+matrix:
+  allow_failures:
+    - php: 7.0
+      env: PHP_COVERAGE_ON=y
+
 sudo: required
 
 cache:
   directories:
-    - src/vendor
     - src/node_modules
+    - src/vendor
 
 before_install:
   - phpenv config-rm xdebug.ini
@@ -26,9 +36,13 @@ before_script:
 script:
   - mkdir -p build/logs
   - >
+    if [[ $PHP_COVERAGE_ON = "y" ]]; then
+      export PHP_COVERAGE_OPTS="--coverage-clover build/logs/clover.xml";
+    fi
+  - >
     if [[ $TRAVIS_PHP_VERSION =~ ^7 ]]; then
       npm test -- --coverage &&
-      phpdbg -qrr vendor/bin/phpunit --coverage-clover build/logs/clover.xml;
+      phpdbg -qrr vendor/bin/phpunit $PHP_COVERAGE_OPTS -d memory_limit="1G";
     else
       php -d max_execution_time="1800" -d memory_limit="1G" vendor/bin/phpunit;
     fi
@@ -37,5 +51,10 @@ after_script:
   - ls -l build/logs/
   - >
     if [[ $TRAVIS_PHP_VERSION =~ ^7 ]]; then
-      travis_retry php vendor/bin/coveralls -v
+      if [[ $PHP_COVERAGE_ON = "y" ]]; then
+        travis_retry php vendor/bin/coveralls -v;
+      else
+        npm install coveralls &&
+        cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js;
+      fi
     fi
