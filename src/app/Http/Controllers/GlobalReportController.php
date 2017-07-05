@@ -71,7 +71,13 @@ class GlobalReportController extends Controller
     {
         $this->context->setRegion($region);
         $this->context->setReportingDate($globalReport->reportingDate);
-        $this->context->setDateSelectAction('ReportsController@getRegionReport', ['abbr' => $region->abbrLower()]);
+        $this->context->setDateSelectAction('ReportsController@getRegionReport', [
+            'abbr' => $region->abbrLower(),
+            // hacky, but useful, keep the same report tab when changing dates.
+            // In the future, react-driven navbar can do this even more efficiently/accurately.
+            'tab1' => $request->segment(5, 'WeeklySummaryGroup'),
+            'tab2' => $request->segment(6, 'RatingSummary'),
+        ]);
         $this->authorize('read', $globalReport);
 
         $reportToken = Gate::allows('readLink', Models\ReportToken::class) ? Models\ReportToken::get($globalReport, $region) : null;

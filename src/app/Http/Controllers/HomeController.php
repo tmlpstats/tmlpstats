@@ -29,6 +29,7 @@ class HomeController extends Controller
     {
         if (Auth::user()->hasRole('localStatistician')) {
             $centerAbbr = Auth::user()->center->abbrLower();
+
             return redirect("center/{$centerAbbr}");
         }
 
@@ -43,6 +44,7 @@ class HomeController extends Controller
     public function home(Request $request, $abbr)
     {
         $region = Region::abbreviation($abbr)->firstorFail();
+
         return $this->regionOverview($request, $region);
     }
 
@@ -57,8 +59,10 @@ class HomeController extends Controller
     {
         $context = App::make(Api\Context::class);
         $context->setRegion($region);
-        $context->setDateSelectAction('HomeController@home', [
+        $context->setDateSelectAction('ReportsController@getRegionReport', [
             'abbr' => $region->abbrLower(),
+            'tab1' => 'WeeklySummaryGroup',
+            'tab2' => 'RatingSummary',
         ]);
 
         if (Gate::denies('index', StatsReport::class)) {
@@ -148,25 +152,25 @@ class HomeController extends Controller
             $localRegion = $localRegion ? $localRegion->abbreviation : 0;
 
             $statsReport = $center->statsReports()
-                ->reportingDate($reportingDate)
-                ->submitted()
-                ->orderBy('submitted_at', 'desc')
-                ->first();
+                                  ->reportingDate($reportingDate)
+                                  ->submitted()
+                                  ->orderBy('submitted_at', 'desc')
+                                  ->first();
 
             $user = $statsReport
-            ? User::find($statsReport->user_id)
-            : null;
+                ? User::find($statsReport->user_id)
+                : null;
 
             $sheetUrl = null;
             $reportUrl = null;
 
             if (Gate::allows('downloadSheet', $statsReport)) {
                 $sheetUrl = $statsReport && XlsxArchiver::getInstance()->getSheetPath($statsReport)
-                ? url("/statsreports/{$statsReport->id}/download")
-                : null;
+                    ? url("/statsreports/{$statsReport->id}/download")
+                    : null;
                 $reportUrl = $statsReport
-                ? StatsReportController::getUrl($statsReport)
-                : null;
+                    ? StatsReportController::getUrl($statsReport)
+                    : null;
             }
 
             $submittedAt = null;
@@ -180,7 +184,7 @@ class HomeController extends Controller
                 'localRegion' => $localRegion,
                 'submitted' => $statsReport ? $statsReport->isSubmitted() : false,
                 'validated' => $statsReport ? $statsReport->isValidated() : false,
-                'rating' => $statsReport && $statsReport->isValidated() ? $statsReport->getRating() . " (" . $statsReport->getPoints() . " pts)" : '-',
+                'rating' => $statsReport && $statsReport->isValidated() ? $statsReport->getRating() . ' (' . $statsReport->getPoints() . ' pts)' : '-',
                 'updatedAt' => $submittedAt ? $submittedAt->format('M j, Y @ g:ia T') : '-',
                 'updatedBy' => $user ? $user->firstName : '-',
                 'sheet' => $sheetUrl,
