@@ -10,6 +10,8 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
 {
     use Traits\ValidatesTravelWithConfig;
 
+    const MAX_COMMENT_LENGTH = 255;
+
     protected $accountabilityCache = [];
 
     protected function populateValidators($data)
@@ -59,6 +61,9 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
             $this->isValid = false;
         }
         if (!$this->validateAccountabilities($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateComment($data)) {
             $this->isValid = false;
         }
 
@@ -323,6 +328,30 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
                 // Only log one error for missing contact info
                 $hasMissingEmailMessage = true;
             }
+        }
+
+        return $isValid;
+    }
+
+    public function validateComment($data)
+    {
+        if (!$data->comment) {
+            return true;
+        }
+
+        $isValid = true;
+
+        $currentLength = strlen($data->comment);
+        if ($currentLength > static::MAX_COMMENT_LENGTH) {
+            $this->addMessage('error', [
+                'id' => 'GENERAL_COMMENT_TOO_LONG',
+                'ref' => $data->getReference(['field' => 'comment']),
+                'params' => [
+                    'currentLength' => $currentLength,
+                    'maxLength' => static::MAX_COMMENT_LENGTH,
+                ],
+            ]);
+            $isValid = false;
         }
 
         return $isValid;

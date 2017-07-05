@@ -19,6 +19,8 @@
         <whitelist>
             <directory suffix=".php">.</directory>
             <exclude>
+                <directory>./bower_components</directory>
+                <directory>./node_modules</directory>
                 <directory>./database</directory>
                 <directory>./resources</directory>
                 <directory>./tests</directory>

@@ -11,10 +11,11 @@ cache:
 
 before_install:
   - phpenv config-rm xdebug.ini
+  - phpenv config-add travis.php.ini
 
 before_script:
   - cd src/
-  - find app resources tests -name "*.php" ! -path '*/_ide_helper.php' -print0 | xargs -0 -n1 -P8 php -l
+  - find app resources tests -name "*.php" -print0 | xargs -0 -n1 -P8 php -l
   - >
     if [[ $TRAVIS_PHP_VERSION =~ ^7 ]]; then
       bash ../bin/travis-node-setup.sh

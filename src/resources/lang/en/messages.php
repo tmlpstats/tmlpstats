@@ -68,6 +68,7 @@ return [
     'COURSE_QSTART_XFER_DOES_NOT_MATCH_QEND' => 'Course quarter starting transferred in does not match the value from the end of last quarter. It changed from :was to :now.',
     'GENERAL_INVALID_VALUE' => 'Incorrect value provided for :name (:value).',
     'GENERAL_MISSING_VALUE' => ':name is required, but no value was provided.',
+    'GENERAL_COMMENT_TOO_LONG' => 'Comment is :currentLength characters. It must be less than :maxLength characters.',
     'CENTERGAME_CAP_ACTUAL_INCORRECT' => 'You reported :reported for the CAP actual, but the net number of CAP registrations this quarter is :calculated.',
     'CENTERGAME_CPC_ACTUAL_INCORRECT' => 'You reported :reported for the CPC actual, but the net number of CPC registrations this quarter is :calculated.',
     'CENTERGAME_GITW_ACTUAL_INCORRECT' => 'You reported :reported for the GITW actual, but the percentage of team members reported as effective is :calculated.',
