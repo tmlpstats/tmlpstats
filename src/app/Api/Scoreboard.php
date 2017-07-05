@@ -33,17 +33,6 @@ class Scoreboard extends AuthenticatedApiBase
             }
         }
 
-        if ($includeInProgress) {
-            $submissionData = App::make(SubmissionData::class);
-            $found = $submissionData->allForType($center, $reportingDate, Domain\Scoreboard::class);
-            foreach ($found as $scoreboard) {
-                $v = $weeks->ensureWeek($scoreboard->week);
-                // laziest way to do this is to simply fill it with the array
-                $v->parseArray($scoreboard->toArray());
-                $v->meta['localChanges'] = true;
-            }
-        }
-
         // fill some additional metadata
         $locks = $this->getScoreboardLockQuarter($center, $quarter);
 
@@ -65,6 +54,25 @@ class Scoreboard extends AuthenticatedApiBase
             $weekLock = $locks->getWeekDefault($week);
             $scoreboard->meta['canEditPromise'] = $weekLock->editPromise;
             $scoreboard->meta['canEditActual'] = $weekLock->editActual || ($week->toDateString() == $reportingDate->toDateString());
+        }
+
+        if ($includeInProgress) {
+            $submissionData = App::make(SubmissionData::class);
+            $found = $submissionData->allForType($center, $reportingDate, Domain\Scoreboard::class);
+            foreach ($found as $stashed) {
+                $scoreboard = $weeks->ensureWeek($stashed->week);
+                if ($scoreboard->game('cap')->promise() !== null && !$scoreboard->meta['canEditPromise']) {
+                    // If we can't edit promises, only copy actuals.
+                    $stashed->eachGame(function ($game) use ($scoreboard) {
+                        $scoreboard->setValue($game->key, 'actual', $game->actual());
+                    });
+                    $scoreboard->meta['mergedLocal'] = true; // mostly as a useful value in tests
+                } else {
+                    // laziest way to do this is to simply fill it with the array
+                    $scoreboard->parseArray($stashed->toArray());
+                }
+                $scoreboard->meta['localChanges'] = true;
+            }
         }
 
         if ($returnObject) {

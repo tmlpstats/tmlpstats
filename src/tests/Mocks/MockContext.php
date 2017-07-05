@@ -8,12 +8,14 @@ class MockContext extends Context
 {
     public $canCalls;
     private $overrideCan = null;
+    private $overrideSettings;
 
     public function __construct()
     {
         $this->user = null;
         $this->request = null;
         $this->canCalls = [];
+        $this->overrideSettings = [];
     }
 
     public static function defaults()
@@ -71,5 +73,21 @@ class MockContext extends Context
     public function clearEncapsulations()
     {
         $this->encapsulations = [];
+    }
+
+    public function withSetting($key, $value)
+    {
+        $this->overrideSettings[$key] = $value;
+
+        return $this;
+    }
+
+    public function getSetting($name, $center = null, $quarter = null)
+    {
+        if (array_key_exists($name, $this->overrideSettings)) {
+            return $this->overrideSettings[$name];
+        } else {
+            return parent::getSetting($name, $center, $quarter);
+        }
     }
 }
