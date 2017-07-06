@@ -294,9 +294,10 @@ class SubmissionCore extends AuthenticatedApiBase
                 }
             } // end team member processing
 
-            // Insert data rows for any team members that have withdrawn and weren't updated this week
+            // Insert data rows for any team members that have withdrawn, transfered out or are wbo
             if (!$isFirstWeek) {
-                DB::insert('INSERT INTO team_members_data
+                DB::insert('
+                    INSERT INTO team_members_data
                         (team_member_id, at_weekend, xfer_out, xfer_in, wbo, ctw, withdraw_code_id,
                         travel, room, comment, gitw, tdo, stats_report_id, created_at, updated_at)
                     SELECT  tmd.team_member_id, tmd.at_weekend, tmd.xfer_out, tmd.xfer_in, tmd.wbo, tmd.ctw,
@@ -308,7 +309,9 @@ class SubmissionCore extends AuthenticatedApiBase
                     WHERE
                         sr.center_id = ?
                         AND sr.reporting_date = ?
-                        AND tmd.withdraw_code_id IS NOT NULL
+                        AND (tmd.withdraw_code_id IS NOT NULL
+                            OR tmd.xfer_out = 1
+                            OR tmd.wbo = 1)
                         AND tmd.team_member_id NOT IN (SELECT team_member_id FROM team_members_data WHERE stats_report_id = ?)',
                     [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
             }
