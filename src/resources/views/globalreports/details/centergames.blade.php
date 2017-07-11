@@ -143,8 +143,8 @@
                             ? 'bg-danger'
                             : 'success';
                     ?>
-                    <td colspan="2" class="data-point {{ $includeActual ? '' : 'border-right' }} {{ $changeClass }}">
-                        {{ round(($totals[$game]['delta']/$totals[$game]['original']) * 100) }}%
+                    <td colspan="2" class="data-point border-right {{ $changeClass }}">
+                        {{ round(($totals[$game]['delta'] / $totals[$game]['original']) * 100) }}%
                     </td>
                 @endforeach
             </tr>
