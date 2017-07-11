@@ -3,7 +3,7 @@
 <thead>
     <th>Center Name</th>
     <th>Program Managers</th>
-    <th>Center Leaders</th>
+    <th>Classroom Leaders</th>
     <th>General Session</th>
     <th>Currently on Team 1</th>
     <th>Team 1 Incoming</th>
