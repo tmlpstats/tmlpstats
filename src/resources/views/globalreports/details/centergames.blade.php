@@ -135,6 +135,19 @@
                     @endif
                 @endforeach
             </tr>
+            <tr class="border-bottom">
+                <th class="border-right">% Change</th>
+                @foreach ($games as $game)
+                    <?php
+                        $changeClass = $totals[$game]['delta'] < 0
+                            ? 'bg-danger'
+                            : 'success';
+                    ?>
+                    <td colspan="2" class="data-point {{ $includeActual ? '' : 'border-right' }} {{ $changeClass }}">
+                        {{ round(($totals[$game]['delta']/$totals[$game]['original']) * 100) }}%
+                    </td>
+                @endforeach
+            </tr>
         @endif
         </tbody>
     </table>
