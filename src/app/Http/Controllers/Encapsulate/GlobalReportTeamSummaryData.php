@@ -281,9 +281,17 @@ class GlobalReportTeamSummaryData
 
             $csd = $report->centerStatsData()->first();
 
+            $pm = $report->center->getProgramManager($report->reportingDate);
+            $cl = $report->center->getClassroomLeader($report->reportingDate);
+
+            $ignoreCl = false;
+            if ($pm->id == $cl->id || ($pm->firstName == $cl->firstName && $pm->lastName == $cl->lastName)) {
+                $ignoreCl = true;
+            }
+
             $row = [];
-            $row['pmAttending'] = $csd->programManagerAttendingWeekend;
-            $row['clAttending'] = $csd->classroomLeaderAttendingWeekend;
+            $row['pmAttending'] = (int) $csd->programManagerAttendingWeekend;
+            $row['clAttending'] = (int) ($csd->classroomLeaderAttendingWeekend && !$ignoreCl);
             $row['team1Current'] = $team1[$centerName]['currentOnTeam'];
             $row['team1Incoming'] = $team1[$centerName]['appStatusNext']['appr'];
             $row['team1Completing'] = $team1[$centerName]['completing'];
