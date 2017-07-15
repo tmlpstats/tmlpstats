@@ -1,0 +1,420 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocalReport Basic 1`] = `
+<div>
+  <h2>
+    ABC
+     - 
+    2017-04-07
+     
+    <button
+      className="btn btn-default"
+      onClick={[Function]}
+    >
+      Show Report Link
+    </button>
+  </h2>
+  <div
+    className="row"
+  >
+    <div
+      className="col-sm-8"
+    >
+      <a
+        href="/home"
+      >
+        « See All
+      </a>
+    </div>
+    <div
+      className="col-sm-4"
+      style={
+        Object {
+          "textAlign": "right",
+        }
+      }
+    >
+      <a
+        className="btn btn-default"
+        onClick={[Function]}
+        style={Object {}}
+      >
+        « 
+        AAA
+      </a>
+      <a
+        className="btn btn-default"
+        onClick={[Function]}
+        style={Object {}}
+      >
+        DEF
+         »
+      </a>
+    </div>
+  </div>
+  <div>
+    <ul
+      className="nav nav-tabs tabs-top brief-tabs"
+      id="tabs"
+    >
+      <li
+        className="active"
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Weekly Summary
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Report Details
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Center Games
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Team Members
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Team Expansion
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Courses
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          <span
+            className="long"
+          >
+            Contact Info
+          </span>
+          <span
+            className="brief"
+          >
+            Contacts
+          </span>
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Transfer Check
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          <span
+            className="long"
+          >
+            Weekend Information
+          </span>
+          <span
+            className="brief"
+          >
+            Weekend
+          </span>
+        </a>
+      </li>
+    </ul>
+    <div>
+      <div
+        className="tab-content"
+      >
+        <div
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Summary Page Here",
+            }
+          }
+          id="content-Summary"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`LocalReport Next Qtr Accountabilities 1`] = `
+<div>
+  <h2>
+    ABC
+     - 
+    2017-04-07
+     
+    <button
+      className="btn btn-default"
+      onClick={[Function]}
+    >
+      Show Report Link
+    </button>
+  </h2>
+  <div
+    className="row"
+  >
+    <div
+      className="col-sm-8"
+    >
+      <a
+        href="/home"
+      >
+        « See All
+      </a>
+    </div>
+    <div
+      className="col-sm-4"
+      style={
+        Object {
+          "textAlign": "right",
+        }
+      }
+    >
+      <a
+        className="btn btn-default"
+        onClick={[Function]}
+        style={Object {}}
+      >
+        « 
+        AAA
+      </a>
+      <a
+        className="btn btn-default"
+        onClick={[Function]}
+        style={Object {}}
+      >
+        DEF
+         »
+      </a>
+    </div>
+  </div>
+  <div>
+    <ul
+      className="nav nav-tabs tabs-top brief-tabs"
+      id="tabs"
+    >
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Weekly Summary
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Report Details
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Center Games
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Team Members
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Team Expansion
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Courses
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          <span
+            className="long"
+          >
+            Contact Info
+          </span>
+          <span
+            className="brief"
+          >
+            Contacts
+          </span>
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          Transfer Check
+        </a>
+      </li>
+      <li
+        className=""
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          <span
+            className="long"
+          >
+            Weekend Information
+          </span>
+          <span
+            className="brief"
+          >
+            Weekend
+          </span>
+        </a>
+      </li>
+      <li
+        className="active"
+      >
+        <a
+          onClick={[Function]}
+          style={Object {}}
+        >
+          <span
+            className="long"
+          >
+            Next Quarter Accountabilities
+          </span>
+          <span
+            className="brief"
+          >
+            Accountabilities
+          </span>
+        </a>
+      </li>
+    </ul>
+    <div>
+      <div
+        className="tab-content"
+      >
+        <div
+          className="table-responsive"
+        >
+          <table
+            className="table table-condensed table-striped table-hover"
+          >
+            <thead>
+              <tr>
+                <th>
+                  Accountability
+                </th>
+                <th>
+                  Name
+                </th>
+                <th>
+                  Phone
+                </th>
+                <th>
+                  Email
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  Boss
+                </td>
+                <td>
+                  Person Name
+                </td>
+                <td>
+                  12345
+                </td>
+                <td>
+                  abc@def.com
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
