@@ -91,6 +91,10 @@ trait GlobalReportDispatch
             'id' => 'TmlpRegistrationsOverdue',
             'method' => 'getTmlpRegistrationsOverdue',
         ],
+        'applicationtransfers' => [
+            'id' => 'ApplicationTransfers',
+            'method' => 'getApplicationTransfers',
+        ],
         'coursesthisweek' => [
             'id' => 'CoursesThisWeek',
             'method' => 'getCoursesThisWeek',
@@ -252,6 +256,9 @@ trait GlobalReportDispatch
 
     // Get report Overdue
     protected abstract function getTmlpRegistrationsOverdue();
+
+    // Get report Transfers
+    protected abstract function getApplicationTransfers();
 
     // Get report Completed This Week
     protected abstract function getCoursesThisWeek();

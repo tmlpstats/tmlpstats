@@ -10,12 +10,14 @@ use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Api\Exceptions;
+use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
 use TmlpStats\Encapsulations;
 use TmlpStats\Http\Controllers;
 
 class SubmissionCore extends AuthenticatedApiBase
 {
+    use Traits\UsesReportDates;
     /**
      * Initialize a submission UI, checking if parameters are valid and returning useful lookups.
      * @param  Models\Center $center
@@ -418,6 +420,11 @@ class SubmissionCore extends AuthenticatedApiBase
      */
     public function submitApplications(Models\Center $center, Carbon $reportingDate, Models\StatsReport $statsReport, $apps)
     {
+        $lastReport = $this->relevantReport($center, $reportingDate->subWeek());
+
+        // clear transfers
+        Models\Transfer::byCenter($center)->reportingDate($reportingDate)->delete();
+
         $debug_message = '';
         foreach ($apps as $app) {
             if ($app->id < 0) {
@@ -435,6 +442,26 @@ class SubmissionCore extends AuthenticatedApiBase
                     // TODO: handle this case
                     Log::error("Application {$app->id} not found for update during submit");
                     continue;
+                }
+
+                // Check if the incoming quarter has changed since last week. If it has, create a
+                // transfer event
+                if ($lastReport) {
+                    $lastWeekData = Models\TmlpRegistrationData::byStatsReport($lastReport)
+                        ->byRegistration($app->id)
+                        ->first();
+
+                    if ($lastWeekData && $lastWeekData->incomingQuarterId !== $app->incomingQuarterId) {
+                        Models\Transfer::create([
+                            'center_id' => $center->id,
+                            'reporting_date' => $reportingDate->toDateString(),
+                            'subject_type' => 'application',
+                            'subject_id' => $app->id,
+                            'transfer_type' => 'quarter',
+                            'from_id' => $lastWeekData->incomingQuarterId,
+                            'to_id' => $app->incomingQuarterId,
+                        ]);
+                    }
                 }
             }
 
