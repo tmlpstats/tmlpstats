@@ -431,6 +431,11 @@ class SubmissionCore extends AuthenticatedApiBase
             } else {
                 // Update application
                 $application = $this->updateExistingApplication($center, $app);
+                if (!$application) {
+                    // TODO: handle this case
+                    Log::error("Application {$app->id} not found for update");
+                    continue;
+                }
             }
 
             // Crate a new data object for all applications. If new data was stashed, that's included
@@ -497,8 +502,6 @@ class SubmissionCore extends AuthenticatedApiBase
     {
         $application = Models\TmlpRegistration::find($app->id);
         if (!$application) {
-            // TODO: handle this case
-            Log::error("Application {$app->id} not found for update");
             return null;
         }
 
