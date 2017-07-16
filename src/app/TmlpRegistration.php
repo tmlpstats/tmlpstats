@@ -12,7 +12,6 @@ class TmlpRegistration extends Model
     protected $fillable = [
         'person_id',
         'team_year',
-        'incoming_quarter_id',
         'reg_date',
         'is_reviewer',
     ];

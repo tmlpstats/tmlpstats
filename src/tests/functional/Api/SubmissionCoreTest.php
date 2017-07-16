@@ -33,7 +33,7 @@ class SubmissionCoreTest extends FunctionalTestAbstract
         $this->quarter = Models\Quarter::year(2016)->quarterNumber(1)->first();
 
         // Order important: context should be installed before creating a CenterQuarter which relies on context
-        $this->context = MockContext::defaults()->withCenter($this->center)->install();
+        $this->context = MockContext::defaults()->withUser($this->user)->withCenter($this->center)->install();
         $this->cq = Domain\CenterQuarter::ensure($this->center, $this->quarter);
 
         $this->api = App::make(Api\SubmissionCore::class);
@@ -107,6 +107,173 @@ class SubmissionCoreTest extends FunctionalTestAbstract
                 ],
             ],
         ];
+    }
+
+    public function testSubmitApplications()
+    {
+        // Setup global data
+        $lastWeekDate = $this->reportingDate->copy()->subWeek();
+        $lastStatsReport = App::make(Api\LocalReport::class)->ensureStatsReport(
+            $this->center,
+            $lastWeekDate
+        );
+        $statsReport = App::make(Api\LocalReport::class)->ensureStatsReport(
+            $this->center,
+            $this->reportingDate
+        );
+
+        // Setup last week's report as "official"
+        Models\GlobalReport::firstOrCreate([
+            'reporting_date' => $lastWeekDate,
+        ])->addCenterReport($lastStatsReport);
+
+        $nextQuarter = $this->quarter->getNextQuarter();
+        $twoQuartersFromNow = $this->quarter->getNextQuarter()->getNextQuarter();
+
+        $reg1 = factory(Models\TmlpRegistration::class)->create();
+        $reg2 = factory(Models\TmlpRegistration::class)->create();
+
+        $member1 = factory(Models\TeamMember::class)->create();
+        $member2 = factory(Models\TeamMember::class)->create();
+
+        $expected = [
+            // This app had data last week and wasn't updated this week
+            1 => [
+                'id' => $reg1->id,
+                'firstName' => $reg1->firstName,
+                'lastName' => $reg1->lastName,
+                'center' => $this->center->id,
+                'teamYear' => $reg1->teamYear,
+                'isReviewer' => false,
+                'regDate' => $reg1->regDate,
+                'appOutDate' => $lastWeekDate->copy()->subDays(6),
+                'appInDate' => $lastWeekDate->copy()->subDays(5),
+                'apprDate' => $lastWeekDate->copy()->subDays(4),
+                'wdDate' => null,
+                'withdrawCode' => null,
+                'committedTeamMember' => $member1->id,
+                'incomingQuarter' => $nextQuarter->id,
+                'comment' => 'a comment',
+                'travel' => false,
+                'room' => false,
+            ],
+            // This app had data last week and was updated this week
+            2 => [
+                'id' => $reg2->id,
+                'firstName' => $reg2->firstName,
+                'lastName' => $reg2->lastName,
+                'center' => $this->center->id,
+                'teamYear' => $reg2->teamYear,
+                'isReviewer' => false,
+                'regDate' => $reg2->regDate,
+                'appOutDate' => $lastWeekDate->copy()->subDays(2),
+                'appInDate' => $lastWeekDate->copy()->subDays(1),
+                'apprDate' => $lastWeekDate,
+                'wdDate' => null,
+                'withdrawCode' => null,
+                'committedTeamMember' => $member2->id,
+                'incomingQuarter' => $twoQuartersFromNow->id,
+                'comment' => 'another comment',
+                'travel' => true,
+                'room' => true,
+            ],
+            // This app is new this week
+            3 => [
+                'id' => 3,
+                'firstName' => $this->faker->unique()->firstName(),
+                'lastName' => $this->faker->unique()->lastName(),
+                'center' => $this->center->id,
+                'teamYear' => 1,
+                'isReviewer' => false,
+                'regDate' => $this->reportingDate->copy()->subDays(6),
+                'appOutDate' => $this->reportingDate->copy()->subDays(5),
+                'appInDate' => $this->reportingDate->copy()->subDays(4),
+                'apprDate' => $this->reportingDate->copy()->subDays(3),
+                'committedTeamMember' => null,
+                'incomingQuarter' => $nextQuarter->id,
+                'comment' => 'a new comment',
+                'travel' => true,
+                'room' => true,
+            ],
+        ];
+
+        // Existing Registration 1, no updates this week
+        $reg1Data = Models\TmlpRegistrationData::create([
+            'stats_report_id' => $lastStatsReport->id,
+            'tmlp_registration_id' => $expected[1]['id'],
+            'incoming_quarter_id' => $expected[1]['incomingQuarter'],
+            'committed_team_member_id' => $expected[1]['committedTeamMember'],
+            'reg_date' => $expected[1]['regDate'],
+            'app_out_date' => $expected[1]['appOutDate'],
+            'app_in_date' => $expected[1]['appInDate'],
+            'appr_date' => $expected[1]['apprDate'],
+            'wd_date' => $expected[1]['wdDate'],
+            'comment' => $expected[1]['comment'],
+            'travel' => $expected[1]['travel'],
+            'room' => $expected[1]['room'],
+        ]);
+
+        // Existing Registration 2
+        $reg2Data = Models\TmlpRegistrationData::create([
+            'stats_report_id' => $lastStatsReport->id,
+            'tmlp_registration_id' => $expected[2]['id'],
+            'incoming_quarter_id' => $expected[2]['incomingQuarter'],
+            'committed_team_member_id' => $expected[2]['committedTeamMember'],
+            'reg_date' => $expected[2]['regDate'],
+            'app_out_date' => $expected[2]['appOutDate'],
+            'app_in_date' => $expected[2]['appInDate'],
+            'appr_date' => $expected[2]['apprDate'],
+            'wd_date' => $expected[2]['wdDate'],
+            'comment' => $expected[2]['comment'],
+            'travel' => $expected[2]['travel'],
+            'room' => $expected[2]['room'],
+        ]);
+
+        // Updates for second stash
+        $expected[2] = array_merge($expected[2], [
+            'firstName' => strtoupper($reg2->firstName),
+            'wdDate' => $this->reportingDate->copy()->subDays(4),
+            'withdrawCode' => 1,
+            'comment' => 'someone withdrew',
+        ]);
+
+        $sd = App::make(Api\SubmissionData::class);
+
+        // Create updated stash for Existing Registration 2
+        $reg2Domain = Domain\TeamApplication::fromModel($reg2Data, $reg2);
+        $reg2Domain->firstName = $expected[2]['firstName'];
+        $reg2Domain->wdDate = $expected[2]['wdDate'];
+        $reg2Domain->withdrawCode = Models\WithdrawCode::find($expected[2]['withdrawCode']);
+        $reg2Domain->comment = $expected[2]['comment'];
+        $sd->store($this->center, $this->reportingDate, $reg2Domain);
+
+        // Create stash for new application
+        $reg3Domain = Domain\TeamApplication::fromArray(
+            array_merge($expected[3], ['id' => '-1234']) // fake ID since we're not using stash method
+        );
+        $sd->store($this->center, $this->reportingDate, $reg3Domain);
+
+        // Submit the applications
+        $apps = App::make(Api\Application::class)->allForCenter($this->center, $this->reportingDate, true);
+        $this->api->submitApplications($this->center, $this->reportingDate, $statsReport, $apps);
+
+        // Setup this week's report as "official"
+        Models\GlobalReport::firstOrCreate([
+            'reporting_date' => $this->reportingDate,
+        ])->addCenterReport($statsReport);
+
+        // verify resulting data is correct
+        $persisted = App::make(Api\Application::class)->allForCenter($this->center, $this->reportingDate, false);
+
+        foreach ($persisted as $id => $app) {
+            foreach ($expected[$id] as $key => $value) {
+                if (!is_object($app->$key) || ($app->$key instanceOf Carbon)) {
+                    $this->assertEquals($value, $app->$key, "App {$id} key {$key} doesn't match expected {$value}");
+                } else {
+                    $this->assertEquals($value, $app->$key->id, "App {$id} key {$key} doesn't match expected id {$value}");
+                }
+            }
+        }
     }
 
     /**
