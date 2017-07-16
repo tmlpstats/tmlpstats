@@ -594,6 +594,7 @@ class GlobalReportController extends Controller
         $teamMembersByCenter = $a->compose();
         $teamMembersByCenter = $teamMembersByCenter['reportData'];
 
+        $totalsData = [];
         $reportData = [];
         $statsReports = [];
         foreach ($teamMembersByCenter as $centerName => $teamMembersData) {
@@ -607,10 +608,21 @@ class GlobalReportController extends Controller
 
             $reportData[$centerName] = $centerRow['reportData'];
             $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Models\Center::name($centerName)->first());
+
+            foreach ($centerRow['reportData'] as $group => $groupData) {
+                foreach ($groupData as $type => $typeData) {
+                    foreach ($typeData as $key => $value) {
+                        if (!isset($totalsData[$group][$type][$key])) {
+                            $totalsData[$group][$type][$key] = 0;
+                        }
+                        $totalsData[$group][$type][$key] += $value;
+                    }
+                }
+            }
         }
         ksort($reportData);
 
-        return view('globalreports.details.traveloverview', compact('reportData', 'statsReports'));
+        return view('globalreports.details.traveloverview', compact('reportData', 'statsReports', 'totalsData'));
     }
     protected function getGitwSummary(Models\GlobalReport $globalReport, Models\Region $region)
     {
