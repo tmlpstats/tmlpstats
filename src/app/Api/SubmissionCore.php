@@ -121,104 +121,10 @@ class SubmissionCore extends AuthenticatedApiBase
             $debug_message .= $this->submitCenterStatsData($center, $reportingDate, $statsReport);
 
             // Process applications
-            // Loop through all applications in submission data and do the following:
-            // - if application is new (stored_id<0), then insert new person, otherwise update info in people table
-            // - insert new records into tmlp_registration_data
-            //
-            // ? - Possibly run the "carry over" for all ones that were not changed
-            //      by
-            $result = DB::select('select i.* from submission_data_applications i
-                                    left outer join tmlp_registrations r
-                                        on r.id=i.stored_id
-                                    where i.center_id=?  and i.reporting_date=?;',
-                [$center->id, $reportingDate->toDateString()]);
-            if (!empty($result)) {
-                foreach ($result as $r) {
-                    if ($r->stored_id < 0) {
-                        // This is a new application, create the things
-                        DB::insert('insert into people
-                                        (first_name, last_name, email, center_id, created_at, updated_at)
-                                            select i.first_name, i.last_name, i.email, i.center_id, sysdate(), sysdate()
-                                        from submission_data_applications i where i.id=?',
-                            [$r->id]);
-                        $person_id = DB::getPdo()->lastInsertId();
-                        $debug_message .= ' sreg_id=' . $r->id . ' person_id=' . $person_id;
+            $apps = App::make(Api\Application::class)->allForCenter($center, $reportingDate, true);
+            $debug_message .= $this->submitApplications($center, $reportingDate, $statsReport, $apps);
 
-                        DB::insert('insert into tmlp_registrations
-                                        (person_id, team_year, reg_date, is_reviewer, created_at, updated_at)
-                                        select ?, team_year, regDate, isReviewer, sysdate(), sysdate()
-                                        from submission_data_applications i where i.id=?',
-                            [$person_id, $r->id]);
-                        $reg_id = DB::getPdo()->lastInsertId();
-                        $debug_message .= ' reg_id=' . $reg_id;
-
-                        // Update submission_data with new id so we don't overwrite if the report is resubmitted
-                        DB::update('update submission_data set stored_id=?, data = JSON_SET(data, "$.id", ?) where id=?', [$reg_id, $reg_id, $r->id]);
-                    } else {
-                        // This is an existing application, update the things
-                        DB::update('update people p, submission_data_applications sda
-                                    set p.updated_at=sysdate(),
-                                        p.first_name=sda.first_name,
-                                        p.last_name=sda.last_name,
-                                        p.email=sda.email,
-                                        p.updated_at=sysdate()
-                                    where p.id=sda.person_id
-                                          and sda.id=?
-                                          and (coalesce(p.first_name,\'\') != BINARY coalesce(sda.first_name,\'\')
-                                                or coalesce(p.last_name,\'\') != BINARY coalesce(sda.last_name,\'\')
-                                                or coalesce(p.email,\'\') != coalesce(sda.email,\'\')
-                                          )',
-                            [$r->id]);
-                        DB::update('update tmlp_registrations p, submission_data_applications sda
-                                    set p.updated_at=sysdate(),
-                                        p.team_year=sda.team_year,
-                                        p.reg_date=sda.regDate,
-                                        p.is_reviewer=sda.isReviewer,
-                                        p.updated_at=sysdate()
-                                    where p.id=sda.stored_id
-                                          and sda.id=?
-                                          and (coalesce(p.team_year,\'\') != coalesce(sda.team_year,\'\')
-                                                or coalesce(p.reg_date,\'\') != coalesce(sda.regDate,\'\')
-                                                or coalesce(p.is_reviewer,\'\') != coalesce(sda.isReviewer,\'\'))',
-                            [$r->id]);
-                        $reg_id = $r->stored_id;
-                        $person_id = $r->person_id;
-                    };
-
-                    // Create application data row
-                    DB::insert('insert into tmlp_registrations_data
-                                (tmlp_registration_id, reg_date, app_out_date, app_in_date, appr_date, wd_date,
-                                    withdraw_code_id, committed_team_member_id, incoming_quarter_id, comment, travel, room, stats_report_id, created_at, updated_at)
-                                select ?, regDate,appOutDate,appinDate,apprDate,wdDate, withdrawCode,committeddteamMember,
-                                incomingQuarter,comment,travel,room,?, sysdate(),sysdate()
-                                from submission_data_applications i where i.id=?;',
-                        [$reg_id, $statsReport->id, $r->id]);
-
-                    $trd_id = DB::getPdo()->lastInsertId();
-                    $debug_message .= ' trd_id=' . $trd_id;
-                }
-            } // end application processing
-
-            // Insert data rows for any applications that weren't updated this week
-            if (!$isFirstWeek) {
-                $affected = DB::insert('INSERT INTO tmlp_registrations_data
-                        (tmlp_registration_id, reg_date, app_out_date, app_in_date, appr_date,
-                        wd_date, withdraw_code_id, committed_team_member_id, incoming_quarter_id,
-                        comment, travel, room, stats_report_id, created_at, updated_at)
-                    SELECT  trd.tmlp_registration_id, trd.reg_date, trd.app_out_date, trd.app_in_date,
-                            trd.appr_date, trd.wd_date, trd.withdraw_code_id, trd.committed_team_member_id,
-                            trd.incoming_quarter_id, trd.comment, trd.travel, trd.room, ?, sysdate(), sysdate()
-                    FROM tmlp_registrations_data trd
-                    INNER JOIN stats_reports sr ON sr.id = trd.stats_report_id
-                    INNER JOIN global_report_stats_report grsr ON grsr.stats_report_id = trd.stats_report_id
-                    WHERE
-                        sr.center_id = ?
-                        AND sr.reporting_date = ?
-                        AND trd.tmlp_registration_id NOT IN (SELECT tmlp_registration_id FROM tmlp_registrations_data WHERE stats_report_id = ?)',
-                    [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
-                $debug_message .= ' last-rep=' . $lastStatsReportDate->toDateString() . ' ins-tmd=' . $affected;
-            }
-
+            // Process team members
             $result = DB::select('select i.* from submission_data_team_members i
                                     left outer join team_members t
                                         on t.id=i.team_member_id
@@ -501,7 +407,155 @@ class SubmissionCore extends AuthenticatedApiBase
         ];
     }
 
-    protected function submitCenterStatsData($center, $reportingDate, $statsReport)
+    /**
+     * Create application objects for submitted statsReport
+     *
+     * @param  Models\Center      $center
+     * @param  Carbon             $reportingDate Report date
+     * @param  Models\StatsReport $statsReport   Report to attach objects to
+     * @param  mixed              $apps          Arrayable collcation of Domain\TeamApplication objects
+     * @return string                            Debug string
+     */
+    public function submitApplications(Models\Center $center, Carbon $reportingDate, Models\StatsReport $statsReport, $apps)
+    {
+        $debug_message = '';
+        foreach ($apps as $app) {
+            if ($app->id < 0) {
+                // This is a new application so create it
+                $application = $this->createNewApplication($center, $app);
+
+                // Now update the stash so subsequent submits don't create new people again
+                $this->updateStashIds($center, $reportingDate, 'application', $app->id, $application->id);
+
+                $debug_message .= " sreg_id={$app->id} person_id={$application->person->id}";
+            } else {
+                // Update application
+                $application = $this->updateExistingApplication($center, $app);
+                if (!$application) {
+                    // TODO: handle this case
+                    Log::error("Application {$app->id} not found for update during submit");
+                    continue;
+                }
+            }
+
+            // Crate a new data object for all applications. If new data was stashed, that's included
+            // along with last week's data for anyone that wasn't updated
+            $appData = Models\TmlpRegistrationData::create([
+                'stats_report_id' => $statsReport->id,
+                'tmlp_registration_id' => $application->id,
+                'incoming_quarter_id' => $app->incomingQuarter->id,
+                'reg_date' => $app->regDate,
+                'app_out_date' => $app->appOutDate ?: null,
+                'app_in_date' => $app->appInDate ?: null,
+                'appr_date' => $app->apprDate ?: null,
+                'wd_date' => $app->wdDate ?: null,
+                'comment' => $app->comment,
+                'travel' => (bool) $app->travel,
+                'room' => (bool) $app->room,
+            ]);
+            if ($app->withdrawCode) {
+                $appData->withdrawCodeId = $app->withdrawCode->id;
+            }
+            if ($app->committedTeamMember) {
+                $appData->committedTeamMemberId = $app->committedTeamMember->id;
+            }
+            $appData->save();
+
+            $debug_message .= " reg_id={$application->id} trd_id={$appData->id}";
+        }
+
+        return $debug_message;
+    }
+
+    /**
+     * Create new TmlpRegistration and Person object
+     *
+     * @param  Models\Center          $center
+     * @param  Domain\TeamApplication $app
+     * @return Models\TmlpRegistration
+     */
+    protected function createNewApplication(Models\Center $center, Domain\TeamApplication $app)
+    {
+        $person = Models\Person::create([
+            'center_id' => $center->id,
+            'first_name' => $app->firstName,
+            'last_name' => $app->lastName,
+            'identifier' => '',
+        ]);
+
+        return Models\TmlpRegistration::create([
+            'person_id' => $person->id,
+            'team_year' => $app->teamYear,
+            'reg_date' => $app->regDate,
+            'is_reviewer' => (bool) $app->isReviewer,
+        ]);
+    }
+
+    /**
+     * Update existing application with data from Domain\TeamApplication
+     *
+     * @param  Models\Center          $center
+     * @param  Domain\TeamApplication $app
+     * @return Models\TmlpRegistration
+     */
+    protected function updateExistingApplication(Models\Center $center, Domain\TeamApplication $app)
+    {
+        $application = Models\TmlpRegistration::find($app->id);
+        if (!$application) {
+            return null;
+        }
+
+        // Update application
+        $application->teamYear = $app->teamYear;
+        $application->regDate = $app->regDate;
+        $application->isReviewer = (bool) $app->isReviewer;
+        $application->save();
+
+        // Update person
+        $person = $application->person;
+        $person->centerId = $center->id;
+        $person->firstName = $app->firstName;
+        $person->lastName = $app->lastName;
+        $person->save();
+
+        $application->setRelation('person', $person);
+
+        return $application;
+    }
+
+    /**
+     * Update stash ids
+     *
+     * This will update stored_id and data['id'] with the value provided for $newId.
+     * Useful for updating stashes after creating new objects so subsequent submits
+     * don't create additional objects.
+     *
+     * @param  Models\Center $center
+     * @param  Carbon        $reportingDate
+     * @param  string        $type          Stash stored_type
+     * @param  string        $stashId       Stash stored_id
+     * @param  string        $newId         New value for stroed_id
+     * @return boolean
+     */
+    protected function updateStashIds(Models\Center $center, Carbon $reportingDate, $type, $stashId, $newId)
+    {
+        // Now update the stash so subsequent submits don't create new people again
+        $stash = Models\SubmissionData::centerDate($center, $reportingDate)
+            ->typeId($type, $stashId)
+            ->first();
+
+        if (!$stash) {
+            return false;
+        }
+
+        $stash->storedId = $newId;
+        $stash->data = array_merge($stash->data, ['id' => $newId]);
+        $stash->save();
+
+        return true;
+    }
+
+    protected function submitCenterStatsData(Models\Center $center, Carbon $reportingDate, Models\StatsReport $statsReport)
     {
         $debug_message = '';
         // Process scoreboards:

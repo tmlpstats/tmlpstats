@@ -69,7 +69,6 @@ class SubmissionData extends Model
 
     public function scopeCenterDate($query, $center, $reportingDate)
     {
-
         return $this->scopeCenter($query, $center)
                     ->where('reporting_date', $reportingDate);
     }
@@ -77,8 +76,13 @@ class SubmissionData extends Model
     // Scope by either the type code or the class name representing the type code.
     public function scopeType($query, $type)
     {
-
         return $query->where('stored_type', $type);
+    }
+
+    public function scopeTypeId($query, $type, $id)
+    {
+        return $this->scopeType($query, $type)
+                    ->where('stored_id', $id);
     }
 
 }
