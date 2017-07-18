@@ -413,10 +413,10 @@ class SubmissionCore extends AuthenticatedApiBase
      * @param  Models\Center      $center
      * @param  Carbon             $reportingDate Report date
      * @param  Models\StatsReport $statsReport   Report to attach objects to
-     * @param  array              $apps          Array of Domain\TeamApplication objects
+     * @param  mixed              $apps          Arrayable collcation of Domain\TeamApplication objects
      * @return string                            Debug string
      */
-    public function submitApplications(Models\Center $center, Carbon $reportingDate, Models\StatsReport $statsReport, array $apps)
+    public function submitApplications(Models\Center $center, Carbon $reportingDate, Models\StatsReport $statsReport, $apps)
     {
         $debug_message = '';
         foreach ($apps as $app) {
@@ -433,7 +433,7 @@ class SubmissionCore extends AuthenticatedApiBase
                 $application = $this->updateExistingApplication($center, $app);
                 if (!$application) {
                     // TODO: handle this case
-                    Log::error("Application {$app->id} not found for update");
+                    Log::error("Application {$app->id} not found for update during submit");
                     continue;
                 }
             }
