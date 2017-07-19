@@ -38,6 +38,7 @@ class TeamMembersCounts extends BaseArrangement
             'total' => 0,
             'ctw'   => 0,
             'wbo'   => 0,
+            'xferOut' => 0,
             'codes' => [],
         ];
 
@@ -79,6 +80,9 @@ class TeamMembersCounts extends BaseArrangement
             } else if ($data->wbo) {
                 $withdraws[$team]++;
                 $withdraws['wbo']++;
+            } else if ($data->xferOut) {
+                $withdraws[$team]++;
+                $withdraws['xferOut']++;
             }
         }
 
