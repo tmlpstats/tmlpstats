@@ -21,4 +21,4 @@ export function Wrap(props) {
     )
 }
 
-export { Provider }
+export { Provider, thunk, applyMiddleware, createStore }
