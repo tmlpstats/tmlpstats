@@ -9,34 +9,35 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
     use Traits\ValidatesTravelWithConfig;
 
     const MAX_DAYS_TO_SEND_APPLICATION_OUT = 2;
-    const MAX_DAYS_TO_APPROVE_APPLICATION  = 14;
+    const MAX_DAYS_TO_APPROVE_APPLICATION = 14;
     const MAX_COMMENT_LENGTH = 255;
 
     protected $startingNextQuarter = null;
+    protected $nextQuarter = 'unset';
 
     protected function populateValidators($data)
     {
-        $idValidator         = v::numeric()->positive();
-        $nameValidator       = v::stringType()->notEmpty();
-        $dateValidator       = v::date('Y-m-d');
+        $idValidator = v::numeric()->positive();
+        $nameValidator = v::stringType()->notEmpty();
+        $dateValidator = v::date('Y-m-d');
         $dateOrNullValidator = v::optional($dateValidator);
         $boolOrNullValidator = v::optional(v::boolType());
 
-        $this->dataValidators['firstName']  = $nameValidator;
-        $this->dataValidators['lastName']   = $nameValidator;
-        $this->dataValidators['email']      = v::optional(v::email());
-        $this->dataValidators['phone']      = v::optional(v::phone());
-        $this->dataValidators['teamYear']   = v::numeric()->between(1, 2, true);
-        $this->dataValidators['regDate']    = $dateValidator;
+        $this->dataValidators['firstName'] = $nameValidator;
+        $this->dataValidators['lastName'] = $nameValidator;
+        $this->dataValidators['email'] = v::optional(v::email());
+        $this->dataValidators['phone'] = v::optional(v::phone());
+        $this->dataValidators['teamYear'] = v::numeric()->between(1, 2, true);
+        $this->dataValidators['regDate'] = $dateValidator;
         $this->dataValidators['appOutDate'] = $dateOrNullValidator;
-        $this->dataValidators['appInDate']  = $dateOrNullValidator;
-        $this->dataValidators['apprDate']   = $dateOrNullValidator;
-        $this->dataValidators['wdDate']     = $dateOrNullValidator;
-        $this->dataValidators['travel']     = $boolOrNullValidator;
-        $this->dataValidators['room']       = $boolOrNullValidator;
+        $this->dataValidators['appInDate'] = $dateOrNullValidator;
+        $this->dataValidators['apprDate'] = $dateOrNullValidator;
+        $this->dataValidators['wdDate'] = $dateOrNullValidator;
+        $this->dataValidators['travel'] = $boolOrNullValidator;
+        $this->dataValidators['room'] = $boolOrNullValidator;
         $this->dataValidators['isReviewer'] = $boolOrNullValidator;
-        $this->dataValidators['incomingQuarterId']     = $idValidator;
-        $this->dataValidators['withdrawCodeId']        = v::optional($idValidator);
+        $this->dataValidators['incomingQuarterId'] = $idValidator;
+        $this->dataValidators['withdrawCodeId'] = v::optional($idValidator);
         $this->dataValidators['committedTeamMemberId'] = v::optional($idValidator);
     }
 
@@ -199,7 +200,7 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
             }
         }
 
-        $maxAppOutDays      = static::MAX_DAYS_TO_SEND_APPLICATION_OUT;
+        $maxAppOutDays = static::MAX_DAYS_TO_SEND_APPLICATION_OUT;
         $maxApplicationDays = static::MAX_DAYS_TO_APPROVE_APPLICATION;
         $reportingDate = $this->statsReport->reportingDate;
 
@@ -292,7 +293,7 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
 
         // Travel and Rooming must be reported starting after the configured date
         if ($this->isTimeToCheckTravel()) {
-            if (is_null($data->travel)) {
+            if (!$data->travel) {
                 // Error if no comment provided, warning to look at it otherwise
                 if (!$data->comment) {
                     $this->addMessage('error', [
@@ -307,7 +308,7 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
                     ]);
                 }
             }
-            if (is_null($data->room)) {
+            if (!$data->room) {
                 // Error if no comment provided, warning to look at it otherwise
                 if (!$data->comment) {
                     $this->addMessage('error', [
@@ -368,11 +369,10 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
 
     public function isStartingNextQuarter($data)
     {
-        if ($this->startingNextQuarter !== null) {
-            return $this->startingNextQuarter;
+        $nextQuarter = $this->nextQuarter;
+        if ($this->nextQuarter === 'unset') {
+            $this->nextQuarter = $nextQuarter = $this->statsReport->quarter->getNextQuarter();
         }
-
-        $nextQuarter = $this->statsReport->quarter->getNextQuarter();
 
         if (!$nextQuarter) {
             return false;
