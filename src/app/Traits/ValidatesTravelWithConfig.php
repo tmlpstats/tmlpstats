@@ -1,8 +1,10 @@
 <?php
 namespace TmlpStats\Traits;
 
+use App;
+use TmlpStats\Api;
 use TmlpStats\Domain;
-use TmlpStats\Settings\Setting;
+use TmlpStats\Domain\Logic;
 
 trait ValidatesTravelWithConfig
 {
@@ -18,10 +20,11 @@ trait ValidatesTravelWithConfig
             $dueDate = $cq->getTravelDueByDate();
         } else {
             // XXX all the validator unit tests use a null center, so we will keep this in place until the next iteration on cleaning up settings.
-            $dueDate = Setting::name('travelDueByDate')
-                ->with($this->statsReport->center, $this->statsReport->quarter)
-                ->get();
-            if (!$dueDate) {
+            $dueDateRaw = App::make(Api\Context::class)->getSetting('travelDueByDate', $this->statsReport->center, $this->statsReport->quarter);
+
+            if ($dueDateRaw) {
+                $dueDate = Logic\QuarterDates::parseQuarterDate($dueDateRaw, $this->statsReport->quarter, $this->statsReport->center);
+            } else {
                 $dueDate = $this->statsReport->quarter->getClassroom2Date($this->statsReport->center);
             }
         }

@@ -1,16 +1,28 @@
 <?php
-namespace TmlpStats\Settings\Parsers;
+namespace TmlpStats\Domain;
 
+use App;
 use Carbon\Carbon;
+use TmlpStats as Models;
+use TmlpStats\Api;
 use TmlpStats\Traits\ParsesQuarterDates;
 
-class ReportDeadlinesParser extends AbstractParser
+class ReportDeadlines
 {
     use ParsesQuarterDates;
 
-    protected $format = ReportDeadlinesParser::FORMAT_JSON;
-
+    protected $context;
+    protected $center;
+    protected $quarter;
     protected $reportingDate = null;
+    protected $allSettings = null;
+
+    public function __construct(Models\Center $center, Models\Quarter $quarter, Api\Context $context = null)
+    {
+        $this->center = $center;
+        $this->quarter = $quarter;
+        $this->context = $context ?: App::make(Api\Context::class);
+    }
 
     /**
      * Parse the setting object and merge with defaults
@@ -18,44 +30,44 @@ class ReportDeadlinesParser extends AbstractParser
      * @return array
      * @throws \Exception
      */
-    protected function parse()
+    public function parseFromArray($settings)
     {
-        $this->reportingDate = $this->arguments['reportingDate'];
-
-        $deadlines = [
-            'report'   => [
-                'dueDate'  => '+0days',
-                'time'     => '19:00:59',
-                'timezone' => $this->center->timezone,
-            ],
-            'response' => [
-                'dueDate'  => '+1days',
-                'time'     => '10:00:00',
-                'timezone' => $this->center->timezone,
-            ],
-        ];
-
-        $settings = $this->decode();
+        $this->allSettings = [];
         if ($settings) {
             foreach ($settings as $dateInfo) {
-
                 if (!isset($dateInfo['reportingDate'])) {
                     throw new \Exception("Missing reportingDate in setting {$this->setting->id}");
                 }
+                $deadlines = [
+                    'report' => [
+                        'dueDate' => '+0days',
+                        'time' => '19:00:59',
+                        'timezone' => $this->center->timezone,
+                    ],
+                    'response' => [
+                        'dueDate' => '+1days',
+                        'time' => '10:00:00',
+                        'timezone' => $this->center->timezone,
+                    ],
+                ];
 
                 $reportingDate = $this->parseQuarterDate($dateInfo['reportingDate']);
-
-                // If we're not looking at the setting for this week, skip-it
-                if (!$reportingDate->eq($this->reportingDate)) {
-                    continue;
-                }
-
                 $deadlines = $this->mergeSettings($deadlines, $dateInfo);
-
-                break;
+                $this->allSettings[$reportingDate->toDateString()] = $deadlines;
             }
-        } else {
+        }
+    }
+
+    public function getWeek(Carbon $reportingDate)
+    {
+        if ($this->allSettings === null) {
+            $this->parseFromArray($this->context->getSetting('reportDeadlines', $this->center, $this->quarter));
+        }
+        $this->reportingDate = $reportingDate;
+        $deadlines = array_get($this->allSettings, $reportingDate->toDateString());
+        if ($deadlines === null) {
             $deadlines = [];
+
         }
 
         return $this->prepareResults($deadlines);
@@ -111,7 +123,7 @@ class ReportDeadlinesParser extends AbstractParser
     {
         if (preg_match('/^\+(\d+)days?$/', $settingValue, $matches)) {
             $offsetDays = $matches[1];
-            $dueDate    = $this->reportingDate->copy();
+            $dueDate = $this->reportingDate->copy();
 
             return $dueDate->addDays($offsetDays);
         }
@@ -120,7 +132,7 @@ class ReportDeadlinesParser extends AbstractParser
             return Carbon::parse($settingValue);
         }
 
-        $blame = $this->setting ? "setting {$this->setting->id}" : "default";
+        $blame = $this->setting ? "setting {$this->setting->id}" : 'default';
         throw new \Exception("Invalid report dueDate format in {$blame}: {$settingValue}");
     }
 
@@ -138,7 +150,7 @@ class ReportDeadlinesParser extends AbstractParser
     protected function parseTime($settingValue)
     {
         if (!preg_match('/^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/', $settingValue)) {
-            $blame = $this->setting ? "setting {$this->setting->id}" : "default";
+            $blame = $this->setting ? "setting {$this->setting->id}" : 'default';
             throw new \Exception("Invalid report time format in {$blame}: {$settingValue}");
         }
 
@@ -156,7 +168,7 @@ class ReportDeadlinesParser extends AbstractParser
     protected function prepareResults($results)
     {
         $response = [
-            'report'   => null,
+            'report' => null,
             'response' => null,
         ];
 
@@ -167,11 +179,11 @@ class ReportDeadlinesParser extends AbstractParser
 
             $deadline = $results[$type];
 
-            $dueDate  = $this->parseDueDate($deadline['dueDate']);
-            $time     = $this->parseTime($deadline['time']);
+            $dueDate = $this->parseDueDate($deadline['dueDate']);
+            $time = $this->parseTime($deadline['time']);
             $timezone = $deadline['timezone'];
 
-            $dateString      = $dueDate->toDateString();
+            $dateString = $dueDate->toDateString();
             $response[$type] = Carbon::parse(
                 "{$dateString} {$time}",
                 $timezone
@@ -179,5 +191,12 @@ class ReportDeadlinesParser extends AbstractParser
         }
 
         return $response;
+    }
+
+    public static function get(Models\Center $center, Models\Quarter $quarter, $reportingDate = null)
+    {
+        return App::make(Api\Context::class)
+            ->getEncapsulation(self::class, compact('center', 'quarter'))
+            ->getWeek($reportingDate);
     }
 }

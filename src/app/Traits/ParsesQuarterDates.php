@@ -2,7 +2,7 @@
 namespace TmlpStats\Traits;
 
 use Carbon\Carbon;
-
+use TmlpStats\Domain\Logic\QuarterDates;
 /**
  * Class ParsesQuarterDates
  *
@@ -27,35 +27,9 @@ trait ParsesQuarterDates
      */
     protected function parseQuarterDate($settingValue)
     {
-        $center  = $this->center;
+        $center = $this->center;
         $quarter = $this->quarter;
 
-        if (!$quarter) {
-            throw new \Exception('No quarter provided');
-        }
-
-        $quarterDates = [
-            'classroom1Date',
-            'classroom2Date',
-            'classroom3Date',
-            'endWeekendDate',
-        ];
-
-        if (in_array($settingValue, $quarterDates)) {
-            return $quarter->getQuarterDate($settingValue, $center);
-        }
-
-        if (preg_match('/^week(\d+)$/', $settingValue, $matches)) {
-            $offsetWeeks      = $matches[1];
-            $quarterStartDate = $quarter->getQuarterStartDate($center);
-
-            return $quarterStartDate->copy()->addWeeks($offsetWeeks);
-        }
-
-        if (preg_match('/^20\d\d-\d\d-\d\d$/', $settingValue)) {
-            return Carbon::parse($settingValue);
-        }
-
-        throw new \Exception("Invalid date format in setting {$this->setting->id}: {$settingValue}");
+        return QuarterDates::parseQuarterDate($settingValue, $quarter, $center);
     }
 }

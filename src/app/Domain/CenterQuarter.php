@@ -8,8 +8,6 @@ use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Domain\Logic\QuarterDates;
 use TmlpStats\Encapsulations\RegionQuarter;
-use TmlpStats\Settings\Setting;
-use TmlpStats\Traits\ParsesQuarterDates;
 
 /**
  * Represents a quarter for a specific center.
@@ -20,8 +18,6 @@ use TmlpStats\Traits\ParsesQuarterDates;
  */
 class CenterQuarter implements Arrayable, \JsonSerializable
 {
-    use ParsesQuarterDates;
-
     public $center = null;
     public $quarter = null;
     public $firstWeekDate = null;
@@ -168,7 +164,7 @@ class CenterQuarter implements Arrayable, \JsonSerializable
     {
         $setting = $this->getSetting('travelDueByDate');
 
-        return ($setting) ? $this->parseQuarterDate($setting) : $this->classroom2Date;
+        return ($setting) ? QuarterDates::parseQuarterDate($setting, $this) : $this->classroom2Date;
     }
 
     private function getSetting($name)

@@ -5,6 +5,7 @@ use TmlpStats\Tests\Unit\Traits\MocksMessages;
 use TmlpStats\Tests\Unit\Traits\MocksQuarters;
 use TmlpStats\Tests\Unit\Traits\MocksSettings;
 use TmlpStats\Util;
+use TmlpStats\Tests\Mocks\MockContext;
 use TmlpStats\Validate\Objects\ClassListValidator;
 use Carbon\Carbon;
 use stdClass;
@@ -13,6 +14,7 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
 {
     use MocksSettings, MocksMessages, MocksQuarters;
 
+    protected $instantiateApp = true;
     protected $testClass = ClassListValidator::class;
 
     protected $dataFields = [
@@ -1067,19 +1069,28 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
     /**
      * @dataProvider providerValidateTravel
      */
-    public function testValidateTravel($data, $statsReport, $messages, $travelDueBy, $expectedResult)
+    public function testValidateTravel($data, $statsReportInput, $messages, $travelDueBy, $expectedResult)
     {
+
+        $statsReport = new stdClass;
+        $statsReport->quarter = $this->getQuarterMock([], $statsReportInput['dates']);
+        $statsReport->center  = null;
+        $statsReport->reportingDate = $statsReportInput['reportingDate'];
+
+        $ctx = MockContext::defaults()->install();
         $this->unsetSetting('travelDueByDate');
         if ($travelDueBy) {
+            $ctx->withSetting('travelDueByDate', $travelDueBy);
             $this->setSetting('travelDueByDate', $travelDueBy);
+        } else {
+            $ctx->withSetting('travelDueByDate', null);
         }
 
         $validator = $this->getObjectMock([
             'addMessage',
         ], [$statsReport]);
-
         $this->setupMessageMocks($validator, $messages);
-
+        $this->mockRegionQuarter([]);
         $result = $validator->validateTravel($data);
 
         $this->assertEquals($expectedResult, $result);
@@ -1087,33 +1098,45 @@ class ClassListValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateTravel()
     {
-        $statsReport          = new stdClass;
-        $statsReport->quarter = $this->getQuarterMock([], [
-            'classroom2Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
-            'endWeekendDate' => Carbon::createFromDate(2015, 5, 29)->startOfDay(),
-        ]);
-        $statsReport->center  = null;
+        $statsReport = [
+            'dates' => [
+                'startWeekendDate' => Carbon::createFromDate(2015, 4, 3)->startOfDay(),
+                'classroom2Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
+                'endWeekendDate' => Carbon::createFromDate(2015, 5, 29)->startOfDay(),
+            ],
+            'reportingDate' => Carbon::createFromDate(2015, 3, 13)->startOfDay(),
+        ];
 
-        $statsReport->reportingDate = Carbon::createFromDate(2015, 3, 13)->startOfDay();
+        $statsReportOnClassroom2 = [
+            'dates' => $statsReport['dates'],
+            'reportingDate' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
+        ];
 
-        $statsReportOnClassroom2                = clone $statsReport;
-        $statsReportOnClassroom2->reportingDate = Carbon::createFromDate(2015, 4, 17)->startOfDay();
+        $statsReportAfterClassroom2 = [
+            'dates' => $statsReport['dates'],
+            'reportingDate' => Carbon::createFromDate(2015, 4, 24)->startOfDay(),
+        ];
 
-        $statsReportAfterClassroom2                = clone $statsReport;
-        $statsReportAfterClassroom2->reportingDate = Carbon::createFromDate(2015, 4, 24)->startOfDay();
+        $statsReportLast2Weeks = [
+            'dates' => $statsReport['dates'],
+            'reportingDate' => Carbon::createFromDate(2015, 5, 15)->startOfDay(),
+        ];
 
-        $statsReportLast2Weeks                = clone $statsReport;
-        $statsReportLast2Weeks->reportingDate = Carbon::createFromDate(2015, 5, 15)->startOfDay();
+        $statsReportWithClassroom1 = [
+            'dates' => [
+                'startWeekendDate' => Carbon::createFromDate(2015, 4, 3)->startOfDay(),
+                'classroom1Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
+            ],
+            'reportingDate' => Carbon::createFromDate(2015, 3, 13)->startOfDay(),
+        ];
 
-        $statsReportWithClassroom1          = clone $statsReport;
-        $statsReportWithClassroom1->quarter = $this->getQuarterMock([], [
-            'classroom1Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
-        ]);
-
-        $statsReportWithClassroom3          = clone $statsReport;
-        $statsReportWithClassroom3->quarter = $this->getQuarterMock([], [
-            'classroom3Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
-        ]);
+        $statsReportWithClassroom3 = [
+            'reportingDate' => Carbon::createFromDate(2015, 3, 13)->startOfDay(),
+            'dates' =>[
+                'startWeekendDate' => Carbon::createFromDate(2015, 4, 3)->startOfDay(),
+                'classroom3Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
+            ],
+        ];
 
         return [
             // Before 2nd Classroom, all null
