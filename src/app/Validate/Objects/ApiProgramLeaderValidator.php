@@ -1,8 +1,9 @@
 <?php
 namespace TmlpStats\Validate\Objects;
 
+use App;
 use Respect\Validation\Validator as v;
-use TmlpStats\Settings\Setting;
+use TmlpStats\Api;
 
 class ApiProgramLeaderValidator extends ApiObjectsValidatorAbstract
 {
@@ -15,11 +16,11 @@ class ApiProgramLeaderValidator extends ApiObjectsValidatorAbstract
     {
         $nameValidator = v::stringType()->notEmpty();
 
-        $this->dataValidators['firstName']        = $nameValidator;
-        $this->dataValidators['lastName']         = $nameValidator;
-        $this->dataValidators['phone']            = v::phone();
-        $this->dataValidators['email']            = v::email();
-        $this->dataValidators['accountability']   = v::in(array_keys($this->accountabilityMap));
+        $this->dataValidators['firstName'] = $nameValidator;
+        $this->dataValidators['lastName'] = $nameValidator;
+        $this->dataValidators['phone'] = v::phone();
+        $this->dataValidators['email'] = v::email();
+        $this->dataValidators['accountability'] = v::in(array_keys($this->accountabilityMap));
         $this->dataValidators['attendingWeekend'] = v::boolType();
     }
 
@@ -34,7 +35,7 @@ class ApiProgramLeaderValidator extends ApiObjectsValidatorAbstract
 
     protected function validateEmail($data)
     {
-        $bouncedEmails = Setting::name('bouncedEmails')->get();
+        $bouncedEmails = App::make(Api\Context::class)->getSetting('bouncedEmails');
         if (!$bouncedEmails) {
             return true;
         }

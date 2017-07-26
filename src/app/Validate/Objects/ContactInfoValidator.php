@@ -1,9 +1,9 @@
 <?php
 namespace TmlpStats\Validate\Objects;
 
+use App;
 use TmlpStats\Import\Xlsx\ImportDocument\ImportDocument;
 use Respect\Validation\Validator as v;
-use TmlpStats\Settings\Setting;
 
 class ContactInfoValidator extends ObjectsValidatorAbstract
 {
@@ -71,7 +71,8 @@ class ContactInfoValidator extends ObjectsValidatorAbstract
     {
         $isValid = true;
 
-        $bouncedEmails = Setting::name('bouncedEmails')->get();
+        $bouncedEmails = App::make(Api\Context::class)->getSetting('bouncedEmails');
+
 
         if ($bouncedEmails) {
             $emails = explode(',', $bouncedEmails);

@@ -3,7 +3,9 @@ namespace TmlpStats\Tests\Unit\Traits;
 
 use App;
 use TmlpStats as Models;
+use Carbon\Carbon;
 use TmlpStats\Domain\CenterQuarter;
+use TmlpStats\Domain\Logic\QuarterDates;
 use TmlpStats\Encapsulations\RegionQuarter;
 use TmlpStats\Quarter;
 
@@ -107,6 +109,11 @@ trait MocksQuarters
         $quarter->method('getNextQuarter')
                 ->willReturn($nextQuarter);
 
+        $region = new Models\Region();
+        $region->id = $quarter->id;
+        $quarter->setRegion($region);
+        SimpleRegionQuarter::$rqdLookup[$quarter->id] = $data;
+
         return $quarter;
     }
 
@@ -119,6 +126,10 @@ trait MocksQuarters
     {
         SimpleRegionQuarter::$cachedDates = $dates;
         App::bind(RegionQuarter::class, SimpleRegionQuarter::class);
+    }
+
+    protected function clearRegionQuarterMock() {
+        SimpleRegionQuarter::$rqdLookup = [];
     }
 }
 
@@ -137,15 +148,22 @@ class SimpleCenterQuarter extends CenterQuarter
 
 class SimpleRegionQuarter extends RegionQuarter
 {
+    public static $rqdLookup = [];
     public static $cachedDates = [];
     public function __construct(Models\Region $region, Models\Quarter $quarter, Models\RegionQuarterDetails $rqd = null)
     {
 
         if ($rqd === null || !$rqd->id) {
             $props = ['id' => 123, 'quarter_id' => $quarter->id, 'region_id' => $region->id];
-            $rqd = new Models\RegionQuarterDetails(array_merge($props, static::$cachedDates));
-            foreach (static::$cachedDates as $k => $v) {
+            $data = array_get(static::$rqdLookup, $quarter->id, static::$cachedDates);
+            //print_r($quarter->id);
+            //print_r(static::$rqdLookup);
+            $rqd = new Models\RegionQuarterDetails(array_merge($props, $data));
+            foreach ($data as $k => $v) {
                 $rqd->$k = $v;
+            }
+            if (!$rqd->startWeekendDate) {
+                $rqd->startWeekendDate = Carbon::createFromDate(2015, 4, 3)->startOfDay();
             }
         }
 

@@ -49,12 +49,17 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
         'validateTravel',
     ];
 
+    public function setUp() {
+        parent::setup();
+        $this->mockRegionQuarter([]);
+    }
+
     //
     // populateValidators()
     //
     public function testPopulateValidatorsSetsValidatorsForEachInput($data = null)
     {
-        $data = new stdClass;
+        $data = new stdClass();
         $data->incomingTeamYear = 2;
         $data->bef = 2;
         $data->dur = null;
@@ -74,8 +79,8 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
         $this->setupMessageMocks($validator, $messages, $i);
 
         $validator->expects($this->at($i))
-            ->method('validate')
-            ->with($data);
+                  ->method('validate')
+                  ->with($data);
 
         Log::shouldReceive('error');
 
@@ -1300,11 +1305,12 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateDates()
     {
-        $statsReport = new stdClass;
+        $statsReport = new stdClass();
         $statsReport->center = new Center();
-        $statsReport->quarter = $this->getQuarterMock([], [
+        $dates = [
             'startWeekendDate' => Carbon::createFromDate(2014, 11, 14)->startOfDay(),
-        ]);
+        ];
+        $statsReport->quarter = $this->getQuarterMock([], $dates);
 
         $statsReport->reportingDate = Carbon::createFromDate(2015, 1, 21);
 
@@ -2122,7 +2128,7 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
     {
         $validator = $this->getObjectMock();
         $validator->expects($this->never())
-            ->method('addMessage');
+                  ->method('addMessage');
 
         $result = $validator->validateComment($data);
 
@@ -2161,15 +2167,15 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 
     public function testValidateCommentFailsWhenNoCommentProvidedForFutureIncomingWeekend()
     {
-        $data = new stdClass;
+        $data = new stdClass();
         $data->comment = null;
         $data->incomingWeekend = 'future';
         $data->wd = null;
 
         $validator = $this->getObjectMock();
         $validator->expects($this->once())
-            ->method('addMessage')
-            ->with($this->equalTo('TMLPREG_COMMENT_MISSING_FUTURE_WEEKEND'));
+                  ->method('addMessage')
+                  ->with($this->equalTo('TMLPREG_COMMENT_MISSING_FUTURE_WEEKEND'));
 
         $result = $validator->validateComment($data);
 
@@ -2191,7 +2197,7 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 
         $validator = $this->getObjectMock([], [$statsReport]);
         $validator->expects($this->never())
-            ->method('addMessage');
+                  ->method('addMessage');
 
         $result = $validator->validateTravel($data);
 
@@ -2200,7 +2206,7 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateTravelPasses()
     {
-        $statsReport = new stdClass;
+        $statsReport = new stdClass();
         $statsReport->quarter = $this->getQuarterMock([], [
             'classroom2Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
         ]);
@@ -2286,8 +2292,14 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
     /**
      * @dataProvider providerValidateTravelFails
      */
-    public function testValidateTravelFails($data, $statsReport, $messages, $expectedResult)
+    public function testValidateTravelFails($data, $statsReportInput, $messages, $expectedResult)
     {
+        $this->clearRegionQuarterMock();
+        $statsReport = new stdClass;
+        $statsReport->center = null;
+        $statsReport->quarter = $this->getQuarterMock([], $statsReportInput['dates']);
+        $statsReport->reportingDate = $statsReportInput['reportingDate'];
+
         $this->setSetting('travelDueByDate', 'classroom2Date');
 
         $validator = $this->getObjectMock([
@@ -2303,17 +2315,18 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
 
     public function providerValidateTravelFails()
     {
-        $statsReport = new stdClass;
-        $statsReport->quarter = $this->getQuarterMock([], [
-            'classroom2Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
-            'endWeekendDate' => Carbon::createFromDate(2015, 5, 29)->startOfDay(),
-        ]);
-        $statsReport->center = null;
+        $statsReport = [
+            'dates' => [
+                'classroom2Date' => Carbon::createFromDate(2015, 4, 17)->startOfDay(),
+                'endWeekendDate' => Carbon::createFromDate(2015, 5, 29)->startOfDay(),
+            ],
+            'reportingDate' => Carbon::createFromDate(2015, 5, 8),
+        ];
 
-        $statsReport->reportingDate = Carbon::createFromDate(2015, 5, 8);
-
-        $statsReportLastTwoWeeks = clone $statsReport;
-        $statsReportLastTwoWeeks->reportingDate = Carbon::createFromDate(2015, 5, 15);
+        $statsReportLastTwoWeeks =[
+            'dates' => $statsReport['dates'],
+            'reportingDate' => Carbon::createFromDate(2015, 5, 15),
+        ];
 
         return [
             // ValidateTravel Fails When Missing Travel

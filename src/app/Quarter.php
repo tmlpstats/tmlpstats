@@ -6,7 +6,6 @@ use Eloquence\Database\Traits\CamelCaseModel;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use TmlpStats\Domain;
-use TmlpStats\Settings\Setting;
 use TmlpStats\Traits\CachedRelationships;
 use TmlpStats\Traits\UsesContext;
 
@@ -22,7 +21,6 @@ class Quarter extends Model
     ];
 
     protected $region = null;
-    protected $regionQuarterDetails = null;
 
     /**
      * Get the date of the first week of reporting
@@ -130,7 +128,7 @@ class Quarter extends Model
 
         if ($center === null) {
             // Use the old school region quarter concept if we get a null center. Hope to log and eliminate these very quickly.
-            $data = $this->context()->getEncapsulation(Encapsulations\RegionQuarter::class, ['region' => $this->region, 'quarter' => $this]);
+            $data = $this->legacyGetRegionQuarter();
         } else {
             $data = $this->getCenterQuarter($center);
         }
@@ -146,8 +144,14 @@ class Quarter extends Model
      * @param  Center $center The center for which we want a centerquarter.
      * @return Domain\CenterQuarter
      */
-    public function getCenterQuarter(Center $center) {
+    public function getCenterQuarter(Center $center)
+    {
         return $this->context()->getEncapsulation(Domain\CenterQuarter::class, ['center' => $center, 'quarter' => $this]);
+    }
+
+    public function legacyGetRegionQuarter()
+    {
+        return $this->context()->getEncapsulation(Encapsulations\RegionQuarter::class, ['region' => $this->region, 'quarter' => $this]);
     }
 
     public function getNextMilestone(Carbon $now)
@@ -178,7 +182,6 @@ class Quarter extends Model
     {
         return $this->getCenterQuarter($center)->getRepromiseDate();
     }
-
 
     /**
      * Is the current reportingDate the first week of the quarter?
@@ -320,10 +323,6 @@ class Quarter extends Model
         }
 
         $this->region = $region;
-
-        $this->regionQuarterDetails = RegionQuarterDetails::byQuarter($this)
-            ->byRegion($this->region)
-            ->first();
     }
 
     public function scopeQuarterNumber($query, $number)

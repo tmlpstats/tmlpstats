@@ -4,8 +4,8 @@ namespace TmlpStats;
 use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Domain\ReportDeadlines;
 use TmlpStats\Domain\ScoreboardGame;
-use TmlpStats\Settings\ReportDeadlines;
 use TmlpStats\Traits\CachedRelationships;
 
 class StatsReport extends Model

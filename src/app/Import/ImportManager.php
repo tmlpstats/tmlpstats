@@ -12,7 +12,6 @@ use TmlpStats\GlobalReport;
 use TmlpStats\Person;
 use TmlpStats\Quarter;
 use TmlpStats\ReportToken;
-use TmlpStats\Settings\Setting;
 use TmlpStats\StatsReport;
 
 // Required for importing multiple sheets

@@ -1,10 +1,12 @@
 <?php
-namespace TmlpStats\Tests\Unit\Settings;
+namespace TmlpStats\Tests\Unit\Domain;
 
 use Carbon\Carbon;
 use TmlpStats\Center;
-use TmlpStats\Settings\ReportDeadlines;
+use TmlpStats\Domain\ReportDeadlines;
+use TmlpStats\Region;
 use TmlpStats\StatsReport;
+use TmlpStats\Tests\Mocks\MockContext;
 use TmlpStats\Tests\TestAbstract;
 use TmlpStats\Tests\Unit\Traits\MocksQuarters;
 use TmlpStats\Tests\Unit\Traits\MocksSettings;
@@ -12,6 +14,7 @@ use TmlpStats\Tests\Unit\Traits\MocksSettings;
 class ReportDeadlinesTest extends TestAbstract
 {
     use MocksSettings, MocksQuarters;
+    protected $instantiateApp = true;
 
     protected $testClass = StatsReport::class;
 
@@ -22,6 +25,18 @@ class ReportDeadlinesTest extends TestAbstract
         $this->clearSettings();
     }
 
+    public function setUp()
+    {
+        parent::setUp();
+        $dates = [
+            'startWeekendDate' => Carbon::parse('2016-08-19')->startOfDay(),
+            'classroom1Date' => Carbon::parse('2016-09-09')->startOfDay(),
+            'classroom2Date' => Carbon::parse('2016-09-30')->startOfDay(),
+            'classroom3Date' => Carbon::parse('2016-10-28')->startOfDay(),
+            'endWeekendDate' => Carbon::parse('2016-11-18')->startOfDay(),
+        ];
+    }
+
     /**
      * @dataProvider providerGet
      */
@@ -29,7 +44,14 @@ class ReportDeadlinesTest extends TestAbstract
     {
         $this->setSetting('reportDeadlines', $setting);
 
+        MockContext::defaults()
+            ->withSetting('reportDeadlines', $setting)
+            ->withSetting('regionQuarterOverride', null)
+            ->install();
+
         $quarter = $this->getQuarterMock([], $quarterDates);
+        $this->mockCenterQuarter();
+        $this->mockRegionQuarter($quarterDates);
 
         $result = ReportDeadlines::get($center, $quarter, $reportingDate);
 
@@ -40,15 +62,20 @@ class ReportDeadlinesTest extends TestAbstract
     {
         $quarterDates = [
             'startWeekendDate' => Carbon::createFromDate(2015, 11, 20)->startOfDay(),
-            'classroom1Date'   => Carbon::createFromDate(2015, 12, 4)->startOfDay(),
-            'classroom2Date'   => Carbon::createFromDate(2016, 1, 8)->startOfDay(),
-            'classroom3Date'   => Carbon::createFromDate(2016, 2, 5)->startOfDay(),
-            'endWeekendDate'   => Carbon::createFromDate(2016, 2, 19)->startOfDay(),
+            'classroom1Date' => Carbon::createFromDate(2015, 12, 4)->startOfDay(),
+            'classroom2Date' => Carbon::createFromDate(2016, 1, 8)->startOfDay(),
+            'classroom3Date' => Carbon::createFromDate(2016, 2, 5)->startOfDay(),
+            'endWeekendDate' => Carbon::createFromDate(2016, 2, 19)->startOfDay(),
         ];
 
-        $center           = new Center();
-        $center->id       = 0;
+        $region = new Region();
+        $region->id = 1;
+
+        $center = new Center();
+        $center->id = 0;
         $center->timezone = 'America/Chicago';
+        $center->regionId = $region->id;
+        $center->setRelation('region', $region);
 
         return [
             // Use Defaults
@@ -58,7 +85,7 @@ class ReportDeadlinesTest extends TestAbstract
                 $quarterDates,
                 $center,
                 [
-                    'report'   => null,
+                    'report' => null,
                     'response' => null,
                 ],
             ],
@@ -67,7 +94,7 @@ class ReportDeadlinesTest extends TestAbstract
                 [
                     [
                         'reportingDate' => 'classroom3Date',
-                        'report'        => [
+                        'report' => [
                             'time' => '23:59:59',
                         ],
                     ],
@@ -76,8 +103,8 @@ class ReportDeadlinesTest extends TestAbstract
                 $quarterDates,
                 $center,
                 [
-                    'report'   => Carbon::parse($reportingDate1->toDateString(), $center->timezone)
-                                        ->setTime(23, 59, 59),
+                    'report' => Carbon::parse($reportingDate1->toDateString(), $center->timezone)
+                        ->setTime(23, 59, 59),
                     'response' => null,
                 ],
             ],
@@ -86,10 +113,10 @@ class ReportDeadlinesTest extends TestAbstract
                 [
                     [
                         'reportingDate' => 'week1',
-                        'report'        => [
+                        'report' => [
                             'time' => '23:59:59',
                         ],
-                        'response'      => [
+                        'response' => [
                             'time' => '12:00:00',
                         ],
                     ],
@@ -98,11 +125,11 @@ class ReportDeadlinesTest extends TestAbstract
                 $quarterDates,
                 $center,
                 [
-                    'report'   => Carbon::parse($reportingDate2->toDateString(), $center->timezone)
-                                        ->setTime(23, 59, 59),
+                    'report' => Carbon::parse($reportingDate2->toDateString(), $center->timezone)
+                        ->setTime(23, 59, 59),
                     'response' => Carbon::parse($reportingDate2->toDateString(), $center->timezone)
-                                        ->addDay()
-                                        ->setTime(12, 0, 0),
+                        ->addDay()
+                        ->setTime(12, 0, 0),
                 ],
             ],
             // Partial Report - date override
@@ -110,13 +137,13 @@ class ReportDeadlinesTest extends TestAbstract
                 [
                     [
                         'reportingDate' => '2015-12-25',
-                        'report'        => [
+                        'report' => [
                             'dueDate' => '2015-12-23',
-                            'time'    => '17:00:59',
+                            'time' => '17:00:59',
                         ],
-                        'response'      => [
+                        'response' => [
                             'dueDate' => '2015-12-23',
-                            'time'    => '21:00:00',
+                            'time' => '21:00:00',
                         ],
                     ],
                 ],
@@ -124,7 +151,7 @@ class ReportDeadlinesTest extends TestAbstract
                 $quarterDates,
                 $center,
                 [
-                    'report'   => Carbon::create(2015, 12, 23, 17, 0, 59, $center->timezone),
+                    'report' => Carbon::create(2015, 12, 23, 17, 0, 59, $center->timezone),
                     'response' => Carbon::create(2015, 12, 23, 21, 0, 0, $center->timezone),
                 ],
             ],
@@ -133,13 +160,13 @@ class ReportDeadlinesTest extends TestAbstract
                 [
                     [
                         'reportingDate' => 'endWeekendDate',
-                        'report'        => [
-                            'time'     => '17:00:00',
+                        'report' => [
+                            'time' => '17:00:00',
                             'timezone' => 'America/Los_Angeles',
                         ],
-                        'response'      => [
+                        'response' => [
                             'dueDate' => '+0days',
-                            'time'    => '17:00:00',
+                            'time' => '17:00:00',
                             'timezone' => 'America/Los_Angeles',
                         ],
                     ],
@@ -148,10 +175,10 @@ class ReportDeadlinesTest extends TestAbstract
                 $quarterDates,
                 $center,
                 [
-                    'report'   => Carbon::parse($reportingDate4->toDateString(), 'America/Los_Angeles')
-                                        ->setTime(17, 0, 0),
+                    'report' => Carbon::parse($reportingDate4->toDateString(), 'America/Los_Angeles')
+                        ->setTime(17, 0, 0),
                     'response' => Carbon::parse($reportingDate4->toDateString(), 'America/Los_Angeles')
-                                        ->setTime(17, 0, 0),
+                        ->setTime(17, 0, 0),
                 ],
             ],
             // Returns the correct date out of a series of overrides
@@ -159,39 +186,39 @@ class ReportDeadlinesTest extends TestAbstract
                 [
                     [
                         'reportingDate' => 'week1',
-                        'report'        => [
+                        'report' => [
                             'time' => '23:59:59',
                         ],
-                        'response'      => [
+                        'response' => [
                             'time' => '12:00:00',
                         ],
                     ],
                     [
                         'reportingDate' => '2015-12-25',
-                        'report'        => [
+                        'report' => [
                             'dueDate' => '2015-12-23',
-                            'time'    => '17:00:59',
+                            'time' => '17:00:59',
                         ],
-                        'response'      => [
+                        'response' => [
                             'dueDate' => '2015-12-23',
-                            'time'    => '21:00:00',
+                            'time' => '21:00:00',
                         ],
                     ],
                     [
                         'reportingDate' => 'classroom3Date',
-                        'report'        => [
+                        'report' => [
                             'time' => '23:59:59',
                         ],
                     ],
                     [
                         'reportingDate' => 'endWeekendDate',
-                        'report'        => [
-                            'time'     => '17:00:00',
+                        'report' => [
+                            'time' => '17:00:00',
                             'timezone' => 'America/Los_Angeles',
                         ],
-                        'response'      => [
+                        'response' => [
                             'dueDate' => '+0days',
-                            'time'    => '17:00:00',
+                            'time' => '17:00:00',
                             'timezone' => 'America/Los_Angeles',
                         ],
                     ],
@@ -200,7 +227,7 @@ class ReportDeadlinesTest extends TestAbstract
                 $quarterDates,
                 $center,
                 [
-                    'report'   => Carbon::create(2015, 12, 23, 17, 0, 59, $center->timezone),
+                    'report' => Carbon::create(2015, 12, 23, 17, 0, 59, $center->timezone),
                     'response' => Carbon::create(2015, 12, 23, 21, 0, 0, $center->timezone),
                 ],
             ],
@@ -225,14 +252,14 @@ class ReportDeadlinesTest extends TestAbstract
     {
         $quarterDates = [
             'startWeekendDate' => Carbon::createFromDate(2015, 11, 20)->startOfDay(),
-            'classroom1Date'   => Carbon::createFromDate(2015, 12, 4)->startOfDay(),
-            'classroom2Date'   => Carbon::createFromDate(2016, 1, 8)->startOfDay(),
-            'classroom3Date'   => Carbon::createFromDate(2016, 2, 5)->startOfDay(),
-            'endWeekendDate'   => Carbon::createFromDate(2016, 2, 19)->startOfDay(),
+            'classroom1Date' => Carbon::createFromDate(2015, 12, 4)->startOfDay(),
+            'classroom2Date' => Carbon::createFromDate(2016, 1, 8)->startOfDay(),
+            'classroom3Date' => Carbon::createFromDate(2016, 2, 5)->startOfDay(),
+            'endWeekendDate' => Carbon::createFromDate(2016, 2, 19)->startOfDay(),
         ];
 
-        $center           = new Center();
-        $center->id       = 0;
+        $center = new Center();
+        $center->id = 0;
         $center->timezone = 'America/Chicago';
 
         $reportingDate = Carbon::createFromDate(2016, 2, 5)->startOfDay();
@@ -242,13 +269,13 @@ class ReportDeadlinesTest extends TestAbstract
             [
                 [
                     [
-                        'report'        => [
+                        'report' => [
                             'dueDate' => '2015-12-23',
-                            'time'    => '17:00:59',
+                            'time' => '17:00:59',
                         ],
-                        'response'      => [
+                        'response' => [
                             'dueDate' => '2015-12-23',
-                            'time'    => '21:00:00',
+                            'time' => '21:00:00',
                         ],
                     ],
                 ],
@@ -262,11 +289,11 @@ class ReportDeadlinesTest extends TestAbstract
                 [
                     [
                         'reportingDate' => 'asdf',
-                        'report'        => [
-                            'time'    => '17:00:59',
+                        'report' => [
+                            'time' => '17:00:59',
                         ],
-                        'response'      => [
-                            'time'    => '21:00:00',
+                        'response' => [
+                            'time' => '21:00:00',
                         ],
                     ],
                 ],
@@ -280,12 +307,12 @@ class ReportDeadlinesTest extends TestAbstract
                 [
                     [
                         'reportingDate' => 'classroom3Date',
-                        'report'        => [
+                        'report' => [
                             'dueDate' => 'asdf',
-                            'time'    => '17:00:59',
+                            'time' => '17:00:59',
                         ],
-                        'response'      => [
-                            'time'    => '21:00:00',
+                        'response' => [
+                            'time' => '21:00:00',
                         ],
                     ],
                 ],
@@ -299,11 +326,11 @@ class ReportDeadlinesTest extends TestAbstract
                 [
                     [
                         'reportingDate' => 'classroom3Date',
-                        'report'        => [
-                            'time'    => 'asdf',
+                        'report' => [
+                            'time' => 'asdf',
                         ],
-                        'response'      => [
-                            'time'    => '21:00:00',
+                        'response' => [
+                            'time' => '21:00:00',
                         ],
                     ],
                 ],
@@ -317,12 +344,12 @@ class ReportDeadlinesTest extends TestAbstract
                 [
                     [
                         'reportingDate' => 'classroom3Date',
-                        'report'        => [
-                            'time'    => '17:00:59',
+                        'report' => [
+                            'time' => '17:00:59',
                         ],
-                        'response'      => [
+                        'response' => [
                             'dueDate' => 'asdf',
-                            'time'    => '21:00:00',
+                            'time' => '21:00:00',
                         ],
                     ],
                 ],
@@ -336,11 +363,11 @@ class ReportDeadlinesTest extends TestAbstract
                 [
                     [
                         'reportingDate' => 'classroom3Date',
-                        'report'        => [
-                            'time'    => '17:00:59',
+                        'report' => [
+                            'time' => '17:00:59',
                         ],
-                        'response'      => [
-                            'time'    => 'asdf',
+                        'response' => [
+                            'time' => 'asdf',
                         ],
                     ],
                 ],
@@ -355,7 +382,7 @@ class ReportDeadlinesTest extends TestAbstract
     protected function getStatsReportMock($methods = [], $constructorArgs = [])
     {
         $defaultMethods = ['__get'];
-        $methods        = $this->mergeMockMethods($defaultMethods, $methods);
+        $methods = $this->mergeMockMethods($defaultMethods, $methods);
 
         $statsReport = $this->getMockBuilder(StatsReport::class)
                             ->setMethods($methods)
@@ -364,10 +391,10 @@ class ReportDeadlinesTest extends TestAbstract
         $statsReport->expects($this->any())
                     ->method('__get')
                     ->will($this->returnCallback(function ($name) use ($constructorArgs) {
-                        return isset($constructorArgs[$name])
-                            ? $constructorArgs[$name]
-                            : null;
-                    }));
+               return isset($constructorArgs[$name])
+                   ? $constructorArgs[$name]
+                   : null;
+           }));
 
         return $statsReport;
     }

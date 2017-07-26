@@ -24,7 +24,7 @@ class RegionQuarter implements \JsonSerializable
         $this->region = $region;
         $this->quarter = $quarter;
 
-        if ($rqd === null || !$rqd->id) {
+        if ($rqd === null || !$rqd->quarterId) {
             $rqd = Models\RegionQuarterDetails::byQuarter($quarter)
                 ->byRegion($region)
                 ->first();
