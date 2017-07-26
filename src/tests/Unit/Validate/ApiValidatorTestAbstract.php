@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Debug\Dumper;
 use TmlpStats as Models;
 use TmlpStats\Api\Parsers;
+use TmlpStats\Tests\Mocks\MockContext;
 use TmlpStats\Tests\Unit\Traits;
 
 class ApiValidatorTestAbstract extends ValidatorTestAbstract
@@ -30,7 +31,7 @@ class ApiValidatorTestAbstract extends ValidatorTestAbstract
     public function setUp()
     {
         parent::setUp();
-
+        $this->context = MockContext::defaults()->install();
         $this->addModelParserMock(Parsers\CenterParser::class, models\Center::class);
         $this->addModelParserMock(Parsers\QuarterParser::class, Models\Quarter::class);
         $this->addModelParserMock(Parsers\WithdrawCodeParser::class);

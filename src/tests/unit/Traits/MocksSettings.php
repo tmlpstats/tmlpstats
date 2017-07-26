@@ -1,6 +1,8 @@
 <?php
 namespace TmlpStats\Tests\Unit\Traits;
 
+use App;
+use TmlpStats\Api;
 use TmlpStats\ModelCache;
 use TmlpStats\Setting;
 
@@ -38,13 +40,16 @@ trait MocksSettings
      */
     public function setSetting($name, $value, $centerId = 0)
     {
+        if ($context = $this->findRelevantContext()) {
+            $context->withSetting($name, $value);
+        }
         if (is_array($value) || is_object($value)) {
             $value = json_encode($value);
         }
 
         $setting = $this->getSettingMock([
-            'id'    => mt_rand(10000, 99999),
-            'name'  => $name,
+            'id' => mt_rand(10000, 99999),
+            'name' => $name,
             'value' => $value,
         ]);
 
@@ -71,8 +76,13 @@ trait MocksSettings
      */
     public function clearSettings()
     {
+        if ($context = $this->findRelevantContext()) {
+            $context->clearSettings();
+        }
+
         if (!$this->mockedSettings) {
             $this->mockedSettings = [];
+
             return;
         }
 
@@ -107,5 +117,16 @@ trait MocksSettings
         }
 
         return $setting;
+    }
+
+    protected function findRelevantContext()
+    {
+        if (isset($this->context)) {
+            return $this->context;
+        } else if (App::resolved(Api\Context::class)) {
+            return App::make(Api\Context::class);
+        }
+
+        return null;
     }
 }
