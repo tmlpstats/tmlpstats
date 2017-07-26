@@ -758,7 +758,7 @@ reportMeta:
         name: Next Quarter Accountabilities
         shortName: Accountabilities
         requiredFlags: ['nextQtrAccountabilities']
-        cacheTime: 5
+        cacheTime: 2
         render: react
 
 

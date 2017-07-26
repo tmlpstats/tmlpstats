@@ -98,7 +98,7 @@ export class AddOneLink extends React.PureComponent {
     }
 }
 
-export class SimpleSelect extends React.PureComponent {
+export class Select extends React.PureComponent {
     static defaultProps = {
         keyProp: 'key',
         labelProp: 'label',
@@ -153,6 +153,8 @@ export class SimpleSelect extends React.PureComponent {
         )
     }
 }
+
+export const SimpleSelect = Select
 
 const customFieldMSP = (state, props) => {
     const modelValue = _.get(state, props.model)

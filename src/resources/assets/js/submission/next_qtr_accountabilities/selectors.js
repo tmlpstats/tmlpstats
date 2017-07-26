@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { createSelector } from 'reselect'
 
-import { makeAccountabilitiesSelector, getLabelTeamMember } from '../core/selectors'
+import { makeAccountabilitiesSelector } from '../core/selectors'
 import { appsCollection } from '../applications/data'
 
 const accSelector = makeAccountabilitiesSelector('team')
@@ -33,26 +33,15 @@ export const selectablePeople = createSelector(
     (state) => state.submission.core.lookups.team_members,
     (state) => state.submission.applications.applications,
     (team_members, applications) => {
-        var allNames = []
-        var nameToKey = {}
-        if (team_members) {
-            team_members.forEach((tmd, idx) => {
-                const fullName = getLabelTeamMember(tmd)
-                allNames.push(fullName)
-                nameToKey[fullName] = ['teamMember', tmd.teamMemberId, idx]
-            })
-        }
-        if (applications && applications.collection) {
-            appsCollection.iterItems(applications, (app, appId) => {
-                const fullName = `${app.firstName} ${app.lastName} (incoming)`
-                allNames.push(fullName)
-                nameToKey[fullName] = ['application', appId]
-            })
+        let teamMembersLookup = _.keyBy(team_members, 'teamMemberId') // yuck, old data format. Fix soon please.
+        let orderedApplications = []
+        if (applications && applications.data) {
+            orderedApplications = appsCollection.opts.getSortedApplications(applications)
         }
         return {
-            team_members,
-            applications,
-            allNames,
-            nameToKey
+            teamMembers: teamMembersLookup,
+            orderedTeamMembers: team_members,
+            applications: applications.data,
+            orderedApplications,
         }
     })

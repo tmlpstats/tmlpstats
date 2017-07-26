@@ -4,7 +4,7 @@ import { defaultMemoize } from 'reselect'
 import { Control, Form, SimpleField, SimpleSelect, SimpleFormGroup, BooleanSelect, AddOneLink, formActions } from '../../reusable/form_utils'
 import { objectAssign } from '../../reusable/ponyfill'
 import { rebind, delayDispatch, connectRedux } from '../../reusable/dispatch'
-import { collectionSortSelector, SORT_BY } from '../../reusable/sort-helpers'
+import { SORT_BY } from '../../reusable/sort-helpers'
 import { Alert, ModeSelectButtons, ButtonStateFlip, MessagesComponent, scrollIntoView } from '../../reusable/ui_basic'
 
 import { loadTeamMembers } from '../team_members/actions'
@@ -16,7 +16,7 @@ import { centerQuarterData } from '../core/data'
 import { loadApplications, saveApplication, chooseApplication } from './actions'
 import AppStatus from './AppStatus'
 
-const getSortedApplications = collectionSortSelector(appsSorts)
+const getSortedApplications = appsCollection.opts.getSortedApplications
 
 const sharedMapState = (state) => {
     const submission = state.submission

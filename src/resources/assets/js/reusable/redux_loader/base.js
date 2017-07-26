@@ -123,6 +123,7 @@ export class ReduxLoader {
                 if (actionData.setLoaded && !actionData.inGroup) {
                     dispatch(loadAction(fixedErr))
                 }
+                throw err
             }
 
             // loader, saver, etc

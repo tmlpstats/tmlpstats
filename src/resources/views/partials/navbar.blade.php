@@ -21,7 +21,8 @@ $crd = null;
 $showNextQtrAccountabilities = false;
 if ($currentCenter !== null && $reportingDate != null) {
     $crd = TmlpStats\Encapsulations\CenterReportingDate::ensure($currentCenter, $reportingDate);
-    $showNextQtrAccountabilities = $crd->canShowNextQtrAccountabilities();
+    // Stop showing the old link. Maybe remove this soon.
+    // $showNextQtrAccountabilities = $crd->canShowNextQtrAccountabilities();
 }
 
 $reports = null;

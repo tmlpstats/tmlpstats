@@ -32,7 +32,8 @@ export class ModeSelectButtons extends React.Component {
             PropTypes.number
         ]),
         ariaGroupDesc: PropTypes.string,
-        onClick: PropTypes.func
+        onClick: PropTypes.func,
+        getLabel: PropTypes.func
     }
 
     render() {
@@ -128,7 +129,8 @@ export class ButtonStateFlip extends React.PureComponent {
         buttonClass: 'btn btn-primary',
         onClick: () => { },
         offset: 'col-md-offset-2 col-md-8',
-        wrapGroup: false
+        wrapGroup: false,
+        disabled: false
     }
     static propTypes = {
         buttonClass: PropTypes.string,
@@ -136,19 +138,26 @@ export class ButtonStateFlip extends React.PureComponent {
         loadState: PropTypes.object.isRequired,
         offset: PropTypes.string,
         onClick: PropTypes.func,
-        wrapGroup: PropTypes.bool
+        wrapGroup: PropTypes.bool,
+        disabled: PropTypes.bool
     }
     render() {
-        var { buttonClass, children, loadState, onClick, offset, wrapGroup } = this.props
+        var { buttonClass, children, loadState, onClick, offset, wrapGroup, disabled } = this.props
+        let extraProps = {className: buttonClass}
+        if (disabled) {
+            extraProps.disabled = true
+        }
 
         let button
         if (loadState.state == 'loading') {
-            button = <button className={buttonClass + ' m-progress'}>{children}</button>
+            extraProps.className = buttonClass + ' m-progress'
         } else if (onClick) {
-            button = <button className={buttonClass} onClick={onClick}>{children}</button>
+            extraProps.onClick = onClick
         } else {
-            button = <button className={buttonClass} type="submit">{children}</button>
+            extraProps.type = 'submit'
         }
+
+        button = <button {...extraProps}>{children}</button>
 
         if (wrapGroup) {
             return (

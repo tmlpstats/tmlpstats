@@ -3,6 +3,7 @@ import _ from 'lodash'
 import Api from '../../api'
 import FormReduxLoader from '../../reusable/redux_loader/rrf'
 import { objectAssign } from '../../reusable/ponyfill'
+import { formActions } from '../../reusable/form_utils'
 
 import { repromisableAccountabilities } from './selectors'
 
@@ -27,10 +28,15 @@ export const qtrAccountabilitiesData = new FormReduxLoader({
 
                 // Keep a pointer at the original value so we can use it later for comparison.
                 return objectAssign({_original: keyed}, keyed)
+            },
+            successHandler: (data, { loader, dispatch }) => {
+                dispatch(loader.replaceCollection(data))
+                dispatch(formActions.setPristine(loader.opts.model))
             }
         },
         save: {
             api: Api.Submission.NextQtrAccountability.stash,
+            setLoaded: true
         },
     },
     setLoaded: true,
