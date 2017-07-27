@@ -587,14 +587,16 @@ class GlobalReportController extends Controller
         $reportData = [];
         foreach ($centers as $center) {
             $allApps = App::make(Api\Application::class)->allForCenter($center, $globalReport->reportingDate);
-            $apps = array_map(function($app) {
-                return $app->id;
-            }, array_filter($allApps, function ($app) {
-                return $app->withdrawCodeId === null;
-            }));
+            $apps = [];
+            foreach ($allApps as $app) {
+                if ($app->withdrawCodeId !== null) {
+                    continue;
+                }
+                $apps[$app->id] = $app;
+            }
 
             $transfers = Models\Transfer::byCenter($center)
-                ->bySubject('application', $apps)
+                ->bySubject('application', array_keys($apps))
                 ->get();
 
             foreach ($transfers as $app) {
@@ -606,6 +608,7 @@ class GlobalReportController extends Controller
                     'name' => "{$reg->firstName} {$reg->lastName}",
                     'from' => "{$fromCq->startWeekendDate->format('F')} - {$fromCq->quarter->t1Distinction}",
                     'to' => "{$toCq->startWeekendDate->format('F')} - {$toCq->quarter->t1Distinction}",
+                    'comment' => $apps[$app->subjectId]->comment,
                     'reportingDate' => $app->reportingDate,
                 ];
             }

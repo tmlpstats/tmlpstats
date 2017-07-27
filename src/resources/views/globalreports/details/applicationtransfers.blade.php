@@ -9,6 +9,7 @@
             <th class="data-point">Name</th>
             <th class="data-point">From</th>
             <th class="data-point">To</th>
+            <th class="data-point">Last Comment</th>
             <th class="data-point">Transfer Count</th>
         </tr>
         </thead>
@@ -20,10 +21,11 @@
                     <td class="border-right">
                         {{ $centerName }}
                     </td>
-                    <td class="data-point">{{ $transfer['reportingDate'] }}</td>
-                    <td class="data-point">{{ $transfer['name'] }}</td>
-                    <td class="data-point">{{ $transfer['from'] }}</td>
-                    <td class="data-point">{{ $transfer['to'] }}</td>
+                    <td class="data-point border-right-thin">{{ $transfer['reportingDate'] }}</td>
+                    <td class="border-right-thin">{{ $transfer['name'] }}</td>
+                    <td class="border-right-thin">{{ $transfer['from'] }}</td>
+                    <td class="border-right-thin">{{ $transfer['to'] }}</td>
+                    <td class="border-right-thin">{{ $transfer['comment'] }}</td>
                     <td class="data-point">{{ count($data) }}</td>
                 </tr>
                 @endforeach
