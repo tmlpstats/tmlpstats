@@ -587,16 +587,12 @@ class GlobalReportController extends Controller
         $reportData = [];
         foreach ($centers as $center) {
             $allApps = App::make(Api\Application::class)->allForCenter($center, $globalReport->reportingDate);
-            $apps = [];
-            foreach ($allApps as $app) {
-                if ($app->withdrawCodeId !== null) {
-                    continue;
-                }
-                $apps[$app->id] = $app;
-            }
+            $apps = collect($allApps)
+                ->filter(function($app) { return $app->withdrawCodeId === null; })
+                ->keyBy(function($app) { return $app->id; });
 
             $transfers = Models\Transfer::byCenter($center)
-                ->bySubject('application', array_keys($apps))
+                ->bySubject('application', $apps->keys()->toArray())
                 ->get();
 
             foreach ($transfers as $app) {
