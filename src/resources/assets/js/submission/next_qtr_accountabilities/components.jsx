@@ -1,12 +1,14 @@
 import _ from 'lodash'
-import React, { Component, PureComponent, PropTypes } from 'react'
+import PropTypes from 'prop-types'
+import React, { Component, PureComponent } from 'react'
 
-import { Typeahead } from '../../reusable/typeahead'
-import { Form, formActions, SimpleFormGroup, NullableTextControl } from '../../reusable/form_utils'
-import { Alert, Panel, SubmitFlip } from '../../reusable/ui_basic'
+import { Form, formActions, SimpleFormGroup, NullableTextControl, Select } from '../../reusable/form_utils'
+import { Alert, Panel, SubmitFlip, ModeSelectButtons, ButtonStateFlip } from '../../reusable/ui_basic'
 import { rebind, connectRedux, delayDispatch } from '../../reusable/dispatch'
+import { loadStateShape } from '../../reusable/shapes'
 
 import { conditionalLoadApplications } from '../applications/actions'
+import { getLabelTeamMember } from '../core/selectors'
 import * as selectors from './selectors'
 import * as actions from './actions'
 import { qtrAccountabilitiesData } from './data'
@@ -16,13 +18,23 @@ export class QuarterAccountabilities extends Component {
         return (
             <div>
                 <h3>Next Quarter Accountabilities</h3>
-                <Alert alert="info">
-                    Fill this form out after classroom 3 to indicate accountabilities for next quarter
-                </Alert>
+                <TopAlert />
                 <QuarterAccountabilitiesTable params={this.props.params} />
             </div>
         )
     }
+}
+
+export function TopAlert() {
+    return (
+        <Alert alert="info">
+            After classroom 3: teams <b>must</b> fill out the following 4 accountabilities for the upcoming quarter:
+            Team 1 Team Leader, Team 2 Team Leader, Statistician, Logistics.
+            <br />
+            We request you fill out other accountabilities as soon as you know them; this greatly helps the weekend
+            teams with setting up the accountability clinics.
+        </Alert>
+    )
 }
 
 @connectRedux()
@@ -35,6 +47,14 @@ export class QuarterAccountabilitiesTable extends Component {
             people: selectors.selectablePeople(state),
             browser: state.browser
         }
+    }
+
+    static propTypes = {
+        nqa: PropTypes.object,
+        autoSave: PropTypes.bool,
+        lookups: PropTypes.object,
+        people: PropTypes.object,
+        accountabilities: PropTypes.array
     }
 
     constructor(props) {
@@ -68,7 +88,7 @@ export class QuarterAccountabilitiesTable extends Component {
         }
 
         const MODEL = qtrAccountabilitiesData.opts.model
-        const tabular = this.props.browser.greaterThan.medium
+        const tabular = this.props.browser.greaterThan.huge
         const submitButton = this.props.autoSave ? undefined : <SubmitFlip loadState={this.props.nqa.saveState}>Submit</SubmitFlip>
 
         const accountabilities = this.props.accountabilities.map((acc) => {
@@ -86,6 +106,7 @@ export class QuarterAccountabilitiesTable extends Component {
                     <table className="table table-hover table-responsive">
                         <thead>
                             <tr>
+                                <th>Person Type</th>
                                 <th>Accountability</th>
                                 <th>Team Member</th>
                                 <th>Email</th>
@@ -104,7 +125,6 @@ export class QuarterAccountabilitiesTable extends Component {
             return (
                 <Form model={MODEL} className="form-horizontal nextQuarterAccountabilities" onSubmit={this.onSubmit}>
                     {accountabilities}
-                    {submitButton}
                 </Form>
             )
         }
@@ -137,6 +157,35 @@ export class QuarterAccountabilitiesTable extends Component {
     }
 }
 
+@connectRedux()
+class AccSaveButton extends Component {
+    static mapStateToProps(state, ownProps) {
+        const nqa = state.submission.next_qtr_accountabilities
+        return {saveState: nqa.saveState, form: nqa.forms[ownProps.itemId], err: nqa.data[ownProps.itemId]._err}
+    }
+    static propTypes = {
+        saveState: loadStateShape,
+        itemId: PropTypes.number,
+        form: PropTypes.object,
+        err: PropTypes.node
+    }
+
+    render() {
+        const { form, saveState } = this.props
+        let disabled = form.$form.pristine
+        let errAlert
+        if (saveState.state == 'failed' && saveState.error && this.props.err) {
+            errAlert = <Alert alert="danger">{this.props.err}</Alert>
+        }
+        return (
+            <SimpleFormGroup label="">
+                <ButtonStateFlip loadState={this.props.saveState} disabled={disabled}>Save</ButtonStateFlip>
+                {errAlert}
+            </SimpleFormGroup>
+        )
+    }
+}
+
 
 class QuarterAccountabilitiesRow extends PureComponent {
     static propTypes = {
@@ -155,20 +204,24 @@ class QuarterAccountabilitiesRow extends PureComponent {
 
     constructor(props) {
         super(props)
-        rebind(this, 'onNameChange')
+        rebind(this, 'changeMode')
     }
 
     render() {
-        const { acc, modelBase, tabular } = this.props
+        const { acc, modelBase, tabular, entry } = this.props
 
         const model = modelBase + '.' + acc.id
 
+        const mode = currentMode(entry)
+
+        const modeSelect = <ModeSelectButtons items={PERSON_MODES} current={mode} onClick={this.changeMode} />
+
         const tmSelectField = (
-            <PersonInput people={this.props.people} onChange={this.onNameChange} name={this.props.entry.name} />
+            <PersonInput model={model} people={this.props.people} entry={this.props.entry} />
         )
-        const emailField = <NullableTextControl model={model+'.email'} className="form-control nqEmail" />
-        const phoneField = <NullableTextControl model={model+'.phone'} className="form-control nqPhone" />
-        const notesField = <NullableTextControl model={model+'.notes'} className="form-control nqNotes" />
+        const emailField = <NullableTextControl model={model+'.email'} className="form-control nqEmail" disabled={!entry.name} />
+        const phoneField = <NullableTextControl model={model+'.phone'} className="form-control nqPhone" disabled={!entry.name} />
+        const notesField = <NullableTextControl model={model+'.notes'} className="form-control nqNotes" disabled={!entry.name} />
         const isRequired = _.includes(requiredAccountabilities, acc.name)
 
         if (tabular) {
@@ -176,6 +229,7 @@ class QuarterAccountabilitiesRow extends PureComponent {
             return (
                 <tr>
                     <th>{acc.display}{required}</th>
+                    <th>{modeSelect}</th>
                     <td>{tmSelectField}</td>
                     <td>{emailField}</td>
                     <td>{phoneField}</td>
@@ -184,83 +238,158 @@ class QuarterAccountabilitiesRow extends PureComponent {
             )
         } else {
             const color = isRequired? 'primary' : 'default'
+            const modeLookup = PERSON_MODES_LOOKUP[mode]
+            const tmSelectLabel =  modeLookup ? (modeLookup.altLabel || modeLookup.label) : 'Person'
             return (
-                <Panel color={color} heading={acc.display} headingLevel="h3">
-                    <SimpleFormGroup label="Team Member">{tmSelectField}</SimpleFormGroup>
+                <Panel color={color} heading={acc.display + (isRequired? '*' : '')} headingLevel="h3">
+                    <SimpleFormGroup label="Accountable Type">
+                        {modeSelect}
+                    </SimpleFormGroup>
+                    <SimpleFormGroup label={tmSelectLabel}>
+                        {tmSelectField}
+                    </SimpleFormGroup>
                     <SimpleFormGroup label="Email">{emailField}</SimpleFormGroup>
                     <SimpleFormGroup label="Phone">{phoneField}</SimpleFormGroup>
+                    <SimpleFormGroup label="Notes">{notesField}</SimpleFormGroup>
+                    <AccSaveButton itemId={acc.id} />
                 </Panel>
             )
         }
     }
 
-    onNameChange(names) {
-        if (!names.length) {
-            return
+    changeMode(key) {
+        if (this.props.entry[PERSON_MODE_KEY] != key) {
+            this.props.dispatch(formActions.merge(`${this.props.modelBase}.${this.props.acc.id}`, {
+                [PERSON_MODE_KEY]: key,
+                application: (key == 'application')? '': null,
+                teamMember: (key == 'team_member')? '': null,
+                email: '',
+                phone: '',
+                name: ''
+            }))
         }
-        const name = names[0]
-
-        let toUpdate = {
-            name: name,
-            application: null,
-            teamMember: null
-        }
-
-        function updateEmailPhone(input) {
-            if (input) {
-                EMAIL_PHONE.forEach((k) => {
-                    // only obliterate email and phone if they exist
-                    if (input[k]) {
-                        toUpdate[k] = input[k]
-                    }
-                })
-            }
-        }
-
-        if (name.customOption) {
-            // In this case, it's a custom entry.
-            toUpdate.name = name.label || name.name
-        } else {
-            const { nameToKey, team_members, applications: {collection: appsCollection} } = this.props.people
-            const key = nameToKey[name]
-
-            if (key[0] == 'teamMember') {
-                const tmd = team_members[key[2]]
-                toUpdate.teamMember = tmd.teamMemberId
-                updateEmailPhone(tmd.teamMember.person)
-
-            } else if (key[0] == 'application') {
-                toUpdate.application = key[1] // this is the application ID but just called application here
-                updateEmailPhone(appsCollection[key[1]])
-            } else {
-                return
-            }
-        }
-        const model = this.props.modelBase + '.' + this.props.acc.id
-        this.props.dispatch(formActions.merge(model, toUpdate))
     }
 }
+
+const PERSON_MODES = [
+    {key: 'team_member', label: 'Current Team Member', altLabel: 'Team Member', objLabel: 'a team member', relevantProp: 'teamMember'},
+    {key: 'application', label: 'Incoming T1/T2', objLabel: 'an application', relevantProp: 'application'},
+    {key: 'other', label: 'Other', relevantProp: 'name'}
+]
+const PERSON_MODES_LOOKUP = _.keyBy(PERSON_MODES, 'key')
+const PERSON_MODE_KEY = '_personMode'
 
 class PersonInput extends PureComponent {
     static propTypes = {
+        model: PropTypes.string.isRequired,
         people: PropTypes.object,
-        name: PropTypes.string
+        entry: PropTypes.object,
+    }
+
+    constructor(props) {
+        super(props)
+        rebind(this, 'changeTeamMember', 'changeApp')
     }
 
     render() {
-        const { props } = this
+        const { entry, model, people } = this.props
+        const mode = currentMode(entry)
+
+        let warning
+        if (mode &&  mode != 'other' && !entry.name) {
+            const modeItem = PERSON_MODES_LOOKUP[mode]
+            warning = (
+                <Alert alert="info">You must select {modeItem.objLabel} below to proceed</Alert>
+            )
+        }
+
+        let mainView
+        switch (mode) {
+        case 'team_member':
+            mainView = (
+                <Select
+                        model={model+'.teamMember'} items={people.orderedTeamMembers}
+                        keyProp="teamMemberId" getLabel={getLabelTeamMember}
+                        changeAction={this.changeTeamMember} emptyChoice=" " />
+            )
+            break
+        case 'application':
+            mainView = (
+                <Select
+                        model={model+'.application'} items={people.orderedApplications}
+                        keyProp="id" getLabel={getLabelApp}
+                        changeAction={this.changeApp} emptyChoice=" " />
+            )
+            break
+        case 'other':
+            warning = (
+                <Alert alert="info">
+                    "Other" is only used in special situations, if the person who will be
+                    this accountability is someone not currently incoming or on this team.
+                </Alert>
+            )
+            mainView = (
+                <NullableTextControl model={model+'.name'} />
+            )
+        }
         return (
-            <Typeahead
-                options={props.people.allNames}
-                selected={[this.props.name]}
-                allowNew={true}
-                onChange={this.props.onChange}
-                minLength={1}
-                />
+            <div>
+                {warning}
+                {mainView}
+            </div>
         )
     }
+
+    changeTeamMember(fieldModel, tmId) {
+        const tmd = this.props.people.teamMembers[tmId]
+        let toUpdate = {
+            teamMember: tmId,
+            application: null,
+            name: getLabelTeamMember(tmd)
+        }
+        this.updateEmailPhone(toUpdate, tmd.teamMember.person)
+        return formActions.merge(this.props.model, toUpdate)
+    }
+
+    changeApp(fieldModel, appId) {
+        const application = this.props.people.applications[appId]
+        let toUpdate = {
+            application: appId,
+            teamMember: null,
+            name: getLabelApp(application)
+        }
+        this.updateEmailPhone(toUpdate, application)
+        return formActions.merge(this.props.model, toUpdate)
+    }
+
+    updateEmailPhone(toUpdate, input) {
+        if (input) {
+            EMAIL_PHONE.forEach((k) => {
+                // only obliterate email and phone if they exist
+                if (input[k]) {
+                    toUpdate[k] = input[k]
+                } else {
+                    toUpdate[k] = ''
+                }
+            })
+        }
+    }
 }
+
+const getLabelApp = (app) => `${app.firstName} ${app.lastName}`
 
 const requiredAccountabilities = ['t1tl', 't2tl', 'statistician', 'logistics']
 
 const EMAIL_PHONE = ['email', 'phone']
+
+function currentMode(entry) {
+    let mode = entry[PERSON_MODE_KEY]
+    if (mode) {
+        return mode
+    }
+    for (let modeItem of PERSON_MODES) {
+        if (entry[modeItem.relevantProp]) {
+            return modeItem.key
+        }
+    }
+}

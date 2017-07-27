@@ -1,0 +1,1638 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NQA Should Render As Snapshot 1`] = `
+<form
+  className="form-horizontal nextQuarterAccountabilities"
+  onReset={[Function]}
+  onSubmit={[Function]}
+>
+  <div
+    className="panel panel-primary"
+  >
+    <div
+      className="panel-heading"
+    >
+      <h3
+        className="panel-title"
+      >
+        Team 1 Team Leader*
+      </h3>
+    </div>
+    <div
+      className="panel-body"
+    >
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Accountable Type
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div
+            aria-label={undefined}
+            className="btn-group"
+            role="group"
+          >
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Current Team Member
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Incoming T1/T2
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Other
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Person
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Email
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqEmail"
+            name="submission.next_qtr_accountabilities.data.6.email"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Phone
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqPhone"
+            name="submission.next_qtr_accountabilities.data.6.phone"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Notes
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqNotes"
+            name="submission.next_qtr_accountabilities.data.6.notes"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <button
+            className="btn btn-primary"
+            disabled={true}
+            onClick={[Function]}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="panel panel-primary"
+  >
+    <div
+      className="panel-heading"
+    >
+      <h3
+        className="panel-title"
+      >
+        Team 2 Team Leader*
+      </h3>
+    </div>
+    <div
+      className="panel-body"
+    >
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Accountable Type
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div
+            aria-label={undefined}
+            className="btn-group"
+            role="group"
+          >
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Current Team Member
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Incoming T1/T2
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Other
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Person
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Email
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqEmail"
+            name="submission.next_qtr_accountabilities.data.7.email"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Phone
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqPhone"
+            name="submission.next_qtr_accountabilities.data.7.phone"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Notes
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqNotes"
+            name="submission.next_qtr_accountabilities.data.7.notes"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <button
+            className="btn btn-primary"
+            disabled={true}
+            onClick={[Function]}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="panel panel-primary"
+  >
+    <div
+      className="panel-heading"
+    >
+      <h3
+        className="panel-title"
+      >
+        Statistician*
+      </h3>
+    </div>
+    <div
+      className="panel-body"
+    >
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Accountable Type
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div
+            aria-label={undefined}
+            className="btn-group"
+            role="group"
+          >
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Current Team Member
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Incoming T1/T2
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Other
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Person
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Email
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqEmail"
+            name="submission.next_qtr_accountabilities.data.4.email"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Phone
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqPhone"
+            name="submission.next_qtr_accountabilities.data.4.phone"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Notes
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqNotes"
+            name="submission.next_qtr_accountabilities.data.4.notes"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <button
+            className="btn btn-primary"
+            disabled={true}
+            onClick={[Function]}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="panel panel-primary"
+  >
+    <div
+      className="panel-heading"
+    >
+      <h3
+        className="panel-title"
+      >
+        Logistics*
+      </h3>
+    </div>
+    <div
+      className="panel-body"
+    >
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Accountable Type
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div
+            aria-label={undefined}
+            className="btn-group"
+            role="group"
+          >
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Current Team Member
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Incoming T1/T2
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Other
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Person
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Email
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqEmail"
+            name="submission.next_qtr_accountabilities.data.17.email"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Phone
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqPhone"
+            name="submission.next_qtr_accountabilities.data.17.phone"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Notes
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqNotes"
+            name="submission.next_qtr_accountabilities.data.17.notes"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <button
+            className="btn btn-primary"
+            disabled={true}
+            onClick={[Function]}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="panel panel-default"
+  >
+    <div
+      className="panel-heading"
+    >
+      <h3
+        className="panel-title"
+      >
+        Statistician Apprentice
+      </h3>
+    </div>
+    <div
+      className="panel-body"
+    >
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Accountable Type
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div
+            aria-label={undefined}
+            className="btn-group"
+            role="group"
+          >
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Current Team Member
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Incoming T1/T2
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Other
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Person
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Email
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqEmail"
+            name="submission.next_qtr_accountabilities.data.5.email"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Phone
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqPhone"
+            name="submission.next_qtr_accountabilities.data.5.phone"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Notes
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqNotes"
+            name="submission.next_qtr_accountabilities.data.5.notes"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <button
+            className="btn btn-primary"
+            disabled={true}
+            onClick={[Function]}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="panel panel-default"
+  >
+    <div
+      className="panel-heading"
+    >
+      <h3
+        className="panel-title"
+      >
+        Access to Power
+      </h3>
+    </div>
+    <div
+      className="panel-body"
+    >
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Accountable Type
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div
+            aria-label={undefined}
+            className="btn-group"
+            role="group"
+          >
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Current Team Member
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Incoming T1/T2
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Other
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Person
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Email
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqEmail"
+            name="submission.next_qtr_accountabilities.data.11.email"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Phone
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqPhone"
+            name="submission.next_qtr_accountabilities.data.11.phone"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Notes
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqNotes"
+            name="submission.next_qtr_accountabilities.data.11.notes"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <button
+            className="btn btn-primary"
+            disabled={true}
+            onClick={[Function]}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="panel panel-default"
+  >
+    <div
+      className="panel-heading"
+    >
+      <h3
+        className="panel-title"
+      >
+        Power to Create
+      </h3>
+    </div>
+    <div
+      className="panel-body"
+    >
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Accountable Type
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div
+            aria-label={undefined}
+            className="btn-group"
+            role="group"
+          >
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Current Team Member
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Incoming T1/T2
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Other
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Person
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Email
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqEmail"
+            name="submission.next_qtr_accountabilities.data.12.email"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Phone
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqPhone"
+            name="submission.next_qtr_accountabilities.data.12.phone"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Notes
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqNotes"
+            name="submission.next_qtr_accountabilities.data.12.notes"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <button
+            className="btn btn-primary"
+            disabled={true}
+            onClick={[Function]}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="panel panel-default"
+  >
+    <div
+      className="panel-heading"
+    >
+      <h3
+        className="panel-title"
+      >
+        Game in the World
+      </h3>
+    </div>
+    <div
+      className="panel-body"
+    >
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Accountable Type
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div
+            aria-label={undefined}
+            className="btn-group"
+            role="group"
+          >
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Current Team Member
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Incoming T1/T2
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Other
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Person
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Email
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqEmail"
+            name="submission.next_qtr_accountabilities.data.15.email"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Phone
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqPhone"
+            name="submission.next_qtr_accountabilities.data.15.phone"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Notes
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqNotes"
+            name="submission.next_qtr_accountabilities.data.15.notes"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <button
+            className="btn btn-primary"
+            disabled={true}
+            onClick={[Function]}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="panel panel-default"
+  >
+    <div
+      className="panel-heading"
+    >
+      <h3
+        className="panel-title"
+      >
+        Landmark Forum
+      </h3>
+    </div>
+    <div
+      className="panel-body"
+    >
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Accountable Type
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div
+            aria-label={undefined}
+            className="btn-group"
+            role="group"
+          >
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Current Team Member
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Incoming T1/T2
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Other
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Person
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Email
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqEmail"
+            name="submission.next_qtr_accountabilities.data.16.email"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Phone
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqPhone"
+            name="submission.next_qtr_accountabilities.data.16.phone"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Notes
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqNotes"
+            name="submission.next_qtr_accountabilities.data.16.notes"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <button
+            className="btn btn-primary"
+            disabled={true}
+            onClick={[Function]}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="panel panel-default"
+  >
+    <div
+      className="panel-heading"
+    >
+      <h3
+        className="panel-title"
+      >
+        T1 Expansion
+      </h3>
+    </div>
+    <div
+      className="panel-body"
+    >
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Accountable Type
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div
+            aria-label={undefined}
+            className="btn-group"
+            role="group"
+          >
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Current Team Member
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Incoming T1/T2
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Other
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Person
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Email
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqEmail"
+            name="submission.next_qtr_accountabilities.data.13.email"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Phone
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqPhone"
+            name="submission.next_qtr_accountabilities.data.13.phone"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Notes
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqNotes"
+            name="submission.next_qtr_accountabilities.data.13.notes"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <button
+            className="btn btn-primary"
+            disabled={true}
+            onClick={[Function]}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="panel panel-default"
+  >
+    <div
+      className="panel-heading"
+    >
+      <h3
+        className="panel-title"
+      >
+        T2 Expansion
+      </h3>
+    </div>
+    <div
+      className="panel-body"
+    >
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Accountable Type
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div
+            aria-label={undefined}
+            className="btn-group"
+            role="group"
+          >
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Current Team Member
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Incoming T1/T2
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Other
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Person
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <div />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Email
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqEmail"
+            name="submission.next_qtr_accountabilities.data.14.email"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Phone
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqPhone"
+            name="submission.next_qtr_accountabilities.data.14.phone"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          Notes
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <input
+            className="testing-control form-control nqNotes"
+            name="submission.next_qtr_accountabilities.data.14.notes"
+            type="text"
+            value={undefined}
+          />
+        </div>
+      </div>
+      <div
+        className=" form-group"
+      >
+        <label
+          className="col-md-2 control-label"
+        >
+          
+        </label>
+        <div
+          className="col-md-8"
+        >
+          <button
+            className="btn btn-primary"
+            disabled={true}
+            onClick={[Function]}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+`;

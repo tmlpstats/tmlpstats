@@ -1,5 +1,5 @@
 import Immutable from 'immutable'
-import { compositeKey, createSorters, SORT_BY } from '../../reusable/sort-helpers'
+import { compositeKey, createSorters, collectionSortSelector, SORT_BY } from '../../reusable/sort-helpers'
 import { LoadingMultiState, MessageManager } from '../../reusable/reducers'
 import SimpleReduxLoader from '../../reusable/redux_loader/simple'
 
@@ -25,6 +25,7 @@ export const appsCollection = new SimpleReduxLoader({
     prefix: 'submission.applications',
     useMeta: true,
     initialMeta: Immutable.Map().set(SORT_BY, 'teamYear_first_last'),
+    getSortedApplications: collectionSortSelector(appsSorts)
 })
 
 export const applicationsLoad = new LoadingMultiState('applications/initialLoadState')

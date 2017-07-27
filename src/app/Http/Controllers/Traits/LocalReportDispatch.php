@@ -75,7 +75,7 @@ trait LocalReportDispatch
         'nextqtraccountabilities' => [
             'id' => 'NextQtrAccountabilities',
             'method' => 'getNextQtrAccountabilities',
-            'cacheTime' => 5,
+            'cacheTime' => 2,
         ],
     ];
 

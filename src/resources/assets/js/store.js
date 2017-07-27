@@ -15,8 +15,6 @@ const responsiveBreakpoints = {
     huge: 1600
 }
 
-
-
 const reducer = combineReducers(objectAssign(
     {
         browser: createResponsiveStateReducer(responsiveBreakpoints),
