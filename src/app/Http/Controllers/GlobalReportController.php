@@ -578,7 +578,7 @@ class GlobalReportController extends Controller
 
     public function getApplicationTransfers(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        $quarter = Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region);
+        $quarter = Encapsulations\RegionReportingDate::ensure($region, $globalReport->reportingDate)->getQuarter();
         $centers = Models\Center::byRegion($region)->active()->get();
 
         // Go through all active centers, get the currently active applications
