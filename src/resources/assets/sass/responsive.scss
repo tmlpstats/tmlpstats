@@ -1,0 +1,30 @@
+@media (max-width: $screen-sm-max) {
+    .hs {
+        display: none;
+    }
+
+    .nav-tabs.brief-tabs .long {
+         display: none;
+     }
+
+    .container-fluid {
+    }
+
+    .hide-mobile {
+        display: none;
+    }
+}
+
+@media (min-width: $screen-md-min) {
+    .hl {
+        display: none;
+    }
+
+    .nav-tabs.brief-tabs .brief {
+         display: none;
+     }
+
+     .container-fluid {
+        padding-left: 55px;
+     }
+}

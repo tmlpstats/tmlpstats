@@ -1,0 +1,22 @@
+
+.panel-body.submission-content {
+    > h3, > div h3, > form h3 {
+        margin-top: 0;
+    }
+}
+
+.nextQuarterAccountabilities {
+    max-width: 70em;
+
+    .nqEmail {
+       max-width: 65em;
+    }
+
+    .nqPhone {
+        max-width: 25em;
+    }
+
+    select {
+        max-width: 35em;
+    }
+}

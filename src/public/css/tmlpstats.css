@@ -1,34 +1,3 @@
-@media (max-width: 991px) {
-    .hs {
-        display: none;
-    }
-
-    .nav-tabs.brief-tabs .long {
-         display: none;
-     }
-
-    .container-fluid {
-    }
-
-    .hide-mobile {
-        display: none;
-    }
-}
-
-@media (min-width: 992px) {
-    .hl {
-        display: none;
-    }
-
-    .nav-tabs.brief-tabs .brief {
-         display: none;
-     }
-
-     .container-fluid {
-        padding-left: 55px;
-     }
-}
-
 body {
     padding-top: 50px;
 }
@@ -400,18 +369,6 @@ table.submissionClassList {
 
 .submissionClassListEdit .tmBox {
     max-width: 1200px;
-}
-
-.nextQuarterAccountabilities .nqEmail {
-    max-width: 65em;
-}
-
-.nextQuarterAccountabilities .nqPhone {
-    max-width: 25em;
-}
-
-.nextQuarterAccountabilities select {
-    max-width: 35em;
 }
 
 

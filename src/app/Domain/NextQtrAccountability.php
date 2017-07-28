@@ -43,7 +43,23 @@ class NextQtrAccountability extends ParserDomain
         ],
     ];
 
-    // Default fromArray and toArray are sufficient for us
+    public $meta;
+
+    public static function fromArray($input, $requiredParams = [])
+    {
+        $obj = parent::fromArray($input, $requiredParams);
+        $obj->meta = isset($input['submissionMeta']) ? $input['submissionMeta'] : [];
+
+        return $obj;
+    }
+
+    public function toArray()
+    {
+        $v = parent::toArray();
+        $v['meta'] = collect($this->meta)->map(function ($x) {return $x->toRfc3339String();});
+
+        return $v;
+    }
 
     public function getAccountability()
     {

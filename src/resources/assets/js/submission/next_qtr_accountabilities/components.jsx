@@ -242,7 +242,7 @@ class QuarterAccountabilitiesRow extends PureComponent {
             const tmSelectLabel =  modeLookup ? (modeLookup.altLabel || modeLookup.label) : 'Person'
             return (
                 <Panel color={color} heading={acc.display + (isRequired? '*' : '')} headingLevel="h3">
-                    <SimpleFormGroup label="Accountable Type">
+                    <SimpleFormGroup label="Choose From">
                         {modeSelect}
                     </SimpleFormGroup>
                     <SimpleFormGroup label={tmSelectLabel}>

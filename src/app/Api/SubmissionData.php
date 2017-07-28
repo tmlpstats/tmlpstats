@@ -96,7 +96,7 @@ class SubmissionData extends AuthenticatedApiBase
             ->where('reporting_date', '<=', $centerQuarter->endWeekendDate)
             ->orderBy('reporting_date', ($reverse) ? 'desc' : 'asc');
 
-        return $this->fulfilLQuery($result->get(), $conf);
+        return $this->fulfillQuery($result->get(), $conf);
 
     }
 
@@ -113,6 +113,11 @@ class SubmissionData extends AuthenticatedApiBase
         return $result->map(function ($row) use ($className) {
             $data = $row->data;
             $data['center'] = $row->centerId;
+            $data['submissionMeta'] = [
+                'updatedAt' => $row->updatedAt,
+                'createdAt' => $row->createdAt,
+            ];
+
             return $className::fromArray($data);
         });
     }
