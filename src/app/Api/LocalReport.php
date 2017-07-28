@@ -35,8 +35,14 @@ class LocalReport extends AuthenticatedApiBase
 
         $quarterStartDate = $statsReport->quarter->getQuarterStartDate($statsReport->center);
 
-        // We are going to mutate this week value, so copy it.
-        $week = $statsReport->quarter->getQuarterEndDate($statsReport->center)->copy();
+        // XXX We have many places making use of this function.
+        // Rather than changing behavior for all, let's make the 'correct' behavior an option.
+        // Then we can go through report by report and see which need the fix and which need the old behavior.
+        if (array_get($options, 'back_from_this_week', false)) {
+            $week = $statsReport->reportingDate->copy();
+        } else {
+            $week = $statsReport->quarter->getQuarterEndDate($statsReport->center)->copy();
+        }
         while ($week->gt($quarterStartDate)) {
 
             // Walk backwards through the quarter week by week and collect the promise/actual objects
