@@ -460,7 +460,7 @@ class StatsReportController extends Controller
     protected function getCenterStats(Models\StatsReport $statsReport)
     {
         $a = new Arrangements\GamesByMilestone([
-            'weeks' => App::make(Api\LocalReport::class)->getQuarterScoreboard($statsReport),
+            'weeks' => App::make(Api\LocalReport::class)->getQuarterScoreboard($statsReport, ['back_from_this_week' => true]),
             'quarter' => $statsReport->quarter,
             'center' => $statsReport->center,
         ]);
