@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use Log;
 use stdClass;
 use TmlpStats\Center;
+use TmlpStats\Tests\Mocks\MockContext;
 use TmlpStats\Tests\Unit\Traits\MocksMessages;
 use TmlpStats\Tests\Unit\Traits\MocksQuarters;
 use TmlpStats\Tests\Unit\Traits\MocksSettings;
@@ -49,8 +50,10 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
         'validateTravel',
     ];
 
-    public function setUp() {
+    public function setUp()
+    {
         parent::setup();
+        $this->context = MockContext::defaults()->install();
         $this->mockRegionQuarter([]);
     }
 
@@ -2295,7 +2298,7 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
     public function testValidateTravelFails($data, $statsReportInput, $messages, $expectedResult)
     {
         $this->clearRegionQuarterMock();
-        $statsReport = new stdClass;
+        $statsReport = new stdClass();
         $statsReport->center = null;
         $statsReport->quarter = $this->getQuarterMock([], $statsReportInput['dates']);
         $statsReport->reportingDate = $statsReportInput['reportingDate'];
@@ -2323,7 +2326,7 @@ class TmlpRegistrationValidatorTest extends ObjectsValidatorTestAbstract
             'reportingDate' => Carbon::createFromDate(2015, 5, 8),
         ];
 
-        $statsReportLastTwoWeeks =[
+        $statsReportLastTwoWeeks = [
             'dates' => $statsReport['dates'],
             'reportingDate' => Carbon::createFromDate(2015, 5, 15),
         ];

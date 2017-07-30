@@ -90,4 +90,9 @@ class MockContext extends Context
             return parent::getSetting($name, $center, $quarter);
         }
     }
+
+    public function clearSettings()
+    {
+        $this->overrideSettings = [];
+    }
 }

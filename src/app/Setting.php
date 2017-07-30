@@ -117,6 +117,11 @@ class Setting extends Model
         return $query->whereQuarterId($quarter->id);
     }
 
+    public function scopeByRegion($query, Region $region)
+    {
+        return $query->whereRegionId($region->id);
+    }
+
     public function center()
     {
         return $this->belongsTo('TmlpStats\Center');

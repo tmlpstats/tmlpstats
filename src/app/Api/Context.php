@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Request;
 use TmlpStats as Models;
+use TmlpStats\Encapsulations\Scopes;
 use TmlpStats\Http\Controllers\Controller;
 
 /**
@@ -127,18 +128,54 @@ class Context
         $this->region = $region;
     }
 
-    public function getRawSetting($name, $center = null, $quarter = null)
+    // Each of the settings lookups represents one of the 'scopes' for a setting.
+    // The scopes are encapsulations which cache settings for a specific level, and for specific parameters.
+    // For example, if two centers in the same region, then resolving a setting for each center
+    // would end up resolving the same RegionScope object, and not load the settings for that region twice.
+    protected static $settingsLookups = [
+        [Scopes\CenterQuarterScope::class, ['center', 'quarter']],
+        [Scopes\CenterScope::class, ['center']],
+        [Scopes\RegionQuarterScope::class, ['region', 'quarter']], // handles both child regions and global regions
+        [Scopes\RegionScope::class, ['region']], // handles both child regions and global regions
+        [Scopes\GlobalScope::class, []],
+    ];
+
+    public function getRawSetting($name, $regionOrCenter = null, $quarter = null)
     {
-        if ($center == null) {
-            $center = $this->getCenter();
+        if (!$regionOrCenter) {
+            $regionOrCenter = $this->getCenter() ?: $this->getRegion();
         }
-        if ($quarter == null) {
-            $setting = Models\Setting::get($name, $center);
-        } else {
-            $setting = Models\Setting::get($name, $center, $quarter);
+        $center = null;
+        $region = null;
+        if ($regionOrCenter !== null) {
+            if ($regionOrCenter instanceof Models\Region) {
+                $region = $regionOrCenter;
+            } else {
+                $center = $regionOrCenter;
+                $region = $center->region;
+            }
         }
-        if ($setting != null) {
-            return $setting->value;
+
+        $inputs = compact('center', 'quarter', 'region');
+
+        // Loop through settings lookups, resolving desired params.
+        // If all the desired params exist and have values (not null),
+        // then instantiate/fetch the encapsulation with those parameters.
+        // The first one which returns a non-null value is used.
+        foreach (static::$settingsLookups as $config) {
+            list($encapsulationClass, $desiredParams) = $config;
+            $outParams = [];
+            foreach ($desiredParams as $n) {
+                if ($v = $inputs[$n]) {
+                    $outParams[$n] = $inputs[$n];
+                } else {
+                    continue 2; // null value, go to the next lookup
+                }
+            }
+            $encapsulation = $this->getEncapsulation($encapsulationClass, $outParams);
+            if (($value = $encapsulation->getScopedSetting($name)) !== null) {
+                return $value;
+            }
         }
 
         return null;
@@ -146,14 +183,14 @@ class Context
 
     /**
      * Get a setting value, interpreted as JSON as an array.
-     * @param  string          $name    The name of the center.
-     * @param  Models\Center   $center  Center, which will default back to the last value of setCenter. Recommended to be set.
-     * @param  Models\Quarter  $quarter Quarter, which if omitted means get a setting for any quarter.
+     * @param  string         $name    The name of the center.
+     * @param  mixed          $regionOrCenter  Region or Center, which will default back to the last value of setCenter. Recommended to be set.
+     * @param  Models\Quarter $quarter Quarter, which if omitted means get a setting for any quarter.
      * @return Any A JSON value, most likely an array, but could be any other valid root JSON object
      */
-    public function getSetting($name, $center = null, $quarter = null)
+    public function getSetting($name, $regionOrCenter = null, $quarter = null)
     {
-        $value = $this->getRawSetting($name, $center, $quarter);
+        $value = $this->getRawSetting($name, $regionOrCenter, $quarter);
         if ($value === null) {
             return null;
         } else {
