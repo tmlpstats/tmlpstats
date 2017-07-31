@@ -1,6 +1,7 @@
 import React from 'react'
 import renderer from 'react-test-renderer'
 import Immutable from 'immutable'
+import moment from 'moment'
 
 import { Wrap, store } from '../../testing-store'
 
@@ -47,7 +48,7 @@ describe('LocalReport', () => {
         reportConfig.flags.nextQtrAccountabilities = true
         store.dispatch(reportConfigData.replaceItem(key, reportConfig))
         store.dispatch(reportData.replaceItem(key.set('page', 'NextQtrAccountabilities'), {nqas: [
-                {id: 123, accountability: {display: 'Boss'}, name: 'Person Name', phone: '12345', email: 'abc@def.com'}
+                {id: 123, accountability: {display: 'Boss'}, name: 'Person Name', phone: '12345', email: 'abc@def.com', meta: {updatedAt: moment('2017-01-01T02:03:04').utc().format()}}
         ]}))
         const params = Object.assign({tab1: 'NextQtrAccountabilities'}, baseParams)
         const tree = renderer.create(

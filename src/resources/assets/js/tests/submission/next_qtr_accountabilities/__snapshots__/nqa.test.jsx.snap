@@ -27,7 +27,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Accountable Type
+          Choose From
         </label>
         <div
           className="col-md-8"
@@ -175,7 +175,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Accountable Type
+          Choose From
         </label>
         <div
           className="col-md-8"
@@ -323,7 +323,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Accountable Type
+          Choose From
         </label>
         <div
           className="col-md-8"
@@ -471,7 +471,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Accountable Type
+          Choose From
         </label>
         <div
           className="col-md-8"
@@ -619,7 +619,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Accountable Type
+          Choose From
         </label>
         <div
           className="col-md-8"
@@ -767,7 +767,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Accountable Type
+          Choose From
         </label>
         <div
           className="col-md-8"
@@ -915,7 +915,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Accountable Type
+          Choose From
         </label>
         <div
           className="col-md-8"
@@ -1063,7 +1063,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Accountable Type
+          Choose From
         </label>
         <div
           className="col-md-8"
@@ -1211,7 +1211,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Accountable Type
+          Choose From
         </label>
         <div
           className="col-md-8"
@@ -1359,7 +1359,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Accountable Type
+          Choose From
         </label>
         <div
           className="col-md-8"
@@ -1507,7 +1507,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Accountable Type
+          Choose From
         </label>
         <div
           className="col-md-8"

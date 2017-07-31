@@ -393,6 +393,9 @@ exports[`LocalReport Next Qtr Accountabilities 1`] = `
                 <th>
                   Email
                 </th>
+                <th>
+                  Updated At
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -408,6 +411,9 @@ exports[`LocalReport Next Qtr Accountabilities 1`] = `
                 </td>
                 <td>
                   abc@def.com
+                </td>
+                <td>
+                  Jan 1, 2017 02:03 AM
                 </td>
               </tr>
             </tbody>
