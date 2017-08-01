@@ -633,6 +633,8 @@ reportMeta:
             desc: Shows Team 2 that registered at the previous TMLP weekend and their current status
           TmlpRegistrationsOverdue:
             name: Overdue
+          ApplicationTransfers:
+            name: Transfers
 
       CoursesGroup:
         type: grouping

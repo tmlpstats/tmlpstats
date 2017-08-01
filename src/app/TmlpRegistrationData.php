@@ -121,9 +121,13 @@ class TmlpRegistrationData extends Model
         return $query->whereStatsReportId($statsReport->id);
     }
 
-    public function scopeByRegistration($query, TmlpRegistration $registration)
+    public function scopeByRegistration($query, $registration)
     {
-        return $query->whereTmlpRegistrationId($registration->id);
+        if (is_object($registration)) {
+            $registration = $registration->id;
+        }
+
+        return $query->whereTmlpRegistrationId($registration);
     }
 
     public function statsReport()

@@ -161,9 +161,15 @@ const GlobalReport = {
         "type": "report",
         "name": "Overdue"
     },
+    "ApplicationTransfers": {
+        "id": "ApplicationTransfers",
+        "n": 22,
+        "type": "report",
+        "name": "Transfers"
+    },
     "ApplicationsGroup": {
         "id": "ApplicationsGroup",
-        "n": 22,
+        "n": 23,
         "type": "grouping",
         "name": "Applications",
         "children": [
@@ -171,48 +177,49 @@ const GlobalReport = {
             "TmlpRegistrationsByStatus",
             "TmlpRegistrationsByCenter",
             "Team2RegisteredAtWeekend",
-            "TmlpRegistrationsOverdue"
+            "TmlpRegistrationsOverdue",
+            "ApplicationTransfers"
         ]
     },
     "CoursesThisWeek": {
         "id": "CoursesThisWeek",
-        "n": 23,
+        "n": 24,
         "type": "report",
         "name": "Completed This Week"
     },
     "CoursesNextMonth": {
         "id": "CoursesNextMonth",
-        "n": 24,
+        "n": 25,
         "type": "report",
         "name": "Next 5 Weeks"
     },
     "CoursesUpcoming": {
         "id": "CoursesUpcoming",
-        "n": 25,
+        "n": 26,
         "type": "report",
         "name": "Upcoming"
     },
     "CoursesCompleted": {
         "id": "CoursesCompleted",
-        "n": 26,
+        "n": 27,
         "type": "report",
         "name": "Completed"
     },
     "CoursesGuestGames": {
         "id": "CoursesGuestGames",
-        "n": 27,
+        "n": 28,
         "type": "report",
         "name": "Guest Games"
     },
     "CoursesSummary": {
         "id": "CoursesSummary",
-        "n": 28,
+        "n": 29,
         "type": "report",
         "name": "Summary"
     },
     "CoursesGroup": {
         "id": "CoursesGroup",
-        "n": 29,
+        "n": 30,
         "type": "grouping",
         "name": "Courses",
         "children": [
@@ -226,63 +233,63 @@ const GlobalReport = {
     },
     "TdoSummary": {
         "id": "TdoSummary",
-        "n": 30,
+        "n": 31,
         "type": "report",
         "name": "Training & Development",
         "shortName": "TDO"
     },
     "GitwSummary": {
         "id": "GitwSummary",
-        "n": 31,
+        "n": 32,
         "type": "report",
         "name": "GITW",
         "shortName": "GITW"
     },
     "TeamMemberStatusCtw": {
         "id": "TeamMemberStatusCtw",
-        "n": 32,
+        "n": 33,
         "type": "report",
         "name": "CTW"
     },
     "TeamMemberStatusWbo": {
         "id": "TeamMemberStatusWbo",
-        "n": 33,
+        "n": 34,
         "type": "report",
         "name": "WBI"
     },
     "TeamMemberStatusTransfer": {
         "id": "TeamMemberStatusTransfer",
-        "n": 34,
+        "n": 35,
         "type": "report",
         "name": "Transfers"
     },
     "TeamMemberStatusWithdrawn": {
         "id": "TeamMemberStatusWithdrawn",
-        "n": 35,
+        "n": 36,
         "type": "report",
         "name": "Withdrawn"
     },
     "WithdrawReport": {
         "id": "WithdrawReport",
-        "n": 36,
+        "n": 37,
         "type": "report",
         "name": "Withdraw Compliance"
     },
     "Team1SummaryGrid": {
         "id": "Team1SummaryGrid",
-        "n": 37,
+        "n": 38,
         "type": "report",
         "name": "Team 1 Summary Grid"
     },
     "Team2SummaryGrid": {
         "id": "Team2SummaryGrid",
-        "n": 38,
+        "n": 39,
         "type": "report",
         "name": "Team 2 Summary Grid"
     },
     "TeamMemberStatusGroup": {
         "id": "TeamMemberStatusGroup",
-        "n": 39,
+        "n": 40,
         "type": "grouping",
         "name": "Team Members",
         "children": [
@@ -299,37 +306,37 @@ const GlobalReport = {
     },
     "TravelReport": {
         "id": "TravelReport",
-        "n": 40,
+        "n": 41,
         "type": "report",
         "name": "Travel Summary"
     },
     "TeamMemberStatusPotentialsOverview": {
         "id": "TeamMemberStatusPotentialsOverview",
-        "n": 41,
+        "n": 42,
         "type": "report",
         "name": "Potentials Overview"
     },
     "TeamMemberStatusPotentials": {
         "id": "TeamMemberStatusPotentials",
-        "n": 42,
+        "n": 43,
         "type": "report",
         "name": "Potentials Details"
     },
     "AcknowledgementReport": {
         "id": "AcknowledgementReport",
-        "n": 43,
+        "n": 44,
         "type": "report",
         "name": "Acknowledgement Report"
     },
     "ProgramSupervisor": {
         "id": "ProgramSupervisor",
-        "n": 44,
+        "n": 45,
         "type": "report",
         "name": "Program Supervisor"
     },
     "WeekendGroup": {
         "id": "WeekendGroup",
-        "n": 45,
+        "n": 46,
         "type": "grouping",
         "name": "Weekend",
         "children": [

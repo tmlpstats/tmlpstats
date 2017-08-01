@@ -10,6 +10,7 @@ use Response;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Domain;
+use TmlpStats\Encapsulations;
 use TmlpStats\Http\Controllers\Encapsulate;
 use TmlpStats\Http\Controllers\Traits\GlobalReportDispatch;
 use TmlpStats\Reports\Arrangements;
@@ -573,6 +574,45 @@ class GlobalReportController extends Controller
         $reportingDate = $globalReport->reportingDate;
 
         return view('globalreports.details.applicationsbycenter', compact('reportData', 'reportingDate'));
+    }
+
+    public function getApplicationTransfers(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        $quarter = Encapsulations\RegionReportingDate::ensure($region, $globalReport->reportingDate)->getQuarter();
+        $centers = Models\Center::byRegion($region)->active()->get();
+
+        // Go through all active centers, get the currently active applications
+        // Collect all transfers for each active application, and build output bucketed
+        // by center and application
+        $reportData = [];
+        foreach ($centers as $center) {
+            $allApps = App::make(Api\Application::class)->allForCenter($center, $globalReport->reportingDate);
+            $apps = collect($allApps)
+                ->filter(function($app) { return $app->withdrawCodeId === null; })
+                ->keyBy(function($app) { return $app->id; })
+                ->map(function($app) { return $app->comment ?: ''; });
+
+            $transfers = Models\Transfer::byCenter($center)
+                ->bySubject('application', $apps->keys()->toArray())
+                ->get();
+
+            foreach ($transfers as $app) {
+                $reg = Models\TmlpRegistration::find($app->subjectId);
+                $fromCq = Domain\CenterQuarter::ensure($center, Models\Quarter::find($app->fromId));
+                $toCq = Domain\CenterQuarter::ensure($center, Models\Quarter::find($app->toId));
+
+                $reportData[$center->name][$app->subjectId][] = [
+                    'name' => "{$reg->firstName} {$reg->lastName}",
+                    'from' => "{$fromCq->startWeekendDate->format('F')} - {$fromCq->quarter->t1Distinction}",
+                    'to' => "{$toCq->startWeekendDate->format('F')} - {$toCq->quarter->t1Distinction}",
+                    'comment' => $apps[$app->subjectId] ?? "application not found",
+                    'reportingDate' => $app->reportingDate,
+                ];
+            }
+        }
+        ksort($reportData);
+
+        return view('globalreports.details.applicationtransfers', compact('reportData'));
     }
 
     protected function getTravelReport(Models\GlobalReport $globalReport, Models\Region $region)
