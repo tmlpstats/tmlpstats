@@ -589,7 +589,8 @@ class GlobalReportController extends Controller
             $allApps = App::make(Api\Application::class)->allForCenter($center, $globalReport->reportingDate);
             $apps = collect($allApps)
                 ->filter(function($app) { return $app->withdrawCodeId === null; })
-                ->keyBy(function($app) { return $app->id; });
+                ->keyBy(function($app) { return $app->id; })
+                ->map(function($app) { return $app->comment ?: ''; });
 
             $transfers = Models\Transfer::byCenter($center)
                 ->bySubject('application', $apps->keys()->toArray())
@@ -604,7 +605,7 @@ class GlobalReportController extends Controller
                     'name' => "{$reg->firstName} {$reg->lastName}",
                     'from' => "{$fromCq->startWeekendDate->format('F')} - {$fromCq->quarter->t1Distinction}",
                     'to' => "{$toCq->startWeekendDate->format('F')} - {$toCq->quarter->t1Distinction}",
-                    'comment' => $apps[$app->subjectId]->comment,
+                    'comment' => $apps[$app->subjectId] ?? "application not found",
                     'reportingDate' => $app->reportingDate,
                 ];
             }
