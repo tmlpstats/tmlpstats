@@ -420,7 +420,18 @@ class SubmissionCore extends AuthenticatedApiBase
      */
     public function submitApplications(Models\Center $center, Carbon $reportingDate, Models\StatsReport $statsReport, $apps)
     {
-        $lastReport = $this->relevantReport($center, $reportingDate->subWeek());
+        $lastReport = $this->relevantReport($center, $reportingDate->copy()->subWeek());
+
+        $appIds = collect($apps)
+            ->filter(function($app) { return $app->id >= 0; })
+            ->map(function($app) { return $app->id; })
+            ->keys();
+
+        // Prefetch all the applications so we only need to do one query
+        $lastWeekData = Models\TmlpRegistrationData::byStatsReport($lastReport)
+            ->whereIn('tmlp_registration_id', $appIds)
+            ->get()
+            ->keyBy(function($app) { return $app->tmlpRegistrationId; });
 
         // clear transfers
         Models\Transfer::byCenter($center)->reportingDate($reportingDate)->delete();
@@ -446,22 +457,17 @@ class SubmissionCore extends AuthenticatedApiBase
 
                 // Check if the incoming quarter has changed since last week. If it has, create a
                 // transfer event
-                if ($lastReport) {
-                    $lastWeekData = Models\TmlpRegistrationData::byStatsReport($lastReport)
-                        ->byRegistration($app->id)
-                        ->first();
-
-                    if ($lastWeekData && $lastWeekData->incomingQuarterId !== $app->incomingQuarterId) {
-                        Models\Transfer::create([
-                            'center_id' => $center->id,
-                            'reporting_date' => $reportingDate->toDateString(),
-                            'subject_type' => 'application',
-                            'subject_id' => $app->id,
-                            'transfer_type' => 'quarter',
-                            'from_id' => $lastWeekData->incomingQuarterId,
-                            'to_id' => $app->incomingQuarterId,
-                        ]);
-                    }
+                $lastWeekAppData = array_get($lastWeekData, $app->id);
+                if ($lastWeekAppData && $lastWeekAppData->incomingQuarterId !== $app->incomingQuarterId) {
+                    Models\Transfer::create([
+                        'center_id' => $center->id,
+                        'reporting_date' => $reportingDate->toDateString(),
+                        'subject_type' => 'application',
+                        'subject_id' => $app->id,
+                        'transfer_type' => 'quarter',
+                        'from_id' => $lastWeekAppData->incomingQuarterId,
+                        'to_id' => $app->incomingQuarterId,
+                    ]);
                 }
             }
 
