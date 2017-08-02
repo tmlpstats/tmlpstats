@@ -221,9 +221,23 @@ class Person extends Model
         return $query->whereFirstName($name);
     }
 
-    public function scopeLastName($query, $name)
+    public function scopeLastName($query, $name, $strict = true)
     {
-        return $query->whereLastName($name);
+        if ($strict) {
+            return $query->whereLastName($name);
+        }
+
+        $altName = null;
+        if (strpos($name, '.') === false) {
+            $altName = "{$name}.";
+        } else {
+            $altName = str_replace('.', '', $name);
+        }
+
+        return $query->where(function($q) use ($name, $altName) {
+            $q->where('last_name', $name)
+              ->orWhere('last_name', $altName);
+        });
     }
 
     public function scopeByCenter($query, Center $center)
