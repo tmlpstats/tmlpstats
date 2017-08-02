@@ -267,20 +267,61 @@ class Quarter extends Model
     }
 
     /**
+     * Get last quarter
+     *
+     * @return Quarter
+     */
+    public function getLastQuarter()
+    {
+        if ($this->quarterNumber == 1) {
+            $quarterNumber = 4;
+            $year = $this->year - 1;
+        } else {
+            $quarterNumber = $this->quarterNumber - 1;
+            $year = $this->year;
+        }
+
+        $quarter = static::year($year)->quarterNumber($quarterNumber)->first();
+
+        if ($this->region) {
+            $quarter->setRegion($this->region);
+        }
+
+        return $quarter;
+    }
+
+    /**
      * Get next quarter
      *
      * @return Quarter
      */
     public function getNextQuarter()
     {
-        $quarterNumber = ($this->quarterNumber + 1) % 5;
-        $quarterNumber = $quarterNumber ?: 1; // no quarter 0
+        if ($this->quarterNumber == 4) {
+            $quarterNumber = 1;
+            $year = $this->year + 1;
+        } else {
+            $quarterNumber = $this->quarterNumber + 1;
+            $year = $this->year;
+        }
 
-        $year = ($quarterNumber === 1)
-            ? $this->year + 1
-            : $this->year;
+        $quarter = static::year($year)->quarterNumber($quarterNumber)->first();
 
-        $quarter = self::year($year)->quarterNumber($quarterNumber)->first();
+        if ($this->region) {
+            $quarter->setRegion($this->region);
+        }
+
+        return $quarter;
+    }
+
+    /**
+     * Get last year
+     *
+     * @return Quarter
+     */
+    public function getLastYear()
+    {
+        $quarter = static::year($this->year - 1)->quarterNumber($this->quarterNumber)->first();
 
         if ($this->region) {
             $quarter->setRegion($this->region);

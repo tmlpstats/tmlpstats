@@ -1119,6 +1119,87 @@ class GlobalReportController extends Controller
         return view('globalreports.details.withdrawreport', compact('reportData', 'almostOutOfCompliance'));
     }
 
+    protected function getQuarterOverviewReport(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        $quarter = Encapsulations\RegionReportingDate::ensure($region, $globalReport->reportingDate)->getQuarter();
+        $rq = Encapsulations\RegionQuarter::ensure($region, $quarter);
+
+        $lastQuarterReport = Models\GlobalReport::reportingDate(
+            $quarter->getLastQuarter()->getQuarterEndDate()
+        )->first();
+
+        $lastYearReport = Models\GlobalReport::reportingDate(
+            $quarter->getLastYear()->getQuarterEndDate()
+        )->first();
+
+        $children = $region->getChildRegions();
+        if (!$children || $children->isEmpty()) {
+            $children = [$region];
+        }
+
+        $statsReports = $globalReport->statsReports()->get()->keyBy(function($report) {
+            return $report->center->name;
+        });
+
+        $reportData = [];
+        foreach ($children as $childRegion) {
+            $quarterScoreboard = App::make(Api\GlobalReport::class)->getQuarterScoreboardByCenter($globalReport->reportingDate, $childRegion);
+            $quarterRegionScoreboard = App::make(Api\GlobalReport::class)->getQuarterScoreboard($globalReport, $childRegion);
+            $rpp = $this->rppData($globalReport, $childRegion)->getOne('RegPerParticipant');
+
+            // Get final report from last quarter
+            $lastQuarterScoreboard = [];
+            if ($lastQuarterReport) {
+                $lastQuarterScoreboard = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($lastQuarterReport, $childRegion);
+                $lastQuarterRegionScoreboard = App::make(Api\GlobalReport::class)->getWeekScoreboard($lastQuarterReport, $childRegion);
+            }
+
+            // Get final report from the same quarter last year
+            $lastYearScoreboard = [];
+            if ($lastYearReport) {
+                $lastYearScoreboard = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($lastYearReport, $childRegion);
+                $lastYearRegionScoreboard = App::make(Api\GlobalReport::class)->getWeekScoreboard($lastYearReport, $childRegion);
+            }
+
+            // Collect data by center
+            $regionData = [];
+            foreach ($quarterScoreboard as $centerName => $centerData) {
+                $regionData[$centerName] = [
+                    'milestone1' => $centerData->getWeek($rq->classroom1Date) ?? [],
+                    'milestone2' => $centerData->getWeek($rq->classroom2Date) ?? [],
+                    'milestone3' => $centerData->getWeek($rq->classroom3Date) ?? [],
+                    'final' => $centerData->getWeek($rq->endWeekendDate) ?? [],
+                    'lastQuarter' => $lastQuarterScoreboard[$centerName] ?? [],
+                    'lastYear' => $lastYearScoreboard[$centerName] ?? [],
+                    'rpp' => [
+                        'net' => $rpp['reportData'][$centerName]['rpp']['net']['quarter'],
+                        'gross' => $rpp['reportData'][$centerName]['rpp']['gross']['quarter'],
+                    ],
+                ];
+            }
+            ksort($regionData); // sort by center
+
+            // Collect totals
+            $regionData['Total'] = [
+                'milestone1' => $quarterRegionScoreboard->getWeek($rq->classroom1Date) ?? [],
+                'milestone2' => $quarterRegionScoreboard->getWeek($rq->classroom2Date) ?? [],
+                'milestone3' => $quarterRegionScoreboard->getWeek($rq->classroom3Date) ?? [],
+                'final' => $quarterRegionScoreboard->getWeek($rq->endWeekendDate) ?? [],
+                'lastQuarter' => $lastQuarterRegionScoreboard ?? [],
+                'lastYear' => $lastYearRegionScoreboard ?? [],
+                'rpp' => [
+                    'net' => $rpp['reportData']['Total']['rpp']['net']['quarter'],
+                    'gross' => $rpp['reportData']['Total']['rpp']['gross']['quarter'],
+                ],
+            ];
+
+            $reportData[$childRegion->name] = $regionData;
+        }
+        ksort($reportData); // sort by region
+
+        return compact('reportData');
+    }
+
     protected function rppData($globalReport, $region)
     {
         return $this->context->getEncapsulation(Encapsulate\GlobalReportRegPerParticipantData::class, compact('globalReport', 'region'));
@@ -1126,12 +1207,14 @@ class GlobalReportController extends Controller
 
     protected function getRegPerParticipant(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        return $this->rppData($globalReport, $region)->getOne('RegPerParticipant');
+        $data = $this->rppData($globalReport, $region)->getOne('RegPerParticipant');
+        return view('globalreports.details.regperparticipant', $data);
     }
 
     protected function getRegPerParticipantWeekly(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        return $this->rppData($globalReport, $region)->getOne('RegPerParticipantWeekly');
+        $data = $this->rppData($globalReport, $region)->getOne('RegPerParticipantWeekly');
+        return view('globalreports.details.rppweekly', $data);
     }
 
     protected function teamSummaryData(Models\GlobalReport $globalReport, Models\Region $region)

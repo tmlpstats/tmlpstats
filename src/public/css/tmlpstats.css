@@ -24,11 +24,26 @@ body.no-navbar{
     color: gray !important;
 }
 
-.info-lite {
+.info-lite,
+table > tbody > tr > td.info-lite,
+table > tbody > tr > th.info-lite {
     background-color: #e5eff5;
 }
-.table-hover > tbody > tr:hover > td.info-lite, .table-hover > tbody > tr:hover > th.info-lite {
-    background-color: #D9EDF8 ;
+
+.table-hover > tbody > tr:hover > td.info-lite,
+.table-hover > tbody > tr:hover > th.info-lite {
+    background-color: #D9EDF8;
+}
+
+.info-liter,
+table > tbody > tr > td.info-liter,
+table > tbody > tr > th.info-liter {
+    background-color: #eef8fd;
+}
+
+.table-hover > tbody > tr:hover > td.info-liter,
+.table-hover > tbody > tr:hover > th.info-liter {
+    background-color: #e5eff5;
 }
 
 .bg-green {
@@ -97,52 +112,127 @@ table {
     empty-cells: show;
 }
 
-td.data-point, th.data-point {
+#tmlpstats table>thead>tr>td.data-point,
+#tmlpstats table>thead>tr>th.data-point,
+#tmlpstats table>thead>tr>td.center-align,
+#tmlpstats table>thead>tr>th.center-align,
+#tmlpstats table>tbody>tr>td.data-point,
+#tmlpstats table>tbody>tr>th.data-point,
+#tmlpstats table>tbody>tr>td.center-align,
+#tmlpstats table>tbody>tr>th.center-align {
     vertical-align: middle;
     text-align: center;
 }
 
-td.middle-align, th.middle-align {
+#tmlpstats table>thead>tr>td.middle-align,
+#tmlpstats table>thead>tr>th.middle-align,
+#tmlpstats table>tbody>tr>td.middle-align,
+#tmlpstats table>tbody>tr>th.middle-align {
     vertical-align: middle;
 }
 
-td.border-left, th.border-left {
-    border-left: 2px solid #DDD !important;
-}
-td.border-right, th.border-right {
-    border-right: 2px solid #DDD !important;
-}
-td.border-top, th.border-top, tr.border-top {
-    border-top: 2px solid #DDD !important;
-}
-td.border-bottom, th.border-bottom, tr.border-bottom {
-    border-bottom: 2px solid #DDD !important;
+#tmlpstats table>thead>tr>td.border-left,
+#tmlpstats table>thead>tr>th.border-left,
+#tmlpstats table>tbody>tr>td.border-left,
+#tmlpstats table>tbody>tr>th.border-left {
+    border-left: 2px solid #DDD;
 }
 
-td.border-left-thin, th.border-left-thin {
-    border-left: 1px solid #DDD !important;
-}
-td.border-right-thin, th.border-right-thin {
-    border-right: 1px solid #DDD !important;
-}
-td.border-top-thin, th.border-top-thin, tr.border-top-thin {
-    border-top: 1px solid #DDD !important;
-}
-td.border-bottom-thin, th.border-bottom-thin, tr.border-bottom-thin {
-    border-bottom: 1px solid #DDD !important;
+#tmlpstats table>thead>tr>td.border-right,
+#tmlpstats table>thead>tr>th.border-right,
+#tmlpstats table>tbody>tr>td.border-right,
+#tmlpstats table>tbody>tr>th.border-right {
+    border-right: 2px solid #DDD;
 }
 
-td.border-left-none, th.border-left-none {
-    border-left: 0px !important;
+#tmlpstats table>thead>tr>td.border-top,
+#tmlpstats table>thead>tr>th.border-top,
+#tmlpstats table>thead>tr.border-top,
+#tmlpstats table>tbody>tr>td.border-top,
+#tmlpstats table>tbody>tr>th.border-top,
+#tmlpstats table>tbody>tr.border-top {
+    border-top: 2px solid #DDD;
 }
-td.border-right-none, th.border-right-none {
-    border-right: 0px !important;
+#tmlpstats table>thead>tr>td.border-bottom,
+#tmlpstats table>thead>tr>th.border-bottom,
+#tmlpstats table>thead>tr.border-bottom,
+#tmlpstats table>tbody>tr>td.border-bottom,
+#tmlpstats table>tbody>tr>th.border-bottom,
+#tmlpstats table>tbody>tr.border-bottom {
+    border-bottom: 2px solid #DDD;
 }
-td.border-top-none, th.border-top-none, tr.border-top-none {
-    border-top: 0px !important;
+
+#tmlpstats table>thead>tr>td.border-left-thin,
+#tmlpstats table>thead>tr>th.border-left-thin,
+#tmlpstats table>tbody>tr>td.border-left-thin,
+#tmlpstats table>tbody>tr>th.border-left-thin {
+    border-left: 1px solid #DDD;
 }
-td.border-bottom-none, th.border-bottom-none, tr.border-bottom-none {
-    border-bottom: 0px !important;
+
+#tmlpstats table>thead>tr>td.border-right-thin,
+#tmlpstats table>thead>tr>th.border-right-thin,
+#tmlpstats table>tbody>tr>td.border-right-thin,
+#tmlpstats table>tbody>tr>th.border-right-thin {
+    border-right: 1px solid #DDD;
+}
+
+#tmlpstats table>thead>tr>td.border-top-thin,
+#tmlpstats table>thead>tr>th.border-top-thin,
+#tmlpstats table>thead>tr.border-top-thin,
+#tmlpstats table>tbody>tr>td.border-top-thin,
+#tmlpstats table>tbody>tr>th.border-top-thin,
+#tmlpstats table>tbody>tr.border-top-thin {
+    border-top: 1px solid #DDD;
+}
+
+#tmlpstats table>thead>tr>td.border-bottom-thin,
+#tmlpstats table>thead>tr>th.border-bottom-thin,
+#tmlpstats table>thead>tr.border-bottom-thin,
+#tmlpstats table>tbody>tr>td.border-bottom-thin,
+#tmlpstats table>tbody>tr>th.border-bottom-thin,
+#tmlpstats table>tbody>tr.border-bottom-thin {
+    border-bottom: 1px solid #DDD;
+}
+
+#tmlpstats table>thead>tr>td.border-left-none,
+#tmlpstats table>thead>tr>th.border-left-none,
+#tmlpstats table>tbody>tr>td.border-left-none,
+#tmlpstats table>tbody>tr>th.border-left-none {
+    border-left: 0px;
+}
+
+#tmlpstats table>thead>tr>td.border-right-none,
+#tmlpstats table>thead>tr>th.border-right-none,
+#tmlpstats table>tbody>tr>td.border-right-none,
+#tmlpstats table>tbody>tr>th.border-right-none {
+    border-right: 0px;
+}
+
+#tmlpstats table>thead>tr>td.border-top-none,
+#tmlpstats table>thead>tr>th.border-top-none,
+#tmlpstats table>thead>tr.border-top-none,
+#tmlpstats table>tbody>tr>td.border-top-none,
+#tmlpstats table>tbody>tr>th.border-top-none,
+#tmlpstats table>tbody>tr.border-top-none {
+    border-top: 0px;
+}
+
+#tmlpstats table>thead>tr>td.border-bottom-none,
+#tmlpstats table>thead>tr>th.border-bottom-none,
+#tmlpstats table>thead>tr.border-bottom-none,
+#tmlpstats table>tbody>tr>td.border-bottom-none,
+#tmlpstats table>tbody>tr>th.border-bottom-none,
+#tmlpstats table>tbody>tr.border-bottom-none {
+    border-bottom: 0px;
+}
+
+#tmlpstats table>thead>tr>td.border-none,
+#tmlpstats table>thead>tr>th.border-none,
+#tmlpstats table>thead>tr.border-none,
+#tmlpstats table>tbody>tr>td.border-none,
+#tmlpstats table>tbody>tr>th.border-none,
+#tmlpstats table>tbody>tr.border-none {
+    border: 0px;
 }
 
 .table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
@@ -481,6 +571,23 @@ table.submissionClassList {
 .stage-warning a {
     color: white;
     text-decoration: underline;
+}
+
+table>tbody>tr>td.quarter-overview-effectiveness-container {
+    padding: 0px;
+    margin: 0px;
+}
+
+table.quarter-overview-effectiveness-table {
+    width: 100%;
+    height: 100%;
+}
+
+table.quarter-overview-effectiveness-table td,
+table.quarter-overview-effectiveness-table th {
+    vertical-align: middle;
+    text-align: center;
+    padding: 6px 5px 5px 5px;
 }
 
 /* Override bootstrap print stylesheet */

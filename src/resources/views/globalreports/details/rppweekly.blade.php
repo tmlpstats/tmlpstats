@@ -67,10 +67,10 @@
                         <td class="data-point {{ $actualClass }}">
                             {{ isset($gameData['actual']) ? $gameData['actual'] : '&nbsp;' }}
                         </td>
-                        <td class="data-point">{{ $weekData['rpp']['week'][$game] }}</td>
+                        <td class="data-point">{{ round($weekData['rpp']['net']['week'][$game], 1) }}</td>
                     @endif
                 @endforeach
-                <td class="data-point">{{ $weekData['rpp']['quarter'][$game] }}</td>
+                <td class="data-point">{{ round($weekData['rpp']['net']['quarter'][$game], 1) }}</td>
             </tr>
             <tr>
                 <?php $game = 'cpc'; ?>
@@ -94,10 +94,10 @@
                         <td class="data-point {{ $actualClass }}">
                             {{ isset($gameData['actual']) ? $gameData['actual'] : '&nbsp;' }}
                         </td>
-                        <td class="data-point">{{ $weekData['rpp']['week'][$game] }}</td>
+                        <td class="data-point">{{ round($weekData['rpp']['net']['week'][$game], 1) }}</td>
                     @endif
                 @endforeach
-                <td class="data-point">{{ $weekData['rpp']['quarter'][$game] }}</td>
+                <td class="data-point">{{ round($weekData['rpp']['net']['quarter'][$game], 1) }}</td>
             </tr>
             <tr class="border-bottom">
                 <?php $game = 'lf'; ?>
@@ -121,10 +121,10 @@
                         <td class="data-point {{ $actualClass }}">
                             {{ isset($gameData['actual']) ? $gameData['actual'] : '&nbsp;' }}
                         </td>
-                        <td class="data-point">{{ $weekData['rpp']['week'][$game] }}</td>
+                        <td class="data-point">{{ round($weekData['rpp']['net']['week'][$game], 1) }}</td>
                     @endif
                 @endforeach
-                <td class="data-point">{{ $weekData['rpp']['quarter'][$game] }}</td>
+                <td class="data-point">{{ round($weekData['rpp']['net']['quarter'][$game], 1) }}</td>
             </tr>
         @endforeach
         </tbody>

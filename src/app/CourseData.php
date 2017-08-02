@@ -33,6 +33,7 @@ class CourseData extends Model
     {
         switch ($name) {
             case 'center':
+            case 'type':
                 return $this->course->$name;
             default:
                 return parent::__get($name);

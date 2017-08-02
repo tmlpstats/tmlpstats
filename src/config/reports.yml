@@ -675,6 +675,9 @@ reportMeta:
             name: Acknowledgement Report
           ProgramSupervisor:
             name: Program Supervisor
+          QuarterOverviewReport:
+            name: Quarter Overview
+            render: react
 
   # ------------ LOCAL REPORT
   Local:

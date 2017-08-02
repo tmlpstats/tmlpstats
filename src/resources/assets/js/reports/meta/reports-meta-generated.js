@@ -340,9 +340,16 @@ const GlobalReport = {
         "type": "report",
         "name": "Program Supervisor"
     },
+    "QuarterOverviewReport": {
+        "id": "QuarterOverviewReport",
+        "n": 46,
+        "type": "report",
+        "name": "Quarter Overview",
+        "render": "react"
+    },
     "WeekendGroup": {
         "id": "WeekendGroup",
-        "n": 46,
+        "n": 47,
         "type": "grouping",
         "name": "Weekend",
         "children": [
@@ -350,7 +357,8 @@ const GlobalReport = {
             "TeamMemberStatusPotentialsOverview",
             "TeamMemberStatusPotentials",
             "AcknowledgementReport",
-            "ProgramSupervisor"
+            "ProgramSupervisor",
+            "QuarterOverviewReport"
         ]
     },
     "_root": {
