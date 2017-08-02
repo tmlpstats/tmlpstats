@@ -185,7 +185,7 @@ class ValidationDataTest extends FunctionalTestAbstract
         App::make(Api\Application::class)->stash($this->center, $reportingDate, $appData);
         App::make(Api\Course::class)->stash($this->center, $reportingDate, $courseData);
         App::make(Api\Course::class)->stash($this->center, $reportingDate, $courseData2);
-        App::make(Api\Scoreboard::class)->stash($this->center, $reportingDate, $scoreboardData);
+        App::make(Api\Submission\Scoreboard::class)->stash($this->center, $reportingDate, $scoreboardData);
 
         $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
     }
@@ -283,7 +283,7 @@ class ValidationDataTest extends FunctionalTestAbstract
         App::make(Api\Application::class)->stash($this->center, $reportingDate, $appData);
         App::make(Api\Course::class)->stash($this->center, $reportingDate, $courseData);
         App::make(Api\Course::class)->stash($this->center, $reportingDate, $courseData2);
-        App::make(Api\Scoreboard::class)->stash($this->center, $reportingDate, $scoreboardData);
+        App::make(Api\Submission\Scoreboard::class)->stash($this->center, $reportingDate, $scoreboardData);
 
         $this->post('/api', $parameters, $this->headers)->seeJsonHas($expectedResponse);
     }

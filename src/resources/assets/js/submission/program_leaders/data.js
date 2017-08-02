@@ -7,11 +7,11 @@ export const programLeadersData = new SimpleReduxLoader({
     extraLMS: ['saveState'],
     actions: {
         load: {
-            api: Api.ProgramLeader.allForCenter,
+            api: Api.Submission.ProgramLeader.allForCenter,
             setLoaded: true,
         },
         save: {
-            api: Api.ProgramLeader.stash,
+            api: Api.Submission.ProgramLeader.stash,
             setLoaded: true,
         }
     }

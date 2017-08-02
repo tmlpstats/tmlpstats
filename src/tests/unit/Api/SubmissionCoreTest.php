@@ -49,7 +49,7 @@ class SubmissionCoreTest extends TestAbstract
         }
         $fakeProgramLeaders->mockData = $input;
 
-        App::instance(Api\ProgramLeader::class, $fakeProgramLeaders);
+        App::instance(Api\Submission\ProgramLeader::class, $fakeProgramLeaders);
 
         $api = App::make(Api\SubmissionCore::class);
 
@@ -129,7 +129,7 @@ class SubmissionCoreTest extends TestAbstract
     }
 }
 
-class FakeProgramLeaderApi extends Api\ProgramLeader
+class FakeProgramLeaderApi extends Api\Submission\ProgramLeader
 {
     public $mockData;
     public function allForCenter(Models\Center $a, Carbon $b, $c = false)

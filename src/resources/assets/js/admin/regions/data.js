@@ -42,7 +42,7 @@ export const centersData = new SimpleReduxLoader({
 export const scoreboardLockData = new FormReduxLoader({
     prefix: 'admin/scoreboardLock',
     model: 'admin.regions.scoreboardLock.data',
-    loader: Api.Scoreboard.getScoreboardLockQuarter,
+    loader: Api.Submission.Scoreboard.getScoreboardLockQuarter,
     extraLMS: ['saveState']
 })
 

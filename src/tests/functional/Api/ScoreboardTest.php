@@ -46,7 +46,7 @@ class ScoreboardTest extends FunctionalTestAbstract
     {
         $reportingDateString = $this->report->reportingDate->toDateString();
         $parameters = [
-            'method' => 'Scoreboard.stash',
+            'method' => 'Submission.Scoreboard.stash',
             'center' => $this->center->abbreviation,
             'reportingDate' => $reportingDate,
             'data' => [
@@ -109,7 +109,7 @@ class ScoreboardTest extends FunctionalTestAbstract
 
         $reportingDateString = $this->report->reportingDate->toDateString();
         $parameters = [
-            'method' => 'Scoreboard.stash',
+            'method' => 'Submission.Scoreboard.stash',
             'center' => $this->center->abbreviation,
             'reportingDate' => $reportingDate,
             'data' => [
@@ -183,8 +183,8 @@ class ScoreboardTest extends FunctionalTestAbstract
     public function providerApiThrowsExceptionForInvalidDate()
     {
         return [
-            ['Scoreboard.allForCenter'],
-            ['Scoreboard.stash', []],
+            ['Submission.Scoreboard.allForCenter'],
+            ['Submission.Scoreboard.stash', []],
         ];
     }
 
@@ -200,7 +200,7 @@ class ScoreboardTest extends FunctionalTestAbstract
             ->withFakedAdmin()
             ->withSetting('scoreboardLock', $locks[$input['locks']]->toArray())
             ->install();
-        $api = App::make(Api\Scoreboard::class);
+        $api = App::make(Api\Submission\Scoreboard::class);
 
         if ($csds = array_get($input, 'csds', null)) {
             $this->fillCsds($csds, $reportingDate);

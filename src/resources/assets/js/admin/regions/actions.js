@@ -45,7 +45,7 @@ function initializeScoreboardLockData(centerId, quarterId, data) {
 export function saveScoreboardLocks(center, quarter, data, clear) {
     return (dispatch) => {
         dispatch(scoreboardLockData.saveState('loading'))
-        return Api.Scoreboard.setScoreboardLockQuarter({center, quarter, data}).then(() => {
+        return Api.Submission.Scoreboard.setScoreboardLockQuarter({center, quarter, data}).then(() => {
             dispatch(scoreboardLockData.saveState('loaded'))
             if (clear) {
                 // Typically, we want to get rid of the data

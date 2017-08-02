@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Api\Traits;
+use TmlpStats\Api\Submission;
 use TmlpStats\Contracts\Referenceable;
 use TmlpStats\Domain;
 use TmlpStats\Encapsulations;
@@ -31,11 +32,11 @@ class ValidationData extends AuthenticatedApiBase
             'typeName' => 'Course',
         ],
         'Scoreboard' => [
-            'apiClass' => Scoreboard::class,
+            'apiClass' => Submission\Scoreboard::class,
             'typeName' => 'Scoreboard',
         ],
         'ProgramLeader' => [
-            'apiClass' => ProgramLeader::class,
+            'apiClass' => Submission\ProgramLeader::class,
             'typeName' => 'ProgramLeader',
         ],
     ];

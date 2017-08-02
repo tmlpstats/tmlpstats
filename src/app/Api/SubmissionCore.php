@@ -98,7 +98,7 @@ class SubmissionCore extends AuthenticatedApiBase
         $person_id = -1;
         $reg_id = -1;
 
-        $programLeaderApi = App::make(Api\ProgramLeader::class);
+        $programLeaderApi = App::make(Api\Submission\ProgramLeader::class);
 
         try {
             // Create stats_report record and get id
@@ -427,15 +427,15 @@ class SubmissionCore extends AuthenticatedApiBase
         $lastReport = $this->relevantReport($center, $reportingDate->copy()->subWeek());
 
         $appIds = collect($apps)
-            ->filter(function($app) { return $app->id >= 0; })
-            ->map(function($app) { return $app->id; })
+            ->filter(function ($app) {return $app->id >= 0;})
+            ->map(function ($app) {return $app->id;})
             ->keys();
 
         // Prefetch all the applications so we only need to do one query
         $lastWeekData = Models\TmlpRegistrationData::byStatsReport($lastReport)
             ->whereIn('tmlp_registration_id', $appIds)
             ->get()
-            ->keyBy(function($app) { return $app->tmlpRegistrationId; });
+            ->keyBy(function ($app) {return $app->tmlpRegistrationId;});
 
         // clear transfers
         Models\Transfer::byCenter($center)->reportingDate($reportingDate)->delete();
@@ -597,7 +597,7 @@ class SubmissionCore extends AuthenticatedApiBase
         $debug_message = '';
         // Process scoreboards:
         // Loop through scoreboard weeks and handle appropriately.
-        $sbWeeks = App::make(Api\Scoreboard::class)->allForCenter($center, $reportingDate, true, true);
+        $sbWeeks = App::make(Api\Submission\Scoreboard::class)->allForCenter($center, $reportingDate, true, true);
         $teamMemberApi = App::make(Api\TeamMember::class);
 
         foreach ($sbWeeks->sortedValues() as $scoreboard) {
@@ -656,7 +656,7 @@ class SubmissionCore extends AuthenticatedApiBase
 
     public function calculateProgramLeaderAttending(Models\Center $center, Carbon $reportingDate)
     {
-        $leaders = App::make(Api\ProgramLeader::class)->allForCenter($center, $reportingDate, true);
+        $leaders = App::make(Api\Submission\ProgramLeader::class)->allForCenter($center, $reportingDate, true);
         $pmAttending = 0;
         $clAttending = 0;
 
