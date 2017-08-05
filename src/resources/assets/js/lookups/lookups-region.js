@@ -21,7 +21,7 @@ export const regionCentersData = lookupsData.addScope({
                                 map.set(key, value)
                             }
                         })
-                        .sortBy(x => x.abbreviation)
+                        .sortBy(x => x.name)
                 },
                 successHandler(data) {
                     dispatch(scope.replaceItem(regionId, data))

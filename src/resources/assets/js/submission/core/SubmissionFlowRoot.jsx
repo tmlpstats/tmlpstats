@@ -11,14 +11,14 @@ import SubmissionNav from './SubmissionNav'
 import { PAGES_CONFIG } from './data'
 
 const steps = _.reject(PAGES_CONFIG, {hide_nav: true})
-const stepsBeforeCr3 = _.reject(steps, {key: 'next_qtr_accountabilities'})
+const stepsNoNqa = _.reject(steps, {key: 'next_qtr_accountabilities'})
 
 @connectRedux()
 export default class SubmissionFlowRoot extends SubmissionBase {
     static mapStateToProps(state) {
         return {
             browser: state.browser,
-            core:state.submission.core,
+            core: state.submission.core,
             systemMessages: systemMessagesData.getMessages(state, 'submission')
         }
     }
@@ -28,7 +28,7 @@ export default class SubmissionFlowRoot extends SubmissionBase {
         if (!this.checkReportingDate()) {
             return this.renderBasicLoading(this.props.coreInit)
         }
-        const navSteps = (core.lookups.pastClassroom[3]) ? steps : stepsBeforeCr3
+        const navSteps = (core.lookups.capabilities.nextQtrAccountabilities) ? steps : stepsNoNqa
         const largeLayout = browser.greaterThan.large
 
         const nav = <SubmissionNav params={params} steps={navSteps} location={location} tabbed={!largeLayout} />
