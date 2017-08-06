@@ -25,9 +25,6 @@ class ApiController extends ApiControllerBase
         'Application.create' => 'Application__create',
         'Application.allForCenter' => 'Application__allForCenter',
         'Application.stash' => 'Application__stash',
-        'Context.getCenter' => 'Context__getCenter',
-        'Context.setCenter' => 'Context__setCenter',
-        'Context.getSetting' => 'Context__getSetting',
         'Course.create' => 'Course__create',
         'Course.allForCenter' => 'Course__allForCenter',
         'Course.stash' => 'Course__stash',
@@ -127,25 +124,6 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'data', 'array')
-        );
-    }
-    protected function Context__getCenter($input)
-    {
-        return $this->app->make(Api\Context::class)->getCenter(
-        );
-    }
-    protected function Context__setCenter($input)
-    {
-        return $this->app->make(Api\Context::class)->setCenter(
-            $this->parse($input, 'center', 'Center'),
-            $this->parse($input, 'permanent', 'bool')
-        );
-    }
-    protected function Context__getSetting($input)
-    {
-        return $this->app->make(Api\Context::class)->getSetting(
-            $this->parse($input, 'name', 'string'),
-            $this->parse($input, 'center', 'Center')
         );
     }
     protected function Course__create($input)

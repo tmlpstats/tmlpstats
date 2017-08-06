@@ -29,7 +29,6 @@ class ApiProvider extends ServiceProvider
         $this->app->singleton(Api\Admin\Quarter::class);
         $this->app->singleton(Api\Admin\System::class);
         $this->app->singleton(Api\Application::class);
-        $this->app->singleton(Api\Context::class);
         $this->app->singleton(Api\Course::class);
         $this->app->singleton(Api\GlobalReport::class);
         $this->app->singleton(Api\LiveScoreboard::class);
@@ -52,7 +51,6 @@ class ApiProvider extends ServiceProvider
             'TmlpStats\Api\Admin\Quarter',
             'TmlpStats\Api\Admin\System',
             'TmlpStats\Api\Application',
-            'TmlpStats\Api\Context',
             'TmlpStats\Api\Course',
             'TmlpStats\Api\GlobalReport',
             'TmlpStats\Api\LiveScoreboard',

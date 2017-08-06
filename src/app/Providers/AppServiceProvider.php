@@ -3,6 +3,7 @@ namespace TmlpStats\Providers;
 
 use Blade;
 use Illuminate\Support\ServiceProvider;
+use TmlpStats\Api;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton(Api\Context::class);
+
         $this->app->bind(
             \Illuminate\Contracts\Auth\Registrar::class,
             \TmlpStats\Services\Registrar::class

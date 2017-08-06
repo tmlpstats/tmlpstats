@@ -95,25 +95,7 @@ api:
             type: date
           - name: data
             type: array
-  Context:
-    type: namespace
-    children:
-      getCenter:
-        desc: Get the current center
-      setCenter:
-        desc: Set the current center
-        params:
-          - name: center
-            type: Center
-          - name: permanent
-            type: bool
-      getSetting:
-        desc: Get a single setting value given a center
-        params:
-          - name: name
-            type: string
-          - name: center
-            type: Center
+
   Course:
     type: namespace
     children:

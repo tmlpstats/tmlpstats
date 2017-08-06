@@ -74,31 +74,6 @@ Api.Application = {
     stash: bac('Application.stash')
 }
 
-Api.Context = {
-
-    /*
-    Get the current center
-    Parameters:
-    */
-    getCenter: bac('Context.getCenter'),
-
-    /*
-    Set the current center
-    Parameters:
-      center: Center
-      permanent: bool
-    */
-    setCenter: bac('Context.setCenter'),
-
-    /*
-    Get a single setting value given a center
-    Parameters:
-      name: string
-      center: Center
-    */
-    getSetting: bac('Context.getSetting')
-}
-
 Api.Course = {
 
     /*
