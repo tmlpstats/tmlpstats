@@ -35,10 +35,7 @@ export function setSubmissionLookups(data, reportingDate) {
         // yuck, but works for now while we're remapping
         const n = normalize(data, cqResponse)
         const c = n.entities.c[n.result]
-        lookups.validRegQuarters = c.validRegQuarters
-        lookups.validStartQuarters = c.validStartQuarters
         lookups.accountabilities = n.entities.accountabilities
-        lookups.currentQuarter = c.currentQuarter
         lookups.orderedAccountabilities = c.accountabilities  // canonically sorted accountabilities
         dispatch(centerQuarterData.replaceItems(n.entities.quarters))
         lookups.pastClassroom = {}
@@ -47,7 +44,10 @@ export function setSubmissionLookups(data, reportingDate) {
             lookups.team_members = lookups.team_members.sort((a, b) => getLabelTeamMember(a).localeCompare(getLabelTeamMember(b)))
         }
 
-        lookups.user = c.user
+        const DIRECT_COPY = ['validRegQuarters', 'validStartQuarters', 'currentQuarter', 'user', 'capabilities']
+        DIRECT_COPY.forEach((key) => {
+            lookups[key] = c[key]
+        })
 
         /// Precompute items like pastClassroom based on quarter dates.
         if (data.currentQuarter) {

@@ -18,16 +18,13 @@ $currentCenter = $context->getCenter(true);
 $submissionReportingDate = $context->getSubmissionReportingDate();
 
 $crd = null;
-$showNextQtrAccountabilities = false;
-if ($currentCenter !== null && $reportingDate != null) {
+if ($currentCenter !== null && $reportingDate !== null) {
     $crd = TmlpStats\Encapsulations\CenterReportingDate::ensure($currentCenter, $reportingDate);
-    // Stop showing the old link. Maybe remove this soon.
-    // $showNextQtrAccountabilities = $crd->canShowNextQtrAccountabilities();
 }
 
 $reports = null;
 $centers = [];
-if ($currentRegion != null) {
+if ($currentRegion !== null) {
     $quarter = $crd? $crd->getQuarter() : TmlpStats\Quarter::getQuarterByDate($reportingDate, $currentRegion);
 
     // Add a week before and after so we can switch between quarters
@@ -73,11 +70,6 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                             @endcan
                         @endcan
 
-                        @if ($showNextQtrAccountabilities)
-                            <li>
-                                <a href="{{ action('CenterController@nextQtrAccountabilities', ['abbr' => $currentCenter->abbrLower()]) }}">Accountabilities</a>
-                            </li>
-                        @endif
 
                         {{-- Admin --}}
                         @if (Auth::user()->hasRole('administrator'))

@@ -30,10 +30,11 @@ class SubmissionCore extends AuthenticatedApiBase
 
         $localReport = App::make(LocalReport::class);
         $rq = $this->reportAndQuarter($center, $reportingDate);
-
         $lastValidReport = $rq['report'];
         $quarter = $rq['quarter'];
-        $centerQuarter = Domain\CenterQuarter::ensure($center, $quarter);
+
+        $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
+        $centerQuarter = $crd->getCenterQuarter();
 
         if ($lastValidReport === null) {
             $team_members = [];
@@ -54,6 +55,9 @@ class SubmissionCore extends AuthenticatedApiBase
             'success' => true,
             'id' => $center->id,
             'user' => compact('canSkipSubmitEmail'),
+            'capabilities' => [
+                'nextQtrAccountabilities' => $crd->canShowNextQtrAccountabilities(),
+            ],
             'validRegQuarters' => $validRegQuarters,
             'validStartQuarters' => $validStartQuarters,
             'lookups' => compact('withdraw_codes', 'team_members', 'center', 'centers'),

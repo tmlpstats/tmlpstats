@@ -1,9 +1,6 @@
 @extends('template')
 @inject('context', 'TmlpStats\Api\Context')
 @section('content')
-<?php
-$nextQtrAccountabilities = $centerReportingDate->canShowNextQtrAccountabilities();
-?>
 
 @if ($statsReport)
     <div id="content">
