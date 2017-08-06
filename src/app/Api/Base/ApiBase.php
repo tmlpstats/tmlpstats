@@ -73,7 +73,7 @@ class ApiBase
     public function useCache($report)
     {
         return $this->cacheEnabled
-        && env('API_USE_CACHE', $this->cacheEnabled)
+        && config('tmlp.api_use_cache', $this->cacheEnabled)
         && !in_array($report, $this->dontCache);
     }
 

@@ -283,21 +283,21 @@ class InviteController extends Controller
             Mail::send('emails.invite', compact('invite', 'acceptUrl'),
                 function ($message) use ($invite) {
                     // Only send email to person in production
-                    if (env('APP_ENV') === 'prod') {
+                    if (config('app.env') === 'prod') {
                         $message->to($invite->email);
                     } else {
-                        $message->to(env('ADMIN_EMAIL'));
+                        $message->to(config('tmlp.admin_email'));
                     }
 
                     $message->subject("Your TMLP Stats Account Invitation");
                 });
             $name           = $invite->firstName ?: $invite->email;
             $successMessage = "Success! Invitation email sent to {$name}.";
-            if (env('APP_ENV') === 'prod') {
+            if (config('app.env') === 'prod') {
                 Log::info("Invite email sent to {$invite->email} for invite {$invite->id}");
             } else {
-                Log::info("Invite email sent to " . env('ADMIN_EMAIL') . " for invite {$invite->id}");
-                $successMessage .= "<br/><br/><strong>Since this is development, we sent it to " . env('ADMIN_EMAIL') . " instead.</strong>";
+                Log::info("Invite email sent to " . config('tmlp.admin_email') . " for invite {$invite->id}");
+                $successMessage .= "<br/><br/><strong>Since this is development, we sent it to " . config('tmlp.admin_email') . " instead.</strong>";
             }
             $results['success'][] = $successMessage;
 

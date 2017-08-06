@@ -193,7 +193,7 @@ class ImportManager
                 $body .= $exception->getTraceAsString() . "\n";
                 try {
                     Mail::raw($body, function ($message) use ($center, $sheetPath) {
-                        $message->to(env('ADMIN_EMAIL'))->subject("Exception processing sheet for {$center} center");
+                        $message->to(config('tmlp.admin_email'))->subject("Exception processing sheet for {$center} center");
                         if ($sheetPath) {
                             $message->attach($sheetPath);
                         }
@@ -332,7 +332,7 @@ class ImportManager
         natcasesort($emails);
 
         // Don't dump HTML into the logs
-        if (env('MAIL_DRIVER') === 'log') {
+        if (config('mail.driver') === 'log') {
             $sheet = [];
         }
 
@@ -359,13 +359,13 @@ class ImportManager
                     'respondByDateTime', 'reportUrl', 'mobileDashUrl', 'reportingDate', 'accountablesCopied'),
                 function ($message) use ($emailTo, $emails, $emailMap, $centerName, $sheetPath, $sheetName) {
                     // Only send email to centers in production
-                    if (env('APP_ENV') === 'prod') {
+                    if (config('app.env') === 'prod') {
                         $message->to($emailTo);
                         foreach ($emails as $email) {
                             $message->cc($email);
                         }
                     } else {
-                        $message->to(env('ADMIN_EMAIL'));
+                        $message->to(config('tmlp.admin_email'));
                     }
 
                     if ($emailMap['regional']) {
@@ -375,7 +375,7 @@ class ImportManager
                     $message->subject("Team {$centerName} Statistics Submitted");
 
                     // Don't include the attachment when we are logging the emails instead of sending them
-                    if (env('MAIL_DRIVER') !== 'log') {
+                    if (config('mail.driver') !== 'log') {
                         $message->attach($sheetPath, [
                             'as' => $sheetName,
                         ]);
@@ -386,12 +386,12 @@ class ImportManager
                 . "<ul><li>{$emailTo}</li><li>" . implode('</li><li>', $emails) . "</li></ul>"
                 . " Please reply-all to that email if there is anything you need to communicate.";
 
-            if (env('APP_ENV') === 'prod') {
+            if (config('app.env') === 'prod') {
                 Log::info("Sent emails to the following people with team {$centerName}'s report: " . implode(', ', $emails));
             } else {
-                Log::info("Sent emails to the following people with team {$centerName}'s report: " . env('ADMIN_EMAIL'));
+                Log::info("Sent emails to the following people with team {$centerName}'s report: " . config('tmlp.admin_email'));
                 $successMessage .= "<br/><br/><strong>Since this is development, we sent it to "
-                    . env('ADMIN_EMAIL') . " instead.</strong>";
+                    . config('tmlp.admin_email') . " instead.</strong>";
             }
             $result['success'][] = $successMessage;
         } catch (\Exception $e) {

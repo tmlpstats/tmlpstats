@@ -87,7 +87,7 @@ class GlobalReportController extends Controller
 
         $showNavCenterSelect = true;
 
-        $defaultVmode = env('GLOBAL_REPORT_VIEW_MODE', 'react');
+        $defaultVmode = config('tmlp.global_report_view_mode');
         $vmode = $request->has('viewmode') ? $request->input('viewmode') : $defaultVmode;
 
         switch (strtolower($vmode)) {

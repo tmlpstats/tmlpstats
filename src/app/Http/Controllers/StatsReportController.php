@@ -106,7 +106,7 @@ class StatsReportController extends Controller
         }
 
         $showNavCenterSelect = true;
-        $defaultVmode = env('LOCAL_REPORT_VIEW_MODE', 'html');
+        $defaultVmode = config('tmlp.local_report_view_mode');
         $vmode = $request->has('viewmode') ? $request->input('viewmode') : $defaultVmode;
 
         switch (strtolower($vmode)) {

@@ -45,7 +45,8 @@ class SanitizeDb extends Command
     public function handle()
     {
         // NEVER IN PROD!
-        if (env('APP_ENV') !== 'local' && env('APP_ENV') !== 'stage') {
+        if (config('app.env') !== 'local' && config('app.env') !== 'stage') {
+            $this->line("Must be in local env... aborting!");
             return false;
         }
 

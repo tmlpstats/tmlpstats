@@ -41,7 +41,7 @@ class FlushTablesCommand extends Command
     public function fire()
     {
         // NEVER IN PROD!
-        if (env('APP_ENV') !== 'local') {
+        if (config('app.env') !== 'local') {
             return false;
         }
 

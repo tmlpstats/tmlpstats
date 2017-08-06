@@ -48,7 +48,7 @@ class ContactController extends Controller
         Mail::send('emails.feedback', compact('feedback', 'sender', 'senderName', 'senderEmail', 'url', 'userAgent'),
             function($message) use ($sender, $senderName, $senderEmail, $ccSender) {
 
-            $message->to(env('ADMIN_EMAIL'));
+            $message->to(config('tmlp.admin_email'));
             $message->replyTo($senderEmail);
             $message->subject("Feedback Submitted - {$senderName} on " . Carbon::now()->toDateTimeString());
 
