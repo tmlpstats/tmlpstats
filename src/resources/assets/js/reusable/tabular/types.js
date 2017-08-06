@@ -8,6 +8,7 @@ const baseColumn = Immutable.Record({
     selector: null,    // If set, a selector to get this column's value. Defaults to a generated selector.
     sorter: 'string',  // What to use for sorts
     sortSelector: null,// if set, a selector to get the sort value.
+    default: null,
 
     // Internal, used by us
     _columnClick: null,

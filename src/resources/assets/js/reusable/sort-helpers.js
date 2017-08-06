@@ -3,38 +3,56 @@ import { createSelector } from 'reselect'
 
 export const SORT_BY = 'sort_by'
 
-export function compositeKey(pairs) {
-    pairs = pairs.map((x) => {
-        if (typeof x[0] === 'string') {
-            return [createIteratee(x[0]), x[1]]
+const SORTERS = {
+    string(selector) {
+        return function(a, b) {
+            const valA = selector(a)
+            if (valA === null || valA === undefined) {
+                return -1
+            }
+            return valA.localeCompare(selector(b))
         }
-        return x
+    },
+
+    number(selector) {
+        return function(a, b) {
+            return selector(a) - selector(b)
+        }
+    },
+
+    moment(selector) {
+        return function(a, b) {
+            const valA = selector(a)
+            const valB = selector(b)
+            if (!valA) {
+                return 1
+            } else if (!valB) {
+                return -1
+            }
+            if (valA.isBefore(valB)) {
+                return -1
+            } else if (valA.isAfter(valB)) {
+                return 1
+            } else {
+                return 0
+            }
+        }
+    }
+
+}
+
+export function compositeKey(pairs) {
+    const subsorters = pairs.map((x) => {
+        const selector = (typeof x[0] === 'string')? createIteratee(x[0]) : x[0]
+
+        return SORTERS[x[1]](selector)
     })
     return (a, b) => {
         var n
-        for (var i = 0; i < pairs.length; i++) {
-            const spec = pairs[i]
-            const getKey = spec[0]
-
-            switch (spec[1]) {
-            case 'string':
-                n = getKey(a).localeCompare(getKey(b))
-                break
-            case 'number':
-                n = getKey(a) - getKey(b)
-                break
-            case 'moment':
-                if (getKey(a).isBefore(getKey(b))) {
-                    n = -1
-                } else if (getKey(a).isAfter(getKey(b))) {
-                    n = 1
-                } else {
-                    n = 0
-                }
-                break
-            }
+        for (var i = 0; i < subsorters.length; i++) {
+            n = subsorters[i](a, b)
             if (n != 0) {
-                return (spec[2] == 'desc') ? -n : n
+                return (pairs[i][2] == 'desc') ? -n : n
             }
         }
         return 0
