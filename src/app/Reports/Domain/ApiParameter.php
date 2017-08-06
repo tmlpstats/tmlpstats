@@ -28,9 +28,4 @@ class ApiParameter
             $this->required = ($body['required'] == 'true');
         }
     }
-
-    public function absNameLocal()
-    {
-        return str_replace('.', '__', $this->absName);
-    }
 }
