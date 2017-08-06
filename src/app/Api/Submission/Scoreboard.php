@@ -1,9 +1,10 @@
 <?php
-namespace TmlpStats\Api;
+namespace TmlpStats\Api\Submission;
 
 use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
+use TmlpStats\Api;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Domain;
 
@@ -14,10 +15,10 @@ class Scoreboard extends AuthenticatedApiBase
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false, $returnObject = false)
     {
         $this->assertAuthz($this->context->can('viewSubmissionUi', $center));
-        $submissionCore = App::make(SubmissionCore::class);
+        $submissionCore = App::make(Api\SubmissionCore::class);
         $submissionCore->checkCenterDate($center, $reportingDate);
 
-        $localReport = App::make(LocalReport::class);
+        $localReport = App::make(Api\LocalReport::class);
         $rq = $submissionCore->reportAndQuarter($center, $reportingDate);
         $quarter = $rq['quarter'];
         $statsReport = $rq['report'];
@@ -57,7 +58,7 @@ class Scoreboard extends AuthenticatedApiBase
         }
 
         if ($includeInProgress) {
-            $submissionData = App::make(SubmissionData::class);
+            $submissionData = App::make(Api\SubmissionData::class);
             $found = $submissionData->allForType($center, $reportingDate, Domain\Scoreboard::class);
             foreach ($found as $stashed) {
                 $scoreboard = $weeks->ensureWeek($stashed->week);
@@ -90,14 +91,14 @@ class Scoreboard extends AuthenticatedApiBase
     public function stash(Models\Center $center, Carbon $reportingDate, $data)
     {
         $this->assertAuthz($this->context->can('submitStats', $center), 'User not allowed access to submit this report');
-        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate, ['write']);
+        App::make(Api\SubmissionCore::class)->checkCenterDate($center, $reportingDate, ['write']);
 
         $scoreboard = Domain\Scoreboard::fromArray($data);
-        $submissionData = App::make(SubmissionData::class);
+        $submissionData = App::make(Api\SubmissionData::class);
         $submissionData->store($center, $reportingDate, $scoreboard);
 
-        $report = LocalReport::ensureStatsReport($center, $reportingDate);
-        $validationResults = App::make(ValidationData::class)->validate($center, $reportingDate);
+        $report = Api\LocalReport::ensureStatsReport($center, $reportingDate);
+        $validationResults = App::make(Api\ValidationData::class)->validate($center, $reportingDate);
 
         $messages = [];
         if (isset($validationResults['messages']['Scoreboard'])) {

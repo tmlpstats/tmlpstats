@@ -53,20 +53,18 @@ class ApiController extends ApiControllerBase
         "LocalReport.reportViewOptions" => "LocalReport__reportViewOptions",
         "LocalReport.getReportPages" => "LocalReport__getReportPages",
         "Lookups.getRegionCenters" => "Lookups__getRegionCenters",
-        "ProgramLeader.allForCenter" => "ProgramLeader__allForCenter",
-        "ProgramLeader.stash" => "ProgramLeader__stash",
-        "Scoreboard.allForCenter" => "Scoreboard__allForCenter",
-        "Scoreboard.stash" => "Scoreboard__stash",
-        "Scoreboard.getScoreboardLockQuarter" => "Scoreboard__getScoreboardLockQuarter",
-        "Scoreboard.setScoreboardLockQuarter" => "Scoreboard__setScoreboardLockQuarter",
+        "Submission.ProgramLeader.allForCenter" => "Submission__ProgramLeader__allForCenter",
+        "Submission.ProgramLeader.stash" => "Submission__ProgramLeader__stash",
+        "Submission.Scoreboard.allForCenter" => "Submission__Scoreboard__allForCenter",
+        "Submission.Scoreboard.stash" => "Submission__Scoreboard__stash",
+        "Submission.Scoreboard.getScoreboardLockQuarter" => "Submission__Scoreboard__getScoreboardLockQuarter",
+        "Submission.Scoreboard.setScoreboardLockQuarter" => "Submission__Scoreboard__setScoreboardLockQuarter",
         "Submission.NextQtrAccountability.allForCenter" => "Submission__NextQtrAccountability__allForCenter",
         "Submission.NextQtrAccountability.stash" => "Submission__NextQtrAccountability__stash",
         "SubmissionCore.initSubmission" => "SubmissionCore__initSubmission",
         "SubmissionCore.completeSubmission" => "SubmissionCore__completeSubmission",
         "SubmissionCore.initFirstWeekData" => "SubmissionCore__initFirstWeekData",
         "SubmissionData.ignoreMe" => "SubmissionData__ignoreMe",
-        "TeamMember.create" => "TeamMember__create",
-        "TeamMember.update" => "TeamMember__update",
         "TeamMember.setWeekData" => "TeamMember__setWeekData",
         "TeamMember.allForCenter" => "TeamMember__allForCenter",
         "TeamMember.stash" => "TeamMember__stash",
@@ -332,48 +330,48 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'region', 'Region')
         );
     }
-    protected function ProgramLeader__allForCenter($input)
+    protected function Submission__ProgramLeader__allForCenter($input)
     {
-        return App::make(Api\ProgramLeader::class)->allForCenter(
+        return App::make(Api\Submission\ProgramLeader::class)->allForCenter(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'includeInProgress', 'bool', false)
         );
     }
-    protected function ProgramLeader__stash($input)
+    protected function Submission__ProgramLeader__stash($input)
     {
-        return App::make(Api\ProgramLeader::class)->stash(
+        return App::make(Api\Submission\ProgramLeader::class)->stash(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'data', 'array')
         );
     }
-    protected function Scoreboard__allForCenter($input)
+    protected function Submission__Scoreboard__allForCenter($input)
     {
-        return App::make(Api\Scoreboard::class)->allForCenter(
+        return App::make(Api\Submission\Scoreboard::class)->allForCenter(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'includeInProgress', 'bool', false)
         );
     }
-    protected function Scoreboard__stash($input)
+    protected function Submission__Scoreboard__stash($input)
     {
-        return App::make(Api\Scoreboard::class)->stash(
+        return App::make(Api\Submission\Scoreboard::class)->stash(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'data', 'array')
         );
     }
-    protected function Scoreboard__getScoreboardLockQuarter($input)
+    protected function Submission__Scoreboard__getScoreboardLockQuarter($input)
     {
-        return App::make(Api\Scoreboard::class)->getScoreboardLockQuarter(
+        return App::make(Api\Submission\Scoreboard::class)->getScoreboardLockQuarter(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'quarter', 'Quarter')
         );
     }
-    protected function Scoreboard__setScoreboardLockQuarter($input)
+    protected function Submission__Scoreboard__setScoreboardLockQuarter($input)
     {
-        return App::make(Api\Scoreboard::class)->setScoreboardLockQuarter(
+        return App::make(Api\Submission\Scoreboard::class)->setScoreboardLockQuarter(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'quarter', 'Quarter'),
             $this->parse($input, 'data', 'array')
@@ -422,19 +420,6 @@ class ApiController extends ApiControllerBase
         return App::make(Api\SubmissionData::class)->ignoreMe(
             $this->parse($input, 'center', 'string'),
             $this->parse($input, 'timezone', 'string')
-        );
-    }
-    protected function TeamMember__create($input)
-    {
-        return App::make(Api\TeamMember::class)->create(
-            $this->parse($input, 'data', 'array')
-        );
-    }
-    protected function TeamMember__update($input)
-    {
-        return App::make(Api\TeamMember::class)->update(
-            $this->parse($input, 'teamMember', 'TeamMember'),
-            $this->parse($input, 'data', 'array')
         );
     }
     protected function TeamMember__setWeekData($input)

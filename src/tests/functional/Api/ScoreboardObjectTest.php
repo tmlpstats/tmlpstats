@@ -28,7 +28,7 @@ class ScoreboardObjectTest extends FunctionalTestAbstract
         $this->quarter = Models\Quarter::year(2016)->quarterNumber(1)->first();
 
         $this->context = MockContext::defaults()->withCenter($this->center)->install();
-        $this->sbapi = App::make(Api\Scoreboard::class);
+        $this->sbapi = App::make(Api\Submission\Scoreboard::class);
     }
 
     public function testSetScoreboardLockQuarter_unauthorized()
@@ -47,7 +47,7 @@ class ScoreboardObjectTest extends FunctionalTestAbstract
         ]]);
 
         // Get the value back
-        $value = $this->context->getSetting(Api\Scoreboard::LOCK_SETTING_KEY, $this->center, $this->quarter);
+        $value = $this->context->getSetting(Api\Submission\Scoreboard::LOCK_SETTING_KEY, $this->center, $this->quarter);
         $this->assertEquals('2016-03-04', $value['weeks'][0]['week']);
         $this->assertEquals(true, $value['weeks'][0]['editActual']);
     }

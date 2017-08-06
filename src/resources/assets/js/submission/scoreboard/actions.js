@@ -11,7 +11,7 @@ const saveState = scoreboardSave.actionCreator()
 export function loadScoreboard(centerId, reportingDate) {
     return (dispatch) => {
         dispatch(loadState('loading'))
-        return Api.Scoreboard.allForCenter({
+        return Api.Submission.Scoreboard.allForCenter({
             center: centerId,
             reportingDate: reportingDate,
             includeInProgress: true
@@ -36,7 +36,7 @@ export function saveScoreboards(centerId, reportingDate, toSaveItems, scoreboard
         const candidate = toSaveItems.entrySeq().first()
 
         dispatch(saveState('loading'))
-        return Api.Scoreboard.stash({
+        return Api.Submission.Scoreboard.stash({
             center: centerId,
             reportingDate: reportingDate,
             data: scoreboards[candidate[0]]

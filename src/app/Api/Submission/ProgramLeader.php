@@ -1,9 +1,10 @@
 <?php
-namespace TmlpStats\Api;
+namespace TmlpStats\Api\Submission;
 
 use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
+use TmlpStats\Api;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
@@ -17,7 +18,7 @@ class ProgramLeader extends AuthenticatedApiBase
 
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
-        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
+        App::make(Api\SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $programManager = $center->getProgramManager($reportingDate);
         $classroomLeader = $center->getClassroomLeader($reportingDate);
@@ -66,7 +67,7 @@ class ProgramLeader extends AuthenticatedApiBase
         }
 
         if ($includeInProgress) {
-            $submissionData = App::make(SubmissionData::class);
+            $submissionData = App::make(Api\SubmissionData::class);
             $found = $submissionData->allForType($center, $reportingDate, Domain\ProgramLeader::class);
             foreach ($found as $domain) {
                 $domain->meta['localChanges'] = true;
@@ -87,11 +88,11 @@ class ProgramLeader extends AuthenticatedApiBase
      */
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
-        App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate, ['write']);
+        App::make(Api\SubmissionCore::class)->checkCenterDate($center, $reportingDate, ['write']);
 
         $this->assertCan('submitStats', $center);
 
-        $submissionData = App::make(SubmissionData::class);
+        $submissionData = App::make(Api\SubmissionData::class);
         $programLeaderId = $submissionData->numericStorageId($data, 'id');
 
         if ($programLeaderId !== null && $programLeaderId > 0) {

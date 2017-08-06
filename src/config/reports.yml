@@ -352,72 +352,72 @@ api:
           - name: region
             type: Region
 
-  ProgramLeader:
-    type: namespace
-    children:
-      allForCenter:
-        desc: Get program leaders data for a center-reportingDate, optionally including in-progress data
-        params:
-          - name: center
-            type: Center
-          - name: reportingDate
-            type: date
-          - name: includeInProgress
-            type: bool
-            required: false
-      stash:
-        desc: Stash data for in-progress Team Member weekly
-        params:
-          - name: center
-            type: Center
-          - name: reportingDate
-            type: date
-          - name: data
-            type: array
-
-  Scoreboard:
-    type: namespace
-    children:
-      allForCenter:
-        desc: Get scoreboard data for center
-        params:
-          - name: center
-            type: Center
-          - name: reportingDate
-            type: date
-          - name: includeInProgress
-            type: bool
-            required: false
-      stash:
-        desc: Save scoreboard data for week
-        params:
-          - name: center
-            type: Center
-          - name: reportingDate
-            type: date
-          - name: data
-            type: array
-      getScoreboardLockQuarter:
-        desc: TBD
-        params:
-          - name: center
-            type: Center
-          - name: quarter
-            type: Quarter
-      setScoreboardLockQuarter:
-        desc: TBD
-        params:
-          - name: center
-            type: Center
-          - name: quarter
-            type: Quarter
-          - name: data
-            type: array
-
   # Submission is a namespace of namespaces... iow a grouping.
   Submission:
     type: namespace
     children:
+      ProgramLeader:
+        type: namespace
+        children:
+          allForCenter:
+            desc: Get program leaders data for a center-reportingDate, optionally including in-progress data
+            params:
+              - name: center
+                type: Center
+              - name: reportingDate
+                type: date
+              - name: includeInProgress
+                type: bool
+                required: false
+          stash:
+            desc: Stash data for in-progress Team Member weekly
+            params:
+              - name: center
+                type: Center
+              - name: reportingDate
+                type: date
+              - name: data
+                type: array
+
+      Scoreboard:
+        type: namespace
+        children:
+          allForCenter:
+            desc: Get scoreboard data for center
+            params:
+              - name: center
+                type: Center
+              - name: reportingDate
+                type: date
+              - name: includeInProgress
+                type: bool
+                required: false
+          stash:
+            desc: Save scoreboard data for week
+            params:
+              - name: center
+                type: Center
+              - name: reportingDate
+                type: date
+              - name: data
+                type: array
+          getScoreboardLockQuarter:
+            desc: TBD
+            params:
+              - name: center
+                type: Center
+              - name: quarter
+                type: Quarter
+          setScoreboardLockQuarter:
+            desc: TBD
+            params:
+              - name: center
+                type: Center
+              - name: quarter
+                type: Quarter
+              - name: data
+                type: array
+
       NextQtrAccountability:
         type: namespace
         children:
@@ -483,18 +483,6 @@ api:
   TeamMember:
     type: namespace
     children:
-      create:
-        desc: Create new team member
-        params:
-          - name: data
-            type: array
-      update:
-        desc: Update an team member
-        params:
-          - name: teamMember
-            type: TeamMember
-          - name: data
-            type: array
       setWeekData:
         desc: Set the weekly data for an team member
         params:

@@ -318,7 +318,10 @@ Api.Lookups = {
     getRegionCenters: bac('Lookups.getRegionCenters')
 }
 
-Api.ProgramLeader = {
+Api.Submission = {
+}
+
+Api.Submission.ProgramLeader = {
 
     /*
     Get program leaders data for a center-reportingDate, optionally including in-progress data
@@ -327,7 +330,7 @@ Api.ProgramLeader = {
       reportingDate: date
       includeInProgress: bool
     */
-    allForCenter: bac('ProgramLeader.allForCenter'),
+    allForCenter: bac('Submission.ProgramLeader.allForCenter'),
 
     /*
     Stash data for in-progress Team Member weekly
@@ -336,10 +339,10 @@ Api.ProgramLeader = {
       reportingDate: date
       data: array
     */
-    stash: bac('ProgramLeader.stash')
+    stash: bac('Submission.ProgramLeader.stash')
 }
 
-Api.Scoreboard = {
+Api.Submission.Scoreboard = {
 
     /*
     Get scoreboard data for center
@@ -348,7 +351,7 @@ Api.Scoreboard = {
       reportingDate: date
       includeInProgress: bool
     */
-    allForCenter: bac('Scoreboard.allForCenter'),
+    allForCenter: bac('Submission.Scoreboard.allForCenter'),
 
     /*
     Save scoreboard data for week
@@ -357,7 +360,7 @@ Api.Scoreboard = {
       reportingDate: date
       data: array
     */
-    stash: bac('Scoreboard.stash'),
+    stash: bac('Submission.Scoreboard.stash'),
 
     /*
     TBD
@@ -365,7 +368,7 @@ Api.Scoreboard = {
       center: Center
       quarter: Quarter
     */
-    getScoreboardLockQuarter: bac('Scoreboard.getScoreboardLockQuarter'),
+    getScoreboardLockQuarter: bac('Submission.Scoreboard.getScoreboardLockQuarter'),
 
     /*
     TBD
@@ -374,10 +377,7 @@ Api.Scoreboard = {
       quarter: Quarter
       data: array
     */
-    setScoreboardLockQuarter: bac('Scoreboard.setScoreboardLockQuarter')
-}
-
-Api.Submission = {
+    setScoreboardLockQuarter: bac('Submission.Scoreboard.setScoreboardLockQuarter')
 }
 
 Api.Submission.NextQtrAccountability = {
@@ -441,21 +441,6 @@ Api.SubmissionData = {
 }
 
 Api.TeamMember = {
-
-    /*
-    Create new team member
-    Parameters:
-      data: array
-    */
-    create: bac('TeamMember.create'),
-
-    /*
-    Update an team member
-    Parameters:
-      teamMember: TeamMember
-      data: array
-    */
-    update: bac('TeamMember.update'),
 
     /*
     Set the weekly data for an team member
