@@ -31,10 +31,9 @@ RUN wget https://getcomposer.org/installer -O /tmp/composer-installer.php \
 
 # Install NPM and Node
 RUN /usr/bin/npm install -g n              \
- && /usr/local/bin/n stable                \
+ && /usr/local/bin/n 7                     \
  && /usr/local/bin/npm install -g npm      \
- && /usr/local/bin/npm install -g bower    \
- && /usr/local/bin/npm install -g gulp-cli
+ && /usr/local/bin/npm install -g bower
 
 RUN mkdir -p /var/www/tmlpstats/src && \
     a2enmod rewrite
@@ -50,10 +49,9 @@ RUN composer install --no-autoloader --no-scripts && \
     md5sum bower.json > bower_components/.hashes
 
 # Node Modules
-ADD src/package.json  /var/www/tmlpstats/src/
-RUN npm set progress=false && \
-    npm install && \
-    md5sum package.json > node_modules/.hashes
+ADD src/package.json src/package-lock.json /var/www/tmlpstats/src/
+RUN npm --progress false install && \
+    md5sum package.json package-lock.json > node_modules/.hashes
 
 
 ADD docker/builder/symlink-farm.sh /tmp/
