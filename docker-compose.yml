@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: docker/localdev/Dockerfile
     ports:
-      - "8080:80"
+      - "8000:80"
       - "8030:8030"
     volumes:
       - "./:/app"

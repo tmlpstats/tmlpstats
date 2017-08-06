@@ -24,7 +24,7 @@ Valid option files:
 
 - norefresh: If exists, don't keep refreshing composer/bower/npm.
 - watch: If exists, use 'npm run watch' to refresh files. Might have performance concerns.
-- nojs: Rarely used, but sets up in case you want to run gulp on your own machine.
+- nojs: Rarely used, but sets up in case you don't want to blow away JS files.
 EOF
 fi
 
@@ -115,7 +115,12 @@ if [[ ! -f "$OPTIONS_DIR/norefresh" && -d /app/.git ]]; then
 
     hashcheck bower_components bower.json _rebuild_bower "bower"
 
-    hashcheck node_modules package.json _rebuild_npm "npm"
+    hashcheck node_modules "package.json package-lock.json" _rebuild_npm "npm"
+fi
+
+if [[ -d node_modules/node-sass && ! -d node_modules/node-sass/vendor/linux-x64-51 ]]; then
+    echo "Rebuilding node-sass...."
+    npm rebuild node-sass
 fi
 
 # If we get here, we got a vendor folder but no autoloads.
@@ -124,8 +129,10 @@ if [ ! -f /app/src/vendor/composer/autoload_real.php ]; then
 fi
 
 export IN_LOCALDEV=y
-
-if [[ "$LOCALDEV_WATCH" = "y" || -f $OPTIONS_DIR/watch ]]; then
+if [[ "$LOCALDEV_WATCH" = "hot" ]]; then
+    apache2-foreground &
+    IN_LOCALDEV_WATCH=y npm run hot
+elif [[ "$LOCALDEV_WATCH" = "y" || -f $OPTIONS_DIR/watch ]]; then
     apache2-foreground &
     IN_LOCALDEV_WATCH=y npm run watch
 else
