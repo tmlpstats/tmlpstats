@@ -57,3 +57,19 @@ export function connectRedux(opener, ...rest) {
         return connect(opener, ...rest)(target)
     }
 }
+
+/**
+ * Turns something to a 'lazy' callable.
+ *
+ * @param Function f The function to call once.
+ * @rtype Function A function which emulates the callable.
+ */
+export function lazy(f) {
+    let value
+    return function() {
+        if (f !== null) {
+            value = f(...arguments)
+        }
+        return value
+    }
+}

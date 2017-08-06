@@ -386,3 +386,24 @@ export function scrollIntoView(id, after=null) {
         }
     }
 }
+
+/**
+ * Helper to dynamically build CSS classes without string appending.
+ *
+ * If `input` is an array (has a forEach attribute) then combine with array join
+ *
+ * Otherwise, if it's an object, set classes based on 'truthiness'
+ */
+export function cssClasses(input) {
+    if (input.forEach && input.join) {
+        return input.join(' ')
+    } else {
+        let classes = []
+        for (let key in input) {
+            if (input[key]) {
+                classes.push(key)
+            }
+        }
+        return classes.join(' ')
+    }
+}
