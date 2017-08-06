@@ -20,11 +20,15 @@ class ApiControllerBase extends Controller
      *
      * @var array
      */
-    protected $unauthenticatedMethods = [];
+    protected $authenticateMethods = [];
+    protected $app;
 
     public function __construct()
     {
         // Disable default middleware
+
+        // Also set the app instance.
+        $this->app = App::make('app');
     }
 
     /**
@@ -43,10 +47,11 @@ class ApiControllerBase extends Controller
             throw new ApiExceptions\NotAllowedException('API method not allowed.');
         }
         $callable = $this->methods[$method];
+        $authenticate = array_get($this->authenticateMethods, $callable, null);
 
-        if (in_array($callable, $this->tokenAuthenticatedMethods)) {
+        if ($authenticate === 'token') {
             App::make(TokenAuthenticate::class)->authenticate();
-        } else if (!in_array($callable, $this->unauthenticatedMethods) && Auth::user() == null) {
+        } else if ($authenticate !== 'all' && Auth::user() == null) {
             throw new ApiExceptions\NotAuthenticatedException('You must be authenticated to access the api.');
         }
 

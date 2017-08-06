@@ -19,22 +19,16 @@ class ApiController extends ApiControllerBase
 {
     protected $methods = [
 @foreach ($apiMethodsFlat as $method)
-        "{{ $method->absName }}" => "{{ $method->absNameLocal() }}",
+        '{{ $method->absName }}' => '{{ $method->absNameLocal() }}',
 @endforeach
     ];
 
-    protected $tokenAuthenticatedMethods = [
+    protected $authenticateMethods = [
 @foreach ($apiMethodsFlat as $method)
 @if ($method->access === 'token')
-        "{{ $method->absNameLocal() }}",
-@endif
-@endforeach
-    ];
-
-    protected $unauthenticatedMethods = [
-@foreach ($apiMethodsFlat as $method)
-@if ($method->access === 'any')
-        "{{ $method->absNameLocal() }}",
+        '{{ $method->absNameLocal() }}' => 'token',
+@elseif ($method->access === 'any')
+        '{{ $method->absNameLocal() }}' => 'any',
 @endif
 @endforeach
     ];
@@ -42,7 +36,7 @@ class ApiController extends ApiControllerBase
 @foreach ($apiMethodsFlat as $method)
     protected function {{ $method->absNameLocal() }}($input)
     {
-        return App::make(Api\{{ $method->packageName() }}::class)->{{ $method->name }}(
+        return $this->app->make(Api\{{ $method->packageName() }}::class)->{{ $method->name }}(
 @foreach ($method->params as $param)
             $this->parse($input, '{{ $param->name }}', '{{ $param->type }}'<?php if (!$param->required) {?>, false<?php } ?>)<?php if (!$param->isLast) { ?>,<?php } ?>
 
