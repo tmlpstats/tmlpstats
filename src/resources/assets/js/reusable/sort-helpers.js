@@ -4,26 +4,45 @@ import { createSelector } from 'reselect'
 export const SORT_BY = 'sort_by'
 
 export function compositeKey(pairs) {
+    pairs = pairs.map((x) => {
+        if (typeof x[0] === 'string') {
+            return [createIteratee(x[0]), x[1]]
+        }
+        return x
+    })
     return (a, b) => {
         var n
         for (var i = 0; i < pairs.length; i++) {
-            var key = pairs[i][0]
+            const spec = pairs[i]
+            const getKey = spec[0]
 
-            switch (pairs[i][1]) {
+            switch (spec[1]) {
             case 'string':
-                n = a[key].localeCompare(b[key])
+                n = getKey(a).localeCompare(getKey(b))
                 break
             case 'number':
-                n = a[key] - b[key]
+                n = getKey(a) - getKey(b)
+                break
+            case 'moment':
+                if (getKey(a).isBefore(getKey(b))) {
+                    n = -1
+                } else if (getKey(a).isAfter(getKey(b))) {
+                    n = 1
+                } else {
+                    n = 0
+                }
                 break
             }
             if (n != 0) {
-                return n
+                return (spec[2] == 'desc') ? -n : n
             }
-
         }
         return 0
     }
+}
+
+function createIteratee(key) {
+    return (obj) => obj[key]
 }
 
 export function createSorters(input) {

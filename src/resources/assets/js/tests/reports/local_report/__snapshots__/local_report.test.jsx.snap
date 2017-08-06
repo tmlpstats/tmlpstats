@@ -376,24 +376,48 @@ exports[`LocalReport Next Qtr Accountabilities 1`] = `
         <div
           className="table-responsive"
         >
+          <h3>
+            Next Quarter Accountabilities
+          </h3>
           <table
             className="table table-condensed table-striped table-hover"
+            id="tbl-localReport_nqa"
           >
             <thead>
               <tr>
-                <th>
+                <th
+                  aria-controls="tbl-localReport_nqa"
+                  className="tabular-sortable"
+                  onClick={[Function]}
+                >
                   Accountability
                 </th>
-                <th>
+                <th
+                  aria-controls="tbl-localReport_nqa"
+                  className="tabular-sortable"
+                  onClick={[Function]}
+                >
                   Name
                 </th>
-                <th>
+                <th
+                  aria-controls="tbl-localReport_nqa"
+                  className="tabular-sortable"
+                  onClick={[Function]}
+                >
                   Phone
                 </th>
-                <th>
+                <th
+                  aria-controls="tbl-localReport_nqa"
+                  className="tabular-sortable"
+                  onClick={[Function]}
+                >
                   Email
                 </th>
-                <th>
+                <th
+                  aria-controls="tbl-localReport_nqa"
+                  className="tabular-sortable"
+                  onClick={[Function]}
+                >
                   Updated At
                 </th>
               </tr>
