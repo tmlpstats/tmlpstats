@@ -28,14 +28,6 @@ Valid option files:
 EOF
 fi
 
-
-# It seems like webpack resolves via the symlink and then can't find node_modules.
-# We can simply symlink them in reverse. (this works on windows!)
-#if [ ! -d /app/src/bower_components ]; then
-#    echo "!! making bower symlink"
-#    ln -s $PWD/bower_components /app/src/bower_components
-#fi
-
 cd /app/src
 
 composer_rerun() {
@@ -113,7 +105,7 @@ if [[ ! -f "$OPTIONS_DIR/norefresh" && -d /app/.git ]]; then
     # If any change, re-run composer/bower.
     hashcheck vendor "composer.json composer.lock" _rebuild_composer "composer" 
 
-    hashcheck bower_components bower.json _rebuild_bower "bower"
+    # hashcheck bower_components bower.json _rebuild_bower "bower"
 
     hashcheck node_modules "package.json package-lock.json" _rebuild_npm "npm"
 fi
