@@ -836,13 +836,13 @@ class SubmissionCore extends AuthenticatedApiBase
                     'reportingDate', 'reportUrl', 'respondByDateTime', 'submittedAt', 'user', 'reportMessages'),
                 function ($message) use ($emailTo, $emails, $emailMap, $centerName) {
                     // Only send email to centers in production
-                    if (env('APP_ENV') === 'prod') {
+                    if (config('app.env') === 'prod') {
                         $message->to($emailTo);
                         foreach ($emails as $email) {
                             $message->cc($email);
                         }
                     } else {
-                        $message->to(env('ADMIN_EMAIL'));
+                        $message->to(config('tmlp.admin_email'));
                     }
 
                     if ($emailMap['regional']) {
@@ -856,12 +856,12 @@ class SubmissionCore extends AuthenticatedApiBase
             . " <ul><li>{$emailTo}</li><li>" . implode('</li><li>', $emails) . '</li></ul>'
                 . ' Please reply-all to that email if there is anything you need to communicate.';
 
-            if (env('APP_ENV') === 'prod') {
+            if (config('app.env') === 'prod') {
                 Log::info("Sent emails to the following people with team {$centerName}'s report: " . implode(', ', $emails));
             } else {
-                Log::info("Sent emails to the following people with team {$centerName}'s report: " . env('ADMIN_EMAIL'));
+                Log::info("Sent emails to the following people with team {$centerName}'s report: " . config('tmlp.admin_email'));
                 $successMessage .= '<br/><br/><strong>Since this is development, we sent it to '
-                . env('ADMIN_EMAIL') . ' instead.</strong>';
+                . config('tmlp.admin_email') . ' instead.</strong>';
             }
 
             return $successMessage;

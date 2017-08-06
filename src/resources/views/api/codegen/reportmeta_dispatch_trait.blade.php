@@ -31,7 +31,7 @@ trait {{ $namespace->id }}ReportDispatch
 
     public function getPageCacheTime($report)
     {
-        $globalUseCache = env('REPORTS_USE_CACHE', true);
+        $globalUseCache = config('tmlp.reports_use_cache');
         if (!$globalUseCache) {
             return 0;
         }

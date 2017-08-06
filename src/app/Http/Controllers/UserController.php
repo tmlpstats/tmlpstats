@@ -288,20 +288,20 @@ class UserController extends Controller
             Mail::send('emails.activate', compact('invite', 'activateUrl'),
                 function($message) use ($user) {
                     // Only send email to person in production
-                    if (env('APP_ENV') === 'prod') {
+                    if (config('app.env') === 'prod') {
                         $message->to($user->email);
                     } else {
-                        $message->to(env('ADMIN_EMAIL'));
+                        $message->to(config('tmlp.admin_email'));
                     }
 
                     $message->subject("Your TMLP Stats Account Invitation");
                 });
             $successMessage = "Success! You are officially registered. We sent an email to {$user->email}. Please follow the instructions in the email to activate your account.";
-            if (env('APP_ENV') === 'prod') {
+            if (config('app.env') === 'prod') {
                 Log::info("User activation email sent to {$user->email} for invite {$user->id}");
             } else {
-                Log::info("User activation email sent to " . env('ADMIN_EMAIL') . " for invite {$user->id}");
-                $successMessage .= "<br/><br/><strong>Since this is development, we sent it to " . env('ADMIN_EMAIL') . " instead.</strong>";
+                Log::info("User activation email sent to " . config('tmlp.admin_email') . " for invite {$user->id}");
+                $successMessage .= "<br/><br/><strong>Since this is development, we sent it to " . config('tmlp.admin_email') . " instead.</strong>";
             }
             $result['success'][] = $successMessage;
 

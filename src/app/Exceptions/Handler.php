@@ -40,7 +40,7 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $e)
     {
-        if ($this->shouldReport($e) && !App::runningInConsole() && env('APP_ENV') == 'prod') {
+        if ($this->shouldReport($e) && !App::runningInConsole() && config('app.env') == 'prod') {
 
             $user = Auth::user() ? Auth::user()->email : 'unknown';
             $center = Auth::user() && Auth::user()->center
@@ -56,7 +56,7 @@ class Handler extends ExceptionHandler
             $body .= "$e";
             try {
                 Mail::raw($body, function ($message) use ($center) {
-                    $message->to(env('ADMIN_EMAIL'))->subject("Exception processing sheet for {$center} center in " . strtoupper(env('APP_ENV')));
+                    $message->to(config('tmlp.admin_email'))->subject("Exception processing sheet for {$center} center in " . strtoupper(config('app.env')));
                 });
             } catch (Exception $ex) {
                 Log::error('Exception caught sending error email: ' . $ex->getMessage());
