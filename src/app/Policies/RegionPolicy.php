@@ -17,4 +17,8 @@ class RegionPolicy extends Policy
         return ($user->hasRole('globalStatistician'));
     }
 
+    public function reconcile(User $user, Region $region)
+    {
+        return $user->hasRole('globalStatistician');
+    }
 }

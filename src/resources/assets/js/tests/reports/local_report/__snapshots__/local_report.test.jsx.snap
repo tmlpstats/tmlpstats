@@ -331,7 +331,7 @@ exports[`LocalReport Next Qtr Accountabilities 1`] = `
         </a>
       </li>
       <li
-        className=""
+        className="active"
       >
         <a
           onClick={[Function]}
@@ -349,99 +349,115 @@ exports[`LocalReport Next Qtr Accountabilities 1`] = `
           </span>
         </a>
       </li>
-      <li
-        className="active"
-      >
-        <a
-          onClick={[Function]}
-          style={Object {}}
-        >
-          <span
-            className="long"
-          >
-            Next Quarter Accountabilities
-          </span>
-          <span
-            className="brief"
-          >
-            Accountabilities
-          </span>
-        </a>
-      </li>
     </ul>
     <div>
       <div
         className="tab-content"
       >
         <div
-          className="table-responsive"
+          style={Object {}}
         >
           <h3>
-            Next Quarter Accountabilities
+            Weekend Information
           </h3>
-          <table
-            className="table table-condensed table-striped table-hover"
-            id="tbl-localReport_nqa"
+          <div
+            className="btn-group grouping"
+            role="group"
           >
-            <thead>
-              <tr>
-                <th
-                  aria-controls="tbl-localReport_nqa"
-                  className="tabular-sortable"
-                  onClick={[Function]}
-                >
-                  Accountability
-                </th>
-                <th
-                  aria-controls="tbl-localReport_nqa"
-                  className="tabular-sortable"
-                  onClick={[Function]}
-                >
-                  Name
-                </th>
-                <th
-                  aria-controls="tbl-localReport_nqa"
-                  className="tabular-sortable"
-                  onClick={[Function]}
-                >
-                  Phone
-                </th>
-                <th
-                  aria-controls="tbl-localReport_nqa"
-                  className="tabular-sortable"
-                  onClick={[Function]}
-                >
-                  Email
-                </th>
-                <th
-                  aria-controls="tbl-localReport_nqa"
-                  className="tabular-sortable"
-                  onClick={[Function]}
-                >
-                  Updated At
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  Boss
-                </td>
-                <td>
-                  Person Name
-                </td>
-                <td>
-                  12345
-                </td>
-                <td>
-                  abc@def.com
-                </td>
-                <td>
-                  Jan 1, 2017 02:03 AM
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Team Summary
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={[Function]}
+              type="button"
+            >
+              Travel / Room
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={[Function]}
+              type="button"
+            >
+              Next Quarter Accountabilities
+            </button>
+          </div>
+          <div>
+            <div
+              className="table-responsive"
+            >
+              <h3>
+                Next Quarter Accountabilities
+              </h3>
+              <table
+                className="table table-condensed table-striped table-hover"
+                id="tbl-localReport_nqa"
+              >
+                <thead>
+                  <tr>
+                    <th
+                      aria-controls="tbl-localReport_nqa"
+                      className="tabular-sortable"
+                      onClick={[Function]}
+                    >
+                      Accountability
+                    </th>
+                    <th
+                      aria-controls="tbl-localReport_nqa"
+                      className="tabular-sortable"
+                      onClick={[Function]}
+                    >
+                      Name
+                    </th>
+                    <th
+                      aria-controls="tbl-localReport_nqa"
+                      className="tabular-sortable"
+                      onClick={[Function]}
+                    >
+                      Phone
+                    </th>
+                    <th
+                      aria-controls="tbl-localReport_nqa"
+                      className="tabular-sortable"
+                      onClick={[Function]}
+                    >
+                      Email
+                    </th>
+                    <th
+                      aria-controls="tbl-localReport_nqa"
+                      className="tabular-sortable"
+                      onClick={[Function]}
+                    >
+                      Updated At
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      Boss
+                    </td>
+                    <td>
+                      Person Name
+                    </td>
+                    <td>
+                      12345
+                    </td>
+                    <td>
+                      abc@def.com
+                    </td>
+                    <td>
+                      Jan 1, 2017 02:03 AM
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>

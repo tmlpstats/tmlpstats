@@ -77,6 +77,10 @@ trait LocalReportDispatch
             'method' => 'getNextQtrAccountabilities',
             'cacheTime' => 2,
         ],
+        'reconciliation' => [
+            'id' => 'Reconciliation',
+            'method' => 'getReconciliation',
+        ],
     ];
 
     public function getPageCacheTime($report)
@@ -146,5 +150,8 @@ trait LocalReportDispatch
 
     // Get report Next Quarter Accountabilities
     protected abstract function getNextQtrAccountabilities();
+
+    // Get report Weekend Reconciliation
+    protected abstract function getReconciliation();
 
 }
