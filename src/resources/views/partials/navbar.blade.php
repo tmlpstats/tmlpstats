@@ -211,4 +211,5 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
             </div>
         </div>
     </div>
+    <div class="stage-warning">This is NOT the official site. Use <a href="https://tmlpstats.com">tmlpstats.com</a></div>
 </nav>

@@ -468,6 +468,16 @@ table.submissionClassList {
     height: 14px;
 }
 
+.stage-warning {
+    background-color: red;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+.stage-warning a {
+    color: white;
+    text-decoration: underline;
+}
 
 /* Override bootstrap print stylesheet */
 @media print {
