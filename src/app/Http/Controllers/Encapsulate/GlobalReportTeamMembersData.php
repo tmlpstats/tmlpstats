@@ -219,7 +219,13 @@ class GlobalReportTeamMembersData
                         continue;
                     }
 
-                    if ($member->teamMember->personId == $registration->registration->personId) {
+                    if ($member->teamMember->personId === $registration->registration->personId
+                        || ($member->firstName === $registration->firstName
+                            && $member->lastName === $registration->lastName
+                            && $member->teamYear == 1
+                            && $registration->teamYear == 2
+                            && !$registration->registration->isReviewer)
+                    ) {
                         $potentialsThatRegistered[$member->teamMember->personId] = $registration;
                         break;
                     }
