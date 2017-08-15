@@ -513,12 +513,26 @@ class SubmissionCore extends AuthenticatedApiBase
      */
     protected function createNewApplication(Models\Center $center, Domain\TeamApplication $app)
     {
-        $person = Models\Person::create([
-            'center_id' => $center->id,
-            'first_name' => $app->firstName,
-            'last_name' => $app->lastName,
-            'identifier' => '',
-        ]);
+        $person = null;
+        if ($app->teamYear == 2) {
+            // If this person is applying into team 2, check if there's already a person with
+            // the same name and center. This isn't super precise, but it helps avoid issues where
+            // team members that register into team 2 aren't correctly matched up with their
+            // existing team member.
+            $person = Models\Person::byCenter($center)
+                ->firstName($app->firstName)
+                ->lastName($app->lastName, false)
+                ->first();
+        }
+
+        if (!$person) {
+            $person = Models\Person::create([
+                'center_id' => $center->id,
+                'first_name' => $app->firstName,
+                'last_name' => $app->lastName,
+                'identifier' => '',
+            ]);
+        }
 
         return Models\TmlpRegistration::create([
             'person_id' => $person->id,
