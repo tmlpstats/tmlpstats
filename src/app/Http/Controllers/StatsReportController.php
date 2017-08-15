@@ -1129,6 +1129,32 @@ class StatsReportController extends Controller
         ];
     }
 
+    protected function getReconciliation(Models\StatsReport $statsReport)
+    {
+        $globalRegion = $statsReport->center->getGlobalRegion();
+        if (!$this->context->can('reconcile', $globalRegion)) {
+            throw new \Exception('Must be a regional statistician');
+        }
+        $localApi = App::make(Api\LocalReport::class);
+        $people = $localApi->getClassList($statsReport);
+
+        $grouped = collect($people)->groupBy(function ($tmd) {return $tmd->teamMember->incomingQuarterId;});
+
+        // Now get applications only for next quarter
+        $nextQuarter = $statsReport->quarter->getNextQuarter();
+        $apps = $localApi->getApplicationsList($statsReport, ['returnUnprocessed' => true]);
+
+        $incoming = $apps->filter(function ($app) use ($nextQuarter) {
+            return $app->incomingQuarterId == $nextQuarter->id;
+        });
+
+        $grouped = $grouped->put($nextQuarter->id, $incoming->values()->all());
+
+        return [
+            'byQuarter' => $grouped,
+        ];
+    }
+
     protected function coursesEqual($new, $old)
     {
         if ($new['courseId'] == $old['courseId']) {

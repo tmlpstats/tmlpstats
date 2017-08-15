@@ -725,13 +725,17 @@ reportMeta:
             name: Team Summary
           TeamTravelSummary:
             name: Travel / Room
-
-      NextQtrAccountabilities:
-        name: Next Quarter Accountabilities
-        shortName: Accountabilities
-        requiredFlags: ['nextQtrAccountabilities']
-        cacheTime: 2
-        render: react
+          NextQtrAccountabilities:
+            name: Next Quarter Accountabilities
+            shortName: Accountabilities
+            requiredFlags: ['nextQtrAccountabilities']
+            cacheTime: 2
+            render: react
+          Reconciliation:
+            name: Weekend Reconciliation
+            shortName: Reconciliation
+            requiredFlags: ['reconcile']
+            render: react
 
 
 reports: {}

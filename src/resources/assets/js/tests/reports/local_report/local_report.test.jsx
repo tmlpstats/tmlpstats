@@ -50,7 +50,7 @@ describe('LocalReport', () => {
         store.dispatch(reportData.replaceItem(key.set('page', 'NextQtrAccountabilities'), {nqas: [
                 {id: 123, accountability: {display: 'Boss'}, name: 'Person Name', phone: '12345', email: 'abc@def.com', meta: {updatedAt: moment('2017-01-01T02:03:04').utc().format()}}
         ]}))
-        const params = Object.assign({tab1: 'NextQtrAccountabilities'}, baseParams)
+        const params = Object.assign({tab1: 'Weekend', tab2: 'NextQtrAccountabilities'}, baseParams)
         const tree = renderer.create(
             <Wrap>
                 <LocalReport params={params} />

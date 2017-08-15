@@ -1,12 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router'
-import _ from 'lodash'
+import { connectRedux } from '../../reusable/dispatch'
 
-import { connectRedux, delayDispatch } from '../../reusable/dispatch'
-
-import { quartersData } from '../data'
+import { checkQuartersData } from './checkers'
 import { joinedRegionQuarters } from './selectors'
 import RegionBase, { regionQuarterBaseUri } from './RegionBase'
+
 
 @connectRedux()
 export class SelectQuarter extends RegionBase {
@@ -21,13 +20,7 @@ export class SelectQuarter extends RegionBase {
     }
 
     checkData() {
-        if (!this.props.quarters.loadState.loaded) {
-            if (this.props.quarters.loadState.available) {
-                delayDispatch(this, quartersData.load())
-            }
-            return false
-        }
-        return this.checkRegions()
+        return checkQuartersData(this) && this.checkRegions()
     }
 
     render() {

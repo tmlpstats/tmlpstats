@@ -1,9 +1,7 @@
 import React from 'react'
 import { createSelector } from 'reselect'
 
-import { delayDispatch } from '../../reusable/dispatch'
-
-import * as actions from './actions'
+import { checkRegionData } from './checkers'
 
 /**
  * RegionBase implements some helpers for routes based on a single region (with regionAbbr in the path param)
@@ -11,12 +9,7 @@ import * as actions from './actions'
 export default class RegionBase extends React.Component {
     checkRegions() {
         const { regionAbbr } = this.props.params
-        const { loadState, data } = this.props.regions
-        if (!data[regionAbbr] && loadState.available) {
-            delayDispatch(this, actions.loadRegionsData(regionAbbr))
-            return false
-        }
-        return loadState.loaded
+        return checkRegionData(this, regionAbbr)
     }
 
     regionCenters() {

@@ -5,12 +5,14 @@
  */
 import moment from 'moment'
 import PropTypes from 'prop-types'
-import React, { PureComponent } from 'react'
+import React, { Component, PureComponent } from 'react'
 import { defaultMemoize } from 'reselect'
 
 import { DATE_TIME_PRETTY } from '../../reusable/time_displays'
 import { buildTable } from '../../reusable/tabular'
 import { lazy } from '../../reusable/dispatch'
+
+export { Reconciliation } from './pages-reconciliation'
 
 const buildNQATable = lazy(function() {
 

@@ -484,20 +484,9 @@ const LocalReport = {
         "type": "report",
         "name": "Travel \/ Room"
     },
-    "Weekend": {
-        "id": "Weekend",
-        "n": 17,
-        "type": "grouping",
-        "name": "Weekend Information",
-        "shortName": "Weekend",
-        "children": [
-            "TeamWeekendSummary",
-            "TeamTravelSummary"
-        ]
-    },
     "NextQtrAccountabilities": {
         "id": "NextQtrAccountabilities",
-        "n": 18,
+        "n": 17,
         "type": "report",
         "name": "Next Quarter Accountabilities",
         "shortName": "Accountabilities",
@@ -505,6 +494,30 @@ const LocalReport = {
             "nextQtrAccountabilities"
         ],
         "render": "react"
+    },
+    "Reconciliation": {
+        "id": "Reconciliation",
+        "n": 18,
+        "type": "report",
+        "name": "Weekend Reconciliation",
+        "shortName": "Reconciliation",
+        "requiredFlags": [
+            "reconcile"
+        ],
+        "render": "react"
+    },
+    "Weekend": {
+        "id": "Weekend",
+        "n": 19,
+        "type": "grouping",
+        "name": "Weekend Information",
+        "shortName": "Weekend",
+        "children": [
+            "TeamWeekendSummary",
+            "TeamTravelSummary",
+            "NextQtrAccountabilities",
+            "Reconciliation"
+        ]
     },
     "_root": {
         "type": "grouping",
@@ -518,8 +531,7 @@ const LocalReport = {
             "Courses",
             "ContactInfo",
             "TransferCheck",
-            "Weekend",
-            "NextQtrAccountabilities"
+            "Weekend"
         ]
     }
 }

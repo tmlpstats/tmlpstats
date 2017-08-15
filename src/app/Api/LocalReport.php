@@ -251,6 +251,7 @@ class LocalReport extends AuthenticatedApiBase
                 'canReadContactInfo' => $this->context->can('readContactInfo', $statsReport),
                 'firstWeek' => $cq->firstWeekDate->toDateString() == $reportingDate->toDateString(),
                 'nextQtrAccountabilities' => $crd->canShowNextQtrAccountabilities(),
+                'reconcile' => $reportingDate->gte($cq->classroom3Date) && $this->context->can('reconcile', $globalRegion),
             ],
             'centerInfo' => collect($center->toArray())->only(['id', 'name', 'abbreviation', 'teamName', 'regionId']),
             'reportToken' => ($reportToken !== null) ? $reportToken->getUrl() : null,
