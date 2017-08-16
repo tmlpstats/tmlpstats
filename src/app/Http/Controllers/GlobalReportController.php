@@ -1072,7 +1072,7 @@ class GlobalReportController extends Controller
 
             if (!isset($reportData[$centerName])) {
                 $reportData[$centerName] = [
-                    'classroomLeader' => $center->getClassroomLeader(),
+                    'classroomLeader' => $center->getClassroomLeader($globalReport->reportingDate),
                     'team1' => [
                         'totalCount' => 0,
                         'withdrawCount' => 0,
