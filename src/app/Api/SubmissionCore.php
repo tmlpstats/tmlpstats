@@ -955,7 +955,7 @@ class SubmissionCore extends AuthenticatedApiBase
                     $report[] = "Applicant {$personInfo} should be turned into a team member";
                 } else {
                     $data = $data->all(); // ->all() on a collection returns the underlying array
-                    if (!array_key_exists($app->committedTeamMemberId, $goodTeamMembers)) {
+                    if (!array_key_exists($app->committedTeamMemberId, $goodTeamMembers) && $app->committedTeamMember) {
                         $ctm = $app->committedTeamMember->person;
                         $personInfo .= " NOTE: Had committed team member {$ctm->firstName} {$ctm->lastName} who completed.";
                         unset($data['committedTeamMember']);
