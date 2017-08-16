@@ -211,5 +211,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
             </div>
         </div>
     </div>
+    @if (config('app.env') == 'stage')
     <div class="stage-warning">This is NOT the official site. Use <a href="https://tmlpstats.com">tmlpstats.com</a></div>
+    @endif
 </nav>
