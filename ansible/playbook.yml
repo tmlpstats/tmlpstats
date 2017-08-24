@@ -173,12 +173,7 @@
       - name: Install bower package manager
         command: /usr/local/bin/npm install -g bower
         args:
-          creates: /usr/local/bin/gulp
-
-      - name: Install gulp
-        command: /usr/local/bin/npm install -g gulp-cli
-        args:
-          creates: /usr/local/bin/gulp
+          creates: /usr/local/bin/bower
 
 
   # This helps maintain the cache and authtokens between box destroys
@@ -215,15 +210,16 @@
           chdir: /vagrant/src
 
       - name: Run bower install
+        when: "'/var/www/tmlpstats.com/bower.json'|exists"
         command: bower install
         args:
           chdir: /var/www/tmlpstats.com
 
-      - name: Run gulp if bundle.js is missing
-        command: gulp
+      - name: Run asset build if vendor.js is missing
+        command: npm run production
         args:
           chdir: /var/www/tmlpstats.com
-          creates: /var/www/tmlpstats.com/public/js/bundle.js
+          creates: /var/www/tmlpstats.com/public/build/js/vendor.js
 
   # Run Laravel Default Admin seeder
 

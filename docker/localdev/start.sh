@@ -22,7 +22,7 @@ if mkdir "$OPTIONS_DIR" 2>/dev/null; then
 This directory allows you to set options by creating small files in here.
 Valid option files:
 
-- norefresh: If exists, don't keep refreshing composer/bower/npm.
+- norefresh: If exists, don't keep refreshing composer/npm.
 - watch: If exists, use 'npm run watch' to refresh files. Might have performance concerns.
 - nojs: Rarely used, but sets up in case you don't want to blow away JS files.
 EOF
