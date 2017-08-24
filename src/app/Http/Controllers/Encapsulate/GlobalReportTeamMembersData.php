@@ -206,29 +206,29 @@ class GlobalReportTeamMembersData
         ]);
 
         $potentialsThatRegistered = [];
-        if ($registrations) {
-
+        if ($registrations) {            
+            // Build list of T2 registrations, ignoring whitespace.
+            $registrationsByCenterAndName = [];
+            foreach ($registrations as $appdata) {
+                $registration = $appdata->registration;
+                if ($appdata->teamYear != 2 || $appdata->xferOut ||
+                        $appdata->isWithdrawn() ||
+                        $registration->isReviewer
+                ) {
+                    continue;
+                }
+                $registrationsByCenterAndName["{$appdata->center->id}/".
+                        trim($registration->person->firstName)." " . 
+                        trim($registration->person->lastName)] = $appdata;
+            }
+            
             $potentials = $data['reportData']['t2Potential'];
             foreach ($potentials as $member) {
-                foreach ($registrations as $registration) {
-                    if ($registration->teamYear != 2
-                        || $registration->xferOut
-                        || $registration->isWithdrawn()
-                        || $registration->center->id != $member->center->id
-                    ) {
-                        continue;
-                    }
+                $person = $member->teamMember->person;
+                $key = "{$person->centerId}/" . trim($person->firstName). " " .trim($person->lastName);
 
-                    if ($member->teamMember->personId === $registration->registration->personId
-                        || ($member->firstName === $registration->firstName
-                            && $member->lastName === $registration->lastName
-                            && $member->teamYear == 1
-                            && $registration->teamYear == 2
-                            && !$registration->registration->isReviewer)
-                    ) {
-                        $potentialsThatRegistered[$member->teamMember->personId] = $registration;
-                        break;
-                    }
+                if (isset($registrationsByCenterAndName[$key])) {                    
+                    $potentialsThatRegistered[$member->teamMember->personId] = $registrationsByCenterAndName[$key];
                 }
             }
         }
