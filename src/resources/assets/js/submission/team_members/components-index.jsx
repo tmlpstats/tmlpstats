@@ -158,7 +158,7 @@ class TeamMemberWithdrawnRow extends React.PureComponent {
             <tr>
                 <td>
                     <Link to={`${baseUri}/edit/${teamMember.id}`}>
-                        {teamMember.firstName} {teamMember.lastName}
+                        {teamMemberText(teamMember)}
                     </Link>
                 </td>
                 <td>T{teamMember.teamYear} Q{teamMember.quarterNumber}</td>
@@ -195,7 +195,7 @@ class TeamMemberIndexRow extends React.PureComponent {
             <tr className={className}>
                 <td>
                     <Link to={`${this.props.baseUri}/edit/${teamMember.id}`}>
-                        {teamMember.firstName} {teamMember.lastName}
+                        {teamMemberText(teamMember)}
                     </Link>
                 </td>
                 <td>T{teamMember.teamYear} Q{teamMember.quarterNumber}</td>
@@ -216,4 +216,8 @@ class GitwTdoLiveSelect extends BooleanSelectView {
         bits.reverse() // the model looks like path.<teamMemberid>.tdo so if we reverse it, we get the right answer
         this.props.dispatch(actions.weeklyReportingUpdated(bits[1]))
     }
+}
+
+function teamMemberText(teamMember) {
+    return (teamMember.firstName || '(First Name Blank)') + ' ' + (teamMember.lastName || '(Last Name Blank)')
 }
