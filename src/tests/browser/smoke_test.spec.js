@@ -49,6 +49,19 @@ describe('Smoke Test', () => {
     it('can switch to Courses Link', () => {
         $('.submission-nav').$('a=Courses').click()
         $('h3=Manage Courses').waitForExist(DEFAULT_WAIT)
+
+        let coursesUrl = browser.getUrl()
+        // Clicking the first course means we have to have one in the database
+        $('.submission-content table tbody').$('tr:nth-child(1)').$('a').click()
+
+        // Do some minor edit to a course.
+        $('h3*=Edit Course').waitForExist(DEFAULT_WAIT)
+        let form = $('.submission-content form')
+        let terElement = form.$('[name*=currentTer]')
+        let newValue = 1 + (terElement.getValue()|0)
+        terElement.setValue(newValue.toString())
+        form.$('button=Save').click()
+        browser.pause(1000)
     })
 
     it('can switch to Review page', () => {

@@ -25,6 +25,15 @@ let browsers = {
             args: [ '--disable-password-bubble' ]
         }
     },
+    chrome_old: {
+        // This specifies Chrome 40, which came out in 2014. It should still work.
+        _excludeDefault: true,
+        os: 'Windows',
+        os_version: '7',
+        browser: 'Chrome',
+        browser_version: '40.0',
+        resolution: '1280x800'
+    },
     safari_old: {
         // Oldest Safari we support right now is Safari 7 (OSX Mavericks).
         // Browserstack has browsers like OSX Lion with Safari 6, which we do not support.

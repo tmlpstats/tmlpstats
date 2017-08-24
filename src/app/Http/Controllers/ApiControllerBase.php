@@ -51,7 +51,7 @@ class ApiControllerBase extends Controller
 
         if ($authenticate === 'token') {
             App::make(TokenAuthenticate::class)->authenticate();
-        } else if ($authenticate !== 'all' && Auth::user() == null) {
+        } else if ($authenticate !== 'any' && Auth::user() == null) {
             throw new ApiExceptions\NotAuthenticatedException('You must be authenticated to access the api.');
         }
 
