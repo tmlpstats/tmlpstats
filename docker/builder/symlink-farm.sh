@@ -23,7 +23,7 @@ do
 done
 
 TRASHFILES=(
-    composer.json composer.lock bower.json package.json
+    composer.json composer.lock package.json
 )
 
 for trashfile in "${TRASHFILES[@]}";

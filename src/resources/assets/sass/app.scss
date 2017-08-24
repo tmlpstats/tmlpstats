@@ -2,10 +2,10 @@
 @import 'node_modules/font-awesome/scss/font-awesome';
 
 // Legacy/addon CSS: Note we omit the '.css' extension so that sass will compile them in.
-@import 'bower_components/jquery-loading/dist/jquery.loading.min';
+@import 'node_modules/jquery-easy-loading/dist/jquery.loading.min';
 @import 'node_modules/react-bootstrap-typeahead/css/Typeahead';
 @import 'node_modules/react-bootstrap-typeahead/css/Token';
-@import 'bower_components/datatables/media/css/dataTables.bootstrap.min';
+@import 'node_modules/datatables.net-bs/css/dataTables.bootstrap';
 
 
 // Custom CSS
