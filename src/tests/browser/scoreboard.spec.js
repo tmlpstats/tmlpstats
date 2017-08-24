@@ -22,7 +22,7 @@ describe('Scoreboard', () => {
     })
 
     it('can load new Submission UI', () => {
-        $('=Submit Report (beta)').click()
+        $('=Submit Report').click()
         browser.pause(1000)
         // We wait for the h3 first because it means the content pane is done loading.
         $('h3').waitForExist(DEFAULT_WAIT)
@@ -75,7 +75,7 @@ describe('Scoreboard', () => {
         expect(cpc.getValue()).toEqual('20')
         expect(t1x.getValue()).toEqual('10')
         expect(t2x.getValue()).toEqual('2')
-        expect(gitw.getValue()).toEqual('90%')
+        expect(gitw.getValue()).toMatch(/^90/)
         expect(lf.getValue()).toEqual('30')
     })
 })
