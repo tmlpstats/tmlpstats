@@ -1,9 +1,11 @@
 <?php
 namespace TmlpStats;
 
+use App;
 use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Model;
+use TmlpStats\Encapsulations;
 use TmlpStats\Traits\CachedRelationships;
 
 class TeamMember extends Model
@@ -50,11 +52,27 @@ class TeamMember extends Model
         return $this->person->getAccountabilities($when);
     }
 
+    protected static $qReportingDate = null;
+
+    // Hack the reporting date for the purpose of getQuarterNumber.
+    // This is a temporary hack to solve a specific website issue with how we use reportingDate.
+    public static function hackReportingDate(Carbon $reportingDate) {
+        static::$qReportingDate =  $reportingDate;
+    }
+
     public static function getQuarterNumber(Quarter $incomingQuarter, Region $region)
     {
-        return static::getFromCache("quarterNumber:region{$region->id}", $incomingQuarter->id, function() use ($incomingQuarter, $region) {
+        $reportingDate = static::$qReportingDate;
+        $candidateDate = $reportingDate ? $reportingDate->toDateString() : 'unknown';
 
-            $thisQuarter = Quarter::getCurrentQuarter($region);
+        return static::getFromCache("quarterNumber:region{$region->id}:{$candidateDate}", $incomingQuarter->id, function () use ($incomingQuarter, $region, $reportingDate) {
+
+            if ($reportingDate) {
+                $thisQuarter = Encapsulations\RegionReportingDate::ensure($region, $reportingDate)->getQuarter();
+            } else {
+                $thisQuarter = Quarter::getCurrentQuarter($region);
+            }
+
             if (!$thisQuarter) {
                 return null;
             }
