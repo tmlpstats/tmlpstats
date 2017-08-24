@@ -103,7 +103,7 @@ class ProgramLeader extends AuthenticatedApiBase
             $domain = Domain\ProgramLeader::fromArray($data);
         }
 
-        $report = LocalReport::ensureStatsReport($center, $reportingDate);
+        $report = Api\LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $domain, $programLeaderId);
 
         if (!isset($data['_idGenerated']) || $validationResults['valid']) {
