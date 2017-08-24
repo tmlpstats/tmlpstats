@@ -20,7 +20,7 @@ class TeamMember extends AuthenticatedApiBase
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
-
+        Models\TeamMember::hackReportingDate($reportingDate); // XXX temporary, fixes an issue with team member's quarterNumber
         $allTeamMembers = [];
 
         if ($includeInProgress) {
@@ -70,8 +70,8 @@ class TeamMember extends AuthenticatedApiBase
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate, ['write']);
-
         $this->assertCan('submitStats', $center);
+        Models\TeamMember::hackReportingDate($reportingDate); // XXX temporary, fixes an issue with team member's quarterNumber
 
         $submissionData = App::make(SubmissionData::class);
         $teamMemberId = $submissionData->numericStorageId($data, 'id');
