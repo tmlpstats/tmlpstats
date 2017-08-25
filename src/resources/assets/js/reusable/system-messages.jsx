@@ -21,17 +21,16 @@ export class SystemMessages extends PureComponent {
             return <span></span>
         }
 
-        let items = messages.map((message) => {
+        let items = []
+        messages.forEach((message) => {
+            if (message.dismissed) {
+                return
+            }
             const parsed = SimpleMarkdown.defaultBlockParse(message.content)
             const title = (message.updatedAt)? `Updated at ${message.updatedAt}` : undefined
-            if (message.dismissed) {
-                return (
-                    undefined
-                )
-            }
 
             const mDismiss = onDismiss? function() { onDismiss(message.id, ...arguments) } : undefined
-            return (
+            items.push(
                 <Alert key={message.id} alert={message.level || 'info'} onDismiss={mDismiss}>
                     &nbsp;<b title={title}>{message.title || 'System Message'}</b>
                     {SimpleMarkdown.defaultOutput(parsed)}
@@ -39,6 +38,6 @@ export class SystemMessages extends PureComponent {
             )
         })
 
-        return (items.size == 1)? items.first() : <div>{items}</div>
+        return (items.length == 1)? items[0] : <div>{items}</div>
     }
 }
