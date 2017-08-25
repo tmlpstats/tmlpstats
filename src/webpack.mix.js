@@ -37,3 +37,7 @@ if (mix.inProduction() || process.env.IN_LOCALDEV) {
     mix.version()
     mix.disableNotifications()
 }
+
+if (!mix.inProduction()) {
+    mix.sourceMaps()
+}

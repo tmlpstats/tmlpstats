@@ -6,24 +6,6 @@ import Api from '../api'
 // Eventually we want to eliminate these, but for now this gives a pathway for eslint.
 const { $ } = window
 
-
-/**
- * Get a human readable message from the HTTP status code
- * @param code
- * @returns {string}
- */
-window.getErrorMessage = function(code) {
-    var message = '';
-    if (code == 404) {
-        message = 'Unable to find report.';
-    } else if (code == 403) {
-        message = 'You do not have access to this report.';
-    } else {
-        message = 'Unable to get report.';
-    }
-    return message;
-}
-
 /**
  * Find all spans with class date, and set value to localized date string
  * e.g.
