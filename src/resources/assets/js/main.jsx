@@ -9,7 +9,7 @@ import { Router } from 'react-router'
 import { LiveScoreboard } from './live_scoreboard'
 import { SubmissionFlow } from './submission'
 import QuarterAccountabilitiesEmbed from './submission/next_qtr_accountabilities/embed'
-import AdminFlow from './admin/flow'
+import { AdminFlow, HomeFlow }from './admin/flow'
 import ReportsFlow from './reports/flow'
 import { store, history } from './store'
 
@@ -20,6 +20,7 @@ function _routedFlow() {
                 {SubmissionFlow()}
                 {AdminFlow()}
                 {ReportsFlow()}
+                {HomeFlow()}
             </Router>
         </Provider>
     )

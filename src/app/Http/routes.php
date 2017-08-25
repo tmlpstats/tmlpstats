@@ -23,7 +23,7 @@ Route::group(['prefix' => 'admin'], function () {
     Route::resource('users', 'UserController');
 
     Route::get('regions/{regionAbbr}/{page?}/{tab1?}/{tab2?}/{irrelevant3?}/{irrelevant4?}', 'ManageController@region');
-    Route::get('system/{ignore?}', 'ManageController@system');
+    Route::get('system/{ignore?}/{ignore2?}', 'ManageController@system');
 });
 
 // Invites

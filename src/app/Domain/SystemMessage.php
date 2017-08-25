@@ -50,13 +50,8 @@ class SystemMessage extends ParserDomain
     public static function fromModel($model, $options = [])
     {
         $ignore = array_get($options, 'ignore', false);
-        $accountability = array_get($options, 'accountability', null);
 
         $obj = new static();
-
-        if ($accountability) {
-            $obj->accountability = $accountability;
-        }
 
         foreach (static::$validProperties as $k => $v) {
             if ($ignore && array_get($ignore, $k, false)) {

@@ -47,6 +47,16 @@ class SystemMessage extends Model
         });
     }
 
+    public function scopeRegion($query, Region $region)
+    {
+        return $query->where(function ($query) use ($region) {
+            $query = $query->where('region_id', '=', $region->id);
+            if ($region->parentId) {
+                $query->orWhere('region_id', '=', $region->parentId);
+            }
+        });
+    }
+
     public function scopeActive($query)
     {
         return $query->whereActive(true);

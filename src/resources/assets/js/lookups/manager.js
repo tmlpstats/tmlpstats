@@ -26,6 +26,7 @@ export class LookupManager extends ReduxLoader {
     constructor(opts) {
         super(opts, DEFAULTS)
         this.put_items_action = opts.prefix + '/put_items'
+        this.put_item_action = opts.prefix + '/put_item'
         this.replace_scope_action = opts.prefix + '/replace_scope'
         this.init_scope_action = opts.prefix + '/init_scope'
         this.scopes = {}
@@ -48,6 +49,8 @@ export class LookupManager extends ReduxLoader {
                         })
                     }
                     return state.set(scope, collection)
+                } else if (action.type == this.put_item_action) {
+                    return state.setIn([scope, payload.key], payload.value)
                 } else if (action.type == this.replace_scope_action) {
                     return state.set(scope, Immutable.Map(payload.value))
                 }
@@ -65,7 +68,7 @@ export class LookupManager extends ReduxLoader {
     }
 
     putItem(scope, key, value) {
-        return this.putItems(scope, [[key, value]])
+        return {type: this.put_item_action, payload: {scope, key, value}}
     }
 
     ensureScope(scope) {

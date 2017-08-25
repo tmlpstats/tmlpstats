@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import React, { PureComponent } from 'react'
 import SimpleMarkdown from 'simple-markdown'
 
-import { Alert } from './ui_basic'
+import { Alert } from '../ui_basic'
 
 /**
  * simple SystemMessages class for the overarching system messages.

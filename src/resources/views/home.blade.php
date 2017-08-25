@@ -6,6 +6,7 @@
     <p>It looks like your account isn't completely setup. Please contact <strong>future.tmlpstat@gmail.com</strong> and they will make sure you get access to everything you need.</p>
     @else
         <h1>Results for Week Ending {{ $reportingDate->format('F j, Y') }}</h1>
+        <div id="react-routed-flow"></div>
 
         @foreach ($regionsData as $data)
             <h3>{{ $data['displayName'] }}</h3>

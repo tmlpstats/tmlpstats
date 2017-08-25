@@ -60,7 +60,14 @@ api:
           allSystemMessages:
             desc: Get all system messages
             params: []
-
+          regionSystemMessages:
+            desc: Get system messages for a region
+            access: token
+            params:
+              - name: section
+                type: string
+              - name: region
+                type: Region
           writeSystemMessage:
             desc: Upsert a system message
             params:
