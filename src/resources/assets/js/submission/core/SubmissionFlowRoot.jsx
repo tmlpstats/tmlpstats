@@ -2,7 +2,7 @@ import _ from 'lodash'
 import React from 'react'
 
 import { systemMessagesData } from '../../lookups/lookups-system-messages'
-import { connectRedux } from '../../reusable/dispatch'
+import { connectRedux, rebind } from '../../reusable/dispatch'
 import { SystemMessages } from '../../reusable/system-messages'
 import { SubmissionBase } from '../base_components'
 
@@ -21,6 +21,11 @@ export default class SubmissionFlowRoot extends SubmissionBase {
             core: state.submission.core,
             systemMessages: systemMessagesData.getMessages(state, 'submission')
         }
+    }
+
+    constructor(props) {
+        super(props)
+        rebind(this, 'onMessageDismiss')
     }
 
     render() {
@@ -61,7 +66,7 @@ export default class SubmissionFlowRoot extends SubmissionBase {
         }
         return (
             <div>
-                <SystemMessages messages={systemMessages} />
+                <SystemMessages messages={systemMessages} onDismiss={this.onMessageDismiss} />
                 {layout}
             </div>
         )
@@ -70,5 +75,9 @@ export default class SubmissionFlowRoot extends SubmissionBase {
     checkReportingDate() {
         const { centerId, reportingDate } = this.props.params
         return checkCoreData(centerId, reportingDate, this.props.core, this.props.dispatch)
+    }
+
+    onMessageDismiss(messageId, a) {
+        this.props.dispatch(systemMessagesData.dismiss('submission', messageId))
     }
 }

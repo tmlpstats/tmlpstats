@@ -252,7 +252,8 @@ export class Alert extends React.PureComponent {
     static propTypes = {
         alert: PropTypes.string.isRequired,
         icon: PropTypes.string,
-        children: PropTypes.node
+        children: PropTypes.node,
+        onDismiss: PropTypes.func
     }
 
     static defaultProps = {
@@ -261,10 +262,19 @@ export class Alert extends React.PureComponent {
     }
 
     render() {
-        const { alert, icon, children } = this.props
-        let chosenIcon = icon? icon : alertsByKey[alert].icon
+        const { alert, icon, children, onDismiss } = this.props
+        const classes = ['alert' , 'alert-' + alert]
+
+        let dismiss
+        if (onDismiss) {
+            classes.push('alert-dismissible')
+            dismiss = <button type="button" className="close" aria-label="Close" onClick={onDismiss}><span aria-hidden="true">&times;</span></button>
+        }
+
+        const chosenIcon = icon? icon : alertsByKey[alert].icon
         return (
-            <div className={'alert alert-' + alert}>
+            <div className={cssClasses(classes)}>
+                {dismiss}
                 <span className={'glyphicon glyphicon-' + chosenIcon} aria-hidden="true"></span>
                 {children}
             </div>

@@ -4,7 +4,7 @@ import Immutable from 'immutable'
 
 import Api from '../../api'
 import {
-    Form, Control, formActions, SimpleField, SimpleFormGroup,
+    Form, formActions, SimpleField, SimpleFormGroup,
     SimpleSelect, NullableTextControl, NullableTextAreaControl, BooleanSelect } from '../../reusable/form_utils'
 import { ALERT_TYPES } from '../../reusable/ui_basic'
 import { objectAssign } from '../../reusable/ponyfill'
@@ -122,7 +122,7 @@ export class AdminSystemMessages extends React.Component {
                         <NullableTextAreaControl model={MODEL+'.content'} rows={10} />
                     </SimpleFormGroup>
                     <SimpleFormGroup label="Preview">
-                        <DebouncedMessages messages={[currentMessage]} />
+                        <DebouncedMessages messages={Immutable.List.of(currentMessage)} />
                     </SimpleFormGroup>
                     <button type="submit" className="btn btn-primary">Save</button>
                 </Form>

@@ -1,5 +1,6 @@
-import moment from 'moment'
+import Immutable from 'immutable'
 import _ from 'lodash'
+import moment from 'moment'
 import { normalize } from 'normalizr'
 
 import { systemMessagesData } from '../../lookups/lookups-system-messages'
@@ -59,7 +60,7 @@ export function setSubmissionLookups(data, reportingDate) {
         }
 
         if (c.systemMessages) {
-            dispatch(systemMessagesData.replaceItem('submission', c.systemMessages))
+            dispatch(systemMessagesData.replaceItem('submission', Immutable.List(c.systemMessages)))
         }
 
         dispatch({
