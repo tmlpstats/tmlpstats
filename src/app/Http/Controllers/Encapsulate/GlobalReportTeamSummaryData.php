@@ -285,7 +285,7 @@ class GlobalReportTeamSummaryData
             $cl = $report->center->getClassroomLeader($report->reportingDate);
 
             $ignoreCl = false;
-            if ($pm->id == $cl->id || ($pm->firstName == $cl->firstName && $pm->lastName == $cl->lastName)) {
+            if ($pm !== null && $cl !== null && ($pm->id == $cl->id || ($pm->firstName == $cl->firstName && $pm->lastName == $cl->lastName))) {
                 $ignoreCl = true;
             }
 
