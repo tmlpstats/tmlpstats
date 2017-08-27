@@ -64,11 +64,21 @@ export class ReportContent extends PureComponent {
         path: PropTypes.arrayOf(PropTypes.string),
         contentVec: PropTypes.instanceOf(Immutable.List),
         level: PropTypes.number,
+        active: PropTypes.bool.isRequired,
+        report: PropTypes.shape({
+            type: PropTypes.string.isRequired,
+            children: PropTypes.array // optional
+        })
     }
     static defaultProps = {
         level: 1
     }
     static contextTypes = { router: routerShape }
+
+    childPath(cid) {
+        const { reportContext, level, path } = this.props
+        return reportContext.reportUri(path.slice(0, level).concat([cid]))
+    }
 
     render() {
         const { report, active, reportContext, level, path, contentVec } = this.props
@@ -77,7 +87,7 @@ export class ReportContent extends PureComponent {
             let tabs = []
             let content
             const jump = (cid) => {
-                this.context.router.push(reportContext.reportUri(path.slice(0, level).concat([cid])))
+                this.context.router.push(this.childPath(cid))
             }
 
             report.children.forEach((cid) => {
@@ -95,7 +105,7 @@ export class ReportContent extends PureComponent {
             })
             if (path && !content) {
                 setTimeout(() => {
-                    jump(report.children[0])
+                    this.context.router.replace(this.childPath(report.children[0]))
                 })
             }
             return (
