@@ -5,6 +5,7 @@ use App;
 use Auth;
 use Carbon\Carbon;
 use Exception;
+use Request;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -18,6 +19,14 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Handler extends ExceptionHandler
 {
+    protected static $EXTRA_INFOS = [
+        ['HTTP_REFERER', 'HTTP Referrer'],
+        ['HTTP_USER_AGENT', 'User Agent'],
+        ['HTTP_ACCEPT_ENCODING', 'Accept-Encoding'],
+        ['HTTP_ACCEPT_LANGUAGE', 'Accept-Lnaguage'],
+        ['HTTP_X_FORWARDED_FOR', 'X-Forwarded-For'],
+        ['REMOTE_ADDR', 'Remote IP (Maybe)'],
+    ];
     /**
      * A list of the exception types that should not be reported.
      *
@@ -47,12 +56,33 @@ class Handler extends ExceptionHandler
                 ? Auth::user()->center->name
                 : 'unknown';
             $time = Carbon::now()->format('Y-m-d H:i:s');
+            $extra = '';
+            $referer = array_get($_SERVER, 'HTTP_REFERER', '');
+
+            foreach (static::$EXTRA_INFOS as list($key, $description)) {
+                if (array_key_exists($key, $_SERVER)) {
+                    $extra .= "    {$description}: {$_SERVER[$key]}\n";
+                }
+            }
+
+            if (array_get($_SERVER, 'REQUEST_METHOD', '') == 'POST') {
+                if (($request = Request::instance()) !== null) {
+                    // getContent is from Symfony and it's going to likely have the raw JSON.
+                    if ($content = $request->getContent()) {
+                        $extra .= "    Request Body: $content\n";
+                    }
+                    // re-indent the string to look nicer in a plaintext email.
+                    $interpreted = preg_replace('/\n/', "\n      ", print_r($request->input(), true));
+                    $extra .= "    Request Interpreted:\n      {$interpreted}\n";
+                }
+            }
 
             $body = "An exception was caught by '{$user}' from {$center} center at {$time} UTC:\n\n";
             $body .= "Request details:\n";
             $body .= "    Method: '{$_SERVER['REQUEST_METHOD']}'\n";
             $body .= "    Uri: '{$_SERVER['REQUEST_URI']}'\n";
-            $body .= "    Query: '{$_SERVER['QUERY_STRING']}'\n\n";
+            $body .= "    Query: '{$_SERVER['QUERY_STRING']}'\n";
+            $body .= "{$extra}\n";
             $body .= "$e";
             try {
                 Mail::raw($body, function ($message) use ($center) {
