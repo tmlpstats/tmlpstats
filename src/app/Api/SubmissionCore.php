@@ -883,6 +883,11 @@ class SubmissionCore extends AuthenticatedApiBase
         return $person->email;
     }
 
+    public static function tmNameShort($tm)
+    {
+        return trim($tm->firstName) . ' ' . trim($tm->lastName);
+    }
+
     public function initFirstWeekData(Models\Center $center, Models\Quarter $quarter)
     {
         $this->assertCan('copyQuarterData', $center);
@@ -913,6 +918,14 @@ class SubmissionCore extends AuthenticatedApiBase
         // Phase 1: Copy non-completing Team Members
         $goodTeamMembers = [];
         $tmApi = App::make(Api\TeamMember::class);
+        $existingTeamNames = collect($tmApi->allForCenter($center, $cq->firstWeekDate, true))
+            ->sortByDesc(function ($app) {return intval($app->id);})
+            ->keyBy([self::class, 'tmNameShort']);
+
+        foreach ($existingTeamNames->all() as $k => $v) {
+            $report[] = "##Existing names '{$k}'";
+        }
+
         $members = $tmApi->allForCenter($center, $lastWeek->reportingDate, true);
         foreach ($members as $id => $member) {
             if ($validStartQids->has($member->incomingQuarterId)
@@ -931,7 +944,30 @@ class SubmissionCore extends AuthenticatedApiBase
                 ]);
                 $goodTeamMembers[$id] = true;
 
+                if ($existing = $existingTeamNames->get(static::tmNameShort($member))) {
+                    $data['gitw'] = $existing->gitw;
+                    $data['tdo'] = $existing->tdo;
+                    $accs = collect($data['accountabilities']);
+                    if ($existing->accountabilities) {
+                        foreach ($existing->accountabilities as $accId) {
+                            $accs->push($accId);
+                        }
+                    }
+                    $data['accountabilities'] = $accs->unique()->all();
+                    if ($existing->comment) {
+                        $data['comment'] .= $existing->comment;
+                    }
+                    if (intval($existing->id) < 0) {
+                        $copy .= ' and deduped ';
+                        Models\SubmissionData::center($center)
+                            ->typeId('team_member', strval($existing->id))
+                            ->limit(1)
+                            ->delete();
+                    }
+                    $copy .= " -- AND MERGED {$existing->id} --";
+                }
                 $result = $tmApi->stash($center, $cq->firstWeekDate, $data);
+
                 if ($result['success']) {
                     $copy .= ' And stashed';
                 }
@@ -944,8 +980,15 @@ class SubmissionCore extends AuthenticatedApiBase
 
         // Phase 2: Copy non-starting Team Expansion
         $appsApi = App::make(Api\Application::class);
-        $applications = $appsApi->allForCenter($center, $lastWeek->reportingDate, true);
+        $existingAppNames = collect($appsApi->allForCenter($center, $cq->firstWeekDate, true))
+            ->sortByDesc(function ($app) {return intval($app->id);})
+            ->keyBy([self::class, 'tmNameShort']);
 
+        foreach ($existingAppNames->all() as $k => $v) {
+            $report[] = "##Existing App names '{$k}'";
+        }
+
+        $applications = $appsApi->allForCenter($center, $lastWeek->reportingDate, true);
         foreach ($applications as $id => $app) {
             $personInfo = "{$app->firstName} {$app->lastName} ({$app->id})";
             if ($app->withdrawCode === null) {
@@ -960,6 +1003,26 @@ class SubmissionCore extends AuthenticatedApiBase
                         $personInfo .= " NOTE: Had committed team member {$ctm->firstName} {$ctm->lastName} who completed.";
                         unset($data['committedTeamMember']);
                         // $data['comment'] = "AUTOMATED NOTE FROM SYSTEM:\napplicant was copied over from previous quarter's stats. Committed team member {$ctm->firstName} {$ctm->lastName} has completed team. Please pick new committed team member, and then clear this note.";
+                    }
+                    $tName = static::tmNameShort($app);
+                    if ($existing = $existingAppNames->get($tName)) {
+                        $personInfo .= ' -- And merged existing';
+                        if ($existing->comment) {
+                            $data['comment'] .= $existing->comment;
+                        }
+                        foreach (['regDate', 'appOutDate', 'appInDate', 'apprDate'] as $k) {
+                            if ($existing->$k && !$data[$k]) {
+                                $data[$k] = $existing->$k;
+                                $personInfo .= " -- and merged $k";
+                            }
+                        }
+                        if (intval($existing->id) < 0) {
+                            $personInfo .= " -- AND DEDUPED {$existing->id}";
+                            Models\SubmissionData::center($center)
+                                ->typeId('application', strval($existing->id))
+                                ->limit(1)
+                                ->delete();
+                        }
                     }
 
                     $appsApi->stash($center, $cq->firstWeekDate, $data);
