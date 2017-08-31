@@ -14,14 +14,17 @@ class TeamApplication extends ParserDomain
         'firstName' => [
             'owner' => 'person',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         'lastName' => [
             'owner' => 'person',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         'email' => [
             'owner' => 'person',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         'center' => [
             'owner' => 'person',
@@ -90,6 +93,7 @@ class TeamApplication extends ParserDomain
         'phone' => [
             'owner' => 'person',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         /*
         FIELDS WE CURRENTLY DO NOT CARE ABOUT

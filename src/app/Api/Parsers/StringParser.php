@@ -12,6 +12,11 @@ class StringParser extends ParserBase
 
     public function parse($value)
     {
-        return (string) $value;
+        $value = (string) $value;
+        if (array_get($this->parserOptions, 'trim', false)) {
+            $value = trim($value);
+        }
+
+        return $value;
     }
 }

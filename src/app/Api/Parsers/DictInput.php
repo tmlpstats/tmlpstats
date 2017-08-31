@@ -34,7 +34,7 @@ class DictInput
                 }
             }
 
-            $parser = Factory::build($shape[$key]['type']);
+            $parser = Factory::build($shape[$key]['type'], array_get($conf, 'options', null));
             $output[$key] = $parser->run($data, $key, $required);
         }
 

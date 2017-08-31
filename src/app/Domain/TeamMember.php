@@ -18,10 +18,13 @@ class TeamMember extends ParserDomain
         'firstName' => [
             'owner' => 'person',
             'type' => 'string',
+            'options' => ['trim' => true],
+
         ],
         'lastName' => [
             'owner' => 'person',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         'phone' => [
             'owner' => 'person',
@@ -30,6 +33,7 @@ class TeamMember extends ParserDomain
         'email' => [
             'owner' => 'person',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         'center' => [
             'owner' => 'person',

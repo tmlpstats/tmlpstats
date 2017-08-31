@@ -28,6 +28,7 @@ class Course extends ParserDomain
         'location' => [
             'owner' => 'course',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         'id' => [
             'owner' => 'course',
