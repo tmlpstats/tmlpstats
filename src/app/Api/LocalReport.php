@@ -206,7 +206,9 @@ class LocalReport extends AuthenticatedApiBase
         $query = Models\StatsReport::byCenter($center)
             ->byQuarter($quarter)
             ->reportingDate($reportingDate)
+            ->where('version', 'api')
             ->orderBy('id', 'desc');
+
         if ($requireNew) {
             $query->submitted(false);
         }
