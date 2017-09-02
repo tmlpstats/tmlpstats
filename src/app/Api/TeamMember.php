@@ -25,11 +25,16 @@ class TeamMember extends AuthenticatedApiBase
 
         if ($includeInProgress) {
             $submissionData = App::make(SubmissionData::class);
-            $found = $submissionData->allForType($center, $reportingDate, Domain\TeamMember::class);
+            list($found, $deleted) = $submissionData->allForType($center, $reportingDate, Domain\TeamMember::class, ['include_deleted' => true]);
             foreach ($found as $domain) {
                 $allTeamMembers[$domain->id] = $domain;
                 $domain->meta['localChanges'] = true;
+                $domain->meta['canDelete'] = true;
             }
+            $deleted = $deleted->map(function ($x) {return intval($x);})->flip();
+
+        } else {
+            $deleted = collect([]);
         }
 
         $lastReport = $this->relevantReport($center, $reportingDate);
@@ -42,6 +47,10 @@ class TeamMember extends AuthenticatedApiBase
                 'accountabilitiesFor' => $reportingDate->copy()->setTime(15, 0, 0),
             ];
             foreach (App::make(LocalReport::class)->getClassList($lastReport) as $tmd) {
+                if ($deleted->has($tmd->teamMemberId)) {
+                    continue; // skip any soft-deleted items
+                }
+
                 // it's a small optimization, but prevent creating domain if we have an existing SubmissionData version
                 if (!array_key_exists($tmd->teamMemberId, $allTeamMembers)) {
                     $domain = Domain\TeamMember::fromModel($tmd, $tmd->teamMember, null, $options);
@@ -49,12 +58,11 @@ class TeamMember extends AuthenticatedApiBase
                     $allTeamMembers[$domain->id] = $domain;
                 } else {
                     $domain = $allTeamMembers[$tmd->teamMemberId];
-
+                    $domain->meta['canDelete'] = false;
                 }
                 $domain->meta['personId'] = $tmd->teamMember->personId;
                 $domain->meta['hasThisWeekReportData'] = ($includeData);
             }
-
         }
 
         return $allTeamMembers;
@@ -72,6 +80,10 @@ class TeamMember extends AuthenticatedApiBase
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate, ['write']);
         $this->assertCan('submitStats', $center);
         Models\TeamMember::hackReportingDate($reportingDate); // XXX temporary, fixes an issue with team member's quarterNumber
+
+        if (array_get($data, 'action', '') == 'delete') {
+            return $this->deleteTeamMember($center, $reportingDate, $data['id']);
+        }
 
         $submissionData = App::make(SubmissionData::class);
         $teamMemberId = $submissionData->numericStorageId($data, 'id');
@@ -105,6 +117,36 @@ class TeamMember extends AuthenticatedApiBase
             'storedId' => $teamMemberId,
             'valid' => $validationResults['valid'],
             'messages' => $validationResults['messages'],
+        ];
+    }
+
+    protected function deleteTeamMember(Models\Center $center, Carbon $reportingDate, $id)
+    {
+        $tmId = intval($id);
+        // Cannot override delete for a team member with an actual ID
+        if ($tmId > 0 && !$this->context->can('overrideDelete', $center)) {
+            throw new Exceptions\UnauthorizedException('Cannot delete this application without delete override privileges.');
+        }
+        App::make(SubmissionData::class)
+            ->deleteOne($center, $reportingDate, Domain\TeamMember::class, $tmId);
+
+        $deletedTeamMember = false;
+        /*
+        if ($tmId > 0) {
+            $lastReport = $this->relevantReport($center, $reportingDate);
+            // Only delete when the reporting date is the same.
+            if ($lastReport !== null && $lastReport->reportingDate->eq($reportingDate)) {
+                Models\TeamMemberData::byStatsReport($lastReport)
+                    ->whereTeamMemberId($tmId)
+                    ->delete();
+                $deletedTeamMember = $lastReport->id;
+            }
+        }*/
+
+        return [
+            'success' => true,
+            'valid' => true,
+            'deletedTeamMember' => $deletedTeamMember,
         ];
     }
 

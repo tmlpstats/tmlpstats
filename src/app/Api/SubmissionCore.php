@@ -49,12 +49,13 @@ class SubmissionCore extends AuthenticatedApiBase
         $accountabilities = Models\Accountability::orderBy('name')->get();
         $centers = Models\Center::byRegion($center->getGlobalRegion())->active()->orderBy('name')->get();
 
-        $canSkipSubmitEmail = $this->context->can('skipSubmitEmail', $center);
-
         return [
             'success' => true,
             'id' => $center->id,
-            'user' => compact('canSkipSubmitEmail'),
+            'user' => [
+                'canSkipSubmitEmail' => $this->context->can('skipSubmitEmail', $center),
+                'canOverrideDelete' => $this->context->can('overrideDelete', $center),
+            ],
             'capabilities' => [
                 'nextQtrAccountabilities' => $crd->canShowNextQtrAccountabilities(),
             ],
@@ -720,7 +721,7 @@ class SubmissionCore extends AuthenticatedApiBase
         if (in_array('write', $flags)) {
 
             if ($center->getGlobalRegion()->abbrLower() == 'na' && !$this->context->can('submitOldStats', $center)) {
-                if ($reportingDate->lte(Carbon::parse('2017-06-02'))) {
+                if ($reportingDate->lte(Carbon::parse(config('tmlp.earliest_submission')))) {
                     // TODO come up with a cleaner solution to this
                     throw new Exceptions\BadRequestException('Cannot do online submission prior to June');
                 }

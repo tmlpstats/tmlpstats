@@ -86,6 +86,11 @@ export function stashTeamMember(center, reportingDate, data) {
         successHandler(result, { dispatch }) {
             dispatch(markStale())
             // The request failed before creating an id (parser error)
+            if (data.action == 'delete') {
+                // Force reloading team members rather than deleting in our state machine.
+                setTimeout(() => dispatch(teamMembersData.loadState('new')), 50)
+                return
+            }
             if (!result.storedId) {
                 dispatch(teamMembersData.saveState({error: 'Validation Failed', messages: result.messages}))
                 setTimeout(() => { dispatch(teamMembersData.saveState('new')) }, 3000)

@@ -7,7 +7,7 @@ import { delayDispatch, rebind, connectRedux } from '../../reusable/dispatch'
 import { ProgramLeadersIndex } from '../program_leaders/components'
 
 import { TEAM_MEMBERS_COLLECTION_FORM_KEY } from './reducers'
-import { teamMembersData, teamMembersSorts } from './data'
+import { teamMembersData, teamMembersSorts, teamMemberText } from './data'
 import * as actions from './actions'
 import { TeamMembersBase, GITW_LABELS, TDO_LABELS } from './components-base'
 
@@ -216,8 +216,4 @@ class GitwTdoLiveSelect extends BooleanSelectView {
         bits.reverse() // the model looks like path.<teamMemberid>.tdo so if we reverse it, we get the right answer
         this.props.dispatch(actions.weeklyReportingUpdated(bits[1]))
     }
-}
-
-function teamMemberText(teamMember) {
-    return (teamMember.firstName || '(First Name Blank)') + ' ' + (teamMember.lastName || '(Last Name Blank)')
 }

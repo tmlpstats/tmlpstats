@@ -27,15 +27,16 @@ export class SimpleField extends React.Component {
         required: false
     }
     render() {
+        const computedId = 'fl-' + this.props.model.replace(/\./, '_')
         var field
         if (this.props.customField) {
-            field = <Field model={this.props.model}>{this.props.children}</Field>
+            field = <Field model={this.props.model} aria-labelledby={computedId}>{this.props.children}</Field>
         } else {
             let controlProps = this.props.controlProps || {}
             if (this.props.disabled) {
                 controlProps = objectAssign({}, controlProps, {disabled: this.props.disabled})
             }
-            field = <NullableTextControl model={this.props.model} controlProps={controlProps} />
+            field = <NullableTextControl model={this.props.model} controlProps={controlProps} aria-labelledby={computedId} />
         }
 
         const { labelClass, divClass, required } = this.props
@@ -48,7 +49,7 @@ export class SimpleField extends React.Component {
         return (
             <Field model={this.props.model}>
                 <div className={requiredClass + ' form-group'}>
-                    <label className={labelClass + ' control-label'}>{this.props.label}</label>
+                    <label className={labelClass + ' control-label'} id={computedId}>{this.props.label}</label>
                     <div className={divClass}>{field}</div>
                 </div>
             </Field>
@@ -64,21 +65,25 @@ export class SimpleFormGroup extends React.PureComponent {
     }
     static propTypes = {
         labelClass: PropTypes.string.isRequired,
+        labelFor: PropTypes.string,
         divClass: PropTypes.string,
         label: PropTypes.any.isRequired,
-        required: PropTypes.bool
+        required: PropTypes.bool,
+        children: PropTypes.node
     }
     render() {
-        const { label, labelClass, divClass, required } = this.props
+        const { label, labelClass, divClass, required, labelFor, children } = this.props
 
-        let requiredClass = ''
-        if (required) {
-            requiredClass = 'required'
+        const requiredClass = required? 'required' : ''
+        let labelProps = {className: `${labelClass} control-label`}
+        if (labelFor) {
+            labelProps.htmlFor = labelFor
         }
+
         return (
             <div className={requiredClass + ' form-group'}>
-                <label className={labelClass + ' control-label'}>{label}</label>
-                <div className={divClass}>{this.props.children}</div>
+                <label {...labelProps}>{label}</label>
+                <div className={divClass}>{children}</div>
             </div>
         )
     }
@@ -108,6 +113,7 @@ export class Select extends React.PureComponent {
     }
     static propTypes = {
         model: PropTypes.string,
+        id: PropTypes.string,
         items: PropTypes.arrayOf(PropTypes.object).isRequired,
         keyProp: PropTypes.string,
         getKey: PropTypes.func,
@@ -147,7 +153,7 @@ export class Select extends React.PureComponent {
         return (
             <Control.select
                     model={this.props.model} multiple={this.props.multiple} changeAction={this.props.changeAction}
-                    className={requiredClass + ' form-control'} rows={this.props.rows}>
+                    className={requiredClass + ' form-control'} rows={this.props.rows} id={this.props.id}>
                 {options}
             </Control.select>
         )

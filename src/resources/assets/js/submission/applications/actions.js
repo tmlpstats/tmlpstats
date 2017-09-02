@@ -61,23 +61,28 @@ export function saveApplication(center, reportingDate, data) {
             center, reportingDate, data
         }).then((result) => {
             dispatch(markStale())
-            // Failed during validation
-            if (!result.storedId) {
-                dispatch(messages.replace('create', result.messages))
-                reset()
+
+            if (data.action == 'delete') {
+                setTimeout(() => dispatch(loadState('new')), 100) // Force server re-fetch
                 return result
             }
 
-            let newData = objectAssign({}, data, {id: result.storedId})
-            dispatch(appsCollection.replaceItem(newData.id, newData))
-            dispatch(messages.replace(result.storedId, result.messages))
+            // Failed during validation
+            if (!result.storedId) {
+                dispatch(messages.replace('create', result.messages))
+            } else {
+                let newData = objectAssign({}, data, {id: result.storedId})
+                dispatch(appsCollection.replaceItem(newData.id, newData))
+                dispatch(messages.replace(result.storedId, result.messages))
 
-            // We successfully saved, reset any existing parser messages
-            if (!data.id) {
-                dispatch(messages.replace('create', []))
+                // We successfully saved, reset any existing parser messages
+                if (!data.id) {
+                    dispatch(messages.replace('create', []))
+                }
             }
+
             reset()
-            return result // Because it's a Promise is you have to return results to continue the chain.
+            return result // Because it's a Promise, you have to return results to continue the chain.
         }).catch((err) => {
             // If this is a parser error, we won't have an ID yet, use 'create'
             const id = data.id ? data.id : 'create'
@@ -87,8 +92,4 @@ export function saveApplication(center, reportingDate, data) {
             scrollIntoView('react-routed-flow')
         })
     }
-}
-
-export function setAppStatus(status) {
-    return formActions.change('submission.applications.currentApp.appStatus', status)
 }
