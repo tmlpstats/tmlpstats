@@ -50,26 +50,32 @@ trait GlobalReportDispatch
         'accesstopowereffectiveness' => [
             'id' => 'AccessToPowerEffectiveness',
             'method' => 'getAccessToPowerEffectiveness',
+            'cacheTime' => 2,
         ],
         'powertocreateeffectiveness' => [
             'id' => 'PowerToCreateEffectiveness',
             'method' => 'getPowerToCreateEffectiveness',
+            'cacheTime' => 2,
         ],
         'team1expansioneffectiveness' => [
             'id' => 'Team1ExpansionEffectiveness',
             'method' => 'getTeam1ExpansionEffectiveness',
+            'cacheTime' => 2,
         ],
         'team2expansioneffectiveness' => [
             'id' => 'Team2ExpansionEffectiveness',
             'method' => 'getTeam2ExpansionEffectiveness',
+            'cacheTime' => 2,
         ],
         'gameintheworldeffectiveness' => [
             'id' => 'GameInTheWorldEffectiveness',
             'method' => 'getGameInTheWorldEffectiveness',
+            'cacheTime' => 2,
         ],
         'landmarkforumeffectiveness' => [
             'id' => 'LandmarkForumEffectiveness',
             'method' => 'getLandmarkForumEffectiveness',
+            'cacheTime' => 2,
         ],
         'tmlpregistrationsoverview' => [
             'id' => 'TmlpRegistrationsOverview',

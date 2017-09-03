@@ -90,10 +90,10 @@ class GlobalReportRegionGamesData
             'region' => $region,
         ]);
 
-        return view('globalreports.details.centergameeffectiveness', [
+        return [
             'game' => $game,
             'reportData' => $this->filterGame($game, $data, $region),
             'milestones' => $regionQuarter->datesAsArray(),
-        ]);
+        ];
     }
 }

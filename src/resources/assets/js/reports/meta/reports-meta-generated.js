@@ -84,37 +84,43 @@ const GlobalReport = {
         "id": "AccessToPowerEffectiveness",
         "n": 10,
         "type": "report",
-        "name": "CAP"
+        "name": "CAP",
+        "render": "react"
     },
     "PowerToCreateEffectiveness": {
         "id": "PowerToCreateEffectiveness",
         "n": 11,
         "type": "report",
-        "name": "CPC"
+        "name": "CPC",
+        "render": "react"
     },
     "Team1ExpansionEffectiveness": {
         "id": "Team1ExpansionEffectiveness",
         "n": 12,
         "type": "report",
-        "name": "T1X"
+        "name": "T1X",
+        "render": "react"
     },
     "Team2ExpansionEffectiveness": {
         "id": "Team2ExpansionEffectiveness",
         "n": 13,
         "type": "report",
-        "name": "T2X"
+        "name": "T2X",
+        "render": "react"
     },
     "GameInTheWorldEffectiveness": {
         "id": "GameInTheWorldEffectiveness",
         "n": 14,
         "type": "report",
-        "name": "GITW"
+        "name": "GITW",
+        "render": "react"
     },
     "LandmarkForumEffectiveness": {
         "id": "LandmarkForumEffectiveness",
         "n": 15,
         "type": "report",
-        "name": "LF"
+        "name": "LF",
+        "render": "react"
     },
     "GameEffectivenessGroup": {
         "id": "GameEffectivenessGroup",

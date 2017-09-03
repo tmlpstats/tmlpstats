@@ -9,6 +9,7 @@ import ReportsMeta from '../meta'
 
 import { loadConfig } from './actions'
 import { reportData, GlobalReportKey } from './data'
+import * as pages from './pages'
 
 @connectRedux()
 export class GlobalReport extends Component {
@@ -77,6 +78,10 @@ export class GlobalReport extends Component {
             const { regionAbbr, reportingDate } = this.props.params
             delayDispatch(this, reportData.loadReport(reportId, {region: regionAbbr, reportingDate}))
         }
+    }
+
+    pageComponent(report) {
+        return pages[report.id]
     }
 
     getContent(reportId) {
