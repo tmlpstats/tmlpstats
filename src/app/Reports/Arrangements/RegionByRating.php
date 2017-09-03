@@ -1,23 +1,24 @@
-<?php namespace TmlpStats\Reports\Arrangements;
+<?php
+namespace TmlpStats\Reports\Arrangements;
 
 use TmlpStats\StatsReport;
 
 class RegionByRating extends BaseArrangement
 {
     /* Builds a breakdown of all the centers in a region by rating
-     * @param $statsReports: an array of stats reports.
+     * @param $centerData: an array of scoreboards (keyed by center)
      * @return
      *      rows: ordered associative array of Rating => [centers with this rating by points]
      *      summary:
      *         rating, points
      */
-    public function build($statsReports)
+    public function build($centerData)
     {
         // Phase 1: loop all stats reports in this region making a subarray by points.
         $centerPoints = array();
-        foreach ($statsReports as $statsReport) {
-            $reportPoints = $statsReport->getPoints();
-            $centerPoints[$reportPoints][] = $statsReport;
+        foreach ($centerData as $center => $sb) {
+            $points = $sb->points();
+            $centerPoints[$points][] = compact('center', 'points');
         }
         ksort($centerPoints); // sort by rating points
 
@@ -25,7 +26,8 @@ class RegionByRating extends BaseArrangement
         $centerReports = array();
         foreach ($centerPoints as $points => $reports) {
             foreach ($reports as $report) {
-                $centerReports[$report->getRating()][] = $report;
+                $sb = $centerData[$report['center']];
+                $centerReports[$sb->rating()][] = $report;
             }
         }
 

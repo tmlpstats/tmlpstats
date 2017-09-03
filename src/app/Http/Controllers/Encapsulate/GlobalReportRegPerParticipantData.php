@@ -74,8 +74,8 @@ class GlobalReportRegPerParticipantData
      */
     protected function getRegPerParticipant(Models\GlobalReport $globalReport, Models\Region $region, $returnRawData = false)
     {
-        $reportData = $this->getScoreboardData($globalReport, $region);
-        if (!$reportData) {
+        $scoreboards = $this->getScoreboardData($globalReport, $region);
+        if (!$scoreboards) {
             return null;
         }
 
@@ -99,12 +99,8 @@ class GlobalReportRegPerParticipantData
         }
 
         $games = ['cap', 'cpc', 'lf'];
-        foreach ($reportData as $centerName => $centerData) {
-            $reportData[$centerName]['statsReport'] = $statsReports[$centerName];
-        }
-        ksort($reportData);
-
-        foreach ($reportData as $centerName => $centerData) {
+        $reportData = [];
+        foreach ($scoreboards as $centerName => $centerData) {
             $participantCount = Models\TeamMemberData::byStatsReport($statsReports[$centerName])
                 ->active()
                 ->count();
@@ -114,17 +110,18 @@ class GlobalReportRegPerParticipantData
                 $change = 0;
                 $rppWeekly = 0;
                 $rppQuarterly = 0;
-                if (isset($centerData['actual'])) {
-                    $actual = $centerData['actual'][$game];
+                $actual = $centerData->game($game)->actual();
+                if ($actual !== null) {
                     $totalQuarterly += $actual;
                     $rppQuarterly = $actual / $participantCount;
 
+                    $lastWeekActual = $lastWeekReportData[$centerName]->game($game)->actual();
                     if ($lastWeekDate->eq($this->regionQuarter->startWeekendDate)) {
-                        $lastWeekReportData[$centerName]['actual'][$game] = 0;
+                        $lastWeekActual = 0;
                     }
 
-                    if (isset($lastWeekReportData[$centerName]['actual'])) {
-                        $change = $actual - $lastWeekReportData[$centerName]['actual'][$game];
+                    if ($lastWeekActual !== null) {
+                        $change = $actual - $lastWeekActual;
                         $totalWeekly += $change;
                         $rppWeekly = $change / $participantCount;
                     }
@@ -133,9 +130,11 @@ class GlobalReportRegPerParticipantData
                 $reportData[$centerName]['rpp']['week'][$game] = round($rppWeekly, 1);
                 $reportData[$centerName]['rpp']['quarter'][$game] = round($rppQuarterly, 1);
             }
+            $reportData[$centerName]['scoreboard'] = $centerData->toArray();
             $reportData[$centerName]['rpp']['week']['total'] = round($totalWeekly / $participantCount, 1);
             $reportData[$centerName]['rpp']['quarter']['total'] = round($totalQuarterly / $participantCount, 1);
         }
+        ksort($reportData);
 
         if ($returnRawData) {
             return $reportData;

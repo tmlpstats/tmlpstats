@@ -132,47 +132,45 @@ class GlobalReportController extends Controller
     protected function getRatingSummary(Models\GlobalReport $globalReport, Models\Region $region)
     {
         $data = App::make(Api\GlobalReport::class)->getRating($globalReport, $region);
+        if (!$data) {
+            return [];
+        }
 
-        return $data ? view('globalreports.details.ratingsummary', $data) : [];
+        $statsReports = App::make(Api\GlobalReport::class)->getStatsReports($globalReport, $region);
+
+        return view('globalreports.details.ratingsummary', array_merge($data, ['statsReports' => $statsReports]));
     }
 
     protected function getRegionSummary(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        $children = Models\Region::byParent($region)->orderby('name')->get();
+        $regions = Models\Region::byParent($region)->orderby('name')->get();
+        $regions->push($region);
 
-        $regions = [];
         $regionsData = [];
-        if ($children) {
-            foreach ($children as $childRegion) {
-                $regions[] = $childRegion;
-                $regionsData[$childRegion->abbreviation] = App::make(Api\GlobalReport::class)
-                    ->getQuarterScoreboard($globalReport, $childRegion);
-            }
+        foreach ($regions as $child) {
+            $regionsData[$child->abbreviation] = App::make(Api\GlobalReport::class)->getQuarterScoreboard($globalReport, $child);
         }
-        $regions[] = $region;
-        $regionsData[$region->abbreviation] = App::make(Api\GlobalReport::class)
-            ->getQuarterScoreboard($globalReport, $region);
 
         // This should get merged with the other reg per participant code and put in the api
         $rpp = [];
         foreach ($regions as $thisRegion) {
-            $abbr = $thisRegion->abbreviation;
-            $statsReports = $this->getStatsReports($globalReport, $thisRegion);
             $participantCount = 0;
+            $statsReports = App::make(Api\GlobalReport::class)->getStatsReports($globalReport, $thisRegion);
             foreach ($statsReports as $report) {
                 $participantCount += Models\TeamMemberData::byStatsReport($report)
                     ->active()
                     ->count();
             }
 
-            $dateStr = $globalReport->reportingDate->toDateString();
-            $data = isset($regionsData[$abbr][$dateStr]['actual']) ? $regionsData[$abbr][$dateStr]['actual'] : [];
-            foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
-                $actual = isset($data[$game]) ? $data[$game] : 0;
+            $abbr = $thisRegion->abbreviation;
+            foreach (Domain\Scoreboard::GAME_KEYS as $game) {
+                $actual = (int) $regionsData[$abbr]->getWeek($globalReport->reportingDate)->game($game)->actual();
 
                 $rpp[$abbr][$game] = ($participantCount > 0) ? ($actual / $participantCount) : 0;
                 $rpp[$abbr]['participantCount'] = $participantCount;
             }
+
+            $regionsData[$abbr] = $regionsData[$abbr]->toArray();
         }
 
         return view('globalreports.details.regionsummary', compact('globalReport', 'regions', 'regionsData', 'rpp'));
@@ -195,28 +193,25 @@ class GlobalReportController extends Controller
 
         $regionsData = [];
         foreach ($regions as $childRegion) {
-            $regionsData[$childRegion->abbreviation] = App::make(Api\GlobalReport::class)
-                ->getWeekScoreboard($globalReport, $childRegion);
+            $regionScoreboard = App::make(Api\GlobalReport::class)->getWeekScoreboard($globalReport, $childRegion);
 
             if ($nextMilestone->ne($globalReport->reportingDate)) {
                 $promiseData = App::make(Api\GlobalReport::class)->getWeekScoreboard($globalReport, $childRegion, $nextMilestone);
 
                 $scoreboard = Domain\Scoreboard::blank();
-
-                $promises = isset($promiseData['promise']) ? $promiseData['promise'] : 0;
-                $actuals = isset($regionsData[$childRegion->abbreviation]['actual']) ? $regionsData[$childRegion->abbreviation]['actual'] : 0;
                 foreach ($scoreboard->games() as $game) {
-                    $promise = isset($promises[$game->key]) ? $promises[$game->key] : 0;
-                    $actual = isset($actuals[$game->key]) ? $actuals[$game->key] : 0;
+                    $promise = $promiseData->game($game->key)->promise();
+                    $actual = $regionScoreboard->game($game->key)->actual();
 
                     $scoreboard->setValue($game->key, 'promise', $promise);
                     $scoreboard->setValue($game->key, 'actual', $actual);
                 }
 
-                $regionsData[$childRegion->abbreviation] = $scoreboard->toArray();
+                $regionScoreboard = $scoreboard;
             }
-        }
 
+            $regionsData[$childRegion->abbreviation] = $regionScoreboard->toArray();
+        }
         return view('globalreports.details.gaps', compact('globalReport', 'regions', 'regionsData'));
     }
 
@@ -228,7 +223,7 @@ class GlobalReportController extends Controller
         }
 
         $a = new Arrangements\GamesByMilestone([
-            'weeks' => $weeks,
+            'weeks' => $weeks->toArray(),
             'quarter' => Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region),
         ]);
         $data = $a->compose();
@@ -243,33 +238,28 @@ class GlobalReportController extends Controller
             return null;
         }
 
-        $statsReports = $this->getStatsReports($globalReport, $region);
-
-        foreach ($statsReports as $statsReport) {
-            $centerName = $statsReport->center->name;
-            $reportData[$centerName]['statsReport'] = $statsReport;
-        }
-
         $totals = [];
         foreach ($reportData as $centerName => $centerData) {
-            foreach ($centerData['promise'] as $game => $gameData) {
+            foreach (Domain\Scoreboard::GAME_KEYS as $game) {
+                $gameData = $centerData->game($game);
                 if (!isset($totals[$game])) {
                     $totals[$game]['promise'] = 0;
-                    if (isset($centerData['actual'])) {
+                    if ($gameData->actual() !== null) {
                         $totals[$game]['actual'] = 0;
                     }
                 }
 
-                $totals[$game]['promise'] += $centerData['promise'][$game];
-                if (isset($centerData['actual'])) {
-                    $totals[$game]['actual'] += $centerData['actual'][$game];
+                $totals[$game]['promise'] += $gameData->promise();
+                if ($gameData->actual() !== null) {
+                    $totals[$game]['actual'] += $gameData->actual();
                 }
             }
+            $reportData[$centerName] = $centerData->toArray();
         }
         ksort($reportData);
 
         $totals['gitw']['promise'] = round($totals['gitw']['promise'] / count($reportData));
-        if (isset($centerData['actual'])) {
+        if (isset($totals['gitw']['actual'])) {
             $totals['gitw']['actual'] = round($totals['gitw']['actual'] / count($reportData));
         }
 
@@ -326,45 +316,35 @@ class GlobalReportController extends Controller
         $quarter = Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region);
         $quarterEndDate = $quarter->getQuarterEndDate();
 
-        $reportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region, [
-            'includeOriginalPromise' => true,
-            'date' => $quarterEndDate,
-        ]);
+        $reportData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region, $quarterEndDate);
         if (!$reportData) {
             return null;
         }
 
-        $statsReportsAll = $this->getStatsReports($globalReport, $region);
-
-        foreach ($statsReportsAll as $report) {
-            $centerName = $report->center->name;
-            $reportData[$centerName]['statsReport'] = $report;
-        }
-
         $totals = [];
         foreach ($reportData as $centerName => $centerData) {
+            $reportData[$centerName] = $centerData->toArray();
             foreach (Domain\Scoreboard::GAME_KEYS as $game) {
-                $data = $centerData['games'][$game];
+                $data = $centerData->game($game);
+
+                $actual = $data->actual();
+                $promise = $data->promise();
+                $original = $data->originalPromise();
 
                 if (!isset($totals[$game])) {
                     $totals[$game]['original'] = 0;
                     $totals[$game]['promise'] = 0;
                     $totals[$game]['delta'] = 0;
-                    if (isset($data['actual'])) {
+                    if ($actual !== null) {
                         $totals[$game]['actual'] = 0;
                     }
                 }
 
-                if (!isset($data['original'])) {
-                    $data['original'] = 0;
-                    $reportData[$centerName]['games'][$game]['original'] = 0;
-                }
-
-                $totals[$game]['original'] += $data['original'];
-                $totals[$game]['promise'] += $data['promise'];
+                $totals[$game]['original'] += $original;
+                $totals[$game]['promise'] += $promise;
                 $totals[$game]['delta'] = ($totals[$game]['promise'] - $totals[$game]['original']);
-                if (isset($data['actual'])) {
-                    $totals[$game]['actual'] += $data['actual'];
+                if ($actual !== null) {
+                    $totals[$game]['actual'] += $actual;
                 }
             }
         }
@@ -890,7 +870,7 @@ class GlobalReportController extends Controller
                 $reportData['regions'][$regionName]['centers'][$scoreboard['rating']][] = $centerName;
 
                 $gameCount = 0;
-                foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
+                foreach (Domain\Scoreboard::GAME_KEYS as $game) {
                     if ($scoreboard['percent'][$game] >= 100) {
                         $reportData['100pctGames'][$game][] = $centerName;
                         $gameCount++;
@@ -1178,13 +1158,5 @@ class GlobalReportController extends Controller
         $date = $globalReport->reportingDate->toDateString();
 
         return url("/reports/regions/{$abbr}/{$date}");
-    }
-
-    protected function getStatsReports(Models\GlobalReport $report, Models\Region $region)
-    {
-        return $report->statsReports()
-                      ->validated()
-                      ->byRegion($region)
-                      ->get();
     }
 }

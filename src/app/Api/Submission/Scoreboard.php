@@ -25,7 +25,7 @@ class Scoreboard extends AuthenticatedApiBase
         $reportingDates = $quarter->listReportingDates($center);
 
         if ($statsReport !== null) {
-            $weeks = $localReport->getQuarterScoreboard($statsReport, ['returnObject' => true]);
+            $weeks = $localReport->getQuarterScoreboard($statsReport);
         } else {
             // This should only happen on the first week of the quarter, but we want to initialize the weeks fully.
             $weeks = new Domain\ScoreboardMultiWeek();

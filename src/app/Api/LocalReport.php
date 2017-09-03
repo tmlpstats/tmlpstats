@@ -24,79 +24,10 @@ class LocalReport extends AuthenticatedApiBase
             return $cached;
         }
 
-        $returnUnprocessed = array_get($options, 'returnUnprocessed', false);
-        $returnUnflattened = array_get($options, 'returnUnflattened', false);
-        $returnObject = array_get($options, 'returnObject', false);
-        $includeOriginalPromise = array_get($options, 'includeOriginalPromise', false);
+        $region = $statsReport->center->region->getParentGlobalRegion();
+        $globalScoreboard = App::make(GlobalReport::class)->getQuarterScoreboardByCenter($statsReport->reportingDate, $region);
 
-        $scoreboardData = [];
-
-        $originalPromise = null;
-
-        $quarterStartDate = $statsReport->quarter->getQuarterStartDate($statsReport->center);
-
-        // XXX We have many places making use of this function.
-        // Rather than changing behavior for all, let's make the 'correct' behavior an option.
-        // Then we can go through report by report and see which need the fix and which need the old behavior.
-        if (array_get($options, 'back_from_this_week', false)) {
-            $week = $statsReport->reportingDate->copy();
-        } else {
-            $week = $statsReport->quarter->getQuarterEndDate($statsReport->center)->copy();
-        }
-        while ($week->gt($quarterStartDate)) {
-
-            // Walk backwards through the quarter week by week and collect the promise/actual objects
-            // from each official report as we find them
-            // Take the newest version of each
-            $report = Models\StatsReport::byCenter($statsReport->center)
-                ->reportingDate($week)
-                ->official()
-                ->first();
-            if ($report) {
-                $weekData = $report->centerStatsData()->get();
-                foreach ($weekData as $data) {
-
-                    $dateStr = $data->reportingDate->toDateString();
-                    if (!isset($scoreboardData[$dateStr][$data->type])) {
-                        if ($data->type == 'promise' || $data->reportingDate->lte($statsReport->reportingDate)) {
-                            $scoreboardData[$dateStr][$data->type] = $data;
-                        }
-                    }
-
-                    // Keep searching until we find the very first promise
-                    if ($includeOriginalPromise && $data->type == 'promise') {
-                        $originalData = clone $data;
-                        $originalData->type = 'original';
-                        $scoreboardData[$dateStr]['original'] = $originalData;
-                    }
-                }
-            }
-
-            $week = $week->copy()->subWeek(); // Wasn't strictly necessary, but let's be safe with mutable dates
-        }
-
-        if ($returnUnprocessed) {
-            if ($returnUnflattened) {
-                $response = $scoreboardData;
-            } else {
-                $response = array_flatten($scoreboardData);
-            }
-
-            $this->putCache($response);
-
-            return $response;
-        }
-
-        $a = new Arrangements\GamesByWeek();
-        $weeks = $a->buildObject(array_flatten($scoreboardData));
-        if ($returnObject) {
-            return $weeks;
-        } else {
-            $weeksArray = $weeks->toArray();
-            $this->putCache($weeksArray);
-
-            return $weeksArray;
-        }
+        return array_get($globalScoreboard, $statsReport->center->name);
     }
 
     public function getWeekScoreboard(Models\StatsReport $statsReport)
@@ -108,12 +39,7 @@ class LocalReport extends AuthenticatedApiBase
 
         $scoreboardData = $this->getQuarterScoreboard($statsReport);
 
-        $dateStr = $statsReport->reportingDate->toDateString();
-
-        $response = [];
-        if (isset($scoreboardData[$dateStr])) {
-            $response = $scoreboardData[$dateStr];
-        }
+        $response = $scoreboardData->getWeek($statsReport->reportingDate) ?? [];
 
         $this->putCache($response);
 

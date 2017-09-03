@@ -9,6 +9,8 @@
 ?>
 @if (!$reportData)
     <p>No game information available.</p>
+@elseif (count($reportData) < 4)
+    <p>There was an issue generating this report. If the problem persists, please submit feedback to the Future of Stats team so they can fix it.</p>
 @else
     <br/>
     @for ($k = 0; $k < 2; $k++)
@@ -56,7 +58,13 @@
                                     ?>
 
                                     <td class="info">{{ $data['promise'][$game] }}{{ ($game == 'gitw') ? '%' : '' }}</td>
-                                    <td>{{ $hasActual ? $data['actual'][$game] : '&nbsp;&nbsp;&nbsp;&nbsp;' }}{{ ($hasActual && $game == 'gitw') ? '%' : '' }}</td>
+                                    <td>
+                                    @if ($hasActual)
+                                        {{ $data['actual'][$game] }}{{ ($game == 'gitw') ? '%' : '' }}
+                                    @else
+                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                    @endif
+                                    </td>
                                 @endforeach
                                 @for ($i = count($reportData[$j+$k]); $i < $maxCount; $i++)
                                     <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>

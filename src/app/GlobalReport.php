@@ -55,8 +55,9 @@ class GlobalReport extends Model
 
     public function scopeBetween($query, Carbon $start, Carbon $end)
     {
-        return $query->where('reporting_date', '>=', $start)
-                     ->where('reporting_date', '<=', $end);
+        // serializing here to make sure we only get the date portion
+        return $query->where('reporting_date', '>=', $start->toDateString())
+                     ->where('reporting_date', '<=', $end->toDateString());
     }
 
 

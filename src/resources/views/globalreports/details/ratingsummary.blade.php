@@ -43,30 +43,34 @@ $ratingColors = [
         <th style="text-align: left; width: 10em;">Center</th>
         </thead>
         <tbody>
-        @foreach ($rows as $rating => $statsReports)
+        @foreach ($rows as $rating => $centers)
             <?php $count = 0; ?>
-            @foreach ($statsReports as $report)
+            @foreach ($centers as $centerData)
                 <?php
-                    $meterClass = ($report->getPoints() > 0) ? 'meter' : 'meter-zero';
+                    $meterClass = ($centerData['points'] > 0) ? 'meter' : 'meter-zero';
 
                     // Width must always be > 0 to display even when 0 points
-                    $meterWidth = max(round(($report->getPoints()/28)*100), 4);
+                    $meterWidth = max(round(($centerData['points']/28)*100), 4);
+
+                    $center = $centerData['center'];
+                    $points = (int) $centerData['points'];
+                    $report = $statsReports[$center];
                 ?>
                 <tr class="points">
                     @if ($count === 0)
                         <?php $count++; ?>
                         <td class="data-point" rowspan="{{ count($rows[$rating]) }}">{{ $rating }}</td>
                     @endif
-                    <td class="data-point" style="background-color: {{ $ratingColors[(int) $report->getPoints()] }}; font-weight: bold;">
+                    <td class="data-point" style="background-color: {{ $ratingColors[$points] }}; font-weight: bold;">
                         @statsReportLink($report)
                             <div class="{{ $meterClass }}">
-                                <span style="width: {{ $meterWidth }}%">{{ (int) $report->getPoints() }}</span>
+                                <span style="width: {{ $meterWidth }}%">{{ $points }}</span>
                             </div>
                         @endStatsReportLink
                     </td>
                     <td>
                         @statsReportLink($report)
-                            <div style="margin-left: 5px">{{ $report->center->name }}</div>
+                            <div style="margin-left: 5px">{{ $center }}</div>
                         @endStatsReportLink
                     </td>
                 </tr>

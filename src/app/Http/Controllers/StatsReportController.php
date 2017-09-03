@@ -424,7 +424,7 @@ class StatsReportController extends Controller
             $liveData = App::make(Api\LiveScoreboard::class)->getCurrentScores($statsReport->center);
         }
 
-        $reportData = App::make(Api\LocalReport::class)->getWeekScoreboard($statsReport);
+        $reportData = App::make(Api\LocalReport::class)->getWeekScoreboard($statsReport)->toArray();
 
         $coursesSummary = $this->getCoursesSummary($statsReport);
         $teamMembersSummary = $this->getTeamMembersSummary($statsReport);
@@ -460,7 +460,7 @@ class StatsReportController extends Controller
     protected function getCenterStats(Models\StatsReport $statsReport)
     {
         $a = new Arrangements\GamesByMilestone([
-            'weeks' => App::make(Api\LocalReport::class)->getQuarterScoreboard($statsReport, ['back_from_this_week' => true]),
+            'weeks' => App::make(Api\LocalReport::class)->getQuarterScoreboard($statsReport)->toArray(),
             'quarter' => $statsReport->quarter,
             'center' => $statsReport->center,
         ]);
