@@ -934,6 +934,7 @@ class GlobalReportController extends Controller
                 'onTime' => false,
                 'officialSubmitTime' => '',
                 'officialReport' => $report,
+                'submittedBy' => "{$report->user->firstName} {$report->user->lastName}",
             ];
 
             $timezone = $report->center->timezone;
