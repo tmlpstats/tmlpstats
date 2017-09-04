@@ -7,20 +7,18 @@ class EffectivenessBase extends PureComponent {
         const dateHeaders = []
 
         dates.forEach((dateStr) => {
-
             let cellText = ''
-            let cellClass = 'border-right-none border-left-none'
+            let cellClass = 'border-right border-left'
 
             const date = moment(dateStr)
             if (date.isSame(milestones['classroom1Date'])) {
                 cellText = 'Milestone 1'
-                cellClass = 'border-right border-left'
             } else if (date.isSame(milestones['classroom2Date'])) {
                 cellText = 'Milestone 2'
-                cellClass = 'border-right border-left'
             } else if (date.isSame(milestones['classroom3Date'])) {
                 cellText = 'Milestone 3'
-                cellClass = 'border-right border-left'
+            } else {
+                cellClass = 'border-right-none border-left-none'
             }
 
             msHeaders.push(
@@ -34,7 +32,7 @@ class EffectivenessBase extends PureComponent {
         return (
             <thead>
                 <tr>
-                    <th rowSpan="2" className="border-right" style={{verticalAlign: 'middle'}}>Center</th>
+                    <th rowSpan="2" className="middle-align border-right">Center</th>
                     {msHeaders}
                 </tr>
                 <tr>{dateHeaders}</tr>
@@ -63,7 +61,7 @@ class EffectivenessBase extends PureComponent {
 
         Object.keys(centerData).forEach((week) => {
             const data = centerData[week]
-            const actualClass = data['effective'] ? 'success' : 'bg-danger'
+            const actualClass = (data['actual'] >= data['promise']) ? 'success' : 'bg-danger'
 
             weekData.push(
                 <td key={week} className={`data-point border-right ${actualClass}`}>

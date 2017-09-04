@@ -44,6 +44,7 @@ class GlobalReportRegionGamesData
                                ->validated()
                                ->get()
                                ->keyBy(function($report) { return $report->id; });
+
             $csds = Models\CenterStatsData::whereIn('stats_report_id', $statsReports->keys())
                                           ->between($rq->firstWeekDate, $reportingDate)
                                           ->get();
@@ -74,11 +75,7 @@ class GlobalReportRegionGamesData
             $centerScoreboards = Domain\ScoreboardMultiWeek::fromArray($centerData)->toArray();
             foreach ($centerScoreboards as $date => $sb) {
                 foreach (Domain\Scoreboard::GAME_KEYS as $game) {
-                    $output[$game][$center][$date] = [
-                        'promise' => $sb['games'][$game]['promise'],
-                        'actual' => $sb['games'][$game]['actual'],
-                        'effective' => ($sb['games'][$game]['actual'] >= $sb['games'][$game]['promise']),
-                    ];
+                    $output[$game][$center][$date] = $sb['games'][$game];
                 }
             }
         }
