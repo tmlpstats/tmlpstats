@@ -78,11 +78,18 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         switch ($name) {
             case 'firstName':
             case 'lastName':
+            case 'fullName':
             case 'phone':
             case 'center':
                 return $this->person
                     ? $this->person->$name
                     : null;
+            case 'shortName':
+                if ($this->managed) {
+                    return $this->person->firstName;
+                }
+
+                return $this->person->shortName;
             default:
                 return parent::__get($name);
         }

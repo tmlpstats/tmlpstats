@@ -29,6 +29,8 @@ class TmlpRegistration extends Model
         switch ($name) {
             case 'firstName':
             case 'lastName':
+            case 'fullName':
+            case 'shortName':
             case 'center':
                 return $this->person->$name;
             default:

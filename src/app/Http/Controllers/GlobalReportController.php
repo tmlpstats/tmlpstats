@@ -934,7 +934,7 @@ class GlobalReportController extends Controller
                 'onTime' => false,
                 'officialSubmitTime' => '',
                 'officialReport' => $report,
-                'submittedBy' => "{$report->user->firstName} {$report->user->lastName}",
+                'submittedBy' => $report->user->shortName,
             ];
 
             $timezone = $report->center->timezone;
@@ -1072,8 +1072,9 @@ class GlobalReportController extends Controller
             $team = "team{$memberData->teamMember->teamYear}";
 
             if (!isset($reportData[$centerName])) {
+                $cl = $center->getClassroomLeader($globalReport->reportingDate);
                 $reportData[$centerName] = [
-                    'classroomLeader' => $center->getClassroomLeader($globalReport->reportingDate),
+                    'classroomLeader' => $cl ? $cl->shortName : '',
                     'team1' => [
                         'totalCount' => 0,
                         'withdrawCount' => 0,
