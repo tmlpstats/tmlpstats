@@ -13,6 +13,7 @@
             <th>Submit Time</th>
             <th class="data-point">Had Revision</th>
             <th>Revision Time</th>
+            <th>Last Submitted By</th>
             <th>Rating</th>
         </tr>
         </thead>
@@ -35,6 +36,7 @@
                     <td class="data-point">No</td>
                     <td></td>
                 @endif
+                <td>{{ $data['submittedBy'] }}</td>
                 <td>
                     @if ($data['isValidated'])
                         {{ $data['rating'] }} ({{ $data['points'] }})
