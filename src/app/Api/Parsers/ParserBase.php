@@ -7,10 +7,16 @@ use TmlpStats\Util;
 abstract class ParserBase
 {
     protected $type = '';
+    protected $parserOptions;
 
     public static function create()
     {
         return new static();
+    }
+
+    public function __construct($options = [])
+    {
+        $this->parserOptions = $options;
     }
 
     public function run($input, $key, $required = true)

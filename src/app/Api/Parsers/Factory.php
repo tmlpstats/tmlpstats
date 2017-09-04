@@ -7,8 +7,9 @@ use TmlpStats\Api\Parsers;
 
 class Factory
 {
-    public static function build($type)
+    public static function build($type, $options = [])
     {
+        $input = ['options' => $options];
         switch ($type) {
             case 'array':
                 return App::make(Parsers\ArrayParser::class);
@@ -19,7 +20,7 @@ class Factory
             case 'int':
                 return App::make(Parsers\IntParser::class);
             case 'string':
-                return App::make(Parsers\StringParser::class);
+                return App::make(Parsers\StringParser::class, $input);
             case 'Application':
                 return App::make(Parsers\ApplicationParser::class);
             case 'Center':

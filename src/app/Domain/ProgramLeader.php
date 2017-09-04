@@ -18,18 +18,22 @@ class ProgramLeader extends ParserDomain
         'firstName' => [
             'owner' => 'person',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         'lastName' => [
             'owner' => 'person',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         'phone' => [
             'owner' => 'person',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         'email' => [
             'owner' => 'person',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         'center' => [
             'owner' => 'person',
