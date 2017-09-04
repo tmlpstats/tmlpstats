@@ -72,7 +72,14 @@ class ProgramLeader extends AuthenticatedApiBase
             foreach ($found as $domain) {
                 $domain->meta['localChanges'] = true;
                 $programLeaders[$domain->id] = $domain;
-                $programLeaders['meta'][$domain->accountability] = $domain->id;
+
+                $existingId = array_get($programLeaders['meta'], $domain->accountability);
+                if ($existingId && $existingId != $domain->id) {
+                    $programLeaders['meta'][$domain->accountability] = $domain->id;
+
+                    // If a program leader has been replaced, remove the old reference
+                    unset($programLeaders[$existingId]);
+                }
             }
         }
 
