@@ -28,6 +28,8 @@ class TeamMember extends Model
         switch ($name) {
             case 'firstName':
             case 'lastName':
+            case 'fullName':
+            case 'shortName':
             case 'center':
             case 'accountabilities':
                 return $this->person->$name;

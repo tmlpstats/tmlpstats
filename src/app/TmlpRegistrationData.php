@@ -46,6 +46,8 @@ class TmlpRegistrationData extends Model
 
             case 'firstName':
             case 'lastName':
+            case 'fullName':
+            case 'shortName':
             case 'center':
                 return $this->registration->person->$name;
             case 'teamYear':

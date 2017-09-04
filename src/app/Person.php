@@ -25,6 +25,18 @@ class Person extends Model
         'unsubscribed' => 'boolean',
     ];
 
+    public function __get($name)
+    {
+        switch ($name) {
+            case 'fullName':
+                return "{$this->firstName} {$this->lastName}";
+            case 'shortName':
+                return "{$this->firstName} {$this->lastName[0]}";
+            default:
+                return parent::__get($name);
+        }
+    }
+
     /**
      * Find a person by their first and last name, and center.
      *
