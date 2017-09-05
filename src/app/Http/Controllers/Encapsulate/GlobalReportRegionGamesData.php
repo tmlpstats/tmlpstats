@@ -71,13 +71,8 @@ class GlobalReportRegionGamesData
                 $centerData[$csd->reportingDate->toDateString()][$csd->type] = $csd;
             }
 
-            // hydrate ScoreboardMultiWeek and filter out unneeded data
-            $centerScoreboards = Domain\ScoreboardMultiWeek::fromArray($centerData)->toArray();
-            foreach ($centerScoreboards as $date => $sb) {
-                foreach (Domain\Scoreboard::GAME_KEYS as $game) {
-                    $output[$game][$center][$date] = $sb['games'][$game];
-                }
-            }
+            // hydrate ScoreboardMultiWeek
+            $output[$center] = Domain\ScoreboardMultiWeek::fromArray($centerData)->toArray();
         }
 
         return $output;
@@ -119,7 +114,7 @@ class GlobalReportRegionGamesData
 
         return [
             'game' => $game,
-            'reportData' => $data[$game],
+            'reportData' => $data,
             'milestones' => $regionQuarter->toArray(),
         ];
     }

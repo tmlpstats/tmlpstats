@@ -1,6 +1,8 @@
 import moment from 'moment'
 import React, { PureComponent } from 'react'
 
+import Scoreboard from '../../reusable/scoreboard'
+
 class EffectivenessBase extends PureComponent {
     renderHeaders(dates, milestones) {
         const msHeaders = []
@@ -57,15 +59,17 @@ class EffectivenessBase extends PureComponent {
     }
 
     renderCenter(name, centerData) {
+        const { initialData: { game } } = this.props
         const weekData = []
 
         Object.keys(centerData).forEach((week) => {
-            const data = centerData[week]
-            const actualClass = (data['actual'] >= data['promise']) ? 'success' : 'bg-danger'
+            const sb = new Scoreboard(centerData[week])
+            const sbGame = sb.games[game]
+            const actualClass = (sbGame.actual >= sbGame.promise) ? 'success' : 'bg-danger'
 
             weekData.push(
                 <td key={week} className={`data-point border-right ${actualClass}`}>
-                    {data['actual']} of {data['promise']}
+                    {sbGame.actual} of {sbGame.promise}
                 </td>
             )
         })
