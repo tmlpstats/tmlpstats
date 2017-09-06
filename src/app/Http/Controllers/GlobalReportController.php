@@ -343,26 +343,28 @@ class GlobalReportController extends Controller
 
         $totals = [];
         foreach ($reportData as $centerName => $centerData) {
-            foreach ($centerData['promise'] as $game => $gameData) {
+            foreach (Domain\Scoreboard::GAME_KEYS as $game) {
+                $data = $centerData['games'][$game];
+
                 if (!isset($totals[$game])) {
                     $totals[$game]['original'] = 0;
                     $totals[$game]['promise'] = 0;
                     $totals[$game]['delta'] = 0;
-                    if (isset($centerData['actual'])) {
+                    if (isset($data['actual'])) {
                         $totals[$game]['actual'] = 0;
                     }
                 }
 
-                if (!isset($centerData['original'][$game])) {
-                    $centerData['original'][$game] = 0;
-                    $reportData[$centerName]['original'][$game] = 0;
+                if (!isset($data['original'])) {
+                    $data['original'] = 0;
+                    $reportData[$centerName]['games'][$game]['original'] = 0;
                 }
 
-                $totals[$game]['original'] += $centerData['original'][$game];
-                $totals[$game]['promise'] += $centerData['promise'][$game];
+                $totals[$game]['original'] += $data['original'];
+                $totals[$game]['promise'] += $data['promise'];
                 $totals[$game]['delta'] = ($totals[$game]['promise'] - $totals[$game]['original']);
-                if (isset($centerData['actual'])) {
-                    $totals[$game]['actual'] += $centerData['actual'][$game];
+                if (isset($data['actual'])) {
+                    $totals[$game]['actual'] += $data['actual'];
                 }
             }
         }
@@ -371,7 +373,7 @@ class GlobalReportController extends Controller
         $totals['gitw']['original'] = round($totals['gitw']['original'] / count($reportData));
         $totals['gitw']['promise'] = round($totals['gitw']['promise'] / count($reportData));
         $totals['gitw']['delta'] = ($totals['gitw']['promise'] - $totals['gitw']['original']);
-        if (isset($centerData['actual'])) {
+        if (isset($totals['gitw']['actual'])) {
             $totals['gitw']['actual'] = round($totals['gitw']['actual'] / count($reportData));
         }
 

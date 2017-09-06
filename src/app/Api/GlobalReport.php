@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\View\View;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
+use TmlpStats\Domain;
 use TmlpStats\Encapsulations;
 use TmlpStats\Http\Controllers;
 use TmlpStats\Reports\Arrangements;
@@ -106,6 +107,64 @@ class GlobalReport extends AuthenticatedApiBase
         return $weeklyData['reportData'];
     }
 
+    public function getQuarterScoreboardByCenter(Models\GlobalReport $report, Models\Region $region)
+    {
+        $reportingDate = $report->reportingDate;
+        $rrd = Encapsulations\RegionReportingDate::ensure($region, $reportingDate);
+        $rq = $rrd->getRegionQuarter();
+
+        $globalReports = Models\GlobalReport::between($rq->firstWeekDate, $reportingDate)
+            ->get()
+            ->keyBy(function($gr) { return $gr->reportingDate->toDateString(); });
+
+        $centers = Models\Center::byRegion($region)
+            ->get()
+            ->keyBy(function($c) { return $c->id; })
+            ->map(function($c) { return $c->name; });
+
+        $csdByCenter = [];
+
+        // First, collect all of the centerStats data objects
+        for ($targetDate = $rq->firstWeekDate; $targetDate->lte($reportingDate); $targetDate = $targetDate->copy()->addWeek()) {
+            $gr = $globalReports->get($targetDate->toDateString());
+
+            $statsReports = $gr->statsReports()
+                               ->byRegion($region)
+                               ->validated()
+                               ->get()
+                               ->keyBy(function($report) { return $report->id; });
+
+            $csds = Models\CenterStatsData::whereIn('stats_report_id', $statsReports->keys())
+                                          ->get();
+            foreach ($csds as $csd) {
+                $centerId = $statsReports->get($csd->statsReportId)->centerId;
+                $csdByCenter[$centers[$centerId]][] = $csd;
+            }
+        }
+        ksort($csdByCenter);
+
+        // Then, format and filter data
+        $output = [];
+        foreach($csdByCenter as $center => $items) {
+            // filter out duplicates from csdByCenter, keeping the latest promise/actual for each
+            // keyBy will end up keeping the last reported thing with the same key... we use that as an easy dedup: https://laravel.com/docs/5.2/collections#method-keyby
+            $csdByCenter[$center] = collect($items)
+                ->keyBy(function($csd) { return "{$csd->type} " . $csd->reportingDate->toDateString(); })
+                ->sortBy(function($csd) { return $csd->reportingDate->toDateString(); }); // re-sort by reportingDate in case later promises took over older ones
+
+            // re-key to be consumed by ScoreboardMultiWeek
+            $centerData = [];
+            foreach ($items as $csd) {
+                $centerData[$csd->reportingDate->toDateString()][$csd->type] = $csd;
+            }
+
+            // hydrate ScoreboardMultiWeek
+            $output[$center] = Domain\ScoreboardMultiWeek::fromArray($centerData)->toArray();
+        }
+
+        return $output;
+    }
+
     public function getWeekScoreboard(Models\GlobalReport $report, Models\Region $region, Carbon $futureDate = null)
     {
         $cached = $this->checkCache(compact('report', 'region', 'futureDate'));
@@ -129,17 +188,21 @@ class GlobalReport extends AuthenticatedApiBase
 
     public function getWeekScoreboardByCenter(Models\GlobalReport $report, Models\Region $region, $options = [])
     {
-        $cached = $this->checkCache($this->merge(compact('report', 'region'), $options));
-        if ($cached) {
-            return $cached;
-        }
+        $date = array_get($options, 'date', $report->reportingDate);
+        $includeOriginalPromise = array_get($options, 'includeOriginalPromise', false);
 
-        $date = $report->reportingDate;
-        if (isset($options['date']) && ($options['date'] instanceof Carbon || is_string($options['date']))) {
-            $date = is_string($options['date']) ? Carbon::parse($options['date']) : $options['date'];
-        }
+        // Use optimized method of getting scoreboards
+        // This currently doesn't support including original promises
+        if (!$includeOriginalPromise) {
+            $data = $this->getQuarterScoreboardByCenter($report, $region);
 
-        $includeOriginalPromise = isset($options['includeOriginalPromise']) ? (bool) $options['includeOriginalPromise'] : false;
+            $output = [];
+            foreach ($data as $center => $centerData) {
+                $output[$center] = $centerData[$date->toDateString()];
+            }
+
+            return $output;
+        }
 
         $statsReports = $this->getStatsReports($report, $region);
         if ($statsReports->isEmpty()) {
@@ -156,8 +219,6 @@ class GlobalReport extends AuthenticatedApiBase
 
             $reportData[$centerName] = $centerStatsData[$dateStr];
         }
-
-        $this->putCache($reportData);
 
         return $reportData;
     }

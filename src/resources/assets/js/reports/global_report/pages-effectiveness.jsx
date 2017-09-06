@@ -60,9 +60,16 @@ class EffectivenessBase extends PureComponent {
 
     renderCenter(name, centerData) {
         const { initialData: { game } } = this.props
+        let { reportContext: { props: { params: { reportingDate } } } } = this.props
+
         const weekData = []
+        reportingDate = moment(reportingDate)
 
         Object.keys(centerData).forEach((week) => {
+            if (reportingDate.isBefore(week)) {
+                return
+            }
+
             const sb = new Scoreboard(centerData[week])
             const sbGame = sb.games[game]
             const actualClass = (sbGame.actual >= sbGame.promise) ? 'success' : 'bg-danger'
@@ -84,15 +91,19 @@ class EffectivenessBase extends PureComponent {
 
     render() {
         const { initialData: { milestones, reportData } } = this.props
+        let { reportContext: { props: { params: { reportingDate } } } } = this.props
 
         if (!milestones || !reportData) {
             return <div>Loading region data...</div>
         }
 
         let dates = []
+        reportingDate = moment(reportingDate)
 
         Object.keys(reportData).forEach(center => {
-            dates = Object.keys(reportData[center])
+            dates = Object.keys(reportData[center]).filter(week => {
+                return reportingDate.isSameOrAfter(week)
+            })
         })
 
         return (
