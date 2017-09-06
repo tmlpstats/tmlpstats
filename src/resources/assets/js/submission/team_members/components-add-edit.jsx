@@ -382,7 +382,7 @@ export class TeamMembersEdit extends _EditCreate {
                     appropriately withdraw them, or transfer them.</p>
 
                     <p>You <i>can</i> override the delete, but please be advised that this
-                    will <b>retroactively</b> change reports, including GITW/TDO values,
+                    will change reports, including GITW/TDO values,
                     potentially held accountabilities, and more.</p>
 
                     <p>If you wish to continue, please enter the full name '{extraConfirm}' below.</p>

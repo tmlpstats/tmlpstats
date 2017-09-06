@@ -4,7 +4,7 @@ namespace TmlpStats\Api;
 use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
-use TmlpStats\Api\Base\ApiBase;
+use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Api\Exceptions;
 use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
@@ -12,7 +12,7 @@ use TmlpStats\Domain;
 /**
  * Applications
  */
-class Application extends ApiBase
+class Application extends AuthenticatedApiBase
 {
     use Traits\UsesReportDates, Traits\ValidatesObjects;
 

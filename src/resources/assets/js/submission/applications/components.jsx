@@ -361,8 +361,7 @@ class _EditCreate extends ApplicationsBase {
                 <div>
                     <p><b>Regional Statisticians</b> - This application cannot be deleted by a statistician.
                     You can override the delete, but please be advised that this
-                    will <b>retroactively</b> change reports, including maybe for
-                    last week.</p>
+                    will change reports, and potentially make things not add up.</p>
 
                     <p>If you wish to continue, please enter the full name '{extraConfirm}' below.</p>
                 </div>
