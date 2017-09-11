@@ -279,7 +279,7 @@ class GlobalReportTeamSummaryData
                 continue;
             }
 
-            $csd = $report->centerStatsData()->first();
+            $csd = $report->centerStatsData()->actual()->first();
 
             $pm = $report->center->getProgramManager($report->reportingDate);
             $cl = $report->center->getClassroomLeader($report->reportingDate);
