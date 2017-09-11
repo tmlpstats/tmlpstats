@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Api;
+<?php
+namespace TmlpStats\Api;
 
 // This is an API servicer. All API methods are simple methods
 // that take typed input and return array responses.
@@ -6,18 +7,21 @@ use App;
 use Cache;
 use Carbon\Carbon;
 use Illuminate\View\View;
+use Storage;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
+use TmlpStats\Api\Traits;
 use TmlpStats\Encapsulations;
 use TmlpStats\Http\Controllers;
 use TmlpStats\Reports\Arrangements;
 
 class GlobalReport extends AuthenticatedApiBase
 {
+    use Traits\CachesOutput;
+
     public function getRating(Models\GlobalReport $report, Models\Region $region)
     {
-        $cached = $this->checkCache(compact('report', 'region'));
-        if ($cached) {
+        if ($cached = $this->getFromCache($report, $region, 'ratings')) {
             return $cached;
         }
 
@@ -35,7 +39,7 @@ class GlobalReport extends AuthenticatedApiBase
         $data['summary']['points'] = $weeklyData[$dateString]['points']['total'];
         $data['summary']['rating'] = $weeklyData[$dateString]['rating'];
 
-        $this->putCache($data);
+        $this->putInCache($report, $region, 'ratings', $data);
 
         return $data;
     }
@@ -222,6 +226,34 @@ class GlobalReport extends AuthenticatedApiBase
         }
 
         return $courses;
+    }
+
+    public function getGamesDataAllWeeks(Models\GlobalReport $report, Models\Region $region)
+    {
+        if ($cached = $this->getFromCache($report, $region, 'gamesDataAllWeeks')) {
+            return $cached;
+        }
+
+        $reportingDate = $report->reportingDate;
+
+        $regionQuarter = $this->context->getEncapsulation(Encapsulations\RegionQuarter::class, [
+            'quarter' => Models\Quarter::getQuarterByDate($reportingDate, $region),
+            'region' => $region,
+        ]);
+
+        $reports = Models\GlobalReport::between($regionQuarter->startWeekendDate, $regionQuarter->endWeekendDate)->get();
+
+        $weeksData = [];
+        foreach ($reports as $weekReport) {
+            $dateStr = $weekReport->reportingDate->toDateString();
+            $week = $this->getWeekScoreboardByCenter($weekReport, $region);
+            ksort($week);
+            $weeksData[$dateStr] = $week;
+        }
+
+        $this->putInCache($report, $region, 'gamesDataAllWeeks', $weeksData);
+
+        return $weeksData;
     }
 
     protected function getStatsReports(Models\GlobalReport $report, Models\Region $region)

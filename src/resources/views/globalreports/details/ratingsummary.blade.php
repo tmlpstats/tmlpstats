@@ -47,27 +47,27 @@ $ratingColors = [
             <?php $count = 0; ?>
             @foreach ($statsReports as $report)
                 <?php
-                    $meterClass = ($report->getPoints() > 0) ? 'meter' : 'meter-zero';
+                    $meterClass = ($report['points'] > 0) ? 'meter' : 'meter-zero';
 
                     // Width must always be > 0 to display even when 0 points
-                    $meterWidth = max(round(($report->getPoints()/28)*100), 4);
+                    $meterWidth = max(round(($report['points'] / 28) * 100), 4);
                 ?>
                 <tr class="points">
                     @if ($count === 0)
                         <?php $count++; ?>
                         <td class="data-point" rowspan="{{ count($rows[$rating]) }}">{{ $rating }}</td>
                     @endif
-                    <td class="data-point" style="background-color: {{ $ratingColors[(int) $report->getPoints()] }}; font-weight: bold;">
-                        @statsReportLink($report)
+                    <td class="data-point" style="background-color: {{ $ratingColors[$report['points']] }}; font-weight: bold;">
+                        <a href="{{ $report['link'] }}">
                             <div class="{{ $meterClass }}">
-                                <span style="width: {{ $meterWidth }}%">{{ (int) $report->getPoints() }}</span>
+                                <span style="width: {{ $meterWidth }}%">{{ $report['points'] }}</span>
                             </div>
-                        @endStatsReportLink
+                        </a>
                     </td>
                     <td>
-                        @statsReportLink($report)
-                            <div style="margin-left: 5px">{{ $report->center->name }}</div>
-                        @endStatsReportLink
+                        <a href="{{ $report['link'] }}">
+                            <div style="margin-left: 5px">{{ $report['center'] }}</div>
+                        </a>
                     </td>
                 </tr>
             @endforeach

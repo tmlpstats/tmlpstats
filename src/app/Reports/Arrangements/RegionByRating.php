@@ -1,5 +1,8 @@
-<?php namespace TmlpStats\Reports\Arrangements;
+<?php
+namespace TmlpStats\Reports\Arrangements;
 
+use App;
+use TmlpStats\Http\Controllers\StatsReportController;
 use TmlpStats\StatsReport;
 
 class RegionByRating extends BaseArrangement
@@ -25,7 +28,11 @@ class RegionByRating extends BaseArrangement
         $centerReports = array();
         foreach ($centerPoints as $points => $reports) {
             foreach ($reports as $report) {
-                $centerReports[$report->getRating()][] = $report;
+                $centerReports[$report->getRating()][] = [
+                    'points' => (int) $report->getPoints(),
+                    'center' => $report->center->name,
+                    'link' => App::make(StatsReportController::class)->getUrl($report),
+                ];
             }
         }
 

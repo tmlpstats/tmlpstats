@@ -2,7 +2,6 @@
 namespace TmlpStats\Http\Controllers\Encapsulate;
 
 use App;
-use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Encapsulations;
@@ -17,27 +16,7 @@ class GlobalReportRegionGamesData
     {
         $this->globalReport = $globalReport;
         $this->region = $region;
-        $this->data = $this->getGamesData($globalReport->reportingDate, $region);
-    }
-
-    protected function getGamesData(Carbon $reportingDate, Models\Region $region)
-    {
-        $regionQuarter = App::make(Api\Context::class)->getEncapsulation(Encapsulations\RegionQuarter::class, [
-            'quarter' => Models\Quarter::getQuarterByDate($reportingDate, $region),
-            'region' => $region,
-        ]);
-
-        $reports = Models\GlobalReport::between($regionQuarter->startWeekendDate, $regionQuarter->endWeekendDate)->get();
-
-        $weeksData = [];
-        foreach ($reports as $weekReport) {
-            $dateStr = $weekReport->reportingDate->toDateString();
-            $week = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($weekReport, $region);
-            ksort($week);
-            $weeksData[$dateStr] = $week;
-        }
-
-        return $weeksData;
+        $this->data = App::make(Api\GlobalReport::class)->getGamesDataAllWeeks($globalReport, $region);
     }
 
     protected function filterGame($game, array $reports, Models\Region $region)
