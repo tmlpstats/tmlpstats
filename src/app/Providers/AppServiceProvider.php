@@ -2,6 +2,7 @@
 namespace TmlpStats\Providers;
 
 use Blade;
+use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
 use TmlpStats\Api;
 
@@ -14,7 +15,30 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        if (env('APP_ENV') === 'local') {
+            \DB::connection()->enableQueryLog();
+            \Event::listen('kernel.handled', function ($request, $response) {
+                if ($request->has('sql-debug')) {
+                    $output = [];
+                    foreach (\DB::getQueryLog() as $query) {
+                        foreach ($query['bindings'] as $i => $binding) {
+                            if ($binding instanceOf Carbon) {
+                                $query['bindings'][$i] = $binding->toDateString();
+                            }
+                        }
+
+                        $output["{$query['time']}"][] = str_replace(['?'], $query['bindings'], $query['query']);
+                    }
+                    ksort($output);
+
+                    file_put_contents(
+                        storage_path("app/sql.log"),
+                        print_r($output, true),
+                        FILE_APPEND
+                    );
+                }
+            });
+        }
     }
 
     /**

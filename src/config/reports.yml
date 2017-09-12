@@ -577,16 +577,22 @@ reportMeta:
         children:
           AccessToPowerEffectiveness:
             name: CAP
+            render: react
           PowerToCreateEffectiveness:
             name: CPC
+            render: react
           Team1ExpansionEffectiveness:
             name: T1X
+            render: react
           Team2ExpansionEffectiveness:
             name: T2X
+            render: react
           GameInTheWorldEffectiveness:
             name: GITW
+            render: react
           LandmarkForumEffectiveness:
             name: LF
+            render: react
 
       ApplicationsGroup:
         type: grouping

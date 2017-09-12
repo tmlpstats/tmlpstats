@@ -44,6 +44,12 @@ class CenterStatsData extends Model
         return $query->whereType('promise');
     }
 
+    public function scopeBetween($query, Carbon $start, Carbon $end)
+    {
+        return $query->where('reporting_date', '>=', $start)
+                     ->where('reporting_date', '<=', $end);
+    }
+
     public function scopeByCenter($query, Center $center)
     {
         $this->center = $center;

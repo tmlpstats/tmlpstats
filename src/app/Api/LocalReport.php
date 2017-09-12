@@ -24,10 +24,10 @@ class LocalReport extends AuthenticatedApiBase
             return $cached;
         }
 
-        $returnUnprocessed = isset($options['returnUnprocessed']) ? (bool) $options['returnUnprocessed'] : false;
-        $returnUnflattened = isset($options['returnUnflattened']) ? (bool) $options['returnUnflattened'] : false;
+        $returnUnprocessed = array_get($options, 'returnUnprocessed', false);
+        $returnUnflattened = array_get($options, 'returnUnflattened', false);
         $returnObject = array_get($options, 'returnObject', false);
-        $includeOriginalPromise = isset($options['includeOriginalPromise']) ? (bool) $options['includeOriginalPromise'] : false;
+        $includeOriginalPromise = array_get($options, 'includeOriginalPromise', false);
 
         $scoreboardData = [];
 

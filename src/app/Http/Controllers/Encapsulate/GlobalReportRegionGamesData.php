@@ -5,6 +5,7 @@ use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api;
+use TmlpStats\Domain;
 use TmlpStats\Encapsulations;
 
 class GlobalReportRegionGamesData
@@ -17,43 +18,7 @@ class GlobalReportRegionGamesData
     {
         $this->globalReport = $globalReport;
         $this->region = $region;
-        $this->data = $this->getGamesData($globalReport->reportingDate, $region);
-    }
-
-    protected function getGamesData(Carbon $reportingDate, Models\Region $region)
-    {
-        $regionQuarter = App::make(Api\Context::class)->getEncapsulation(Encapsulations\RegionQuarter::class, [
-            'quarter' => Models\Quarter::getQuarterByDate($reportingDate, $region),
-            'region' => $region,
-        ]);
-
-        $reports = Models\GlobalReport::between($regionQuarter->startWeekendDate, $regionQuarter->endWeekendDate)->get();
-
-        $weeksData = [];
-        foreach ($reports as $weekReport) {
-            $dateStr = $weekReport->reportingDate->toDateString();
-            $week = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($weekReport, $region);
-            ksort($week);
-            $weeksData[$dateStr] = $week;
-        }
-
-        return $weeksData;
-    }
-
-    protected function filterGame($game, array $reports, Models\Region $region)
-    {
-        $weeksData = [];
-        foreach ($reports as $date => $weekReports) {
-            foreach ($weekReports as $centerName => $centerData) {
-                // Note: we're transforming the output from $array[date][center] to $array[center][date]
-                $weeksData[$centerName][$date] = [
-                    'promise' => $centerData['promise'][$game],
-                    'actual' => $centerData['actual'][$game],
-                    'effective' => ($centerData['actual'][$game] >= $centerData['promise'][$game]),
-                ];
-            }
-        }
-        return $weeksData;
+        $this->data = App::make(Api\GlobalReport::class)->getQuarterScoreboardByCenter($globalReport, $region);
     }
 
     public function getOne($page)
@@ -90,10 +55,10 @@ class GlobalReportRegionGamesData
             'region' => $region,
         ]);
 
-        return view('globalreports.details.centergameeffectiveness', [
+        return [
             'game' => $game,
-            'reportData' => $this->filterGame($game, $data, $region),
-            'milestones' => $regionQuarter->datesAsArray(),
-        ]);
+            'reportData' => $data,
+            'milestones' => $regionQuarter->toArray(),
+        ];
     }
 }

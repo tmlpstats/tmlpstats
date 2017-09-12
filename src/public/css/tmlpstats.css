@@ -102,6 +102,10 @@ td.data-point, th.data-point {
     text-align: center;
 }
 
+td.middle-align, th.middle-align {
+    vertical-align: middle;
+}
+
 td.border-left, th.border-left {
     border-left: 2px solid #DDD !important;
 }

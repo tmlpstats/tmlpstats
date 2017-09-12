@@ -63,32 +63,39 @@
             </th>
             @foreach ($games as $game)
                 <?php
+                    $gameData = $centerData['games'][$game];
 
                     if (!$includeOriginal) {
                         $repromiseClass = '';
                     } else {
-                        $repromiseClass = ($centerData['promise'][$game] < $centerData['original'][$game])
+                        $repromiseClass = ($gameData['promise'] < $gameData['original'])
                             ? 'bg-danger'
                             : 'success';
 
-                        if ($centerData['promise'][$game] != $centerData['original'][$game] && !$includeActual && $repromiseClass == 'success') {
+                        if ($gameData['promise'] != $gameData['original'] && !$includeActual && $repromiseClass == 'success') {
                             $repromiseClass = 'bg-green';
                         }
                     }
 
                     if ($includeActual) {
-                        $actualClass = ($centerData['promise'][$game] > $centerData['actual'][$game])
+                        $actualClass = ($gameData['promise'] > $gameData['actual'])
                             ? 'bg-danger'
                             : 'success';
                     }
                 ?>
                 @if ($includeOriginal)
-                    <td class="data-point">{{ $centerData['original'][$game] }}{{ ($game == 'gitw') ? '%' : '' }}</td>
+                    <td class="data-point">{{ $gameData['original'] }}{{ ($game == 'gitw') ? '%' : '' }}</td>
                 @endif
-                <td class="data-point {{ $includeActual ? '' : 'border-right' }} {{ $repromiseClass }}">{{ $centerData['promise'][$game] }}{{ ($game == 'gitw') ? '%' : '' }}</td>
+                <td class="data-point {{ $includeActual ? '' : 'border-right' }} {{ $repromiseClass }}">
+                    {{ $gameData['promise'] }}{{ ($game == 'gitw') ? '%' : '' }}
+                </td>
                 @if ($includeActual)
                     <td class="data-point border-right {{ $actualClass }}">
-                        {{ isset($centerData['actual']) ? $centerData['actual'][$game] : '&nbsp;' }}{{ (isset($centerData['actual']) && $game == 'gitw') ? '%' : '' }}
+                        @if (isset($gameData['actual']))
+                            {{ $gameData['actual'] }}{{ ($game == 'gitw') ? '%' : '' }}
+                        @else
+                            &nbsp;
+                        @endif
                     </td>
                 @endif
             @endforeach
