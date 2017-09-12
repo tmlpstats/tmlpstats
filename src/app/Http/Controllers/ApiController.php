@@ -21,6 +21,7 @@ class ApiController extends ApiControllerBase
         'Admin.Region.getRegion' => 'Admin__Region__getRegion',
         'Admin.Quarter.filter' => 'Admin__Quarter__filter',
         'Admin.System.allSystemMessages' => 'Admin__System__allSystemMessages',
+        'Admin.System.regionSystemMessages' => 'Admin__System__regionSystemMessages',
         'Admin.System.writeSystemMessage' => 'Admin__System__writeSystemMessage',
         'Application.create' => 'Application__create',
         'Application.allForCenter' => 'Application__allForCenter',
@@ -72,6 +73,7 @@ class ApiController extends ApiControllerBase
     ];
 
     protected $authenticateMethods = [
+        'Admin__System__regionSystemMessages' => 'token',
         'GlobalReport__getReportPages' => 'token',
         'GlobalReport__getReportPagesByDate' => 'token',
         'GlobalReport__reportViewOptions' => 'token',
@@ -96,6 +98,13 @@ class ApiController extends ApiControllerBase
     protected function Admin__System__allSystemMessages($input)
     {
         return $this->app->make(Api\Admin\System::class)->allSystemMessages(
+        );
+    }
+    protected function Admin__System__regionSystemMessages($input)
+    {
+        return $this->app->make(Api\Admin\System::class)->regionSystemMessages(
+            $this->parse($input, 'section', 'string'),
+            $this->parse($input, 'region', 'Region')
         );
     }
     protected function Admin__System__writeSystemMessage($input)

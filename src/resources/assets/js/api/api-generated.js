@@ -39,6 +39,14 @@ Api.Admin.System = {
     allSystemMessages: bac('Admin.System.allSystemMessages'),
 
     /*
+    Get system messages for a region
+    Parameters:
+      section: string
+      region: Region
+    */
+    regionSystemMessages: bac('Admin.System.regionSystemMessages'),
+
+    /*
     Upsert a system message
     Parameters:
       data: array

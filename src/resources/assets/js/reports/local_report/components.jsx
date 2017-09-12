@@ -128,7 +128,7 @@ export class LocalReport extends Component {
         }
         const tabs = this.makeTabParams(params)
 
-        let nav, reportTokenLink
+        let nav, reportTokenLink, messages
         if (config.capabilities.reportNavLinks) {
             nav = <ReportCenterNav params={params} regionId={config.globalRegionId} />
         }
@@ -141,6 +141,7 @@ export class LocalReport extends Component {
             <div>
                 <h2>{config.centerInfo.name} - {params.reportingDate} {reportTokenLink}</h2>
                 {nav}
+                {messages}
                 <TabbedReport tabs={tabs} fullReport={this.fullReport} reportContext={this} />
             </div>
         )

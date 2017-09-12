@@ -3,6 +3,7 @@ import { defaultMemoize } from 'reselect'
 
 import { TabbedReport } from '../tabbed_report/components'
 import { connectRedux, delayDispatch } from '../../reusable/dispatch'
+import { RegionSystemMessages } from '../../reusable/system-messages/connected'
 import { filterReportFlags, makeTwoTabParamsSelector } from '../tabbed_report/util'
 import { reportConfigData } from '../data'
 import ReportsMeta from '../meta'
@@ -96,8 +97,14 @@ export class GlobalReport extends Component {
         if (!this.fullReport) {
             return <div>Loading...</div>
         }
-        const tabs = this.makeTabParams(this.props.params)
-        return <TabbedReport tabs={tabs} fullReport={this.fullReport} reportContext={this} />
+        const { params } = this.props
+        const tabs = this.makeTabParams(params)
+        return (
+            <div>
+                <RegionSystemMessages region={this.props.params.regionAbbr} section="global_report" />
+                <TabbedReport tabs={tabs} fullReport={this.fullReport} reportContext={this} />
+            </div>
+        )
     }
 
 }

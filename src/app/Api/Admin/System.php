@@ -14,14 +14,28 @@ class System extends AuthenticatedApiBase
         $user = $this->context->getUser();
         $this->assertAuthz($user->hasRole('administrator') || $user->hasRole('globalStatistician'));
     }
+
     public function allSystemMessages($data = [])
     {
         $this->assertSystemAdmin();
 
-        return Models\SystemMessage::get()->map(function ($x) {
-            return Domain\SystemMessage::fromModel($x);
-        });
+        return Models\SystemMessage::get()
+            ->map([Domain\SystemMessage::class, 'fromModel']);
     }
+
+    public function regionSystemMessages($section, Models\Region $region)
+    {
+        if (!$this->context->getUser()) {
+            return [];
+        }
+
+        return Models\SystemMessage::active()
+            ->section($section)
+            ->region($region)
+            ->get()
+            ->map([Domain\SystemMessage::class, 'fromModel']);
+    }
+
     public function writeSystemMessage($data = [])
     {
         $this->assertSystemAdmin();
@@ -44,4 +58,5 @@ class System extends AuthenticatedApiBase
             'storedId' => $message->id,
         ];
     }
+
 }
