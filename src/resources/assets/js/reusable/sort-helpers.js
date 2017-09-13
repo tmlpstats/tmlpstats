@@ -64,11 +64,11 @@ function createIteratee(key) {
 }
 
 export function createSorters(input) {
-    let m = Immutable.Map()
-    input.forEach((v) => {
-        m = m.set(v.key, v)
+    return Immutable.OrderedMap().withMutations((m) => {
+        input.forEach((v) => {
+            m.set(v.key, v)
+        })
     })
-    return  m
 }
 
 const defaultInputSelectors = [

@@ -6,10 +6,12 @@ import { delayDispatch, connectRedux, rebind } from '../../reusable/dispatch'
 import { FormTypeahead } from '../../reusable/typeahead'
 
 import { centerQuarterData } from '../core/data'
+import DeleteWarning from '../core/DeleteWarning'
 import { makeAccountabilitiesSelector, makeQuartersSelector } from '../core/selectors'
 import { TEAM_MEMBER_FORM_KEY } from './reducers'
 import { EXIT_CHOICES, EXIT_CHOICES_HELP } from './exit_choice'
 import * as actions from './actions'
+import { teamMemberText as fullName } from './data'
 import { TeamMembersBase, GITW_LABELS, TDO_LABELS } from './components-base'
 
 
@@ -260,7 +262,7 @@ class _EditCreate extends TeamMembersBase {
     saveTeamMember(data) {
         const { centerId, reportingDate } = this.props.params
 
-        this.props.dispatch(actions.stashTeamMember(centerId, reportingDate, data)).then((result) => {
+        return this.props.dispatch(actions.stashTeamMember(centerId, reportingDate, data)).then((result) => {
             if (!result) {
                 return
             }
@@ -286,6 +288,11 @@ class _EditCreate extends TeamMembersBase {
 // Detailed edit of class list
 @connectRedux(teamMembersMapState)
 export class TeamMembersEdit extends _EditCreate {
+    constructor(props) {
+        super(props)
+        rebind(this, 'deleteTeamMember')
+    }
+
     checkLoading() {
         if (!super.checkLoading()) {
             return false
@@ -322,11 +329,13 @@ export class TeamMembersEdit extends _EditCreate {
 
         return (
             <div>
-                <h3>Edit Team Member {teamMember.firstName} {teamMember.lastName}</h3>
+                <h3>Edit Team Member {fullName(teamMember)}</h3>
 
                 <MessagesComponent messages={messages} />
 
                 {super.render()}
+
+                {this.renderDeleteFlow()}
             </div>
         )
     }
@@ -355,6 +364,46 @@ export class TeamMembersEdit extends _EditCreate {
                 </div>
             </div>
         )
+    }
+
+    renderDeleteFlow() {
+        const { currentMember, lookups } = this.props
+        let extraConfirm, spiel
+        if (!currentMember.id) {
+            return
+        } else if (currentMember.meta && currentMember.meta.canDelete) {
+            spiel = <p>Deleting a team member will cause them to be permanently removed.</p>
+        } else if (lookups.user.canOverrideDelete) {
+            extraConfirm = fullName(currentMember)
+            spiel = (
+                <div>
+                    <p><b>Regional Statisticians</b> - This team member cannot be deleted by a statistician.
+                    It is a very rare occasion to delete a team member, note most cases you would want to
+                    appropriately withdraw them, or transfer them.</p>
+
+                    <p>You <i>can</i> override the delete, but please be advised that this
+                    will change reports, including GITW/TDO values,
+                    potentially held accountabilities, and more.</p>
+
+                    <p>If you wish to continue, please enter the full name '{extraConfirm}' below.</p>
+                </div>
+            )
+        } else {
+            return
+        }
+        return (
+            <div style={{maxWidth: '80em', marginTop: '3em'}}>
+                <DeleteWarning
+                        model={TEAM_MEMBER_FORM_KEY} noun="Team Member" spiel={spiel}
+                        extraConfirm={extraConfirm} onSubmit={this.deleteTeamMember}
+                        buttonState={this.props.teamMembers.saveState} />
+            </div>
+        )
+    }
+
+    deleteTeamMember(data) {
+        data = Object.assign({}, data, {action: 'delete'})
+        return this.saveTeamMember(data)
     }
 }
 

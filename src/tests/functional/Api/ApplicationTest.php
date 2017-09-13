@@ -9,6 +9,7 @@ use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Domain;
 use TmlpStats\Tests\Functional\FunctionalTestAbstract;
+use TmlpStats\Tests\Mocks\MockContext;
 
 class ApplicationTest extends FunctionalTestAbstract
 {
@@ -22,6 +23,7 @@ class ApplicationTest extends FunctionalTestAbstract
     public function setUp()
     {
         parent::setUp();
+        config(['tmlp.earliest_submission' => '2015-01-01']);
 
         $this->center = Models\Center::abbreviation('VAN')->first();
         $this->quarter = Models\Quarter::year(2016)->quarterNumber(1)->first();
@@ -387,4 +389,78 @@ class ApplicationTest extends FunctionalTestAbstract
              ->seeJsonHas($expectedResponse)
              ->seeStatusCode(400);
     }
+
+    protected function softDeleteCommon($role)
+    {
+        $storedAppId = $this->application->id;
+        list($center, $reportingDate) = [$this->center, $this->report->reportingDate];
+        // Make a non-admin user
+        $role = Models\Role::firstOrCreate(['name' => $role]);
+        $user = factory(Models\User::class)->create(['role_id' => $role->id]);
+
+        $context = MockContext::defaults()->withUser($user)->install();
+        $thisWeeksGlobalReport = Models\GlobalReport::firstOrCreate(['reporting_date' => $reportingDate]);
+        $thisWeeksGlobalReport->addCenterReport($this->report);
+
+        $appsApi = App::make(Api\Application::class);
+        $stashed = $appsApi->stash($center, $reportingDate, [
+            'firstName' => 'Name', 'lastName' => 'last',
+            'teamYear' => 1, 'incomingQuarter' => $this->nextQuarter->id,
+            'regDate' => '2016-04-09',
+        ]);
+        $this->assertTrue($stashed['success']);
+        $stashId = $stashed['storedId'];
+
+        return [$center, $reportingDate, $context, $storedAppId, $stashId];
+    }
+
+    public function testSoftDeletesErrorWithNoPrivs()
+    {
+        list($center, $reportingDate, $context, $storedAppId, $stashId) = $this->softDeleteCommon('localStatistician');
+
+        $this->assertFalse($context->can('overrideDelete', $center));
+        $this->expectException(Api\Exceptions\UnauthorizedException::class);
+        $appsApi = App::make(Api\Application::class);
+        $appsApi->stash($center, $reportingDate, ['action' => 'delete', 'id' => $storedAppId]);
+    }
+
+    public function testSoftDeletesWorkForLocalStats()
+    {
+        list($center, $reportingDate, $context, $storedAppId, $stashId) = $this->softDeleteCommon('localStatistician');
+
+        $this->assertFalse($context->can('overrideDelete', $center));
+        $appsApi = App::make(Api\Application::class);
+        $result = $appsApi->stash($center, $reportingDate, ['action' => 'delete', 'id' => $stashId]);
+        $this->assertTrue($result['success']);
+    }
+
+    public function testSoftDeletes()
+    {
+        list($center, $reportingDate, $context, $storedAppId, $stashId) = $this->softDeleteCommon('globalStatistician');
+        $appsApi = App::make(Api\Application::class);
+
+        // Step 1: Check the item is in the allForCenter result
+        $items = collect($appsApi->allForCenter($center, $reportingDate, true));
+        $this->assertEquals(2, $items->count());
+        $this->assertTrue($items->get($stashId)->meta['canDelete']);
+        $this->assertFalse(array_get($items->get($storedAppId)->meta, 'canDelete', false));
+
+        // Step 2: Soft delete the stored app.
+        $result = $appsApi->stash($center, $reportingDate, ['action' => 'delete', 'id' => $storedAppId]);
+        $this->assertTrue($result['success']);
+
+        // Step 3: Check it's missing from allForCenter
+        $items = collect($appsApi->allForCenter($center, $reportingDate, true));
+        $this->assertEquals(1, $items->count());
+
+        // Step 4: Now soft delete the stashed app.
+        $result = $appsApi->stash($center, $reportingDate, ['action' => 'delete', 'id' => $stashId]);
+        $this->assertTrue($result['success']);
+
+        // Step 3: Check it's missing from allForCenter
+        $items = collect($appsApi->allForCenter($center, $reportingDate, true));
+        $this->assertEquals(0, $items->count());
+
+    }
+
 }

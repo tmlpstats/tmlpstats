@@ -49,3 +49,7 @@ export const weeklyReportingSave = new LoadingMultiState('team_members/saveWeekl
 export const weeklyReportingData = new InlineBulkWork('team_members/weeklyReporting')
 
 export const messages = new MessageManager('team_members')
+
+export function teamMemberText(teamMember) {
+    return (teamMember.firstName || '(First Name Blank)') + ' ' + (teamMember.lastName || '(Last Name Blank)')
+}

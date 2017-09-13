@@ -4,14 +4,15 @@ namespace TmlpStats\Api;
 use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
-use TmlpStats\Api\Base\ApiBase;
+use TmlpStats\Api\Base\AuthenticatedApiBase;
+use TmlpStats\Api\Exceptions;
 use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
 
 /**
  * Applications
  */
-class Application extends ApiBase
+class Application extends AuthenticatedApiBase
 {
     use Traits\UsesReportDates, Traits\ValidatesObjects;
 
@@ -20,21 +21,28 @@ class Application extends ApiBase
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
 
         $allApplications = [];
+        $deleted = collect([]);
         if ($includeInProgress) {
             $submissionData = App::make(SubmissionData::class);
-            $found = $submissionData->allForType($center, $reportingDate, Domain\TeamApplication::class);
+            list($found, $deleted) = $submissionData->allForType($center, $reportingDate, Domain\TeamApplication::class, ['include_deleted' => true]);
             foreach ($found as $domain) {
                 $allApplications[$domain->id] = $domain;
                 $domain->meta['localChanges'] = true;
+                $domain->meta['canDelete'] = true;
             }
+
+            $deleted = $deleted->map(function ($x) {return intval($x);})->flip();
         }
 
         $lastReport = $this->relevantReport($center, $reportingDate);
         if ($lastReport) {
             $applications = App::make(LocalReport::class)->getApplicationsList($lastReport, ['returnUnprocessed' => true]);
             foreach ($applications as $appData) {
-                // it's a small optimization, but prevent creating domain if we have an existing SubmissionData version
-                if (isset($allApplications[$appData->tmlpRegistrationId])) {
+                if ($deleted->has($appData->tmlpRegistrationId)) {
+                    continue;
+                } else if ($domain = array_get($allApplications, $appData->tmlpRegistrationId)) {
+                    // it's a small optimization, but prevent creating domain if we have an existing SubmissionData version
+                    $domain->meta['canDelete'] = false;
                     continue;
                 }
 
@@ -56,6 +64,11 @@ class Application extends ApiBase
     public function stash(Models\Center $center, Carbon $reportingDate, array $data)
     {
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate, ['write']);
+        $this->assertCan('submitStats', $center);
+
+        if (array_get($data, 'action', '') == 'delete') {
+            return $this->deleteApp($center, $reportingDate, $data['id']);
+        }
 
         $submissionData = App::make(SubmissionData::class);
         $appId = $submissionData->numericStorageId($data, 'id');
@@ -71,6 +84,7 @@ class Application extends ApiBase
         } else {
             $teamApp = Domain\TeamApplication::fromArray($data);
         }
+
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $teamApp, $appId, $pastWeeks);
 
@@ -89,6 +103,22 @@ class Application extends ApiBase
             'storedId' => $appId,
             'valid' => $validationResults['valid'],
             'messages' => $validationResults['messages'],
+        ];
+    }
+
+    protected function deleteApp(Models\Center $center, Carbon $reportingDate, $appId)
+    {
+        $appId = intval($appId);
+        // Cannot override delete for an application with an actual ID
+        if ($appId > 0 && !$this->context->can('overrideDelete', $center)) {
+            throw new Exceptions\UnauthorizedException('Cannot delete this application without delete override privileges.');
+        }
+        App::make(SubmissionData::class)
+            ->deleteOne($center, $reportingDate, Domain\TeamApplication::class, $appId);
+
+        return [
+            'success' => true,
+            'valid' => true,
         ];
     }
 

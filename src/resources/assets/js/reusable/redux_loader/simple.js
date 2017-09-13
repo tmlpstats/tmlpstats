@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import { objectAssign } from '../ponyfill'
 import { ReduxLoader } from './base'
 
@@ -6,6 +8,7 @@ export default class SimpleReduxLoader extends ReduxLoader {
         super(opts)
         this.replace_action = opts.prefix + '/replace'
         this.replace_items_action = opts.prefix + '/replace_items'
+        this.delete_item_action = opts.prefix + '/delete'
     }
 
     dataReducer(opts) {
@@ -16,6 +19,8 @@ export default class SimpleReduxLoader extends ReduxLoader {
                 return action.payload
             case this.replace_items_action:
                 return objectAssign({}, state, action.payload)
+            case this.delete_item_action:
+                return _.omit(state, [action.payload])
             }
             return state
         }
@@ -31,5 +36,9 @@ export default class SimpleReduxLoader extends ReduxLoader {
 
     replaceItems(values) {
         return {type: this.replace_items_action, payload: values}
+    }
+
+    deleteItem(key) {
+        return {type: this.delete_item_action, payload: key}
     }
 }

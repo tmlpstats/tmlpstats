@@ -1,7 +1,7 @@
 import { Link, withRouter } from 'react-router'
 import { defaultMemoize } from 'reselect'
 
-import { Control, Form, SimpleField, SimpleSelect, SimpleFormGroup, BooleanSelect, AddOneLink, formActions } from '../../reusable/form_utils'
+import { Control, Form, SimpleField, Select, SimpleFormGroup, BooleanSelect, AddOneLink, formActions } from '../../reusable/form_utils'
 import { objectAssign } from '../../reusable/ponyfill'
 import { rebind, delayDispatch, connectRedux } from '../../reusable/dispatch'
 import { SORT_BY } from '../../reusable/sort-helpers'
@@ -13,6 +13,7 @@ import { SubmissionBase, React } from '../base_components'
 import { APPLICATIONS_FORM_KEY } from './reducers'
 import { appsSorts, appsCollection } from './data'
 import { centerQuarterData } from '../core/data'
+import DeleteWarning from '../core/DeleteWarning'
 import { loadApplications, saveApplication, chooseApplication } from './actions'
 import AppStatus from './AppStatus'
 
@@ -77,7 +78,7 @@ export class ApplicationsIndex extends ApplicationsBase {
 
             withdraws.push(
                 <tr key={key}>
-                    <td><Link to={`${baseUri}/edit/${key}`}>{app.firstName} {app.lastName}</Link></td>
+                    <td><Link to={`${baseUri}/edit/${key}`}>{nameRow(app)}</Link></td>
                     <td>{app.teamYear}</td>
                     <td>{quarterLabel}</td>
                     <td>{app.regDate}</td>
@@ -132,7 +133,7 @@ export class ApplicationsIndex extends ApplicationsBase {
 
             apps.push(
                 <tr key={key}>
-                    <td><Link to={`${baseUri}/edit/${key}`}>{app.firstName} {app.lastName}</Link></td>
+                    <td><Link to={`${baseUri}/edit/${key}`}>{nameRow(app)}</Link></td>
                     <td>{app.teamYear}</td>
                     <td>{quarterLabel}</td>
                     <td>{app.regDate}</td>
@@ -186,6 +187,7 @@ class _EditCreate extends ApplicationsBase {
             const tmp = teamMembersData.opts.getSortedMembers(teamMembers)
             return tmp.filter(tm => tm.id && parseInt(tm.id) > 0)
         })
+        rebind(this, 'saveAppData', 'deleteApp')
     }
     checkLoading() {
         if (!super.checkLoading()) {
@@ -228,8 +230,8 @@ class _EditCreate extends ApplicationsBase {
                     {this.renderStartingQuarter(modelKey)}
                     <SimpleField label="First Name" model={modelKey+'.firstName'} divClass="col-md-6" required={true} />
                     <SimpleField label="Last Initial" model={modelKey+'.lastName'} divClass="col-md-6" required={true} />
-                    <SimpleFormGroup label="Team Year" divClass="col-md-4" required={true}>
-                        <Control.select model={modelKey+'.teamYear'} className="form-control" style={{maxWidth: '10em'}}>
+                    <SimpleFormGroup label="Team Year" divClass="col-md-4" required={true} labelFor="f-app-teamYear">
+                        <Control.select model={modelKey+'.teamYear'} className="form-control" style={{maxWidth: '10em'}} id="f-app-teamYear">
                             <option value="1">Team 1</option>
                             <option value="2">Team 2</option>
                         </Control.select>
@@ -237,14 +239,12 @@ class _EditCreate extends ApplicationsBase {
                     <SimpleField label="Comment" model={modelKey+'.comment'} divClass="col-md-6" customField={true}>
                         <textarea className="form-control" rows="3"></textarea>
                     </SimpleField>
-                    <div className="required form-group">
-                        <label className="col-md-2 control-label">Committed Team Member</label>
-                        <div className="col-md-6">
-                            <SimpleSelect
-                                    model={modelKey+'.committedTeamMember'} items={selectableMembers}
-                                    keyProp="id" getLabel={teamMembersData.opts.getLabel} emptyChoice="Choose One" />
-                        </div>
-                    </div>
+                    <SimpleFormGroup label="Committed Team Member" required={true} labelFor="f-app-commitedTeamMember" divClass="col-md-6">
+                        <Select
+                                id="f-app-committedTeamMember"
+                                model={modelKey+'.committedTeamMember'} items={selectableMembers}
+                                keyProp="id" getLabel={teamMembersData.opts.getLabel} emptyChoice="Choose One" />
+                    </SimpleFormGroup>
                     <div className="form-group">
                         <label className="col-md-2 control-label">Application Status</label>
                         <div className="col-md-9">
@@ -254,6 +254,7 @@ class _EditCreate extends ApplicationsBase {
                     {this.renderTravelRoom(modelKey)}
                     <ButtonStateFlip loadState={this.props.saveApp} offset='col-sm-offset-2 col-sm-8' wrapGroup={true}>Save</ButtonStateFlip>
                 </Form>
+                {this.renderDeleteFlow(modelKey)}
             </div>
         )
     }
@@ -271,7 +272,7 @@ class _EditCreate extends ApplicationsBase {
         const CHANGING_QUARTER_KEY = '_changingQuarter'
         const isNewApp = this.isNewApp()
         if (isNewApp || currentApp[CHANGING_QUARTER_KEY]) {
-            body = <SimpleSelect model={modelKey+'.incomingQuarter'} items={centerQuarters}
+            body = <Select model={modelKey+'.incomingQuarter'} items={centerQuarters}
                                  keyProp="quarterId" getLabel={centerQuarterData.getLabel} />
         } else {
             const clickHandler = () => {
@@ -329,7 +330,7 @@ class _EditCreate extends ApplicationsBase {
     // saveAppData for now is the same between edit and create flows
     saveAppData(data) {
         const { router, dispatch, params: {centerId, reportingDate} } = this.props
-        dispatch(saveApplication(centerId, reportingDate, data)).then((result) => {
+        return dispatch(saveApplication(centerId, reportingDate, data)).then((result) => {
             if (!result) {
                 return
             }
@@ -345,6 +346,42 @@ class _EditCreate extends ApplicationsBase {
                 router.push(this.appsBaseUri())
             }
         })
+    }
+
+    renderDeleteFlow(modelKey) {
+        const { currentApp, lookups } = this.props
+        let extraConfirm, spiel
+        if (!currentApp.id) {
+            return
+        } else if (currentApp.meta && currentApp.meta.canDelete) {
+            spiel = <p>Deleting an application will cause the application to be permanently removed.</p>
+        } else if (lookups.user.canOverrideDelete) {
+            extraConfirm = nameRow(currentApp)
+            spiel = (
+                <div>
+                    <p><b>Regional Statisticians</b> - This application cannot be deleted by a statistician.
+                    You can override the delete, but please be advised that this
+                    will change reports, and potentially make things not add up.</p>
+
+                    <p>If you wish to continue, please enter the full name '{extraConfirm}' below.</p>
+                </div>
+            )
+        } else {
+            return
+        }
+        return (
+            <div style={{maxWidth: '80em', marginTop: '3em'}}>
+                <DeleteWarning
+                        model={modelKey} noun="Application" spiel={spiel}
+                        extraConfirm={extraConfirm} onSubmit={this.deleteApp}
+                        buttonState={this.props.saveApp} />
+            </div>
+        )
+    }
+
+    deleteApp(data) {
+        data = objectAssign({}, data, {action: 'delete'})
+        this.saveAppData(data)
     }
 }
 
@@ -414,4 +451,11 @@ export class ApplicationsAdd extends _EditCreate {
         return super.render()
     }
 
+}
+
+function nameRow(app) {
+    if (!app.firstName && !app.lastName) {
+        return '<Name Blank>'
+    }
+    return (app.firstName || 'unknown') + ' ' + (app.lastName || 'unknown')
 }

@@ -71,13 +71,15 @@ class SubmissionData extends AuthenticatedApiBase
      * @param  string        $type          either the class or key representing a type.
      * @return A collection of objects mapped to the proxied type.
      */
-    public function allForType(Models\Center $center, Carbon $reportingDate, $type)
+    public function allForType(Models\Center $center, Carbon $reportingDate, $type, array $options = [])
     {
         $conf = $this->combinedTypeMapping[$type];
 
-        $result = Models\SubmissionData::centerDate($center, $reportingDate)->type($conf['key'])->get();
+        $result = Models\SubmissionData::type($conf['key'])
+            ->centerDate($center, $reportingDate)
+            ->get();
 
-        return $this->fulfillQuery($result, $conf);
+        return $this->fulfillQuery($result, $conf, $options);
     }
 
     /**
@@ -86,7 +88,7 @@ class SubmissionData extends AuthenticatedApiBase
      * @param  [type]               $type          [description]
      * @param  array                $options       [description]
      */
-    public function allForTypeWholeQuarter(Domain\CenterQuarter $centerQuarter, $type, $options = [])
+    public function allForTypeWholeQuarter(Domain\CenterQuarter $centerQuarter, $type, array $options = [])
     {
         $reverse = array_get($options, 'reverse', false);
         $conf = $this->combinedTypeMapping[$type];
@@ -96,7 +98,7 @@ class SubmissionData extends AuthenticatedApiBase
             ->where('reporting_date', '<=', $centerQuarter->endWeekendDate)
             ->orderBy('reporting_date', ($reverse) ? 'desc' : 'asc');
 
-        return $this->fulfillQuery($result->get(), $conf);
+        return $this->fulfillQuery($result->get(), $conf, $options);
 
     }
 
@@ -106,11 +108,15 @@ class SubmissionData extends AuthenticatedApiBase
      * @param  array  $conf   Config
      * @return [type]         [description]
      */
-    protected function fulfillQuery($result, array $conf)
+    protected function fulfillQuery($result, array $conf, array $options = [])
     {
         $className = $conf['class'];
 
-        return $result->map(function ($row) use ($className) {
+        $filterSoftDeleted = function ($row) {
+            return $row->isSoftDeleted();
+        };
+
+        $domains = $result->reject($filterSoftDeleted)->map(function ($row) use ($className) {
             $data = $row->data;
             $data['center'] = $row->centerId;
             $data['submissionMeta'] = [
@@ -120,6 +126,18 @@ class SubmissionData extends AuthenticatedApiBase
 
             return $className::fromArray($data);
         });
+
+        if (array_get($options, 'include_deleted', false)) {
+            $deleted = $result
+                ->filter($filterSoftDeleted)
+                ->map(function ($row) {
+                    return $row->storedId;
+                });
+
+            return [$domains, $deleted];
+        } else {
+            return $domains;
+        }
     }
 
     /**
@@ -152,20 +170,26 @@ class SubmissionData extends AuthenticatedApiBase
     public function store(Models\Center $center, Carbon $reportingDate, $obj)
     {
         App::make(SubmissionCore::class)->checkCenterDate($center, $reportingDate);
-        $userId = $this->context->getUser()->id;
 
         $conf = $this->combinedTypeMapping[get_class($obj)];
         $idAttr = $conf['idAttr'];
         $toArrayFunc = array_get($conf, 'toArray', 'toArray');
+        $objArray = $obj->$toArrayFunc();
 
+        $this->storeRaw($center, $reportingDate, $conf['key'], $obj->$idAttr, $objArray);
+    }
+
+    protected function storeRaw(Models\Center $center, Carbon $reportingDate, $type, $id, $objArray)
+    {
         $params = [
             'center_id' => $center->id,
             'reporting_date' => $reportingDate,
-            'stored_type' => $conf['key'],
-            'stored_id' => $obj->$idAttr,
+            'stored_type' => $type,
+            'stored_id' => $id,
         ];
+        $userId = $this->context->getUser()->id;
+
         $current = Models\SubmissionData::firstOrNew($params);
-        $objArray = $obj->$toArrayFunc();
         $current->data = $objArray;
         $current->userId = $userId;
         $current->save();
@@ -173,6 +197,20 @@ class SubmissionData extends AuthenticatedApiBase
         $params['data'] = $objArray;
         $params['user_id'] = $userId;
         Models\SubmissionDataLog::create($params);
+    }
+
+    /**
+     * Soft-Delete a single stash element, and add a log entry of the deletion.
+     * @param  Center     $center        Center
+     * @param  Carbon     $reportingDate Reporting Date
+     * @param  string     $type          Either the type key or a class ref of the stored type.
+     * @param  string|int $id            The observed ID (will be treated as a string)
+     */
+    public function deleteOne(Models\Center $center, Carbon $reportingDate, $type, $id)
+    {
+        $conf = $this->combinedTypeMapping[$type];
+
+        return $this->storeRaw($center, $reportingDate, $conf['key'], $id, ['__deleted' => true]);
     }
 
     // Return a simple ID for generation purposes that is not likely to be used.

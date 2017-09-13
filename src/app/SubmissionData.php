@@ -17,45 +17,12 @@ class SubmissionData extends Model
     ];
 
     /**
-     * Return the data coerced to the type defined by typeMapping.
-     * The class in question has to have a static method fromArray
-     * @return Data in the type defined by typeMapping
+     * Returns true if this has been soft deleted
+     * @return boolean [description]
      */
-    public function getTypedData()
+    public function isSoftDeleted(): bool
     {
-        $className = static::$typeMapping[$this->storedType]['class'];
-
-        return $className::fromArray($this->data);
-    }
-
-    public function setTypedData($data)
-    {
-        $info = static::mappingForObj($data);
-        if ($info === null) {
-            // if we reach here, then we didn't find a type mapping
-            throw new \Exception("Unknown type mapping {$className}");
-        }
-
-        $this->storedType = $info['storedType'];
-        $this->storedId = $info['storedId'];
-        $this->data = $data->toArray();
-    }
-
-    protected static function mappingForObj($data)
-    {
-        $className = get_class($data);
-        foreach (static::$typeMapping as $k => $v) {
-            if ($v['class'] == $className) {
-                $idAttr = $v['idAttr'];
-
-                return [
-                    'storedType' => $k,
-                    'storedId' => $data->$idAttr,
-                ];
-            }
-        }
-
-        return null;
+        return array_get($this->data, '__deleted', false);
     }
 
     public function scopeCenter($query, $center)

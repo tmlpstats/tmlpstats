@@ -8,4 +8,6 @@ return [
 
     'global_report_view_mode' => env('GLOBAL_REPORT_VIEW_MODE', 'react'),
     'local_report_view_mode' => env('LOCAL_REPORT_VIEW_MODE', 'html'),
+
+    'earliest_submission' => '2017-06-02',
 ];

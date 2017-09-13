@@ -69,4 +69,9 @@ class CenterPolicy extends Policy
     {
         return $user->hasRole('globalStatistician');
     }
+
+    public function overrideDelete(User $user, Center $center)
+    {
+        return $user->hasRole('globalStatistician');
+    }
 }

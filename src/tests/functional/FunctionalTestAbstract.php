@@ -14,16 +14,27 @@ class FunctionalTestAbstract extends TestAbstract
 
     protected $faker;
     protected $user;
+    protected $desiredRole = 'administrator'; // For some reason, the default factory is admin
 
     public function setUp()
     {
         parent::setUp();
 
         $this->faker = Factory::create();
-        $this->user = factory(Models\User::class)->create();
-        $this->be($this->user);
+        $this->user = $this->createUser($this->desiredRole, true);
 
         Models\ModelCache::create()->flush();
+    }
+
+    protected function createUser(string $desiredRole, bool $beUser = false): Models\User
+    {
+        $role = Models\Role::firstOrCreate(['name' => $desiredRole]);
+        $user = factory(Models\User::class)->create(['role_id' => $role->id]);
+        if ($beUser) {
+            $this->be($user);
+        }
+
+        return $user;
     }
 
     /**
