@@ -19,14 +19,19 @@ class DatabaseSeeder extends Seeder {
         $this->call('RolesTableSeeder');
         $this->call('AccountabilitiesTableSeeder');
 
+        // Seeders needed for Scoreboard tests
+        $this->call('ScoreboardStatsReportTableSeeder');
+        $this->call('ScoreboardCenterStatsDataTableSeeder');
+        $this->call('ScoreboardGlobalReportStatsReportTableSeeder');
+        $this->call('ScoreboardGlobalReportTableSeeder');
+
         // Import people and people related objects
         $this->call('PeopleObjectSeeder');
 
         if (env('APP_ENV') === 'local') {
             $this->call('DefaultAdminSeeder');
         }
-        
+
         Model::reguard();
     }
 }
-

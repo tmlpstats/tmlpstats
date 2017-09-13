@@ -22,30 +22,30 @@ class ValidationDataTest extends FunctionalTestAbstract
     {
         parent::setUp();
 
-        $reportingDateStr = '2016-04-15';
+        $reportingDateStr = '2017-07-07';
         $this->reportingDate = Carbon::parse($reportingDateStr);
 
         $this->center = Models\Center::abbreviation('VAN')->first();
-        $this->quarter = Models\Quarter::year(2016)->quarterNumber(1)->first();
-        $this->nextQuarter = Models\Quarter::year(2016)->quarterNumber(2)->first();
-        $this->lastQuarter = Models\Quarter::year(2015)->quarterNumber(4)->first();
+        $this->quarter = Models\Quarter::year(2017)->quarterNumber(2)->first();
+        $this->nextQuarter = Models\Quarter::year(2017)->quarterNumber(3)->first();
+        $this->lastQuarter = Models\Quarter::year(2017)->quarterNumber(1)->first();
 
         $this->report = $this->getReport($reportingDateStr, ['submitted_at' => null]);
-        $this->lastReport = $this->getReport('2016-04-08');
-        $this->lastGlobalReport = $this->getGlobalReport('2016-04-08', [$this->lastReport]);
+        $this->lastReport = $this->getReport('2017-06-30');
+        $this->lastGlobalReport = $this->getGlobalReport('2017-06-30', [$this->lastReport]);
 
         // Setup course
         $this->course = factory(Models\Course::class)->create([
             'center_id' => $this->center->id,
-            'start_date' => Carbon::parse('2016-04-23'),
+            'start_date' => Carbon::parse('2017-07-15'),
         ]);
         $this->course2 = factory(Models\Course::class)->create([
             'center_id' => $this->center->id,
-            'start_date' => Carbon::parse('2016-08-13'),
+            'start_date' => Carbon::parse('2017-09-09'),
         ]);
         $this->course3 = factory(Models\Course::class)->create([
             'center_id' => $this->center->id,
-            'start_date' => Carbon::parse('2016-08-13'),
+            'start_date' => Carbon::parse('2017-09-09'),
         ]);
 
         // Setup application
@@ -53,7 +53,7 @@ class ValidationDataTest extends FunctionalTestAbstract
             'incoming_quarter_id' => $this->lastQuarter->id,
         ]);
         $this->application = factory(Models\TmlpRegistration::class)->create([
-            'reg_date' => Carbon::parse('2016-04-01'),
+            'reg_date' => Carbon::parse('2017-07-01'),
         ]);
 
         $this->lastWeekApplicationData = Models\TmlpRegistrationData::firstOrCreate([
@@ -131,11 +131,11 @@ class ValidationDataTest extends FunctionalTestAbstract
         $appData = [
             'id' => $this->application->id,
             'regDate' => $this->application->regDate,
-            'appOutDate' => '2016-04-02',
-            'appInDate' => '2016-04-03',
-            'apprDate' => '2016-04-11',
+            'appOutDate' => '2017-07-02',
+            'appInDate' => '2017-07-03',
+            'apprDate' => '2017-07-06',
             'committedTeamMember' => $this->teamMember->id,
-            'incomingQuarter' => $this->quarter->id,
+            'incomingQuarter' => $this->quarter->id, // Changed from next quarter
         ];
 
         $courseData = [
@@ -144,9 +144,9 @@ class ValidationDataTest extends FunctionalTestAbstract
             'type' => $this->course->type,
             'quarterStartTer' => 8,
             'quarterStartStandardStarts' => 6,
-            'quarterStartXfer' => 1,
+            'quarterStartXfer' => 1, // Changed from 0
             'currentTer' => 28,
-            'currentStandardStarts' => 22,
+            'currentStandardStarts' => 24,
             'currentXfer' => 2,
         ];
 
@@ -157,8 +157,8 @@ class ValidationDataTest extends FunctionalTestAbstract
             'quarterStartTer' => 0,
             'quarterStartStandardStarts' => 0,
             'quarterStartXfer' => 0,
-            'currentTer' => 17,
-            'currentStandardStarts' => 17,
+            'currentTer' => 23,
+            'currentStandardStarts' => 23,
             'currentXfer' => 2,
         ];
 
@@ -223,15 +223,20 @@ class ValidationDataTest extends FunctionalTestAbstract
                         ],
                     ],
                 ],
+                'TeamMember' => [
+                    ['level' => 'warning'],
+                    ['level' => 'warning'],
+                    ['level' => 'warning'],
+                ],
             ],
         ];
 
         $appData = [
             'id' => $this->application->id,
             'regDate' => $this->application->regDate,
-            'appOutDate' => '2016-04-02',
-            'appInDate' => '2016-04-03',
-            'apprDate' => '2016-04-11',
+            'appOutDate' => '2017-07-02',
+            'appInDate' => '2017-07-03',
+            'apprDate' => '2017-07-06',
             'committedTeamMember' => $this->teamMember->id,
             'incomingQuarter' => $this->quarter->id,
         ];

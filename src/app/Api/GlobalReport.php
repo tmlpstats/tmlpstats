@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Api;
+<?php
+namespace TmlpStats\Api;
 
 // This is an API servicer. All API methods are simple methods
 // that take typed input and return array responses.
@@ -22,19 +23,14 @@ class GlobalReport extends AuthenticatedApiBase
             return $cached;
         }
 
-        $statsReports = $this->getStatsReports($report, $region);
-        if ($statsReports->isEmpty()) {
-            return null;
-        }
+        $centerData = $this->getWeekScoreboardByCenter($report, $region, $report->reportingDate);
+        $weeklyData = $this->getWeekScoreboard($report, $region, $report->reportingDate);
 
-        $weeklyData = $this->getQuarterScoreboard($report, $region);
-
-        $a = new Arrangements\RegionByRating($statsReports);
+        $a = new Arrangements\RegionByRating($centerData);
         $data = $a->compose();
 
-        $dateString = $report->reportingDate->toDateString();
-        $data['summary']['points'] = $weeklyData[$dateString]['points']['total'];
-        $data['summary']['rating'] = $weeklyData[$dateString]['rating'];
+        $data['summary']['points'] = $weeklyData->points();
+        $data['summary']['rating'] = $weeklyData->rating();
 
         $this->putCache($data);
 
@@ -48,121 +44,41 @@ class GlobalReport extends AuthenticatedApiBase
             return $cached;
         }
 
-        $statsReports = $this->getStatsReports($report, $region);
-        if ($statsReports->isEmpty()) {
-            return [];
-        }
+        $scoreboardData = $this->getQuarterScoreboardByCenter($report->reportingDate, $region);
+        $centerCount = count($scoreboardData);
 
-        $cumulativeData = [];
-        foreach ($statsReports as $statsReport) {
-            $centerStatsData = App::make(LocalReport::class)->getQuarterScoreboard($statsReport);
+        $gamesData = [];
+        foreach ($scoreboardData as $center => $centerData) {
+            foreach ($centerData->sortedValues() as $week) {
+                $date = $week->week->toDateString();
+                $data = array_get($gamesData, "{$date}.games", []);
 
-            foreach ($centerStatsData as $dateStr => $week) {
-                foreach (['promise', 'actual'] as $type) {
-
-                    // Skip if we don't have that type, or if the data is empty
-                    if (!isset($week[$type]) || $week[$type]['cap'] === null) {
-                        continue;
+                foreach (Domain\Scoreboard::GAME_KEYS as $game) {
+                    if (!isset($data[$game])) {
+                        $data[$game]['promise'] = $data[$game]['actual'] = 0;
                     }
-
-                    $data = $week[$type];
-
-                    if (isset($cumulativeData[$dateStr][$type])) {
-                        $weekData = $cumulativeData[$dateStr][$type];
-                    } else {
-                        $weekData = new \stdClass();
-                        $weekData->type = $type;
-                        $weekData->reportingDate = Carbon::parse($dateStr);
-                    }
-
-                    foreach (['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'] as $game) {
-
-                        if (!isset($weekData->$game)) {
-                            $weekData->$game = 0;
-                        }
-                        $weekData->$game += $data[$game];
-                    }
-                    $cumulativeData[$dateStr][$type] = $weekData;
+                    $data[$game]['promise'] += $week->game($game)->promise();
+                    $data[$game]['actual'] += $week->game($game)->actual();
                 }
+                $gamesData[$date]['games'] = $data;
             }
         }
 
-        $scoreboardData = [];
-        $count = count($statsReports);
-        foreach ($cumulativeData as $date => $week) {
-            foreach ($week as $type => $data) {
-                // GITW is calculated as an average, so we need the total first
-                $total = $data->gitw;
-                $data->gitw = ($total / $count);
-
-                $scoreboardData[] = $data;
-            }
+        foreach ($gamesData as $date => &$week) {
+            $week['games']['gitw']['promise'] = round($week['games']['gitw']['promise'] / $centerCount);
+            $week['games']['gitw']['actual'] = round($week['games']['gitw']['actual'] / $centerCount);
         }
 
-        $a = new Arrangements\GamesByWeek($scoreboardData);
-        $weeklyData = $a->compose();
+        $this->putCache($gamesData);
 
-        $this->putCache($weeklyData['reportData']);
-
-        return $weeklyData['reportData'];
+        return Domain\ScoreboardMultiWeek::fromArray($gamesData);
     }
 
-    public function getQuarterScoreboardByCenter(Models\GlobalReport $report, Models\Region $region)
+    public function getQuarterScoreboardByCenter(Carbon $reportingDate, Models\Region $region)
     {
-        $reportingDate = $report->reportingDate;
-        $rrd = Encapsulations\RegionReportingDate::ensure($region, $reportingDate);
-        $rq = $rrd->getRegionQuarter();
-
-        $globalReports = Models\GlobalReport::between($rq->firstWeekDate, $reportingDate)
-            ->get()
-            ->keyBy(function($gr) { return $gr->reportingDate->toDateString(); });
-
-        $centers = Models\Center::byRegion($region)
-            ->get()
-            ->keyBy(function($c) { return $c->id; })
-            ->map(function($c) { return $c->name; });
-
-        $csdByCenter = [];
-
-        // First, collect all of the centerStats data objects
-        for ($targetDate = $rq->firstWeekDate; $targetDate->lte($reportingDate); $targetDate = $targetDate->copy()->addWeek()) {
-            $gr = $globalReports->get($targetDate->toDateString());
-
-            $statsReports = $gr->statsReports()
-                               ->byRegion($region)
-                               ->validated()
-                               ->get()
-                               ->keyBy(function($report) { return $report->id; });
-
-            $csds = Models\CenterStatsData::whereIn('stats_report_id', $statsReports->keys())
-                                          ->get();
-            foreach ($csds as $csd) {
-                $centerId = $statsReports->get($csd->statsReportId)->centerId;
-                $csdByCenter[$centers[$centerId]][] = $csd;
-            }
-        }
-        ksort($csdByCenter);
-
-        // Then, format and filter data
-        $output = [];
-        foreach($csdByCenter as $center => $items) {
-            // filter out duplicates from csdByCenter, keeping the latest promise/actual for each
-            // keyBy will end up keeping the last reported thing with the same key... we use that as an easy dedup: https://laravel.com/docs/5.2/collections#method-keyby
-            $csdByCenter[$center] = collect($items)
-                ->keyBy(function($csd) { return "{$csd->type} " . $csd->reportingDate->toDateString(); })
-                ->sortBy(function($csd) { return $csd->reportingDate->toDateString(); }); // re-sort by reportingDate in case later promises took over older ones
-
-            // re-key to be consumed by ScoreboardMultiWeek
-            $centerData = [];
-            foreach ($items as $csd) {
-                $centerData[$csd->reportingDate->toDateString()][$csd->type] = $csd;
-            }
-
-            // hydrate ScoreboardMultiWeek
-            $output[$center] = Domain\ScoreboardMultiWeek::fromArray($centerData)->toArray();
-        }
-
-        return $output;
+        return $this->context
+                    ->getEncapsulation(Domain\RegionScoreboard::class, compact('region', 'reportingDate'))
+                    ->getScoreboard();
     }
 
     public function getWeekScoreboard(Models\GlobalReport $report, Models\Region $region, Carbon $futureDate = null)
@@ -174,53 +90,27 @@ class GlobalReport extends AuthenticatedApiBase
 
         $scoreboardData = $this->getQuarterScoreboard($report, $region);
 
-        $dateStr = $futureDate ? $futureDate->toDateString() : $report->reportingDate->toDateString();
+        $date = $futureDate ?: $report->reportingDate;
 
-        $reportData = [];
-        if (isset($scoreboardData[$dateStr])) {
-            $reportData = $scoreboardData[$dateStr];
-        }
+        $reportData = $scoreboardData->getWeek($date) ?? [];
 
         $this->putCache($reportData);
 
         return $reportData;
     }
 
-    public function getWeekScoreboardByCenter(Models\GlobalReport $report, Models\Region $region, $options = [])
+    public function getWeekScoreboardByCenter(Models\GlobalReport $report, Models\Region $region, Carbon $futureDate = null)
     {
-        $date = array_get($options, 'date', $report->reportingDate);
-        $includeOriginalPromise = array_get($options, 'includeOriginalPromise', false);
+        $date = $futureDate ?: $report->reportingDate;
 
-        // Use optimized method of getting scoreboards
-        // This currently doesn't support including original promises
-        if (!$includeOriginalPromise) {
-            $data = $this->getQuarterScoreboardByCenter($report, $region);
+        $data = $this->getQuarterScoreboardByCenter($report->reportingDate, $region);
 
-            $output = [];
-            foreach ($data as $center => $centerData) {
-                $output[$center] = $centerData[$date->toDateString()];
-            }
-
-            return $output;
+        $output = [];
+        foreach ($data as $center => $centerData) {
+            $output[$center] = $centerData->getWeek($date);
         }
 
-        $statsReports = $this->getStatsReports($report, $region);
-        if ($statsReports->isEmpty()) {
-            return [];
-        }
-
-        $dateStr = $date->toDateString();
-
-        $reportData = [];
-        foreach ($statsReports as $statsReport) {
-            $centerStatsData = App::make(LocalReport::class)->getQuarterScoreboard($statsReport, compact('includeOriginalPromise'));
-
-            $centerName = $statsReport->center->name;
-
-            $reportData[$centerName] = $centerStatsData[$dateStr];
-        }
-
-        return $reportData;
+        return $output;
     }
 
     public function getApplicationsListByCenter(Models\GlobalReport $report, Models\Region $region, $options = [])
@@ -285,12 +175,16 @@ class GlobalReport extends AuthenticatedApiBase
         return $courses;
     }
 
-    protected function getStatsReports(Models\GlobalReport $report, Models\Region $region)
+    public function getStatsReports(Models\GlobalReport $report, Models\Region $region)
     {
         return $report->statsReports()
                       ->validated()
                       ->byRegion($region)
-                      ->get();
+                      ->with('center')
+                      ->get()
+                      ->keyBy(function($report) {
+                            return $report->center->name;
+                      });
     }
 
     public function getReportPages(Models\GlobalReport $report, Models\Region $region, $pages)

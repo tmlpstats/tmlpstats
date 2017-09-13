@@ -52,13 +52,14 @@
                 <th class="border-right">{{ strtoupper($game) }}</th>
                 @foreach ($centerData as $dateStr => $weekData)
                     <?php
-                        $actualClass = ($weekData['promise'][$game] > $weekData['actual'][$game])
+                        $gameData = $weekData['scoreboard']['games'][$game];
+                        $actualClass = ($gameData['promise'] > $gameData['actual'])
                             ? 'danger'
                             : 'success';
                     ?>
-                    <td class="data-point">{{ $weekData['promise'][$game] }}</td>
+                    <td class="data-point">{{ $gameData['promise'] }}</td>
                     <td class="data-point {{ $actualClass }}">
-                        {{ isset($weekData['actual']) ? $weekData['actual'][$game] : '&nbsp;' }}
+                        {{ isset($gameData['actual']) ? $gameData['actual'] : '&nbsp;' }}
                     </td>
                     <td class="data-point">{{ $weekData['rpp']['week'][$game] }}</td>
                 @endforeach
@@ -69,13 +70,14 @@
                 <th class="border-right">{{ strtoupper($game) }}</th>
                 @foreach ($centerData as $dateStr => $weekData)
                     <?php
-                        $actualClass = ($weekData['promise'][$game] > $weekData['actual'][$game])
+                        $gameData = $weekData['scoreboard']['games'][$game];
+                        $actualClass = ($gameData['promise'] > $gameData['actual'])
                             ? 'danger'
                             : 'success';
                     ?>
-                    <td class="data-point">{{ $weekData['promise'][$game] }}</td>
+                    <td class="data-point">{{ $gameData['promise'] }}</td>
                     <td class="data-point {{ $actualClass }}">
-                        {{ isset($weekData['actual']) ? $weekData['actual'][$game] : '&nbsp;' }}
+                        {{ isset($gameData['actual']) ? $gameData['actual'] : '&nbsp;' }}
                     </td>
                     <td class="data-point">{{ $weekData['rpp']['week'][$game] }}</td>
                 @endforeach
@@ -86,13 +88,14 @@
                 <th class="border-right">{{ strtoupper($game) }}</th>
                 @foreach ($centerData as $dateStr => $weekData)
                     <?php
-                        $actualClass = ($weekData['promise'][$game] > $weekData['actual'][$game])
+                        $gameData = $weekData['scoreboard']['games'][$game];
+                        $actualClass = ($gameData['promise'] > $gameData['actual'])
                             ? 'danger'
                             : 'success';
                     ?>
-                    <td class="data-point">{{ $weekData['promise'][$game] }}</td>
+                    <td class="data-point">{{ $gameData['promise'] }}</td>
                     <td class="data-point {{ $actualClass }}">
-                        {{ isset($weekData['actual']) ? $weekData['actual'][$game] : '&nbsp;' }}
+                        {{ isset($gameData['actual']) ? $gameData['actual'] : '&nbsp;' }}
                     </td>
                     <td class="data-point">{{ $weekData['rpp']['week'][$game] }}</td>
                 @endforeach

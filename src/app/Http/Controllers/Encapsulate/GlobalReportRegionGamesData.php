@@ -18,7 +18,7 @@ class GlobalReportRegionGamesData
     {
         $this->globalReport = $globalReport;
         $this->region = $region;
-        $this->data = App::make(Api\GlobalReport::class)->getQuarterScoreboardByCenter($globalReport, $region);
+        $this->data = App::make(Api\GlobalReport::class)->getQuarterScoreboardByCenter($globalReport->reportingDate, $region);
     }
 
     public function getOne($page)

@@ -22,8 +22,9 @@
                     <th class="border-left border-right">{{ strtoupper($game) }}</th>
                     @foreach ($regionsData as $name => $data)
                         <?php
-                            $promise = isset($data['promise'][$game]) ? $data['promise'][$game] : '-';
-                            $actual = isset($data['actual'][$game]) ? $data['actual'][$game] : '-';
+                            $gameData = array_get($data, "games.{$game}", []);
+                            $promise = $gameData['promise'] ?? '-';
+                            $actual = $gameData['actual'] ?? '-';
                             if ($promise === '-' || $actual === '-') {
                                 $gap = '-';
                                 $suffix = '';

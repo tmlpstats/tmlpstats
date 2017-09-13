@@ -40,9 +40,7 @@ class GlobalReportTeamSummaryData
 
         $thisQuarterStartDate = $thisQuarter->getQuarterStartDate();
 
-        $centerGamesData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region, [
-            'date' => $thisQuarter->getQuarterEndDate(),
-        ]);
+        $centerGamesData = App::make(Api\GlobalReport::class)->getWeekScoreboardByCenter($globalReport, $region, $thisQuarter->getQuarterEndDate());
         if (!$centerGamesData) {
             return null;
         }
@@ -93,7 +91,7 @@ class GlobalReportTeamSummaryData
         $reportData = [];
         foreach ($centerGamesData as $centerName => $centerData) {
             $reportData[$centerName] = $template;
-            $reportData[$centerName]['qtrPromise'] = $centerGamesData[$centerName]['promise']["t{$teamYear}x"];
+            $reportData[$centerName]['qtrPromise'] = $centerData->game("t{$teamYear}x")->promise();
         }
 
         foreach ($registrations as $registration) {

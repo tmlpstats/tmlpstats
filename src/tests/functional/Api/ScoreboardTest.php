@@ -193,18 +193,19 @@ class ScoreboardTest extends FunctionalTestAbstract
      */
     public function testAllForCenter($input)
     {
-        $reportingDate = $this->report->reportingDate;
-        $locks = $this->buildLocks();
+        $this->now = Carbon::parse('2017-07-07 18:45:00');
+        Carbon::setTestNow($this->now);
+
+        $reportingDate = $this->report->reportingDate = Carbon::parse('2017-07-07');
+
+        $quarter = Models\Quarter::year(2017)->quarterNumber(2)->first();
+        $locks = $this->buildLocks($quarter);
         $context = MockContext::defaults()
             ->withUser($this->user)
             ->withFakedAdmin()
             ->withSetting('scoreboardLock', $locks[$input['locks']]->toArray())
             ->install();
         $api = App::make(Api\Submission\Scoreboard::class);
-
-        if ($csds = array_get($input, 'csds', null)) {
-            $this->fillCsds($csds, $reportingDate);
-        }
 
         // Now fill in stashes
         foreach ($input['stashes'] as $toStash) {
@@ -235,49 +236,41 @@ class ScoreboardTest extends FunctionalTestAbstract
 
     public function providerAllForCenter()
     {
-        $april15 = [
-            'week' => '2016-04-15',
+        $july7 = [
+            'week' => '2017-07-07',
             'games' => [
-                'cap' => ['promise' => 0, 'actual' => 0],
-                'cpc' => ['promise' => 1, 'actual' => 1],
-                't1x' => ['promise' => 2, 'actual' => 2],
-                't2x' => ['promise' => 3, 'actual' => 3],
-                'gitw' => ['promise' => 100, 'actual' => 100],
-                'lf' => ['promise' => 10, 'actual' => 10],
+                'cap' => ['promise' => 36, 'actual' => 34],
+                'cpc' => ['promise' => 1, 'actual' => -14],
+                't1x' => ['promise' => 10, 'actual' => 2], // promise changed from 11
+                't2x' => ['promise' => 7, 'actual' => 3], // promise changed from 1
+                'gitw' => ['promise' => 100, 'actual' => 70],
+                'lf' => ['promise' => 22, 'actual' => 25],
             ],
-        ];
-
-        $columns = ['posted_date', 'reporting_date', 'type', 'cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'];
-        $csds = [
-            array_combine($columns, ['2016-02-26', '2016-02-26', 'promise', 1, 1, 1, 1, 1, 85]),
-            array_combine($columns, ['2016-02-26', '2016-03-04', 'promise', 2, 2, 2, 2, 2, 85]),
-            array_combine($columns, ['2016-02-26', '2016-03-11', 'promise', 3, 3, 3, 3, 3, 85]),
-            array_combine($columns, ['2016-02-26', '2016-03-18', 'promise', 4, 4, 4, 4, 4, 85]),
-            array_combine($columns, ['2016-02-26', '2016-04-15', 'promise', 7, 7, 7, 7, 7, 85]),
         ];
 
         return [
             [[
                 'includeInProgress' => true,
                 'locks' => 'normal',
-                'stashes' => [$april15],
-                'csds' => $csds,
+                'stashes' => [$july7],
                 'assertions' => [
-                    '2016-02-26' => [
+                    '2017-06-09' => [
                         'meta' => [
                             'canEditPromise' => false,
                             'canEditActual' => false,
                         ],
                     ],
-                    '2016-03-18' => [
+                    '2017-06-16' => [
                         'meta' => [
                             'isClassroom' => true,
                         ],
                         'games' => [
-                            't1x.promise' => 4,
+                            // spot check
+                            'cap.promise' => 13,
+                            't1x.promise' => 1,
                         ],
                     ],
-                    '2016-04-15' => [
+                    '2017-07-07' => [
                         'meta' => [
                             'canEditPromise' => false,
                             'canEditActual' => true,
@@ -286,9 +279,9 @@ class ScoreboardTest extends FunctionalTestAbstract
                         ],
                         'games' => [
                             // This combination proves that we merged local changes with official promises.
-                            't1x.promise' => 7,
+                            't1x.promise' => 11,
                             't1x.actual' => 2,
-                            't2x.promise' => 7,
+                            't2x.promise' => 1,
                             't2x.actual' => 3,
                         ],
                     ],
@@ -298,19 +291,19 @@ class ScoreboardTest extends FunctionalTestAbstract
             [[
                 'includeInProgress' => true,
                 'locks' => 'halfLocked',
-                'stashes' => [$april15],
-                'csds' => $csds,
+                'stashes' => [$july7],
                 'assertions' => [
-                    '2016-02-26' => [
+                    '2017-06-09' => [
                         'meta' => [
                             'canEditPromise' => false,
                             'canEditActual' => false,
                         ],
                         'games' => [
-                            'cap.promise' => 1,
+                            // spot check
+                            'cap.promise' => 5,
                         ],
                     ],
-                    '2016-04-15' => [
+                    '2017-07-07' => [
                         'meta' => [
                             'canEditPromise' => true,
                             'canEditActual' => true,
@@ -319,9 +312,9 @@ class ScoreboardTest extends FunctionalTestAbstract
                         ],
                         'games' => [
                             // This combination proves that editable promises works
-                            't1x.promise' => 2,
+                            't1x.promise' => 10,
                             't1x.actual' => 2,
-                            't2x.promise' => 3,
+                            't2x.promise' => 7,
                         ],
                     ],
                 ],
@@ -342,35 +335,5 @@ class ScoreboardTest extends FunctionalTestAbstract
         }
 
         return compact('normal', 'unlocked', 'halfLocked');
-    }
-
-    protected function fillCsds($input, $defaultReportingDate)
-    {
-        $createdReports = [];
-        foreach ($input as $csdInput) {
-            $csdInput['tdo'] = array_get($csdInput, 'tdo', 100);
-            if (isset($csdInput['posted_date'])) {
-                $report = array_get($createdReports, $csdInput['posted_date'], null);
-                if ($report === null) {
-                    $report = Models\StatsReport::firstOrNew([
-                        'center_id' => $this->center->id,
-                        'quarter_id' => $this->quarter->id,
-                        'reporting_date' => $csdInput['posted_date'],
-                        'version' => 'test',
-                    ]);
-                    if (!$report->id) {
-                        $report->save();
-                        $gr = Models\GlobalReport::firstOrCreate(['reporting_date' => $csdInput['posted_date']]);
-                        $gr->addCenterReport($report);
-                    }
-                    $createdReports[$csdInput['posted_date']] = $report;
-                }
-                $csdInput['stats_report_id'] = $report->id;
-                unset($csdInput['posted_date']);
-            } else {
-                $csdInput['stats_report_id'] = array_get($csdInput, 'stats_report_id', $this->report->id);
-            }
-            Models\CenterStatsData::create($csdInput);
-        }
     }
 }

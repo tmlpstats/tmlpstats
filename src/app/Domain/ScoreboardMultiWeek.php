@@ -2,6 +2,7 @@
 namespace TmlpStats\Domain;
 
 use Carbon\Carbon;
+use Illuminate\Contracts\Support\Arrayable;
 
 /**
  * A little bonus
@@ -9,7 +10,7 @@ use Carbon\Carbon;
  * A container for a scoreboard consisting of multiple weeks.
  * This can add any number of features in the future.
  */
-class ScoreboardMultiWeek
+class ScoreboardMultiWeek implements Arrayable, \JsonSerializable
 {
     protected $weeks = [];
 
@@ -61,5 +62,15 @@ class ScoreboardMultiWeek
         }
 
         return $output;
+    }
+
+    /**
+     * Implementation for JsonSerializable interface
+     *
+     * @return array  Array that is serializable with json_encode()
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
     }
 }
