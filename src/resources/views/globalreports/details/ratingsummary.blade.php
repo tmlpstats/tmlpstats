@@ -47,14 +47,14 @@ $ratingColors = [
             <?php $count = 0; ?>
             @foreach ($centers as $centerData)
                 <?php
-                    $meterClass = ($centerData['points'] > 0) ? 'meter' : 'meter-zero';
-
-                    // Width must always be > 0 to display even when 0 points
-                    $meterWidth = max(round(($centerData['points']/28)*100), 4);
-
                     $center = $centerData['center'];
                     $points = (int) $centerData['points'];
-                    $report = $statsReports[$center];
+                    $report = $statsReports[$center] ?? null;
+
+                    $meterClass = ($points > 0) ? 'meter' : 'meter-zero';
+
+                    // Width must always be > 0 to display even when 0 points
+                    $meterWidth = max(round(($points/28)*100), 4);
                 ?>
                 <tr class="points">
                     @if ($count === 0)

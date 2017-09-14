@@ -17,6 +17,11 @@ class RegionByRating extends BaseArrangement
         // Phase 1: loop all stats reports in this region making a subarray by points.
         $centerPoints = array();
         foreach ($centerData as $center => $sb) {
+            // Skip any centers that don't have stats for this week
+            if ($sb->game('cap')->actual() === null) {
+                continue;
+            }
+
             $points = $sb->points();
             $centerPoints[$points][] = compact('center', 'points');
         }
