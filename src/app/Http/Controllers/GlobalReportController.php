@@ -244,14 +244,12 @@ class GlobalReportController extends Controller
                 $gameData = $centerData->game($game);
                 if (!isset($totals[$game])) {
                     $totals[$game]['promise'] = 0;
-                    if ($gameData->actual() !== null) {
-                        $totals[$game]['actual'] = 0;
-                    }
                 }
 
                 $totals[$game]['promise'] += $gameData->promise();
                 if ($gameData->actual() !== null) {
-                    $totals[$game]['actual'] += $gameData->actual();
+                    $existing = $totals[$game]['actual'] ?? 0;
+                    $totals[$game]['actual'] = $existing + $gameData->actual();
                 }
             }
             $reportData[$centerName] = $centerData->toArray();
@@ -313,6 +311,14 @@ class GlobalReportController extends Controller
 
     protected function getRepromisesByCenter(Models\GlobalReport $globalReport, Models\Region $region)
     {
+        // Only generate the data if it's before classroom 2.
+        // TODO: the correct thing to do is have the UI not request this report until after classroom2
+        $rrd = Encapsulations\RegionReportingDate::ensure($region, $globalReport->reportingDate);
+        $rq = $rrd->getRegionQuarter();
+        if ($rq->classroom2Date->gt($globalReport->reportingDate)) {
+            return null;
+        }
+
         $quarter = Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region);
         $quarterEndDate = $quarter->getQuarterEndDate();
 
