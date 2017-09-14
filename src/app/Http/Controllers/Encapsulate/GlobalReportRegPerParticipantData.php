@@ -101,6 +101,9 @@ class GlobalReportRegPerParticipantData
         $games = ['cap', 'cpc', 'lf'];
         $reportData = [];
         foreach ($scoreboards as $centerName => $centerData) {
+            if (!isset($statsReports[$centerName])) {
+                continue;
+            }
             $participantCount = Models\TeamMemberData::byStatsReport($statsReports[$centerName])
                 ->active()
                 ->count();
