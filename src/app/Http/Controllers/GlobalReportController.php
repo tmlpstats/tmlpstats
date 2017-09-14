@@ -311,14 +311,6 @@ class GlobalReportController extends Controller
 
     protected function getRepromisesByCenter(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        // Only generate the data if it's before classroom 2.
-        // TODO: the correct thing to do is have the UI not request this report until after classroom2
-        $rrd = Encapsulations\RegionReportingDate::ensure($region, $globalReport->reportingDate);
-        $rq = $rrd->getRegionQuarter();
-        if ($rq->classroom2Date->gt($globalReport->reportingDate)) {
-            return null;
-        }
-
         $quarter = Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region);
         $quarterEndDate = $quarter->getQuarterEndDate();
 
