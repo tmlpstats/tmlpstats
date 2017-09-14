@@ -55,10 +55,14 @@ class GlobalReport extends AuthenticatedApiBase
 
                 foreach (Domain\Scoreboard::GAME_KEYS as $game) {
                     if (!isset($data[$game])) {
-                        $data[$game]['promise'] = $data[$game]['actual'] = 0;
+                        $data[$game]['promise'] = 0;
                     }
                     $data[$game]['promise'] += $week->game($game)->promise();
-                    $data[$game]['actual'] += $week->game($game)->actual();
+
+                    if ($week->game($game)->actual() !== null) {
+                        $existing = $data[$game]['actual'] ?? 0;
+                        $data[$game]['actual'] = $existing + $week->game($game)->actual();
+                    }
                 }
                 $gamesData[$date]['games'] = $data;
             }
@@ -66,7 +70,9 @@ class GlobalReport extends AuthenticatedApiBase
 
         foreach ($gamesData as $date => &$week) {
             $week['games']['gitw']['promise'] = round($week['games']['gitw']['promise'] / $centerCount);
-            $week['games']['gitw']['actual'] = round($week['games']['gitw']['actual'] / $centerCount);
+            if (isset($week['games']['gitw']['actual'])) {
+                $week['games']['gitw']['actual'] = round($week['games']['gitw']['actual'] / $centerCount);
+            }
         }
 
         $this->putCache($gamesData);
