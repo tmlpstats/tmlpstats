@@ -59,7 +59,7 @@ export class GlobalReport extends Component {
             }
         } else if (reportConfig !== this.props.reportConfig) {
             const r = this.fullReport = filterReportFlags(ReportsMeta['Global'], reportConfig.flags)
-            dispatch(reportData.init(r, this.storageKey))
+            dispatch(reportData.init(r, storageKey))
             this.showReport(nextProps.params.tab2 || nextProps.params.tab1)
         }
     }
