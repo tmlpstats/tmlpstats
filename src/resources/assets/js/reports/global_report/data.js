@@ -21,7 +21,6 @@ export class GlobalReportKey extends _baseKey {
 export const reportData = new TabbedReportManager({
     prefix: 'reports/GlobalReport',
     findRoot: (state) => state.reports.global_report,
-    report: ReportsMeta['Global'],
     actions: {
         load: {
             api: Api.GlobalReport.getReportPagesByDate
