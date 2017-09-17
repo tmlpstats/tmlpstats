@@ -1,7 +1,7 @@
 import Immutable from 'immutable'
 import PropTypes from 'prop-types'
 import React, { PureComponent } from 'react'
-import SimpleMarkdown from 'simple-markdown'
+import { parse, reactOutput } from '../markdown'
 
 import { Alert } from '../ui_basic'
 
@@ -26,14 +26,14 @@ export class SystemMessages extends PureComponent {
             if (message.dismissed) {
                 return
             }
-            const parsed = SimpleMarkdown.defaultBlockParse(message.content)
+            const parsed = parse(message.content)
             const title = (message.updatedAt)? `Updated at ${message.updatedAt}` : undefined
 
             const mDismiss = onDismiss? function() { onDismiss(message.id, ...arguments) } : undefined
+            const renderTitle = (glyph) => <h4 title={title}>{glyph} {message.title || 'System Message'}</h4>
             items.push(
-                <Alert key={message.id} alert={message.level || 'info'} onDismiss={mDismiss}>
-                    &nbsp;<b title={title}>{message.title || 'System Message'}</b>
-                    {SimpleMarkdown.defaultOutput(parsed)}
+                <Alert key={message.id} alert={message.level || 'info'} onDismiss={mDismiss} renderTitle={renderTitle}>
+                    {reactOutput(parsed)}
                 </Alert>
             )
         })
