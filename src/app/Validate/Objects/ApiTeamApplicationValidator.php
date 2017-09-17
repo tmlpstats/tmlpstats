@@ -8,8 +8,9 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
 {
     use Traits\ValidatesTravelWithConfig;
 
-    const MAX_DAYS_TO_SEND_APPLICATION_OUT = 2;
-    const MAX_DAYS_TO_APPROVE_APPLICATION = 14;
+    const MAX_DAYS_TO_SEND_APPLICATION_OUT = 3;
+    const MAX_DAYS_TO_RECEIVE_APPLICATION = 7;
+    const MAX_DAYS_TO_APPROVE_APPLICATION = 7;
     const MAX_COMMENT_LENGTH = 255;
 
     protected $startingNextQuarter = null;
@@ -200,8 +201,6 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
             }
         }
 
-        $maxAppOutDays = static::MAX_DAYS_TO_SEND_APPLICATION_OUT;
-        $maxApplicationDays = static::MAX_DAYS_TO_APPROVE_APPLICATION;
         $reportingDate = $this->statsReport->reportingDate;
 
         if (is_null($data->wdDate)) {
@@ -209,34 +208,34 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
             if (is_null($data->appOutDate)) {
                 if ($data->regDate
                     && $data->regDate->lt($reportingDate)
-                    && $data->regDate->diffInDays($reportingDate) > $maxAppOutDays
+                    && $data->regDate->diffInDays($reportingDate) > static::MAX_DAYS_TO_SEND_APPLICATION_OUT
                 ) {
                     $this->addMessage('warning', [
                         'id' => 'TEAMAPP_APPOUT_LATE',
                         'ref' => $data->getReference(['field' => 'appOutDate']),
-                        'params' => ['daysSince' => $maxAppOutDays],
+                        'params' => ['daysSince' => static::MAX_DAYS_TO_SEND_APPLICATION_OUT],
                     ]);
                 }
             } else if (is_null($data->appInDate)) {
                 if ($data->appOutDate
                     && $data->appOutDate->lt($reportingDate)
-                    && $data->regDate->diffInDays($reportingDate) > $maxApplicationDays
+                    && $data->appOutDate->diffInDays($reportingDate) > static::MAX_DAYS_TO_RECEIVE_APPLICATION
                 ) {
                     $this->addMessage('warning', [
                         'id' => 'TEAMAPP_APPIN_LATE',
                         'ref' => $data->getReference(['field' => 'appInDate']),
-                        'params' => ['daysSince' => $maxApplicationDays],
+                        'params' => ['daysSince' => static::MAX_DAYS_TO_RECEIVE_APPLICATION],
                     ]);
                 }
             } else if (is_null($data->apprDate)) {
                 if ($data->appInDate
                     && $data->appInDate->lt($reportingDate)
-                    && $data->regDate->diffInDays($reportingDate) > $maxApplicationDays
+                    && $data->appInDate->diffInDays($reportingDate) > static::MAX_DAYS_TO_APPROVE_APPLICATION
                 ) {
                     $this->addMessage('warning', [
                         'id' => 'TEAMAPP_APPR_LATE',
                         'ref' => $data->getReference(['field' => 'apprDate']),
-                        'params' => ['daysSince' => $maxApplicationDays],
+                        'params' => ['daysSince' => static::MAX_DAYS_TO_APPROVE_APPLICATION],
                     ]);
                 }
             }
