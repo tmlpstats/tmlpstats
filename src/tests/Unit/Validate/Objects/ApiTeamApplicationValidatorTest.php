@@ -295,6 +295,11 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                         'id' => 'TEAMAPP_APPIN_DATE_MISSING',
                         'reference.field' => 'appInDate',
                     ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPIN_LATE',
+                        'reference.field' => 'appInDate',
+                        'level' => 'warning',
+                    ]),
                 ],
                 false,
             ],
@@ -322,8 +327,8 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
             // App In
             [
                 [
-                    'appOutDate' => Carbon::parse('2016-08-22'),
-                    'appInDate' => Carbon::parse('2016-08-23'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-30'),
                     'apprDate' => null,
                 ],
                 [],
@@ -333,7 +338,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
             [
                 [
                     'appOutDate' => null,
-                    'appInDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-27'),
                     'apprDate' => null,
                 ],
                 [
@@ -353,7 +358,8 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
             // App Out
             [
                 [
-                    'appOutDate' => Carbon::parse('2016-08-22'),
+                    'regDate' => Carbon::parse('2016-08-26'),
+                    'appOutDate' => Carbon::parse('2016-08-29'),
                     'appInDate' => null,
                     'apprDate' => null,
                 ],
@@ -612,8 +618,8 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
             [
                 [
                     'regDate' => Carbon::parse('2016-08-22'),
-                    'appOutDate' => Carbon::parse('2016-08-23'),
-                    'appInDate' => Carbon::parse('2016-08-24'),
+                    'appOutDate' => Carbon::parse('2016-08-25'),
+                    'appInDate' => Carbon::parse('2016-08-29'),
                     'apprDate' => null,
                 ],
                 [],
@@ -623,7 +629,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
             [
                 [
                     'regDate' => Carbon::parse('2016-08-22'),
-                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appOutDate' => Carbon::parse('2016-08-25'),
                     'appInDate' => Carbon::parse('2016-08-21'),
                     'apprDate' => null,
                 ],
@@ -636,15 +642,20 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                         'id' => 'TEAMAPP_APPIN_DATE_BEFORE_APPOUT_DATE',
                         'reference.field' => 'appInDate',
                     ]),
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPR_LATE',
+                        'reference.field' => 'apprDate',
+                        'level' => 'warning',
+                    ]),
                 ],
                 false,
             ],
             // AppIn and appInDate before appOutDate
             [
                 [
-                    'regDate' => Carbon::parse('2016-08-22'),
-                    'appOutDate' => Carbon::parse('2016-08-23'),
-                    'appInDate' => Carbon::parse('2016-08-22'),
+                    'regDate' => Carbon::parse('2016-08-26'),
+                    'appOutDate' => Carbon::parse('2016-08-29'),
+                    'appInDate' => Carbon::parse('2016-08-26'),
                     'apprDate' => null,
                 ],
                 [
@@ -659,8 +670,8 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
             // AppOut date OK
             [
                 [
-                    'regDate' => Carbon::parse('2016-08-22'),
-                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'regDate' => Carbon::parse('2016-08-26'),
+                    'appOutDate' => Carbon::parse('2016-08-29'),
                     'appInDate' => null,
                     'apprDate' => null,
                 ],
@@ -670,8 +681,8 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
             // AppOut and appOutDate before regDate
             [
                 [
-                    'regDate' => Carbon::parse('2016-08-22'),
-                    'appOutDate' => Carbon::parse('2016-08-21'),
+                    'regDate' => Carbon::parse('2016-08-31'),
+                    'appOutDate' => Carbon::parse('2016-08-30'),
                     'appInDate' => null,
                     'apprDate' => null,
                 ],
@@ -684,21 +695,21 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                 false,
             ],
 
-            // AppOut within 2 days of regDate
+            // AppOut within 3 days of regDate
             [
                 [
-                    'regDate' => Carbon::parse('2016-08-22'),
-                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'regDate' => Carbon::parse('2016-08-28'),
+                    'appOutDate' => Carbon::parse('2016-08-31'),
                     'appInDate' => null,
                     'apprDate' => null,
                 ],
                 [],
                 true,
             ],
-            // AppOut not within 2 days of regDate
+            // AppOut not within 3 days of regDate (not complete)
             [
                 [
-                    'regDate' => Carbon::parse('2016-08-22'),
+                    'regDate' => Carbon::parse('2016-08-28'),
                     'appOutDate' => null,
                     'appInDate' => null,
                     'apprDate' => null,
@@ -712,22 +723,39 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                 ],
                 true,
             ],
-            // AppIn within 14 days of regDate
+            // AppOut not within 3 days of regDate (complete)
+            [
+                [
+                    'regDate' => Carbon::parse('2016-08-27'),
+                    'appOutDate' => Carbon::parse('2016-08-31'),
+                    'appInDate' => null,
+                    'apprDate' => null,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPOUT_LATE',
+                        'reference.field' => 'appOutDate',
+                        'level' => 'warning',
+                    ]),
+                ],
+                true,
+            ],
+            // AppIn within 7 days of appOut
             [
                 [
                     'regDate' => Carbon::parse('2016-08-22'),
                     'appOutDate' => Carbon::parse('2016-08-23'),
-                    'appInDate' => Carbon::parse('2016-08-24'),
+                    'appInDate' => Carbon::parse('2016-08-30'),
                     'apprDate' => null,
                 ],
                 [],
                 true,
             ],
-            // AppIn not within 14 days of regDate
+            // AppIn not within 7 days of appOut (not complete)
             [
                 [
-                    'regDate' => Carbon::parse('2016-08-17'),
-                    'appOutDate' => Carbon::parse('2016-08-18'),
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
                     'appInDate' => null,
                     'apprDate' => null,
                 ],
@@ -740,24 +768,58 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                 ],
                 true,
             ],
-            // Appr within 14 days of regDate
+            // AppIn not within 7 days of appOut (complete)
+            [
+                [
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-31'),
+                    'apprDate' => null,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPIN_LATE',
+                        'reference.field' => 'appInDate',
+                        'level' => 'warning',
+                    ]),
+                ],
+                true,
+            ],
+            // Appr within 7 days of appIn
             [
                 [
                     'regDate' => Carbon::parse('2016-08-22'),
                     'appOutDate' => Carbon::parse('2016-08-23'),
                     'appInDate' => Carbon::parse('2016-08-24'),
-                    'apprDate' => Carbon::parse('2016-09-02'),
+                    'apprDate' => Carbon::parse('2016-08-31'),
                 ],
                 [],
                 true,
             ],
-            // Appr not within 14 days of regDate
+            // Appr not within 7 days of appIn (not complete)
             [
                 [
-                    'regDate' => Carbon::parse('2016-08-17'),
-                    'appOutDate' => Carbon::parse('2016-08-18'),
-                    'appInDate' => Carbon::parse('2016-08-19'),
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-24'),
                     'apprDate' => null,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_APPR_LATE',
+                        'reference.field' => 'apprDate',
+                        'level' => 'warning',
+                    ]),
+                ],
+                true,
+            ],
+            // Appr not within 7 days of appIn (complete)
+            [
+                [
+                    'regDate' => Carbon::parse('2016-08-22'),
+                    'appOutDate' => Carbon::parse('2016-08-23'),
+                    'appInDate' => Carbon::parse('2016-08-24'),
+                    'apprDate' => Carbon::parse('2016-09-01'),
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
