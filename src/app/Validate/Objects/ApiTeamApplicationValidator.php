@@ -8,8 +8,9 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
 {
     use Traits\ValidatesTravelWithConfig;
 
-    const MAX_DAYS_TO_SEND_APPLICATION_OUT = 2;
-    const MAX_DAYS_TO_APPROVE_APPLICATION = 14;
+    const MAX_DAYS_TO_SEND_APPLICATION_OUT = 3;
+    const MAX_DAYS_TO_RECEIVE_APPLICATION = 7;
+    const MAX_DAYS_TO_APPROVE_APPLICATION = 7;
     const MAX_COMMENT_LENGTH = 255;
 
     protected $startingNextQuarter = null;
@@ -200,45 +201,60 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
             }
         }
 
-        $maxAppOutDays = static::MAX_DAYS_TO_SEND_APPLICATION_OUT;
-        $maxApplicationDays = static::MAX_DAYS_TO_APPROVE_APPLICATION;
         $reportingDate = $this->statsReport->reportingDate;
 
         if (is_null($data->wdDate)) {
             // Make sure steps are taken in timely manner
-            if (is_null($data->appOutDate)) {
-                if ($data->regDate
-                    && $data->regDate->lt($reportingDate)
-                    && $data->regDate->diffInDays($reportingDate) > $maxAppOutDays
-                ) {
-                    $this->addMessage('warning', [
-                        'id' => 'TEAMAPP_APPOUT_LATE',
-                        'ref' => $data->getReference(['field' => 'appOutDate']),
-                        'params' => ['daysSince' => $maxAppOutDays],
-                    ]);
-                }
-            } else if (is_null($data->appInDate)) {
-                if ($data->appOutDate
-                    && $data->appOutDate->lt($reportingDate)
-                    && $data->regDate->diffInDays($reportingDate) > $maxApplicationDays
-                ) {
-                    $this->addMessage('warning', [
-                        'id' => 'TEAMAPP_APPIN_LATE',
-                        'ref' => $data->getReference(['field' => 'appInDate']),
-                        'params' => ['daysSince' => $maxApplicationDays],
-                    ]);
-                }
-            } else if (is_null($data->apprDate)) {
-                if ($data->appInDate
-                    && $data->appInDate->lt($reportingDate)
-                    && $data->regDate->diffInDays($reportingDate) > $maxApplicationDays
-                ) {
-                    $this->addMessage('warning', [
-                        'id' => 'TEAMAPP_APPR_LATE',
-                        'ref' => $data->getReference(['field' => 'apprDate']),
-                        'params' => ['daysSince' => $maxApplicationDays],
-                    ]);
-                }
+
+            // If appOutDate is not provided, check how long since they registered
+            // If it is, check if it was late this week, but only show the message on the first week
+            if ($data->regDate && $reportingDate->gte($data->regDate)
+                && ((!$data->appOutDate
+                    && $data->regDate->diffInDays($reportingDate) > static::MAX_DAYS_TO_SEND_APPLICATION_OUT)
+                || ($data->appOutDate
+                    && $reportingDate->gte($data->appOutDate)
+                    && $data->appOutDate->diffInDays($data->regDate) > static::MAX_DAYS_TO_SEND_APPLICATION_OUT
+                    && $data->appOutDate->diffInDays($reportingDate) <= 7))
+            ) {
+                $this->addMessage('warning', [
+                    'id' => 'TEAMAPP_APPOUT_LATE',
+                    'ref' => $data->getReference(['field' => 'appOutDate']),
+                    'params' => ['daysSince' => static::MAX_DAYS_TO_SEND_APPLICATION_OUT],
+                ]);
+            }
+
+            // If appInDate is not provided, check how long since they registered
+            // If it is, check if it was late this week, but only show the message on the first week
+            if ($data->appOutDate && $reportingDate->gte($data->appOutDate)
+                && ((!$data->appInDate
+                    && $data->appOutDate->diffInDays($reportingDate) > static::MAX_DAYS_TO_RECEIVE_APPLICATION)
+                || ($data->appInDate
+                    && $reportingDate->gte($data->appInDate)
+                    && $data->appInDate->diffInDays($data->appOutDate) > static::MAX_DAYS_TO_RECEIVE_APPLICATION
+                    && $data->appInDate->diffInDays($reportingDate) <= 7))
+            ) {
+                $this->addMessage('warning', [
+                    'id' => 'TEAMAPP_APPIN_LATE',
+                    'ref' => $data->getReference(['field' => 'appInDate']),
+                    'params' => ['daysSince' => static::MAX_DAYS_TO_RECEIVE_APPLICATION],
+                ]);
+            }
+
+            // If apprDate is not provided, check how long since they registered
+            // If it is, check if it was late this week, but only show the message on the first week
+            if ($data->appInDate && $reportingDate->gte($data->appInDate)
+                && ((!$data->apprDate
+                    && $data->appInDate->diffInDays($reportingDate) > static::MAX_DAYS_TO_APPROVE_APPLICATION)
+                || ($data->apprDate
+                    && $reportingDate->gte($data->apprDate)
+                    && $data->apprDate->diffInDays($data->appInDate) > static::MAX_DAYS_TO_APPROVE_APPLICATION
+                    && $data->apprDate->diffInDays($reportingDate) <= 7))
+            ) {
+                $this->addMessage('warning', [
+                    'id' => 'TEAMAPP_APPR_LATE',
+                    'ref' => $data->getReference(['field' => 'apprDate']),
+                    'params' => ['daysSince' => static::MAX_DAYS_TO_APPROVE_APPLICATION],
+                ]);
             }
         }
 
