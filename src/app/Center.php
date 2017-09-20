@@ -58,7 +58,8 @@ class Center extends Model
         return $this->getAccountable('statisticianApprentice', $date);
     }
 
-    public function getAccountable($accountabilityName, Carbon $date = null)
+    public function getAccountable($accountabilityName, Carbon $date) //: ?Person
+
     {
         $accountability = Accountability::name($accountabilityName)->first();
 
@@ -66,9 +67,15 @@ class Center extends Model
             return null;
         }
 
-        return Person::byAccountability($accountability, $date)
-            ->byCenter($this)
+        $ap = AccountabilityMapping::byAccountability($accountability)
+            ->with('person')
+            ->activeOn($date)
+            ->where('center_id', $this->id)
             ->first();
+
+        if ($ap) {
+            return $ap->person;
+        }
     }
 
     /**
@@ -79,10 +86,10 @@ class Center extends Model
     public function getTeamRoster()
     {
         $statsReports = $this->statsReports()
-            ->currentQuarter($this->region)
-            ->orderBy('submitted_at')
-            ->groupBy('reporting_date')
-            ->get();
+                             ->currentQuarter($this->region)
+                             ->orderBy('submitted_at')
+                             ->groupBy('reporting_date')
+                             ->get();
 
         $memberIds = [];
         foreach ($statsReports as $report) {
@@ -124,6 +131,7 @@ class Center extends Model
     public function getMailingList(Quarter $quarter)
     {
         $list = App::make(Api\Context::class)->getSetting('centerReportMailingList', $this, $quarter);
+
         return $list ?: [];
     }
 
@@ -150,6 +158,7 @@ class Center extends Model
         sort($list);
 
         $setting->value = json_encode($list);
+
         return $setting->save();
     }
 
@@ -177,9 +186,9 @@ class Center extends Model
     {
         return $query->whereIn('region_id', function ($query) use ($region) {
             $query->select('id')
-                ->from('regions')
-                ->where('id', $region->id)
-                ->orWhere('parent_id', $region->id);
+                  ->from('regions')
+                  ->where('id', $region->id)
+                  ->orWhere('parent_id', $region->id);
         });
     }
 

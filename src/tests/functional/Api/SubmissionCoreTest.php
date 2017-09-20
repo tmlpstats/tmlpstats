@@ -267,7 +267,7 @@ class SubmissionCoreTest extends FunctionalTestAbstract
 
         foreach ($persisted as $id => $app) {
             foreach ($expected[$id] as $key => $value) {
-                if (!is_object($app->$key) || ($app->$key instanceOf Carbon)) {
+                if (!is_object($app->$key) || ($app->$key instanceof Carbon)) {
                     $this->assertEquals($value, $app->$key, "App {$id} key {$key} doesn't match expected {$value}");
                 } else {
                     $this->assertEquals($value, $app->$key->id, "App {$id} key {$key} doesn't match expected id {$value}");
@@ -304,9 +304,21 @@ class SubmissionCoreTest extends FunctionalTestAbstract
         // Set accountabilities from input, and set up 'initial' accountabilities as desired.
         foreach ($setAccountabilities as $firstName => $data) {
             $tmDomain = $teamMembers[$byName[$firstName]];
-            $setAccountabilities[$firstName]['initial'] = $initial = collect(array_get($data, 'initial', []))->map($findAcc);
-            foreach ($initial as $acc) {
-                $tmDomain->meta['personObj']->addAccountability($acc, $this->cq->firstWeekDate, $quarterEndDate);
+            $initial = $setAccountabilities[$firstName]['initial'] = collect(array_get($data, 'initial', []))
+                ->map(function ($x) use ($findAcc) {
+                    return [
+                        'acc' => $findAcc($x[0]),
+                        'starts_at' => isset($x[1]) ? Carbon::parse($x[1]) : null,
+                        'ends_at' => isset($x[2]) ? Carbon::parse($x[2]) : null,
+                    ];
+                });
+            $setAccountabilities[$firstName]['initialAcc'] = $initial->pluck('acc');
+            foreach ($initial as $m) {
+                $tmDomain->meta['personObj']->addAccountability(
+                    $m['acc'],
+                    $m['starts_at'] ?: $this->cq->firstWeekDate,
+                    $m['ends_at'] ?: $quarterEndDate
+                );
             }
 
             if ($assigned = array_get($data, 'assign', null)) {
@@ -315,6 +327,8 @@ class SubmissionCoreTest extends FunctionalTestAbstract
                     ->pluck('id')
                     ->sort()
                     ->all();
+            } else {
+                $tmDomain->accountabilities = [];
             }
         }
 
@@ -331,7 +345,11 @@ class SubmissionCoreTest extends FunctionalTestAbstract
             sort($current);
             $this->assertEquals($tmDomain->accountabilities, $current);
             // Ensure 'initial' accountabilities were ended or continued.
-            foreach ($data['initial'] as $acc) {
+            foreach ($data['initial'] as $m) {
+                if ($m['starts_at'] && $m['starts_at']->gte($tomorrow)) {
+                    continue;
+                }
+                $acc = $m['acc'];
                 $this->assertEquals(true, $person->hasAccountability($acc, $yesterday), "Expected {$firstName} to have accountability {$acc->name} yesterday");
                 if (in_array($acc->id, $tmDomain->accountabilities)) {
                     $this->assertEquals(true, $person->hasAccountability($acc, $tomorrow));
@@ -358,15 +376,43 @@ class SubmissionCoreTest extends FunctionalTestAbstract
                 'person2' => ['assign' => ['t2tl']],
                 'person3' => ['assign' => ['cpc', 't1x']],
                 'person4' => [
-                    'initial' => ['cap', 'logistics'],
+                    'initial' => [
+                        ['cap', '2016-04-08'],
+                        ['logistics', '2016-04-01'],
+                    ],
                     'assign' => ['logistics'],
                 ],
                 'person5' => [
-                    'initial' => ['gitw'],
+                    'initial' => [
+                        ['gitw', '2016-04-01'],
+                    ],
                     'assign' => ['gitw', 'lf'],
                 ],
             ]],
 
+            // Test some weird initial data
+            [[
+                'person1' => [
+                    'initial' => [
+                        ['cap', '2016-04-08', '2016-04-15'],
+                        ['cap', '2016-04-15', '2016-04-22'],
+                    ],
+                    'assign' => ['t1tl', 'cap'],
+                ],
+                'person2' => [
+                    'initial' => [
+                        ['t1tl', '2016-04-01'],
+                        ['logistics'],
+                    ],
+                    'assign' => [],
+                ],
+                'person3' => [
+                    'initial' => [
+                        ['t1tl', '2016-04-22'],
+                    ],
+                    'assign' => [],
+                ],
+            ]],
         ];
     }
 
