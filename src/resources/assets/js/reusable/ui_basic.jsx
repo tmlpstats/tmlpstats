@@ -253,16 +253,20 @@ export class Alert extends React.PureComponent {
         alert: PropTypes.string.isRequired,
         icon: PropTypes.string,
         children: PropTypes.node,
-        onDismiss: PropTypes.func
+        renderTitle: PropTypes.func,
+        onDismiss: PropTypes.func,
     }
 
     static defaultProps = {
         alert: 'info',
-        icon: ''
+        icon: '',
+        renderTitle: function(glyph) {
+            return glyph
+        }
     }
 
     render() {
-        const { alert, icon, children, onDismiss } = this.props
+        const { alert, icon, children, onDismiss, renderTitle } = this.props
         const classes = ['alert' , 'alert-' + alert]
 
         let dismiss
@@ -272,10 +276,12 @@ export class Alert extends React.PureComponent {
         }
 
         const chosenIcon = icon? icon : alertsByKey[alert].icon
+        const glyph = <span className={'glyphicon glyphicon-' + chosenIcon} aria-hidden="true"></span>
+
         return (
             <div className={cssClasses(classes)}>
                 {dismiss}
-                <span className={'glyphicon glyphicon-' + chosenIcon} aria-hidden="true"></span>
+                {renderTitle(glyph)}
                 {children}
             </div>
         )
