@@ -1,6 +1,7 @@
 language: php
 php:
   - 7.0
+  - 7.1
 dist: precise
 
 env:
@@ -11,6 +12,8 @@ env:
 matrix:
   allow_failures:
     - php: 7.0
+      env: PHP_COVERAGE_ON=y
+    - php: 7.1
       env: PHP_COVERAGE_ON=y
 
 sudo: required

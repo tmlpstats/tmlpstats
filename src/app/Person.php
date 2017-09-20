@@ -2,9 +2,10 @@
 namespace TmlpStats;
 
 use Carbon\Carbon;
-use DB;
 use Eloquence\Database\Traits\CamelCaseModel;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use TmlpStats\Traits\CachedRelationships;
 
 class Person extends Model
@@ -92,32 +93,24 @@ class Person extends Model
         return $possibleMembers;
     }
 
+    protected function queryAccountabilityMappings(Carbon $when): Builder
+    {
+        return AccountabilityMapping::byPerson($this)
+            ->activeOn($when);
+    }
+
     /**
      * Get a list of the accountabilities person currently holds
      *
      * @param Carbon $when  Reference date/time for getting accountability.
      * @return array
      */
-    public function getAccountabilities(Carbon $when)
+    public function getAccountabilities(Carbon $when): Collection
     {
-        $allAccountabilities = $this->accountabilities()->get();
-
-        $accountabilities = [];
-        foreach ($allAccountabilities as $myAccountability) {
-            $startsAt = $myAccountability->pivot->starts_at
-                ? Carbon::createFromFormat('Y-m-d H:i:s', $myAccountability->pivot->starts_at)
-                : null;
-
-            $endsAt = $myAccountability->pivot->ends_at
-                ? Carbon::createFromFormat('Y-m-d H:i:s', $myAccountability->pivot->ends_at)
-                : null;
-
-            if ($startsAt && $startsAt->lte($when) && ($endsAt === null || $endsAt->gt($when))) {
-                $accountabilities[] = $myAccountability;
-            }
-        }
-
-        return $accountabilities;
+        return $this->queryAccountabilityMappings($when)
+                    ->with('accountability') // eager-load accountability
+                    ->get() // execute query
+                    ->pluck('accountability'); // get only the 'accountability' sub-object;
     }
 
     /**
@@ -125,17 +118,12 @@ class Person extends Model
      * @param  Carbon $when  Reference date/time for getting accountability.
      * @return array
      */
-    public function getAccountabilityIds(Carbon $when)
+    public function getAccountabilityIds(Carbon $when): array
     {
-        $items = DB::table('accountability_person')
-            ->where('person_id', $this->id)
-            ->where('starts_at', '<=', $when)
-            ->where(function ($query) use ($when) {
-                $query->whereNull('ends_at')
-                      ->orWhere('ends_at', '>', $when);
-            })->pluck('accountability_id');
-
-        return $items;
+        return $this->queryAccountabilityMappings($when)
+                    ->pluck('accountability_id')
+                    ->map(function ($x) {return intval($x);})
+                    ->all();
     }
 
     /**
@@ -145,16 +133,11 @@ class Person extends Model
      * @param  Carbon         $when  Reference date/time for getting accountability.
      * @return boolean
      */
-    public function hasAccountability(Accountability $accountability, Carbon $when)
+    public function hasAccountability(Accountability $accountability, Carbon $when): bool
     {
-        $accountabilities = $this->getAccountabilities($when);
-        foreach ($accountabilities as $myAccountability) {
-            if ($myAccountability->id == $accountability->id) {
-                return true;
-            }
-        }
+        $ap = $this->queryAccountabilityMappings($when)->byAccountability($accountability)->first();
 
-        return false;
+        return ($ap !== null);
     }
 
     /**
@@ -167,12 +150,19 @@ class Person extends Model
     public function addAccountability(Accountability $accountability, Carbon $starts, Carbon $ends)
     {
         if (!$this->hasAccountability($accountability, $starts)) {
-            $this->accountabilities()->attach($accountability->id, ['starts_at' => $starts, 'ends_at' => $ends]);
+            AccountabilityMapping::create([
+                'person_id' => $this->id,
+                'accountability_id' => $accountability->id,
+                'center_id' => $this->centerId,
+                'starts_at' => $starts,
+                'ends_at' => $ends,
+            ]);
         }
     }
 
     /**
      * Remove accountability from person
+     * @deprecated Don't use this function!!!
      *
      * @param  Accountability $accountability
      * @param  Carbon         $when  Reference date/time for getting accountability.
@@ -180,36 +170,22 @@ class Person extends Model
     public function removeAccountability(Accountability $accountability, Carbon $when)
     {
         if ($this->hasAccountability($accountability, $when)) {
-            DB::table('accountability_person')
-                ->where('person_id', $this->id)
-                ->where('accountability_id', $accountability->id)
-                ->update(['ends_at' => $when]);
+            $ams = AccountabilityMapping::activeOn($when)
+                ->person($this)
+                ->accountability($accountability);
+            foreach ($ams->get() as $am) {
+                if ($am->starts_at->ne($when)) {
+                    $am->ends_at = $when;
+                    $am->save();
+                }
+            }
         }
-    }
-
-    /**
-     * Takeover an accountability within person's center.
-     *
-     * Remove accountability from any existing holders effective the start date,
-     * except if we are the holder.
-     *
-     * @param  Accountability $accountability
-     * @param  Carbon         $starts
-     * @param  Carbon         $ends
-     */
-    public function takeoverAccountability(Accountability $accountability, Carbon $starts, Carbon $ends)
-    {
-        // Remove accountability from any existing holders, EXCEPT the given person
-        Accountability::removeAccountabilityFromCenter($accountability->id, $this->center->id, $starts, $this->id);
-
-        // Add accountability
-        $this->addAccountability($accountability, $starts, $ends);
     }
 
     /**
      * Get the Region where the person's center is located
      *
-     * @return null|Center
+     * @return null|Region
      */
     public function homeRegion()
     {
@@ -243,34 +219,9 @@ class Person extends Model
         return $query->whereCenterId($center->id);
     }
 
-    public function scopeByAccountability($query, Accountability $accountability, Carbon $when = null)
-    {
-        if ($when == null) {
-            return $query->whereHas('accountabilities', function ($query) use ($accountability) {
-                $query->whereName($accountability->name);
-            });
-        }
-
-        return $query->whereHas('accountabilities', function ($query) use ($accountability, $when) {
-            $query->whereName($accountability->name)
-                  ->where('starts_at', '<=', $when)
-                  ->where(function ($query) use ($when) {
-                      $query->where('ends_at', '>', $when)
-                            ->orWhereNull('ends_at');
-                  });
-        });
-    }
-
     public function scopeIdentifier($query, $identifier)
     {
         return $query->whereIdentifier($identifier);
-    }
-
-    public function accountabilities()
-    {
-        return $this->belongsToMany('TmlpStats\Accountability', 'accountability_person', 'person_id', 'accountability_id')
-                    ->withPivot(['starts_at', 'ends_at'])
-                    ->withTimestamps();
     }
 
     public function center()

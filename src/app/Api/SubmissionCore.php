@@ -229,6 +229,8 @@ class SubmissionCore extends AuthenticatedApiBase
                     [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
             }
 
+            $toSetAccountabilities = [];
+
             // Only update the most recently stored PM/CL, ignore any other stashed rows
             foreach (['programManager', 'classroomLeader'] as $accountabilityName) {
                 $result = DB::select('
@@ -285,7 +287,7 @@ class SubmissionCore extends AuthenticatedApiBase
                 $accountability = Models\Accountability::name($r->accountability)->first();
                 if ($person && $accountability && !$person->hasAccountability($accountability, $reportNow)) {
                     Log::error("Taking over accountability {$r->accountability} for person {$person->id}.");
-                    $person->takeoverAccountability($accountability, $reportNow, $quarterEndDate);
+                    $toSetAccountabilities[$accountability->id] = [$person->id];
                 }
 
                 $field = ($accountabilityName == 'programManager') ? 'program_manager_attending_weekend' : 'classroom_leader_attending_weekend';
@@ -294,7 +296,14 @@ class SubmissionCore extends AuthenticatedApiBase
                     SET csd.{$field} = sd.attending_weekend
                     WHERE sd.id=? AND csd.stats_report_id=? AND csd.reporting_date=? AND csd.type='actual'
                 ", [$r->id, $statsReport->id, $reportingDate->toDateString()]);
-            } // end program leader processing
+            }
+
+            if (count($toSetAccountabilities)) {
+                // set or override program leaders as ending slightly past quarter end. They can be curtailed later.
+                $programLeaderFinal = $quarterEndDate->copy()->addDays(3);
+                AccountabilityMapping::bulkSetCenterAccountabilities($center, $reportNow, $programLeaderFinal, $toSetAccountabilities);
+            }
+            // end program leader processing
 
             //Insert course data
             $result = DB::select('select i.* from submission_data_courses i
@@ -677,34 +686,31 @@ class SubmissionCore extends AuthenticatedApiBase
     public function submitTeamAccountabilities(Models\Center $center, Carbon $reportingDate, Carbon $reportNow, Carbon $quarterEndDate, $teamMembers)
     {
         // Phase 1: make a map of accountability ID -> person
-        $result = [];
+        $toApply = [];
         foreach ($teamMembers as $k => $tm) {
             // no idea why we'd have a negative ID at this point, but let's just be safe.
             if ($tm->id > 0 && count($tm->accountabilities)) {
                 try {
                     $person = $tm->getAssociatedPerson();
+                    foreach ($tm->accountabilities as $accId) {
+                        $toApply[$accId][] = $person->id;
+                    }
                 } catch (\Exception $e) {
                     // TODO send email
-                }
-                foreach ($tm->accountabilities as $accId) {
-                    $result[$accId] = $person;
                 }
             }
         }
         // Phase 2: Loop accountabilities (Skip program managers and classroom leaders for now)
-        $allAccountabilities = Models\Accountability::context('team')->whereNotIn('id', [8, 9])->get();
+        $allAccountabilities = Models\Accountability::context('team')
+            ->whereNotIn('name', ['programManager', 'classroomLeader'])
+            ->get();
         foreach ($allAccountabilities as $accountability) {
-            if (!isset($result[$accountability->id])) {
-                // No one is listed as accountable, remove any existing accountables
-                Models\Accountability::removeAccountabilityFromCenter($accountability->id, $center->id, $reportNow);
-            } else {
-                $person = $result[$accountability->id];
-
-                // If the person doesn't already have this accountability, add it and remove previous holder
-                // Always call takeover to cleanup any stragglers (leftover from spreadsheet migration)
-                $person->takeoverAccountability($accountability, $reportNow, $quarterEndDate);
+            if (!isset($toApply[$accountability->id])) {
+                $toApply[$accountability->id] = [];
             }
         }
+
+        Models\AccountabilityMapping::bulkSetCenterAccountabilities($center, $reportNow, $quarterEndDate, $toApply);
 
     }
 
