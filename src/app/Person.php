@@ -2,7 +2,6 @@
 namespace TmlpStats;
 
 use Carbon\Carbon;
-use DB;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -163,6 +162,7 @@ class Person extends Model
 
     /**
      * Remove accountability from person
+     * @deprecated Don't use this function!!!
      *
      * @param  Accountability $accountability
      * @param  Carbon         $when  Reference date/time for getting accountability.
@@ -170,30 +170,16 @@ class Person extends Model
     public function removeAccountability(Accountability $accountability, Carbon $when)
     {
         if ($this->hasAccountability($accountability, $when)) {
-            DB::table('accountability_person')
-                ->where('person_id', $this->id)
-                ->where('accountability_id', $accountability->id)
-                ->update(['ends_at' => $when]);
+            $ams = AccountabilityMapping::activeOn($when)
+                ->person($this)
+                ->accountability($accountability);
+            foreach ($ams->get() as $am) {
+                if ($am->starts_at->ne($when)) {
+                    $am->ends_at = $when;
+                    $am->save();
+                }
+            }
         }
-    }
-
-    /**
-     * Takeover an accountability within person's center.
-     *
-     * Remove accountability from any existing holders effective the start date,
-     * except if we are the holder.
-     *
-     * @param  Accountability $accountability
-     * @param  Carbon         $starts
-     * @param  Carbon         $ends
-     */
-    public function takeoverAccountability(Accountability $accountability, Carbon $starts, Carbon $ends)
-    {
-        // Remove accountability from any existing holders, EXCEPT the given person
-        Accountability::removeAccountabilityFromCenter($accountability->id, $this->center->id, $starts, $this->id);
-
-        // Add accountability
-        $this->addAccountability($accountability, $starts, $ends);
     }
 
     /**

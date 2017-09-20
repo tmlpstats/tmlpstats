@@ -228,6 +228,8 @@ class SubmissionCore extends AuthenticatedApiBase
                     [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
             }
 
+            $toSetAccountabilities = [];
+
             // Only update the most recently stored PM/CL, ignore any other stashed rows
             foreach (['programManager', 'classroomLeader'] as $accountabilityName) {
                 $result = DB::select('
@@ -284,7 +286,7 @@ class SubmissionCore extends AuthenticatedApiBase
                 $accountability = Models\Accountability::name($r->accountability)->first();
                 if ($person && $accountability && !$person->hasAccountability($accountability, $reportNow)) {
                     Log::error("Taking over accountability {$r->accountability} for person {$person->id}.");
-                    $person->takeoverAccountability($accountability, $reportNow, $quarterEndDate);
+                    $toSetAccountabilities[$accountability->id] = [$person->id];
                 }
 
                 $field = ($accountabilityName == 'programManager') ? 'program_manager_attending_weekend' : 'classroom_leader_attending_weekend';
@@ -293,7 +295,14 @@ class SubmissionCore extends AuthenticatedApiBase
                     SET csd.{$field} = sd.attending_weekend
                     WHERE sd.id=? AND csd.stats_report_id=? AND csd.reporting_date=? AND csd.type='actual'
                 ", [$r->id, $statsReport->id, $reportingDate->toDateString()]);
-            } // end program leader processing
+            }
+
+            if (count($toSetAccountabilities)) {
+                // set or override program leaders as ending slightly past quarter end. They can be curtailed later.
+                $programLeaderFinal = $quarterEndDate->copy()->addDays(3);
+                AccountabilityMapping::bulkSetCenterAccountabilities($center, $reportNow, $programLeaderFinal, $toSetAccountabilities);
+            }
+            // end program leader processing
 
             //Insert course data
             $result = DB::select('select i.* from submission_data_courses i

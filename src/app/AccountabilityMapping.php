@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AccountabilityMapping extends Model
 {
@@ -45,14 +45,14 @@ class AccountabilityMapping extends Model
         return $query->where('center_id', ($center instanceof Center) ? $center->id : $center);
     }
 
-    public function accountability(): HasOne
+    public function accountability(): BelongsTo
     {
-        return $this->hasOne(Accountability::class);
+        return $this->belongsTo(Accountability::class);
     }
 
-    public function person(): HasOne
+    public function person(): BelongsTo
     {
-        return $this->hasOne(Person::class);
+        return $this->belongsTo(Person::class);
     }
 
     public static function bulkSetCenterAccountabilities(Center $center, Carbon $startsAt, Carbon $endsAt, array $toApply)

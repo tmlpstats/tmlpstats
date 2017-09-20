@@ -28,13 +28,6 @@ class Accountability extends Model
         return $query->whereContext($context);
     }
 
-    public function people()
-    {
-        return $this->belongsToMany('TmlpStats\Person', 'accountability_person', 'accountability_id', 'person_id')
-                    ->withPivot(['starts_at', 'ends_at'])
-                    ->withTimestamps();
-    }
-
     /**
      * Remove anyone who is accountable for a given accountability in a given center.
      *
