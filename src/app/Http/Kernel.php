@@ -18,7 +18,7 @@ class Kernel extends HttpKernel
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         Middleware\VerifyCsrfToken::class,
         \Fideloper\Proxy\TrustProxies::class,
-//        Middleware\ActiveUsersMiddleware::class,
+        Middleware\HttpsProtocol::class,
     ];
 
     /**
