@@ -87,16 +87,14 @@ class GlobalReportRegPerParticipantData
 
         $lastWeekReportData = $this->getScoreboardData($lastGlobalReport, $region);
 
-        $statsReportsAll = $globalReport->statsReports()
+        $statsReports = $globalReport->statsReports()
             ->validated()
             ->byRegion($region)
-            ->get();
-
-        $statsReports = [];
-        foreach ($statsReportsAll as $report) {
-            $centerName = $report->center->name;
-            $statsReports[$centerName] = $report;
-        }
+            ->with('TeamMemberData')
+            ->get()
+            ->keyBy(function ($report) {
+                return $report->center->name;
+            });
 
         $games = ['cap', 'cpc', 'lf'];
         $reportData = [];
@@ -104,7 +102,7 @@ class GlobalReportRegPerParticipantData
             if (!isset($statsReports[$centerName])) {
                 continue;
             }
-            $participantCount = Models\TeamMemberData::byStatsReport($statsReports[$centerName])
+            $participantCount = $statsReports[$centerName]->teamMemberData()
                 ->active()
                 ->count();
             $totalWeekly = 0;
@@ -114,7 +112,7 @@ class GlobalReportRegPerParticipantData
                 $rppWeekly = 0;
                 $rppQuarterly = 0;
                 $actual = $centerData->game($game)->actual();
-                if ($actual !== null) {
+                if ($actual !== null && isset($lastWeekReportData[$centerName])) {
                     $totalQuarterly += $actual;
                     $rppQuarterly = $actual / $participantCount;
 
@@ -156,7 +154,7 @@ class GlobalReportRegPerParticipantData
     protected function getRegPerParticipantWeekly(Models\GlobalReport $globalReport, Models\Region $region)
     {
         $reports = Models\GlobalReport::between(
-            $this->regionQuarter->startWeekendDate->copy()->addWeek(),
+            $this->regionQuarter->firstWeekDate,
             $this->regionQuarter->endWeekendDate
         )->get();
 
