@@ -83,7 +83,7 @@ return [
     'TEAMAPP_APPR_DATE_CHANGED' => 'Approval date changed from :was to :now.',
     'TEAMAPP_APPR_DATE_IN_FUTURE' => 'Approve date is in the future.',
     'TEAMAPP_APPR_LATE' => 'Application was not completed within :daysSince days of returned application. Application is out of integrity with the design of application process.',
-    'TEAMAPP_INCOMING_QUARTER_CHANGED' => 'Applicant incoming quarter was :was, and is now :now. Ensure that applicant is within integrity of application process (only transferred once to a future quarter). Please put in a comment indicating this is the first transfer from Month/Year to Month/Year.',
+    'TEAMAPP_INCOMING_QUARTER_CHANGED' => 'Applicant incoming quarter was :was, and is now :now. Ensure that applicant is within integrity of application process (only transferred once to a future quarter after the application is approved).',
     'TEAMAPP_NO_COMMITTED_TEAM_MEMBER' => 'No committed team member provided.',
     'TEAMAPP_REG_DATE_CHANGED' => 'Registration date changed from :was to :now.',
     'TEAMAPP_REG_DATE_IN_FUTURE' => 'Registration date is in the future.',

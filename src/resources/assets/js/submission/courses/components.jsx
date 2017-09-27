@@ -275,6 +275,14 @@ class _EditCreate extends CoursesBase {
                         <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
                         <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
                         <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
+                        <div className="row">
+                            <div className="col-md-2"></div>
+                            <div className="col-md-6">
+                                This is the team's guest game. It is a total of all guests who are potentials for Team's games:<br/>
+                                Landmark Forum, Landmark Forum for Teens, Communication: Access to Power,
+                                Communication: Power to Create, Team 1 Expansion and Team 2 Expansion.
+                            </div>
+                        </div>
                     </div>
                     </div>
                 )
@@ -286,6 +294,14 @@ class _EditCreate extends CoursesBase {
                         <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-2" divClass="col-md-2" />
                         <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" />
                         <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-2" divClass="col-md-2" />
+                        <div className="row">
+                            <div className="col-md-2"></div>
+                            <div className="col-md-6">
+                                This is the team's guest game. It is a total of all guests who are potentials for Team's games:<br/>
+                                Landmark Forum, Landmark Forum for Teens, Communication: Access to Power,
+                                Communication: Power to Create, Team 1 Expansion and Team 2 Expansion.
+                            </div>
+                        </div>
                     </div>
                     </div>
                 )
