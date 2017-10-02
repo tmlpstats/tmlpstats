@@ -244,6 +244,7 @@ class GlobalReportController extends Controller
                 $gameData = $centerData->game($game);
                 if (!isset($totals[$game])) {
                     $totals[$game]['promise'] = 0;
+                    $totals[$game]['actual'] = null;
                 }
 
                 $totals[$game]['promise'] += $gameData->promise();

@@ -106,6 +106,9 @@ export class TabbedReportManager extends ImmutableMapLoader {
                         let finishedPages = Immutable.Set()
                         pages.forEach((reportId) => {
                             let pageData = data.pages[reportId]
+                            if (pageData === null) {
+                                pageData = '<div>This report is not available at this time.</div>'
+                            }
                             if (pageData !== undefined) {
                                 let key = (baseKey)? baseKey.set('page', reportId) : reportId
                                 toUpdate = toUpdate.set(key, pageData)
