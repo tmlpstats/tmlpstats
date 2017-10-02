@@ -113,7 +113,7 @@ class GlobalReport extends AuthenticatedApiBase
 
         $output = [];
         foreach ($data as $center => $centerData) {
-            $output[$center] = $centerData->getWeek($date);
+            $output[$center] = $centerData->ensureWeek($date);
         }
 
         return $output;
