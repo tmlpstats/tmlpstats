@@ -69,7 +69,11 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                             </li>
                             @endcan
                         @endcan
-
+                        
+                        {{-- Help --}}
+                        <li {!! Request::is('help') ? 'class="active"' : '' !!}>
+                            <a href="{{ action('HelpController@index') }}">Help</a>
+                        </li>
 
                         {{-- Admin --}}
                         @if (Auth::user()->hasRole('administrator'))
