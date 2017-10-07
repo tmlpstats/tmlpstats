@@ -66,6 +66,7 @@
                     if (!$includeOriginal) {
                         $repromiseClass = '';
                     } else {
+                        $gameData['original'] = $gameData['original'] ?? $gameData['promise'];
                         $repromiseClass = ($gameData['promise'] < $gameData['original'])
                             ? 'bg-danger'
                             : 'success';
