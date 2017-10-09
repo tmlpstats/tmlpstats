@@ -329,6 +329,9 @@ class GlobalReportController extends Controller
                 $actual = $data->actual();
                 $promise = $data->promise();
                 $original = $data->originalPromise();
+                if ($original === null) {
+                    $original = $promise;
+                }
 
                 if (!isset($totals[$game])) {
                     $totals[$game]['original'] = 0;
