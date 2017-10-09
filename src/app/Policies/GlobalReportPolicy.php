@@ -17,7 +17,7 @@ class GlobalReportPolicy extends Policy
         if ($user->hasRole('readonly')) {
             return ($user->reportToken && $user->reportToken->reportId === $globalReport->id);
         } else {
-            return ($user->hasRole('globalStatistician') || $user->hasRole('localStatistician'));
+            return ($user->hasRole('globalStatistician') || $user->hasRole('localStatistician') || $user->hasRole('programLeader'));
         }
     }
 
@@ -33,7 +33,7 @@ class GlobalReportPolicy extends Policy
 
     public function index(User $user)
     {
-        return $user->hasRole('globalStatistician') || $user->hasRole('localStatistician');
+        return $user->hasRole('globalStatistician') || $user->hasRole('localStatistician') || $user->hasRole('programLeader');
     }
 
     public function submit(User $user, GlobalReport $globalReport)

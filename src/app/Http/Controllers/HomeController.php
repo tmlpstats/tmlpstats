@@ -27,12 +27,26 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-        if (Auth::user()->hasRole('localStatistician')) {
-            $centerAbbr = Auth::user()->center->abbrLower();
+        $user = $this->context->getUser();
+        $reportingDate = $this->context->getReportingDate();
 
-            return redirect("center/{$centerAbbr}");
+        // Statisticians default to their center's most recent report
+        if ($user->hasRole('localStatistician')) {
+            return redirect(action('ReportsController@getCenterReport', [
+                'abbr' => $user->center->abbrLower(),
+                'date' => $reportingDate->toDateString(),
+            ]));
         }
 
+        // Program Leaders default to their region's most recent report
+        if ($user->hasRole('programLeader')) {
+            return redirect(action('ReportsController@getRegionReport', [
+                'abbr' => $user->center->getGlobalRegion()->abbrLower(),
+                'date' => $reportingDate->toDateString(),
+            ]));
+        }
+
+        // Admins/global statisticians default to the region overview page
         $region = $this->getRegion($request);
         if ($region) {
             return redirect(action('HomeController@home', [

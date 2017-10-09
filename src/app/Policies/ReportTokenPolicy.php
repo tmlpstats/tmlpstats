@@ -34,6 +34,6 @@ class ReportTokenPolicy extends Policy
      */
     public function readLink(User $user)
     {
-        return ($user->hasRole('globalStatistician') || $user->hasRole('localStatistician'));
+        return ($user->hasRole('globalStatistician') || $user->hasRole('localStatistician') || $user->hasRole('programLeader'));
     }
 }
