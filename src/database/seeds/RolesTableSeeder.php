@@ -12,6 +12,7 @@ class RolesTableSeeder extends ArraySeeder
             ['globalStatistician', 'Global Statistician'],
             ['localStatistician', 'Local Statistician'],
             ['readonly', 'Read-Only'],
+            ['programLeader', 'Program Leader'],
         ];
     }
 }

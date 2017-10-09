@@ -23,7 +23,7 @@ class StatsReportPolicy extends Policy
      */
     public function read(User $user, StatsReport $statsReport)
     {
-        if ($user->hasRole('globalStatistician')) {
+        if ($user->hasRole('globalStatistician') || $user->hasRole('programLeader')) {
             return true;
         } else if ($user->hasRole('localStatistician')) {
             return $user->center->id === $statsReport->center->id || $user->id === $statsReport->user->id;
@@ -95,7 +95,7 @@ class StatsReportPolicy extends Policy
      */
     public function index(User $user)
     {
-        return $user->hasRole('globalStatistician') || $user->hasRole('localStatistician');
+        return $user->hasRole('globalStatistician') || $user->hasRole('localStatistician') || $user->hasRole('programLeader');
     }
 
     /**
