@@ -1,3 +1,6 @@
+<?php
+    $verb = ($game === 'gitw') ? 'Effective' : 'Attending';
+?>
 <div class="table-responsive">
     <table class="table table-condensed table-striped table-hover">
         <thead>
@@ -8,14 +11,14 @@
             <th colspan="3" class="data-point border-right">Total</th>
         </tr>
         <tr>
-            <th class="data-point">Current</th>
-            <th class="data-point border-right">Attending</th>
+            <th class="data-point">Total Members</th>
+            <th class="data-point border-right">{{ $verb }}</th>
             <th class="data-point border-right">%</th>
-            <th class="data-point">Current</th>
-            <th class="data-point border-right">Attending</th>
+            <th class="data-point">Total Members</th>
+            <th class="data-point border-right">{{ $verb }}</th>
             <th class="data-point border-right">%</th>
-            <th class="data-point">Current</th>
-            <th class="data-point border-right">Attending</th>
+            <th class="data-point">Total Members</th>
+            <th class="data-point border-right">{{ $verb }}</th>
             <th class="data-point border-right">%</th>
         </tr>
         </thead>

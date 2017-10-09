@@ -11,11 +11,11 @@ return [
     |
     */
 
-    'CENTERGAME_CAP_ACTUAL_INCORRECT' => 'You reported :reported for the CAP actual, but the net number of CAP registrations this quarter is :calculated.',
-    'CENTERGAME_CPC_ACTUAL_INCORRECT' => 'You reported :reported for the CPC actual, but the net number of CPC registrations this quarter is :calculated.',
+    'CENTERGAME_CAP_ACTUAL_INCORRECT' => 'You reported :reported for the CAP actual, but the net number of CAP registrations based on course numbers is :calculated. Please correct the discrepancy before submitting.',
+    'CENTERGAME_CPC_ACTUAL_INCORRECT' => 'You reported :reported for the CPC actual, but the net number of CPC registrations based on course numbers is :calculated. Please correct the discrepancy before submitting.',
     'CENTERGAME_GITW_ACTUAL_INCORRECT' => 'You reported :reported for the GITW actual, but the percentage of team members reported as effective is :calculated.',
-    'CENTERGAME_T1X_ACTUAL_INCORRECT' => 'You reported :reported for the T1X actual, but the net number of T1 incoming approved this quarter is :calculated.',
-    'CENTERGAME_T2X_ACTUAL_INCORRECT' => 'You reported :reported for the T2X actual, but the net number of T2 incoming approved this quarter is :calculated.',
+    'CENTERGAME_T1X_ACTUAL_INCORRECT' => 'You reported :reported for the T1X actual, but the net number of T1 incoming approved based on team expansion numbers is :calculated. Please correct the discrepancy before submitting.',
+    'CENTERGAME_T2X_ACTUAL_INCORRECT' => 'You reported :reported for the T2X actual, but the net number of T2 incoming approved based on team expansion numbers is :calculated. Please correct the discrepancy before submitting.',
     'CLASSLIST_ACCOUNTABLE_AND_WITHDRAWN' => 'Team member has left the team. Please remove accountabilities.',
     'CLASSLIST_ACCOUNTABLE_EMAIL_MISSING' => 'Team member is the :accountability accountable. Please provide their email address in case we need to contact them regarding statistics.',
     'CLASSLIST_ACCOUNTABLE_PHONE_MISSING' => 'Team member is the :accountability accountable. Please provide their phone number in case we need to contact them regarding statistics.',

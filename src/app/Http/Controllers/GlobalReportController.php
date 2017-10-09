@@ -747,7 +747,7 @@ class GlobalReportController extends Controller
             }
         }
 
-        return view('globalreports.details.tdogitwsummary', compact('reportData', 'totals', 'statsReports'));
+        return view('globalreports.details.tdogitwsummary', compact('reportData', 'totals', 'statsReports', 'game'));
     }
 
     protected function getTeam2RegisteredAtWeekend(Models\GlobalReport $globalReport, Models\Region $region)
