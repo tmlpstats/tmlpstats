@@ -1156,9 +1156,9 @@ class GlobalReportController extends Controller
 
     public static function getUrl(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        $abbr = strtolower($region->abbreviation);
-        $date = $globalReport->reportingDate->toDateString();
-
-        return url("/reports/regions/{$abbr}/{$date}");
+        return action('ReportsController@getRegionReport', [
+            'abbr' => $region->abbrLower(),
+            'date' => $globalReport->reportingDate->toDateString(),
+        ]);
     }
 }

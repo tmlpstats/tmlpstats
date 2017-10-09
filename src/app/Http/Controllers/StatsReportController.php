@@ -1259,9 +1259,9 @@ class StatsReportController extends Controller
 
     public static function getUrl(Models\StatsReport $statsReport)
     {
-        $abbr = strtolower($statsReport->center->abbreviation);
-        $date = $statsReport->reportingDate->toDateString();
-
-        return url("/reports/centers/{$abbr}/{$date}");
+        return action('ReportsController@getCenterReport', [
+            'abbr' => $statsReport->center->abbrLower(),
+            'date' => $statsReport->reportingDate->toDateString(),
+        ]);
     }
 }
