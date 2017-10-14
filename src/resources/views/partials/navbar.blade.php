@@ -82,9 +82,9 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                                     <li><a href="{{ url('/admin/users') }}">Users</a></li>
                                     <li><a href="{{ url('/users/invites') }}">Invites</a></li>
                                     <li><a href="{{ url('/admin/centers') }}">Centers</a></li>
-                                    <li><a href="{{ url($homeRegion ? "/regions/{$homeRegion->id}" : '/regions') }}">Regions</a></li>
-                                    <li><a href="{{ url('/globalreports') }}">Global Reports</a></li>
-                                    <li><a href="{{ url('/import') }}">Import Sheets</a></li>
+                                    @if ($homeRegion)
+                                    <li><a href="{{ url("/admin/regions/{$homeRegion->abbrLower()}") }}">Regions</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
