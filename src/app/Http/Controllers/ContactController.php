@@ -16,10 +16,21 @@ class ContactController extends Controller
             abort(401);
         }
 
-        if (!$request->has('message')) {
+        if (!$request->get('message')) {
             return [
                 'success' => false,
+                'field' => 'message',
+                'csrf_token' => csrf_token(),
                 'message' => 'Please provide a message.',
+            ];
+        }
+
+        if (!$request->get('topic')) {
+            return [
+                'success' => false,
+                'field' => 'topic',
+                'csrf_token' => csrf_token(),
+                'message' => 'Please let us know how we can help you.',
             ];
         }
 
@@ -40,20 +51,45 @@ class ContactController extends Controller
             $url = $request->get('feedbackUrl');
         }
 
-        $ccSender = $request->has('copySender');
         $feedback = $request->get('message');
+        $topic = $request->get('topic');
+
+        $ccList = [];
+        if ($request->has('copySender')) {
+            $ccList[] = $senderEmail;
+        }
+
+        $type = 'general';
+        switch ($topic) {
+            case 'I have a stats question':
+                $type = 'Stats Question';
+                $ccList[] = $sender->center->region->email();
+                break;
+            case 'I need technical help':
+                $type = 'Technical Issue';
+                break;
+            case 'I have a suggestion':
+                $type = 'Suggestion';
+                break;
+            case 'I have feedback':
+            default:
+                $type = 'Feedback';
+                break;
+        }
 
         $userAgent = $request->header('User-Agent');
 
-        Mail::send('emails.feedback', compact('feedback', 'sender', 'senderName', 'senderEmail', 'url', 'userAgent'),
-            function($message) use ($sender, $senderName, $senderEmail, $ccSender) {
+        Mail::send('emails.feedback', compact('feedback', 'topic', 'sender', 'senderName', 'senderEmail', 'url', 'userAgent'),
+            function($message) use ($type, $sender, $senderName, $senderEmail, $ccList) {
 
             $message->to(config('tmlp.admin_email'));
             $message->replyTo($senderEmail);
-            $message->subject("Feedback Submitted - {$senderName} on " . Carbon::now()->toDateTimeString());
+            $message->subject("{$type} Submitted - {$senderName} on " . Carbon::now()->toDateTimeString());
 
-            if ($ccSender) {
-                $message->cc($senderEmail);
+            if ($ccList) {
+                foreach ($ccList as $email) {
+                    $message->cc($email);
+                }
             }
         });
 

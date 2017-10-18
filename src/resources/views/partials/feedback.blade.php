@@ -23,16 +23,29 @@
                     {!! Form::open(['url' => url('/feedback')]) !!}
 
                     <br/>
-                    {!! Form::label('name', 'Name:', ['class' => 'control-label']) !!}
-                    {!! Form::text('name', null, ['class' => 'form-control']) !!}
+                    <div id="feedback-name" class="form-group">
+                        {!! Form::label('name', 'Name:', ['class' => 'control-label']) !!}
+                        {!! Form::text('name', null, ['class' => 'form-control']) !!}
+                    </div>
                     <br/>
+                    <div id="feedback-email" class="form-group">
                     {!! Form::label('email', 'Email:', ['class' => 'control-label']) !!}
                     {!! Form::email('email', null, ['class' => 'form-control']) !!}
+                    </div>
                     <br/>
+                    <div id="feedback-topic" class="form-group">
+                    {!! Form::label('topic', 'What can we help you with?', ['class' => 'control-label']) !!}
+                    {!! Form::select('topic', ['', 'I have feedback', 'I have a stats question', 'I need technical help', 'I have a suggestion'], null, ['class' => 'form-control']) !!}
+                    </div>
+                    <br/>
+                    <div id="feedback-message" class="form-group">
                     {!! Form::label('message', 'Message:', ['class' => 'control-label']) !!}
                     {!! Form::textarea('message', null, ['class' => 'form-control', 'rows' => '10']) !!}
+                    </div>
                     <br/>
+                    <div id="feedback-copySender" class="form-group">
                     {!! Form::checkbox('copySender', 1, true, []) !!} Send me a copy
+                    </div>
 
                     {!! Form::close() !!}
                 </div>

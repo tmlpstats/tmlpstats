@@ -91,12 +91,26 @@ window.Tmlp = (function(window, $) {
 
             $("#submitFeedbackCancel").val('Cancel');
 
+            // Reset data
+            $("#feedbackSubmitResult").find("span.message").html('')
             $("input[name=name]").val(config.user.firstName);
             $("input[name=email]").val(config.user.email);
+            $("select[name=topic]").val("");
             $("textarea[name=message]").val("");
+
+            // Clear errors
+            resetFeedbackFormErrors()
+
             $("input[name=copySender]").prop('checked', true);
 
             feedbackFormDirty = false;
+        }
+
+        function resetFeedbackFormErrors() {
+            $("#feedback-name").removeClass("has-error")
+            $("#feedback-email").removeClass("has-error")
+            $("#feedback-topic").removeClass("has-error")
+            $("#feedback-message").removeClass("has-error")
         }
 
         resetFeedbackForm();
@@ -114,10 +128,13 @@ window.Tmlp = (function(window, $) {
 
             $("#submitFeedback").attr("disabled", true);
 
+            resetFeedbackFormErrors()
+
             var data = {};
             data.dataType = 'JSON';
             data.name = $("input[name=name]").val();
             data.email = $("input[name=email]").val();
+            data.topic = $("select[name=topic]").val();
             data.message = $("textarea[name=message]").val();
             data.feedbackUrl = location.href;
 
@@ -139,15 +156,23 @@ window.Tmlp = (function(window, $) {
                     if (response.success) {
                         $resultDiv.removeClass("alert-danger");
                         $resultDiv.addClass("alert-success");
+
+                        $("#feedbackForm").hide();
+                        $("#submitFeedback").hide();
+                        $("#submitFeedbackCancel").html('Close');
                     } else {
                         $resultDiv.removeClass("alert-success");
                         $resultDiv.addClass("alert-danger");
+
+                        config.session.csrfToken = response.csrf_token
+
+                        $("#feedback-"+response.field).addClass("has-error")
+
+                        $("#feedbackForm").show();
+                        $("#submitFeedback").show();
+                        $("#submitFeedback").attr("disabled", false);
                     }
                     $resultDiv.show();
-
-                    $("#feedbackForm").hide();
-                    $("#submitFeedback").hide();
-                    $("#submitFeedbackCancel").html('Close');
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     var code = jqXHR.status;
