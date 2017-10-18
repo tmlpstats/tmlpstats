@@ -58,20 +58,19 @@ class ContactController extends Controller
         if ($request->has('copySender')) {
             $ccList[] = $senderEmail;
         }
-
         $type = 'general';
         switch ($topic) {
-            case 'I have a stats question':
+            case 2: // 'I have a stats question'
                 $type = 'Stats Question';
-                $ccList[] = $sender->center->region->email();
+                $ccList[] = $sender->center->region->email;
                 break;
-            case 'I need technical help':
+            case 3: // 'I need technical help'
                 $type = 'Technical Issue';
                 break;
-            case 'I have a suggestion':
+            case 4: // 'I have a suggestion'
                 $type = 'Suggestion';
                 break;
-            case 'I have feedback':
+            case 1: // 'I have feedback'
             default:
                 $type = 'Feedback';
                 break;
