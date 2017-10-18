@@ -78,7 +78,7 @@ class ContactController extends Controller
 
         $userAgent = $request->header('User-Agent');
 
-        Mail::send('emails.feedback', compact('feedback', 'topic', 'sender', 'senderName', 'senderEmail', 'url', 'userAgent'),
+        Mail::send('emails.feedback', compact('feedback', 'sender', 'senderName', 'senderEmail', 'url', 'userAgent'),
             function($message) use ($type, $sender, $senderName, $senderEmail, $ccList) {
 
             $message->to(config('tmlp.admin_email'));
