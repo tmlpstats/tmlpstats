@@ -154,9 +154,7 @@ return [
          * 3rd Party Service Providers...
          */
         Eloquence\EloquenceServiceProvider::class,
-        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
         Intouch\LaravelNewrelic\NewrelicServiceProvider::class,
-        Barryvdh\Debugbar\ServiceProvider::class,
         Fideloper\Proxy\TrustedProxyServiceProvider::class,
     ],
 
@@ -209,7 +207,6 @@ return [
         'Form' => Collective\Html\FormFacade::class,
         'Html' => Collective\Html\HtmlFacade::class,
         'Newrelic' => Intouch\LaravelNewrelic\Facades\Newrelic::class,
-        'Debugbar' => Barryvdh\Debugbar\Facade::class,
     ],
 
 ];
