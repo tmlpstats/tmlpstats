@@ -815,12 +815,12 @@ class StatsReportController extends Controller
                 'description' => 'Team Rooming',
             ],
             [
-                'stat' => $incomingTravelDetails['team1']['room'] + $incomingTravelDetails['team2']['room'],
+                'stat' => $incomingTravelDetails['team1']['travel'] + $incomingTravelDetails['team2']['travel'],
                 'subStat' => $incomingTravelDetails['team1']['total'] + $incomingTravelDetails['team2']['total'],
                 'description' => 'Incoming Travel',
             ],
             [
-                'stat' => $incomingTravelDetails['team1']['travel'] + $incomingTravelDetails['team2']['travel'],
+                'stat' => $incomingTravelDetails['team1']['room'] + $incomingTravelDetails['team2']['room'],
                 'subStat' => $incomingTravelDetails['team1']['total'] + $incomingTravelDetails['team2']['total'],
                 'description' => 'Incoming Rooming',
             ],
