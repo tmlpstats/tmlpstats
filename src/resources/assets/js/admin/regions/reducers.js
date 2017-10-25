@@ -9,7 +9,6 @@ const regionsReducer = combineReducers({
     scoreboardLock: scoreboardLockData.reducer(),
     extra: extraData.reducer(),
     quarterDates: modelReducer('admin.regions.quarterDates'),
-    selectQuarter: modelReducer('admin.regions.selectQuarter'),
 })
 
 export default regionsReducer
