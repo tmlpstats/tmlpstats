@@ -6,7 +6,7 @@ import { Link, withRouter } from 'react-router'
 import { delayDispatch, connectRedux, rebind } from '../../reusable/dispatch'
 import { Form, formActions } from '../../reusable/form_utils'
 import { FormTypeahead } from '../../reusable/typeahead'
-import { SubmitFlip, Panel, Alert } from '../../reusable/ui_basic'
+import { ButtonStateFlip, Panel, Alert } from '../../reusable/ui_basic'
 
 import RegionBase from './RegionBase'
 import * as actions from './actions'
@@ -30,7 +30,7 @@ export class RegionScoreboards extends RegionBase {
         })
         return (
             <div>
-                <h4>{region.title}</h4>
+                <h4>Please select a center:</h4>
                 {dispCenters}
             </div>
         )
@@ -130,9 +130,10 @@ export class EditScoreboardLock extends RegionBase {
                         {acWarn}
                     </div>
                 </div>
-                <SubmitFlip buttonClasses="btn btn-primary btn-lg" loadState={this.props.scoreboardLock.saveState}>
-                    Save
-                </SubmitFlip>
+
+                <ButtonStateFlip buttonClass="btn btn-primary btn-lg"
+                                 loadState={this.props.scoreboardLock.saveState}
+                                 wrapGroup={true}>Save</ButtonStateFlip>
                 <div style={{paddingTop: '20em'}}>&nbsp;</div>
             </Form>
         )

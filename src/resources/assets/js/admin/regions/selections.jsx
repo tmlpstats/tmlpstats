@@ -1,12 +1,12 @@
 import React from 'react'
-import { Link } from 'react-router'
-import { connectRedux } from '../../reusable/dispatch'
+import { Link, withRouter } from 'react-router'
+import { connectRedux, rebind } from '../../reusable/dispatch'
 
 import { checkQuartersData } from './checkers'
 import { joinedRegionQuarters } from './selectors'
-import RegionBase, { regionQuarterBaseUri } from './RegionBase'
+import RegionBase from './RegionBase'
 
-
+@withRouter
 @connectRedux()
 export class SelectQuarter extends RegionBase {
     static mapStateToProps(state, ownProps) {
@@ -19,55 +19,69 @@ export class SelectQuarter extends RegionBase {
         }
     }
 
+    componentWillMount() {
+        rebind(this, 'setQuarter', 'getLabel')
+    }
+
+    getLabel(cq) {
+        return `${cq.quarter.t1Distinction} ${cq.quarter.year} (starting ${cq.startWeekendDate})`
+    }
+
     checkData() {
-        return checkQuartersData(this) && this.checkRegions()
+        if (!checkQuartersData(this) || !this.checkRegions()) {
+            return false
+        }
+
+        if (!this.props.params.quarterId) {
+            let currentQuarterId = this.props.regionQuarters.find(q => q.isCurrent).quarterId
+            setTimeout(() => this.props.router.push(this.regionQuarterBaseUri(currentQuarterId)))
+            return false
+        }
+
+        return true
+    }
+
+    setQuarter(event) {
+        this.props.router.push(this.regionQuarterBaseUri(event.target.value))
     }
 
     render() {
         if (!this.checkData()) {
             return <div>Loading...</div>
         }
+
         const { quarterId, regionAbbr } = this.props.params
+        const quarter = this.props.quarters.data[quarterId]
 
-        if (quarterId) {
-            const quarter = this.props.quarters.data[quarterId]
-            return (
-                <div>
-                    <h3>Region: {regionAbbr} | Quarter: {quarter.t1Distinction} {quarter.year}</h3>
-                    {this.props.children}
-                </div>
+        let options = []
+        this.props.regionQuarters.forEach((q) => {
+            options.push(
+                <option key={q.id} value={q.quarterId}>{this.getLabel(q)}</option>
             )
-        } else {
-            var quarterChoices = this.props.regionQuarters.map((q) => {
-                const target = regionQuarterBaseUri(this, q.quarterId)
-                const style = q.isCurrent? {fontWeight: 'bold'} : {}
-                return (
-                    <li key={q.id}>
-                        <span style={style}><Link to={target}>{q.quarter.t1Distinction} {q.quarter.year}</Link></span>
-                        &nbsp;{q.startWeekendDate} to {q.endWeekendDate}
-                    </li>
-                )
-            })
-            return (
-                <div>
-                    Select quarter
-                    <ul>{quarterChoices}</ul>
-                </div>
-            )
-        }
-    }
-}
+        })
 
-export class RegionQuarterIndex extends RegionBase {
-    render() {
+        const regionId = this.props.regions.data[regionAbbr].id
         const base = this.regionQuarterBaseUri()
         return (
             <div>
-                <ul>
-                    <li><Link to={base+'/quarter_dates'}>Quarter Dates</Link></li>
-                    <li><Link to={base+'/manage_scoreboards'}>Manage Scoreboard Locks</Link></li>
-                    <li><Link to={base+'/accountability_rosters'}>Next Qtr Weekend Accountability Rosters</Link></li>
-                </ul>
+                Select quarter
+                <form className="form-horizontal">
+                    <select value={quarterId} onChange={this.setQuarter}>
+                        {options}
+                    </select>
+                </form>
+                <div>
+                    <h3>Region: {regionAbbr} | Quarter: {quarter.t1Distinction} {quarter.year}</h3>
+                </div>
+                <div>
+                    <ul>
+                        <li><Link to={base+'/quarter_dates'}>Quarter Dates</Link></li>
+                        <li><Link to={base+'/manage_scoreboards'}>Manage Scoreboard Locks</Link></li>
+                        <li><Link to={base+'/accountability_rosters'}>Next Qtr Weekend Accountability Rosters</Link></li>
+                        <li><a href={'/regions/'+regionId}>Old Admin Page</a></li>
+                    </ul>
+                </div>
+                {this.props.children}
             </div>
         )
     }

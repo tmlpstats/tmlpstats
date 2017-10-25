@@ -24,8 +24,8 @@ export default class RegionBase extends React.Component {
         return regionBaseUri(this)
     }
 
-    regionQuarterBaseUri() {
-        return regionQuarterBaseUri(this)
+    regionQuarterBaseUri(quarterId=undefined) {
+        return regionQuarterBaseUri(this, quarterId)
     }
 }
 
