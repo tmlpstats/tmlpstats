@@ -22,6 +22,12 @@ class NextQtrAccountability
             ->allForTypeWholeQuarter($centerQuarter, Domain\NextQtrAccountability::class);
 
         foreach ($found as $qtrAccountability) {
+            // Override stashed object with actual person's data
+            if ($person = $this->getPerson($qtrAccountability)) {
+                $qtrAccountability->phone = $person->phone;
+                $qtrAccountability->email = $person->email;
+            }
+
             $allAccountabilities[$qtrAccountability->id] = $qtrAccountability;
         }
 
@@ -43,10 +49,32 @@ class NextQtrAccountability
 
         $submissionData->store($center, $reportingDate, $nqa);
 
+        if ($person = $this->getPerson($nqa)) {
+            if ($data['phone'] ?? false) {
+                $person->phone = $data['phone'];
+            }
+            if ($data['email'] ?? false) {
+                $person->email = $data['email'];
+            }
+            $person->save();
+        }
+
         // currently no validation exists
         //    $report = LocalReport::ensureStatsReport($center, $reportingDate);
         //   $validationResults = $this->validateObject($report, $nqa, $someId);
 
         return ['storedId' => $accountabilityId];
+    }
+
+    protected function getPerson(Domain\NextQtrAccountability $nqa)
+    {
+        if ($nqa->teamMember) {
+            return $nqa->teamMember->person;
+        }
+        if ($nqa->application) {
+            return $nqa->application->person;
+        }
+
+        return null;
     }
 }
