@@ -112,22 +112,12 @@ table {
     empty-cells: show;
 }
 
-#tmlpstats table>thead>tr>td.data-point,
-#tmlpstats table>thead>tr>th.data-point,
-#tmlpstats table>thead>tr>td.center-align,
-#tmlpstats table>thead>tr>th.center-align,
-#tmlpstats table>tbody>tr>td.data-point,
-#tmlpstats table>tbody>tr>th.data-point,
-#tmlpstats table>tbody>tr>td.center-align,
-#tmlpstats table>tbody>tr>th.center-align {
+td.data-point, th.data-point {
     vertical-align: middle;
     text-align: center;
 }
 
-#tmlpstats table>thead>tr>td.middle-align,
-#tmlpstats table>thead>tr>th.middle-align,
-#tmlpstats table>tbody>tr>td.middle-align,
-#tmlpstats table>tbody>tr>th.middle-align {
+td.middle-align, th.middle-align {
     vertical-align: middle;
 }
 

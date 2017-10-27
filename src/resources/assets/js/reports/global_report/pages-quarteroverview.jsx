@@ -12,32 +12,32 @@ export class QuarterOverviewReport extends PureComponent {
             <thead>
                 <tr>
                     <th colSpan="2" className="border-left-none border-top-none"></th>
-                    <th colSpan="3" className="center-align border-right border-left border-top">Milestone 1</th>
-                    <th colSpan="3" className="center-align border-right border-top">Milestone 2</th>
-                    <th colSpan="3" className="center-align border-right border-top">Milestone 3</th>
-                    <th colSpan="3" className="center-align border-right border-top">Weekend</th>
+                    <th colSpan="3" className="text-center border-right border-left border-top">Milestone 1</th>
+                    <th colSpan="3" className="text-center border-right border-top">Milestone 2</th>
+                    <th colSpan="3" className="text-center border-right border-top">Milestone 3</th>
+                    <th colSpan="3" className="text-center border-right border-top">Weekend</th>
                     <th colSpan="4" className="border-right border-bottom border-top-none"></th>
-                    <th colSpan="2" className="center-align border-left border-right border-top">Historical Stats</th>
+                    <th colSpan="2" className="text-center border-left border-right border-top">Historical Stats</th>
                 </tr>
                 <tr>
                     <th className="border-right border-left">Center</th>
                     <th className="border-right">Game</th>
-                    <th className="center-align border-right-thin">P</th>
-                    <th className="center-align border-right-thin">A</th>
-                    <th className="center-align border-right">%</th>
-                    <th className="center-align border-right-thin">P</th>
-                    <th className="center-align border-right-thin">A</th>
-                    <th className="center-align border-right">%</th>
-                    <th className="center-align border-right-thin">P</th>
-                    <th className="center-align border-right-thin">A</th>
-                    <th className="center-align border-right">%</th>
-                    <th className="center-align border-right-thin">P</th>
-                    <th className="center-align border-right-thin">A</th>
-                    <th className="center-align border-right">%</th>
-                    <th className="center-align border-right">Points</th>
-                    <th colSpan="3" className="center-align border-right">Effectiveness</th>
-                    <th className="center-align border-right">Last Qtr.</th>
-                    <th className="center-align border-right">Last Year</th>
+                    <th className="text-center border-right-thin">P</th>
+                    <th className="text-center border-right-thin">A</th>
+                    <th className="text-center border-right">%</th>
+                    <th className="text-center border-right-thin">P</th>
+                    <th className="text-center border-right-thin">A</th>
+                    <th className="text-center border-right">%</th>
+                    <th className="text-center border-right-thin">P</th>
+                    <th className="text-center border-right-thin">A</th>
+                    <th className="text-center border-right">%</th>
+                    <th className="text-center border-right-thin">P</th>
+                    <th className="text-center border-right-thin">A</th>
+                    <th className="text-center border-right">%</th>
+                    <th className="text-center border-right">Points</th>
+                    <th colSpan="3" className="text-center border-right">Effectiveness</th>
+                    <th className="text-center border-right">Last Qtr.</th>
+                    <th className="text-center border-right">Last Year</th>
                 </tr>
             </thead>
         )
@@ -114,7 +114,7 @@ export class QuarterOverviewReport extends PureComponent {
             }
 
             effectivenessData = (
-                <td key="effectiveness" colSpan="3" rowSpan="6" className={bgColorClass+' center-align border-right quarter-overview-effectiveness-container'}>
+                <td key="effectiveness" colSpan="3" rowSpan="6" className={bgColorClass+' text-center border-right quarter-overview-effectiveness-container'}>
                     <Effectiveness points={points} rating={rating} rppNet={rpp['net']} rppGross={rpp['gross']} />
                 </td>
             )
@@ -129,9 +129,9 @@ export class QuarterOverviewReport extends PureComponent {
         let milestones = [milestone1, milestone2, milestone3, final]
         milestones.forEach((sb) => {
             const ms = this.getGameStats(sb, game)
-            msCols.push(<td key={row++} className={bgColorClass+' center-align border-right-thin'}>{ms.promise}</td>)
-            msCols.push(<td key={row++} className={bgColorClass+' center-align border-right-thin'}>{ms.actual}</td>)
-            msCols.push(<td key={row++} className={bgColorClass+' center-align border-right'}>{ms.percent}</td>)
+            msCols.push(<td key={row++} className={bgColorClass+' text-center border-right-thin'}>{ms.promise}</td>)
+            msCols.push(<td key={row++} className={bgColorClass+' text-center border-right-thin'}>{ms.actual}</td>)
+            msCols.push(<td key={row++} className={bgColorClass+' text-center border-right'}>{ms.percent}</td>)
         })
 
         let points
@@ -144,10 +144,10 @@ export class QuarterOverviewReport extends PureComponent {
                 <th key="center" className={bgColorClass+' border-right border-left'}>{centerDisplayName}</th>
                 <th key="game" className={bgColorClass+' border-right'}>{game.toUpperCase()}</th>
                 {msCols}
-                <td key="points" className={bgColorClass+' center-align border-right'}>{points}</td>
+                <td key="points" className={bgColorClass+' text-center border-right'}>{points}</td>
                 {effectivenessData}
-                <td key="lastQuarter" className={bgColorClass+' center-align border-right'}>{lastQuarter.games[game].actual}</td>
-                <td key="lastYear" className={bgColorClass+' center-align border-right'}>{lastYear.games[game].actual}</td>
+                <td key="lastQuarter" className={bgColorClass+' text-center border-right'}>{lastQuarter.games[game].actual}</td>
+                <td key="lastYear" className={bgColorClass+' text-center border-right'}>{lastYear.games[game].actual}</td>
             </tr>
         )
     }
