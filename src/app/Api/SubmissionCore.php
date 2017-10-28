@@ -301,7 +301,7 @@ class SubmissionCore extends AuthenticatedApiBase
             if (count($toSetAccountabilities)) {
                 // set or override program leaders as ending slightly past quarter end. They can be curtailed later.
                 $programLeaderFinal = $quarterEndDate->copy()->addDays(3);
-                AccountabilityMapping::bulkSetCenterAccountabilities($center, $reportNow, $programLeaderFinal, $toSetAccountabilities);
+                Models\AccountabilityMapping::bulkSetCenterAccountabilities($center, $reportNow, $programLeaderFinal, $toSetAccountabilities);
             }
             // end program leader processing
 
