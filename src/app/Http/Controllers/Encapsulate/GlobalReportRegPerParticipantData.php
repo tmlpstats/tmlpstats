@@ -75,7 +75,7 @@ class GlobalReportRegPerParticipantData
      * @param  boolean             $returnRawData
      * @return array
      */
-    protected function getRegPerParticipant(Models\GlobalReport $globalReport, Models\Region $region, $returnRawData = false)
+    protected function getRegPerParticipant(Models\GlobalReport $globalReport, Models\Region $region)
     {
         $defaultGames = array_fill_keys(static::GAMES + ['total'], 0);
         $template = [
@@ -138,10 +138,6 @@ class GlobalReportRegPerParticipantData
             $reportData[$centerName]['rpp'] = $centerRpp;
             $reportData[$centerName]['scoreboard'] = $centerData['scoreboard'] ?? [];
             $reportData[$centerName]['participantCount'] = $participantCount;
-        }
-
-        if ($returnRawData) {
-            return $reportData;
         }
 
         $games = static::GAMES;
@@ -233,6 +229,7 @@ class GlobalReportRegPerParticipantData
                 $gameData['lastWeekNetReg'] = $lastWeekNetReg;
 
                 // For LF, use the net as gross
+                // LF withdraws don't count against the scoreboard, so gross and net are always the same
                 $gameData['grossReg'] = $netReg;
                 $gameData['lastWeekGrossReg'] = $lastWeekNetReg;
 
@@ -310,28 +307,22 @@ class GlobalReportRegPerParticipantData
             $this->regionQuarter->endWeekendDate
         )->get();
 
-        $initialData = [];
-        foreach ($reports as $weekReport) {
-            $dateStr = $weekReport->reportingDate->toDateString();
-            $initialData[$dateStr] = $this->getRegPerParticipant($weekReport, $region, true);
-        }
-
         $reportData = [];
         $dates = [];
-        foreach ($initialData as $dateStr => $weekData) {
-            if (!is_array($weekData)) {
-                continue;
-            }
-            $dates[] = Carbon::parse($dateStr);
-            foreach ($weekData as $centerName => $centerWeekData) {
+        foreach ($reports as $weekReport) {
+            $dateStr = $weekReport->reportingDate->toDateString();
+            $dates[$dateStr] = $weekReport->reportingDate;
+
+            $rpp = $this->getRegPerParticipant($weekReport, $region);
+            foreach ($rpp['reportData'] as $centerName => $centerWeekData) {
                 $reportData[$centerName][$dateStr] = $centerWeekData;
             }
         }
 
         return [
             'reportData' => $reportData,
-            'games' => ['cap', 'cpc', 'lf'],
-            'dates' => $dates,
+            'games' => static::GAMES,
+            'dates' => array_flatten($dates),
             'milestones' => $this->regionQuarter->datesAsArray(),
         ];
     }
