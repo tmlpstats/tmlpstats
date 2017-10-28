@@ -99,9 +99,9 @@ export class QuarterOverviewReport extends PureComponent {
             currentWeek = milestone1
         }
 
-        let rowClass = ''
+        let rowClass
         let centerDisplayName
-        let effectivenessData = []
+        let effectivenessData
         if (game === 'cap') {
             rowClass = 'border-top'
             centerDisplayName = centerName
@@ -114,7 +114,7 @@ export class QuarterOverviewReport extends PureComponent {
             }
 
             effectivenessData = (
-                <td key="effectiveness" colSpan="3" rowSpan="6" className={bgColorClass+' text-center border-right quarter-overview-effectiveness-container'}>
+                <td key="effectiveness" colSpan="3" rowSpan="6" className={bgColorClass+' text-center border-right border-bottom quarter-overview-effectiveness-container'}>
                     <Effectiveness points={points} rating={rating} rppNet={rpp['net']} rppGross={rpp['gross']} />
                 </td>
             )
