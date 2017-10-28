@@ -5,3 +5,4 @@
  */
 
 export * from './pages-effectiveness'
+export * from './pages-quarteroverview'

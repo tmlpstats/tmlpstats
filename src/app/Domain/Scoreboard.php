@@ -11,7 +11,7 @@ use TmlpStats\Contracts\Referenceable;
  * This is a mutable structure which can marshal to/from arrays.
  * It will also do some bonus things.
  */
-class Scoreboard implements Arrayable, Referenceable
+class Scoreboard implements Arrayable, \JsonSerializable, Referenceable
 {
     const GAME_KEYS = ['cap', 'cpc', 't1x', 't2x', 'gitw', 'lf'];
     protected $games = [];
@@ -246,5 +246,15 @@ class Scoreboard implements Arrayable, Referenceable
         unset($v['promise'], $v['actual'], $v['percent'], $v['points']);
 
         return $v;
+    }
+
+    /**
+     * Implementation for JsonSerializable interface
+     *
+     * @return array  Array that is serializable with json_encode()
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
     }
 }

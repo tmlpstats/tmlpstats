@@ -1,7 +1,6 @@
 import Immutable from 'immutable'
 
 import { TabbedReportManager } from '../tabbed_report/manager'
-import ReportsMeta from '../meta'
 import Api from '../../api'
 
 const _baseKey = Immutable.Record({

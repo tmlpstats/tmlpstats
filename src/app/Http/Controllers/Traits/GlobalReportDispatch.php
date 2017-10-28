@@ -175,6 +175,10 @@ trait GlobalReportDispatch
             'id' => 'ProgramSupervisor',
             'method' => 'getProgramSupervisor',
         ],
+        'quarteroverviewreport' => [
+            'id' => 'QuarterOverviewReport',
+            'method' => 'getQuarterOverviewReport',
+        ],
     ];
 
     public function getPageCacheTime($report)
@@ -319,5 +323,8 @@ trait GlobalReportDispatch
 
     // Get report Program Supervisor
     protected abstract function getProgramSupervisor();
+
+    // Get report Quarter Overview
+    protected abstract function getQuarterOverviewReport();
 
 }

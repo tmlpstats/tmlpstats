@@ -24,11 +24,26 @@ body.no-navbar{
     color: gray !important;
 }
 
-.info-lite {
+.info-lite,
+table > tbody > tr > td.info-lite,
+table > tbody > tr > th.info-lite {
     background-color: #e5eff5;
 }
-.table-hover > tbody > tr:hover > td.info-lite, .table-hover > tbody > tr:hover > th.info-lite {
-    background-color: #D9EDF8 ;
+
+.table-hover > tbody > tr:hover > td.info-lite,
+.table-hover > tbody > tr:hover > th.info-lite {
+    background-color: #D9EDF8;
+}
+
+.info-liter,
+table > tbody > tr > td.info-liter,
+table > tbody > tr > th.info-liter {
+    background-color: #eef8fd;
+}
+
+.table-hover > tbody > tr:hover > td.info-liter,
+.table-hover > tbody > tr:hover > th.info-liter {
+    background-color: #e5eff5;
 }
 
 .bg-green {
@@ -106,43 +121,113 @@ td.middle-align, th.middle-align {
     vertical-align: middle;
 }
 
-td.border-left, th.border-left {
-    border-left: 2px solid #DDD !important;
-}
-td.border-right, th.border-right {
-    border-right: 2px solid #DDD !important;
-}
-td.border-top, th.border-top, tr.border-top {
-    border-top: 2px solid #DDD !important;
-}
-td.border-bottom, th.border-bottom, tr.border-bottom {
-    border-bottom: 2px solid #DDD !important;
+/**
+ * Attaching styles to #tmlpstats helps override bootstrap classes without
+ * having to use !important
+ */
+
+#tmlpstats td.border-left,
+#tmlpstats th.border-left,
+#tmlpstats td.border-left,
+#tmlpstats th.border-left {
+    border-left: 2px solid #DDD;
 }
 
-td.border-left-thin, th.border-left-thin {
-    border-left: 1px solid #DDD !important;
-}
-td.border-right-thin, th.border-right-thin {
-    border-right: 1px solid #DDD !important;
-}
-td.border-top-thin, th.border-top-thin, tr.border-top-thin {
-    border-top: 1px solid #DDD !important;
-}
-td.border-bottom-thin, th.border-bottom-thin, tr.border-bottom-thin {
-    border-bottom: 1px solid #DDD !important;
+#tmlpstats td.border-right,
+#tmlpstats th.border-right,
+#tmlpstats td.border-right,
+#tmlpstats th.border-right {
+    border-right: 2px solid #DDD;
 }
 
-td.border-left-none, th.border-left-none {
-    border-left: 0px !important;
+#tmlpstats td.border-top,
+#tmlpstats th.border-top,
+#tmlpstats tr.border-top,
+#tmlpstats td.border-top,
+#tmlpstats th.border-top,
+#tmlpstats tr.border-top {
+    border-top: 2px solid #DDD;
 }
-td.border-right-none, th.border-right-none {
-    border-right: 0px !important;
+#tmlpstats td.border-bottom,
+#tmlpstats th.border-bottom,
+#tmlpstats tr.border-bottom,
+#tmlpstats td.border-bottom,
+#tmlpstats th.border-bottom,
+#tmlpstats tr.border-bottom {
+    border-bottom: 2px solid #DDD;
 }
-td.border-top-none, th.border-top-none, tr.border-top-none {
-    border-top: 0px !important;
+
+#tmlpstats td.border-left-thin,
+#tmlpstats th.border-left-thin,
+#tmlpstats td.border-left-thin,
+#tmlpstats th.border-left-thin {
+    border-left: 1px solid #DDD;
 }
-td.border-bottom-none, th.border-bottom-none, tr.border-bottom-none {
-    border-bottom: 0px !important;
+
+#tmlpstats td.border-right-thin,
+#tmlpstats th.border-right-thin,
+#tmlpstats td.border-right-thin,
+#tmlpstats th.border-right-thin {
+    border-right: 1px solid #DDD;
+}
+
+#tmlpstats td.border-top-thin,
+#tmlpstats th.border-top-thin,
+#tmlpstats tr.border-top-thin,
+#tmlpstats td.border-top-thin,
+#tmlpstats th.border-top-thin,
+#tmlpstats tr.border-top-thin {
+    border-top: 1px solid #DDD;
+}
+
+#tmlpstats td.border-bottom-thin,
+#tmlpstats th.border-bottom-thin,
+#tmlpstats tr.border-bottom-thin,
+#tmlpstats td.border-bottom-thin,
+#tmlpstats th.border-bottom-thin,
+#tmlpstats tr.border-bottom-thin {
+    border-bottom: 1px solid #DDD;
+}
+
+#tmlpstats td.border-left-none,
+#tmlpstats th.border-left-none,
+#tmlpstats td.border-left-none,
+#tmlpstats th.border-left-none {
+    border-left: 0px;
+}
+
+#tmlpstats td.border-right-none,
+#tmlpstats th.border-right-none,
+#tmlpstats td.border-right-none,
+#tmlpstats th.border-right-none {
+    border-right: 0px;
+}
+
+#tmlpstats td.border-top-none,
+#tmlpstats th.border-top-none,
+#tmlpstats tr.border-top-none,
+#tmlpstats td.border-top-none,
+#tmlpstats th.border-top-none,
+#tmlpstats tr.border-top-none {
+    border-top: 0px;
+}
+
+#tmlpstats td.border-bottom-none,
+#tmlpstats th.border-bottom-none,
+#tmlpstats tr.border-bottom-none,
+#tmlpstats td.border-bottom-none,
+#tmlpstats th.border-bottom-none,
+#tmlpstats tr.border-bottom-none {
+    border-bottom: 0px;
+}
+
+#tmlpstats td.border-none,
+#tmlpstats th.border-none,
+#tmlpstats tr.border-none,
+#tmlpstats td.border-none,
+#tmlpstats th.border-none,
+#tmlpstats tr.border-none {
+    border: 0px;
 }
 
 .table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
@@ -481,6 +566,23 @@ table.submissionClassList {
 .stage-warning a {
     color: white;
     text-decoration: underline;
+}
+
+#tmlpstats td.quarter-overview-effectiveness-container {
+    padding: 0px;
+    margin: 0px;
+}
+
+table.quarter-overview-effectiveness-table {
+    width: 100%;
+    height: 100%;
+}
+
+table.quarter-overview-effectiveness-table td,
+table.quarter-overview-effectiveness-table th {
+    vertical-align: middle;
+    text-align: center;
+    padding: 6px 5px 5px 5px;
 }
 
 /* Override bootstrap print stylesheet */

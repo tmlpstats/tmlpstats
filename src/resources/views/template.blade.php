@@ -29,7 +29,7 @@ $needs_shim = Session::get('needs_shim', '');
 
     @yield('headers')
 </head>
-<body <?php if($skip_navbar) { ?>class="no-navbar"<?php } ?>>
+<body id="tmlpstats" <?php if($skip_navbar) { ?>class="no-navbar"<?php } ?>>
     @if (!$skip_navbar)
         @include('partials.navbar')
     @endif
