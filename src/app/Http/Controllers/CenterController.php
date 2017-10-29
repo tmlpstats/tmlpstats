@@ -16,18 +16,18 @@ class CenterController extends Controller
     }
     public function dashboard($abbr)
     {
-        $center = Models\Center::abbreviation($abbr)->first();
-        if (!$center) {
-            abort(404);
-        }
-        $context = App::make(Api\Context::class);
-        $context->setCenter($center);
+        $center = Models\Center::abbreviation($abbr)->firstOrFail();
+
+        $this->context->setCenter($center);
         $this->setCenter($center);
 
         $statsReport = Models\StatsReport::byCenter($center)
             ->official()
             ->orderBy('reporting_date', 'desc')
-            ->first();
+            ->firstOrFail();
+
+        // Short circuit to most recent local report until we make a more useful dashboard
+        return redirect($statsReport->getUriLocalReport());
 
         $weekData = [];
         $reportUrl = '';
@@ -51,8 +51,6 @@ class CenterController extends Controller
             'reportUrl',
             'liveScoreboard'
         );
-
-        return redirect($statsReport->getUriLocalReport());
 
         return view('centers.dashboard')->with(array_merge($data, $weekData));
     }
