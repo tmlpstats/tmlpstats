@@ -61,15 +61,10 @@ class GlobalReportController extends Controller
         ]));
     }
 
-    public function showReport(Request $request, Models\GlobalReport $globalReport)
+    public function showReport(Request $request, Models\GlobalReport $globalReport, Models\Region $region = null)
     {
-        $region = $this->getRegion($request, true);
+        $region = $region ?: $this->getRegion($request, true);
 
-        return $this->showForRegion($request, $globalReport, $region);
-    }
-
-    public function showForRegion(Request $request, Models\GlobalReport $globalReport, Models\Region $region)
-    {
         $this->context->setRegion($region);
         $this->context->setReportingDate($globalReport->reportingDate);
         $this->context->setDateSelectAction('ReportsController@getRegionReport', [
@@ -103,6 +98,34 @@ class GlobalReportController extends Controller
             'reportToken',
             'quarter',
             'showNavCenterSelect'
+        ));
+    }
+
+    public function showReportChooser(Request $request, Models\Region $region, Carbon $reportingDate)
+    {
+        $rrd = Encapsulations\RegionReportingDate::ensure($region, $reportingDate);
+        $cq = $rrd->getRegionQuarter();
+
+        // candidates are reporting dates in reverse, but only those which are before this reporting date.
+        $dates = collect($cq->listReportingDates())->reverse()->filter(function ($d) use ($reportingDate) {
+            return $d->lt($reportingDate);
+        });
+
+        $maybeReport = null;
+        foreach ($dates as $d) {
+            $maybeReport = Models\GlobalReport::reportingDate($d)->first();
+            if ($maybeReport !== null) {
+                break;
+            }
+        }
+
+        $maybeReportDate = $maybeReport->reportingDate;
+        $maybeReportUrl = $this->getUrl($maybeReport, $region);
+
+        return view('reports.report_chooser', compact(
+            'reportingDate',
+            'maybeReportDate',
+            'maybeReportUrl'
         ));
     }
 

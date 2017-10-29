@@ -131,7 +131,6 @@ class StatsReportController extends Controller
 
     public function showReportChooser(Request $request, Models\Center $center, Carbon $reportingDate)
     {
-
         $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
         $cq = $crd->getCenterQuarter();
 
@@ -151,9 +150,13 @@ class StatsReportController extends Controller
             }
         }
 
-        return view('statsreports.report_chooser', compact(
+        $maybeReportDate = $maybeReport->reportingDate;
+        $maybeReportUrl = $this->getUrl($maybeReport, $center);
+
+        return view('reports.report_chooser', compact(
             'reportingDate',
-            'maybeReport'
+            'maybeReportDate',
+            'maybeReportUrl'
         ));
     }
 
