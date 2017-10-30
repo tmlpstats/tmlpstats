@@ -110,7 +110,13 @@ export class GlobalReport extends Component {
 
         let nav
         if (config.capabilities.reportNavLinks) {
-            nav = <ReportRegionNav />
+            nav = (
+                <div className="row goBackLink">
+                    <div className="col-sm-8">
+                        <a href="/home">&laquo; Go Back</a>
+                    </div>
+                </div>
+            )
         }
 
         return (
@@ -118,18 +124,6 @@ export class GlobalReport extends Component {
                 <ReportTitle title={title} reportToken={config.reportToken} nav={nav} />
                 <RegionSystemMessages region={this.props.params.regionAbbr} section="global_report" />
                 <TabbedReport tabs={tabs} fullReport={this.fullReport} reportContext={this} />
-            </div>
-        )
-    }
-}
-
-class ReportRegionNav extends Component {
-    render() {
-        return (
-            <div className="row goBackLink">
-                <div className="col-sm-8">
-                    <a href="/home">&laquo; Go Back</a>
-                </div>
             </div>
         )
     }

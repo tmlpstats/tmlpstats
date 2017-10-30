@@ -576,7 +576,7 @@ table.submissionClassList {
         display: none;
     }
 
-    .topLevelTitle, .goBackLink, .reportLink, .groupingHeader {
+    .topLevelTitle, .goBackLink, .reportTokenLink, .groupingHeader {
         display: none;
     }
 

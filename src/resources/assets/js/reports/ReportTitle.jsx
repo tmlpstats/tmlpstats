@@ -1,11 +1,11 @@
 import React, { PropTypes } from 'react'
 import ReportTokenLink from './ReportTokenLink'
 
-export default class ReportTitle extends React.Component {
+export default class ReportTitle extends React.PureComponent {
     static propTypes = {
-        title: PropTypes.string,
+        nav: PropTypes.object,
         reportToken: PropTypes.string,
-        nav: PropTypes.object
+        title: PropTypes.string
     }
 
     render() {

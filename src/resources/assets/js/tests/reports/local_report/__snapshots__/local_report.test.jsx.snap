@@ -9,7 +9,7 @@ exports[`LocalReport Basic 1`] = `
       ABC - Apr 7, 2017
        
       <button
-        className="btn btn-default reportLink"
+        className="btn btn-default reportTokenLink"
         onClick={[Function]}
       >
         Show Report Link
@@ -195,7 +195,7 @@ exports[`LocalReport Next Qtr Accountabilities 1`] = `
       ABC - Apr 7, 2017
        
       <button
-        className="btn btn-default reportLink"
+        className="btn btn-default reportTokenLink"
         onClick={[Function]}
       >
         Show Report Link
