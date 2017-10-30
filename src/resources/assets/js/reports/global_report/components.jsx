@@ -1,12 +1,13 @@
 import React, { Component, PropTypes } from 'react'
 import { defaultMemoize } from 'reselect'
-
+import moment from 'moment'
 import { TabbedReport } from '../tabbed_report/components'
 import { connectRedux, delayDispatch } from '../../reusable/dispatch'
 import { RegionSystemMessages } from '../../reusable/system-messages/connected'
 import { filterReportFlags, makeTwoTabParamsSelector } from '../tabbed_report/util'
 import { reportConfigData } from '../data'
 import ReportsMeta from '../meta'
+import ReportTitle from '../ReportTitle'
 
 import { loadConfig } from './actions'
 import { reportData, GlobalReportKey } from './data'
@@ -22,7 +23,8 @@ export class GlobalReport extends Component {
             const reportConfig = reportConfigData.selector(state).get(storageKey)
             const reportRoot = reportData.opts.findRoot(state)
             return {
-                storageKey, reportConfig,
+                storageKey,
+                reportConfig,
                 lookupsLoad: state.lookups.loadState,
                 pageData: reportRoot.data
             }
@@ -99,16 +101,38 @@ export class GlobalReport extends Component {
         if (!this.fullReport) {
             return <div>Loading...</div>
         }
-        const { params } = this.props
+
+        const { params, reportConfig: config } = this.props
         const tabs = this.makeTabParams(params)
+
+        let dateStr = moment(params.reportingDate).format('MMM D, YYYY')
+        const title = `${config.regionInfo.name} - ${dateStr}`
+
+        let nav
+        if (config.capabilities.reportNavLinks) {
+            nav = <ReportRegionNav />
+        }
+
         return (
             <div>
+                <ReportTitle title={title} reportToken={config.reportToken} nav={nav} />
                 <RegionSystemMessages region={this.props.params.regionAbbr} section="global_report" />
                 <TabbedReport tabs={tabs} fullReport={this.fullReport} reportContext={this} />
             </div>
         )
     }
+}
 
+class ReportRegionNav extends Component {
+    render() {
+        return (
+            <div className="row goBackLink">
+                <div className="col-sm-8">
+                    <a href="/home">&laquo; Go Back</a>
+                </div>
+            </div>
+        )
+    }
 }
 
 /** Generate tab label HTML for a report if shortName is set */

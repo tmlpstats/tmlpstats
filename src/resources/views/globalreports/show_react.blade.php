@@ -3,8 +3,6 @@
 
 @section('content')
     <div id="content">
-        @include('globalreports._show_head')
-
         <div id="react-routed-flow"></div>
 
         <div id="loader" style="display: none">

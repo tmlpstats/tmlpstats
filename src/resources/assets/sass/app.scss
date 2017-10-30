@@ -10,8 +10,10 @@
 
 // Custom CSS
 @import './datepicker';
-@import './submission';
+@import './reports';
 @import './responsive';
+@import './stage';
+@import './submission';
 @import './tabular';
 
 #react-routed-flow  {
@@ -25,6 +27,16 @@
 .already-submitted {
     font-size: smaller;
     color: red;
+}
+
+
+.reportTitle {
+    padding-top: 0px;
+    padding-bottom: 1em;
+}
+
+.topLevelTitle {
+    padding-bottom: 1.5em;
 }
 
 // TODO let's integrate this

@@ -47,7 +47,7 @@ export class TabbedReport extends Component {
 
         return (
             <div>
-                <ul id="tabs" className="nav nav-tabs tabs-top brief-tabs">
+                <ul id="tabs" className="nav nav-tabs tabs-top brief-tabs report-nav-level0">
                     {navTabs}
                 </ul>
                 <div>
@@ -110,8 +110,8 @@ export class ReportContent extends PureComponent {
             }
             return (
                 <div style={activeStyle(active)}>
-                    <h3>{report.name}</h3>
-                    <div className="btn-group grouping" role="group">
+                    <h3 className="groupingHeader">{report.name}</h3>
+                    <div className="btn-group grouping report-nav-level1" role="group">
                         {tabs}
                     </div>
                     <div>{content}</div>

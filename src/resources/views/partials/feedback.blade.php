@@ -1,4 +1,4 @@
-<div class="hs">
+<div class="hs feedback-wrapper">
     <button id="contactLink" href="#" title="Feedback">
         <div id="feedbackTabText">Feedback</div>
     </button>

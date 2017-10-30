@@ -1,6 +1,7 @@
 import React, { Component, PureComponent, PropTypes } from 'react'
 import { Link } from 'react-router'
 import { defaultMemoize } from 'reselect'
+import moment from 'moment'
 
 import { connectRedux, delayDispatch } from '../../reusable/dispatch'
 import { loadStateShape } from '../../reusable/shapes'
@@ -9,7 +10,7 @@ import { TabbedReport } from '../tabbed_report/components'
 import { filterReportFlags, makeTwoTabParamsSelector } from '../tabbed_report/util'
 import ReportsMeta from '../meta'
 import { reportConfigData } from '../data'
-import ReportTokenLink from '../ReportTokenLink'
+import ReportTitle from '../ReportTitle'
 
 import * as actions from './actions'
 import * as pages from './pages'
@@ -26,8 +27,7 @@ export class LocalReport extends Component {
         return (state, ownProps) => {
             const { local_report } = state.reports
             const storageKey = getStorageKey(ownProps.params)
-            const allReportConfigs = reportConfigData.selector(state)
-            const reportConfig = allReportConfigs.get(storageKey)
+            const reportConfig = reportConfigData.selector(state).get(storageKey)
             return {
                 storageKey,
                 reportConfig,
@@ -128,19 +128,17 @@ export class LocalReport extends Component {
         }
         const tabs = this.makeTabParams(params)
 
-        let nav, reportTokenLink, messages
+        let nav, messages
         if (config.capabilities.reportNavLinks) {
             nav = <ReportCenterNav params={params} regionId={config.globalRegionId} />
         }
 
-        if (config.reportToken) {
-            reportTokenLink = <ReportTokenLink token={config.reportToken} />
-        }
+        const dateStr = moment(params.reportingDate).format('MMM D, YYYY')
+        const title = `${config.centerInfo.name} - ${dateStr}`
 
         return (
             <div>
-                <h2>{config.centerInfo.name} - {params.reportingDate} {reportTokenLink}</h2>
-                {nav}
+                <ReportTitle title={title} reportToken={config.reportToken} nav={nav} />
                 {messages}
                 <TabbedReport tabs={tabs} fullReport={this.fullReport} reportContext={this} />
             </div>
@@ -207,7 +205,7 @@ class ReportCenterNav extends PureComponent {
             }
         }
         return (
-            <div className="row">
+            <div className="row goBackLink">
                 <div className="col-sm-8">
                     <a href="/home">&laquo; See All</a>
                 </div>

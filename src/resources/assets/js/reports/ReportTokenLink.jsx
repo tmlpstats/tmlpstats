@@ -27,7 +27,7 @@ export default class ReportTokenLink extends React.Component {
                 </Modal>
             )
         } else {
-            return <button className="btn btn-default" onClick={this.showToken}>Show Report Link</button>
+            return <button className="btn btn-default reportLink" onClick={this.showToken}>Show Report Link</button>
         }
     }
 

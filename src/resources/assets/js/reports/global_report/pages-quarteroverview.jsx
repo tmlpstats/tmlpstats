@@ -114,7 +114,7 @@ export class QuarterOverviewReport extends PureComponent {
             }
 
             effectivenessData = (
-                <td key="effectiveness" colSpan="3" rowSpan="6" className={bgColorClass+' text-center border-right border-bottom quarter-overview-effectiveness-container'}>
+                <td key="effectiveness" colSpan="3" rowSpan="6" className={bgColorClass+' text-center border-right border-bottom effectiveness-container'}>
                     <Effectiveness points={points} rating={rating} rppNet={rpp['net']} rppGross={rpp['gross']} />
                 </td>
             )
@@ -193,10 +193,9 @@ export class QuarterOverviewReport extends PureComponent {
             }
 
             regionsData.push(
-                <div key={region}>
-                    <br/>
+                <div key={region} className="regionContainer">
                     <h3>{title}</h3>
-                    <table className="table table-condensed table-hover">
+                    <table className="table table-condensed table-hover region-container">
                         {this.renderHeaders()}
                         {this.renderBody(reportData[region])}
                     </table>
@@ -205,7 +204,7 @@ export class QuarterOverviewReport extends PureComponent {
         })
 
         return (
-            <div className="table-responsive">
+            <div className="table-responsive quarter-overview">
                 {regionsData}
             </div>
         )
@@ -223,7 +222,7 @@ class Effectiveness extends PureComponent {
     render() {
         const { points, rating, rppNet, rppGross } = this.props
         return (
-            <table className="quarter-overview-effectiveness-table">
+            <table>
             <tbody>
                 <tr>
                     <th colSpan="3">Reg Per Participant</th>
