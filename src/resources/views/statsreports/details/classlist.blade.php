@@ -53,7 +53,11 @@
                                 </td>
                                 <td class="data-point">
                                     @if ($memberData->isActiveMember())
-                                        {{ $memberData->tdo ? 'Y' : 'N' }}
+                                        @if ($memberData->tdo > 1)
+                                            <strong>{{ $memberData->tdo }}</strong>
+                                        @else
+                                            {{ $memberData->tdo }}
+                                        @endif
                                     @else
                                         -
                                     @endif

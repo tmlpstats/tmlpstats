@@ -19,6 +19,7 @@ class TeamMembersCounts extends BaseArrangement
                 'team2' => 0,
                 'total' => 0,
             ],
+            'totalCompleted' => 0,
         ];
 
         $gitw = [
@@ -60,6 +61,7 @@ class TeamMembersCounts extends BaseArrangement
             if ($data->tdo) {
                 $tdo[$team]++;
                 $tdo['total']++;
+                $tdo['totalCompleted'] += $data->tdo;
             }
 
             if ($data->gitw) {

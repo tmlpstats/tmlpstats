@@ -1,25 +1,35 @@
 <?php
     $verb = ($game === 'gitw') ? 'Effective' : 'Attending';
+    $sectionCols = ($game === 'tdo') ? 4 : 3;
 ?>
 <div class="table-responsive">
     <table class="table table-condensed table-striped table-hover">
         <thead>
         <tr>
-            <th rowspan="2" class="border-right">Center</th>
-            <th colspan="3" class="data-point border-right">Team 1</th>
-            <th colspan="3" class="data-point border-right">Team 2</th>
-            <th colspan="3" class="data-point border-right">Total</th>
+            <th rowspan="2" class="border-left border-right border-top">Center</th>
+            <th colspan="{{ $sectionCols }}" class="data-point border-right border-top">Team 1</th>
+            <th colspan="{{ $sectionCols }}" class="data-point border-right border-top">Team 2</th>
+            <th colspan="{{ $sectionCols }}" class="data-point border-right border-top">Total</th>
         </tr>
         <tr>
             <th class="data-point">Total Members</th>
             <th class="data-point border-right">{{ $verb }}</th>
             <th class="data-point border-right">%</th>
+            @if ($game === 'tdo')
+                <th class="data-point border-right">Total Opps</th>
+            @endif
             <th class="data-point">Total Members</th>
             <th class="data-point border-right">{{ $verb }}</th>
             <th class="data-point border-right">%</th>
+            @if ($game === 'tdo')
+                <th class="data-point border-right">Total Opps</th>
+            @endif
             <th class="data-point">Total Members</th>
             <th class="data-point border-right">{{ $verb }}</th>
             <th class="data-point border-right">%</th>
+            @if ($game === 'tdo')
+                <th class="data-point border-right">Total Opps</th>
+            @endif
         </tr>
         </thead>
         <tbody>
@@ -36,7 +46,7 @@
             }
             ?>
             <tr>
-                <td class="border-right">
+                <td class="border-left border-right">
                     @statsReportLink($statsReports[$centerName])
                     {{ $centerName }}
                     @endStatsReportLink
@@ -50,6 +60,9 @@
                         -
                     @endif
                 </td>
+                @if ($game === 'tdo')
+                    <td class="data-point border-right">{{ $centerData['team1']['totalOppsCompleted'] }} / {{ $centerData['team1']['total'] }}</td>
+                @endif
                 <td class="data-point">{{ $centerData['team2']['total'] }}</td>
                 <td class="data-point border-right">{{ $centerData['team2']['attended'] }}</td>
                 <td class="{{ $t2TotalClass }} data-point border-right">
@@ -59,6 +72,9 @@
                         -
                     @endif
                 </td>
+                @if ($game === 'tdo')
+                    <td class="data-point border-right">{{ $centerData['team2']['totalOppsCompleted'] }} / {{ $centerData['team2']['total'] }}</td>
+                @endif
                 <td class="data-point">{{ $centerData['total']['total'] }}</td>
                 <td class="data-point border-right">{{ $centerData['total']['attended'] }}</td>
                 <td class="{{ $t2TotalClass }} data-point border-right">
@@ -68,11 +84,14 @@
                         -
                     @endif
                 </td>
+                @if ($game === 'tdo')
+                    <td class="data-point border-right">{{ $centerData['total']['totalOppsCompleted'] }} / {{ $centerData['total']['total'] }}</td>
+                @endif
             </tr>
         @endforeach
         </tbody>
         <tr>
-            <th class="border-right border-bottom">Region</th>
+            <th class="border-left border-right border-bottom">Region</th>
             <th class="data-point border-bottom">{{ $totals['team1']['total'] }}</th>
             <th class="data-point border-right border-bottom">{{ $totals['team1']['attended'] }}</th>
             <th class="data-point border-right border-bottom">
@@ -82,6 +101,9 @@
                     -
                 @endif
             </th>
+            @if ($game === 'tdo')
+                <th class="data-point border-right border-bottom">{{ $totals['team1']['totalOppsCompleted'] }} / {{ $totals['team1']['total'] }}</th>
+            @endif
             <th class="data-point border-bottom">{{ $totals['team2']['total'] }}</th>
             <th class="data-point border-right border-bottom">{{ $totals['team2']['attended'] }}</th>
             <th class="data-point border-right border-bottom">
@@ -91,6 +113,9 @@
                     -
                 @endif
             </th>
+            @if ($game === 'tdo')
+                <th class="data-point border-right border-bottom">{{ $totals['team2']['totalOppsCompleted'] }} / {{ $totals['team2']['total'] }}</th>
+            @endif
             <th class="data-point border-bottom">{{ $totals['total']['total'] }}</th>
             <th class="data-point border-right border-bottom">{{ $totals['total']['attended'] }}</th>
             <th class="data-point border-right border-bottom">
@@ -100,6 +125,9 @@
                     -
                 @endif
             </th>
+            @if ($game === 'tdo')
+                <th class="data-point border-right border-bottom">{{ $totals['total']['totalOppsCompleted'] }} / {{ $totals['total']['total'] }}</th>
+            @endif
         </tr>
     </table>
 </div>

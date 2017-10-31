@@ -61,7 +61,7 @@ class TeamMemberTest extends FunctionalTestAbstract
         $context = MockContext::defaults()->withUser($user)->install();
         $tmApi = App::make(Api\TeamMember::class);
 
-        $defaults = ['atWeekend' => true, 'gitw' => true, 'tdo' => true, 'teamYear' => 1];
+        $defaults = ['atWeekend' => true, 'gitw' => true, 'tdo' => 1, 'teamYear' => 1];
         $input = array_merge($defaults, $data['input']);
         $v = $input['incomingQuarter'];
         $input['incomingQuarter'] = $this->$v->id;

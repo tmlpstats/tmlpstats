@@ -585,6 +585,12 @@ table.quarter-overview-effectiveness-table th {
     padding: 6px 5px 5px 5px;
 }
 
+span.numeric-glyphicon {
+    font-size: 12pt;
+    font-weight: bold;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
 /* Override bootstrap print stylesheet */
 @media print {
     /* Remove the stuff that goes after links */

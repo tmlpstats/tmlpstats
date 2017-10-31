@@ -76,6 +76,11 @@ export function weeklyReportingSubmit(center, reportingDate, tracking, rawData) 
     }
 }
 
+export function selectChangeAction(model, value) {
+    const newValue = (value === '') ? null : value
+    return formActions.change(model, newValue)
+}
+
 export function setExitChoice(exitChoice) {
     const merges = exitChoiceMerges(exitChoice)
     return formActions.merge(TEAM_MEMBER_FORM_KEY, merges)

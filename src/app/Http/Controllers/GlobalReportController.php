@@ -669,39 +669,32 @@ class GlobalReportController extends Controller
         $teamMembersByCenter = $a->compose();
         $teamMembersByCenter = $teamMembersByCenter['reportData'];
 
-        $statsReports = [];
-        $reportData = [];
+        $template = [
+            'total' => 0,
+            'attended' => 0,
+            'percent' => 0,
+            'totalOppsCompleted' => 0,
+        ];
         $totals = [
-            'team1' => [
-                'total' => 0,
-                'attended' => 0,
-                'percent' => 0,
-            ],
-            'team2' => [
-                'total' => 0,
-                'attended' => 0,
-                'percent' => 0,
-            ],
-            'total' => [
-                'total' => 0,
-                'attended' => 0,
-                'percent' => 0,
-            ],
+            'team1' => $template,
+            'team2' => $template,
+            'total' => $template,
         ];
 
+        $statsReports = [];
+        $reportData = [];
         foreach ($teamMembersByCenter as $centerName => $centerData) {
             $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Models\Center::name($centerName)->first());
             foreach ($centerData as $memberData) {
-                $team = "team{$memberData->teamYear}";
-
-                if (!isset($reportData[$centerName][$team]['total'])) {
-                    $reportData[$centerName][$team]['total'] = 0;
-                    $reportData[$centerName][$team]['attended'] = 0;
-                    $reportData[$centerName][$team]['percent'] = 0;
-                }
-
+                // Not active? TDO/GITW should be ignored
                 if (!$memberData->isActiveMember()) {
                     continue;
+                }
+
+                $team = "team{$memberData->teamYear}";
+
+                if (!isset($reportData[$centerName][$team])) {
+                    $reportData[$centerName][$team] = $template;
                 }
 
                 $reportData[$centerName][$team]['total']++;
@@ -712,7 +705,15 @@ class GlobalReportController extends Controller
                     $reportData[$centerName][$team]['attended']++;
                     $totals[$team]['attended']++;
                     $totals['total']['attended']++;
+
+                    // Total TDO opps completed
+                    if ($game === 'tdo') {
+                        $reportData[$centerName][$team]['totalOppsCompleted'] += $memberData->tdo;
+                        $totals[$team]['totalOppsCompleted'] += $memberData->tdo;
+                        $totals['total']['totalOppsCompleted'] += $memberData->tdo;
+                    }
                 }
+
             }
         }
         ksort($reportData);
@@ -720,24 +721,25 @@ class GlobalReportController extends Controller
         foreach ($reportData as $centerName => $data) {
             $total = 0;
             $attended = 0;
+            $totalOppsCompleted = 0;
 
             foreach (['team1', 'team2'] as $team) {
-                if (!isset($reportData[$centerName][$team])) {
-                    $reportData[$centerName][$team]['total'] = 0;
-                    $reportData[$centerName][$team]['attended'] = 0;
-                    $reportData[$centerName][$team]['percent'] = 0;
-                    continue;
-                } else if ($reportData[$centerName][$team]['total'] == 0) {
+                if (!isset($reportData[$centerName][$team]) || !$reportData[$centerName][$team]['total']) {
+                    // If the center doesn't have anyone on this team, set the defaults and skip it
+                    // since there are no stats
+                    $reportData[$centerName][$team] = $template;
                     continue;
                 }
 
                 $reportData[$centerName][$team]['percent'] = round(($reportData[$centerName][$team]['attended'] / $reportData[$centerName][$team]['total']) * 100);
                 $total += $reportData[$centerName][$team]['total'];
                 $attended += $reportData[$centerName][$team]['attended'];
+                $totalOppsCompleted += $reportData[$centerName][$team]['totalOppsCompleted'];
             }
             $reportData[$centerName]['total']['total'] = $total;
             $reportData[$centerName]['total']['attended'] = $attended;
             $reportData[$centerName]['total']['percent'] = $total ? round(($attended / $total) * 100) : 0;
+            $reportData[$centerName]['total']['totalOppsCompleted'] = $totalOppsCompleted;
         }
 
         foreach ($totals as $team => $data) {

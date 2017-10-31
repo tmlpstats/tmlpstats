@@ -12,7 +12,7 @@ import { TEAM_MEMBER_FORM_KEY } from './reducers'
 import { EXIT_CHOICES, EXIT_CHOICES_HELP } from './exit_choice'
 import * as actions from './actions'
 import { teamMemberText as fullName } from './data'
-import { TeamMembersBase, GITW_LABELS, TDO_LABELS } from './components-base'
+import { TeamMembersBase, GITW_LABELS, TDO_OPTIONS } from './components-base'
 
 
 const CHANGING_QUARTER_KEY = '_changingQuarter'
@@ -251,10 +251,9 @@ class _EditCreate extends TeamMembersBase {
                 <SimpleFormGroup label="GITW" required={true}>
                     <BooleanSelect model={modelKey+'.gitw'} emptyChoice=" " labels={GITW_LABELS} className="form-control gitw" />
                 </SimpleFormGroup>
-                <SimpleFormGroup label="TDO" required={true}>
-                    <BooleanSelect model={modelKey+'.tdo'} emptyChoice=" " labels={TDO_LABELS} className="form-control boolSelect" />
+                <SimpleFormGroup label="TDO" required={true} divClass="col-md-6 boolSelect">
+                    <SimpleSelect model={modelKey+'.tdo'} emptyChoice=" " items={TDO_OPTIONS} className="form-control tdo" keyProp='k' labelProp='k' />
                 </SimpleFormGroup>
-
             </div>
         )
     }

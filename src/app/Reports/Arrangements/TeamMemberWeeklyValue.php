@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Reports\Arrangements;
+<?php
+namespace TmlpStats\Reports\Arrangements;
 
 use Carbon\Carbon;
 
@@ -33,6 +34,7 @@ abstract class TeamMemberWeeklyValue extends BaseArrangement
                 if (!$member) {
                     $member['member'] = $data->teamMember;
                     $member['withdrawn'] = false;
+                    $member['total'] = 0;
                 }
                 if ($data->withdrawCodeId !== null || $data->wbo) {
                     $member['withdrawn'] = true;
@@ -45,6 +47,7 @@ abstract class TeamMemberWeeklyValue extends BaseArrangement
                     $member[$date] = [
                         'value' => $this->getValue($data),
                     ];
+                    $member['total'] += $this->getValue($data);
                 }
 
                 $members[$team][$data->teamMember->id] = $member;
