@@ -204,10 +204,8 @@ class ReportsController extends Controller
     {
         if ($reportType == 'region') {
             $reportTargetClass = Region::class;
-            $controllerClass = GlobalReportController::class;
         } else if ($reportType == 'center') {
             $reportTargetClass = Center::class;
-            $controllerClass = StatsReportController::class;
         } else {
             throw new \Exception("Invalid report type '{$reportType}'");
         }
@@ -253,11 +251,9 @@ class ReportsController extends Controller
 
         $report = null;
         if ($reportType == 'region') {
-            $report = $globalReport ?: GlobalReport::reportingDate($reportingDate)->firstOrFail();
-            $redirectUrl = App::make(GlobalReportController::class)->getUrl($report, $reportTarget);
-            if (!$reportViewUpdate) {
-                return App::make($controllerClass)->showForRegion($request, $report, $reportTarget);
-            }
+            $controller = App::make(GlobalReportController::class);
+
+            $report = $globalReport ?: GlobalReport::reportingDate($reportingDate)->first();
         } else {
             $controller = App::make(StatsReportController::class);
 
@@ -266,19 +262,21 @@ class ReportsController extends Controller
                 ->official()
                 ->first();
 
-            // Find a report from a previous week
-            if ($report === null) {
-                return $controller->showReportChooser($request, $reportTarget, $reportingDate);
+            if ($report) {
+                $this->setCenter($report->center);
             }
-
-            $redirectUrl = $report->getUriLocalReport();
-
-            $this->setCenter($report->center);
         }
+
+        // Find a report from a previous week
+        if ($report === null) {
+            return $controller->showReportChooser($request, $reportTarget, $reportingDate);
+        }
+
+        $redirectUrl = $controller->getUrl($report, $reportTarget);
 
         return $reportViewUpdate
             ? redirect($redirectUrl)
-            : App::make($controllerClass)->showReport($request, $report);
+            : $controller->showReport($request, $report, $reportTarget);
     }
 
     /**

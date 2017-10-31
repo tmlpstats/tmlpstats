@@ -6,12 +6,12 @@
     <div id="content">
         We couldn't find a report for <b>{{ $reportingDate->toDateString() }}</b>
 
-        @if ($maybeReport)
+        @if ($maybeReportDate && $maybeReportUrl)
             <p>
-                However, we do have a report for <b>{{ $maybeReport->reportingDate->toDateString() }}</b>
+                However, we do have a report for <b>{{ $maybeReportDate->toDateString() }}</b>
             </p>
             <p>
-                <a href="{{ $maybeReport->getUriLocalReport() }}" class="btn btn-lg btn-default">Click Here</a>
+                <a href="{{ $maybeReportUrl }}" class="btn btn-lg btn-default">Click Here</a>
             </div>
         @endif
     </div>
@@ -19,10 +19,10 @@
 @endsection
 
 @section('scripts')
-@if ($maybeReport)
+@if ($maybeReportDate && $maybeReportUrl)
     <script type="text/javascript">
         setTimeout(function() {
-            document.location.href = @json($maybeReport->getUriLocalReport());
+            document.location.href = @json($maybeReportUrl);
         }, 3000);
     </script>
 @endif

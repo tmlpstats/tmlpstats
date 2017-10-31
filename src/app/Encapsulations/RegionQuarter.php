@@ -52,6 +52,23 @@ class RegionQuarter implements \JsonSerializable
         return $this->dates;
     }
 
+    /**
+     * List all reporting dates in a region quarter
+     *
+     * @return array An array of Carbon objects being each reporting week in the quarter
+     */
+    public function listReportingDates()
+    {
+        $output = [];
+        $d = $this->dates['firstWeekDate']->copy();
+        while ($d->lte($this->dates['endWeekendDate'])) {
+            $output[] = $d;
+            $d = $d->copy()->addWeek();
+        }
+
+        return $output;
+    }
+
     public function toArray()
     {
         $v = [
