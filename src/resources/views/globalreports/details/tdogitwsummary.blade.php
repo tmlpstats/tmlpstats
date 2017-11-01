@@ -16,19 +16,19 @@
             <th class="data-point border-right">{{ $verb }}</th>
             <th class="data-point border-right">%</th>
             @if ($game === 'tdo')
-                <th class="data-point border-right">Total Opps</th>
+                <th class="data-point border-right">Total TDOs<br/>Completed</th>
             @endif
             <th class="data-point">Total Members</th>
             <th class="data-point border-right">{{ $verb }}</th>
             <th class="data-point border-right">%</th>
             @if ($game === 'tdo')
-                <th class="data-point border-right">Total Opps</th>
+                <th class="data-point border-right">Total TDOs<br/>Completed</th>
             @endif
             <th class="data-point">Total Members</th>
             <th class="data-point border-right">{{ $verb }}</th>
             <th class="data-point border-right">%</th>
             @if ($game === 'tdo')
-                <th class="data-point border-right">Total Opps</th>
+                <th class="data-point border-right">Total TDOs<br/>Completed</th>
             @endif
         </tr>
         </thead>
