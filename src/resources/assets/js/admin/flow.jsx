@@ -10,6 +10,15 @@ function EmptyWrapper(props) {
     return <div>{props.children}</div>
 }
 
+function GraphQLFlow() {
+    if (process.env.NODE_ENV !== 'production') {
+        const gqlView = require('./gql-view')
+        return (
+            <Route path="graphql" component={gqlView.Interface} />
+        )
+    }
+}
+
 export function AdminFlow() {
     return (
         <Route path="/admin" component={AdminRoot}>
@@ -25,6 +34,7 @@ export function AdminFlow() {
                 <Route path="system_messages" component={systemComponents.AdminSystemMessages} />
                 <Route path="system_messages/:id" component={systemComponents.EditSystemMessage} />
             </Route>
+            {GraphQLFlow()}
         </Route>
     )
 }

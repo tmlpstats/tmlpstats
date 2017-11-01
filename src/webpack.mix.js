@@ -1,5 +1,12 @@
 let mix = require('laravel-mix')
+let webpack = require('webpack')
 
+mix.webpackConfig({
+    plugins: [
+        // yucky hack, but works
+        new webpack.ContextReplacementPlugin(/graphql-language-service-interface[\/\\]dist/, /\.js$/),
+    ]
+})
 
 mix
     .react('resources/assets/js/main.jsx', 'public/build/js')
@@ -16,6 +23,7 @@ mix
         'node_modules/jquery-easy-loading/dist/jquery.loading.min.js',
         'node_modules/highcharts/highcharts.js',
     ], 'public/build/js/classic-vendor.js')
+    .copy(['node_modules/graphiql/graphiql.css'], 'public/vendor/css/')
     .copy([
         'node_modules/html5shiv/dist/html5shiv.min.js',
         'node_modules/core-js/client/shim.min.js',

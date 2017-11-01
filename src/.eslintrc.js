@@ -1,3 +1,5 @@
+const fs = require('fs')
+
 module.exports = {
     "env": {
         "browser": true,
@@ -17,7 +19,8 @@ module.exports = {
         "sourceType": "module"
     },
     "plugins": [
-        "react"
+        "react",
+        "graphql"
     ],
     "rules": {
         "react/jsx-uses-vars": 1,
@@ -41,7 +44,12 @@ module.exports = {
         "semi": [
             "error",
             "never"
-        ]
+        ],
+         "graphql/template-strings": ['error', {
+            env: 'apollo',
+            //schemaJson: require('./schema.json')
+            //schemaString: fs.readFileSync(`${__dirname}/foo.graphql`)
+         }]
     },
     "globals": {
         "window": true,

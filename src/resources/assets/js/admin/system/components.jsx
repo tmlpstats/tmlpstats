@@ -14,8 +14,9 @@ import debounceRender from '../../reusable/debounce'
 import { connectRedux, rebind, delayDispatch } from '../../reusable/dispatch'
 import { loadStateShape } from '../../reusable/shapes'
 import { SystemMessages } from '../../reusable/system-messages'
-
 import { systemMessagesData } from '../../lookups/lookups-system-messages'
+import gql from 'graphql-tag'
+import { graphql } from 'react-apollo'
 
 const MODEL = 'admin.system.currentMessage'
 const SYSTEM_MESSAGES_BASE = '/admin/system/system_messages'
@@ -185,7 +186,7 @@ class SystemMessagesForm extends React.Component {
         centerRegion.forEach((k) => {
             currentMessage[k] = currentMessage[k] || null  // Override with null
         })
-
+GetUserQuery
         this.props.dispatch(systemMessagesData.manager.runNetworkAction('save', {data: currentMessage}, {
             api: Api.Admin.System.writeSystemMessage,
             successHandler: (data, { dispatch }) => {
@@ -195,5 +196,42 @@ class SystemMessagesForm extends React.Component {
                 dispatch(formActions.load(MODEL, {active: true}))
             }
         }))
+    }
+}
+
+
+const GetAppsQuery = gql`
+    query GetAppsQuery($center: String) {
+        applications(centerId: $center) {
+            regDate
+            appOutDate
+            person {
+                firstName
+                lastName
+                ssz
+            }
+        }
+    }
+`
+
+@graphql(GetAppsQuery)
+export class TeamApps extends React.Component {
+    render() {
+        const { applications, loading } = this.props.data
+        if (loading) {
+            return <div>Loading...</div>
+        }
+        let items = applications.map((app) => {
+            return (
+                <li key={app.id}>
+                    {app.person.firstName} {app.person.lastName}
+                </li>
+            )
+        })
+        return <ul>{items}</ul>
+    }
+
+    static propTypes = {
+        data: PropTypes.object
     }
 }

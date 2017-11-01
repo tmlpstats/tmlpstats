@@ -5,7 +5,6 @@ use App;
 use Auth;
 use Carbon\Carbon;
 use Exception;
-use Request;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -14,6 +13,7 @@ use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Log;
 use Mail;
+use Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -105,7 +105,7 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $e)
     {
         if ($request->ajax() || $request->wantsJson()) {
-            $statusCode = 400;
+            $statusCode = 500;
             if ($e instanceof HttpException) {
                 $statusCode = $e->getStatusCode();
             }
@@ -134,6 +134,10 @@ class Handler extends ExceptionHandler
                 'code' => $e->getCode(),
                 'message' => $e->getMessage(),
             ];
+            if (config('app.env') != 'prod') {
+                $error['class'] = get_class($e);
+                $error['trace'] = $e->getTrace();
+            }
         }
 
         return [

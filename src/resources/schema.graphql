@@ -1,0 +1,55 @@
+schema {
+  query: Query
+}
+
+scalar Date
+
+type Query {
+	regions: [Region]
+	adminRegion(regionAbbr: String!): AdminRegion
+}
+
+# WE HAVE SOMETHING
+type AdminRegion {
+	region: Region!
+	regionQuarters: [RegionQuarter]!
+	currentQuarter: RegionQuarter
+
+	adminQuarter(quarterId: Int!): AdminRegionQuarter
+}
+
+type AdminRegionQuarter {
+	rq: RegionQuarter
+	locks: [WeekLock]	
+}
+
+# RegionQuarter represents the dates of a single quarter for a region.
+# You can think of this as the 'default' dates.
+type RegionQuarter {
+	gid: ID!
+	region: Region!
+	quarterId: Int!
+
+	# The Friday of the weekend before this quarter.
+	startWeekendDate: Date
+	# The Friday of the upcoming weekend.
+	endWeekendDate: Date
+	milestone1Date: Date
+	milestone2Date: Date
+	milestone3Date: Date
+}
+
+type WeekLock {
+	reportingDate: Date!
+	locks: [ScoreboardLock]
+}
+
+type ScoreboardLock {
+	week: Date!
+	editPromise: Boolean!
+}
+
+type Region {
+	id: Int!
+	abbr: String!
+}

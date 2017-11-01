@@ -73,6 +73,16 @@ class RegionQuarter implements \JsonSerializable
         return $output;
     }
 
+    public function getRegion(): Models\Region
+    {
+        return $this->region;
+    }
+
+    public function getQuarter(): Models\Quarter
+    {
+        return $this->quarter;
+    }
+
     public function getNextMilestone(Carbon $ref = null): Carbon
     {
         return QuarterDates::getNextMilestone($this, $ref);

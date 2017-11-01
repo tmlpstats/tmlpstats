@@ -20,6 +20,7 @@ class Kernel extends ConsoleKernel
         Commands\MergeDuplicatePeople::class,
         Commands\MoveStashesToCenter::class,
         Commands\ReportsCodegen::class,
+        Commands\GraphqlCodegen::class,
         Commands\SanitizeDb::class,
         Commands\SendTestEmailCommand::class,
         Commands\UpdatePromise::class,

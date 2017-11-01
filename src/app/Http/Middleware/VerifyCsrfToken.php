@@ -10,6 +10,8 @@ class VerifyCsrfToken extends BaseVerifier
         'auth/login',
         'api',
         'api/*',
+        'graphql',
+        'graphiql',
     ];
 
     /**

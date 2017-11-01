@@ -26,6 +26,19 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('system/{ignore?}/{ignore2?}', 'ManageController@system');
 });
 
+/*
+Route::get('graphql', array(
+    'as' => 'graphql.query',
+    'uses' => '\Folklore\GraphQL\GraphQLController' . '@query',
+));
+Route::post('graphql', array(
+    'as' => 'graphql.query.post',
+    'uses' => '\Folklore\GraphQL\GraphQLController' . '@query',
+));
+
+Route::get('graphiql', ['uses' => '\Folklore\GraphQL\GraphQLController' . '@graphiql']);
+*/
+
 // Invites
 Route::resource('users/invites', 'InviteController');
 Route::delete('users/invites/{id}/revoke', 'InviteController@revokeInvite');

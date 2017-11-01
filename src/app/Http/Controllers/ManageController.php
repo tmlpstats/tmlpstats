@@ -25,4 +25,13 @@ class ManageController extends Controller
         return view('admin.region', compact('region'));
 
     }
+
+    public function graphql()
+    {
+        $region = Region::abbreviation('na')->firstOrFail();
+
+        return view('admin.region', compact('region'));
+
+    }
+
 }

@@ -156,6 +156,7 @@ return [
         Eloquence\EloquenceServiceProvider::class,
         Intouch\LaravelNewrelic\NewrelicServiceProvider::class,
         Fideloper\Proxy\TrustedProxyServiceProvider::class,
+        Folklore\GraphQL\ServiceProvider::class,
     ],
 
     /*
@@ -207,6 +208,7 @@ return [
         'Form' => Collective\Html\FormFacade::class,
         'Html' => Collective\Html\HtmlFacade::class,
         'Newrelic' => Intouch\LaravelNewrelic\Facades\Newrelic::class,
+        'GraphQL' => Folklore\GraphQL\Support\Facades\GraphQL::class,
     ],
 
 ];
