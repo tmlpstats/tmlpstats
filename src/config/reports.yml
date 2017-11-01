@@ -47,6 +47,21 @@ api:
             params:
               - name: region
                 type: Region
+          getQuarterConfig:
+            params:
+              - name: region
+                type: Region
+              - name: quarter
+                type: Quarter
+          saveQuarterConfig:
+            params:
+              - name: region
+                type: Region
+              - name: quarter
+                type: Quarter
+              - name: data
+                type: array
+
       Quarter:
         type: namespace
         children:

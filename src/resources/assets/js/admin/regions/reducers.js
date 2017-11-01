@@ -3,6 +3,7 @@ import { combineReducers } from 'redux'
 
 import { regionsData, centersData, quarterTransferData, scoreboardLockData, extraData } from './data'
 
+
 const regionsReducer = combineReducers({
     form: formReducer('admin.regions'),
     regions: regionsData.reducer(),
@@ -11,6 +12,7 @@ const regionsReducer = combineReducers({
     quarterTransfer: quarterTransferData.reducer(),
     extra: extraData.reducer(),
     quarterDates: modelReducer('admin.regions.quarterDates'),
+    selected: modelReducer('admin.regions.selected')
 })
 
 export default regionsReducer

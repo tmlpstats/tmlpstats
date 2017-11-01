@@ -115,3 +115,14 @@ function indexWeek(getState, week) {
     }
     return {idx: -1}
 }
+
+export function loadQuarterDates(regionAbbr, quarterId) {
+    return (dispatch) => {
+        const params = {
+            region: regionAbbr,
+            quarter: quarterId
+        }
+        return Api.Admin.Region.getQuarterConfig(params).then(() => {
+        })
+    }
+}

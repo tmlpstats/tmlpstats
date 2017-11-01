@@ -24,7 +24,8 @@ export class SelectQuarter extends RegionBase {
     }
 
     getLabel(cq) {
-        return `${cq.quarter.t1Distinction} ${cq.quarter.year} (starting ${cq.startWeekendDate})`
+        const startInfo = (cq.startWeekendDate)? `(starting ${cq.startWeekendDate})` : 'UNCONFIGURED'
+        return `${cq.quarter.t1Distinction} ${cq.quarter.year} ${startInfo}`
     }
 
     checkData() {
