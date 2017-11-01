@@ -3,6 +3,7 @@
 exports[`NQA Should Render As Snapshot 1`] = `
 <form
   className="form-horizontal nextQuarterAccountabilities"
+  noValidate={undefined}
   onReset={[Function]}
   onSubmit={[Function]}
 >

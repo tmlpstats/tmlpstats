@@ -36,7 +36,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
         $this->dataValidators['travel']     = $boolOrNullValidator;
         $this->dataValidators['room']       = $boolOrNullValidator;
         $this->dataValidators['gitw']       = $boolOrNullValidator;
-        $this->dataValidators['tdo']        = $boolOrNullValidator;
+        $this->dataValidators['tdo']        = v::optional(v::numeric()->min(0, true));
         $this->dataValidators['withdrawCodeId'] = v::optional($idValidator);
     }
 

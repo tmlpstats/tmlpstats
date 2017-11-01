@@ -575,6 +575,7 @@ class StatsReportController extends Controller
 
         $a = new Arrangements\GitwByTeamMember(['teamMembersData' => $weeksData]);
         $data = $a->compose();
+        $data['type'] = 'gitw';
 
         return view('statsreports.details.teammembersweekly', $data);
     }
@@ -588,6 +589,7 @@ class StatsReportController extends Controller
 
         $a = new Arrangements\TdoByTeamMember(['teamMembersData' => $weeksData]);
         $data = $a->compose();
+        $data['type'] = 'tdo';
 
         return view('statsreports.details.teammembersweekly', $data);
     }

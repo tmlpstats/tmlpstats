@@ -55,7 +55,7 @@ class ApiAccountabilityValidatorTest extends ApiValidatorTestAbstract
         'travel' => false,
         'room' => false,
         'gitw' => false,
-        'tdo' => false,
+        'tdo' => 0,
         'withdrawCode' => null,
         'comment' => null,
     ];

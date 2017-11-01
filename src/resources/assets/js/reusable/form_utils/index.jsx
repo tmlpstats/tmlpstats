@@ -112,23 +112,24 @@ export class Select extends React.PureComponent {
         required: false
     }
     static propTypes = {
-        model: PropTypes.string,
+        changeAction: PropTypes.func,
+        emptyChoice: PropTypes.node,
+        getKey: PropTypes.func,
+        getLabel: PropTypes.func,
         id: PropTypes.string,
         items: PropTypes.arrayOf(PropTypes.object).isRequired,
         keyProp: PropTypes.string,
-        getKey: PropTypes.func,
         labelProp: PropTypes.string,
-        getLabel: PropTypes.func,
-        emptyChoice: PropTypes.node,
-        selectClasses: PropTypes.string,
+        model: PropTypes.string,
         multiple: PropTypes.bool,
         required: PropTypes.bool,
         rows: PropTypes.number,
-        changeAction: PropTypes.func
+        selectClasses: PropTypes.string
     }
+
     render() {
-        const items = this.props.items
-        let { getKey, getLabel, emptyChoice, required } = this.props
+        const { id, items, emptyChoice, required, rows } = this.props
+        let { getKey, getLabel } = this.props
         if (!getKey) {
             getKey = (obj) => obj[this.props.keyProp]
         }
@@ -150,10 +151,11 @@ export class Select extends React.PureComponent {
                 <option key={i} value={getKey(item)}>{getLabel(item)}</option>
             )
         })
+
         return (
             <Control.select
                     model={this.props.model} multiple={this.props.multiple} changeAction={this.props.changeAction}
-                    className={requiredClass + ' form-control'} rows={this.props.rows} id={this.props.id}>
+                    className={requiredClass + ' form-control'} rows={rows} id={id} >
                 {options}
             </Control.select>
         )

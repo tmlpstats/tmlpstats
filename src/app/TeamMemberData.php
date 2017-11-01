@@ -40,7 +40,7 @@ class TeamMemberData extends Model
         'travel'     => 'boolean',
         'room'       => 'boolean',
         'gitw'       => 'boolean',
-        'tdo'        => 'boolean',
+        'tdo'        => 'integer',
     ];
 
     public function __get($name)

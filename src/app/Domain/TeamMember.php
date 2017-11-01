@@ -95,7 +95,7 @@ class TeamMember extends ParserDomain
         ],
         'tdo' => [
             'owner' => 'teamMemberData',
-            'type' => 'bool',
+            'type' => 'int',
         ],
         'withdrawCode' => [
             'owner' => 'teamMemberData',

@@ -62,7 +62,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             'travel' => false,
             'room' => false,
             'gitw' => false,
-            'tdo' => false,
+            'tdo' => 0,
             'withdrawCode' => null,
             'comment' => null,
         ];
@@ -359,18 +359,26 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 true,
             ],
 
-            // Passes TDO true
+            // Passes TDO one
             [
                 [
-                    'tdo' => true,
+                    'tdo' => 1,
                 ],
                 [],
                 true,
             ],
-            // Passes TDO false
+            // Passes TDO multiple
             [
                 [
-                    'tdo' => false,
+                    'tdo' => 3,
+                ],
+                [],
+                true,
+            ],
+            // Passes TDO none
+            [
+                [
+                    'tdo' => 0,
                 ],
                 [],
                 true,

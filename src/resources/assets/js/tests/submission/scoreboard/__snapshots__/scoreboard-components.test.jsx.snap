@@ -1080,6 +1080,7 @@ exports[`ScoreboardRow Renders no heading when week is out 1`] = `
 
 exports[`SubmissionScoreboard Should Render As Snapshot 1`] = `
 <form
+  noValidate={undefined}
   onReset={[Function]}
   onSubmit={[Function]}
 >

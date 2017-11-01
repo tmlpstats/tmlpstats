@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react'
 import { Link } from 'react-router'
 
-import { Form, BooleanSelectView, connectCustomField, AddOneLink } from '../../reusable/form_utils'
+import { Form, BooleanSelectView, SimpleSelect, connectCustomField, AddOneLink } from '../../reusable/form_utils'
 import { ModeSelectButtons, ButtonStateFlip, Alert } from '../../reusable/ui_basic'
 import { delayDispatch, rebind, connectRedux } from '../../reusable/dispatch'
 import { ProgramLeadersIndex } from '../program_leaders/components'
@@ -9,8 +9,7 @@ import { ProgramLeadersIndex } from '../program_leaders/components'
 import { TEAM_MEMBERS_COLLECTION_FORM_KEY } from './reducers'
 import { teamMembersData, teamMembersSorts, teamMemberText } from './data'
 import * as actions from './actions'
-import { TeamMembersBase, GITW_LABELS, TDO_LABELS } from './components-base'
-
+import { TeamMembersBase, GITW_LABELS, TDO_OPTIONS } from './components-base'
 
 const STATE_UPDATING = 'Updating'
 const STATE_NOTHING = 'Nothing'
@@ -200,16 +199,16 @@ class TeamMemberIndexRow extends React.PureComponent {
                 </td>
                 <td>T{teamMember.teamYear} Q{teamMember.quarterNumber}</td>
                 <td>{accountability}</td>
-                <td className="gitw"><GitwTdoLiveSelect model={modelKey+'.gitw'} emptyChoice=" " labels={GITW_LABELS} /></td>
-                <td className="tdo"><GitwTdoLiveSelect model={modelKey+'.tdo'} emptyChoice=" " labels={TDO_LABELS} /></td>
+                <td className="gitw"><GitwLiveSelect model={modelKey+'.gitw'} emptyChoice=" " labels={GITW_LABELS} /></td>
+                <td className="tdo"><SimpleSelect model={modelKey+'.tdo'} emptyChoice=" " items={TDO_OPTIONS}
+                    keyProp='k' labelProp='k' changeAction={actions.selectChangeAction} /></td>
             </tr>
         )
     }
 }
 
-
 @connectCustomField
-class GitwTdoLiveSelect extends BooleanSelectView {
+class GitwLiveSelect extends BooleanSelectView {
     onChange(e) {
         super.onChange(e)
         let bits = this.props.model.split('.')
