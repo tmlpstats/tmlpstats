@@ -55,7 +55,7 @@ class SubmissionCore extends AuthenticatedApiBase
             'user' => [
                 'canSkipSubmitEmail' => $this->context->can('skipSubmitEmail', $center),
                 'canOverrideDelete' => $this->context->can('overrideDelete', $center),
-                'canSubmitMultipleTdos' => ($center->region->id > 3), // Not for NA
+                'canSubmitMultipleTdos' => $center->getGlobalRegion()->abbrLower() !== 'na',
             ],
             'capabilities' => [
                 'nextQtrAccountabilities' => $crd->canShowNextQtrAccountabilities(),
