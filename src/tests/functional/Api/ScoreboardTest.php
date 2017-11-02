@@ -199,7 +199,7 @@ class ScoreboardTest extends FunctionalTestAbstract
         $reportingDate = $this->report->reportingDate = Carbon::parse('2017-07-07');
 
         $quarter = Models\Quarter::year(2017)->quarterNumber(2)->first();
-        $locks = $this->buildLocks($quarter);
+        $locks = $this->buildLocks($quarter, $reportingDate);
         $context = MockContext::defaults()
             ->withUser($this->user)
             ->withFakedAdmin()
@@ -322,16 +322,17 @@ class ScoreboardTest extends FunctionalTestAbstract
         ];
     }
 
-    public function buildLocks($quarter = null)
+    public function buildLocks($quarter = null, $reportingDate = null)
     {
         $cq = Domain\CenterQuarter::ensure($this->center, $quarter ?: $this->quarter);
         $reportingDates = $cq->listReportingDates();
         $normal = new Domain\ScoreboardLockQuarter($reportingDates);
         $unlocked = new Domain\ScoreboardLockQuarter($reportingDates);
         $halfLocked = new Domain\ScoreboardLockQuarter($reportingDates); // unlocked after CR2
+        $reportingDate = $reportingDate ?: $this->report->reportingDate;
         foreach ($reportingDates as $d) {
-            $unlocked->getWeek($d)->editPromise = true;
-            $halfLocked->getWeek($d)->editPromise = ($d->gte($cq->classroom2Date));
+            $unlocked->getWeekDefault($reportingDate, $d)->editPromise = true;
+            $halfLocked->getWeekDefault($reportingDate, $d)->editPromise = ($d->gte($cq->classroom2Date));
         }
 
         return compact('normal', 'unlocked', 'halfLocked');

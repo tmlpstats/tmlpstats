@@ -52,7 +52,7 @@ class Scoreboard extends AuthenticatedApiBase
                     $scoreboard->meta['isClassroom'] = true;
                 }
             }
-            $weekLock = $locks->getWeekDefault($week);
+            $weekLock = $locks->getWeekDefault($reportingDate, $week);
             $scoreboard->meta['canEditPromise'] = $weekLock->editPromise;
             $scoreboard->meta['canEditActual'] = $weekLock->editActual || ($week->toDateString() == $reportingDate->toDateString());
         }

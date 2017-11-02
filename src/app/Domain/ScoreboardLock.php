@@ -27,4 +27,9 @@ class ScoreboardLock implements Arrayable
         ];
     }
 
+    public function isInteresting(): bool
+    {
+        return ($this->editPromise || $this->editActual);
+    }
+
 }

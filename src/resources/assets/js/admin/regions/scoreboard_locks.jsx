@@ -1,16 +1,19 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import Immutable from 'immutable'
 
 import { Link, withRouter } from 'react-router'
 
+import { defaultMemoize } from 'reselect'
+import { objectAssign } from '../../reusable/ponyfill'
 import { delayDispatch, connectRedux, rebind } from '../../reusable/dispatch'
 import { Form, formActions } from '../../reusable/form_utils'
 import { FormTypeahead } from '../../reusable/typeahead'
-import { ButtonStateFlip, Panel, Alert } from '../../reusable/ui_basic'
+import { ButtonStateFlip, Panel, Alert, ModeSelectButtons } from '../../reusable/ui_basic'
 
 import RegionBase from './RegionBase'
 import * as actions from './actions'
-import { getQuarterTransitions } from './selectors'
+import { annotatedRegionQuarter } from './selectors'
 
 const mapStateToProps = (state) => state.admin.regions
 const MODEL = 'admin.regions.scoreboardLock.data'
@@ -22,7 +25,7 @@ export class RegionScoreboards extends RegionBase {
             return <div>Loading...</div>
         }
         const baseUri = this.regionQuarterBaseUri()
-        const { region, centers } = this.regionCenters()
+        const { centers } = this.regionCenters()
 
         const dispCenters = centers.map((center) => {
             const href = `${baseUri}/manage_scoreboards/from/${center.abbreviation}`
@@ -63,32 +66,19 @@ export class EditScoreboardLock extends RegionBase {
         }
         const { params, dispatch } = this.props
         const { centerId } = params
-        const { centers: otherCenters, regionQuarter } = this.regionCenters()
+        const { centers: otherCenters, regionQuarter: rawRegionQuarter } = this.regionCenters()
         const center = this.props.centers.data[centerId]
         const sbl = this.props.scoreboardLock.data
-        const transitionDates = getQuarterTransitions(regionQuarter)
+        const regionQuarter = annotatedRegionQuarter(rawRegionQuarter)
 
-        let currentRow = []
-        let outerRows = []
-        outerRows.push(<div key={0}>{currentRow}</div>)
-        sbl.weeks.forEach((weekData, idx) => {
-            currentRow.push(
-                <div key={idx} className="btn-toolbar">
-                    <div className="btn-group"><h4>{weekData.week}</h4></div>
-                    <LockButtons value={weekData.editPromise} week={idx} dispatch={dispatch} />
-                </div>
-            )
-            if (transitionDates[weekData.week]) {
-                currentRow = []
-                outerRows.push(<div key={idx}>{currentRow}</div>)
-            }
-        })
-
-        const weeksInfo = outerRows.map((v, idx) => {
-            return (
-                <div key={idx} className="col-md-8 col-lg-6">
-                    <Panel>{v}</Panel>
-                </div>
+        const allLocks = []
+        getLocksByDates(regionQuarter, sbl).forEach(({date, dateString, idx, rdLocks}) => {
+            allLocks.push(
+                <ReportingDateLocks
+                    key={dateString} model={`${MODEL}.reportingDates[${idx}]`}
+                    regionQuarter={regionQuarter}
+                    reportingDate={date} sbl={rdLocks}
+                    dispatch={dispatch} />
             )
         })
 
@@ -110,10 +100,16 @@ export class EditScoreboardLock extends RegionBase {
         return (
             <Form model={MODEL} onSubmit={this.onSubmit.bind(this)}>
                 <h2>Edit Scoreboard Locks - {otherCenter? 'Multiple Centers' : center.name}</h2>
-                <div className="row">
-                    {weeksInfo}
-                </div>
+                <Alert alert="warning">
+                    <b>Important</b> - The way this dialogue works has changed since the last time
+                    this was used.
 
+                    <p>In the past, you set the locks at the beginning of the repromise week and then un-set them.</p>
+                    <p>Now, promise locks are set for a reporting week, this should reduce the incidence of issues.</p>
+                    <p>We are going to keep changing this user experience to make it more streamlined, this is currently done as-is for the Nov 2017 repromise.</p>
+                    <p>Contact Future Stats team if you need more info.</p>
+                </Alert>
+                {allLocks}
                 <div className="row">
                     <div className="form-group">
                         <div className="col-md-2">
@@ -156,9 +152,107 @@ export class EditScoreboardLock extends RegionBase {
     }
 }
 
+// This helper is a selector which co-locates locks with dates.
+// It's needed because the 'reportingDates' array is a positional array, not keyed.
+// We're doing the positional array to make it easier to transition to GraphQL based objects later.
+const getLocksByDates = defaultMemoize(function(regionQuarter, sbl) {
+    // avoid a N^2 loop by keying the locks first.
+    const keyedLocks = Immutable.Map(Immutable.Seq(sbl.reportingDates).map((x, idx) => {
+        return [x.reportingDate, {idx: idx, rdLocks: x}]
+    }))
+
+    return regionQuarter.annotatedDates.map((qdate) => {
+        const v = keyedLocks.get(qdate.dateString) || {}
+        return objectAssign(v, qdate)
+    })
+})
+
+
+const LOCK_OPTIONS = [
+    {key: 'all_locked', label: 'All Locked'},
+    {key: 'customize', label: 'Customize'},
+]
+
+
+class ReportingDateLocks extends React.PureComponent {
+    static propTypes = {
+        reportingDate: PropTypes.object.isRequired,
+        regionQuarter: PropTypes.object.isRequired,
+        model: PropTypes.string.isRequired,
+        dispatch: PropTypes.func.isRequired,
+        sbl: PropTypes.shape({
+            reportingDate: PropTypes.string,
+            weeks: PropTypes.array,
+        })
+    }
+
+    constructor(props) {
+        super(props)
+        rebind(this, 'changeMode')
+    }
+
+    changeMode(mode) {
+        const weekString = this.props.reportingDate.format('YYYY-MM-DD')
+        switch(mode){
+        case 'all_locked':
+            this.props.dispatch(actions.fullyLockWeek(weekString))
+            break
+        case 'customize':
+            this.props.dispatch(actions.unlockWeek(weekString, this.props.regionQuarter.reportingDates))
+            break
+        }
+    }
+
+    render() {
+        const { sbl, regionQuarter, dispatch } = this.props
+
+        let current = 'all_locked'
+        let weeksInfo
+        if (sbl && sbl.weeks && sbl.weeks.length) {
+            current = 'customize'
+            let currentRow = []
+            let outerRows = []
+            outerRows.push(<div key={0}>{currentRow}</div>)
+            sbl.weeks.forEach((weekData, idx) => {
+                currentRow.push(
+                    <div key={idx} className="btn-toolbar">
+                        <div className="btn-group"><h4>{weekData.week}</h4></div>
+                        <LockButtons model={`${this.props.model}.weeks[${idx}]`} value={weekData.editPromise} week={idx} dispatch={dispatch} />
+                    </div>
+                )
+                const aWeek = regionQuarter.annotatedDates.get(weekData.week)
+                if (aWeek && aWeek.isMilestone) {
+                    currentRow = []
+                    outerRows.push(<div key={idx}>{currentRow}</div>)
+                }
+            })
+
+            weeksInfo = outerRows.map((v, idx) => {
+                return (
+                    <div key={idx} className="col-md-8 col-lg-6">
+                        <Panel>{v}</Panel>
+                    </div>
+                )
+            })
+        }
+
+
+        return (
+            <div>
+            <h4>On Date: {this.props.reportingDate.format('YYYY-MM-DD')}</h4>
+            <ModeSelectButtons items={LOCK_OPTIONS} onClick={this.changeMode} current={current} />
+            <div className="row">
+                {weeksInfo}
+            </div>
+            </div>
+        )
+    }
+}
+
 
 class LockButtons extends React.PureComponent {
     static propTypes = {
+        model: PropTypes.string.isRequired,
         week: PropTypes.number.isRequired,
         value: PropTypes.bool
     }
@@ -181,7 +275,7 @@ class LockButtons extends React.PureComponent {
     }
 
     setValue(v) {
-        this.props.dispatch(formActions.change(`${MODEL}.weeks[${this.props.week}].editPromise`, v))
+        this.props.dispatch(formActions.change(`${this.props.model}.editPromise`, v))
         return false
     }
 
