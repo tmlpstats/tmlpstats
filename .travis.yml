@@ -59,6 +59,7 @@ after_script:
         travis_retry php vendor/bin/coveralls -v;
       else
         npm install coveralls &&
-        cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js;
+        cd .. &&
+        cat ./src/coverage/lcov.info | ./src/node_modules/coveralls/bin/coveralls.js;
       fi
     fi

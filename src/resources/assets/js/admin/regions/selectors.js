@@ -47,12 +47,16 @@ export const quarterReportingDates = createSelector(
     (q) => q.firstWeekDate,
     (q) => q.endWeekendDate,
     (firstWeekDate, endWeekendDate) => {
-        const end = moment(endWeekendDate)
         let output = []
-        let current = moment(firstWeekDate)
-        while (!current.isAfter(end)) {
-            output.push(current)
-            current = current.clone().add(1, 'week')
+        if (firstWeekDate && endWeekendDate) {
+            const end = moment(endWeekendDate)
+            let current = moment(firstWeekDate)
+            let sanityCounter = 50 // Sanity check
+
+            while (!current.isAfter(end) && --sanityCounter > 0) {
+                output.push(current)
+                current = current.clone().add(1, 'week')
+            }
         }
         return output
     }
