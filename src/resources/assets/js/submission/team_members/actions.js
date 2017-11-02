@@ -28,6 +28,9 @@ function initializeTeamMembers(data) {
         const state = getState()
         _.forEach(data, (teamMember) => {
             teamMember.exitChoice = determineExitChoice(teamMember, state)
+            if(typeof(teamMember.tdo) === 'boolean'){
+                teamMember.tdo = teamMember.tdo ? 1 : 0
+            }
         })
         // Re-format the collection as a key-ordered collection
         data = _.keyBy(data, 'id')

@@ -193,6 +193,23 @@ class TeamMember extends ParserDomain
         return $member;
     }
 
+    /**
+     * Fill/update values in this domain from an array.
+     *
+     * @param  array  $input           Flat array of input values
+     * @param  array  $requiredParams  An array of required keys in $input
+     */
+    public function updateFromArray($input, $requiredParams = [])
+    {
+        // We switched TDO from a bool to an int.
+        // Implicitely cast to int for old stashes
+        if (isset($input['tdo']) && is_bool($input['tdo'])) {
+            $input['tdo'] = (int) $input['tdo'];
+        }
+
+        parent::updateFromArray($input, $requiredParams);
+    }
+
     public function getFlattenedReference(array $supplemental = [])
     {
         $firstName = $this->firstName ?: 'unknown';

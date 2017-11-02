@@ -217,7 +217,7 @@ export class BooleanSelectView extends React.Component {
 
     // return the value for the select box
     selectValue(modelValue) {
-        if (modelValue === false || modelValue === '0' || modelValue === '') {
+        if (modelValue === false || modelValue === 0 || modelValue === '0' || modelValue === '') {
             return '0'
         } else if (modelValue) {
             return '1'
