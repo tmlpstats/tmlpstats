@@ -9,7 +9,7 @@ import { ProgramLeadersIndex } from '../program_leaders/components'
 import { TEAM_MEMBERS_COLLECTION_FORM_KEY } from './reducers'
 import { teamMembersData, teamMembersSorts, teamMemberText } from './data'
 import * as actions from './actions'
-import { TeamMembersBase, GITW_LABELS, TDO_OPTIONS } from './components-base'
+import { TeamMembersBase, GITW_LABELS, TDO_LABELS, TDO_OPTIONS } from './components-base'
 
 const STATE_UPDATING = 'Updating'
 const STATE_NOTHING = 'Nothing'
@@ -171,13 +171,14 @@ class TeamMemberWithdrawnRow extends React.PureComponent {
 class TeamMemberIndexRow extends React.PureComponent {
     static propTypes = {
         baseUri: PropTypes.string.isRequired,
+        lookups: PropTypes.object.isRequired,
         updating: PropTypes.string.isRequired,
         teamMember: PropTypes.object.isRequired,
         accountabilities: PropTypes.object
     }
 
     render() {
-        const { teamMember, updating, accountabilities } = this.props
+        const { teamMember, updating, accountabilities, lookups } = this.props
         const modelKey = `${TEAM_MEMBERS_COLLECTION_FORM_KEY}.${teamMember.id}`
         var className, accountability
         if (updating == STATE_SAVED) {
@@ -190,6 +191,15 @@ class TeamMemberIndexRow extends React.PureComponent {
             accountability = acc.map((accId) => accountabilities[accId].display).join(', ')
         }
 
+        let tdoSelect = <GitwTdoLiveSelect model={modelKey+'.tdo'} emptyChoice=" " labels={TDO_LABELS} />
+        if (lookups.user.canSubmitMultipleTdos) {
+            tdoSelect = (
+                <SimpleSelect model={modelKey+'.tdo'} emptyChoice=" "
+                              items={TDO_OPTIONS} keyProp='k' labelProp='k'
+                              changeAction={actions.selectChangeAction} />
+            )
+        }
+
         return (
             <tr className={className}>
                 <td>
@@ -199,16 +209,15 @@ class TeamMemberIndexRow extends React.PureComponent {
                 </td>
                 <td>T{teamMember.teamYear} Q{teamMember.quarterNumber}</td>
                 <td>{accountability}</td>
-                <td className="gitw"><GitwLiveSelect model={modelKey+'.gitw'} emptyChoice=" " labels={GITW_LABELS} /></td>
-                <td className="tdo"><SimpleSelect model={modelKey+'.tdo'} emptyChoice=" " items={TDO_OPTIONS}
-                    keyProp='k' labelProp='k' changeAction={actions.selectChangeAction} /></td>
+                <td className="gitw"><GitwTdoLiveSelect model={modelKey+'.gitw'} emptyChoice=" " labels={GITW_LABELS} /></td>
+                <td className="tdo">{tdoSelect}</td>
             </tr>
         )
     }
 }
 
 @connectCustomField
-class GitwLiveSelect extends BooleanSelectView {
+class GitwTdoLiveSelect extends BooleanSelectView {
     onChange(e) {
         super.onChange(e)
         let bits = this.props.model.split('.')
