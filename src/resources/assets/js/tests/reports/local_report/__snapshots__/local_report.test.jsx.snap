@@ -2,59 +2,61 @@
 
 exports[`LocalReport Basic 1`] = `
 <div>
-  <h2>
-    ABC
-     - 
-    2017-04-07
-     
-    <button
-      className="btn btn-default"
-      onClick={[Function]}
-    >
-      Show Report Link
-    </button>
-  </h2>
   <div
-    className="row"
+    className="topLevelTitle"
   >
-    <div
-      className="col-sm-8"
-    >
-      <a
-        href="/home"
+    <h2>
+      ABC - Apr 7, 2017
+       
+      <button
+        className="btn btn-default reportTokenLink"
+        onClick={[Function]}
       >
-        « See All
-      </a>
-    </div>
+        Show Report Link
+      </button>
+    </h2>
     <div
-      className="col-sm-4"
-      style={
-        Object {
-          "textAlign": "right",
+      className="row goBackLink"
+    >
+      <div
+        className="col-sm-8"
+      >
+        <a
+          href="/home"
+        >
+          « See All
+        </a>
+      </div>
+      <div
+        className="col-sm-4"
+        style={
+          Object {
+            "textAlign": "right",
+          }
         }
-      }
-    >
-      <a
-        className="btn btn-default"
-        onClick={[Function]}
-        style={Object {}}
       >
-        « 
-        AAA
-      </a>
-      <a
-        className="btn btn-default"
-        onClick={[Function]}
-        style={Object {}}
-      >
-        DEF
-         »
-      </a>
+        <a
+          className="btn btn-default"
+          onClick={[Function]}
+          style={Object {}}
+        >
+          « 
+          AAA
+        </a>
+        <a
+          className="btn btn-default"
+          onClick={[Function]}
+          style={Object {}}
+        >
+          DEF
+           »
+        </a>
+      </div>
     </div>
   </div>
   <div>
     <ul
-      className="nav nav-tabs tabs-top brief-tabs"
+      className="nav nav-tabs tabs-top brief-tabs report-nav-level0"
       id="tabs"
     >
       <li
@@ -186,59 +188,61 @@ exports[`LocalReport Basic 1`] = `
 
 exports[`LocalReport Next Qtr Accountabilities 1`] = `
 <div>
-  <h2>
-    ABC
-     - 
-    2017-04-07
-     
-    <button
-      className="btn btn-default"
-      onClick={[Function]}
-    >
-      Show Report Link
-    </button>
-  </h2>
   <div
-    className="row"
+    className="topLevelTitle"
   >
-    <div
-      className="col-sm-8"
-    >
-      <a
-        href="/home"
+    <h2>
+      ABC - Apr 7, 2017
+       
+      <button
+        className="btn btn-default reportTokenLink"
+        onClick={[Function]}
       >
-        « See All
-      </a>
-    </div>
+        Show Report Link
+      </button>
+    </h2>
     <div
-      className="col-sm-4"
-      style={
-        Object {
-          "textAlign": "right",
+      className="row goBackLink"
+    >
+      <div
+        className="col-sm-8"
+      >
+        <a
+          href="/home"
+        >
+          « See All
+        </a>
+      </div>
+      <div
+        className="col-sm-4"
+        style={
+          Object {
+            "textAlign": "right",
+          }
         }
-      }
-    >
-      <a
-        className="btn btn-default"
-        onClick={[Function]}
-        style={Object {}}
       >
-        « 
-        AAA
-      </a>
-      <a
-        className="btn btn-default"
-        onClick={[Function]}
-        style={Object {}}
-      >
-        DEF
-         »
-      </a>
+        <a
+          className="btn btn-default"
+          onClick={[Function]}
+          style={Object {}}
+        >
+          « 
+          AAA
+        </a>
+        <a
+          className="btn btn-default"
+          onClick={[Function]}
+          style={Object {}}
+        >
+          DEF
+           »
+        </a>
+      </div>
     </div>
   </div>
   <div>
     <ul
-      className="nav nav-tabs tabs-top brief-tabs"
+      className="nav nav-tabs tabs-top brief-tabs report-nav-level0"
       id="tabs"
     >
       <li
@@ -357,11 +361,13 @@ exports[`LocalReport Next Qtr Accountabilities 1`] = `
         <div
           style={Object {}}
         >
-          <h3>
+          <h3
+            className="groupingHeader"
+          >
             Weekend Information
           </h3>
           <div
-            className="btn-group grouping"
+            className="btn-group grouping report-nav-level1"
             role="group"
           >
             <button
