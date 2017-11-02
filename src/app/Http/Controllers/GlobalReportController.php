@@ -1196,13 +1196,11 @@ class GlobalReportController extends Controller
                     'final' => $centerData->getWeek($rq->endWeekendDate) ?? [],
                     'lastQuarter' => $lastQuarterScoreboard[$centerName] ?? [],
                     'lastYear' => $lastYearScoreboard[$centerName] ?? [],
+                    'rpp' => [
+                        'net' => $rpp['reportData'][$centerName]['rpp']['net']['quarter'],
+                        'gross' => $rpp['reportData'][$centerName]['rpp']['gross']['quarter'],
+                    ],
                 ];
-                if ($rpp['reportData'][$centerName]) {
-                    $regionData[$centerName]['rpp'] = [
-                        'net' => $rpp['reportData'][$centerName]['rpp']['net']['quarter'] ?? [],
-                        'gross' => $rpp['reportData'][$centerName]['rpp']['gross']['quarter'] ?? [],
-                    ];
-                }
             }
             ksort($regionData); // sort by center
 
