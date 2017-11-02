@@ -159,9 +159,8 @@ CREATE OR REPLACE VIEW `submission_data_team_members` AS
         case when `submission_data`.`data`->> '$.gitw'='true' then 1
              else 0 end AS `gitw`,
         case when `submission_data`.`data`->> '$.tdo'='true' then 1
-             when `submission_data`.`data`->> '$.tdo'=1 then 1
-             when `submission_data`.`data`->> '$.tdo'='1' then 1
-             else 0 end AS `tdo`,
+             when `submission_data`.`data`->> '$.tdo'='false' then 0
+             else `submission_data`.`data`->> '$.tdo' end AS `tdo`,
         case when `submission_data`.`data`->> '$.withdrawCode'='null' then null
              else `submission_data`.`data`->> '$.withdrawCode' end AS `withdrawCode`,
         case when `submission_data`.`data`->> '$.comment' = 'null' then NULL
