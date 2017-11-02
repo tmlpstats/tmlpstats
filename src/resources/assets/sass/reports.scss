@@ -19,3 +19,15 @@
         }
     }
 }
+
+.numeric-glyphicon {
+    font-size: 14pt;
+    font-weight: bold;
+
+    .success & {
+        color: $brand-success
+    }
+    .danger & {
+        color: $brand-danger
+    }
+}

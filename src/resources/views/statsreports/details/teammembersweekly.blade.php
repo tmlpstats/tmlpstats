@@ -31,7 +31,7 @@
                         @elseif ($data['value'])
                             <td class="data-point success">
                                 @if ($type === 'tdo')
-                                    <span class="glyphicon numeric-glyphicon">{{ $data['value'] }}</span>
+                                    <span class="numeric-glyphicon">{{ $data['value'] }}</span>
                                 @else
                                     <span class="glyphicon glyphicon-ok"></span>
                                 @endif
@@ -39,7 +39,7 @@
                         @else
                             <td class="data-point danger">
                                 @if ($type === 'tdo')
-                                    <span class="glyphicon numeric-glyphicon">{{ $data['value'] }}</span>
+                                    <span class="numeric-glyphicon">{{ $data['value'] }}</span>
                                 @else
                                     <span class="glyphicon glyphicon-remove"></span>
                                 @endif

@@ -36,7 +36,7 @@ export class TeamMembersIndex extends TeamMembersBase {
         }
 
         const baseUri = this.teamMembersBaseUri()
-        const { weeklySave, weeklyReporting: wr, teamMembers, sortedMembers , lookups } = this.props
+        const { weeklySave, weeklyReporting: wr, teamMembers, sortedMembers, lookups } = this.props
         var teamMemberRows = []
         var withdraws = []
         var members = []
@@ -84,12 +84,18 @@ export class TeamMembersIndex extends TeamMembersBase {
                 </div>
             )
         }
+
+        let tdoOptions = '"Y" "N"'
+        if (lookups.user.canSubmitMultipleTdos) {
+            tdoOptions = '0 - 10'
+        }
+
         return (
             <Form model={TEAM_MEMBERS_COLLECTION_FORM_KEY} onSubmit={this.saveWeeklyReporting}>
                 <h3>Class List</h3>
                 <Alert alert="info">
                     Tip: you can use the "tab" key to quickly jump through the GITW/TDO.
-                    <p>Set each one with the keyboard using "E" "I" for GITW and "Y" "N" for TDO.
+                    <p>Set each one with the keyboard using "E" "I" for GITW and {tdoOptions} for TDO.
                     You can quick-save the GITW/TDO by hitting the enter key.</p>
                 </Alert>
                 <ModeSelectButtons
