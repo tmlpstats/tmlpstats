@@ -159,6 +159,8 @@ CREATE OR REPLACE VIEW `submission_data_team_members` AS
         case when `submission_data`.`data`->> '$.gitw'='true' then 1
              else 0 end AS `gitw`,
         case when `submission_data`.`data`->> '$.tdo'='true' then 1
+             when `submission_data`.`data`->> '$.tdo'=1 then 1
+             when `submission_data`.`data`->> '$.tdo'='1' then 1
              else 0 end AS `tdo`,
         case when `submission_data`.`data`->> '$.withdrawCode'='null' then null
              else `submission_data`.`data`->> '$.withdrawCode' end AS `withdrawCode`,
@@ -170,7 +172,7 @@ CREATE OR REPLACE VIEW `submission_data_team_members` AS
         `submission_data` left outer join `team_members`
               on `submission_data`.stored_id=`team_members`.id
     WHERE
-        (`submission_data`.`stored_type` = 'team_member' 
+        (`submission_data`.`stored_type` = 'team_member'
           AND NOT JSON_CONTAINS_PATH(`submission_data`.`data`, 'one', '$.__deleted'));
 
 CREATE OR REPLACE VIEW submission_data_accountabilities AS
