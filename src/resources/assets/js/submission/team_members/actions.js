@@ -80,8 +80,14 @@ export function weeklyReportingSubmit(center, reportingDate, tracking, rawData) 
 }
 
 export function selectChangeAction(model, value) {
-    const newValue = (value === '') ? null : value
-    return formActions.change(model, newValue)
+    return (dispatch) => {
+        const newValue = (value === '') ? null : value
+        dispatch(formActions.change(model, newValue))
+
+        let bits = model.split('.')
+        bits.reverse() // the model looks like path.<teamMemberid>.tdo so if we reverse it, we get the right answer
+        dispatch(weeklyReportingUpdated(bits[1]))
+    }
 }
 
 export function setExitChoice(exitChoice) {
