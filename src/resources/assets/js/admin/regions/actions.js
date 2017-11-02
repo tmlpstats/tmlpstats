@@ -38,6 +38,7 @@ function initializeScoreboardLockData(centerId, quarterId, data) {
     return (dispatch) => {
         data = objectAssign({}, data, {centerId, quarterId, applyCenter: [centerId]})
         // TODO decide on center / quarter info being part of the key
+        console.log('got lock data', data)
         dispatch(scoreboardLockData.replaceCollection(data))
         dispatch(scoreboardLockData.loadState('loaded'))
     }

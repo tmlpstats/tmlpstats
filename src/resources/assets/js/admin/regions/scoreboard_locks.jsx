@@ -71,6 +71,18 @@ export class EditScoreboardLock extends RegionBase {
         const sbl = this.props.scoreboardLock.data
         const regionQuarter = annotatedRegionQuarter(rawRegionQuarter)
 
+        // Sanity check until we provide a reporting date management UI
+        if (!regionQuarter.reportingDates.length) {
+            return (
+                <Alert alert="danger">
+                    No reporting dates configured for this quarter! Check quarter setup,
+                    or contact Future Stats Team.
+                    <p><b>Region:</b> {params.regionAbbr}</p>
+                    <p><b>Quarter:</b> {params.quarterId}</p>
+                </Alert>
+            )
+        }
+
         const allLocks = []
         getLocksByDates(regionQuarter, sbl).forEach(({date, dateString, idx, rdLocks}) => {
             allLocks.push(
