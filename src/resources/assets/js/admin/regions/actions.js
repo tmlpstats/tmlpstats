@@ -1,6 +1,7 @@
 import { delayDispatch } from '../../reusable/dispatch'
 import { objectAssign } from '../../reusable/ponyfill'
 import { normalize } from 'normalizr'
+import { actions as formActions } from 'react-redux-form'
 
 import Api from '../../api'
 import { regionsData, centersData, scoreboardLockData, regionSchema } from './data'
@@ -53,4 +54,42 @@ export function saveScoreboardLocks(center, quarter, data, clear) {
             }
         })
     }
+}
+
+export function fullyLockWeek(week) {
+    return (dispatch, getState) => {
+        const { idx } = indexWeek(getState, week)
+        if (idx != -1){
+            dispatch(formActions.remove(`${scoreboardLockData.opts.model}.reportingDates`, idx))
+        }
+    }
+}
+
+export function unlockWeek(week, reportingDates) {
+    return (dispatch, getState) => {
+        const { idx } = indexWeek(getState, week)
+        if (idx == -1) {
+            let output = {
+                reportingDate: week,
+                weeks: reportingDates.map(week=>{
+                    return {
+                        week: week.format('YYYY-MM-DD'),
+                        editPromise: false
+                    }
+                })
+            }
+
+            dispatch(formActions.push(`${scoreboardLockData.opts.model}.reportingDates`, output))
+        }
+    }
+}
+
+function indexWeek(getState, week) {
+    const rds = getState().admin.regions.scoreboardLock.data.reportingDates
+    for (let i = 0; i <rds.length; i++) {
+        if (rds[i].reportingDate == week) {
+            return {idx: i, value: rds[i]}
+        }
+    }
+    return {idx: -1}
 }

@@ -1,4 +1,5 @@
 import Immutable from 'immutable'
+import moment from 'moment'
 import { createSelector, defaultMemoize } from 'reselect'
 
 import { objectAssign } from '../../reusable/ponyfill'
@@ -40,6 +41,40 @@ export const getQuarterTransitions = defaultMemoize((regionQuarter) => {
         [regionQuarter.classroom2Date]: true,
         [regionQuarter.classroom3Date]: true
     }
+})
+
+export const quarterReportingDates = createSelector(
+    (q) => q.firstWeekDate,
+    (q) => q.endWeekendDate,
+    (firstWeekDate, endWeekendDate) => {
+        const end = moment(endWeekendDate)
+        let output = []
+        let current = moment(firstWeekDate)
+        while (!current.isAfter(end)) {
+            output.push(current)
+            current = current.clone().add(1, 'week')
+        }
+        return output
+    }
+)
+
+export const annotatedRegionQuarter = defaultMemoize((regionQuarter) => {
+    const reportingDates = quarterReportingDates(regionQuarter)
+    const transitions = getQuarterTransitions(regionQuarter)
+
+    const annotatedDates = Immutable.OrderedMap().withMutations((m) => {
+        reportingDates.forEach(date => {
+            const dateString = date.format('YYYY-MM-DD')
+            const isMilestone = transitions[dateString] || false
+            m.set(dateString, {date, dateString, isMilestone})
+        })
+    })
+
+    return objectAssign({}, regionQuarter, {
+        reportingDates: reportingDates,
+        transitions: transitions,
+        annotatedDates: annotatedDates
+    })
 })
 
 function quarterYearKey(quarterNumber, year) {

@@ -79,7 +79,13 @@ class Setting extends Model
             $data['quarter_id'] = $quarter->id;
         }
 
-        $query = static::byCenter($center)->name($name);
+        if (($region = array_pull($data, 'region')) !== null) {
+            $data['region_id'] = $region->id;
+        }
+
+        $query = static::name($name);
+
+        $query = ($region !== null) ? $query->byRegion($region) : $query->byCenter($center);
 
         if ($quarter != null) {
             $query = $query->byQuarter($quarter);
