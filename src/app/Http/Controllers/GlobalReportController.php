@@ -1197,10 +1197,16 @@ class GlobalReportController extends Controller
                     'lastQuarter' => $lastQuarterScoreboard[$centerName] ?? [],
                     'lastYear' => $lastYearScoreboard[$centerName] ?? [],
                     'rpp' => [
-                        'net' => $rpp['reportData'][$centerName]['rpp']['net']['quarter'],
-                        'gross' => $rpp['reportData'][$centerName]['rpp']['gross']['quarter'],
+                        'net' => ['cap' => 0, 'cpc' => 0],
+                        'gross' => ['cap' => 0, 'cpc' => 0],
                     ],
                 ];
+                if (isset($rpp['reportData'][$centerName])) {
+                    $regionData[$centerName]['rpp'] = [
+                        'net' => $rpp['reportData'][$centerName]['rpp']['net']['quarter'],
+                        'gross' => $rpp['reportData'][$centerName]['rpp']['gross']['quarter'],
+                    ];
+                }
             }
             ksort($regionData); // sort by center
 
@@ -1213,10 +1219,16 @@ class GlobalReportController extends Controller
                 'lastQuarter' => $lastQuarterRegionScoreboard ?? [],
                 'lastYear' => $lastYearRegionScoreboard ?? [],
                 'rpp' => [
-                    'net' => $rpp['reportData']['Total']['rpp']['net']['quarter'],
-                    'gross' => $rpp['reportData']['Total']['rpp']['gross']['quarter'],
+                    'net' => ['cap' => 0, 'cpc' => 0],
+                    'gross' => ['cap' => 0, 'cpc' => 0],
                 ],
             ];
+            if (isset($rpp['reportData']['Total'])) {
+                $regionData['Total']['rpp'] = [
+                    'net' => $rpp['reportData']['Total']['rpp']['net']['quarter'],
+                    'gross' => $rpp['reportData']['Total']['rpp']['gross']['quarter'],
+                ];
+            }
 
             $reportData[$childRegion->name] = $regionData;
         }
