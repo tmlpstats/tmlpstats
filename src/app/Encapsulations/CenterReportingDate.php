@@ -79,7 +79,7 @@ class CenterReportingDate
     {
         $globalRegion = $this->center->getGlobalRegion();
         // TODO make this configurable in the future, but for this quarter, hard-coded to NA region
-        if ($globalRegion === null || $globalRegion->abbreviation != 'NA') {
+        if ($globalRegion === null) {
             return false;
         }
         $cq = $this->getCenterQuarter();
