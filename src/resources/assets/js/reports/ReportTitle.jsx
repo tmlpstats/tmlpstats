@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 import ReportTokenLink from './ReportTokenLink'
 
 export default class ReportTitle extends React.PureComponent {

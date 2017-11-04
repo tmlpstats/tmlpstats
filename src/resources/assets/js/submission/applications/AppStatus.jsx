@@ -1,6 +1,7 @@
 import _ from 'lodash'
-import React, { PropTypes, PureComponent, Component } from 'react'
+import React, { PureComponent, Component } from 'react'
 import { actions as formActions } from 'react-redux-form'
+import PropTypes from 'prop-types'
 
 import { Glyphicon } from '../../reusable/ui_basic'
 import { SimpleSelect, SimpleDateInput } from '../../reusable/form_utils'

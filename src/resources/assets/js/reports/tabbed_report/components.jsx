@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
-import React, { Component, PropTypes, PureComponent } from 'react'
+import React, { Component, PureComponent } from 'react'
+import PropTypes from 'prop-types'
 import Immutable from 'immutable'
 import { routerShape } from 'react-router/lib/PropTypes'
 
