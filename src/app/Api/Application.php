@@ -148,8 +148,8 @@ class Application extends AuthenticatedApiBase
             Domain\CenterQuarter::ensure($center, $next2),
         ];
 
-        // In the last 2 weeks of the quarter, we can also register into the next-next quarter.
-        if ($startQuarter->getQuarterEndDate($center)->copy()->subWeeks(2)->lt($reportingDate)) {
+        // In the last 3 weeks of the quarter, we can also register into the next-next quarter.
+        if ($startQuarter->getQuarterEndDate($center)->copy()->subWeeks(3)->lt($reportingDate)) {
             $quarters[] = Domain\CenterQuarter::ensure($center, $next2->getNextQuarter());
         }
 
