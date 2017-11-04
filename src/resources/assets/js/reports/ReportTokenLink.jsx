@@ -1,4 +1,5 @@
-import React,  {PropTypes } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 
 import { rebind, connectRedux } from '../reusable/dispatch'
 import { Modal } from '../reusable/ui_basic'

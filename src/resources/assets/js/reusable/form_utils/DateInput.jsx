@@ -1,6 +1,7 @@
 import moment from 'moment'
 import _ from 'lodash'
-import React, { PropTypes } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 import { actions as formActions, getField } from 'react-redux-form'
 import { SingleDatePicker } from 'react-dates'
 

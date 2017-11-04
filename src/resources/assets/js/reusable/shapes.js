@@ -1,5 +1,4 @@
-import { PropTypes } from 'react'
-/// Some React PropTypes shapes
+import PropTypes from 'prop-types'
 
 export const loadStateShape = PropTypes.shape({
     state: PropTypes.string.isRequired,

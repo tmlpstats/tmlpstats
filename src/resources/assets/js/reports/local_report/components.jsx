@@ -1,4 +1,5 @@
-import React, { Component, PureComponent, PropTypes } from 'react'
+import React, { Component, PureComponent } from 'react'
+import PropTypes from 'prop-types'
 import { Link } from 'react-router'
 import { defaultMemoize } from 'reselect'
 import moment from 'moment'

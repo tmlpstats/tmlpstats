@@ -1,5 +1,6 @@
-import React, { PropTypes } from 'react'
+import React from 'react'
 import { Link } from 'react-router'
+import PropTypes from 'prop-types'
 
 import { Form, BooleanSelectView, SimpleSelect, connectCustomField, AddOneLink } from '../../reusable/form_utils'
 import { ModeSelectButtons, ButtonStateFlip, Alert } from '../../reusable/ui_basic'
