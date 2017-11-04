@@ -216,7 +216,7 @@ class SubmissionData extends AuthenticatedApiBase
     // Return a simple ID for generation purposes that is not likely to be used.
     public function generateId()
     {
-        return 0 - time();
+        return 0 - mt_rand(10000000000, 99999999999);
     }
 
     /**
