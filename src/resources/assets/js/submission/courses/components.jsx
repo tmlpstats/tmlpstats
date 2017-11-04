@@ -12,7 +12,7 @@ import { ModeSelectButtons, ButtonStateFlip, MessagesComponent, scrollIntoView }
 
 import { COURSES_FORM_KEY } from './reducers'
 import { coursesSorts, coursesCollection, courseTypeMap, BLANK_COURSE } from './data'
-import { loadCourses, saveCourse, chooseCourse } from './actions'
+import * as actions from './actions'
 
 const getSortedCourses = collectionSortSelector(coursesSorts)
 
@@ -27,7 +27,7 @@ class CoursesBase extends SubmissionBase {
         const { loading, params } = this.props
         if (loading.state == 'new') {
             const { centerId, reportingDate } = params
-            delayDispatch(this, loadCourses(centerId, reportingDate))
+            delayDispatch(this, actions.loadCourses(centerId, reportingDate))
         }
         return (loading.state == 'loaded')
     }
@@ -154,7 +154,7 @@ class CoursesIndexView extends CoursesBase {
 class _EditCreate extends CoursesBase {
     constructor(props) {
         super(props)
-        rebind(this, 'saveCourseData')
+        rebind(this, 'saveCourseData', 'toggleQuarterStartEditable')
     }
 
     render() {
@@ -237,7 +237,7 @@ class _EditCreate extends CoursesBase {
     }
     // saveCourseData for now is the same between edit and create flows
     saveCourseData(data) {
-        this.props.dispatch(saveCourse(this.props.params.centerId, this.reportingDateString(), data)).then((result) => {
+        this.props.dispatch(actions.saveCourse(this.props.params.centerId, this.reportingDateString(), data)).then((result) => {
             if (!result) {
                 return
             }
@@ -253,7 +253,7 @@ class _EditCreate extends CoursesBase {
                 this.props.router.push(this.baseUri() + '/courses')
             }
 
-            this.props.dispatch(chooseCourse(this.getCourseById(result.storedId)))
+            this.props.dispatch(actions.chooseCourse(this.getCourseById(result.storedId)))
         })
     }
 
@@ -331,7 +331,30 @@ class _EditCreate extends CoursesBase {
         }
         return completionFields
     }
+
+    toggleQuarterStartEditable() {
+        if (confirm('You usually should not need to update the quarter starting stats. Are you sure you want to edit them?')) {
+            this.props.dispatch(actions.setQuarterStartEditable(!this.props.qstartEditable))
+        }
+    }
+
     getCurrentBalanceFields(modelKey, qstartState, currentState) {
+        let qStartEditRow
+        if (qstartState == 'visible' && !this.props.qstartEditable) {
+            qStartEditRow = (
+                <div className="row">
+                    <div className="col-md-12">
+                        <div className="form-group">
+                            <div className="col-md-2 col-md-offset-2">
+                                <Link onClick={this.toggleQuarterStartEditable}>Edit</Link>
+                            </div>
+                            <div className="col-md-2"></div>
+                        </div>
+                    </div>
+                </div>
+            )
+            qstartState = 'disabled'
+        }
 
         const rows = []
         const rowData = [
@@ -381,8 +404,8 @@ class _EditCreate extends CoursesBase {
                     </div>
                 </div>
                 </div>
-
                 {rows}
+                {qStartEditRow}
             </div>
             </div>
         )
@@ -398,7 +421,7 @@ class CoursesEditView extends _EditCreate {
         if (!currentCourse || currentCourse.id != courseId) {
             let course = this.getCourseById(courseId)
             if (course) {
-                delayDispatch(this, chooseCourse(course))
+                delayDispatch(this, actions.chooseCourse(course))
                 return false
             }
         }
@@ -418,7 +441,7 @@ class CoursesAddView extends _EditCreate {
         const { currentCourse } = this.props
         if (!currentCourse || currentCourse.id) {
 
-            delayDispatch(this, chooseCourse(BLANK_COURSE))
+            delayDispatch(this, actions.chooseCourse(BLANK_COURSE))
             return false
         }
         return true

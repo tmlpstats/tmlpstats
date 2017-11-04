@@ -55,9 +55,13 @@ class CourseData extends Model
         }
     }
 
-    public function scopeByCourse($query, Course $course)
+    public function scopeByCourse($query, $course)
     {
-        return $query->whereCourseId($course->id);
+        if ($course instanceof Course) {
+            $course = $course->id;
+        }
+
+        return $query->whereCourseId($course);
     }
 
     public function scopeByStatsReport($query, $statsReport)

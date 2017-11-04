@@ -8,7 +8,7 @@ import Api from '../../api'
 import { markStale } from '../review/actions'
 
 import { coursesCollection, coursesLoad, saveCourseLoad, messages } from './data'
-import { COURSES_FORM_KEY } from './reducers'
+import { COURSES_FORM_KEY, COURSES_QSTART_EDITABLE } from './reducers'
 
 export const loadState = coursesLoad.actionCreator()
 export const saveCourseState = saveCourseLoad.actionCreator()
@@ -42,7 +42,14 @@ export function initializeCourses(data) {
 }
 
 export function chooseCourse(data) {
-    return formActions.load(COURSES_FORM_KEY, data)
+    return (dispatch) => {
+        dispatch(formActions.load(COURSES_FORM_KEY, data))
+        dispatch(setQuarterStartEditable(false)) // Off be default
+    }
+}
+
+export function setQuarterStartEditable(data) {
+    return formActions.load(COURSES_QSTART_EDITABLE, data)
 }
 
 export function saveCourse(center, reportingDate, data) {

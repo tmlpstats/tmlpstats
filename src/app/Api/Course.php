@@ -137,6 +137,18 @@ class Course extends ApiBase
         $cq = Encapsulations\CenterReportingDate::ensure($center, $reportingDate)->getCenterQuarter();
 
         $isFirstWeek = $reportingDate->eq($cq->firstWeekDate);
+        // Check if this is the first week the course was added (even if there was a prior submission)
+        if (!$isFirstWeek && $course->id >= 0) {
+            $courseData = Models\CourseData::byCourse($course->id)->with('statsReport')->get();
+            $hasPriorWeekData = false;
+            foreach ($courseData as $week) {
+                if ($week->statsReport->reportingDate->ne($reportingDate)) {
+                    $hasPriorWeekData = true;
+                    break;
+                }
+            }
+            $isFirstWeek = !$hasPriorWeekData;
+        }
         $courseReportDate = $course->startDate->copy()->next(Carbon::FRIDAY);
         $isPastCourse = $reportingDate->gt($courseReportDate);
         $isCompletionWeek = $reportingDate->eq($courseReportDate);
