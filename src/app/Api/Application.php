@@ -134,6 +134,7 @@ class Application extends AuthenticatedApiBase
         if ($startQuarter == null) {
             $startQuarter = Models\Quarter::getQuarterByDate($reportingDate, $center->region);
         }
+        $thisQuarter = $startQuarter;
 
         // Probably not needed, but might as well, for looking at previous quarters.
         while ($reportingDate->gt($startQuarter->getQuarterEndDate($center))) {
@@ -148,8 +149,9 @@ class Application extends AuthenticatedApiBase
             Domain\CenterQuarter::ensure($center, $next2),
         ];
 
-        // In the last 2 weeks of the quarter, we can also register into the next-next quarter.
-        if ($startQuarter->getQuarterEndDate($center)->copy()->subWeeks(2)->lt($reportingDate)) {
+        // In the last N weeks of the quarter, we can also register into the next-next quarter.
+        $weeks = $this->context->getSetting('appRegFutureQuarterWeeks', $center->getGlobalRegion(), $thisQuarter) ?? 3;
+        if ($startQuarter->getQuarterEndDate($center)->copy()->subWeeks($weeks)->lt($reportingDate)) {
             $quarters[] = Domain\CenterQuarter::ensure($center, $next2->getNextQuarter());
         }
 
