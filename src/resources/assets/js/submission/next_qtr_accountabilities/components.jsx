@@ -9,6 +9,7 @@ import { rebind, connectRedux, delayDispatch } from '../../reusable/dispatch'
 import { loadStateShape } from '../../reusable/shapes'
 
 import { conditionalLoadApplications } from '../applications/actions'
+import { conditionalLoadTeamMembers } from '../team_members/actions'
 import { appsCollection } from '../applications/data'
 import { getLabelTeamMember } from '../core/selectors'
 import * as selectors from './selectors'
@@ -72,7 +73,10 @@ export class QuarterAccountabilitiesTable extends Component {
         const { loadState } = this.props.nqa
         if (!loadState.loaded) {
             const { centerId: center, reportingDate } = this.props.params
-            delayDispatch(this, conditionalLoadApplications(center, reportingDate))
+            delayDispatch(this,
+                conditionalLoadApplications(center, reportingDate),
+                conditionalLoadTeamMembers(center, reportingDate)
+            )
             return qtrAccountabilitiesData.conditionalLoad(this.props.dispatch, loadState, {center, reportingDate})
         }
         return true
@@ -327,7 +331,7 @@ class PersonInput extends PureComponent {
             mainView = (
                 <Select
                         model={model+'.teamMember'} items={people.orderedTeamMembers}
-                        keyProp="teamMemberId" getLabel={getLabelTeamMember}
+                        keyProp="id" getLabel={getLabelApp}
                         changeAction={this.changeTeamMember} emptyChoice=" " />
             )
             break
@@ -359,13 +363,13 @@ class PersonInput extends PureComponent {
     }
 
     changeTeamMember(fieldModel, tmId) {
-        const tmd = this.props.people.teamMembers[tmId]
+        const tmd = this.props.people.teamMembers.get(parseInt(tmId))
         let toUpdate = {
             teamMember: tmId,
             application: null,
-            name: getLabelTeamMember(tmd)
+            name: getLabelApp(tmd)
         }
-        updateEmailPhone(toUpdate, tmd.teamMember.person)
+        updateEmailPhone(toUpdate, tmd)
         return formActions.merge(this.props.model, toUpdate)
     }
 

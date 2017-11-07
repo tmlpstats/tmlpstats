@@ -1,8 +1,10 @@
 import _ from 'lodash'
+import Immutable from 'immutable'
 import { createSelector } from 'reselect'
 
 import { makeAccountabilitiesSelector } from '../core/selectors'
 import { appsCollection } from '../applications/data'
+import { teamMembersData } from '../team_members/data'
 
 const accSelector = makeAccountabilitiesSelector('team')
 
@@ -30,17 +32,23 @@ export const repromisableAccountabilities = createSelector(
 )
 
 export const selectablePeople = createSelector(
-    (state) => state.submission.core.lookups.team_members,
+    (state) => state.submission.team_members.teamMembers,
     (state) => state.submission.applications.applications,
-    (team_members, applications) => {
-        let teamMembersLookup = _.keyBy(team_members, 'teamMemberId') // yuck, old data format. Fix soon please.
+    (tmd, applications) => {
+        const rawSorted = teamMembersData.opts.getSortedMembers(tmd)
+        const orderedTeamMembers = Immutable.List(rawSorted)
+            .filter(x => parseInt(x.id) > 0)
+
+        const teamMembers = Immutable.Map(orderedTeamMembers.map(x => [x.id, x]))
+
+
         let orderedApplications = []
         if (applications && applications.data) {
             orderedApplications = appsCollection.opts.getSortedApplications(applications)
         }
         return {
-            teamMembers: teamMembersLookup,
-            orderedTeamMembers: team_members,
+            teamMembers: teamMembers,
+            orderedTeamMembers,
             applications: applications.data,
             orderedApplications,
         }
