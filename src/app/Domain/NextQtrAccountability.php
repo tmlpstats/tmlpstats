@@ -32,10 +32,12 @@ class NextQtrAccountability extends ParserDomain
         'email' => [
             'owner' => 'qtrAccountability',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         'phone' => [
             'owner' => 'qtrAccountability',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         'notes' => [
             'owner' => 'qtrAccountability',

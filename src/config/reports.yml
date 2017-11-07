@@ -745,7 +745,7 @@ reportMeta:
             name: Next Quarter Accountabilities
             shortName: Accountabilities
             requiredFlags: ['nextQtrAccountabilities']
-            cacheTime: 2
+            cacheTime: 0
             render: react
           Reconciliation:
             name: Weekend Reconciliation

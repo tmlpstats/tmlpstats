@@ -153,9 +153,9 @@ class SubmissionData extends AuthenticatedApiBase
         $conf = $this->combinedTypeMapping[$type];
         $className = $conf['class'];
 
-        $result = Models\SubmissionData::centerDate($center, $reportingDate)->type($conf['key'])->storedId($id)->get();
+        $result = Models\SubmissionData::centerDate($center, $reportingDate)->typeId($conf['key'], $id)->first();
         if ($result != null) {
-            return $className::fromArray($row->data);
+            return $className::fromArray($result->data);
         }
     }
 

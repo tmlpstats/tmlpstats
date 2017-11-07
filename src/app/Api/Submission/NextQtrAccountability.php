@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Api\Exceptions;
-use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
 use TmlpStats\Encapsulations;
 
@@ -49,14 +48,36 @@ class NextQtrAccountability
 
         $submissionData->store($center, $reportingDate, $nqa);
 
-        if ($person = $this->getPerson($nqa)) {
+        // Merge email and phone into an object. Used to update local stashes.
+        $mergeit = function ($obj) use ($data) {
             if ($data['phone'] ?? false) {
-                $person->phone = $data['phone'];
+                $obj->phone = $data['phone'];
             }
             if ($data['email'] ?? false) {
-                $person->email = $data['email'];
+                $obj->email = $data['email'];
             }
+        };
+
+        // Update person object if relevant.
+        if ($person = $this->getPerson($nqa)) {
+            $mergeit($person);
             $person->save();
+        }
+
+        // Update TeamMember stash if one already exists.
+        if ($nqa->teamMemberId) {
+            if ($tmd = $submissionData->get($center, $reportingDate, Domain\TeamMember::class, $nqa->teamMemberId)) {
+                $mergeit($tmd);
+                $submissionData->store($center, $reportingDate, $tmd);
+            }
+        }
+
+        // Update Application stash if one already exists.
+        if ($nqa->applicationId) {
+            if ($app = $submissionData->get($center, $reportingDate, Domain\TeamApplication::class, $nqa->applicationId)) {
+                $mergeit($app);
+                $submissionData->store($center, $reportingDate, $app);
+            }
         }
 
         // currently no validation exists
