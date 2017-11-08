@@ -953,14 +953,15 @@ class SubmissionCore extends AuthenticatedApiBase
         // Phase 2: Copy non-starting Team Expansion
         $appsApi = App::make(Api\Application::class);
         $applications = $appsApi->allForCenter($center, $lastWeek->reportingDate, true);
+        $newTeamMembers = [];
 
         foreach ($applications as $id => $app) {
             $personInfo = "{$app->firstName} {$app->lastName} ({$app->id})";
             if ($app->withdrawCode === null) {
                 $data = collect($app->toArray())->except(['travel', 'room']);
                 if ($app->apprDate !== null && $app->incomingQuarterId == $quarter->id) {
-                    // TODO copy applicants to stashed negative ID team members
-                    $report[] = "Applicant {$personInfo} should be turned into a team member";
+                    // Save application to turn them into a team member in Phase 4.
+                    $newTeamMembers[] = $data->all();
                 } else {
                     $data = $data->all(); // ->all() on a collection returns the underlying array
                     if (!array_key_exists($app->committedTeamMemberId, $goodTeamMembers) && $app->committedTeamMember) {
@@ -994,6 +995,24 @@ class SubmissionCore extends AuthenticatedApiBase
             }
         }
 
+        // Phase 4: Copy starting Team Expansion
+        if (!empty($newTeamMembers)) {
+            $report[] = "Number of Team Expansion to copy as new Team Members: " .
+                    count($newTeamMembers);
+            foreach ($newTeamMembers as $index => $newTeamMember) {
+                $logLine = "Team Member from Team Expansion {$newTeamMember['firstName']} {$newTeamMember['lastName']}";
+                $newTeamMember['id'] = -1 - $index; // Needs to be unique negative number.
+                unset($newTeamMember['comment']);
+                $result = $tmApi->stash($center, $cq->firstWeekDate, $newTeamMember);
+                if ($result['success']) {
+                    $report[] = "Copied $logLine";
+                } else {
+                    $report[] = "Could not copy $logLine";
+                }
+            }
+        } else {
+            $report[] = "No new team members to copy from Team Expansion";
+        }
         return compact('report', 'validStartQids');
     }
 
