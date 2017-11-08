@@ -29,6 +29,7 @@ class TeamMember extends ParserDomain
         'phone' => [
             'owner' => 'person',
             'type' => 'string',
+            'options' => ['trim' => true],
         ],
         'email' => [
             'owner' => 'person',
