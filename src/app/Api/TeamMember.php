@@ -102,7 +102,7 @@ class TeamMember extends AuthenticatedApiBase
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $domain, $teamMemberId, $pastWeeks);
 
-        if (!isset($data['_idGenerated']) || $validationResults['valid']) {
+        if (!isset($data['_idGenerated']) || $validationResults['valid'] || isset($data['_alwaysStash'])) {
             $submissionData->store($center, $reportingDate, $domain);
         } else {
             return [
