@@ -49,12 +49,12 @@ class NextQtrAccountability
         $submissionData->store($center, $reportingDate, $nqa);
 
         // Merge email and phone into an object. Used to update local stashes.
-        $mergeit = function ($obj) use ($data) {
-            if ($data['phone'] ?? false) {
-                $obj->phone = $data['phone'];
+        $mergeit = function ($obj) use ($nqa) {
+            if ($nqa->phone ?? false) {
+                $obj->phone = $nqa->phone;
             }
-            if ($data['email'] ?? false) {
-                $obj->email = $data['email'];
+            if ($nqa->email ?? false) {
+                $obj->email = $nqa->email;
             }
         };
 
