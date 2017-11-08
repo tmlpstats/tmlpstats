@@ -39,7 +39,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
             role="group"
           >
             <button
-              className="btn btn-default"
+              className="btn btn-default active"
               onClick={[Function]}
               type="button"
             >
@@ -68,12 +68,39 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Person
+          Team Member
         </label>
         <div
           className="col-md-8"
         >
-          <div />
+          <div>
+            <div
+              className="alert alert-info"
+            >
+              <span
+                aria-hidden="true"
+                className="glyphicon glyphicon-info-sign"
+              />
+              You must select 
+              a team member
+               below to proceed
+            </div>
+            <select
+              name="submission.next_qtr_accountabilities.data.6.teamMember"
+              value={789}
+            >
+              <option
+                value=""
+              >
+                 
+              </option>
+              <option
+                value={789}
+              >
+                TM1 TM1Last
+              </option>
+            </select>
+          </div>
         </div>
       </div>
       <div
@@ -342,7 +369,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
               Current Team Member
             </button>
             <button
-              className="btn btn-default"
+              className="btn btn-default active"
               onClick={[Function]}
               type="button"
             >
@@ -364,12 +391,39 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Person
+          Incoming T1/T2
         </label>
         <div
           className="col-md-8"
         >
-          <div />
+          <div>
+            <div
+              className="alert alert-info"
+            >
+              <span
+                aria-hidden="true"
+                className="glyphicon glyphicon-info-sign"
+              />
+              You must select 
+              an application
+               below to proceed
+            </div>
+            <select
+              name="submission.next_qtr_accountabilities.data.4.application"
+              value={123}
+            >
+              <option
+                value=""
+              >
+                 
+              </option>
+              <option
+                value={123}
+              >
+                Person1 Person1Last
+              </option>
+            </select>
+          </div>
         </div>
       </div>
       <div
@@ -645,7 +699,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
               Incoming T1/T2
             </button>
             <button
-              className="btn btn-default"
+              className="btn btn-default active"
               onClick={[Function]}
               type="button"
             >
@@ -660,12 +714,28 @@ exports[`NQA Should Render As Snapshot 1`] = `
         <label
           className="col-md-2 control-label"
         >
-          Person
+          Other
         </label>
         <div
           className="col-md-8"
         >
-          <div />
+          <div>
+            <div
+              className="alert alert-info"
+            >
+              <span
+                aria-hidden="true"
+                className="glyphicon glyphicon-info-sign"
+              />
+              "Other" is only used in special situations, if the person who will be this accountability is someone not currently incoming or on this team.
+            </div>
+            <input
+              className="testing-control form-control"
+              name="submission.next_qtr_accountabilities.data.5.name"
+              type="text"
+              value="Person Name"
+            />
+          </div>
         </div>
       </div>
       <div
@@ -683,7 +753,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqEmail"
             name="submission.next_qtr_accountabilities.data.5.email"
             type="text"
-            value={undefined}
+            value="Person@email.com"
           />
         </div>
       </div>
@@ -702,7 +772,7 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqPhone"
             name="submission.next_qtr_accountabilities.data.5.phone"
             type="text"
-            value={undefined}
+            value="111-222-3333"
           />
         </div>
       </div>
@@ -1636,4 +1706,30 @@ exports[`NQA Should Render As Snapshot 1`] = `
     </div>
   </div>
 </form>
+`;
+
+exports[`NQA Should display loading screen 1`] = `
+<div>
+  <h3>
+    Next Quarter Accountabilities
+  </h3>
+  <div
+    className="alert alert-info"
+  >
+    <span
+      aria-hidden="true"
+      className="glyphicon glyphicon-info-sign"
+    />
+    After classroom 3: teams 
+    <b>
+      must
+    </b>
+     fill out the following 4 accountabilities for the upcoming quarter: Team 1 Team Leader, Team 2 Team Leader, Statistician, Logistics.
+    <br />
+    We request you fill out other accountabilities as soon as you know them; this greatly helps the weekend teams with setting up the accountability clinics.
+  </div>
+  <div>
+    Loading
+  </div>
+</div>
 `;

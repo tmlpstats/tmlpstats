@@ -2,12 +2,15 @@ import _ from 'lodash'
 import PropTypes from 'prop-types'
 import React, { Component, PureComponent } from 'react'
 
+import { objectAssign } from '../../reusable/ponyfill'
 import { Form, formActions, SimpleFormGroup, NullableTextControl, Select } from '../../reusable/form_utils'
 import { Alert, Panel, SubmitFlip, ModeSelectButtons, ButtonStateFlip } from '../../reusable/ui_basic'
 import { rebind, connectRedux, delayDispatch } from '../../reusable/dispatch'
 import { loadStateShape } from '../../reusable/shapes'
 
 import { conditionalLoadApplications } from '../applications/actions'
+import { conditionalLoadTeamMembers } from '../team_members/actions'
+import { appsCollection } from '../applications/data'
 import { getLabelTeamMember } from '../core/selectors'
 import * as selectors from './selectors'
 import * as actions from './actions'
@@ -70,7 +73,10 @@ export class QuarterAccountabilitiesTable extends Component {
         const { loadState } = this.props.nqa
         if (!loadState.loaded) {
             const { centerId: center, reportingDate } = this.props.params
-            delayDispatch(this, conditionalLoadApplications(center, reportingDate))
+            delayDispatch(this,
+                conditionalLoadApplications(center, reportingDate),
+                conditionalLoadTeamMembers(center, reportingDate)
+            )
             return qtrAccountabilitiesData.conditionalLoad(this.props.dispatch, loadState, {center, reportingDate})
         }
         return true
@@ -147,7 +153,23 @@ export class QuarterAccountabilitiesTable extends Component {
         let toSave = []
         for (let key in data) {
             if (!original || original[key] !== data[key]) {
-                toSave.push(data[key])
+                let nqa = data[key]
+
+                // TECH DEBT: Copy value for email and phone over to appropriate place
+                if (nqa.phone || nqa.email) {
+                    // Copy data back to the in-memory version of the stashes so they 'stick'
+                    let toUpdate = {phone: nqa.phone, email: nqa.email}
+                    if (nqa.application) {
+                        let appData = this.props.people.applications[nqa.application]
+                        if (appData) {
+                            let fixedApp = objectAssign({}, appData, toUpdate)
+                            this.props.dispatch(appsCollection.replaceItem(nqa.application, fixedApp))
+                        }
+                    } else if (nqa.teamMember) {
+                        this.props.dispatch(formActions.merge(`submission.team_members.teamMembers.data[${nqa.teamMember}]`, toUpdate))
+                    }
+                }
+                toSave.push(nqa)
             }
         }
         if (toSave.length) {
@@ -217,7 +239,7 @@ class QuarterAccountabilitiesRow extends PureComponent {
         const modeSelect = <ModeSelectButtons items={PERSON_MODES} current={mode} onClick={this.changeMode} />
 
         const tmSelectField = (
-            <PersonInput model={model} people={this.props.people} entry={this.props.entry} />
+            <PersonInput model={model} people={this.props.people} entry={entry} />
         )
         const emailField = <NullableTextControl model={model+'.email'} className="form-control nqEmail" disabled={!entry.name} />
         const phoneField = <NullableTextControl model={model+'.phone'} className="form-control nqPhone" disabled={!entry.name} />
@@ -309,7 +331,7 @@ class PersonInput extends PureComponent {
             mainView = (
                 <Select
                         model={model+'.teamMember'} items={people.orderedTeamMembers}
-                        keyProp="teamMemberId" getLabel={getLabelTeamMember}
+                        keyProp="id" getLabel={getLabelApp}
                         changeAction={this.changeTeamMember} emptyChoice=" " />
             )
             break
@@ -341,13 +363,13 @@ class PersonInput extends PureComponent {
     }
 
     changeTeamMember(fieldModel, tmId) {
-        const tmd = this.props.people.teamMembers[tmId]
+        const tmd = this.props.people.teamMembers.get(parseInt(tmId))
         let toUpdate = {
             teamMember: tmId,
             application: null,
-            name: getLabelTeamMember(tmd)
+            name: getLabelApp(tmd)
         }
-        this.updateEmailPhone(toUpdate, tmd.teamMember.person)
+        updateEmailPhone(toUpdate, tmd)
         return formActions.merge(this.props.model, toUpdate)
     }
 
@@ -358,21 +380,8 @@ class PersonInput extends PureComponent {
             teamMember: null,
             name: getLabelApp(application)
         }
-        this.updateEmailPhone(toUpdate, application)
+        updateEmailPhone(toUpdate, application)
         return formActions.merge(this.props.model, toUpdate)
-    }
-
-    updateEmailPhone(toUpdate, input) {
-        if (input) {
-            EMAIL_PHONE.forEach((k) => {
-                // only obliterate email and phone if they exist
-                if (input[k]) {
-                    toUpdate[k] = input[k]
-                } else {
-                    toUpdate[k] = ''
-                }
-            })
-        }
     }
 }
 
@@ -393,3 +402,16 @@ function currentMode(entry) {
         }
     }
 }
+
+function updateEmailPhone(toUpdate, input) {
+        if (input) {
+            EMAIL_PHONE.forEach((k) => {
+                // only obliterate email and phone if they exist
+                if (input[k]) {
+                    toUpdate[k] = input[k]
+                } else {
+                    toUpdate[k] = ''
+                }
+            })
+        }
+    }

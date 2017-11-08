@@ -12,6 +12,14 @@ import { determineExitChoice, exitChoiceMerges } from './exit_choice'
 
 const weeklySaveState = weeklyReportingSave.actionCreator()
 
+export function conditionalLoadTeamMembers(centerId, reportingDate) {
+    return (dispatch, getState) => {
+        if (getState().submission.team_members.teamMembers.loadState.state == 'new') {
+            return dispatch(loadTeamMembers(centerId, reportingDate))
+        }
+    }
+}
+
 export function loadTeamMembers(centerId, reportingDate) {
     const params = {
         center: centerId,
@@ -23,7 +31,7 @@ export function loadTeamMembers(centerId, reportingDate) {
     })
 }
 
-function initializeTeamMembers(data) {
+export function initializeTeamMembers(data) {
     return (dispatch, getState) => {
         const state = getState()
         _.forEach(data, (teamMember) => {
@@ -36,7 +44,6 @@ function initializeTeamMembers(data) {
         data = _.keyBy(data, 'id')
 
         dispatch(formActions.load(TEAM_MEMBERS_COLLECTION_FORM_KEY, data))
-        dispatch(teamMembersData.loadState('loaded'))
     }
 }
 

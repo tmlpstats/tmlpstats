@@ -1,3 +1,4 @@
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
@@ -117,7 +118,10 @@ export class Select extends React.PureComponent {
         getKey: PropTypes.func,
         getLabel: PropTypes.func,
         id: PropTypes.string,
-        items: PropTypes.arrayOf(PropTypes.object).isRequired,
+        items: PropTypes.oneOfType([
+            PropTypes.arrayOf(PropTypes.object),
+            ImmutablePropTypes.listOf(PropTypes.object)
+        ]).isRequired,
         keyProp: PropTypes.string,
         labelProp: PropTypes.string,
         model: PropTypes.string,
@@ -333,9 +337,14 @@ if (process.env.NODE_ENV == 'test') {
         return <textarea name={props.model} value={props.modelValue} className='testing-control' />
     }
 
+    function selectFake(props) {
+        return <select name={props.model} value={props.modelValue}>{props.children}</select>
+    }
+
     Control = makeInputFake('text')
     Control.checkbox = makeInputFake('checkbox')
     Control.text = makeInputFake('text')
     Control.textarea = connectCustomField(textareaFake)
+    Control.select = connectCustomField(selectFake)
 }
 export { Control }
