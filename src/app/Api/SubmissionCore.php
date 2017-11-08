@@ -961,14 +961,23 @@ class SubmissionCore extends AuthenticatedApiBase
                 $data = collect($app->toArray())->except(['travel', 'room']);
                 if ($app->apprDate !== null && $app->incomingQuarterId == $quarter->id) {
                     // Save application to turn them into a team member in Phase 4.
-                    $newTeamMembers[] = $data->all();
+                    // Only grab the data we want to copy over to the team member
+                    $newTeamMembers[] = $data->only([
+                        'firstName',
+                        'lastName',
+                        'center',
+                        'email',
+                        'phone',
+                        'teamYear',
+                        'incomingQuarter',
+                        'isReviewer',
+                    ])->all();
                 } else {
                     $data = $data->all(); // ->all() on a collection returns the underlying array
                     if (!array_key_exists($app->committedTeamMemberId, $goodTeamMembers) && $app->committedTeamMember) {
                         $ctm = $app->committedTeamMember->person;
                         $personInfo .= " NOTE: Had committed team member {$ctm->firstName} {$ctm->lastName} who completed.";
                         unset($data['committedTeamMember']);
-                        // $data['comment'] = "AUTOMATED NOTE FROM SYSTEM:\napplicant was copied over from previous quarter's stats. Committed team member {$ctm->firstName} {$ctm->lastName} has completed team. Please pick new committed team member, and then clear this note.";
                     }
 
                     $appsApi->stash($center, $cq->firstWeekDate, $data);
@@ -1001,8 +1010,8 @@ class SubmissionCore extends AuthenticatedApiBase
                     count($newTeamMembers);
             foreach ($newTeamMembers as $index => $newTeamMember) {
                 $logLine = "Team Member from Team Expansion {$newTeamMember['firstName']} {$newTeamMember['lastName']}";
-                $newTeamMember['id'] = -1 - $index; // Needs to be unique negative number.
-                unset($newTeamMember['comment']);
+                $newTeamMember['_alwaysStash'] = true; // stash even though validation will fail because we're missing tdo/gitw
+                $newTeamMember['atWeekend'] = true;
                 $result = $tmApi->stash($center, $cq->firstWeekDate, $newTeamMember);
                 if ($result['success']) {
                     $report[] = "Copied $logLine";
