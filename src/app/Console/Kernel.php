@@ -20,6 +20,7 @@ class Kernel extends ConsoleKernel
         Commands\SanitizeDb::class,
         Commands\MergeDuplicatePeople::class,
         Commands\FlushCacheTagCommand::class,
+        Commands\SendTestEmailCommand::class,
     ];
 
     /**
