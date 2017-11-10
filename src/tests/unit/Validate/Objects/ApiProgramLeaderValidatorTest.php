@@ -28,6 +28,7 @@ class ApiProgramLeaderValidatorTest extends ApiValidatorTestAbstract
         $this->statsReport->center = null;
 
         $this->setSetting('bouncedEmails', '');
+        $this->setSetting('travelDueByDate', 'classroom2Date');
 
         $this->dataTemplate = [
             'firstName' => 'Keith',
@@ -93,10 +94,6 @@ class ApiProgramLeaderValidatorTest extends ApiValidatorTestAbstract
                     $this->getMessageData($this->messageTemplate, [
                         'id' => 'GENERAL_MISSING_VALUE',
                         'reference.field' => 'accountability',
-                    ]),
-                    $this->getMessageData($this->messageTemplate, [
-                        'id' => 'GENERAL_MISSING_VALUE',
-                        'reference.field' => 'attendingWeekend',
                     ]),
                 ],
                 false,
@@ -206,6 +203,66 @@ class ApiProgramLeaderValidatorTest extends ApiValidatorTestAbstract
                     ]),
                 ],
                 true,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerValidateTravel
+     */
+    public function testValidateTravel($data, $expectedMessages, $expectedResult)
+    {
+        $data = $this->getProgramLeader($data);
+
+        $validator = $this->getObjectMock();
+        $result = $validator->run($data);
+
+        $this->assertMessages($expectedMessages, $validator->getMessages());
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    public function providerValidateTravel()
+    {
+        return [
+            // validateTravel Passes When Before Second Classroom
+            [
+                [
+                    'attendingWeekend' => null,
+                    '__reportingDate' => Carbon::parse('2016-09-02'),
+                ],
+                [],
+                true,
+            ],
+            // validateTravel Passes When attendingWeekend set
+            [
+                [
+                    'attendingWeekend' => true,
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
+                ],
+                [],
+                true,
+            ],
+            [
+                [
+                    'attendingWeekend' => false,
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
+                ],
+                [],
+                true,
+            ],
+            // ValidateTravel Fails When attendingWeekend missing after classroom 2
+            [
+                [
+                    'attendingWeekend' => null,
+                    '__reportingDate' => Carbon::parse('2016-10-07'),
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'PROGRAMLEADER_ATTENDING_WEEKEND_MISSING',
+                        'reference.field' => 'attendingWeekend',
+                    ]),
+                ],
+                false,
             ],
         ];
     }

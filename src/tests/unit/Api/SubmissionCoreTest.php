@@ -24,8 +24,6 @@ class SubmissionCoreTest extends TestAbstract
         $center = $this->center = new Models\Center(['id' => 123]);
         $center->setRelation('region', new Models\Region(['id' => 123]));
 
-//        $center->region = new Models\Region(['id' => 123, 'abbreviation' => 'na']);
-
         $this->context = MockContext::defaults()->withCenter($this->center)->install();
     }
 
@@ -53,9 +51,17 @@ class SubmissionCoreTest extends TestAbstract
 
         $api = App::make(Api\SubmissionCore::class);
 
-        $result = $api->calculateProgramLeaderAttending($this->center, $this->reportingDate);
-        $this->assertEquals($expected[0], $result[0]);
-        $this->assertEquals($expected[1], $result[1]);
+        list($pm, $cl) = $api->calculateProgramLeaderAttending($this->center, $this->reportingDate);
+        if (is_null($expected[0])) {
+            $this->assertNull($pm);
+        } else {
+            $this->assertEquals($expected[0], $pm);
+        }
+        if (is_null($expected[1])) {
+            $this->assertNull($cl);
+        } else {
+            $this->assertEquals($expected[1], $cl);
+        }
     }
 
     public function providerProgramLeaderAttending()
@@ -85,7 +91,7 @@ class SubmissionCoreTest extends TestAbstract
                     ],
                     1 => ['attendingWeekend' => true],
                 ],
-                [1, 0],
+                [1, null],
 
             ],
 
@@ -110,7 +116,7 @@ class SubmissionCoreTest extends TestAbstract
                         'classroomLeader' => null,
                     ],
                 ],
-                [0, 0],
+                [null, null],
             ],
 
             // Only CL is set
@@ -123,7 +129,7 @@ class SubmissionCoreTest extends TestAbstract
                     1 => ['attendingWeekend' => true],
 
                 ],
-                [0, 1],
+                [null, 1],
             ],
         ];
     }
