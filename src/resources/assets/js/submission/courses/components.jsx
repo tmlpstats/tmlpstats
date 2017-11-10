@@ -439,7 +439,7 @@ class CoursesAddView extends _EditCreate {
             return false
         }
         const { currentCourse } = this.props
-        if (!currentCourse || currentCourse.startDate != '' || currentCourse.id) {
+        if (!currentCourse || !currentCourse.type || currentCourse.id) {
             delayDispatch(this, actions.chooseCourse(BLANK_COURSE))
             return false
         }
