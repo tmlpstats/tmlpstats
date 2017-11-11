@@ -85,6 +85,8 @@ class UpdatePromise extends Command
             return false;
         }
 
+        // If we have more than 1, there was a new promise.
+        // Find the one from the most recent reporting date
         $csd = $csds[0];
         if (count($csds) > 1) {
             foreach ($csds as $c) {
@@ -100,6 +102,7 @@ class UpdatePromise extends Command
         }
 
         // Get the original scoreboard for calculating points change
+        // This is the week the promise is for, whereas $csd->statsReport is the week the pormise was made
         $weeksReport = Models\StatsReport::byCenter($center)
             ->reportingDate($csd->reportingDate)
             ->official()
