@@ -12,15 +12,16 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        Commands\Inspire::class,
-        Commands\FlushTablesCommand::class,
         Commands\ClearTablesCommand::class,
-        Commands\ReportsCodegen::class,
-        Commands\FlushReportsCacheCommand::class,
-        Commands\SanitizeDb::class,
-        Commands\MergeDuplicatePeople::class,
         Commands\FlushCacheTagCommand::class,
+        Commands\FlushReportsCacheCommand::class,
+        Commands\FlushTablesCommand::class,
+        Commands\Inspire::class,
+        Commands\MergeDuplicatePeople::class,
+        Commands\ReportsCodegen::class,
+        Commands\SanitizeDb::class,
         Commands\SendTestEmailCommand::class,
+        Commands\UpdatePromise::class,
     ];
 
     /**
