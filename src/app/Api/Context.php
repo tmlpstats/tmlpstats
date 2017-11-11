@@ -47,6 +47,11 @@ class Context
         return $this->user;
     }
 
+    public function clearEncapsulations()
+    {
+        $this->encapsulations = [];
+    }
+
     /**
      * A convenience shortcut for context->getUser()->can('privilege', $model)
      * @param  string $priv   The privilege to check

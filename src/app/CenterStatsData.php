@@ -80,6 +80,14 @@ class CenterStatsData extends Model
         return $query->whereStatsReportId($statsReport->id);
     }
 
+    public function scopeOfficial($query)
+    {
+        return $query->whereIn('stats_report_id', function ($query) {
+            $query->select('stats_report_id')
+                  ->from('global_report_stats_report');
+        });
+    }
+
     public function statsReport()
     {
         return $this->belongsTo('TmlpStats\StatsReport');
