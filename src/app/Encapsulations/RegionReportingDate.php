@@ -5,6 +5,7 @@ use App;
 use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api;
+use TmlpStats\Api\Exceptions;
 
 /**
  * A bridge to help prevent repeated quarter lookups

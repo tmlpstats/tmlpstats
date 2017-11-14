@@ -62,6 +62,9 @@ class RegionScoreboard implements Arrayable, \JsonSerializable
         $statsReports = [];
         for ($targetDate = $rq->firstWeekDate; $targetDate->lte($reportingDate); $targetDate = $targetDate->copy()->addWeek()) {
             $gr = $globalReports->get($targetDate->toDateString());
+            if (!$gr) {
+                continue;
+            }
 
             $srs = $gr->statsReports()
                       ->byRegion($region)
