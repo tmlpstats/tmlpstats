@@ -54,6 +54,11 @@ class RegionScoreboard implements Arrayable, \JsonSerializable
             ->get()
             ->keyBy(function($gr) { return $gr->reportingDate->toDateString(); });
 
+        if ($globalReports->isEmpty()) {
+            // There are no reports available for quarter
+            return collect([]);
+        }
+
         $this->centers = Models\Center::byRegion($region)
             ->get()
             ->keyBy(function($c) { return $c->id; });
@@ -75,6 +80,11 @@ class RegionScoreboard implements Arrayable, \JsonSerializable
             $statsReports = array_merge($statsReports, $srs->all());
         }
         $statsReports = collect($statsReports)->keyBy(function($report) { return $report->id; });
+
+        if (!$statsReports) {
+            // There are no stats reports available from this region during this quarter
+            return collect([]);
+        }
 
         // Then, get the scoreboard data and format to be consumed by ScoreboardMultiWeek
         // We have to sort this list by statsReport's reporting date in case a report is
