@@ -27,23 +27,23 @@ body.no-navbar{
 .info-lite,
 table > tbody > tr > td.info-lite,
 table > tbody > tr > th.info-lite {
-    background-color: #e5eff5;
+    background-color: #e5eff5 !important;
 }
 
 .table-hover > tbody > tr:hover > td.info-lite,
 .table-hover > tbody > tr:hover > th.info-lite {
-    background-color: #D9EDF8;
+    background-color: #D9EDF8 !important;
 }
 
 .info-liter,
 table > tbody > tr > td.info-liter,
 table > tbody > tr > th.info-liter {
-    background-color: #eef8fd;
+    background-color: #eef8fd !important;
 }
 
 .table-hover > tbody > tr:hover > td.info-liter,
 .table-hover > tbody > tr:hover > th.info-liter {
-    background-color: #e5eff5;
+    background-color: #e5eff5 !important;
 }
 
 .bg-green {
@@ -576,7 +576,7 @@ table.submissionClassList {
         display: none;
     }
 
-    .topLevelTitle, .goBackLink, .reportTokenLink, .groupingHeader {
+    .topLevelTitle, .goBackLink, .reportTokenLink, .groupingHeader, .print-hide {
         display: none;
     }
 

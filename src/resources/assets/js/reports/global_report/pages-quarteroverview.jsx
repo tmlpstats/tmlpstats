@@ -205,6 +205,7 @@ export class QuarterOverviewReport extends PureComponent {
 
         return (
             <div className="table-responsive quarter-overview">
+                <p className="print-hide report-description">To print, use Google Chrome with scaling set to 45% and Background graphics checked.</p>
                 {regionsData}
             </div>
         )
