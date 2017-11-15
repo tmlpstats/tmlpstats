@@ -213,7 +213,7 @@ class ParserDomain implements Arrayable, \JsonSerializable, Referenceable
                 $target->$k = $this->$k;
             }
         } else if ($existing !== $v) {
-            if (!$conf !== null && array_get($conf, 'assignId')) {
+            if ($v && $conf !== null && array_get($conf, 'assignId')) {
                 $k_id = $k . 'Id';
                 $id_prop = array_get($conf, 'idProp', 'id');
                 $target->$k_id = $v->$id_prop;
