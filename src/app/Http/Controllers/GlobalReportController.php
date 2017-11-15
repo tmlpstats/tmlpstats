@@ -360,16 +360,14 @@ class GlobalReportController extends Controller
                     $totals[$game]['original'] = 0;
                     $totals[$game]['promise'] = 0;
                     $totals[$game]['delta'] = 0;
-                    if ($actual !== null) {
-                        $totals[$game]['actual'] = 0;
-                    }
                 }
 
                 $totals[$game]['original'] += $original;
                 $totals[$game]['promise'] += $promise;
                 $totals[$game]['delta'] = ($totals[$game]['promise'] - $totals[$game]['original']);
                 if ($actual !== null) {
-                    $totals[$game]['actual'] += $actual;
+                    $existing = $totals[$game]['actual'] ?? 0;
+                    $totals[$game]['actual'] = $existing + $actual;
                 }
             }
         }

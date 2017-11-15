@@ -93,7 +93,7 @@ class GlobalReportRegPerParticipantData
             'change' => $defaultGames,
         ];
 
-        $data = $this->getRegPerParticipantData($globalReport, $region);
+        $data = $this->getRegPerParticipantData($globalReport, $region) ?? [];
 
         $reportData = [];
         foreach ($data as $centerName => $centerData) {
