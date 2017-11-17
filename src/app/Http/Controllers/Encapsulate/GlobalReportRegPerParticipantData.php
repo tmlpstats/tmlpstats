@@ -287,7 +287,7 @@ class GlobalReportRegPerParticipantData
 
         $gross = ['cap' => 0, 'cpc' => 0];
         foreach ($gross as $game => $unused) {
-            $gross[$game] = ($ter[$game] - $qTer[$game] - $cumXfer[$game] - $qCumXfer[$game]);
+            $gross[$game] = ($ter[$game] - $qTer[$game]) - ($cumXfer[$game] - $qCumXfer[$game]);
         }
 
         return $gross;
