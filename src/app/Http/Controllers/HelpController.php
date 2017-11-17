@@ -11,9 +11,11 @@ class HelpController extends Controller
      * @param string $file
      * @return string
      */
-    private function get_title($file) {
+    private function get_title($file)
+    {
         $pathinfo = pathinfo($file);
         // Use title of file as the video title.
+
         return ucfirst($pathinfo['filename']);
     }
 
@@ -24,17 +26,17 @@ class HelpController extends Controller
      */
     public function index()
     {
-        // Check if user is an admin to filter out admin videos later.        
+        // Check if user is an admin to filter out admin videos later.
         $currentUser = Auth::user();
         $isAdminUser = false;
-        if ($currentUser->isAdmin() || 
-                $currentUser->hasRole('globalStatistician')) {
+        if ($currentUser->isAdmin() ||
+            $currentUser->hasRole('globalStatistician')) {
             $isAdminUser = true;
         }
-        
+
         $files = array('accountabilities.mov',
             'managing application dates.mov',
-            'where to find accountabilities report.mov', 
+            'where to find accountabilities report.mov',
             'admin/printing weekend accountability rosters.mov',
             'admin/Reconciliation Report Walkthrough.mov',
             'admin/unlocking promises.mov',
@@ -48,9 +50,9 @@ class HelpController extends Controller
             $content = new \stdClass();
             $content->title = $this->get_title($file);
             $content->file = $file;
-            
+
             // Do not show admin videos to non-admins.
-            if (strpos($file, 'admin') !== false && !$isAdminUser) {
+            if ((strpos($file, 'admin') !== false || strpos($file, 'preview') !== false) && !$isAdminUser) {
                 continue;
             }
 
@@ -59,7 +61,7 @@ class HelpController extends Controller
             if ($pathinfo['dirname'] != '.') {
                 // If there is a directory, then list has tag.
                 $content->tag = $pathinfo['dirname'];
-            }            
+            }
 
             $videos[] = $content;
         }
@@ -67,13 +69,13 @@ class HelpController extends Controller
         return view('help.index')->with(['videos' => $videos]);
     }
 
-
     /**
      * Displays video player.
      *
      * @return Response
      */
-    public function view($file) {
+    public function view($file)
+    {
         return view('help.view')->with(['title' => $this->get_title($file),
             'file' => $file]);
     }
