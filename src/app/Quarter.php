@@ -22,6 +22,11 @@ class Quarter extends Model
 
     protected $region = null;
 
+    public function getDisplayLabel(): string
+    {
+        return "{$this->t1Distinction} {$this->year}";
+    }
+
     /**
      * Get the date of the first week of reporting
      *

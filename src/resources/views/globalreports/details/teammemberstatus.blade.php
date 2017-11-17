@@ -31,6 +31,7 @@
                     @elseif ($group == 't2Potential')
                         <th class="data-point">Registered</th>
                         <th class="data-point">Approved</th>
+                        <th class="data-point">Starting Quarter</th>
                     @endif
                     <th>Comments</th>
                 </tr>
@@ -56,16 +57,24 @@
                                 </td>
                             @endif
                         @elseif ($group == 't2Potential')
-                            <td class="data-point">
-                                @if (isset($registrations[$memberData->teamMember->personId]))
+                            @if (isset($registrations[$memberData->teamMember->personId]))
+                                <?php $reg = $registrations[$memberData->teamMember->personId]; ?>
+                                <td class="data-point">
                                     <span class="glyphicon glyphicon-ok"></span>
-                                @endif
-                            </td>
-                            <td class="data-point">
-                                @if (isset($registrations[$memberData->teamMember->personId]) && $registrations[$memberData->teamMember->personId]->apprDate)
-                                    <span class="glyphicon glyphicon-ok"></span>
-                                @endif
-                            </td>
+                                </td>
+                                <td class="data-point">
+                                    @if ($reg->apprDate)
+                                        <span class="glyphicon glyphicon-ok"></span>
+                                    @endif
+                                </td>
+                                <td class="data-point">
+                                    {{ $quarters[$reg->incomingQuarterId]->startWeekendDate->format('F Y')}}
+                                </td>
+                            @else
+                                <td class="data-point"></td>
+                                <td class="data-point"></td>
+                                <td></td>
+                            @endif
                         @endif
                         <td>
                         <?php

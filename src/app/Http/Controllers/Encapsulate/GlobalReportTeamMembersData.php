@@ -4,6 +4,7 @@ namespace TmlpStats\Http\Controllers\Encapsulate;
 use App;
 use TmlpStats as Models;
 use TmlpStats\Api;
+use TmlpStats\Encapsulations;
 use TmlpStats\Reports\Arrangements;
 
 class GlobalReportTeamMembersData
@@ -156,6 +157,7 @@ class GlobalReportTeamMembersData
             'registered' => 0,
             'approved' => 0,
         ];
+        $quarters = [];
 
         foreach ($details['reportData']['t2Potential'] as $member) {
             $centerName = $member->center->name;
@@ -170,12 +172,20 @@ class GlobalReportTeamMembersData
             $reportData[$centerName]['total']++;
             $totals['total']++;
 
-            if (isset($details['registrations'][$member->teamMember->personId])) {
-                $reportData[$centerName]['registered']++;
+            if ($appData = $details['registrations'][$member->teamMember->personId] ?? null) {
+                $qid = $appData->incomingQuarterId;
+                $rd = &$reportData[$centerName];
+                $rd['registered']++;
                 $totals['registered']++;
+                $key = "registered{$qid}";
+                $rd[$key] = ($rd[$key] ?? 0) + 1;
+                $totals[$key] = ($totals[$key] ?? 0) + 1;
                 if ($details['registrations'][$member->teamMember->personId]->apprDate) {
-                    $reportData[$centerName]['approved']++;
+                    $rd['approved']++;
                     $totals['approved']++;
+                    $key = "approved{$qid}";
+                    $rd[$key] = ($rd[$key] ?? 0) + 1;
+                    $totals[$key] = ($totals[$key] ?? 0) + 1;
                 }
             }
 
@@ -183,8 +193,9 @@ class GlobalReportTeamMembersData
                 $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Models\Center::name($centerName)->first());
             }
         }
+        $quarters = $details['quarters'];
 
-        return view('globalreports.details.potentialsoverview', compact('reportData', 'totals', 'statsReports'));
+        return view('globalreports.details.potentialsoverview', compact('reportData', 'totals', 'statsReports', 'quarters'));
     }
 
     protected function getTeamMemberStatusPotentialsData()
@@ -204,36 +215,40 @@ class GlobalReportTeamMembersData
         $registrations = App::make(Api\GlobalReport::class)->getApplicationsListByCenter($globalReport, $region, [
             'returnUnprocessed' => true,
         ]);
+        $quarters = collect([]);
 
         $potentialsThatRegistered = [];
-        if ($registrations) {            
+        if ($registrations) {
             // Build list of T2 registrations, ignoring whitespace.
             $registrationsByCenterAndName = [];
             foreach ($registrations as $appdata) {
                 $registration = $appdata->registration;
                 if ($appdata->teamYear != 2 || $appdata->xferOut ||
-                        $appdata->isWithdrawn() ||
-                        $registration->isReviewer
+                    $appdata->isWithdrawn() ||
+                    $registration->isReviewer
                 ) {
                     continue;
                 }
-                $registrationsByCenterAndName["{$appdata->center->id}/".
-                        trim($registration->person->firstName)." " . 
-                        trim($registration->person->lastName)] = $appdata;
+                $registrationsByCenterAndName["{$appdata->center->id}/" .
+                    trim($registration->person->firstName) . ' ' .
+                    trim($registration->person->lastName)] = $appdata;
             }
-            
+
             $potentials = $data['reportData']['t2Potential'];
             foreach ($potentials as $member) {
                 $person = $member->teamMember->person;
-                $key = "{$person->centerId}/" . trim($person->firstName). " " .trim($person->lastName);
+                $key = "{$person->centerId}/" . trim($person->firstName) . ' ' . trim($person->lastName);
 
-                if (isset($registrationsByCenterAndName[$key])) {                    
-                    $potentialsThatRegistered[$member->teamMember->personId] = $registrationsByCenterAndName[$key];
+                if (isset($registrationsByCenterAndName[$key])) {
+                    $potentialsThatRegistered[$member->teamMember->personId] = $appdata = $registrationsByCenterAndName[$key];
+                    if (!$quarters->has($appdata->incomingQuarterId)) {
+                        $quarters[$appdata->incomingQuarterId] = Encapsulations\RegionQuarter::ensure($region, $appdata->incomingQuarter);
+                    }
                 }
             }
         }
 
-        return $this->potentialsData = array_merge($data, ['registrations' => $potentialsThatRegistered]);
+        return $this->potentialsData = array_merge($data, ['registrations' => $potentialsThatRegistered, 'quarters' => $quarters]);
     }
 
 }
