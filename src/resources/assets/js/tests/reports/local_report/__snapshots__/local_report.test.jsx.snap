@@ -397,7 +397,8 @@ exports[`LocalReport Next Qtr Accountabilities 1`] = `
               className="table-responsive"
             >
               <h3>
-                Next Quarter Accountabilities
+                Next Quarter Accountabilities - 
+                ABC
               </h3>
               <table
                 className="table table-condensed table-striped table-hover"
@@ -435,7 +436,7 @@ exports[`LocalReport Next Qtr Accountabilities 1`] = `
                     </th>
                     <th
                       aria-controls="tbl-localReport_nqa"
-                      className="tabular-sortable"
+                      className="hidden-print tabular-sortable"
                       onClick={[Function]}
                     >
                       Updated At
@@ -456,7 +457,9 @@ exports[`LocalReport Next Qtr Accountabilities 1`] = `
                     <td>
                       abc@def.com
                     </td>
-                    <td>
+                    <td
+                      className="hidden-print"
+                    >
                       Jan 1, 2017 02:03 AM
                     </td>
                   </tr>

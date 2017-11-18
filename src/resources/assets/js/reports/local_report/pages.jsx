@@ -54,7 +54,6 @@ export class NextQtrAccountabilities extends PureComponent {
         const { initialData } = this.props
         const NQATable = buildNQATable()
         const nqas = this.datedNQAs(initialData.nqas)
-        console.log(this.props)
         return (
             <div className="table-responsive">
                 <h3>Next Quarter Accountabilities - {this.props.reportContext.savedConfig.centerInfo.name}</h3>
