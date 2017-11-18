@@ -18,7 +18,7 @@ const buildNQATable = lazy(function() {
 
     function PrettyDate(props) {
         const { data } = props
-        return <td>{data? data.format(DATE_TIME_PRETTY) : 'unknown'}</td>
+        return <td className="hidden-print">{data? data.format(DATE_TIME_PRETTY) : 'unknown'}</td>
     }
 
     return buildTable({
@@ -28,7 +28,7 @@ const buildNQATable = lazy(function() {
             {key: 'name', label: 'Name', default: 'N/A'},
             {key: 'phone', label: 'Phone', default: 'N/A'},
             {key: 'email', label: 'Email', default: 'N/A'},
-            {key: 'updatedAt', label: 'Updated At', 'sorter': 'moment', component: PrettyDate}
+            {key: 'updatedAt', label: 'Updated At', sorter: 'moment', headingClasses: ['hidden-print'], component: PrettyDate}
         ],
     })
 })
@@ -54,9 +54,10 @@ export class NextQtrAccountabilities extends PureComponent {
         const { initialData } = this.props
         const NQATable = buildNQATable()
         const nqas = this.datedNQAs(initialData.nqas)
+        console.log(this.props)
         return (
             <div className="table-responsive">
-                <h3>Next Quarter Accountabilities</h3>
+                <h3>Next Quarter Accountabilities - {this.props.reportContext.savedConfig.centerInfo.name}</h3>
                 <NQATable data={nqas} tableClasses="table table-condensed table-striped table-hover" />
             </div>
         )

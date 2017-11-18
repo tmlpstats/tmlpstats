@@ -86,12 +86,14 @@ export class AccountabilityRosters extends RegionBase {
             return <div>Loading rosters...</div>
         }
 
+        const { regionQuarter, centers } = regionCenters
+
         const rosters = this.props.accountabilities.map((acc) => {
             const centerData = data[acc.id] || {}
             return (
                 <AccountabilityRoster
                     key={acc.id} accountability={acc} data={centerData}
-                    allCenters={regionCenters.centers} />
+                    allCenters={centers} regionQuarter={regionQuarter} />
             )
         })
         return (
@@ -109,9 +111,11 @@ export class AccountabilityRosters extends RegionBase {
 
 class AccountabilityRoster extends RegionBase {
     render() {
+        const { regionQuarter } = this.props
         const rows = this.props.allCenters.map((center) => {
             const data = this.props.data[center.abbreviation] || {}
-            const dest = `/center/${center.abbreviation}/next_qtr_accountabilities`
+            const dest = `/reports/centers/${center.abbreviation}/${regionQuarter.endWeekendDate}/Weekend/NextQtrAccountabilities`
+            const editDest = `/center/${center.abbreviation}/submission/${regionQuarter.endWeekendDate}/next_qtr_accountabilities`
             return (
                 <tr key={center.id}>
                     <td>
@@ -121,6 +125,7 @@ class AccountabilityRoster extends RegionBase {
                     <td>{data.name}</td>
                     <td>{data.phone}</td>
                     <td>{data.email}</td>
+                    <td className="hidden-print">[<Link to={editDest}>Edit</Link>]</td>
                 </tr>
             )
         })
@@ -134,6 +139,7 @@ class AccountabilityRoster extends RegionBase {
                             <th>Name</th>
                             <th>Phone</th>
                             <th>Email</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>

@@ -53,14 +53,14 @@ class TabularBase extends React.Component {
         const boundColumns = this.boundColumns()
         boundColumns.forEach((col) => {
             let ascDesc
-            let classes = []
+            let classes = col.headingClasses || []
             if (col.sortable) {
                 classes.push('tabular-sortable')
                 if (col._sort) {
                     classes.push(col._sort)
                     // sort-by-alphabet{-alt} and sort-by-attributes{-alt}
                     const icon = 'sort-by-' + (col.sorter == 'string'? 'alphabet' : 'attributes') + (col._sort == 'asc'? '' : '-alt')
-                    ascDesc = <Glyphicon icon={icon}  />
+                    ascDesc = <Glyphicon icon={icon} />
                 }
             }
             headings.push(<th key={col.key} onClick={col._columnClick} className={cssClasses(classes)} aria-controls={htmlId}>{col.label}{ascDesc}</th>)
