@@ -34,7 +34,7 @@ if ($currentRegion !== null) {
     $reports = TmlpStats\GlobalReport::between($startDate, $endDate)
         ->orderBy('reporting_date', 'desc')
         ->get();
-    $centers = TmlpStats\Center::byRegion($currentRegion)->orderBy('name')->get();
+    $centers = TmlpStats\Center::byRegion($currentRegion)->active()->orderBy('name')->get();
 }
 
 $reportingDateString = ($reportingDate != null) ? $reportingDate->toDateString() : null;
@@ -61,7 +61,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                         @can ('validate', TmlpStats\StatsReport::class)
                             @can ('showNewSubmissionUi', $currentCenter)
                             <li {!! Request::is('center/*/submission/*') ? 'class="active"' : '' !!}>
-                                <a href="{{ action('CenterController@submission', ['abbr' => $currentCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Submit Report</a>
+                                <a href="{{ action('CenterController@submission', ['abbr' => $currentCenter->abbrLower(), 'reportingDate' => '2017-11-24',/*$submissionReportingDate->toDateString()*/]) }}">Submit Report</a>
                             </li>
                             @else
                             <li {!! Request::is('validate') ? 'class="active"' : '' !!}>
@@ -69,7 +69,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                             </li>
                             @endcan
                         @endcan
-                        
+
                         {{-- Help --}}
                         <li {!! Request::is('help') ? 'class="active"' : '' !!}>
                             <a href="{{ action('HelpController@index') }}">Help</a>

@@ -31,7 +31,7 @@ export default class SubmissionFlowRoot extends SubmissionBase {
     render() {
         const { core, browser, params, location, systemMessages } = this.props
         if (!this.checkReportingDate()) {
-            return this.renderBasicLoading(this.props.coreInit)
+            return this.renderBasicLoading(core.coreInit)
         }
         const navSteps = (core.lookups.capabilities.nextQtrAccountabilities) ? steps : stepsNoNqa
         const largeLayout = browser.greaterThan.large
