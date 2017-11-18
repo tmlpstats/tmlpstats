@@ -1,6 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router'
 
+import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber'
+
 import { objectAssign } from '../../reusable/ponyfill'
 import { connectRedux } from '../../reusable/dispatch'
 import { Alert } from '../../reusable/ui_basic'
@@ -93,7 +95,8 @@ export class AccountabilityRosters extends RegionBase {
             return (
                 <AccountabilityRoster
                     key={acc.id} accountability={acc} data={centerData}
-                    allCenters={centers} regionQuarter={regionQuarter} />
+                    allCenters={centers} regionQuarter={regionQuarter}
+                    params={this.props.params} />
             )
         })
         return (
@@ -114,8 +117,48 @@ class AccountabilityRoster extends RegionBase {
         const { regionQuarter } = this.props
         const rows = this.props.allCenters.map((center) => {
             const data = this.props.data[center.abbreviation] || {}
+
             const dest = `/reports/centers/${center.abbreviation}/${regionQuarter.endWeekendDate}/Weekend/NextQtrAccountabilities`
             const editDest = `/center/${center.abbreviation}/submission/${regionQuarter.endWeekendDate}/next_qtr_accountabilities`
+
+            // TODO: We need to implement this country code lookup into the center table
+            //       or possible storing the person's phone_country on the people table
+            //       so we know how to parse the numbers
+            let phoneString = data.phone
+            if (data.phone) {
+                let country
+                let format = PhoneNumberFormat.INTERNATIONAL
+
+                switch (this.props.params.regionAbbr) {
+                case 'anz':
+                    country = 'AU'
+                    if (center.abbreviation == 'auk') {
+                        country = 'NZ'
+                    }
+                    break
+                case 'eme':
+                    country = 'GB'
+                    if (center.abbreviation == 'tlv') {
+                        country = 'IL'
+                    }
+                    break
+                case 'ind':
+                    country = 'IN'
+                    break
+                case 'na':
+                default:
+                    country = 'US'
+                    if (center.abbreviation == 'mex') {
+                        country = 'MX'
+                    }
+                    break
+                }
+
+                const phoneUtil = PhoneNumberUtil.getInstance()
+                const phoneNumber = phoneUtil.parse(data.phone, country)
+                phoneString = phoneUtil.format(phoneNumber, format)
+            }
+
             return (
                 <tr key={center.id}>
                     <td>
@@ -123,7 +166,7 @@ class AccountabilityRoster extends RegionBase {
                         <span className="hidden-print"><Link to={dest}>{center.name}</Link></span>
                     </td>
                     <td>{data.name}</td>
-                    <td>{data.phone}</td>
+                    <td>{phoneString}</td>
                     <td>{data.email}</td>
                     <td className="hidden-print">[<Link to={editDest}>Edit</Link>]</td>
                 </tr>
