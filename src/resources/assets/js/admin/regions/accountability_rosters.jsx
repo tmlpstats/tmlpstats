@@ -121,20 +121,36 @@ class AccountabilityRoster extends RegionBase {
             const dest = `/reports/centers/${center.abbreviation}/${regionQuarter.endWeekendDate}/Weekend/NextQtrAccountabilities`
             const editDest = `/center/${center.abbreviation}/submission/${regionQuarter.endWeekendDate}/next_qtr_accountabilities`
 
-            // Only NA for now. We need to implement this country code lookup into the center table
-            // so we know how to parse the numbers
+            // TODO: We need to implement this country code lookup into the center table
+            //       or possible storing the person's phone_country on the people table
+            //       so we know how to parse the numbers
             let phoneString = data.phone
-            if (data.phone && this.props.params.regionAbbr == 'na') {
+            if (data.phone) {
                 let country
-                let format
-                switch (center.abbreviation) {
-                case 'mex':
-                    country = 'MX'
-                    format = PhoneNumberFormat.INTERNATIONAL
+                let format = PhoneNumberFormat.INTERNATIONAL
+
+                switch (this.props.params.regionAbbr) {
+                case 'anz':
+                    country = 'AU'
+                    if (center.abbreviation == 'auk') {
+                        country = 'NZ'
+                    }
                     break
+                case 'eme':
+                    country = 'GB'
+                    if (center.abbreviation == 'tlv') {
+                        country = 'IL'
+                    }
+                    break
+                case 'ind':
+                    country = 'IN'
+                    break
+                case 'na':
                 default:
                     country = 'US'
-                    format = PhoneNumberFormat.NATIONAL
+                    if (center.abbreviation == 'mex') {
+                        country = 'MX'
+                    }
                     break
                 }
 
