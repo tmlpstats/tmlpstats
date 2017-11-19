@@ -61,7 +61,7 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                         @can ('validate', TmlpStats\StatsReport::class)
                             @can ('showNewSubmissionUi', $currentCenter)
                             <li {!! Request::is('center/*/submission/*') ? 'class="active"' : '' !!}>
-                                <a href="{{ action('CenterController@submission', ['abbr' => $currentCenter->abbrLower(), 'reportingDate' => '2017-11-24',/*$submissionReportingDate->toDateString()*/]) }}">Submit Report</a>
+                                <a href="{{ action('CenterController@submission', ['abbr' => $currentCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Submit Report</a>
                             </li>
                             @else
                             <li {!! Request::is('validate') ? 'class="active"' : '' !!}>
