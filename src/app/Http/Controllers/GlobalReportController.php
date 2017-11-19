@@ -119,8 +119,11 @@ class GlobalReportController extends Controller
             }
         }
 
-        $maybeReportDate = $maybeReport->reportingDate;
-        $maybeReportUrl = $this->getUrl($maybeReport, $region);
+        $maybeReportDate = $maybeReportUrl = '';
+        if ($maybeReport) {
+            $maybeReportDate = $maybeReport->reportingDate;
+            $maybeReportUrl = $this->getUrl($maybeReport, $region);
+        }
 
         return view('reports.report_chooser', compact(
             'reportingDate',

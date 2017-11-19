@@ -150,8 +150,11 @@ class StatsReportController extends Controller
             }
         }
 
-        $maybeReportDate = $maybeReport->reportingDate;
-        $maybeReportUrl = $this->getUrl($maybeReport, $center);
+        $maybeReportDate = $maybeReportUrl = '';
+        if ($maybeReport) {
+            $maybeReportDate = $maybeReport->reportingDate;
+            $maybeReportUrl = $this->getUrl($maybeReport, $center);
+        }
 
         return view('reports.report_chooser', compact(
             'reportingDate',
