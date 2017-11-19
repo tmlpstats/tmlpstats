@@ -20,6 +20,12 @@ export function initSubmission(centerId, reportingDate) {
             center: centerId,
             reportingDate: reportingDate
         }).then((data) => {
+
+            if (!data.success) {
+                dispatch(initState({error: data.error}))
+                return
+            }
+
             // We delay this dispatch because the default case causes a lot of downstream rendering.
             // The downstream rendering causes the error catch for this Promise to trigger.
             delayDispatch(dispatch, setSubmissionLookups(data, reportingDate))
