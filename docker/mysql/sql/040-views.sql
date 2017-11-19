@@ -166,10 +166,12 @@ CREATE OR REPLACE VIEW `submission_data_team_members` AS
         case when `submission_data`.`data`->> '$.comment' = 'null' then NULL
              else `submission_data`.`data`->> '$.comment' end AS `comment`,
         `submission_data`.`data`->> '$.accountabilities' AS `accountabilities`,
-        `team_members`.person_id
+        `team_members`.`person_id`,
+        case when `submission_data`.`data`->> '$._personId' = 'null' then NULL
+             else `submission_data`.`data`->> '$._personId' end AS `override_person_id`
     FROM
         `submission_data` left outer join `team_members`
-              on `submission_data`.stored_id=`team_members`.id
+              on `submission_data`.`stored_id`=`team_members`.`id`
     WHERE
         (`submission_data`.`stored_type` = 'team_member'
           AND NOT JSON_CONTAINS_PATH(`submission_data`.`data`, 'one', '$.__deleted'));

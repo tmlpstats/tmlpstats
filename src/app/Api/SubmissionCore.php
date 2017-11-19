@@ -142,14 +142,23 @@ class SubmissionCore extends AuthenticatedApiBase
                 foreach ($result as $r) {
                     $tm_id = -1;
                     if ($r->team_member_id < 0) {
+                        $person_id = null;
+
+                        // If we already know the person to use, find them
+                        if (!empty($r->override_person_id) && Models\Person::find($r->override_person_id)) {
+                            $person_id = $r->override_person_id;
+                        }
+
                         // This is a new team member, create the things
-                        DB::insert('insert into people
-                                        (first_name, last_name, email, phone, center_id, created_at, updated_at)
-                                    select i.first_name, i.last_name, i.email, i.phone, i.center_id, sysdate(), sysdate()
-                                    from submission_data_team_members i where i.id=?',
-                            [$r->id]);
-                        $person_id = DB::getPdo()->lastInsertId();
-                        $debug_message .= ' snewtm_id=' . $r->id . ' person_id=' . $person_id;
+                        if (!$person_id) {
+                            DB::insert('insert into people
+                                            (first_name, last_name, email, phone, center_id, created_at, updated_at)
+                                        select i.first_name, i.last_name, i.email, i.phone, i.center_id, sysdate(), sysdate()
+                                        from submission_data_team_members i where i.id=?',
+                                [$r->id]);
+                            $person_id = DB::getPdo()->lastInsertId();
+                            $debug_message .= ' snewtm_id=' . $r->id . ' person_id=' . $person_id;
+                        }
 
                         DB::insert('insert into team_members
                                         (person_id, team_year, incoming_quarter_id, is_reviewer, created_at, updated_at)
@@ -524,12 +533,22 @@ class SubmissionCore extends AuthenticatedApiBase
      */
     protected function createNewApplication(Models\Center $center, Domain\TeamApplication $app)
     {
-        $person = Models\Person::create([
-            'center_id' => $center->id,
-            'first_name' => $app->firstName,
-            'last_name' => $app->lastName,
-            'identifier' => '',
-        ]);
+        $person = null;
+
+        // If the app gave us a hint, try to use that person
+        if (!empty($app->_personId)) {
+            $person = Models\Person::find($app->_personId);
+        }
+
+        // Create a new person object if we don't already know this person
+        if (!$person) {
+            $person = Models\Person::create([
+                'center_id' => $center->id,
+                'first_name' => $app->firstName,
+                'last_name' => $app->lastName,
+                'identifier' => '',
+            ]);
+        }
 
         return Models\TmlpRegistration::create([
             'person_id' => $person->id,
@@ -962,7 +981,7 @@ class SubmissionCore extends AuthenticatedApiBase
                 if ($app->apprDate !== null && $app->incomingQuarterId == $quarter->id) {
                     // Save application to turn them into a team member in Phase 4.
                     // Only grab the data we want to copy over to the team member
-                    $newTeamMembers[] = $data->only([
+                    $futureMember = $data->only([
                         'firstName',
                         'lastName',
                         'center',
@@ -972,6 +991,14 @@ class SubmissionCore extends AuthenticatedApiBase
                         'incomingQuarter',
                         'isReviewer',
                     ])->all();
+
+                    // Stash the original personId so we can make sure to use the correct person
+                    $appModel = Models\TmlpRegistration::find($data['id']);
+                    if ($appModel && $appModel->personId) {
+                        $futureMember['_personId'] = $appModel->personId;
+                    }
+
+                    $newTeamMembers[] = $futureMember;
                 } else {
                     $data = $data->all(); // ->all() on a collection returns the underlying array
                     if (!array_key_exists($app->committedTeamMemberId, $goodTeamMembers) && $app->committedTeamMember) {

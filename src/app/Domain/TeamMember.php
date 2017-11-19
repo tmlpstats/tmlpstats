@@ -114,6 +114,12 @@ class TeamMember extends ParserDomain
         'quarterNumber' => [
             'owner' => 'teamMember',
             'type' => 'int',
+            'domainOnly' => true,
+        ],
+        '_personId' => [
+            'owner' => 'teamMember',
+            'type' => 'int',
+            'domainOnly' => true,
         ],
     ];
 
@@ -176,7 +182,7 @@ class TeamMember extends ParserDomain
                     $target = $teamMemberData;
                     break;
             }
-            if ($target !== null) {
+            if ($target !== null && empty($conf['domainOnly'])) {
                 $this->copyTarget($target, $k, $v, $conf);
             }
         }

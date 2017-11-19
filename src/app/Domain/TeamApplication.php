@@ -95,6 +95,11 @@ class TeamApplication extends ParserDomain
             'type' => 'string',
             'options' => ['trim' => true],
         ],
+        '_personId' => [
+            'owner' => 'application',
+            'type' => 'int',
+            'domainOnly' => true,
+        ],
         /*
         FIELDS WE CURRENTLY DO NOT CARE ABOUT
 
@@ -158,7 +163,9 @@ class TeamApplication extends ParserDomain
             if ($k == 'regDate') {
                 $appData->regDate = $v;
             }
-            $this->copyTarget($target, $k, $v, $conf);
+            if ($target !== null && empty($conf['domainOnly'])) {
+                $this->copyTarget($target, $k, $v, $conf);
+            }
         }
     }
 
