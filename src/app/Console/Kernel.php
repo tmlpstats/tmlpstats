@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel
         Commands\FlushTablesCommand::class,
         Commands\Inspire::class,
         Commands\MergeDuplicatePeople::class,
+        Commands\MoveStashesToCenter::class,
         Commands\ReportsCodegen::class,
         Commands\SanitizeDb::class,
         Commands\SendTestEmailCommand::class,
