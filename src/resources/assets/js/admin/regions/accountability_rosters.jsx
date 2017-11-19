@@ -5,7 +5,7 @@ import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber'
 
 import { objectAssign } from '../../reusable/ponyfill'
 import { connectRedux } from '../../reusable/dispatch'
-import { Alert, renderBasicLoading } from '../../reusable/ui_basic'
+import { Alert } from '../../reusable/ui_basic'
 
 import checkCoreData from '../../submission/core/checkCoreData'
 import { repromisableAccountabilities } from '../../submission/next_qtr_accountabilities/selectors'
@@ -79,7 +79,7 @@ export class AccountabilityRosters extends RegionBase {
 
     render() {
         if (!this.checkData()) {
-            renderBasicLoading(this.props.submissionCore.coreInit, 'Loading prerequisites...')
+            return <div>Loading prerequisites...</div>
         }
         const regionCenters = this.regionCenters()
 

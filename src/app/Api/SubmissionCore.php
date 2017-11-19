@@ -44,18 +44,10 @@ class SubmissionCore extends AuthenticatedApiBase
 
         // Get values for lookups
         $withdraw_codes = Models\WithdrawCode::get();
+        $validRegQuarters = App::make(Api\Application::class)->validRegistrationQuarters($center, $reportingDate, $quarter);
+        $validStartQuarters = App::make(Api\TeamMember::class)->validStartQuarters($center, $reportingDate, $quarter);
         $accountabilities = Models\Accountability::orderBy('display')->get();
         $centers = Models\Center::byRegion($center->getGlobalRegion())->active()->orderBy('name')->get();
-
-        try {
-            $validRegQuarters = App::make(Api\Application::class)->validRegistrationQuarters($center, $reportingDate, $quarter);
-            $validStartQuarters = App::make(Api\TeamMember::class)->validStartQuarters($center, $reportingDate, $quarter);
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'error' => $e->getMessage(),
-            ];
-        }
 
         return [
             'success' => true,

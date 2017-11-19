@@ -423,15 +423,3 @@ export function cssClasses(input) {
         return classes.join(' ')
     }
 }
-
-export function renderBasicLoading(loadState, loadingMessage) {
-    if (loadState && loadState.state == 'failed') {
-        return (
-            <Alert alert="danger" icon="exclamation-sign">
-                {getErrMessage(loadState.error || 'error')}
-            </Alert>
-        )
-    }
-
-    return <div>{loadingMessage || 'Loading....'}</div>
-}
