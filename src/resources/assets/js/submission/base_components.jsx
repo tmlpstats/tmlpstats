@@ -1,7 +1,8 @@
 import React from 'react'
 import { routerShape } from 'react-router/lib/PropTypes'
 
-import { renderBasicLoading } from '../reusable/ui_basic'
+import { getErrMessage } from '../reusable/ajax_utils'
+import { Alert } from '../reusable/ui_basic'
 
 export { React }
 
@@ -21,6 +22,13 @@ export class SubmissionBase extends React.Component {
         if (!loadState) {
             loadState = this.props.loading
         }
-        renderBasicLoading(loadState, 'Loading....')
+        if (loadState && loadState.state == 'failed') {
+            return (
+                <Alert alert="danger" icon="exclamation-sign">
+                    {getErrMessage(loadState.error || 'error')}
+                </Alert>
+            )
+        }
+        return <div>Loading....</div>
     }
 }

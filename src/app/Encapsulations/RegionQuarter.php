@@ -31,11 +31,6 @@ class RegionQuarter implements \JsonSerializable
                 ->byRegion($region)
                 ->first();
         }
-
-        if (!$rqd) {
-            throw new \Exception("Quarter information is not setup completely for {$region->name} region during the {$quarter->t1Distinction} quarter {$quarter->year}.");
-        }
-
         foreach (QuarterDates::SIMPLE_DATE_FIELDS as $field) {
             $this->dates[$field] = QuarterDates::fixDateInput($rqd->$field);
         }
