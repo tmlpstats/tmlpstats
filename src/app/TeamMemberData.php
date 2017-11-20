@@ -51,8 +51,9 @@ class TeamMemberData extends Model
             case 'lastName':
             case 'fullName':
             case 'shortName':
-            case 'center':
                 return $this->teamMember->person->$name;
+            case 'center':
+                return $this->statsReport->center;
             case 'teamYear':
             case 'quarterNumber':
             case 'incomingQuarter':

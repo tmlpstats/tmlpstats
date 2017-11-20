@@ -31,7 +31,7 @@
         <tr>
             <td data-order="{{ $courseData['startDate']->getTimestamp() }}">@date($courseData['startDate'])</td>
             <td class="data-point">
-                @if (isset($statsReports))
+                @if (isset($statsReports[$courseData['centerName']]))
                     @statsReportLink($statsReports[$courseData['centerName']])
                         {{ $courseData['location'] != $courseData['centerName'] ? "{$courseData['centerName']} ({$courseData['location']})" : $courseData['centerName'] }}
                     @endStatsReportLink

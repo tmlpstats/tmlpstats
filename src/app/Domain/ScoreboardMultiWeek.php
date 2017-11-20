@@ -38,7 +38,7 @@ class ScoreboardMultiWeek implements Arrayable, \JsonSerializable
 
     public function getWeek(Carbon $day)
     {
-        return $this->weeks[$day->toDateString()];
+        return $this->weeks[$day->toDateString()] ?? null;
     }
 
     public function sortedValues()

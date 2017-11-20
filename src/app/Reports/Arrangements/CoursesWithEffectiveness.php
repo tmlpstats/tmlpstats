@@ -48,9 +48,9 @@ class CoursesWithEffectiveness extends BaseArrangement
             $type = $courseData->course->type;
 
             $course = [
-                'centerName' => $courseData->course->center->name,
-                'location'   => $courseData->course->location ?: $courseData->course->center->name,
-                'startDate'  => $courseData->course->startDate,
+                'centerName' => $courseData->center->name,
+                'location'   => $courseData->location ?: $courseData->center->name,
+                'startDate'  => $courseData->startDate,
                 'type'       => $type,
             ];
 

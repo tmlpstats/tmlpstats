@@ -33,6 +33,9 @@ class CourseData extends Model
     {
         switch ($name) {
             case 'center':
+                return $this->statsReport->center;
+            case 'location':
+            case 'startDate':
             case 'type':
                 return $this->course->$name;
             default:
