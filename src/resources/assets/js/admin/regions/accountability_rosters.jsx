@@ -79,7 +79,7 @@ export class AccountabilityRosters extends RegionBase {
 
     render() {
         if (!this.checkData()) {
-            renderBasicLoading(this.props.submissionCore.coreInit, 'Loading prerequisites...')
+            return renderBasicLoading(this.props.submissionCore.coreInit, 'Loading prerequisites...')
         }
         const regionCenters = this.regionCenters()
 

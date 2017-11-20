@@ -21,6 +21,6 @@ export class SubmissionBase extends React.Component {
         if (!loadState) {
             loadState = this.props.loading
         }
-        renderBasicLoading(loadState, 'Loading....')
+        return renderBasicLoading(loadState, 'Loading....')
     }
 }
