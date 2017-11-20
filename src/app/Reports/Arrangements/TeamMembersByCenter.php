@@ -8,8 +8,8 @@ class TeamMembersByCenter extends BaseArrangement
 
         $reportData = [];
 
-        foreach ($teamMembersData as $data) {
-            $reportData[$data->center->name][] = $data;
+        foreach ($teamMembersData as $member) {
+            $reportData[$member->center->name][] = $member;
         }
 
         return compact('reportData');

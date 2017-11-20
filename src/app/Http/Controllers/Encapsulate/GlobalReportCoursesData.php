@@ -184,11 +184,10 @@ class GlobalReportCoursesData
     {
         $a = new Arrangements\CoursesByCenter(['coursesData' => $coursesData]);
         $coursesByCenter = $a->compose();
-        $coursesByCenter = $coursesByCenter['reportData'];
 
         $statsReports = [];
         $centerReportData = [];
-        foreach ($coursesByCenter as $centerName => $coursesData) {
+        foreach ($coursesByCenter['reportData'] as $centerName => $coursesData) {
             $a = new Arrangements\CoursesWithEffectiveness([
                 'courses' => $coursesData,
                 'reportingDate' => $globalReport->reportingDate,
