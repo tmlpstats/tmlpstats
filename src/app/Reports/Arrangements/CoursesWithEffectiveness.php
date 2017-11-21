@@ -55,17 +55,19 @@ class CoursesWithEffectiveness extends BaseArrangement
             ];
 
             $isComplete = $course['startDate']->lt($reportingDate);
+            $state = $isComplete ? 'closed' : 'open';
 
             foreach ($copyFields as $field) {
                 $course[$field] = $courseData->$field;
 
                 if ($includeTotals) {
-                    $state = $isComplete ? 'closed' : 'open';
-
                     $totals[$type][$state][$field] += $courseData->$field;
                     $totals[$type]['all'][$field] += $courseData->$field;
                 }
             }
+
+            $current = $totals[$type][$state]['courseCount'] ?? 0;
+            $totals[$type][$state]['courseCount'] = $current + 1;
 
             $course['completionStats'] = $this->calculateEffectiveness($course, $isComplete);
 
@@ -84,6 +86,7 @@ class CoursesWithEffectiveness extends BaseArrangement
                         $this->calculateEffectiveness($totals[$type][$state], $state !== 'open')
                     );
                 }
+                $totals[$type]['all']['courseCount'] = $totals[$type]['closed']['courseCount'] + $totals[$type]['open']['courseCount'];
             }
 
             $reportData['CAP']['totals'] = $totals['CAP'];
