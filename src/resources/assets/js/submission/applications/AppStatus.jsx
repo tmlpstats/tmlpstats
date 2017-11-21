@@ -107,9 +107,13 @@ export default class AppStatus extends Component {
         let trailer
         if (withdrawn) {
             const { withdraw_codes } = this.props.lookups
+            const validCodes = withdraw_codes.filter((code) => {
+                return code.context == 'application' || code.context == 'all'
+            })
+
             trailer = (
                 <Withdrawn status={currentStatus} model={model}
-                        buttonClick={this.onStatusClick} withdraw_codes={withdraw_codes} />
+                        buttonClick={this.onStatusClick} withdraw_codes={validCodes} />
             )
         } else {
             trailer = <StatusButtons status={currentStatus} buttonClick={this.onStatusClick} />
