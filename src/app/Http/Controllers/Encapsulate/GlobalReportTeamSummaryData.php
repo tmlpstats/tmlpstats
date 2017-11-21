@@ -264,6 +264,7 @@ class GlobalReportTeamSummaryData
             'team2Current' => 0,
             'team2Incoming' => 0,
             'team2Completing' => 0,
+            'team2RoomSatPm' => 0,
             'team2Room' => 0,
             'team2RegistrationEvent' => 0,
             'generalSession' => 0,
@@ -296,6 +297,7 @@ class GlobalReportTeamSummaryData
             $row['team2Current'] = $team2[$centerName]['currentOnTeam'];
             $row['team2Incoming'] = $team2[$centerName]['appStatusNext']['appr'];
             $row['team2Completing'] = $team2[$centerName]['completing'];
+            $row['team2RoomSatPm'] = $row['team2Current'] + $row['team2Incoming'];
             $row['team2Room'] = $row['team2Current'] + $row['team2Incoming'] + $row['pmAttending'] + $row['clAttending'];
             $row['team2RegistrationEvent'] = $row['team2Current'] + $row['team2Incoming'] + $row['pmAttending'] + $row['team1Completing'];
 
