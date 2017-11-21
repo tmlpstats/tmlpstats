@@ -2,6 +2,9 @@
     <thead>
         <tr>
             <th>&nbsp;</th>
+            <th class="data-point border-left">
+                Courses
+            </th>
             <th colspan="2" class="data-point border-left">
                 Starting
             </th>
@@ -17,6 +20,7 @@
         </tr>
         <tr>
             <th class="data-point">&nbsp;</th>
+            <th class="data-point border-left">&nbsp;</th>
             <th class="data-point border-left" title="Total Ever Registered">TER</th>
             <th class="data-point" title="Standard Starts">SS</th>
             <th class="data-point border-left" title="Total Ever Registered">TER</th>
@@ -37,6 +41,7 @@
     @foreach ($coursesData as $state => $courseData)
         <tr>
             <td class="data-point">{{ ucfirst($state) }} Courses</td>
+            <td class="data-point border-left">{{ $courseData['courseCount'] }}</td>
             <td class="data-point border-left">{{ $courseData['quarterStartTer'] }}</td>
             <td class="data-point">{{ $courseData['quarterStartStandardStarts'] }}</td>
             <td class="data-point border-left">{{ $courseData['currentTer'] }}</td>
