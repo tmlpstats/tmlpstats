@@ -894,7 +894,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
-                        'id' => 'TEAMAPP_WD_CODE_INACTIVE',
+                        'id' => 'CLASSLIST_WD_CODE_INACTIVE',
                         'reference.field' => 'withdrawCodeId',
                     ]),
                 ],
@@ -910,7 +910,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
-                        'id' => 'TEAMAPP_WD_CODE_UNKNOWN',
+                        'id' => 'CLASSLIST_WD_CODE_UNKNOWN',
                         'reference.field' => 'withdrawCodeId',
                     ]),
                 ],
