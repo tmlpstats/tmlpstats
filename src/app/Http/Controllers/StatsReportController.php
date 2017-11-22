@@ -129,10 +129,13 @@ class StatsReportController extends Controller
         ));
     }
 
-    public function showReportChooser(Request $request, Models\Center $center, Carbon $reportingDate)
+    public function showReportChooser(Request $request, Models\Center $center, Carbon $reportingDate, $reason = null)
     {
         $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
         $cq = $crd->getCenterQuarter();
+
+        $this->context->setCenter($center);
+        $this->context->setReportingDate($reportingDate);
 
         // candidates are reporting dates in reverse, but only those which are before this reporting date.
         $dates = collect($cq->listReportingDates())->reverse()->filter(function ($d) use ($reportingDate) {
@@ -159,7 +162,8 @@ class StatsReportController extends Controller
         return view('reports.report_chooser', compact(
             'reportingDate',
             'maybeReportDate',
-            'maybeReportUrl'
+            'maybeReportUrl',
+            'reason'
         ));
     }
 

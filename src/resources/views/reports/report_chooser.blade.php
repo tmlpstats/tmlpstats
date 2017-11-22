@@ -4,7 +4,7 @@
     <h1>Report Not Found</h1>
 
     <div id="content">
-        We couldn't find a report for <b>{{ $reportingDate->toDateString() }}</b>
+        We couldn't find a report for <b>{{ $reportingDate->toDateString() }}</b>. {{ $reason ?? '' }}
 
         @if ($maybeReportDate && $maybeReportUrl)
             <p>

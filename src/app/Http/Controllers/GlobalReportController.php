@@ -101,10 +101,13 @@ class GlobalReportController extends Controller
         ));
     }
 
-    public function showReportChooser(Request $request, Models\Region $region, Carbon $reportingDate)
+    public function showReportChooser(Request $request, Models\Region $region, Carbon $reportingDate, $reason = null)
     {
         $rrd = Encapsulations\RegionReportingDate::ensure($region, $reportingDate);
         $cq = $rrd->getRegionQuarter();
+
+        $this->context->setRegion($region);
+        $this->context->setReportingDate($reportingDate);
 
         // candidates are reporting dates in reverse, but only those which are before this reporting date.
         $dates = collect($cq->listReportingDates())->reverse()->filter(function ($d) use ($reportingDate) {
@@ -128,7 +131,8 @@ class GlobalReportController extends Controller
         return view('reports.report_chooser', compact(
             'reportingDate',
             'maybeReportDate',
-            'maybeReportUrl'
+            'maybeReportUrl',
+            'reason'
         ));
     }
 
