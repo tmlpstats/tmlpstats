@@ -223,6 +223,41 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
             }
         }
 
+        if (!$data->withdrawCodeId) {
+            return $isValid;
+        }
+
+        $code = $this->getWithdrawCode($data->withdrawCodeId);
+        if (!$code) {
+            $this->addMessage('error', [
+                'id' => 'TEAMAPP_WD_CODE_UNKNOWN',
+                'ref' => $data->getReference(['field' => 'withdrawCodeId']),
+            ]);
+            return false;
+        }
+
+        if (!$code->active) {
+            $this->addMessage('error', [
+                'id' => 'TEAMAPP_WD_CODE_INACTIVE',
+                'ref' => $data->getReference(['field' => 'withdrawCodeId']),
+                'params' => [
+                    'reason' => $code->display,
+                ],
+            ]);
+            return false;
+        }
+
+        if ($code->context !== 'all' && $code->context !== 'team_member') {
+            $this->addMessage('error', [
+                'id' => 'TEAMAPP_WD_CODE_WRONG_CONTEXT',
+                'ref' => $data->getReference(['field' => 'withdrawCodeId']),
+                'params' => [
+                    'reason' => $code->display,
+                ],
+            ]);
+            return false;
+        }
+
         return $isValid;
     }
 
@@ -359,6 +394,14 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
         }
 
         return $isValid;
+    }
+
+    public function getWithdrawCode($id)
+    {
+        if ($id === null) {
+            return null;
+        }
+        return Models\WithdrawCode::find($id);
     }
 
     /**

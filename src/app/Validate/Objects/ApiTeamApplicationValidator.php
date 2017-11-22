@@ -427,7 +427,6 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
         return true;
     }
 
-
     public function isStartingNextQuarter($data)
     {
         if ($this->nextQuarter === 'unset') {
