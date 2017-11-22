@@ -25,6 +25,8 @@ class DatabaseSeeder extends Seeder {
         $this->call('ScoreboardGlobalReportStatsReportTableSeeder');
         $this->call('ScoreboardGlobalReportTableSeeder');
 
+        $this->call('WithdrawCodesTableSeeder');
+
         // Import people and people related objects
         $this->call('PeopleObjectSeeder');
 
