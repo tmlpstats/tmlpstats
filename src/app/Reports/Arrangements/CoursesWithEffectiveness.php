@@ -27,6 +27,7 @@ class CoursesWithEffectiveness extends BaseArrangement
             'guestsInvited',
             'guestsConfirmed',
             'guestsAttended',
+            'courseCount',
         ];
 
         $totals = [
@@ -41,6 +42,9 @@ class CoursesWithEffectiveness extends BaseArrangement
                 'all' => array_fill_keys($copyFields, 0),
             ],
         ];
+
+        // only needed for totals
+        unset($copyFields['courseCount']);
 
         $reportData = [];
         foreach ($courses as $courseData) {
@@ -66,8 +70,7 @@ class CoursesWithEffectiveness extends BaseArrangement
                 }
             }
 
-            $current = $totals[$type][$state]['courseCount'] ?? 0;
-            $totals[$type][$state]['courseCount'] = $current + 1;
+            $totals[$type][$state]['courseCount']++;
 
             $course['completionStats'] = $this->calculateEffectiveness($course, $isComplete);
 
