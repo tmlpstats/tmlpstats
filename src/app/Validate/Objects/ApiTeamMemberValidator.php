@@ -230,7 +230,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
         $code = $this->getWithdrawCode($data->withdrawCodeId);
         if (!$code) {
             $this->addMessage('error', [
-                'id' => 'TEAMAPP_WD_CODE_UNKNOWN',
+                'id' => 'CLASSLIST_WD_CODE_UNKNOWN',
                 'ref' => $data->getReference(['field' => 'withdrawCodeId']),
             ]);
             return false;
@@ -238,7 +238,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
 
         if (!$code->active) {
             $this->addMessage('error', [
-                'id' => 'TEAMAPP_WD_CODE_INACTIVE',
+                'id' => 'CLASSLIST_WD_CODE_INACTIVE',
                 'ref' => $data->getReference(['field' => 'withdrawCodeId']),
                 'params' => [
                     'reason' => $code->display,
@@ -249,7 +249,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
 
         if ($code->context !== 'all' && $code->context !== 'team_member') {
             $this->addMessage('error', [
-                'id' => 'TEAMAPP_WD_CODE_WRONG_CONTEXT',
+                'id' => 'CLASSLIST_WD_CODE_WRONG_CONTEXT',
                 'ref' => $data->getReference(['field' => 'withdrawCodeId']),
                 'params' => [
                     'reason' => $code->display,
