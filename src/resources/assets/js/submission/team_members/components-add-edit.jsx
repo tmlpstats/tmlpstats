@@ -213,7 +213,7 @@ class _EditCreate extends TeamMembersBase {
             break
         case 'wd':
             const validCodes = this.props.lookups.withdraw_codes.filter((code) => {
-                return code.context == 'team_member' || code.context == 'all'
+                return (code.context == 'team_member' || code.context == 'all') && code.active
             })
             content = (
                 <div>

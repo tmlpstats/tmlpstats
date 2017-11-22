@@ -43,7 +43,7 @@ class SubmissionCore extends AuthenticatedApiBase
         }
 
         // Get values for lookups
-        $withdraw_codes = Models\WithdrawCode::active()->get();
+        $withdraw_codes = Models\WithdrawCode::get();
         $accountabilities = Models\Accountability::orderBy('display')->get();
         $centers = Models\Center::byRegion($center->getGlobalRegion())->active()->orderBy('name')->get();
 

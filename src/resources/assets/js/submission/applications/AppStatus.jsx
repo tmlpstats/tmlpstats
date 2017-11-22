@@ -108,7 +108,7 @@ export default class AppStatus extends Component {
         if (withdrawn) {
             const { withdraw_codes } = this.props.lookups
             const validCodes = withdraw_codes.filter((code) => {
-                return code.context == 'application' || code.context == 'all'
+                return (code.context == 'application' || code.context == 'all') && code.active
             })
 
             trailer = (
