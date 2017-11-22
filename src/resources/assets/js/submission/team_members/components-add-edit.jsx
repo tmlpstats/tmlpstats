@@ -212,12 +212,15 @@ class _EditCreate extends TeamMembersBase {
             )
             break
         case 'wd':
+            const validCodes = this.props.lookups.withdraw_codes.filter((code) => {
+                return code.context == 'team_member' || code.context == 'all'
+            })
             content = (
                 <div>
                     <Alert alert="info">&nbsp;{EXIT_CHOICES_HELP.wd}</Alert>
                     <label>Withdraw Reason</label>
                     <SimpleSelect
-                            model={modelKey+'.withdrawCode'} items={this.props.lookups.withdraw_codes}
+                            model={modelKey+'.withdrawCode'} items={validCodes}
                             labelProp="display" keyProp="id" emptyChoice=" " />
                 </div>
             )

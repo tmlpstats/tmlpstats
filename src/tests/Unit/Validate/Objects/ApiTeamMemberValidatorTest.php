@@ -38,6 +38,12 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
         17 => 'Logistics',
     ];
 
+    protected $defaultWithdrawCode = [
+        'active' => true,
+        'context' => 'team_member',
+        'display' => 'Cool Code',
+    ];
+
     public function setUp()
     {
         parent::setUp();
@@ -63,7 +69,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             'room' => false,
             'gitw' => false,
             'tdo' => 0,
-            'withdrawCode' => null,
+            'withdrawCodeId' => null,
             'comment' => null,
         ];
     }
@@ -80,10 +86,8 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
      */
     public function testRun($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamMember($data);
-
-        $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamMember($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -110,7 +114,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                     'room' => null,
                     'gitw' => null,
                     'tdo' => null,
-                    'withdrawCode' => null,
+                    'withdrawCodeId' => null,
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
@@ -192,10 +196,8 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
      */
     public function testValidateGitw($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamMember($data);
-
-        $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamMember($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -224,8 +226,9 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             [
                 [
                     'gitw' => null,
-                    'withdrawCode' => 2,
+                    'withdrawCodeId' => 2,
                     'comment' => 'something about the withdraw',
+                    '__withdrawCode' => $this->defaultWithdrawCode,
                 ],
                 [],
                 true,
@@ -294,10 +297,8 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
      */
     public function testValidateTdo($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamMember($data);
-
-        $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamMember($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -326,8 +327,9 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             [
                 [
                     'tdo' => null,
-                    'withdrawCode' => 2,
+                    'withdrawCodeId' => 2,
                     'comment' => 'something about the withdraw',
+                    '__withdrawCode' => $this->defaultWithdrawCode,
                 ],
                 [],
                 true,
@@ -404,10 +406,8 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
      */
     public function testValidateTeamYear($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamMember($data);
-
-        $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamMember($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -512,14 +512,13 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
      */
     public function testValidateTransfer($data, $expectedMessages, $expectedResult, $pastWeeks = [])
     {
-        $data = $this->getTeamMember($data);
-
+        $members = $this->getTeamMember($data);
         if ($pastWeeks) {
             $pastWeeks = [ $this->getTeamMember($pastWeeks) ];
         }
 
-        $validator = $this->getObjectMock();
-        $result = $validator->run($data, $pastWeeks);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($members, $pastWeeks);
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -716,10 +715,8 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
      */
     public function testValidateWithdraw($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamMember($data);
-
-        $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamMember($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -731,7 +728,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             // Wd, Ctw null
             [
                 [
-                    'withdrawCode' => null,
+                    'withdrawCodeId' => null,
                     'ctw' => null,
                     'wbo' => null,
                     'comment' => null,
@@ -743,8 +740,9 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             // Wd set with comment
             [
                 [
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                     'comment' => 'something about the wd',
+                    '__withdrawCode' => $this->defaultWithdrawCode,
                 ],
                 [],
                 true,
@@ -771,9 +769,10 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             // Wd & CTW set
             [
                 [
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                     'ctw' => true,
                     'comment' => 'something about the wd',
+                    '__withdrawCode' => $this->defaultWithdrawCode,
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
@@ -786,9 +785,10 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             // Wd & WBO set
             [
                 [
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                     'wbo' => true,
                     'comment' => 'something about the wd',
+                    '__withdrawCode' => $this->defaultWithdrawCode,
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
@@ -817,8 +817,9 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             // Wd set without comment
             [
                 [
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                     'comment' => null,
+                    '__withdrawCode' => $this->defaultWithdrawCode,
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
@@ -856,6 +857,65 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 ],
                 false,
             ],
+            // Not withdrawn
+            [
+                [
+                    'withdrawCodeId' => null,
+                ],
+                [],
+                true,
+            ],
+            // App only code
+            [
+                [
+                    'wdDate' => Carbon::parse('2016-09-01'),
+                    'withdrawCodeId' => 1,
+                    'comment' => 'something about the wd',
+                    '__withdrawCode' => [
+                        'active' => true,
+                        'context' => 'team_member',
+                        'display' => 'Cool Code',
+                    ],
+                ],
+                [],
+                true,
+            ],
+            // Inactive code
+            [
+                [
+                    'wdDate' => Carbon::parse('2016-09-01'),
+                    'withdrawCodeId' => 2,
+                    'comment' => 'something about the wd',
+                    '__withdrawCode' => [
+                        'active' => false,
+                        'context' => 'team_member',
+                        'display' => 'Another Cool Code',
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_WD_CODE_INACTIVE',
+                        'reference.field' => 'withdrawCodeId',
+                    ]),
+                ],
+                false,
+            ],
+            // Invalid code
+            [
+                [
+                    'wdDate' => Carbon::parse('2016-09-01'),
+                    'withdrawCodeId' => 99,
+                    'comment' => 'something about the wd',
+                    '__withdrawCode' => [],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_WD_CODE_UNKNOWN',
+                        'reference.field' => 'withdrawCodeId',
+                    ]),
+                ],
+                false,
+            ],
         ];
     }
 
@@ -864,10 +924,8 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
      */
     public function testValidateTravel($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamMember($data);
-
-        $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamMember($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -924,9 +982,10 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 [
                     'travel' => null,
                     'room' => null,
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                     'comment' => 'something about the wd',
                     '__reportingDate' => Carbon::parse('2016-10-07'),
+                    '__withdrawCode' => $this->defaultWithdrawCode,
                 ],
                 [],
                 true,
@@ -1033,9 +1092,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
      */
     public function testValidateAccountablilities($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamMember($data);
-
-        $validator = $this->getObjectMock(['getAccountability']);
+        $validator = $this->getValidatorMock($data, ['getAccountability']);
         $validator->expects($this->any())
             ->method('getAccountability')
             ->will($this->returnCallback(function($id) {
@@ -1048,7 +1105,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 return $accountability;
             }));
 
-        $result = $validator->run($data);
+        $result = $validator->run($this->getTeamMember($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -1290,11 +1347,12 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             // Has withdrawn, ignores contact info and throws error to remove accountabilities
             [
                 [
-                    'withdrawCode' => 1,
+                    'withdrawCodeId' => 1,
                     'comment' => 'withdraw message',
                     'accountabilities' => [
                         4
                     ],
+                    '__withdrawCode' => $this->defaultWithdrawCode,
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
@@ -1400,10 +1458,8 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
      */
     public function testValidateComment($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamMember($data);
-
-        $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamMember($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -1442,6 +1498,40 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 false,
             ],
         ];
+    }
+
+    public function getValidatorMock($data, $methods = [])
+    {
+        $methods = array_merge(['getWithdrawCode'], $methods);
+
+        $mock = $this->getObjectMock($methods);
+
+        if (isset($data['withdrawCodeId'])) {
+            // If __withdrawCode isn't set at all, provide a reasonable default
+            if (!isset($data['__withdrawCode'])) {
+                $data['__withdrawCode'] = [
+                    'active' => true,
+                    'context' => 'team_member',
+                    'display' => 'Cool Code',
+                ];
+            }
+
+            // If __withdrawCode is empty, we'll pretend it doesn't exist
+            $code = null;
+            if (isset($data['__withdrawCode']['active'])) {
+                $code = new \stdClass;
+
+                $code->active = $data['__withdrawCode']['active'];
+                $code->context = $data['__withdrawCode']['context'];
+                $code->display = $data['__withdrawCode']['display'];
+            }
+
+            $mock->method('getWithdrawCode')
+                 ->with($data['withdrawCodeId'])
+                 ->willReturn($code);
+        }
+
+        return $mock;
     }
 
     public function getTeamMember($data)

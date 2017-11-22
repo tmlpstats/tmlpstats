@@ -2,6 +2,7 @@
 namespace TmlpStats\Validate\Objects;
 
 use Respect\Validation\Validator as v;
+use TmlpStats as Models;
 use TmlpStats\Traits;
 
 class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
@@ -57,6 +58,9 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
             $this->isValid = false;
         }
         if (!$this->validateComment($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateWithdraw($data)) {
             $this->isValid = false;
         }
 
@@ -383,17 +387,64 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
         return $isValid;
     }
 
-    public function isStartingNextQuarter($data)
+    public function validateWithdraw($data)
     {
-        $nextQuarter = $this->nextQuarter;
-        if ($this->nextQuarter === 'unset') {
-            $this->nextQuarter = $nextQuarter = $this->statsReport->quarter->getNextQuarter();
+        if (!$data->withdrawCodeId) {
+            return true;
         }
 
-        if (!$nextQuarter) {
+        $code = $this->getWithdrawCode($data->withdrawCodeId);
+        if (!$code) {
+            $this->addMessage('error', [
+                'id' => 'TEAMAPP_WD_CODE_UNKNOWN',
+                'ref' => $data->getReference(['field' => 'withdrawCodeId']),
+            ]);
             return false;
         }
 
-        return $this->startingNextQuarter = ($nextQuarter->id === $data->incomingQuarterId);
+        if (!$code->active) {
+            $this->addMessage('error', [
+                'id' => 'TEAMAPP_WD_CODE_INACTIVE',
+                'ref' => $data->getReference(['field' => 'withdrawCodeId']),
+                'params' => [
+                    'reason' => $code->display,
+                ],
+            ]);
+            return false;
+        }
+
+        if ($code->context !== 'all' && $code->context !== 'application') {
+            $this->addMessage('error', [
+                'id' => 'TEAMAPP_WD_CODE_WRONG_CONTEXT',
+                'ref' => $data->getReference(['field' => 'withdrawCodeId']),
+                'params' => [
+                    'reason' => $code->display,
+                ],
+            ]);
+            return false;
+        }
+
+        return true;
+    }
+
+    public function isStartingNextQuarter($data)
+    {
+        if ($this->nextQuarter === 'unset') {
+            $this->nextQuarter = $this->statsReport->quarter->getNextQuarter();
+        }
+
+        if (!$this->nextQuarter) {
+            return false;
+        }
+
+        return $this->startingNextQuarter = ($this->nextQuarter->id === $data->incomingQuarterId);
+    }
+
+    public function getWithdrawCode($id)
+    {
+        if ($id === null) {
+            return null;
+        }
+        return Models\WithdrawCode::find($id);
     }
 }

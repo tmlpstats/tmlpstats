@@ -46,7 +46,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
             'appInDate' => Carbon::parse('2016-08-24'),
             'apprDate' => Carbon::parse('2016-08-25'),
             'wdDate' => null,
-            'withdrawCode' => null,
+            'withdrawCodeId' => null,
             'committedTeamMember' => 1234,
             'incomingQuarter' => 1234,
             'comment' => 'asdf qwerty',
@@ -67,9 +67,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
      */
     public function testRun($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamApplication($data);
-
-        $validator = $this->getObjectMock(['isStartingNextQuarter', 'isTimeToCheckTravel']);
+        $validator = $this->getValidatorMock($data, ['isStartingNextQuarter', 'isTimeToCheckTravel']);
 
         $validator->expects($this->any())
                   ->method('isStartingNextQuarter')
@@ -79,7 +77,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                   ->method('isTimeToCheckTravel')
                   ->willReturn(false);
 
-        $result = $validator->run($data);
+        $result = $validator->run($this->getTeamApplication($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -105,7 +103,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'apprDate' => null,
                     'wdDate' => null,
                     'committedTeamMember' => null,
-                    'withdrawCode' => null,
+                    'withdrawCodeId' => null,
                     'incomingQuarter' => null,
                     'comment' => null,
                     'travel' => null,
@@ -151,7 +149,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
             [
                 [
                     'wdDate' => Carbon::parse('2016-08-26'),
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                     'teamYear' => 2,
                     'isReviewer' => true,
                     'travel' => false,
@@ -208,10 +206,8 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
      */
     public function testValidateApprovalProcess($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamApplication($data);
-
-        $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamApplication($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -227,7 +223,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'appInDate' => null,
                     'apprDate' => null,
                     'wdDate' => Carbon::parse('2016-08-22'),
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                 ],
                 [],
                 true,
@@ -239,7 +235,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'appInDate' => Carbon::parse('2016-08-23'),
                     'apprDate' => Carbon::parse('2016-08-27'),
                     'wdDate' => Carbon::parse('2016-08-28'),
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                 ],
                 [],
                 true,
@@ -248,7 +244,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
             [
                 [
                     'wdDate' => Carbon::parse('2016-08-28'),
-                    'withdrawCode' => null,
+                    'withdrawCodeId' => null,
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
@@ -262,7 +258,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
             [
                 [
                     'wdDate' => null,
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
@@ -405,10 +401,8 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
      */
     public function testValidateDates($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamApplication($data);
-
-        $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamApplication($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -425,7 +419,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'appInDate' => null,
                     'apprDate' => null,
                     'wdDate' => Carbon::parse('2016-08-25'),
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                 ],
                 [],
                 true,
@@ -438,7 +432,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'appInDate' => null,
                     'apprDate' => null,
                     'wdDate' => Carbon::parse('2016-08-21'),
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
@@ -456,7 +450,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'appInDate' => null,
                     'apprDate' => Carbon::parse('2016-08-25'),
                     'wdDate' => Carbon::parse('2016-08-26'),
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                 ],
                 [],
                 true,
@@ -469,7 +463,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'appInDate' => null,
                     'apprDate' => Carbon::parse('2016-08-25'),
                     'wdDate' => Carbon::parse('2016-08-24'),
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
@@ -487,7 +481,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'appInDate' => Carbon::parse('2016-08-24'),
                     'apprDate' => null,
                     'wdDate' => Carbon::parse('2016-08-26'),
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                 ],
                 [],
                 true,
@@ -500,7 +494,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'appInDate' => Carbon::parse('2016-08-24'),
                     'apprDate' => null,
                     'wdDate' => Carbon::parse('2016-08-23'),
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
@@ -518,7 +512,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'appInDate' => null,
                     'apprDate' => null,
                     'wdDate' => Carbon::parse('2016-08-26'),
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                 ],
                 [],
                 true,
@@ -531,7 +525,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'appInDate' => null,
                     'apprDate' => null,
                     'wdDate' => Carbon::parse('2016-08-22'),
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
@@ -855,7 +849,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'appInDate' => Carbon::parse('2016-08-24'),
                     'apprDate' => Carbon::parse('2016-08-25'),
                     'wdDate' => Carbon::parse('2016-09-09'),
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
@@ -921,10 +915,8 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
      */
     public function testValidateTravel($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamApplication($data);
-
-        $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamApplication($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -940,7 +932,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'room' => null,
                     'comment' => null,
                     'wdDate' => null,
-                    'withdrawCode' => null,
+                    'withdrawCodeId' => null,
                     'incomingQuarter' => 'next',
                     '__reportingDate' => Carbon::parse('2016-09-02'),
                 ],
@@ -954,7 +946,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'room' => true,
                     'comment' => null,
                     'wdDate' => null,
-                    'withdrawCode' => null,
+                    'withdrawCodeId' => null,
                     'incomingQuarter' => 'next',
                     '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
@@ -968,7 +960,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'room' => null,
                     'comment' => 'Travel and rooming booked by May 4',
                     'wdDate' => null,
-                    'withdrawCode' => null,
+                    'withdrawCodeId' => null,
                     'incomingQuarter' => 'next',
                     '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
@@ -993,7 +985,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'room' => null,
                     'comment' => null,
                     'wdDate' => Carbon::parse('2016-08-26'),
-                    'withdrawCode' => 1234,
+                    'withdrawCodeId' => 1234,
                     'incomingQuarter' => 'next',
                     '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
@@ -1007,7 +999,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'room' => null,
                     'comment' => null,
                     'wdDate' => null,
-                    'withdrawCode' => null,
+                    'withdrawCodeId' => null,
                     'incomingQuarter' => 'future',
                     '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
@@ -1021,7 +1013,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'room' => true,
                     'comment' => null,
                     'wdDate' => null,
-                    'withdrawCode' => null,
+                    'withdrawCodeId' => null,
                     'incomingQuarter' => 'next',
                     '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
@@ -1040,7 +1032,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'room' => true,
                     'comment' => '',
                     'wdDate' => null,
-                    'withdrawCode' => null,
+                    'withdrawCodeId' => null,
                     'incomingQuarter' => 'next',
                     '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
@@ -1059,7 +1051,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'room' => null,
                     'comment' => null,
                     'wdDate' => null,
-                    'withdrawCode' => null,
+                    'withdrawCodeId' => null,
                     'incomingQuarter' => 'next',
                     '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
@@ -1078,7 +1070,7 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                     'room' => null,
                     'comment' => '',
                     'wdDate' => null,
-                    'withdrawCode' => null,
+                    'withdrawCodeId' => null,
                     'incomingQuarter' => 'next',
                     '__reportingDate' => Carbon::parse('2016-10-07'),
                 ],
@@ -1098,10 +1090,8 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
      */
     public function testValidateReviewer($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamApplication($data);
-
-        $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamApplication($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -1159,10 +1149,8 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
      */
     public function testValidateComment($data, $expectedMessages, $expectedResult)
     {
-        $data = $this->getTeamApplication($data);
-
-        $validator = $this->getObjectMock();
-        $result = $validator->run($data);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamApplication($data));
 
         $this->assertMessages($expectedMessages, $validator->getMessages());
         $this->assertEquals($expectedResult, $result);
@@ -1203,19 +1191,87 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
         ];
     }
 
-    //
-    // Helpers
-    //
+    /**
+     * @dataProvider providerValidateWithdraw
+     */
+    public function testValidateWithdraw($data, $expectedMessages, $expectedResult)
+    {
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamApplication($data));
+
+        $this->assertMessages($expectedMessages, $validator->getMessages());
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    public function providerValidateWithdraw()
+    {
+        return [
+            // Not withdrawn
+            [
+                [
+                    'withdrawCodeId' => null,
+                ],
+                [],
+                true,
+            ],
+            // App only code
+            [
+                [
+                    'wdDate' => Carbon::parse('2016-09-01'),
+                    'withdrawCodeId' => 1,
+                    '__withdrawCode' => [
+                        'active' => true,
+                        'context' => 'application',
+                        'display' => 'Cool Code',
+                    ],
+                ],
+                [],
+                true,
+            ],
+            // Inactive code
+            [
+                [
+                    'wdDate' => Carbon::parse('2016-09-01'),
+                    'withdrawCodeId' => 2,
+                    '__withdrawCode' => [
+                        'active' => false,
+                        'context' => 'application',
+                        'display' => 'Another Cool Code',
+                    ],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_WD_CODE_INACTIVE',
+                        'reference.field' => 'withdrawCodeId',
+                    ]),
+                ],
+                false,
+            ],
+            // Invalid code
+            [
+                [
+                    'wdDate' => Carbon::parse('2016-09-01'),
+                    'withdrawCodeId' => 99,
+                    '__withdrawCode' => [],
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'TEAMAPP_WD_CODE_UNKNOWN',
+                        'reference.field' => 'withdrawCodeId',
+                    ]),
+                ],
+                false,
+            ],
+        ];
+    }
 
     /**
      * @dataProvider providerIsStartingNextQuarter
      */
     public function testIsStartingNextQuarter($data, $expected)
     {
-        $data = $this->getTeamApplication($data);
-
-        $validator = $this->getObjectMock();
-        $result = $validator->isStartingNextQuarter($data);
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->isStartingNextQuarter($this->getTeamApplication($data));
 
         $this->assertEquals($expected, $result);
     }
@@ -1238,6 +1294,44 @@ class ApiTeamApplicationValidatorTest extends ApiValidatorTestAbstract
                 false,
             ],
         ];
+    }
+
+    //
+    // Helpers
+    //
+
+    public function getValidatorMock($data, $methods = [])
+    {
+        $methods = array_merge(['getWithdrawCode'], $methods);
+
+        $mock = $this->getObjectMock($methods);
+
+        if (isset($data['withdrawCodeId'])) {
+            // If __withdrawCode isn't set at all, provide a reasonable default
+            if (!isset($data['__withdrawCode'])) {
+                $data['__withdrawCode'] = [
+                    'active' => true,
+                    'context' => 'application',
+                    'display' => 'Cool Code',
+                ];
+            }
+
+            // If __withdrawCode is empty, we'll pretend it doesn't exist
+            $code = null;
+            if (isset($data['__withdrawCode']['active'])) {
+                $code = new \stdClass;
+
+                $code->active = $data['__withdrawCode']['active'];
+                $code->context = $data['__withdrawCode']['context'];
+                $code->display = $data['__withdrawCode']['display'];
+            }
+
+            $mock->method('getWithdrawCode')
+                 ->with($data['withdrawCodeId'])
+                 ->willReturn($code);
+        }
+
+        return $mock;
     }
 
     public function getTeamApplication($data)
