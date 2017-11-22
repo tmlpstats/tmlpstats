@@ -416,6 +416,158 @@ class SubmissionCoreTest extends FunctionalTestAbstract
         ];
     }
 
+    /**
+     * @dataProvider providerSubmitTeamMembers
+     */
+    public function testSubmitTeamMembers($setTM)
+    {
+        $lastQuarter = Models\Quarter::year(2015)->quarterNumber(4)->firstOrFail();
+        $statsReport = App::make(Api\LocalReport::class)->ensureStatsReport(
+            $this->center,
+            $this->reportingDate
+        );
+        $teamMembers = [];
+        $byName = [];
+
+        $reportNow = $this->reportingDate->copy()->setTime(15, 0, 0);
+        $quarterEndDate = $this->cq->endWeekendDate->copy()->addDay()->setTime(12, 00, 00);
+
+        // Create fake TMData to start
+        foreach ($this->sequentialNamedTeam() as $tm) {
+            $tmd = new Models\TeamMemberData(['at_weekend' => true]); // bogus
+            $domain = Domain\TeamMember::fromModel($tmd, $tm);
+            $domain->meta['personId'] = $tm->person->id;
+            $domain->meta['personObj'] = $tm->person; // atypical, only used for this test.
+            $domain->clearSetValues();
+            $teamMembers[$domain->id] = $domain;
+            $byName[$tm->firstName] = $domain->id;
+        }
+
+        // Set team member stashes from input
+        $negativeId = -100;
+        foreach ($setTM as $firstName => $data) {
+            if ($tmId = $byName[$firstName] ?? null) {
+                $tmDomain = $teamMembers[$tmId];
+            } else {
+                $tmDomain = Domain\TeamMember::fromArray([
+                    'id' => --$negativeId,
+                    'at_weekend' => true,
+                    'is_reviewer' => false,
+                    'firstName' => $firstName,
+                    'lastName' => 'newPerson',
+                    'teamYear' => 1,
+                    'incomingQuarter' => $lastQuarter->id,
+                ]);
+                $teamMembers[$tmDomain->id] = $tmDomain;
+            }
+
+            if (isset($data['stashed'])) {
+                $stashed = collect($data['stashed'])->map(function ($v, $k) {
+                    return ($v instanceof \Closure) ? $v() : $v;
+                });
+                $tmDomain->updateFromArray($stashed->all());
+            }
+        }
+
+        // Actually run API
+        $this->api->submitTeamMembers($this->center, $this->reportingDate, $statsReport, $teamMembers);
+
+        $allTmd = Models\TeamMemberData::byStatsReport($statsReport)
+            ->get()
+            ->keyBy('teamMemberId');
+
+        // Run checks that are set
+        foreach ($setTM as $firstName => $data) {
+            if ($tmId = $byName[$firstName] ?? null) {
+                $tmd = $allTmd->get($tmId);
+            } else {
+                $tmd = $allTmd->first(function ($k, $x) use ($firstName) {return $x->firstName == $firstName;});
+            }
+            $this->assertNotNull($tmd, "{$firstName} has missing TMData");
+
+            if ($checker = $data['checks'] ?? null) {
+                $checker($this, $tmd, $tmd->teamMember);
+            }
+
+        }
+    }
+
+    public function providerSubmitTeamMembers()
+    {
+        return [
+            // First run, do a withdraw and some other things
+            [[
+                'person1' => [
+                    'stashed' => ['withdrawCode' => 1, 'tdo' => 0, 'travel' => true, 'room' => false],
+                    'checks' => function ($suite, $tmd, $tm) {
+                        $suite->assertNotEmpty($tm->firstName);
+                        $suite->assertNotEmpty($tm->lastName);
+                        $suite->assertEquals(1, $tmd->withdrawCodeId);
+                        $suite->assertEquals(1, $tmd->withdrawCode->id);
+                        $suite->assertTrue($tmd->travel);
+                        $suite->assertFalse($tmd->room);
+                    },
+                ],
+                'person2' => [
+                    'stashed' => ['gitw' => true, 'tdo' => 2, 'firstName' => 'Bob', 'teamYear' => 2],
+                    'checks' => function ($suite, $tmd, $tm) {
+                        $suite->assertEquals(null, $tmd->withdrawCode);
+                        $suite->assertEquals(true, $tmd->gitw);
+                        $suite->assertEquals(2, $tmd->tdo);
+                        $suite->assertEquals(2, $tm->teamYear);
+                        $suite->assertEquals('Bob', $tm->person->firstName);
+                    },
+                ],
+                'person3' => [
+                    'checks' => function ($suite, $tmd, $tm) {
+                        $suite->assertEquals(false, $tmd->gitw);
+                        $suite->assertEquals(0, $tmd->tdo);
+                    },
+                ],
+                'person4' => [
+                    'stashed' => [
+                        'travel' => false, 'room' => true,
+                        '_personId' => function () {
+                            return factory(Models\Person::class)->create([
+                                'firstName' => 'otherPerson',
+                                'lastName' => 'otherPersonLastName',
+                                'identifier' => 'op',
+                            ])->id;
+                        },
+                    ],
+                    'checks' => function ($suite, $tmd, $tm) {
+                        $suite->assertFalse($tmd->travel);
+                        $suite->assertTrue($tmd->room);
+                        $suite->assertEquals('op', $tm->person->identifier);
+                    },
+                ],
+                'person5' => [
+                    // Testing accountabilities tests an issue we found with `fillModel` - worked but did odd things
+                    'stashed' => ['accountabilities' => [7, 8]],
+                ],
+                // This checks that we can create new people too
+                'newPerson1' => [
+                    'stashed' => ['gitw' => false, 'tdo' => 1],
+                    'checks' => function ($suite, $tmd, $tm) {
+                        $suite->assertFalse($tmd->gitw);
+                        $suite->assertEquals(1, $tmd->tdo);
+                        $suite->assertGreaterThan(1, $tm->id);
+                    },
+                ],
+            ]],
+
+            // This checks a few edge cases like withdrawn new person
+            [[
+                'createPerson1' => [
+                    'stashed' => ['withdrawCode' => 1],
+                    'checks' => function ($suite, $tmd, $tm) {
+                        $suite->assertFalse($tmd->gitw);
+                    },
+                ],
+            ]],
+        ];
+    }
+
     public function sequentialNamedTeam()
     {
         $peeps = [];
