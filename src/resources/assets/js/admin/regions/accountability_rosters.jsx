@@ -113,6 +113,54 @@ export class AccountabilityRosters extends RegionBase {
 }
 
 class AccountabilityRoster extends RegionBase {
+    formatPhoneNumber(center, phone) {
+        if (!phone) {
+            return phone
+        }
+
+        // TODO: We need to implement this country code lookup into the center table
+        //       or possible storing the person's phone_country on the people table
+        //       so we know how to parse the numbers
+        let phoneString = phone
+        let country
+        let format = PhoneNumberFormat.INTERNATIONAL
+
+        switch (this.props.params.regionAbbr) {
+        case 'anz':
+            country = 'AU'
+            if (center.abbreviation == 'auk') {
+                country = 'NZ'
+            }
+            break
+        case 'eme':
+            country = 'GB'
+            if (center.abbreviation == 'tlv') {
+                country = 'IL'
+            }
+            break
+        case 'ind':
+            country = 'IN'
+            break
+        case 'na':
+        default:
+            country = 'US'
+            if (center.abbreviation == 'mex') {
+                country = 'MX'
+            }
+            break
+        }
+
+        try {
+            const phoneUtil = PhoneNumberUtil.getInstance()
+            const phoneNumber = phoneUtil.parse(phone, country)
+            phoneString = phoneUtil.format(phoneNumber, format)
+        } catch (e) {
+            console.log(`Error formatting phone number ${phone} ` + e)
+        }
+
+        return phoneString
+    }
+
     render() {
         const { regionQuarter } = this.props
         const rows = this.props.allCenters.map((center) => {
@@ -121,43 +169,7 @@ class AccountabilityRoster extends RegionBase {
             const dest = `/reports/centers/${center.abbreviation}/${regionQuarter.endWeekendDate}/Weekend/NextQtrAccountabilities`
             const editDest = `/center/${center.abbreviation}/submission/${regionQuarter.endWeekendDate}/next_qtr_accountabilities`
 
-            // TODO: We need to implement this country code lookup into the center table
-            //       or possible storing the person's phone_country on the people table
-            //       so we know how to parse the numbers
-            let phoneString = data.phone
-            if (data.phone) {
-                let country
-                let format = PhoneNumberFormat.INTERNATIONAL
-
-                switch (this.props.params.regionAbbr) {
-                case 'anz':
-                    country = 'AU'
-                    if (center.abbreviation == 'auk') {
-                        country = 'NZ'
-                    }
-                    break
-                case 'eme':
-                    country = 'GB'
-                    if (center.abbreviation == 'tlv') {
-                        country = 'IL'
-                    }
-                    break
-                case 'ind':
-                    country = 'IN'
-                    break
-                case 'na':
-                default:
-                    country = 'US'
-                    if (center.abbreviation == 'mex') {
-                        country = 'MX'
-                    }
-                    break
-                }
-
-                const phoneUtil = PhoneNumberUtil.getInstance()
-                const phoneNumber = phoneUtil.parse(data.phone, country)
-                phoneString = phoneUtil.format(phoneNumber, format)
-            }
+            const phoneString = this.formatPhoneNumber(center, data.phone)
 
             return (
                 <tr key={center.id}>
