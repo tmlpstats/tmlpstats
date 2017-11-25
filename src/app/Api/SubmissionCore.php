@@ -460,10 +460,14 @@ class SubmissionCore extends AuthenticatedApiBase
             ->keys();
 
         // Prefetch all the applications so we only need to do one query
-        $lastWeekData = Models\TmlpRegistrationData::byStatsReport($lastReport)
-            ->whereIn('tmlp_registration_id', $appIds)
-            ->get()
-            ->keyBy(function ($app) {return $app->tmlpRegistrationId;});
+        if ($lastReport !== null) {
+            $lastWeekData = Models\TmlpRegistrationData::byStatsReport($lastReport)
+                ->whereIn('tmlp_registration_id', $appIds)
+                ->get()
+                ->keyBy(function ($app) {return $app->tmlpRegistrationId;});
+        } else {
+            $lastWeekData = collect([]);
+        }
 
         // clear transfers
         Models\Transfer::byCenter($center)->reportingDate($reportingDate)->delete();
