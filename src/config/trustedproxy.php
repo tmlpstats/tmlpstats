@@ -57,5 +57,10 @@ return [
         \Illuminate\Http\Request::HEADER_CLIENT_HOST  => 'X_FORWARDED_HOST',
         \Illuminate\Http\Request::HEADER_CLIENT_PROTO => 'X_FORWARDED_PROTO',
         \Illuminate\Http\Request::HEADER_CLIENT_PORT  => 'X_FORWARDED_PORT',
+
+        // As documented in this issue comment:
+        // https://github.com/symfony/symfony/issues/20215#issuecomment-261252378
+        // This is a workaround to ignore the 'Forwarded' header which we don't want.
+        \Illuminate\Http\Request::HEADER_FORWARDED    => null,
     ]
 ];
