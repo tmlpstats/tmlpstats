@@ -511,9 +511,9 @@ class SubmissionCore extends AuthenticatedApiBase
      * @param  string        $type          Stash stored_type
      * @param  string        $stashId       Stash stored_id
      * @param  string        $newId         New value for stroed_id
-     * @return boolean
+     * @return bool
      */
-    protected function updateStashIds(Models\Center $center, Carbon $reportingDate, $type, $stashId, $newId)
+    protected function updateStashIds(Models\Center $center, Carbon $reportingDate, string $type, $stashId, $newId): bool
     {
         // Now update the stash so subsequent submits don't create new people again
         $stash = Models\SubmissionData::centerDate($center, $reportingDate)
@@ -653,7 +653,7 @@ class SubmissionCore extends AuthenticatedApiBase
             list($tm, $person) = $this->ensureTeamMember($center, $tmDomain);
             if ($tmDomain->id < 0) {
                 // If ID < 0, then we need to update any existing stash with the newly assigned team member ID
-                Models\SubmissionData::centerDate($center, $reportingDate)->typeId('team_member', $tmDomain->id)->update(['stored_id' => $tm->id]);
+                $this->updateStashIds($center, $reportingDate, 'team_member', $tmDomain->id, $tm->id);
                 $tmDomain->id = $tm->id;
             }
             $tmd = Models\TeamMemberData::firstOrNew([
