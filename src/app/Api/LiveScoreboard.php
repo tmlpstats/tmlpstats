@@ -95,7 +95,7 @@ class LiveScoreboard extends AuthenticatedApiBase
         // Step 1: Determine the week for promises to use (may be same week)
         $actualDate = $report->reportingDate;
         if ($actualDate->lt($now)) {
-            $reportingDates = $report->quarter->listReportingDates($report->center);
+            $reportingDates = $report->quarter->getCenterQuarter($report->center)->listReportingDates();
             foreach ($reportingDates as $promiseDate) {
                 if ($promiseDate->gt($now)) {
                     break;

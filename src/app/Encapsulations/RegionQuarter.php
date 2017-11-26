@@ -5,7 +5,6 @@ use App;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Domain\Logic\QuarterDates;
-use TmlpStats\Traits\ScopedSettings;
 
 /**
  * RegionQuarter encapsulates data specific to quarters in a region.
@@ -15,7 +14,6 @@ use TmlpStats\Traits\ScopedSettings;
  */
 class RegionQuarter implements \JsonSerializable
 {
-    use ScopedSettings;
     protected $region;
     protected $quarter;
 
@@ -72,6 +70,11 @@ class RegionQuarter implements \JsonSerializable
         }
 
         return $output;
+    }
+
+    public function getNextMilestone(Carbon $ref = null): Carbon
+    {
+        return QuarterDates::getNextMilestone($this, $ref);
     }
 
     public function toArray()

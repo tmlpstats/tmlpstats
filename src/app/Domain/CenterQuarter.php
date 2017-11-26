@@ -120,13 +120,14 @@ class CenterQuarter implements Arrayable, \JsonSerializable
     }
 
     /**
-     * Get the date when repromises are accepted
+     * Get the date when repromises are accepted.
+     * LEGACY/DEPRECATED: This is only used for the Excel submission.
      *
      * Will check for a setting override, otherwise uses the classroom2 date
      *
      * @return Carbon
      */
-    public function getRepromiseDate()
+    public function getRepromiseDate(): Carbon
     {
         if ($this->repromiseDate === null) {
             $setting = $this->getSetting('repromiseDate');
