@@ -2,6 +2,7 @@
 namespace TmlpStats\Encapsulations;
 
 use App;
+use Carbon\Carbon;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Domain\Logic\QuarterDates;
