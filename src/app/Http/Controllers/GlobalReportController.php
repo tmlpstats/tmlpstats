@@ -194,7 +194,7 @@ class GlobalReportController extends Controller
 
             $abbr = $thisRegion->abbreviation;
             foreach (Domain\Scoreboard::GAME_KEYS as $game) {
-                $actual = (int) $regionsData[$abbr]->getWeek($globalReport->reportingDate)->game($game)->actual();
+                $actual = (int) $regionsData[$abbr]->ensureWeek($globalReport->reportingDate)->game($game)->actual();
 
                 $rpp[$abbr][$game] = ($participantCount > 0) ? ($actual / $participantCount) : 0;
                 $rpp[$abbr]['participantCount'] = $participantCount;
