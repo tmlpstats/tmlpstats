@@ -39,7 +39,7 @@ class LocalReport extends AuthenticatedApiBase
 
         $scoreboardData = $this->getQuarterScoreboard($statsReport);
 
-        $response = $scoreboardData->getWeek($statsReport->reportingDate) ?? [];
+        $response = $scoreboardData->ensureWeek($statsReport->reportingDate);
 
         $this->putCache($response);
 

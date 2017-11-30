@@ -98,7 +98,7 @@ class GlobalReport extends AuthenticatedApiBase
 
         $date = $futureDate ?: $report->reportingDate;
 
-        $reportData = $scoreboardData->getWeek($date) ?? [];
+        $reportData = $scoreboardData->ensureWeek($date);
 
         $this->putCache($reportData);
 

@@ -250,10 +250,17 @@ class ReportsController extends Controller
         }
 
         $report = null;
+        $missingReportReason = null;
         if ($reportType == 'region') {
             $controller = App::make(GlobalReportController::class);
 
             $report = $globalReport ?: GlobalReport::reportingDate($reportingDate)->first();
+
+            // If we don't have any stats report for this region, then don't show the global report
+            if ($report && $report->statsReports()->byRegion($reportTarget)->count() === 0) {
+                $report = null;
+                $missingReportReason = "There are currently no reports from centers in {$reportTarget->name} for that week.";
+            }
         } else {
             $controller = App::make(StatsReportController::class);
 
@@ -269,7 +276,7 @@ class ReportsController extends Controller
 
         // Find a report from a previous week
         if ($report === null) {
-            return $controller->showReportChooser($request, $reportTarget, $reportingDate);
+            return $controller->showReportChooser($request, $reportTarget, $reportingDate, $missingReportReason);
         }
 
         $redirectUrl = $controller->getUrl($report, $reportTarget);
