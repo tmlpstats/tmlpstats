@@ -6,15 +6,10 @@ dist: precise
 
 env:
   matrix:
-    - PHP_COVERAGE_ON=
     - PHP_COVERAGE_ON=y
 
 matrix:
-  allow_failures:
-    - php: 7.0
-      env: PHP_COVERAGE_ON=y
-    - php: 7.1
-      env: PHP_COVERAGE_ON=y
+  allow_failures: []
 
 sudo: required
 
@@ -54,11 +49,9 @@ script:
 after_script:
   - ls -l build/logs/
   - >
-    if [[ $TRAVIS_PHP_VERSION =~ ^7 ]]; then
-      if [[ $PHP_COVERAGE_ON = "y" ]]; then
-        travis_retry php vendor/bin/coveralls -v;
-      else
-        npm install coveralls &&
-        cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js;
-      fi
+    if [[ $PHP_COVERAGE_ON = "y" ]]; then
+      travis_retry php vendor/bin/coveralls -v;
     fi
+  - >
+    npm install coveralls &&
+    cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
