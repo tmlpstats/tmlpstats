@@ -204,8 +204,9 @@ class GlobalReportController extends Controller
 
     protected function getGaps(Models\GlobalReport $globalReport, Models\Region $region)
     {
-        $quarter = Models\Quarter::getQuarterByDate($globalReport->reportingDate, $region);
-        $nextMilestone = $quarter->getNextMilestone($globalReport->reportingDate);
+        $rrd = Encapsulations\RegionReportingDate::ensure($region, $globalReport->reportingDate);
+        $rq = $rrd->getRegionQuarter();
+        $nextMilestone = $rq->getNextMilestone($globalReport->reportingDate);
 
         $children = Models\Region::byParent($region)->orderby('name')->get();
 
@@ -238,6 +239,7 @@ class GlobalReportController extends Controller
 
             $regionsData[$childRegion->abbreviation] = $regionScoreboard->toArray();
         }
+
         return view('globalreports.details.gaps', compact('globalReport', 'regions', 'regionsData'));
     }
 
@@ -423,7 +425,7 @@ class GlobalReportController extends Controller
                 'abbr' => strtolower($region->abbreviation),
                 'date' => $globalReport->reportingDate->toDateString(),
                 'report' => 'applicationsoverdue',
-            ])
+            ]),
         ]);
     }
 
@@ -440,6 +442,7 @@ class GlobalReportController extends Controller
         $statusData = $a->compose();
 
         $a = new Arrangements\TmlpRegistrationsByOverdue(['registrationsData' => $statusData['reportData']]);
+
         return $a->compose();
     }
 
@@ -596,9 +599,9 @@ class GlobalReportController extends Controller
         foreach ($centers as $center) {
             $allApps = App::make(Api\Application::class)->allForCenter($center, $globalReport->reportingDate);
             $apps = collect($allApps)
-                ->filter(function($app) { return $app->withdrawCodeId === null; })
-                ->keyBy(function($app) { return $app->id; })
-                ->map(function($app) { return $app->comment ?: ''; });
+                ->filter(function ($app) {return $app->withdrawCodeId === null;})
+                ->keyBy(function ($app) {return $app->id;})
+                ->map(function ($app) {return $app->comment ?: '';});
 
             $transfers = Models\Transfer::byCenter($center)
                 ->bySubject('application', $apps->keys()->toArray())
@@ -613,7 +616,7 @@ class GlobalReportController extends Controller
                     'name' => "{$reg->firstName} {$reg->lastName}",
                     'from' => "{$fromCq->startWeekendDate->format('F')} - {$fromCq->quarter->t1Distinction}",
                     'to' => "{$toCq->startWeekendDate->format('F')} - {$toCq->quarter->t1Distinction}",
-                    'comment' => $apps[$app->subjectId] ?? "application not found",
+                    'comment' => $apps[$app->subjectId] ?? 'application not found',
                     'reportingDate' => $app->reportingDate,
                 ];
             }
@@ -1163,7 +1166,7 @@ class GlobalReportController extends Controller
             $children = [$region];
         }
 
-        $statsReports = $globalReport->statsReports()->get()->keyBy(function($report) {
+        $statsReports = $globalReport->statsReports()->get()->keyBy(function ($report) {
             return $report->center->name;
         });
 
@@ -1246,12 +1249,14 @@ class GlobalReportController extends Controller
     protected function getRegPerParticipant(Models\GlobalReport $globalReport, Models\Region $region)
     {
         $data = $this->rppData($globalReport, $region)->getOne('RegPerParticipant');
+
         return view('globalreports.details.regperparticipant', $data);
     }
 
     protected function getRegPerParticipantWeekly(Models\GlobalReport $globalReport, Models\Region $region)
     {
         $data = $this->rppData($globalReport, $region)->getOne('RegPerParticipantWeekly');
+
         return view('globalreports.details.rppweekly', $data);
     }
 

@@ -170,11 +170,6 @@ class TeamMember extends Model
         //]);
     }
 
-    public function getIncomingQuarter()
-    {
-        return Quarter::findForCenter($this->incomingQuarterId, $this->person->center);
-    }
-
     public function scopeTeamYear($query, $teamYear)
     {
         return $query->whereTeamYear($teamYear);

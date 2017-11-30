@@ -22,7 +22,7 @@ class Scoreboard extends AuthenticatedApiBase
         $rq = $submissionCore->reportAndQuarter($center, $reportingDate);
         $quarter = $rq['quarter'];
         $statsReport = $rq['report'];
-        $reportingDates = $quarter->listReportingDates($center);
+        $reportingDates = $quarter->getCenterQuarter($center)->listReportingDates();
 
         if ($statsReport !== null) {
             $weeks = $localReport->getQuarterScoreboard($statsReport);
@@ -124,7 +124,7 @@ class Scoreboard extends AuthenticatedApiBase
         if ($v === null) {
             // Create a blank scoreboard lock with reporting dates filled
             $quarter->setRegion($center->region);
-            $reportingDates = $quarter->listReportingDates($center);
+            $reportingDates = $quarter->getCenterQuarter($center)->listReportingDates();
 
             return new Domain\ScoreboardLockQuarter($reportingDates);
         } else {

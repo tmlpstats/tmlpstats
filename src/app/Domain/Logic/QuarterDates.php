@@ -54,7 +54,7 @@ class QuarterDates
      *     week1, week2, etc.
      *     An actual date in string format. e.g. 2015-12-31
      * @param  string $settingValue The value we're parsing, usually from a setting.
-     * @param  mixed  $quarterLike  A quarter-like object (CenterQuarter, RegionQuarter) or a Quarter model.
+     * @param  mixed  $quarterLike  A quarter-like object (CenterQuarter, RegionQuarter)
      * @param  Center $center       Needed if $quarterLike is just a plain Quarter.
      * @return Carbon
      */
@@ -96,6 +96,28 @@ class QuarterDates
         }
 
         throw new \Exception("Invalid date format: {$settingValue}");
+    }
+
+    /**
+     * Get the next milestone after the given date 'now'
+     *
+     * @param  mixed       $quarterLike  A quarter-like object (CenterQuarter, RegionQuarter)
+     * @param  Carbon|null $now          The reference date to go off of
+     * @return Carbon                    The next milestone date.
+     */
+    public static function getNextMilestone($quarterLike, Carbon $now = null): Carbon
+    {
+        $now = $now ?: Carbon::now();
+
+        if ($now->gt($quarterLike->classroom3Date)) {
+            return $quarterLike->endWeekendDate;
+        } else if ($now->gt($quarterLike->classroom2Date)) {
+            return $quarterLike->classroom3Date;
+        } else if ($now->gt($quarterLike->classroom1Date)) {
+            return $quarterLike->classroom2Date;
+        } else {
+            return $quarterLike->classroom1Date;
+        }
     }
 }
 

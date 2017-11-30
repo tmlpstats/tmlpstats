@@ -149,43 +149,14 @@ class Quarter extends Model
      * @param  Center $center The center for which we want a centerquarter.
      * @return Domain\CenterQuarter
      */
-    public function getCenterQuarter(Center $center)
+    public function getCenterQuarter(Center $center): Domain\CenterQuarter
     {
         return $this->context()->getEncapsulation(Domain\CenterQuarter::class, ['center' => $center, 'quarter' => $this]);
     }
 
-    public function legacyGetRegionQuarter()
+    public function legacyGetRegionQuarter(): Encapsulations\RegionQuarter
     {
         return $this->context()->getEncapsulation(Encapsulations\RegionQuarter::class, ['region' => $this->region, 'quarter' => $this]);
-    }
-
-    public function getNextMilestone(Carbon $now)
-    {
-        if ($now->gt($this->getClassroom3Date())) {
-            $nextMilestone = $this->getQuarterEndDate();
-        } else if ($now->gt($this->getClassroom2Date())) {
-            $nextMilestone = $this->getClassroom3Date();
-        } else if ($now->gt($this->getClassroom1Date())) {
-            $nextMilestone = $this->getClassroom2Date();
-        } else {
-            $nextMilestone = $this->getClassroom1Date();
-        }
-
-        return $nextMilestone;
-    }
-
-    /**
-     * Get the date when repromises are accepted
-     *
-     * Will check for a setting override, otherwise uses the classroom2 date
-     *
-     * @param Center $center
-     *
-     * @return Carbon
-     */
-    public function getRepromiseDate(Center $center)
-    {
-        return $this->getCenterQuarter($center)->getRepromiseDate();
     }
 
     /**
@@ -214,7 +185,7 @@ class Quarter extends Model
      *
      * @param Region $region
      *
-     * @return null|Carbon
+     * @return null|Quarter
      */
     public static function getCurrentQuarter(Region $region)
     {
@@ -333,24 +304,6 @@ class Quarter extends Model
         }
 
         return $quarter;
-    }
-
-    /**
-     * List all reporting dates in a center quarter
-     * @param  Center|null $center The center
-     * @return array               An array of Carbon objects being each reporting week in the quarter
-     */
-    public function listReportingDates(Center $center = null)
-    {
-        $output = [];
-        $d = $this->getFirstWeekDate($center)->copy();
-        $endDate = $this->getQuarterEndDate($center)->copy();
-        while ($d->lte($endDate)) {
-            $output[] = $d;
-            $d = $d->copy()->addWeek();
-        }
-
-        return $output;
     }
 
     /**
