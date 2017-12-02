@@ -87,7 +87,7 @@ class Context
     {
         $this->center = $center;
         if ($setRegion) {
-            $this->setRegion($center->region);
+            $this->setRegion($center->region, false);
         }
     }
 
@@ -128,9 +128,25 @@ class Context
      *
      * @param Models\Region $region The region.
      */
-    public function setRegion(Models\Region $region)
+    public function setRegion(Models\Region $region, $setCenter = true)
     {
+        if ($this->region && $this->region->id === $region->id) {
+            return;
+        }
+
         $this->region = $region;
+
+        if ($setCenter) {
+            $centers = $region->centers;
+            if ($centers && $this->getGlobalRegion()->id !== $this->user->homeRegion(true)->id) {
+                // in foreign regions, use the first center off the list
+                $center = $centers[0];
+            } else {
+                // in our home region or when we don't have another center, use the user's home center
+                $center = $this->user->center;
+            }
+            $this->setCenter($center, false);
+        }
     }
 
     // Each of the settings lookups represents one of the 'scopes' for a setting.
