@@ -309,6 +309,11 @@ class SubmissionCore extends AuthenticatedApiBase
             $globalReport->addCenterReport($statsReport);
         } catch (\Exception $e) {
             DB::rollback();
+            Log::error('Exception caught performing submission: ' . $e->getMessage(), [
+                'center' => $center->abbrLower(),
+                'reportingDate' => $reportingDate->toDateString(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
             return [
                 'success' => false,
