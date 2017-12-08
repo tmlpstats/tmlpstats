@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Stage script.
+# 
+# Usage: stage [<branch>]
+# 
+# Either stage master or a specific branch to this server.
+
+set -e
+
+. /opt/website/assets/envs/stage-host-machine
+
+echo "Downloading db dump "
+
+ssh -t "$PROD_SSH" "$DEPLOYMENT_SCRIPTS/dump-db.sh" > /tmp/prod_db.sql
+sudo mv /tmp/prod_db.sql /var/lib/mysql/prod_db.sql
+
+echo "Importing db dump " 
+
+docker exec -i `docker ps | grep website_mysql | awk '{print $1}'` bash -c 'mysql -f tmlpstats_main -uroot -p"$MYSQL_ROOT_PASSWORD" < /var/lib/mysql/prod_db.sql' 
+
+/opt/tmlpstats/deployment/prod-packager/build-prod-docker.sh "$@"
+
+cd /opt/website
+# Allow overriding whether we update the website repo
+if [[ -z "$NO_UPDATE_WEBSITE" ]]; then
+	git pull
+fi
+docker-compose -f stage.yml build
+docker-compose -f stage.yml up -d
+
+docker exec -i `docker ps | grep website_web | awk '{print $1}'` bash -c 'php /var/www/tmlpstats.com/artisan migrate'
