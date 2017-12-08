@@ -617,12 +617,18 @@ class SubmissionCore extends AuthenticatedApiBase
         $person = ($tmDomain->_personId) ? Models\Person::findOrFail($tmDomain->_personId) : null;
         if ($tmDomain->id < 0) {
             if (!$person) {
-                $person = Models\Person::firstOrCreate([
-                    'center_id' => $center->id,
-                    'first_name' => $tmDomain->firstName,
-                    'last_name' => $tmDomain->lastName,
-                    'identifier' => '',
-                ]);
+                list($person, $identifier) = Models\TeamMember::findAppropriatePerson(
+                    $center, $tmDomain->firstName, $tmDomain->lastName,
+                    $tmDomain->teamYear, $tmDomain->incomingQuarter
+                );
+                if (!$person) {
+                    $person = Models\Person::firstOrCreate([
+                        'center_id' => $center->id,
+                        'first_name' => $tmDomain->firstName,
+                        'last_name' => $tmDomain->lastName,
+                        'identifier' => $identifier,
+                    ]);
+                }
             }
             $tm = Models\TeamMember::create([
                 'person_id' => $person->id,
@@ -637,9 +643,14 @@ class SubmissionCore extends AuthenticatedApiBase
             $tm = Models\TeamMember::findOrFail($tmDomain->id);
 
             // Check for team member person overrides
-            if ($tmDomain->_personId != null && $tm->personId != $tmDomain->_personId) {
-                $tm->personId = $person->id;
-                $tm->setRelation('person', $person);
+            if ($tmDomain->_personId !== null && $tm->personId != $tmDomain->_personId) {
+                // Only apply override if the user is allowed to override team person IDs.
+                if ($this->context->can('overrideTeamPerson', $center)) {
+                    $tm->personId = $person->id;
+                    $tm->setRelation('person', $person);
+                } else {
+                    $tmDomain->_personId = null;
+                }
             }
 
             return [$tm, $tm->person];

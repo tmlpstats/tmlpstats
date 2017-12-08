@@ -1,10 +1,10 @@
 <?php
 namespace TmlpStats;
 
-use App;
 use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
 use Illuminate\Database\Eloquent\Model;
+use TmlpStats as Models;
 use TmlpStats\Encapsulations;
 use TmlpStats\Traits\CachedRelationships;
 
@@ -37,11 +37,13 @@ class TeamMember extends Model
                 return static::getQuarterNumber($this->incomingQuarter, $this->person->center->region);
             case 'incomingQuarter':
                 $key = "incomingQuarter:region{$this->center->regionId}";
-                return static::getFromCache($key, $this->incomingQuarterId, function() {
+
+                return static::getFromCache($key, $this->incomingQuarterId, function () {
                     $quarter = Quarter::find($this->incomingQuarterId);
                     if ($quarter) {
                         $quarter->setRegion($this->center->region);
                     }
+
                     return $quarter;
                 });
             default:
@@ -58,8 +60,9 @@ class TeamMember extends Model
 
     // Hack the reporting date for the purpose of getQuarterNumber.
     // This is a temporary hack to solve a specific website issue with how we use reportingDate.
-    public static function hackReportingDate(Carbon $reportingDate) {
-        static::$qReportingDate =  $reportingDate;
+    public static function hackReportingDate(Carbon $reportingDate)
+    {
+        static::$qReportingDate = $reportingDate;
     }
 
     public static function getQuarterNumber(Quarter $incomingQuarter, Region $region)
@@ -88,22 +91,19 @@ class TeamMember extends Model
         });
     }
 
-    public static function firstOrNew(array $attributes)
+    public static function findAppropriatePerson(Models\Center $center, string $firstName, string $lastName, int $teamYear, Models\Quarter $incomingQuarter)
     {
-        $center = Center::find($attributes['center_id']);
 
-        $incomingQuarter = Quarter::findForCenter($attributes['incoming_quarter_id'], $center);
-
-        $quarterStartDateString = $incomingQuarter->getQuarterStartDate($center)->toDateString();
+        $quarterStartDateString = $incomingQuarter->getCenterQuarter($center)->startWeekendDate->toDateString();
 
         // This identifier is designed to help us distinguish between 'people' from a center
         // with the same name. It's not perfect, but it should work well enough
-        $identifier = "q:{$quarterStartDateString}:{$attributes['team_year']}";
+        $identifier = "q:{$quarterStartDateString}:{$teamYear}";
 
         // Try to find them by name only first
-        $people = Person::where('center_id', $attributes['center_id'])
-            ->where('first_name', $attributes['first_name'])
-            ->where('last_name', $attributes['last_name'])
+        $people = Person::where('center_id', $center->id)
+            ->where('first_name', $firstName)
+            ->where('last_name', $lastName)
             ->get();
 
         $person = null;
@@ -113,8 +113,7 @@ class TeamMember extends Model
 
             // That didn't work? Maybe they are a new team member
             if (!$person) {
-                $searchIdentifier = "r:%:{$attributes['team_year']}";
-                $person = $people->where('identifier', 'like', $searchIdentifier)->first();
+                $person = $people->where('identifier', 'like', "r:%:{$teamYear}")->first();
                 if ($person) {
                     $person->identifier = $identifier;
                     $person->save();
@@ -127,13 +126,26 @@ class TeamMember extends Model
             $person = $people->first();
         }
 
+        return [$person, $identifier];
+    }
+
+    public static function firstOrNew(array $attributes)
+    {
+        $center = Center::find($attributes['center_id']);
+
+        $incomingQuarter = Quarter::findForCenter($attributes['incoming_quarter_id'], $center);
+        list($person, $identifier) = static::findAppropriatePerson(
+            $center, $attributes['first_name'], $attributes['last_name'],
+            $attributes['team_year'], $incomingQuarter
+        );
+
         // If we couldnt find anyone with that name, create a new person
         if (!$person) {
             // Still haven't found them? Fine, create a new one then
             $person = Person::create([
-                'center_id'  => $attributes['center_id'],
+                'center_id' => $attributes['center_id'],
                 'first_name' => $attributes['first_name'],
-                'last_name'  => $attributes['last_name'],
+                'last_name' => $attributes['last_name'],
                 'identifier' => $identifier,
             ]);
         } else if ($person->identifier != $identifier && isset($attributes['team_quarter']) && $attributes['team_quarter'] == 1) {
@@ -153,12 +165,12 @@ class TeamMember extends Model
         // No idea why I have to do this, but it was breaking because parent::firstOfNew
         // was actually re-calling this method
         $attributes = [
-            'team_year'           => $attributes['team_year'],
+            'team_year' => $attributes['team_year'],
             'incoming_quarter_id' => $attributes['incoming_quarter_id'],
-            'person_id'           => $person->id,
+            'person_id' => $person->id,
         ];
 
-        if (! is_null($instance = (new static)->newQueryWithoutScopes()->where($attributes)->first())) {
+        if (!is_null($instance = (new static())->newQueryWithoutScopes()->where($attributes)->first())) {
             return $instance;
         }
 
