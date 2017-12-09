@@ -248,6 +248,16 @@ class _EditCreate extends TeamMembersBase {
         )
     }
 
+    renderRpp(modelKey) {
+        return (
+            <div>
+                <SimpleField label="CAP Registrations" model={modelKey+'.rppCap'} divClass="col-md-6" />
+                <SimpleField label="CPC Registrations" model={modelKey+'.rppCpc'} divClass="col-md-6" />
+                <SimpleField label="LF Registrations" model={modelKey+'.rppLf'} divClass="col-md-6" />
+            </div>
+        )
+    }
+
     renderGitwTdo(modelKey) {
         const { lookups } = this.props
         let tdoSelect = <BooleanSelect model={modelKey+'.tdo'} emptyChoice=" " labels={TDO_LABELS} className="form-control tdo" />
@@ -368,6 +378,12 @@ export class TeamMembersEdit extends _EditCreate {
                     <div className={className}>
                         {this.renderRegPrefs(modelKey, options)}
                     </div>
+                </div>
+                <div className="row">
+                    <div className={className}>
+                        {this.renderRpp(modelKey, options)}
+                    </div>
+                    <div className={className}>&nbsp;</div>
                 </div>
             </div>
         )

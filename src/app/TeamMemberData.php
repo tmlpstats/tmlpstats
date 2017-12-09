@@ -27,6 +27,9 @@ class TeamMemberData extends Model
         'comment',
         'gitw',
         'tdo',
+        'rpp_cap',
+        'rpp_cpc',
+        'rpp_lf',
     ];
 
     protected $casts = [
@@ -41,12 +44,14 @@ class TeamMemberData extends Model
         'room'       => 'boolean',
         'gitw'       => 'boolean',
         'tdo'        => 'integer',
+        'rpp_cap'    => 'integer',
+        'rpp_cpc'    => 'integer',
+        'rpp_lf'     => 'integer',
     ];
 
     public function __get($name)
     {
         switch ($name) {
-
             case 'firstName':
             case 'lastName':
             case 'fullName':
@@ -58,6 +63,12 @@ class TeamMemberData extends Model
             case 'quarterNumber':
             case 'incomingQuarter':
                 return $this->teamMember->$name;
+            case 'rpp':
+                return [
+                    'cap' => $this->rppCap,
+                    'cpc' => $this->rppCpc,
+                    'lf' => $this->rppLf,
+                ];
             default:
                 return parent::__get($name);
         }
