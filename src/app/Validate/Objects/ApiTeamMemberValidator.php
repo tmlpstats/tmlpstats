@@ -21,6 +21,7 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
         $boolValidator       = v::boolType();
         $boolOrNullValidator = v::optional($boolValidator);
         $teamYearValidator   = v::numeric()->between(1, 2, true);
+        $numericValidator    = v::numeric()->min(0, true);
 
         $this->dataValidators['firstName']  = $nameValidator;
         $this->dataValidators['lastName']   = $nameValidator;
@@ -37,10 +38,13 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
         $this->dataValidators['room']       = $boolOrNullValidator;
         $this->dataValidators['gitw']       = $boolOrNullValidator;
         $this->dataValidators['tdo']        = v::oneOf(
-            v::numeric()->min(0, true),
+            $numericValidator,
             v::boolType(),
             v::nullType()
         );
+        $this->dataValidators['rppCap'] = v::optional($numericValidator);
+        $this->dataValidators['rppCpc'] = v::optional($numericValidator);
+        $this->dataValidators['rppLf']  = v::optional($numericValidator);
         $this->dataValidators['withdrawCodeId'] = v::optional($idValidator);
     }
 
