@@ -251,9 +251,9 @@ class _EditCreate extends TeamMembersBase {
     renderRpp(modelKey) {
         return (
             <div>
-                <SimpleField label="CAP Registrations" model={modelKey+'.rppCap'} divClass="col-md-6" />
-                <SimpleField label="CPC Registrations" model={modelKey+'.rppCpc'} divClass="col-md-6" />
-                <SimpleField label="LF Registrations" model={modelKey+'.rppLf'} divClass="col-md-6" />
+                <SimpleField label="CAP Registrations" model={modelKey+'.rppCap'} divClass="col-md-2" />
+                <SimpleField label="CPC Registrations" model={modelKey+'.rppCpc'} divClass="col-md-2" />
+                <SimpleField label="LF Registrations" model={modelKey+'.rppLf'} divClass="col-md-2" />
             </div>
         )
     }
