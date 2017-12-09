@@ -167,7 +167,7 @@ class TeamMember extends ParserDomain
         }
 
         foreach ($this->_values as $k => $v) {
-            if ($only_set && !array_key_exists($k, $this->_setValues)) {
+            if (($only_set && !array_key_exists($k, $this->_setValues)) || !array_key_exists($k, self::$validProperties)) {
                 continue;
             }
             $conf = self::$validProperties[$k];
@@ -180,6 +180,9 @@ class TeamMember extends ParserDomain
                     break;
                 case 'teamMemberData':
                     $target = $teamMemberData;
+                    break;
+                default:
+                    $target = null;
                     break;
             }
             if ($target !== null && empty($conf['domainOnly'])) {

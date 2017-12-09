@@ -3,6 +3,7 @@ namespace TmlpStats\Api;
 
 use App;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Log;
 use Mail;
@@ -140,112 +141,8 @@ class SubmissionCore extends AuthenticatedApiBase
             $apps = App::make(Api\Application::class)->allForCenter($center, $reportingDate, true);
             $debug_message .= $this->submitApplications($center, $reportingDate, $statsReport, $apps);
 
-            // Process team members
-            $result = DB::select('select i.* from submission_data_team_members i
-                                    left outer join team_members t
-                                        on t.id=i.team_member_id
-                                    where i.center_id=?  and i.reporting_date=?;',
-                [$center->id, $reportingDate->toDateString()]);
-            if (!empty($result)) {
-                foreach ($result as $r) {
-                    $tm_id = -1;
-                    if ($r->team_member_id < 0) {
-                        $person_id = null;
-
-                        // If we already know the person to use, find them
-                        if (!empty($r->override_person_id) && Models\Person::find($r->override_person_id)) {
-                            $person_id = $r->override_person_id;
-                        }
-
-                        // This is a new team member, create the things
-                        if (!$person_id) {
-                            DB::insert('insert into people
-                                            (first_name, last_name, email, phone, center_id, created_at, updated_at)
-                                        select i.first_name, i.last_name, i.email, i.phone, i.center_id, sysdate(), sysdate()
-                                        from submission_data_team_members i where i.id=?',
-                                [$r->id]);
-                            $person_id = DB::getPdo()->lastInsertId();
-                            $debug_message .= ' snewtm_id=' . $r->id . ' person_id=' . $person_id;
-                        }
-
-                        DB::insert('insert into team_members
-                                        (person_id, team_year, incoming_quarter_id, is_reviewer, created_at, updated_at)
-                                    select ?, team_year, incoming_quarter_id, is_reviewer, sysdate(), sysdate()
-                                    from submission_data_team_members i where i.id=?',
-                            [$person_id, $r->id]);
-                        $tm_id = DB::getPdo()->lastInsertId();
-                        $debug_message .= ' newtm_id=' . $tm_id;
-
-                        // Update submission_data with new id so we don't overwrite if the report is resubmitted
-                        DB::update('update submission_data set stored_id=?, data = JSON_SET(data, "$.id", ?) where id=?', [$tm_id, $tm_id, $r->id]);
-                    } else {
-                        // This is an existing application, update the things
-                        DB::update('update people p, submission_data_team_members sda
-                                    set p.updated_at=sysdate(),
-                                        p.first_name=sda.first_name,
-                                        p.last_name=sda.last_name,
-                                        p.email=sda.email,
-                                        p.phone=sda.phone,
-                                        p.updated_at=sysdate()
-                                    where p.id=sda.person_id
-                                          and sda.id=?
-                                          and (coalesce(p.first_name,\'\') != BINARY coalesce(sda.first_name,\'\')
-                                                or coalesce(p.last_name,\'\') != BINARY coalesce(sda.last_name,\'\')
-                                                or coalesce(p.email,\'\') != coalesce(sda.email,\'\')
-                                                or coalesce(p.phone,\'\') != coalesce(sda.phone,\'\')
-                                          )',
-                            [$r->id]);
-                        DB::update('update team_members p, submission_data_team_members sda
-                                    set p.updated_at=sysdate(),
-                                        p.team_year=sda.team_year,
-                                        p.incoming_quarter_id=sda.incoming_quarter_id,
-                                        p.is_reviewer=sda.is_reviewer,
-                                        p.updated_at=sysdate()
-                                    where p.id=sda.team_member_id
-                                          and sda.id=?
-                                          and (coalesce(p.team_year,\'\') != coalesce(sda.team_year,\'\')
-                                                or coalesce(p.incoming_quarter_id,\'\') != coalesce(sda.incoming_quarter_id,\'\')
-                                                or coalesce(p.is_reviewer,\'\') != coalesce(sda.is_reviewer,\'\'))',
-                            [$r->id]);
-                        $tm_id = $r->team_member_id;
-                        $person_id = $r->person_id;
-                    };
-
-                    // Create team member data row
-                    DB::insert('insert into team_members_data
-                                    (team_member_id, at_weekend, xfer_out, xfer_in, wbo, ctw, withdraw_code_id, travel, room, comment,
-                                    gitw, tdo, stats_report_id, created_at, updated_at)
-                                select ?, atWeekend, xfer_out, xfer_in, wbo, ctw, withdrawCode, travel, room, comment,
-                                    gitw, tdo, ?, sysdate(), sysdate()
-                                from submission_data_team_members
-                                where center_id=? and reporting_date=? and team_member_id=?',
-                        [$tm_id, $statsReport->id, $center->id, $reportingDate->toDateString(), $tm_id]);
-                    $tmd_id = DB::getPdo()->lastInsertId();
-                    $debug_message .= ' last_tmd_id=' . $tmd_id;
-                }
-            } // end team member processing
-
-            // Insert data rows for any team members that have withdrawn, transfered out or are wbo
-            if (!$isFirstWeek) {
-                DB::insert('
-                    INSERT INTO team_members_data
-                        (team_member_id, at_weekend, xfer_out, xfer_in, wbo, ctw, withdraw_code_id,
-                        travel, room, comment, gitw, tdo, stats_report_id, created_at, updated_at)
-                    SELECT  tmd.team_member_id, tmd.at_weekend, tmd.xfer_out, tmd.xfer_in, tmd.wbo, tmd.ctw,
-                            tmd.withdraw_code_id, tmd.travel, tmd.room, tmd.comment, tmd.gitw, tmd.tdo,
-                            ?, sysdate(), sysdate()
-                    FROM team_members_data tmd
-                    INNER JOIN stats_reports sr ON sr.id = tmd.stats_report_id
-                    INNER JOIN global_report_stats_report grsr ON grsr.stats_report_id = tmd.stats_report_id
-                    WHERE
-                        sr.center_id = ?
-                        AND sr.reporting_date = ?
-                        AND (tmd.withdraw_code_id IS NOT NULL
-                            OR tmd.xfer_out = 1
-                            OR tmd.wbo = 1)
-                        AND tmd.team_member_id NOT IN (SELECT team_member_id FROM team_members_data WHERE stats_report_id = ?)',
-                    [$statsReport->id, $center->id, $lastStatsReportDate->toDateString(), $statsReport->id]);
-            }
+            $teamMembers = App::make(Api\TeamMember::class)->allForCenter($center, $reportingDate, true);
+            $debug_message .= $this->submitTeamMembers($center, $reportingDate, $statsReport, $teamMembers);
 
             $toSetAccountabilities = [];
 
@@ -412,6 +309,11 @@ class SubmissionCore extends AuthenticatedApiBase
             $globalReport->addCenterReport($statsReport);
         } catch (\Exception $e) {
             DB::rollback();
+            Log::error('Exception caught performing submission: ' . $e->getMessage(), [
+                'center' => $center->abbrLower(),
+                'reportingDate' => $reportingDate->toDateString(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
             return [
                 'success' => false,
@@ -614,9 +516,9 @@ class SubmissionCore extends AuthenticatedApiBase
      * @param  string        $type          Stash stored_type
      * @param  string        $stashId       Stash stored_id
      * @param  string        $newId         New value for stroed_id
-     * @return boolean
+     * @return bool
      */
-    protected function updateStashIds(Models\Center $center, Carbon $reportingDate, $type, $stashId, $newId)
+    protected function updateStashIds(Models\Center $center, Carbon $reportingDate, string $type, $stashId, $newId): bool
     {
         // Now update the stash so subsequent submits don't create new people again
         $stash = Models\SubmissionData::centerDate($center, $reportingDate)
@@ -713,6 +615,76 @@ class SubmissionCore extends AuthenticatedApiBase
         }
 
         return [$pmAttending, $clAttending];
+    }
+
+    protected function ensureTeamMember(Models\Center $center, Domain\TeamMember $tmDomain)
+    {
+        $person = ($tmDomain->_personId) ? Models\Person::findOrFail($tmDomain->_personId) : null;
+        if ($tmDomain->id < 0) {
+            if (!$person) {
+                list($person, $identifier) = Models\TeamMember::findAppropriatePerson(
+                    $center, $tmDomain->firstName, $tmDomain->lastName,
+                    $tmDomain->teamYear, $tmDomain->incomingQuarter
+                );
+                if (!$person) {
+                    $person = Models\Person::firstOrCreate([
+                        'center_id' => $center->id,
+                        'first_name' => $tmDomain->firstName,
+                        'last_name' => $tmDomain->lastName,
+                        'identifier' => $identifier,
+                    ]);
+                }
+            }
+            $tm = Models\TeamMember::create([
+                'person_id' => $person->id,
+                'team_year' => $tmDomain->teamYear,
+                'at_weekend' => $tmDomain->atWeekend,
+                'incoming_quarter_id' => $tmDomain->incomingQuarterId,
+            ]);
+            $tm->setRelation('person', $person); // To avoid an extra lookup
+
+            return [$tm, $person];
+        } else {
+            $tm = Models\TeamMember::findOrFail($tmDomain->id);
+
+            // Check for team member person overrides
+            if ($tmDomain->_personId !== null && $tm->personId != $tmDomain->_personId) {
+                // Only apply override if the user is allowed to override team person IDs.
+                if ($this->context->can('overrideTeamPerson', $center)) {
+                    $tm->personId = $person->id;
+                    $tm->setRelation('person', $person);
+                } else {
+                    $tmDomain->_personId = null;
+                }
+            }
+
+            return [$tm, $tm->person];
+        }
+    }
+
+    public function submitTeamMembers(Models\Center $center, Carbon $reportingDate, Models\StatsReport $statsReport, $teamMembers)
+    {
+        $debug_message = '';
+        foreach ($teamMembers as $tmDomain) {
+            list($tm, $person) = $this->ensureTeamMember($center, $tmDomain);
+            if ($tmDomain->id < 0) {
+                // If ID < 0, then we need to update any existing stash with the newly assigned team member ID
+                $this->updateStashIds($center, $reportingDate, 'team_member', $tmDomain->id, $tm->id);
+                $tmDomain->id = $tm->id;
+            }
+            $tmd = Models\TeamMemberData::firstOrNew([
+                'team_member_id' => $tm->id,
+                'stats_report_id' => $statsReport->id,
+            ]);
+            $tmDomain->fillModel($tmd, $tm, false);
+            $person->save();
+            $tm->save();
+            $tmd->save();
+            $debug_message .= ' last_tmd_id=' . $tmd->id;
+
+        }
+
+        return $debug_message . '\n';
     }
 
     public function submitTeamAccountabilities(Models\Center $center, Carbon $reportingDate, Carbon $reportNow, Carbon $quarterEndDate, $teamMembers)
@@ -1045,8 +1017,8 @@ class SubmissionCore extends AuthenticatedApiBase
 
         // Phase 4: Copy starting Team Expansion
         if (!empty($newTeamMembers)) {
-            $report[] = "Number of Team Expansion to copy as new Team Members: " .
-                    count($newTeamMembers);
+            $report[] = 'Number of Team Expansion to copy as new Team Members: ' .
+            count($newTeamMembers);
             foreach ($newTeamMembers as $index => $newTeamMember) {
                 $logLine = "Team Member from Team Expansion {$newTeamMember['firstName']} {$newTeamMember['lastName']}";
                 $newTeamMember['_alwaysStash'] = true; // stash even though validation will fail because we're missing tdo/gitw
@@ -1059,8 +1031,9 @@ class SubmissionCore extends AuthenticatedApiBase
                 }
             }
         } else {
-            $report[] = "No new team members to copy from Team Expansion";
+            $report[] = 'No new team members to copy from Team Expansion';
         }
+
         return compact('report', 'validStartQids');
     }
 
