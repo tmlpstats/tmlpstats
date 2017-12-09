@@ -63,12 +63,6 @@ class TeamMemberData extends Model
             case 'quarterNumber':
             case 'incomingQuarter':
                 return $this->teamMember->$name;
-            case 'rpp':
-                return [
-                    'cap' => $this->rppCap,
-                    'cpc' => $this->rppCpc,
-                    'lf' => $this->rppLf,
-                ];
             default:
                 return parent::__get($name);
         }
