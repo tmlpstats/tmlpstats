@@ -522,11 +522,15 @@ class SubmissionCoreTest extends FunctionalTestAbstract
                     'checks' => function ($suite, $tmd, $tm) {
                         $suite->assertEquals(false, $tmd->gitw);
                         $suite->assertEquals(0, $tmd->tdo);
+                        $suite->assertEquals(0, $tmd->rppCap);
+                        $suite->assertEquals(0, $tmd->rppCpc);
+                        $suite->assertEquals(0, $tmd->rppLf);
                     },
                 ],
                 'person4' => [
                     'stashed' => [
                         'travel' => false, 'room' => true,
+                        'rppCap' => 1, 'rppCpc' => 2, 'rppLf' => 3,
                         '_personId' => function () {
                             return factory(Models\Person::class)->create([
                                 'firstName' => 'otherPerson',
@@ -538,6 +542,9 @@ class SubmissionCoreTest extends FunctionalTestAbstract
                     'checks' => function ($suite, $tmd, $tm) {
                         $suite->assertFalse($tmd->travel);
                         $suite->assertTrue($tmd->room);
+                        $suite->assertEquals(1, $tmd->rppCap);
+                        $suite->assertEquals(2, $tmd->rppCpc);
+                        $suite->assertEquals(3, $tmd->rppLf);
                         $suite->assertEquals('op', $tm->person->identifier);
                     },
                 ],
