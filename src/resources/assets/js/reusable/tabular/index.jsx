@@ -1,6 +1,43 @@
+/**
+ The tabular library provides a way to make sortable table components with other features.
+
+ Features include:
+    * Efficient sorting clicking on column headings including compound sorts
+    * Manages its own state without connecting more reducers
+    * Tries to minimize expensive re-renders
+
+ To use it, you first must create a component with buildTable:
+
+const MyTable  = buildTable({
+    name: 'unique_slug',
+    columns: [
+        {key: 'name', label: 'Name', default: 'N/A'}
+        {key: 'acc', label: 'Accountability', selector: row => row.accountability.display},
+        {key: 'updatedAt', label: 'Updated At', sorter: 'moment',
+         headingClasses: ['hidden-print'], component: PrettyDate}
+    ]
+})
+
+Columns specify the columns in the table. Column specifiers are objects with
+the following properties:
+
+|    Property    |    Type   |                    Description                    |       Default        |
+| -------------: | --------- | ------------------------------------------------- | -------------------- |
+|            key | string    | Required. Must be a unique key for this column.   |                      |
+|          label | string    | Required. Heading label.                          |                      |
+|       selector | func      | A function to select the value for this column.   | x => x[key]          |
+|        default | <any>     | Default value if the result of selector is empty  | undefined            |
+|      component | Component | A react component to render this row.             | <internal component> |
+|         sorter | string    | Sort method, one of 'string', 'number', 'moment'. | 'string'             |
+|   sortSelector | func      | A selector to find the sort candidate value.      | <selector>           |
+| headingClasses | array     | Array of additional CSS classes                   | []                   |
+
+
+*/
 import PropTypes from 'prop-types'
 import React from 'react'
 import Immutable from 'immutable'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { defaultMemoize, createSelector } from 'reselect'
 import { connect } from 'react-redux'
@@ -72,16 +109,9 @@ class TabularBase extends React.Component {
 
     renderRows() {
         let rows = []
-        const getPrimaryKey = this.config.getPrimaryKey
+        const {getPrimaryKey, columns} = this.config
         this.sortedRows(this).forEach((row) => {
-            let cols = []
-            this.config.columns.forEach((col) => {
-                const Component = col.component
-                const data = col.selector(row) || col.default
-                const rendered = Component? (<Component key={col.key} data={data} />) : <td key={col.key}>{data}</td>
-                cols.push(rendered)
-            })
-            rows.push(<tr key={getPrimaryKey(row)}>{cols}</tr>)
+            rows.push(<TabularRow key={getPrimaryKey(row)} row={row} columns={columns} />)
         })
         return (
             <tbody>{rows}</tbody>
@@ -126,9 +156,37 @@ function createBoundColumnsSelector(component) {
     })
 }
 
+class TabularRow extends React.PureComponent {
+    static propTypes = {
+        row: PropTypes.any.isRequired,
+        columns: ImmutablePropTypes.orderedMapOf(
+            PropTypes.instanceOf(Column),  // Value type
+            PropTypes.string // Key type
+        )
+    }
+
+    render() {
+        const { row, columns } = this.props
+        let cols = []
+        columns.forEach((col) => {
+            const Component = col.component
+            const data = col.selector(row) || col.default
+            const rendered = Component? (<Component key={col.key} data={data} />) : <td key={col.key}>{data}</td>
+            cols.push(rendered)
+        })
+        return <tr>{cols}</tr>
+    }
+}
+
 /**
  * Create a table component.
- * @param  object options [description]
+ * @param  object options An object with the following properties:
+ *
+ *            name | string | Required. An identifier for this table for property storage.
+ *         columns | array  | Required. An array of column specifier objects. See top of module for docs.
+ *   getPrimaryKey | func   | A selector to get the 'primary key' of a row. defaults to x => x.id
+ *     displayName | string | DisplayName primarily for React debugging use.
+ *
  * @return React.Component A component used to render a table.
  */
 export function buildTable(options) {
