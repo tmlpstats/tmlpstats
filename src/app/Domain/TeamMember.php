@@ -98,6 +98,18 @@ class TeamMember extends ParserDomain
             'owner' => 'teamMemberData',
             'type' => 'int',
         ],
+        'rppCap' => [
+            'owner' => 'teamMemberData',
+            'type' => 'int',
+        ],
+        'rppCpc' => [
+            'owner' => 'teamMemberData',
+            'type' => 'int',
+        ],
+        'rppLf' => [
+            'owner' => 'teamMemberData',
+            'type' => 'int',
+        ],
         'withdrawCode' => [
             'owner' => 'teamMemberData',
             'type' => 'WithdrawCode',

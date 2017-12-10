@@ -71,6 +71,9 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
             'tdo' => 0,
             'withdrawCodeId' => null,
             'comment' => null,
+            'rppCap' => null,
+            'rppCpc' => null,
+            'rppLf' => null,
         ];
     }
 
@@ -115,6 +118,9 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                     'gitw' => null,
                     'tdo' => null,
                     'withdrawCodeId' => null,
+                    'rppCap' => null,
+                    'rppCpc' => null,
+                    'rppLf' => null,
                 ],
                 [
                     $this->getMessageData($this->messageTemplate, [
@@ -187,6 +193,45 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                 ],
                 [],
                 true,
+            ],
+            // Test rppCap negative
+            [
+                [
+                    'rppCap' => -1,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'GENERAL_INVALID_VALUE',
+                        'reference.field' => 'rppCap',
+                    ]),
+                ],
+                false,
+            ],
+            // Test rppCpc negative
+            [
+                [
+                    'rppCpc' => -1,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'GENERAL_INVALID_VALUE',
+                        'reference.field' => 'rppCpc',
+                    ]),
+                ],
+                false,
+            ],
+            // Test rppLf negative
+            [
+                [
+                    'rppLf' => -1,
+                ],
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'GENERAL_INVALID_VALUE',
+                        'reference.field' => 'rppLf',
+                    ]),
+                ],
+                false,
             ],
         ];
     }
