@@ -289,8 +289,8 @@ class GlobalReportTeamSummaryData
             }
 
             $row = [];
-            $row['pmAttending'] = (int) $csd->programManagerAttendingWeekend;
-            $row['clAttending'] = (int) ($csd->classroomLeaderAttendingWeekend && !$ignoreCl);
+            $row['pmAttending'] = (int) ($csd && $csd->programManagerAttendingWeekend);
+            $row['clAttending'] = (int) ($csd && $csd->classroomLeaderAttendingWeekend && !$ignoreCl);
             $row['team1Current'] = $team1[$centerName]['currentOnTeam'];
             $row['team1Incoming'] = $team1[$centerName]['appStatusNext']['appr'];
             $row['team1Completing'] = $team1[$centerName]['completing'];
