@@ -31,8 +31,8 @@ class ImportController extends Controller
      */
     public function indexValidateSheet(Request $request)
     {
-        $this->context->setRegion(Auth::user()->homeRegion());
-        $this->context->setCenter(Auth::user()->center);
+        $this->context->setRegion(Auth::user()->homeRegion(), false);
+        $this->context->setCenter(Auth::user()->center, false);
         $this->authorize('validate', StatsReport::class);
         $expectedDate = ImportManager::getExpectedReportDate();
 

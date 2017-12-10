@@ -39,6 +39,13 @@ if ($currentRegion !== null) {
 
 $reportingDateString = ($reportingDate != null) ? $reportingDate->toDateString() : null;
 $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : false;
+
+// Provide the submit report link for a center the user is actually able to view
+// First try the selected center, and if they can't view that, use their local center
+$submissionCenter = $currentCenter;
+if ($currentUser && $currentUser->cannot('viewSubmissionUi', $currentCenter)) {
+    $submissionCenter = $currentUser->center;
+}
 ?>
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container-fluid">
@@ -59,9 +66,9 @@ $showNavCenterSelect = isset($showNavCenterSelect) ? $showNavCenterSelect : fals
                     <ul class="nav navbar-nav">
 
                         @can ('validate', TmlpStats\StatsReport::class)
-                            @can ('showNewSubmissionUi', $currentCenter)
+                            @can ('showNewSubmissionUi', $submissionCenter)
                             <li {!! Request::is('center/*/submission/*') ? 'class="active"' : '' !!}>
-                                <a href="{{ action('CenterController@submission', ['abbr' => $currentCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Submit Report</a>
+                                <a href="{{ action('CenterController@submission', ['abbr' => $submissionCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Submit Report</a>
                             </li>
                             @else
                             <li {!! Request::is('validate') ? 'class="active"' : '' !!}>
