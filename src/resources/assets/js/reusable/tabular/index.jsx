@@ -28,6 +28,7 @@ the following properties:
 |       selector | func      | A function to select the value for this column.   | x => x[key]          |
 |        default | <any>     | Default value if the result of selector is empty  | undefined            |
 |      component | Component | A react component to render this row.             | <internal component> |
+|       sortable | bool      | Set to false to disable column sorting            | true                 |
 |         sorter | string    | Sort method, one of 'string', 'number', 'moment'. | 'string'             |
 |   sortSelector | func      | A selector to find the sort candidate value.      | <selector>           |
 | headingClasses | array     | Array of additional CSS classes                   | []                   |
@@ -121,15 +122,16 @@ class TabularBase extends React.Component {
     onColumnClick(colKey, event) {
         event.persist()
         this.props.dispatch(clickColumn(this.config.name, colKey, event.ctrlKey || event.shiftKey || event.altKey))
-        console.log('onColumnClick', colKey)
     }
 }
 
 function createSortedRowsSelector() {
     const sorterForColumns = defaultMemoize((columns, sort_by) => {
-        const accessors = sort_by.map(x => columns.get(x[0]))
-        const sortFunc = compositeKey(accessors.map((col, i) => [(col.sortSelector || col.selector), col.sorter, sort_by.get(i)[1]]).toJS())
-        return { accessors, sortFunc }
+        const sortKeys = sort_by.map((colSort) => {
+            const col = columns.get(colSort.column)
+            return [(col.sortSelector || col.selector), col.sorter, colSort.direction]
+        })
+        return compositeKey(sortKeys.toJS())
     })
     return createSelector(
         (c) => c.props.data,
@@ -139,7 +141,7 @@ function createSortedRowsSelector() {
             if (!sort_by || !sort_by.size) {
                 return rows
             }
-            const { sortFunc } = sorterForColumns(columns, sort_by)
+            const sortFunc = sorterForColumns(columns, sort_by)
             return rows.slice().sort(sortFunc)
         }
     )
@@ -147,7 +149,7 @@ function createSortedRowsSelector() {
 
 function createBoundColumnsSelector(component) {
     return defaultMemoize((columns, sort_by) => {
-        const keyed_sort_by = Immutable.Map(sort_by)
+        const keyed_sort_by = Immutable.Map(sort_by.map(x => [x.column, x.direction]))
         return columns.map((col) => {
             return col
                 .set('_columnClick', component.onColumnClick.bind(component, col.key))

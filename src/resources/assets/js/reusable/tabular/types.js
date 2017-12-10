@@ -33,3 +33,8 @@ function makeKeySelector(key) {
 export const TableState = Immutable.Record({
     sort_by: Immutable.List(),
 })
+
+export const ColumnSort = Immutable.Record({
+    column: '',
+    direction: 'asc',
+})

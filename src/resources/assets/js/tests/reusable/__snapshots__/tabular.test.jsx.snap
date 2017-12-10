@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Tables Should Render Snapshot 1`] = `
+<table
+  className="table"
+  id="tbl-abc"
+>
+  <thead>
+    <tr>
+      <th
+        aria-controls="tbl-abc"
+        className="tabular-sortable"
+        onClick={[Function]}
+      >
+        Name
+      </th>
+      <th
+        aria-controls="tbl-abc"
+        className="tabular-sortable"
+        onClick={[Function]}
+      >
+        Upper Name
+      </th>
+      <th
+        aria-controls="tbl-abc"
+        className="tabular-sortable"
+        onClick={[Function]}
+      />
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        Bob
+      </td>
+      <td>
+        BOB
+      </td>
+      <td>
+        55
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Mary
+      </td>
+      <td>
+        MARY
+      </td>
+      <td>
+        49
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Joan
+      </td>
+      <td>
+        JOAN
+      </td>
+      <td>
+        38
+      </td>
+    </tr>
+  </tbody>
+</table>
+`;
