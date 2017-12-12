@@ -19,3 +19,16 @@ const Promise = (function() {
 const { fetch, Request, Response, Headers } = require('fetch-ponyfill')({Promise})
 
 export { Promise, fetch, Request, Response, Headers }
+
+export function isNumber(num) {
+  var type = typeof num;
+
+  if (type === 'string' || num instanceof String) {
+    // an empty string would be coerced to true with the below logic
+    if (!num.trim()) return false;
+  } else if (type !== 'number' && !(num instanceof Number)) {
+    return false;
+  }
+
+  return (num - num + 1) >= 0;
+};

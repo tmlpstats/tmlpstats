@@ -60,7 +60,8 @@ class TabularBase extends React.Component {
         idExtension: PropTypes.oneOfType([
             PropTypes.string,
             PropTypes.number,
-        ])
+        ]),
+        columnContext: PropTypes.any
     }
 
     constructor(props) {
@@ -112,7 +113,7 @@ class TabularBase extends React.Component {
         let rows = []
         const {getPrimaryKey, columns} = this.config
         this.sortedRows(this).forEach((row) => {
-            rows.push(<TabularRow key={getPrimaryKey(row)} row={row} columns={columns} />)
+            rows.push(<TabularRow key={getPrimaryKey(row)} row={row} columns={columns} columnContext={this.props.columnContext} />)
         })
         return (
             <tbody>{rows}</tbody>
@@ -121,7 +122,12 @@ class TabularBase extends React.Component {
 
     onColumnClick(colKey, event) {
         event.persist()
-        this.props.dispatch(clickColumn(this.config.name, colKey, event.ctrlKey || event.shiftKey || event.altKey))
+        const column = this.config.columns.get(colKey)
+        if (column.sortable) {
+            this.props.dispatch(clickColumn(this.config.name, colKey, event.ctrlKey || event.shiftKey || event.altKey))
+        } else {
+            console.log('clicked on un-sortable column ' + colKey)
+        }
     }
 }
 
@@ -164,7 +170,8 @@ class TabularRow extends React.PureComponent {
         columns: ImmutablePropTypes.orderedMapOf(
             PropTypes.instanceOf(Column),  // Value type
             PropTypes.string // Key type
-        )
+        ),
+        columnContext: PropTypes.any
     }
 
     render() {
@@ -173,7 +180,7 @@ class TabularRow extends React.PureComponent {
         columns.forEach((col) => {
             const Component = col.component
             const data = col.selector(row) || col.default
-            const rendered = Component? (<Component key={col.key} data={data} />) : <td key={col.key}>{data}</td>
+            const rendered = Component? (<Component key={col.key} data={data} columnContext={this.props.columnContext} />) : <td key={col.key}>{data}</td>
             cols.push(rendered)
         })
         return <tr>{cols}</tr>
