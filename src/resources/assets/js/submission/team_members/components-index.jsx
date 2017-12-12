@@ -2,9 +2,12 @@ import React from 'react'
 import { Link } from 'react-router'
 import PropTypes from 'prop-types'
 
+import { arrayFind } from '../../reusable/ponyfill'
+
 import { Form, BooleanSelectView, SimpleSelect, connectCustomField, AddOneLink } from '../../reusable/form_utils'
 import { ModeSelectButtons, ButtonStateFlip, Alert } from '../../reusable/ui_basic'
 import { delayDispatch, rebind, connectRedux } from '../../reusable/dispatch'
+import { buildTable } from '../../reusable/tabular'
 import { ProgramLeadersIndex } from '../program_leaders/components'
 
 import { TEAM_MEMBERS_COLLECTION_FORM_KEY } from './reducers'
@@ -15,6 +18,44 @@ import { TeamMembersBase, GITW_LABELS, TDO_LABELS, TDO_OPTIONS } from './compone
 const STATE_UPDATING = 'Updating'
 const STATE_NOTHING = 'Nothing'
 const STATE_SAVED = 'Saved'
+
+const TABLE_DEFAULT_COLS = [
+    {key: 'name', label: 'Name', selector: teamMemberText},
+    {key: 'year', label: 'Year', selector: row => row.teamYear, sorter: 'number'},
+    {key: 'accountabilities', label: 'Accountabilities', default: ''
+    /*, selector: row => row.map((accId) => accountabilities[accId].display).join(', ')*/},
+]
+
+const ClassListDefaultTable = buildTable({
+    name: 'submission_team_members_default',
+    columns: TABLE_DEFAULT_COLS.concat([
+        {key: 'gitw', label: 'GITW', default: '', sortable: false},
+        {key: 'tdo', label: 'TDO', default: '', sortable: false},
+    ])
+})
+
+const ClassListTravelTable = buildTable({
+    name: 'submission_team_members_travel',
+    columns: TABLE_DEFAULT_COLS.concat([
+        {key: 'travel', label: 'Travel', default: '', sortable: false},
+        {key: 'room', label: 'Rooming', default: '', sortable: false},
+    ])
+})
+
+const ClassListRppTable = buildTable({
+    name: 'submission_team_members_rpp',
+    columns: TABLE_DEFAULT_COLS.concat([
+        {key: 'rppCap', label: 'RPP CAP', default: '', sortable: false},
+        {key: 'rppCpc', label: 'RPP CPC', default: '', sortable: false},
+        {key: 'rppLf', label: 'RPP LF', default: '', sortable: false},
+    ])
+})
+
+const TABLES = [
+    {key: 'submission_team_members_default', label: 'GITW/TDO', table: ClassListDefaultTable},
+    {key: 'submission_team_members_travel', label: 'Travel/Room', table: ClassListTravelTable},
+    {key: 'submission_team_members_rpp', label: 'Reg. Per Participant', table: ClassListRppTable},
+]
 
 @connectRedux()
 export class TeamMembersIndex extends TeamMembersBase {
@@ -29,7 +70,7 @@ export class TeamMembersIndex extends TeamMembersBase {
     }
     constructor(props) {
         super(props)
-        rebind(this, 'saveWeeklyReporting', 'changeSort')
+        rebind(this, 'saveWeeklyReporting', 'changeTableFormat')
     }
     render() {
         if (!this.checkLoading()) {
@@ -91,6 +132,9 @@ export class TeamMembersIndex extends TeamMembersBase {
             tdoOptions = '0 - 10'
         }
 
+        const format = teamMembers.meta.get('format')
+        const TableClass = arrayFind(TABLES, table => table.key === format).table
+
         return (
             <Form model={TEAM_MEMBERS_COLLECTION_FORM_KEY} onSubmit={this.saveWeeklyReporting}>
                 <h3>Class List</h3>
@@ -100,8 +144,9 @@ export class TeamMembersIndex extends TeamMembersBase {
                     You can quick-save the GITW/TDO by hitting the enter key.</p>
                 </Alert>
                 <ModeSelectButtons
-                        items={teamMembersSorts} current={teamMembers.meta.get('sort_by')}
-                        onClick={this.changeSort} ariaGroupDesc="Sort Preferences" />
+                        items={TABLES} current={teamMembers.meta.get('format')}
+                        onClick={this.changeTableFormat} ariaGroupDesc="Sort Preferences" />
+                <TableClass data={sortedMembers} />
                 <table className="table submissionTeamMembers">
                     <thead>
                         <tr>
@@ -140,8 +185,8 @@ export class TeamMembersIndex extends TeamMembersBase {
         }
     }
 
-    changeSort(newSort) {
-        this.props.dispatch(teamMembersData.setMeta('sort_by', newSort))
+    changeTableFormat(newFormat) {
+        this.props.dispatch(teamMembersData.setMeta('format', newFormat))
     }
 }
 
