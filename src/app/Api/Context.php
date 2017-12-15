@@ -145,7 +145,11 @@ class Context
                 // in our home region or when we don't have another center, use the user's home center
                 $center = $this->user->center;
             }
-            $this->setCenter($center, false);
+
+            if ($center) {
+                // If this is a report-only user with a region based reportToken, they don't have a parent center
+                $this->setCenter($center, false);
+            }
         }
     }
 

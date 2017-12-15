@@ -45,6 +45,9 @@ class TokenAuthenticate
                 $this->auth->onceUsingId(0);
                 $user = $this->auth->user();
                 $user->setReportToken($reportToken);
+                if ($center = $reportToken->getCenter()) {
+                    $user->setRelation('center', $center);
+                }
                 Auth::setUser($user);
 
                 if (!Session::has('timezone')) {
