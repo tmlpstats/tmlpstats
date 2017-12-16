@@ -135,6 +135,20 @@ class ReportToken extends Model
     }
 
     /**
+     * Get center if report is owned by a center
+     *
+     * @return Center|null
+     */
+    public function getCenter()
+    {
+        if ($this->ownerType !== Center::class) {
+            return null;
+        }
+
+        return $this->getOwner();
+    }
+
+    /**
      * Get the full URL for using this token
      *
      * @return string
