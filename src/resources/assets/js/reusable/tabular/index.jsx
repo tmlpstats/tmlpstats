@@ -45,8 +45,8 @@ import { connect } from 'react-redux'
 
 import { Glyphicon, cssClasses } from '../ui_basic'
 import { compositeKey } from '../sort-helpers'
-import { Column, TableState } from './types'
-import { clickColumn } from './actions'
+import { Column, TableState, adaptColumnSorts } from './types'
+import { clickColumn, overrideSort } from './actions'
 
 
 class TabularBase extends React.Component {
@@ -70,11 +70,18 @@ class TabularBase extends React.Component {
         this.sortedRows = createSortedRowsSelector()
     }
 
+    componentWillMount() {
+        const { dispatch, current } = this.props
+        const { defaultSorts, name: tableName } = this.config
+        if (defaultSorts && current.sort_by.size ==0) {
+            dispatch(overrideSort(tableName, defaultSorts))
+        }
+    }
+
     render() {
         const { props } = this
         let idExtension = props.idExtension? '-' + props.idExtension: ''
         const htmlId = `tbl-${this.config.name}${idExtension}`
-
         return (
             <table className={props.tableClasses} id={htmlId}>
                 {this.renderHeading(htmlId)}
@@ -111,9 +118,14 @@ class TabularBase extends React.Component {
 
     renderRows() {
         let rows = []
-        const {getPrimaryKey, columns} = this.config
+        const {getPrimaryKey, columns, getRowProps} = this.config
         this.sortedRows(this).forEach((row) => {
-            rows.push(<TabularRow key={getPrimaryKey(row)} row={row} columns={columns} columnContext={this.props.columnContext} />)
+            rows.push(
+                <TabularRow
+                        key={getPrimaryKey(row)} row={row} columns={columns}
+                        columnContext={this.props.columnContext}
+                        getRowProps={getRowProps} />
+            )
         })
         return (
             <tbody>{rows}</tbody>
@@ -171,19 +183,20 @@ class TabularRow extends React.PureComponent {
             PropTypes.instanceOf(Column),  // Value type
             PropTypes.string // Key type
         ),
-        columnContext: PropTypes.any
+        columnContext: PropTypes.any,
+        getRowProps: PropTypes.func,
     }
 
     render() {
-        const { row, columns } = this.props
+        const { row, columns, getRowProps, columnContext } = this.props
         let cols = []
         columns.forEach((col) => {
             const Component = col.component
             const data = col.selector(row) || col.default
-            const rendered = Component? (<Component key={col.key} data={data} columnContext={this.props.columnContext} />) : <td key={col.key}>{data}</td>
+            const rendered = Component? (<Component key={col.key} data={data} columnContext={columnContext} />) : <td key={col.key}>{data}</td>
             cols.push(rendered)
         })
-        return <tr>{cols}</tr>
+        return <tr {...getRowProps(row, columnContext)}>{cols}</tr>
     }
 }
 
@@ -195,13 +208,15 @@ class TabularRow extends React.PureComponent {
  *         columns | array  | Required. An array of column specifier objects. See top of module for docs.
  *   getPrimaryKey | func   | A selector to get the 'primary key' of a row. defaults to x => x.id
  *     displayName | string | DisplayName primarily for React debugging use.
+ *     getRowProps | func   | A selector for <tr props.
+ *    defaultSorts | array  | Default array of sorts for startup.
  *
  * @return React.Component A component used to render a table.
  */
 export function buildTable(options) {
     const tableName = options.name
-    const defaultState = options.defaultState || defaultTableState
     options.getPrimaryKey = options.getPrimaryKey || defaultPrimaryKeyFunc
+    options.getRowProps = options.getRowProps || defaultGetRowProps
     options.columns = Immutable.Seq.Indexed(options.columns)
         .map((c) => {
             return (c.set) ? c : new Column(c)
@@ -224,6 +239,8 @@ export function buildTable(options) {
         return MyTable
     }
 
+    const defaultState = options.defaultState || defaultTableState
+
     function mapState(state) {
         return {
             current: state.tabular.tables.get(tableName, defaultState)
@@ -232,6 +249,7 @@ export function buildTable(options) {
 
     return connect(mapState)(MyTable)
 }
-
+const EMPTY_OBJECT = {}
+const defaultGetRowProps = function() { return EMPTY_OBJECT }
 const defaultTableState = new TableState({})
 const defaultPrimaryKeyFunc = x => x.id
