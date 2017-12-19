@@ -1,9 +1,11 @@
 <?php
 namespace TmlpStats\Validate\Objects;
 
+use App;
 use Cache;
 use Respect\Validation\Validator as v;
 use TmlpStats as Models;
+use TmlpStats\Api;
 use TmlpStats\Traits;
 
 class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
@@ -25,6 +27,8 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
 
         $this->dataValidators['firstName']  = $nameValidator;
         $this->dataValidators['lastName']   = $nameValidator;
+        $this->dataValidators['email']      = v::optional(v::email());
+        $this->dataValidators['phone']      = v::optional(v::phone());
         $this->dataValidators['teamYear']   = $teamYearValidator;
         $this->dataValidators['atWeekend']  = $boolValidator;
         $this->dataValidators['isReviewer'] = $boolOrNullValidator;
@@ -72,6 +76,9 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
             $this->isValid = false;
         }
         if (!$this->validateComment($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateEmail($data)) {
             $this->isValid = false;
         }
 
@@ -398,6 +405,31 @@ class ApiTeamMemberValidator extends ApiObjectsValidatorAbstract
         }
 
         return $isValid;
+    }
+
+    public function validateEmail($data)
+    {
+        if (!$data->email) {
+            return true;
+        }
+
+        $bouncedEmails = App::make(Api\Context::class)->getSetting('bouncedEmails');
+        if (!$bouncedEmails) {
+            return true;
+        }
+
+        $emails = explode(',', $bouncedEmails);
+        if (in_array($data->email, $emails)) {
+            $this->addMessage('warning', [
+                'id' => 'CLASSLIST_BOUNCED_EMAIL',
+                'ref' => $data->getReference(['field' => 'email']),
+                'params' => [
+                    'email' => $data->email,
+                ],
+            ]);
+        }
+
+        return true;
     }
 
     public function getWithdrawCode($id)

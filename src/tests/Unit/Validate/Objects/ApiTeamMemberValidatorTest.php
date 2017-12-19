@@ -52,6 +52,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
         $this->statsReport->center = null;
 
         $this->setSetting('travelDueByDate', 'classroom2Date');
+        $this->setSetting('bouncedEmails', '');
 
         $this->dataTemplate = [
             'firstName' => 'Keith',
@@ -1541,6 +1542,62 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
                     ]),
                 ],
                 false,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerValidateEmail
+     */
+    public function testValidateEmail($data, $bouncedEmails, $expectedMessages, $expectedResult)
+    {
+        $this->setSetting('bouncedEmails', $bouncedEmails);
+
+        $validator = $this->getValidatorMock($data);
+        $result = $validator->run($this->getTeamMember($data));
+
+        $this->assertMessages($expectedMessages, $validator->getMessages());
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    public function providerValidateEmail()
+    {
+        return [
+            // No bounced emails
+            [
+                [],
+                '',
+                [],
+                true,
+            ],
+            // Has bounced emails but doesn't match
+            [
+                [],
+                'some-other@tmlpstats.com',
+                [],
+                true,
+            ],
+            // Has multple bounced emails but doesn't match
+            [
+                [],
+                'some-other@tmlpstats.com,and-another@tmlpstats.com,and-finally@tmlpstats.com',
+                [],
+                true,
+            ],
+            // Matches bounced email
+            [
+                [
+                    'email' => 'a-match@tmlpstats.com',
+                ],
+                'some-other@tmlpstats.com,a-match@tmlpstats.com',
+                [
+                    $this->getMessageData($this->messageTemplate, [
+                        'id' => 'CLASSLIST_BOUNCED_EMAIL',
+                        'level' => 'warning',
+                        'reference.field' => 'email',
+                    ]),
+                ],
+                true,
             ],
         ];
     }

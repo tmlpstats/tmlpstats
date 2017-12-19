@@ -1,8 +1,10 @@
 <?php
 namespace TmlpStats\Validate\Objects;
 
+use App;
 use Respect\Validation\Validator as v;
 use TmlpStats as Models;
+use TmlpStats\Api;
 use TmlpStats\Traits;
 
 class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
@@ -61,6 +63,9 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
             $this->isValid = false;
         }
         if (!$this->validateWithdraw($data)) {
+            $this->isValid = false;
+        }
+        if (!$this->validateEmail($data)) {
             $this->isValid = false;
         }
 
@@ -422,6 +427,31 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
                 ],
             ]);
             return false;
+        }
+
+        return true;
+    }
+
+    public function validateEmail($data)
+    {
+        if (!$data->email) {
+            return true;
+        }
+
+        $bouncedEmails = App::make(Api\Context::class)->getSetting('bouncedEmails');
+        if (!$bouncedEmails) {
+            return true;
+        }
+
+        $emails = explode(',', $bouncedEmails);
+        if (in_array($data->email, $emails)) {
+            $this->addMessage('warning', [
+                'id' => 'TEAMAPP_BOUNCED_EMAIL',
+                'ref' => $data->getReference(['field' => 'email']),
+                'params' => [
+                    'email' => $data->email,
+                ],
+            ]);
         }
 
         return true;
