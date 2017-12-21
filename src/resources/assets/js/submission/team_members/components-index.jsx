@@ -138,20 +138,20 @@ const ClassListRppTable = buildTable({
     defaultSorts: NAME_SORT,
     columns: TABLE_DEFAULT_COLS.slice(0, 2).concat([
         {
-            key: 'rppCap', label: 'RPP CAP', default: '',
+            key: 'rppCap', label: 'CAP Registrations', default: '',
             sorter: 'number', sortSelector: 'KEY',
             selector: 'IDENT',
             component: rppComponent('rppCap')
 
         },
         {
-            key: 'rppCpc', label: 'RPP CPC', default: '',
+            key: 'rppCpc', label: 'CPC Registrations', default: '',
             sorter: 'number', 'sortSelector': 'KEY',
             selector: 'IDENT',
             component: rppComponent('rppCpc')
         },
         {
-            key: 'rppLf', label: 'RPP LF', default: '',
+            key: 'rppLf', label: 'LF Registrations', default: '',
             sorter: 'number', 'sortSelector': 'KEY',
             selector: 'IDENT',
             component: rppComponent('rppLf')
@@ -162,7 +162,7 @@ const ClassListRppTable = buildTable({
 const TABLES = [
     {key: 'submission_team_members_default', label: 'GITW/TDO', table: ClassListDefaultTable},
     {key: 'submission_team_members_travel', label: 'Travel/Room', table: ClassListTravelTable},
-    {key: 'submission_team_members_rpp', label: 'Reg. Per Participant', table: ClassListRppTable},
+    {key: 'submission_team_members_rpp', label: 'Registrations', table: ClassListRppTable},
 ]
 
 @connectRedux()
