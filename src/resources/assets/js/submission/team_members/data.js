@@ -38,7 +38,10 @@ export const teamMembersData = new FormReduxLoader({
         }
     },
     useMeta: true,
-    initialMeta: Immutable.Map({sort_by: 'first_last'}),
+    initialMeta: Immutable.Map({
+        format: 'submission_team_members_default',
+        counter: 0
+    }),
     getSortedMembers: collectionSortSelector(teamMembersSorts),
     getLabel(tm) {
         return `${tm.firstName} ${tm.lastName} (T${tm.teamYear}Q${tm.quarterNumber})`

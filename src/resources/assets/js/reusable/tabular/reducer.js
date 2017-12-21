@@ -2,7 +2,7 @@
 import Immutable from 'immutable'
 
 import { CLICK_COLUMN, OVERRIDE_SORT } from './actions'
-import { TableState, ColumnSort } from './types'
+import { TableState, ColumnSort, adaptColumnSorts } from './types'
 
 
 const R = new Immutable.Record({
@@ -37,7 +37,7 @@ function reducer(state=startState, action) {
         } else if (action.type === OVERRIDE_SORT) {
             // override sort is a special action not given by our own component, instead done when
             // there is an action maybe to do a custom set of sorts.
-            current = current.set('sort_by', Immutable.List(action.sorts.map(x => new ColumnSort(x))))
+            current = current.set('sort_by', adaptColumnSorts(action.sorts))
         }
         return state.setIn(['tables', action.table], current)
     }

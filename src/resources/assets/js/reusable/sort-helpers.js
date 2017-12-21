@@ -1,5 +1,6 @@
 import Immutable from 'immutable'
 import { createSelector } from 'reselect'
+import { isNumber } from './ponyfill'
 
 export const SORT_BY = 'sort_by'
 
@@ -16,7 +17,21 @@ const SORTERS = {
 
     number(selector) {
         return function(a, b) {
-            return selector(a) - selector(b)
+            let valA = selector(a)
+            let valB = selector(b)
+            if (valA === undefined || !isNumber(valA)) valA = null
+            if (valB === undefined || !isNumber(valB)) valB = null
+
+            if (valA === null) {
+                if (valB === null) {
+                    return 0
+                } else {
+                    return 1
+                }
+            } else if (valB === null) {
+                return -1
+            }
+            return valA - valB
         }
     },
 

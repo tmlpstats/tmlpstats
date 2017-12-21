@@ -2,7 +2,7 @@ import { SubmissionBase } from '../base_components'
 import * as actions from './actions'
 
 export const GITW_LABELS = ['Ineffective', 'Effective']
-export const TDO_LABELS = ['N', 'Y']
+export const YES_NO = ['N', 'Y']
 export const TDO_OPTIONS = [
     {k:0}, {k:1}, {k:2},
     {k:3}, {k:4}, {k:5},

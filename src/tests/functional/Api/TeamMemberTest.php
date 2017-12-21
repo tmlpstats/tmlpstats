@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use TmlpStats as Models;
 use TmlpStats\Api;
+use TmlpStats\Domain;
 use TmlpStats\Tests\Functional\FunctionalTestAbstract;
 use TmlpStats\Tests\Mocks\MockContext;
 
@@ -137,6 +138,57 @@ class TeamMemberTest extends FunctionalTestAbstract
         return [
             ['TeamMember.allForCenter'],
             ['TeamMember.stash'],
+        ];
+    }
+
+    /**
+     * @dataProvider providerBulkStashWeeklyReporting
+     */
+    public function testBulkStashWeeklyReporting($data)
+    {
+        $user = $this->createUser('localStatistician', true);
+        $context = MockContext::defaults()->withUser($user)->install();
+        $tmApi = App::make(Api\TeamMember::class);
+
+        // TODO come back and set up multiple team members to test cases with multiple updates
+        $update1 = $data['input'];
+        $update1['id'] = $this->teamMember->id;
+
+        $tmApi->bulkStashWeeklyReporting($this->center, $this->report->reportingDate, [$update1]);
+
+        // Check the stashes
+        $submissionData = App::make(Api\SubmissionData::class);
+
+        $domain = $submissionData->get($this->center, $this->report->reportingDate, Domain\TeamMember::class, $this->teamMember->id);
+        $data['checks']($this, $domain);
+    }
+
+    public function providerBulkStashWeeklyReporting()
+    {
+        return [
+            [[
+                'input' => ['gitw' => true, 'tdo' => 1],
+                'checks' => function ($suite, $domain) {
+                    $suite->assertEquals(true, $domain->gitw);
+                    $suite->assertEquals(1, $domain->tdo);
+                },
+            ]],
+            [[
+                'input' => ['travel' => true, 'room' => null],
+                'checks' => function ($suite, $domain) {
+                    $suite->assertEquals(true, $domain->travel);
+                    $suite->assertEquals(null, $domain->room);
+                },
+            ]],
+            [[
+                'input' => ['rppCap' => '1', 'rppCpc' => 2, 'rppLf' => '0'],
+                'checks' => function ($suite, $domain) {
+                    $suite->assertEquals(1, $domain->rppCap);
+                    $suite->assertEquals(2, $domain->rppCpc);
+                    $suite->assertEquals(0, $domain->rppLf);
+
+                },
+            ]],
         ];
     }
 }

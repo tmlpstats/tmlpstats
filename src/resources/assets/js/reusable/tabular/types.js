@@ -20,11 +20,17 @@ export class Column extends baseColumn {
     constructor(input) {
         if (!input.selector) {
             input.selector = makeKeySelector(input.key)
+        } else if (input.selector === 'IDENT') {
+            input.selector = identitySelector
+        }
+        if (input.sortSelector === 'KEY') {
+            input.sortSelector = makeKeySelector(input.key)
         }
         super(input)
     }
 }
 
+function identitySelector(x) { return x }
 
 function makeKeySelector(key) {
     return (obj) => obj[key]
@@ -38,3 +44,7 @@ export const ColumnSort = Immutable.Record({
     column: '',
     direction: 'asc',
 })
+
+export function adaptColumnSorts(sorts) {
+    return Immutable.List(sorts.map(x => new ColumnSort(x)))
+}

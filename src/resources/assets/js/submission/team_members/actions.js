@@ -55,11 +55,26 @@ export function weeklyReportingUpdated(teamMemberId) {
     return weeklyReportingData.mark(teamMemberId)
 }
 
+export function markWeeklyReportingFromModel(model) {
+    const bits = model.split('.')
+    const target = bits.length - 2 // the model looks like path.<teamMemberid>.tdo so we can get it from 2nd to last
+    return weeklyReportingUpdated(bits[target])
+}
+
+const WEEKLY_REPORTING_KEYS = ['gitw', 'tdo', 'travel', 'room', 'rppCap', 'rppCpc', 'rppLf']
+
 export function weeklyReportingSubmit(center, reportingDate, tracking, rawData) {
     var updates = []
     for (var id in tracking.changed) {
-        let {gitw, tdo} = rawData[id]
-        updates.push({id, gitw, tdo})
+        const input = rawData[id]
+        const update = {id}
+        // For each of the WEEKLY_REPORTING_KEYS on the teamMember, update if assigned.
+        for (const k of WEEKLY_REPORTING_KEYS) {
+            if (input[k] !== undefined && input[k] !== null) {
+                update[k] = input[k]
+            }
+        }
+        updates.push(update)
     }
 
     return (dispatch) => {
@@ -75,6 +90,12 @@ export function weeklyReportingSubmit(center, reportingDate, tracking, rawData) 
             setTimeout(() => {
                 dispatch(weeklyReportingData.endWork())
                 dispatch(weeklySaveState('new'))
+                // make an inconsequential change to each team member to trigger re-rendering
+                updates.forEach((update) => {
+                    const tm = rawData[update.id]
+                    const newCounter = (tm._ctr || 0) + 1
+                    dispatch(formActions.change(`${TEAM_MEMBERS_COLLECTION_FORM_KEY}.${update.id}._ctr`, newCounter))
+                })
             }, 3000)
             return data
         }
@@ -135,4 +156,16 @@ export function stashTeamMember(center, reportingDate, data) {
             dispatch(messages.replace(id, getMessages(err)))
         }
     })
+}
+
+export function rppChangeAction(model, value) {
+    return (dispatch) => {
+        dispatch(markWeeklyReportingFromModel(model))
+        if (value === '') {
+            value = null
+        } else if (value !== null) {
+            value = parseInt(value)
+        }
+        dispatch(formActions.change(model, value))
+    }
 }

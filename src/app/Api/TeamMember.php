@@ -152,6 +152,7 @@ class TeamMember extends AuthenticatedApiBase
 
     public function bulkStashWeeklyReporting(Models\Center $center, Carbon $reportingDate, array $updates)
     {
+        $possibleFields = ['gitw', 'tdo', 'travel', 'room', 'rppCap', 'rppCpc', 'rppLf'];
         $this->assertCan('submitStats', $center);
         $submissionData = App::make(SubmissionData::class);
         $sourceData = $this->allForCenter($center, $reportingDate, true);
@@ -160,8 +161,14 @@ class TeamMember extends AuthenticatedApiBase
         foreach ($updates as $item) {
             $updatedDomain = Domain\TeamMember::fromArray($item, ['id']);
             $existing = array_get($sourceData, $updatedDomain->id, null);
-            $existing->gitw = $updatedDomain->gitw;
-            $existing->tdo = $updatedDomain->tdo;
+            if ($existing === null) {
+                continue;
+            }
+            foreach ($possibleFields as $field) {
+                if (array_key_exists($field, $item)) {
+                    $existing->$field = $updatedDomain->$field;
+                }
+            }
             $submissionData->store($center, $reportingDate, $existing);
             $validationResults = $this->validateObject($report, $existing, $existing->id);
             $messages[$updatedDomain->id] = $validationResults['messages'];
