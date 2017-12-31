@@ -40,6 +40,18 @@ trait LocalReportDispatch
             'id' => 'TdoSummary',
             'method' => 'getTdoSummary',
         ],
+        'rppcapsummary' => [
+            'id' => 'RppCapSummary',
+            'method' => 'getRppCapSummary',
+        ],
+        'rppcpcsummary' => [
+            'id' => 'RppCpcSummary',
+            'method' => 'getRppCpcSummary',
+        ],
+        'rpplfsummary' => [
+            'id' => 'RppLfSummary',
+            'method' => 'getRppLfSummary',
+        ],
         'tmlpregistrations' => [
             'id' => 'TmlpRegistrations',
             'method' => 'getTmlpRegistrations',
@@ -123,6 +135,15 @@ trait LocalReportDispatch
 
     // Get report TDO
     protected abstract function getTdoSummary();
+
+    // Get report CAP Registration
+    protected abstract function getRppCapSummary();
+
+    // Get report CPC Registration
+    protected abstract function getRppCpcSummary();
+
+    // Get report LF Registration
+    protected abstract function getRppLfSummary();
 
     // Get report By Team Year
     protected abstract function getTmlpRegistrations();

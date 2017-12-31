@@ -549,56 +549,57 @@ class StatsReportController extends Controller
         return view('statsreports.details.contactinfo', compact('contacts'));
     }
 
-    protected function getMemberSummaryData(Models\StatsReport $statsReport)
+    protected function getMemberSummaryData(Models\StatsReport $statsReport, $type)
     {
-        $weeksData = [];
+        $center = $statsReport->center;
+        $reportingDate = $statsReport->reportingDate;
 
-        $date = $statsReport->quarter->getFirstWeekDate($statsReport->center);
-        while ($date->lte($statsReport->reportingDate)) {
-            $globalReport = Models\GlobalReport::reportingDate($date)->first();
+        $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
+        $cq = $crd->getCenterQuarter();
 
-            $report = null;
-            if ($globalReport) {
-                $report = $globalReport->statsReports()->byCenter($statsReport->center)->first();
-            }
+        $weeksData = collect($cq->listReportingDates())->filter(function ($d) use ($reportingDate) {
+            return $d->lte($reportingDate);
+        })->keyBy(function($d) {
+            return $d->toDateString();
+        })->map(function ($d) use ($center) {
+            return App::make(Api\TeamMember::class)->allForCenter($center, $d);
+        });
 
-            $weeksData[$date->toDateString()] = null;
-            if ($report) {
-                $weeksData[$date->toDateString()] = App::make(Api\LocalReport::class)->getClassList($report);
-            }
-
-            $date->addWeek();
+        if (!$weeksData) {
+            return null;
         }
 
-        return $weeksData;
+        $a = new Arrangements\TeamMemberWeeklyValue([
+            'teamMembersData' => $weeksData,
+            'field' => $type,
+        ]);
+
+        return $a->compose();
     }
 
     protected function getGitwSummary(Models\StatsReport $statsReport)
     {
-        $weeksData = $this->getMemberSummaryData($statsReport);
-        if (!$weeksData) {
-            return null;
-        }
-
-        $a = new Arrangements\GitwByTeamMember(['teamMembersData' => $weeksData]);
-        $data = $a->compose();
-        $data['type'] = 'gitw';
-
-        return view('statsreports.details.teammembersweekly', $data);
+        return $this->getMemberSummaryData($statsReport, 'gitw');
     }
 
     protected function getTdoSummary(Models\StatsReport $statsReport)
     {
-        $weeksData = $this->getMemberSummaryData($statsReport);
-        if (!$weeksData) {
-            return null;
-        }
+        return $this->getMemberSummaryData($statsReport, 'tdo');
+    }
 
-        $a = new Arrangements\TdoByTeamMember(['teamMembersData' => $weeksData]);
-        $data = $a->compose();
-        $data['type'] = 'tdo';
+    protected function getRppCapSummary(Models\StatsReport $statsReport)
+    {
+        return $this->getMemberSummaryData($statsReport, 'rppCap');
+    }
 
-        return view('statsreports.details.teammembersweekly', $data);
+    protected function getRppCpcSummary(Models\StatsReport $statsReport)
+    {
+        return $this->getMemberSummaryData($statsReport, 'rppCpc');
+    }
+
+    protected function getRppLfSummary(Models\StatsReport $statsReport)
+    {
+        return $this->getMemberSummaryData($statsReport, 'rppLf');
     }
 
     public function compileApiReportMessages(Models\StatsReport $statsReport)

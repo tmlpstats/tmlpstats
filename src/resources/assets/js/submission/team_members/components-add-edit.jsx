@@ -12,8 +12,7 @@ import { TEAM_MEMBER_FORM_KEY } from './reducers'
 import { EXIT_CHOICES, EXIT_CHOICES_HELP } from './exit_choice'
 import * as actions from './actions'
 import { teamMemberText as fullName } from './data'
-import { TeamMembersBase, GITW_LABELS, TDO_LABELS, TDO_OPTIONS } from './components-base'
-
+import { TeamMembersBase, GITW_LABELS, YES_NO, TDO_OPTIONS } from './components-base'
 
 const CHANGING_QUARTER_KEY = '_changingQuarter'
 const getTeamAccountabilities = makeAccountabilitiesSelector('team')

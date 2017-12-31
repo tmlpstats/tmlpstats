@@ -3,11 +3,12 @@ namespace TmlpStats\Reports\Arrangements;
 
 use Carbon\Carbon;
 
-abstract class TeamMemberWeeklyValue extends BaseArrangement
+class TeamMemberWeeklyValue extends BaseArrangement
 {
     public function build($data)
     {
         $teamMembersData = $data['teamMembersData'];
+        $field = $data['field'];
 
         $reportData = [];
         $dates = [];
@@ -25,14 +26,14 @@ abstract class TeamMemberWeeklyValue extends BaseArrangement
 
             foreach ($teamData as $data) {
 
-                $team = "team{$data->teamMember->teamYear}";
+                $team = "team{$data->teamYear}";
 
-                $member = isset($members[$team][$data->teamMember->id])
-                    ? $members[$team][$data->teamMember->id]
+                $member = isset($members[$team][$data->id])
+                    ? $members[$team][$data->id]
                     : [];
 
                 if (!$member) {
-                    $member['member'] = $data->teamMember;
+                    $member['member'] = $data;
                     $member['withdrawn'] = false;
                     $member['total'] = 0;
                 }
@@ -45,19 +46,18 @@ abstract class TeamMemberWeeklyValue extends BaseArrangement
                 }
                 if (!$data->xferOut) {
                     $member[$date] = [
-                        'value' => $this->getValue($data),
+                        'value' => $data->$field,
                     ];
-                    $member['total'] += $this->getValue($data);
+                    $member['total'] += $data->$field;
                 }
 
-                $members[$team][$data->teamMember->id] = $member;
+                $members[$team][$data->id] = $member;
             }
         }
         $reportData['dates'] = $dates;
         $reportData['members'] = array_merge($members['team1'], $members['team2']);
+        $reportData['type'] = $field;
 
         return compact('reportData');
     }
-
-    abstract function getValue($data);
 }

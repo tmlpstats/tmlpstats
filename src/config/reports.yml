@@ -702,8 +702,22 @@ reportMeta:
             name: Summary
           GitwSummary:
             name: GITW
+            render: react
           TdoSummary:
             name: TDO
+            render: react
+          RppCapSummary:
+            name: CAP Registration
+            shortName: CAP Reg
+            render: react
+          RppCpcSummary:
+            name: CPC Registration
+            shortName: CPC Reg
+            render: react
+          RppLfSummary:
+            name: LF Registration
+            shortName: LF Reg
+            render: react
 
       TeamExpansion:
         name: Team Expansion
