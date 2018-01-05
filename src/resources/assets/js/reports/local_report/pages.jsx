@@ -13,6 +13,7 @@ import { buildTable } from '../../reusable/tabular'
 import { lazy } from '../../reusable/dispatch'
 
 export { Reconciliation } from './pages-reconciliation'
+export { GitwSummary, TdoSummary, RppCapSummary, RppCpcSummary, RppLfSummary } from './pages-memberstats'
 
 const buildNQATable = lazy(function() {
 

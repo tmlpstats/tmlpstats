@@ -404,40 +404,69 @@ const LocalReport = {
         "id": "GitwSummary",
         "n": 4,
         "type": "report",
-        "name": "GITW"
+        "name": "GITW",
+        "render": "react"
     },
     "TdoSummary": {
         "id": "TdoSummary",
         "n": 5,
         "type": "report",
-        "name": "TDO"
+        "name": "TDO",
+        "render": "react"
+    },
+    "RppCapSummary": {
+        "id": "RppCapSummary",
+        "n": 6,
+        "type": "report",
+        "name": "CAP Registration",
+        "shortName": "CAP Reg",
+        "render": "react"
+    },
+    "RppCpcSummary": {
+        "id": "RppCpcSummary",
+        "n": 7,
+        "type": "report",
+        "name": "CPC Registration",
+        "shortName": "CPC Reg",
+        "render": "react"
+    },
+    "RppLfSummary": {
+        "id": "RppLfSummary",
+        "n": 8,
+        "type": "report",
+        "name": "LF Registration",
+        "shortName": "LF Reg",
+        "render": "react"
     },
     "TeamMembers": {
         "id": "TeamMembers",
-        "n": 6,
+        "n": 9,
         "type": "grouping",
         "name": "Team Members",
         "children": [
             "ClassList",
             "GitwSummary",
-            "TdoSummary"
+            "TdoSummary",
+            "RppCapSummary",
+            "RppCpcSummary",
+            "RppLfSummary"
         ]
     },
     "TmlpRegistrations": {
         "id": "TmlpRegistrations",
-        "n": 7,
+        "n": 10,
         "type": "report",
         "name": "By Team Year"
     },
     "TmlpRegistrationsByStatus": {
         "id": "TmlpRegistrationsByStatus",
-        "n": 8,
+        "n": 11,
         "type": "report",
         "name": "By Status"
     },
     "TeamExpansion": {
         "id": "TeamExpansion",
-        "n": 9,
+        "n": 12,
         "type": "grouping",
         "name": "Team Expansion",
         "children": [
@@ -447,13 +476,13 @@ const LocalReport = {
     },
     "Courses": {
         "id": "Courses",
-        "n": 10,
+        "n": 13,
         "type": "report",
         "name": "Courses"
     },
     "ContactInfo": {
         "id": "ContactInfo",
-        "n": 11,
+        "n": 14,
         "type": "report",
         "name": "Contact Info",
         "shortName": "Contacts",
@@ -463,19 +492,19 @@ const LocalReport = {
     },
     "PeopleTransferSummary": {
         "id": "PeopleTransferSummary",
-        "n": 12,
+        "n": 15,
         "type": "report",
         "name": "People"
     },
     "CoursesTransferSummary": {
         "id": "CoursesTransferSummary",
-        "n": 13,
+        "n": 16,
         "type": "report",
         "name": "Courses"
     },
     "TransferCheck": {
         "id": "TransferCheck",
-        "n": 14,
+        "n": 17,
         "type": "grouping",
         "name": "Transfer Check",
         "children": [
@@ -488,19 +517,19 @@ const LocalReport = {
     },
     "TeamWeekendSummary": {
         "id": "TeamWeekendSummary",
-        "n": 15,
+        "n": 18,
         "type": "report",
         "name": "Team Summary"
     },
     "TeamTravelSummary": {
         "id": "TeamTravelSummary",
-        "n": 16,
+        "n": 19,
         "type": "report",
         "name": "Travel \/ Room"
     },
     "NextQtrAccountabilities": {
         "id": "NextQtrAccountabilities",
-        "n": 17,
+        "n": 20,
         "type": "report",
         "name": "Next Quarter Accountabilities",
         "shortName": "Accountabilities",
@@ -511,7 +540,7 @@ const LocalReport = {
     },
     "Reconciliation": {
         "id": "Reconciliation",
-        "n": 18,
+        "n": 21,
         "type": "report",
         "name": "Weekend Reconciliation",
         "shortName": "Reconciliation",
@@ -522,7 +551,7 @@ const LocalReport = {
     },
     "Weekend": {
         "id": "Weekend",
-        "n": 19,
+        "n": 22,
         "type": "grouping",
         "name": "Weekend Information",
         "shortName": "Weekend",
