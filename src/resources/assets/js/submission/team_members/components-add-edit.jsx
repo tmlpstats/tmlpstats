@@ -259,7 +259,7 @@ class _EditCreate extends TeamMembersBase {
 
     renderGitwTdo(modelKey) {
         const { lookups } = this.props
-        let tdoSelect = <BooleanSelect model={modelKey+'.tdo'} emptyChoice=" " labels={TDO_LABELS} className="form-control tdo" />
+        let tdoSelect = <BooleanSelect model={modelKey+'.tdo'} emptyChoice=" " labels={YES_NO} className="form-control tdo" />
         if (lookups.user.canSubmitMultipleTdos) {
             tdoSelect = <SimpleSelect model={modelKey+'.tdo'} emptyChoice=" " items={TDO_OPTIONS} className="form-control tdo" keyProp='k' labelProp='k' />
         }
