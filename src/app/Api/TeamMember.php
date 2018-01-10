@@ -15,7 +15,7 @@ class TeamMember extends AuthenticatedApiBase
 {
     use Traits\UsesReportDates, Traits\ValidatesObjects;
 
-    private static $omitGitwTdo = ['tdo' => true, 'gitw' => true];
+    private static $omitGames = ['tdo' => true, 'gitw' => true, 'rppCap' => true, 'rppCpc' => true, 'rppLf' => true];
 
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
@@ -42,7 +42,7 @@ class TeamMember extends AuthenticatedApiBase
             // If the last report happens to be the same week as this week, we can include GITW/TDO.
             $includeData = ($lastReport->reportingDate->eq($reportingDate));
             $options = [
-                'ignore' => ($includeData) ? false : self::$omitGitwTdo,
+                'ignore' => ($includeData) ? false : self::$omitGames,
                 // setting time explicitly here to make sure we display accountabiles up to the time this report is active
                 'accountabilitiesFor' => $reportingDate->copy()->setTime(15, 0, 0),
             ];
