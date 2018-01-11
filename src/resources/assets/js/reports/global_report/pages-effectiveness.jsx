@@ -72,7 +72,10 @@ class EffectivenessBase extends PureComponent {
 
             const sb = new Scoreboard(centerData[week])
             const sbGame = sb.games[game]
-            const actualClass = (sbGame.actual >= sbGame.promise) ? 'success' : 'bg-danger'
+            let actualClass = 'bg-danger'
+            if ((sbGame.actual >= sbGame.promise) && (sbGame.promise > 0)) {
+                actualClass = 'success'
+            }
 
             weekData.push(
                 <td key={week} className={`data-point border-right ${actualClass}`}>
