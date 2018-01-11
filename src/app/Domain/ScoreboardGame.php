@@ -78,16 +78,25 @@ class ScoreboardGame
     public function setPromise($promise)
     {
         $this->promise = $promise;
+        if (is_numeric($promise)) {
+            $this->promise = (int) $promise;
+        }
     }
 
     public function setOriginalPromise($promise)
     {
         $this->originalPromise = $promise;
+        if (is_numeric($promise)) {
+            $this->originalPromise = (int) $promise;
+        }
     }
 
     public function setActual($actual)
     {
         $this->actual = $actual;
+        if (is_numeric($actual)) {
+            $this->actual = (int) $actual;
+        }
     }
 
     public function set($type, $value)
