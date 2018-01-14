@@ -298,6 +298,11 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         return $this->person->formatPhone();
     }
 
+    public function toLocalTimezone(Carbon $date)
+    {
+        return $date->setTimezone($this->center->timezone);
+    }
+
     public function scopeActive($query, $active = true)
     {
         return $query->whereActive($active);

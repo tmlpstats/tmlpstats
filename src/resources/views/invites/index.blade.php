@@ -19,6 +19,7 @@
                 <th>Email</th>
                 <th>Role</th>
                 <th>Center</th>
+                <th>Sent At</th>
                 <th>&nbsp;</th>
             </tr>
             </thead>
@@ -29,6 +30,7 @@
                     <td>{{ $invite->email }}</td>
                     <td>{{ $invite->role ? $invite->role->display : '' }}</td>
                     <td>{{ $invite->center ? $invite->center->name : '' }}</td>
+                    <td>{{ Auth::user()->toLocalTimezone($invite->emailSentAt)->format('M j, Y \a\t g:i a T') }}</td>
                     <td>
                         <a href="#" class="delete" title="Delete" style="color: black">
                             <span class="glyphicon glyphicon-remove"></span>
