@@ -1,7 +1,7 @@
 @extends('template')
 
 @section('content')
-    <h2>Edit Invite for {{ $invite->first_name }} {{ $invite->last_name[0] }}</h2>
+    <h2>Edit Invite for {{ $invite->firstName }} {{ $invite->lastName }}</h2>
 
     @include('errors.list')
 
