@@ -19,7 +19,8 @@
                 <th>Email</th>
                 <th>Role</th>
                 <th>Center</th>
-                <th>Sent At</th>
+                <th>Invited By</th>
+                <th>Last Sent</th>
                 <th>&nbsp;</th>
             </tr>
             </thead>
@@ -30,6 +31,7 @@
                     <td>{{ $invite->email }}</td>
                     <td>{{ $invite->role ? $invite->role->display : '' }}</td>
                     <td>{{ $invite->center ? $invite->center->name : '' }}</td>
+                    <td>{{ $invite->invitedByUser->firstName }} {{ $invite->invitedByUser->lastName }}</td>
                     <td>{{ Auth::user()->toLocalTimezone($invite->emailSentAt)->format('M j, Y \a\t g:i a T') }}</td>
                     <td>
                         <a href="#" class="delete" title="Delete" style="color: black">
