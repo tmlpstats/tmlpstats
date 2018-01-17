@@ -3,6 +3,7 @@
 namespace TmlpStats\Console\Commands;
 
 use DB;
+use Faker;
 use Illuminate\Console\Command;
 use Schema;
 use TmlpStats\Person;
@@ -46,21 +47,29 @@ class SanitizeDb extends Command
     {
         // NEVER IN PROD!
         if (config('app.env') !== 'local' && config('app.env') !== 'stage') {
-            $this->line("Must be in local env... aborting!");
+            $this->line('Must be in local env... aborting!');
+
             return false;
         }
+        $faker = Faker\Factory::create();
 
-        $this->line("Clearing password resets...");
+        $this->line('Clearing password resets...');
         if (Schema::hasTable('password_resets')) {
             DB::table('password_resets')->truncate();
         }
 
-        $this->line("Clearing sessions...");
+        $this->line('Clearing sessions...');
         if (Schema::hasTable('sessions')) {
             DB::table('sessions')->truncate();
         }
 
-        $this->line("Scrubbing users...");
+        $this->line('Clearing stashes...');
+        if (Schema::hasTable('submission_data')) {
+            DB::table('submission_data')->truncate();
+            DB::table('submission_data_log')->truncate();
+        }
+
+        $this->line('Scrubbing users...');
         $users = User::all();
         $bar = $this->output->createProgressBar(count($users));
         $newPassword = bcrypt('password');
@@ -81,9 +90,9 @@ class SanitizeDb extends Command
             $bar->advance();
         }
         $bar->finish();
-        $this->line("");
+        $this->line('');
 
-        $this->line("Scrubbing people...");
+        $this->line('Scrubbing people...');
         $people = Person::all();
         $bar = $this->output->createProgressBar(count($people));
         foreach ($people as $person) {
@@ -94,14 +103,15 @@ class SanitizeDb extends Command
             if (strlen($person->lastName) > 2) {
                 $person->lastName = $person->lastName[0];
             }
+            $person->firstName = $faker->firstName;
 
             $person->save();
             $bar->advance();
         }
         $bar->finish();
-        $this->line("");
+        $this->line('');
 
-        $this->line("Scrubbing reportTokens...");
+        $this->line('Scrubbing reportTokens...');
         $reportTokens = ReportToken::all();
         $bar = $this->output->createProgressBar(count($reportTokens));
         foreach ($reportTokens as $token) {
@@ -111,9 +121,9 @@ class SanitizeDb extends Command
             $bar->advance();
         }
         $bar->finish();
-        $this->line("");
+        $this->line('');
 
-        $this->line("Scrubbing settings...");
+        $this->line('Scrubbing settings...');
         $settings = Setting::name('centerReportMailingList')->get();
         $bar = $this->output->createProgressBar(count($settings));
         foreach ($settings as $setting) {
@@ -129,8 +139,8 @@ class SanitizeDb extends Command
             $bar->advance();
         }
         $bar->finish();
-        $this->line("");
+        $this->line('');
 
-        $this->line("Done");
+        $this->line('Done');
     }
 }

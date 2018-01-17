@@ -37,6 +37,7 @@ class HelpController extends Controller
         $files = array('accountabilities.mov',
             'managing application dates.mov',
             'where to find accountabilities report.mov',
+            'entering reg per participant.mov',
             'admin/printing weekend accountability rosters.mov',
             'admin/Reconciliation Report Walkthrough.mov',
             'admin/unlocking promises.mov',
