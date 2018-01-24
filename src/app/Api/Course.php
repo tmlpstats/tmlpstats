@@ -39,7 +39,7 @@ class Course extends ApiBase
                     continue;
                 }
 
-                $domain = Domain\Course::fromModel($cd, $cd->course);
+                $domain = Domain\Course::fromModel($cd);
                 $domain->meta = $this->getCourseMeta($domain, $center, $reportingDate);
                 $domain->meta['fromReport'] = true;
                 $allCourses[$domain->id] = $domain;

@@ -73,3 +73,12 @@ $factory->define(TmlpStats\Course::class, function (Faker\Generator $faker) {
         'type' => 'CAP',
     ];
 });
+
+$factory->define(TmlpStats\CourseData::class, function (Faker\Generator $faker) {
+    return [
+        'course_id' => factory(TmlpStats\Course::class)->create()->id,
+        'quarter_start_ter' => 0, 'current_ter' => 0,
+        'quarter_start_standard_starts' => 0, 'current_standard_starts' => 0,
+        'quarter_start_xfer' => 0, 'current_xfer' => 0,
+    ];
+});

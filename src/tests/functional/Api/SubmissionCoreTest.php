@@ -575,6 +575,141 @@ class SubmissionCoreTest extends FunctionalTestAbstract
         ];
     }
 
+    /**
+     * @dataProvider providerSubmitCourses
+     */
+    public function testSubmitCourses($cInput)
+    {
+        $sd = App::make(Api\SubmissionData::class);
+        $lastWeekDate = $this->reportingDate->copy()->subWeek();
+        $lastStatsReport = App::make(Api\LocalReport::class)->ensureStatsReport(
+            $this->center,
+            $lastWeekDate
+        );
+
+        // Setup last week's report as "official"
+        Models\GlobalReport::firstOrCreate([
+            'reporting_date' => $lastWeekDate,
+        ])->addCenterReport($lastStatsReport);
+
+        $existingCourses = [
+            'c1' => factory(Models\Course::class)->create([
+                'center_id' => $this->center->id,
+                'start_date' => Carbon::parse('2016-04-23'),
+            ]),
+            'c2' => factory(Models\Course::class)->create([
+                'center_id' => $this->center->id,
+                'start_date' => Carbon::parse('2016-04-30'),
+            ]),
+        ];
+
+        factory(Models\CourseData::class)->create([
+            'course_id' => $existingCourses['c2']->id, 'stats_report_id' => $lastStatsReport->id,
+            'current_ter' => 10,
+            'current_standard_starts' => 10,
+        ]);
+
+        $inCourses = [];
+        $fakeId = -1;
+        foreach ($cInput['input'] as $c) {
+            $c['center'] = $this->center->id;
+            if (isset($c['course'])) {
+                $c['id'] = $existingCourses[$c['course']]->id;
+            } else {
+                $c['id'] = --$fakeId;
+            }
+
+            $course = Domain\Course::fromArray($c);
+            $inCourses[$course->id] = $course;
+            $sd->store($this->center, $this->reportingDate, $course);
+        }
+
+        $statsReport = App::make(Api\LocalReport::class)->ensureStatsReport(
+            $this->center,
+            $this->reportingDate
+        );
+
+        $courses = App::make(Api\Course::class)->allForCenter($this->center, $this->reportingDate, true);
+        $this->assertEquals(3, count($courses));
+        $this->api->submitCourses($this->center, $this->reportingDate, $statsReport, collect($courses));
+
+        $courseData = Models\CourseData::byStatsReport($statsReport)->get();
+        $this->assertEquals(3, count($courseData));
+
+        foreach ($courseData as $cdata) {
+            $check = $cInput['checks'][$cdata->startDate->toDateString()] ?? null;
+            $check($this, $cdata, $cdata->course);
+        }
+
+        /*course_id, quarter_start_ter, quarter_start_standard_starts, quarter_start_xfer,
+                            current_ter, current_standard_starts, current_xfer,
+                            completed_standard_starts, potentials, registrations,
+                            guests_promised, guests_invited, guests_confirmed, guests_attended,
+                            stats_report_id, created_at, updated_at*/
+
+    }
+
+    public function providerSubmitCourses()
+    {
+        return [
+            [[
+                'input' => [
+                    [
+                        'course' => 'c1',
+                        'type' => 'CAP',
+                        'startDate' => '2016-04-23',
+                        'quarterStartTer' => 0,
+                        'quarterStartStandardStarts' => 0,
+                        'currentTer' => 2,
+                        'currentStandardStarts' => 2,
+                    ],
+                    [
+                        'startDate' => '2016-05-07',
+                        'location' => 'Denver',
+                        'type' => 'CAP',
+                        'quarterStartTer' => 0,
+                        'quarterStartStandardStarts' => 0,
+                        'currentTer' => 7,
+                        'currentStandardStarts' => 6,
+                    ],
+                ],
+                'checks' => [
+                    '2016-04-23' => function ($suite, $cdata, $course) {
+                        // Basics are set properly
+                        $suite->assertEquals(0, $cdata->quarterStartTer);
+                        $suite->assertEquals(2, $cdata->currentTer);
+                        $suite->assertNotNull($cdata->quarterStartXfer);
+                        $suite->assertEquals(0, $cdata->quarterStartXfer);
+                        $suite->assertNotNull($cdata->currentXfer);
+                        $suite->assertEquals(0, $cdata->currentXfer);
+                    },
+                    '2016-05-07' => function ($suite, $cdata, $course) {
+                        // Course created properly
+                        $suite->assertGreaterThan(0, $course->id);
+                        $suite->assertEquals('2016-05-07', $course->startDate->toDateString());
+                        $suite->assertEquals('CAP', $course->type);
+                        $suite->assertEquals('CAP', $course->type);
+                        $suite->assertEquals('Denver', $course->location);
+                        $suite->assertEquals(0, $cdata->quarterStartTer);
+                        $suite->assertEquals(7, $cdata->currentTer);
+                    },
+                    '2016-04-30' => function ($suite, $cdata, $course) {
+                        // Got non-updated course fine too
+                        $suite->assertGreaterThan(0, $course->id);
+                        $suite->assertEquals('Vancouver', $course->location);
+                        $suite->assertEquals('2016-04-30', $course->startDate->toDateString());
+                        $suite->assertEquals('CAP', $course->type);
+                        $suite->assertEquals(0, $cdata->quarterStartTer);
+                        $suite->assertEquals(10, $cdata->currentTer);
+                        $suite->assertEquals(0, $cdata->quarterStartStandardStarts);
+                        $suite->assertEquals(10, $cdata->currentStandardStarts);
+                    },
+
+                ],
+            ]],
+        ];
+    }
+
     public function sequentialNamedTeam()
     {
         $peeps = [];

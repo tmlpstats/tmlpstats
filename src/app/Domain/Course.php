@@ -37,26 +37,32 @@ class Course extends ParserDomain
         'quarterStartTer' => [
             'owner' => 'courseData',
             'type' => 'int',
+            'options' => ['zeroOnMissing' => true],
         ],
         'quarterStartStandardStarts' => [
             'owner' => 'courseData',
             'type' => 'int',
+            'options' => ['zeroOnMissing' => true],
         ],
         'quarterStartXfer' => [
             'owner' => 'courseData',
             'type' => 'int',
+            'options' => ['zeroOnMissing' => true],
         ],
         'currentTer' => [
             'owner' => 'courseData',
             'type' => 'int',
+            'options' => ['zeroOnMissing' => true],
         ],
         'currentStandardStarts' => [
             'owner' => 'courseData',
             'type' => 'int',
+            'options' => ['zeroOnMissing' => true],
         ],
         'currentXfer' => [
             'owner' => 'courseData',
             'type' => 'int',
+            'options' => ['zeroOnMissing' => true],
         ],
         'completedStandardStarts' => [
             'owner' => 'courseData',
@@ -137,6 +143,15 @@ class Course extends ParserDomain
         return $obj;
     }
 
+    public function prepareZeroes() {
+        foreach (self::$validProperties as $k => $conf) {
+            $options = array_get($conf, 'options', null);
+            if ($options !== null && array_get($options, 'zeroOnMissing', false) && is_null($this->$k)) {
+                $this->$k = 0;
+            }
+        }
+    }
+
     /**
      * Populate the provided model(s) with $this->values
      *
@@ -144,12 +159,11 @@ class Course extends ParserDomain
      * @param  Models\Course|null $course     If not provided, $courseData->course is used
      * @param  boolean            $only_set   When true, only populate the values that have been
      */
-    public function fillModel($courseData, $course = null, $only_set = true)
+    public function fillModel($courseData = null, $course = null, $only_set = true)
     {
         if ($course === null) {
             $course = $courseData->course;
         }
-
         foreach ($this->_values as $k => $v) {
             if ($only_set && (!isset($this->_setValues[$k]) || !$this->_setValues[$k])) {
                 continue;
@@ -163,13 +177,9 @@ class Course extends ParserDomain
                     $target = $courseData;
                     break;
             }
-
-            if ($k == 'location' && $k == $course->center->name) {
-                // Don't save the location if it's the same as the center name since that's redundant
-                $v = null;
+            if ($target !== null) {
+                $this->copyTarget($target, $k, $v, $conf);
             }
-
-            $this->copyTarget($target, $k, $v, $conf);
         }
     }
 

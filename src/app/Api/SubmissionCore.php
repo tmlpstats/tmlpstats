@@ -4,6 +4,7 @@ namespace TmlpStats\Api;
 use App;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Log;
 use Mail;
@@ -225,82 +226,8 @@ class SubmissionCore extends AuthenticatedApiBase
             // end program leader processing
 
             //Insert course data
-            $result = DB::select('select i.* from submission_data_courses i
-                                    where i.center_id=? and i.reporting_date=?',
-                [$center->id, $reportingDate->toDateString()]);
-            if (!empty($result)) {
-                foreach ($result as $r) {
-                    $c_id = -1;
-                    if ($r->course_id < 0) {
-                        DB::insert('insert into courses
-                                        ( id, start_date, type, location, center_id, created_at, updated_at)
-                                            select null, i.start_date, i.type, i.location, i.center_id,  sysdate(), sysdate()
-                                        from submission_data_courses i where i.id=?',
-                            [$r->id]);
-                        $c_id = DB::getPdo()->lastInsertId();
-                        $debug_message .= ' c_id=' . $c_id;
-
-                        // Update submission_data with new id so we don't overwrite if the report is resubmitted
-                        DB::update('update submission_data set stored_id=?, data = JSON_SET(data, "$.id", ?) where id=?', [$c_id, $c_id, $r->id]);
-                    } else {
-                        // This is an existing course, update the things
-                        DB::update('update courses c, submission_data_courses sda
-                                    set c.updated_at=sysdate(),
-                                        c.start_date=sda.start_date,
-                                        c.type=sda.type,
-                                        c.location=sda.location
-                                    where c.id=sda.course_id
-                                          and sda.id=?
-                                          and (coalesce(c.start_date,\'\') != coalesce(sda.start_date,\'\')
-                                                or coalesce(c.type,\'\') != coalesce(sda.type,\'\')
-                                                or coalesce(c.location,\'\') != coalesce(sda.location,\'\'))',
-                            [$r->id]);
-                        $c_id = $r->course_id;
-                    };
-
-                    $affected = DB::insert(
-                        'insert into courses_data
-                            (course_id, quarter_start_ter, quarter_start_standard_starts, quarter_start_xfer,
-                            current_ter, current_standard_starts, current_xfer,
-                            completed_standard_starts, potentials, registrations,
-                            guests_promised, guests_invited, guests_confirmed, guests_attended,
-                            stats_report_id, created_at, updated_at)
-                         select course_id, quarter_start_ter, quarter_start_standard_starts,  quarter_start_xfer,
-                            current_ter, current_standard_starts, current_xfer,
-                            completed_standard_starts, potentials, registrations,
-                            guests_promised, guests_invited, guests_confirmed, guests_attended, ?, sysdate(),sysdate()
-                         from submission_data_courses
-                         where center_id=? and reporting_date=? and course_id=?',
-                        [$statsReport->id, $center->id, $reportingDate->toDateString(), $c_id]);
-                    $debug_message .= ' upd_courses_rows=' . $affected;
-                }
-            } // end course processing
-
-            if (!$isFirstWeek) {
-                $affected = DB::insert(
-                    'insert into courses_data
-                        (course_id, quarter_start_ter, quarter_start_standard_starts, quarter_start_xfer,
-                        current_ter, current_standard_starts, current_xfer,
-                        completed_standard_starts, potentials, registrations,
-                        guests_promised, guests_invited, guests_confirmed, guests_attended,
-                        stats_report_id, created_at, updated_at)
-                     select course_id, quarter_start_ter, quarter_start_standard_starts,  quarter_start_xfer,
-                        current_ter, current_standard_starts, current_xfer,
-                        completed_standard_starts, potentials, registrations,
-                        guests_promised, guests_invited, guests_confirmed, guests_attended, ?, sysdate(),sysdate()
-                     from courses_data
-                            where stats_report_id in
-                                (select id from global_report_stats_report gr, stats_reports s
-                                    where gr.stats_report_id=s.id
-                                        and s.reporting_date=? and
-                                        s.center_id=?
-                                )
-                                and course_id not in
-                                    (select course_id from submission_data_courses
-                                        where center_id=? and reporting_date=?)',
-                    [$statsReport->id, $lastStatsReportDate->toDateString(), $center->id,
-                        $center->id, $reportingDate->toDateString()]);
-            }
+            $courses = App::make(Api\Course::class)->allForCenter($center, $reportingDate, true);
+            $this->submitCourses($center, $reportingDate, $statsReport, collect($courses));
 
             // Add/update all accountability holders
             $teamMembers = App::make(Api\TeamMember::class)->allForCenter($center, $reportingDate, true);
@@ -720,6 +647,35 @@ class SubmissionCore extends AuthenticatedApiBase
 
         Models\AccountabilityMapping::bulkSetCenterAccountabilities($center, $reportNow, $quarterEndDate, $toApply);
 
+    }
+
+    public function submitCourses(Models\Center $center, Carbon $reportingDate, Models\StatsReport $statsReport, Collection $courses)
+    {
+
+        $debug_message = '';
+        foreach ($courses as $oid => $courseDomain) {
+            $courseDomain->prepareZeroes();
+            if ($courseDomain->id < 0) {
+                $courseDomain->clearSetValue('id');
+                $course = new Models\Course();
+                $courseDomain->fillModel(null, $course);
+                $course->save();
+
+                // we need to update any existing stash with the newly assigned course ID
+                $this->updateStashIds($center, $reportingDate, 'course', $courseDomain->id, $course->id);
+                $courseDomain->id = $course->id;
+            } else {
+                $course = Models\Course::findOrFail($courseDomain->id);
+            }
+            $cdata = Models\CourseData::firstOrNew([
+                'course_id' => $course->id,
+                'stats_report_id' => $statsReport->id,
+            ]);
+            $courseDomain->fillModel($cdata, $course, true);
+            $course->save();
+            $cdata->save();
+            $debug_message .= ' course_data_id=' . $cdata->id;
+        }
     }
 
     public function checkCenterDate(Models\Center $center, Carbon $reportingDate, $flags = [])

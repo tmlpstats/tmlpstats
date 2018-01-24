@@ -142,6 +142,11 @@ class ParserDomain implements Arrayable, \JsonSerializable, Referenceable
         }
     }
 
+    public function clearSetValue($k)
+    {
+        $this->_setValues[$k] = false;
+    }
+
     public function __get($key)
     {
         if (isset($this->_values[$key])) {
