@@ -34,7 +34,8 @@ class HelpController extends Controller
             $isAdminUser = true;
         }
 
-        $files = array('accountabilities.mov',
+        $files = [
+            'accountabilities.mov',
             'managing application dates.mov',
             'where to find accountabilities report.mov',
             'entering reg per participant.mov',
@@ -42,9 +43,8 @@ class HelpController extends Controller
             'admin/Reconciliation Report Walkthrough.mov',
             'admin/unlocking promises.mov',
             'admin/weekend presentation thoughts.mov',
-            'preview/playing with graphql.mov',
-            'preview/preview sorts.mov',
-            'preview/soft deletes.mov');
+            'admin/deleting duplicates.mov',
+        ];
 
         $videos = array();
         foreach ($files as $file) {
