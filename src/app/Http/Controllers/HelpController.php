@@ -2,23 +2,10 @@
 namespace TmlpStats\Http\Controllers;
 
 use Auth;
+use TmlpStats as Models;
 
 class HelpController extends Controller
 {
-    /**
-     * Parses file name for the video title.
-     *
-     * @param string $file
-     * @return string
-     */
-    private function get_title($file)
-    {
-        $pathinfo = pathinfo($file);
-        // Use title of file as the video title.
-
-        return ucfirst($pathinfo['filename']);
-    }
-
     /**
      * Shows list of videos.
      *
@@ -26,48 +13,24 @@ class HelpController extends Controller
      */
     public function index()
     {
-        // Check if user is an admin to filter out admin videos later.
-        $currentUser = Auth::user();
-        $isAdminUser = false;
-        if ($currentUser->isAdmin() ||
-            $currentUser->hasRole('globalStatistician')) {
-            $isAdminUser = true;
-        }
-
-        $files = [
-            'accountabilities.mov',
-            'managing application dates.mov',
-            'where to find accountabilities report.mov',
-            'entering reg per participant.mov',
-            'admin/printing weekend accountability rosters.mov',
-            'admin/Reconciliation Report Walkthrough.mov',
-            'admin/unlocking promises.mov',
-            'admin/weekend presentation thoughts.mov',
-            'admin/deleting duplicates.mov',
-        ];
-
-        $videos = array();
-        foreach ($files as $file) {
-            $content = new \stdClass();
-            $content->title = $this->get_title($file);
-            $content->file = $file;
-
-            // Do not show admin videos to non-admins.
-            if ((strpos($file, 'admin') !== false || strpos($file, 'preview') !== false) && !$isAdminUser) {
+        $videos = [];
+        foreach (Models\HelpVideo::active()->get() as $video) {
+            if (!$this->context->can('watch', $video)) {
                 continue;
             }
 
-            // Have folder as a tag.
-            $pathinfo = pathinfo($file);
-            if ($pathinfo['dirname'] != '.') {
-                // If there is a directory, then list has tag.
-                $content->tag = $pathinfo['dirname'];
-            }
-
-            $videos[] = $content;
+            $videos[] = [
+                'id' => $video->id,
+                'title' => $video->title,
+                'description' => $video->description,
+                'url' => $video->url,
+                'tags' => collect($video->tags)->map(function($tag) {
+                    return $tag->name;
+                }),
+            ];
         }
 
-        return view('help.index')->with(['videos' => $videos]);
+        return view('help.index')->with(compact('videos'));
     }
 
     /**
@@ -75,10 +38,13 @@ class HelpController extends Controller
      *
      * @return Response
      */
-    public function view($file)
+    public function view($id)
     {
-        return view('help.view')->with(['title' => $this->get_title($file),
-            'file' => $file]);
-    }
+        $video = Models\HelpVideo::findOrFail($id);
+        if (!$video->active) {
+            abort(404);
+        }
 
+        return view('help.view')->with(['title' => $video->title, 'url' => $video->url]);
+    }
 }

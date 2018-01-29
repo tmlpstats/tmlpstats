@@ -101,4 +101,4 @@ Route::post('password/reset', 'Auth\PasswordController@postReset');
 
 // Help
 Route::get('help', 'HelpController@index');
-Route::get('help/view/{file}', 'HelpController@view')->where('file', '(.*)');
+Route::get('help/view/{id}', 'HelpController@view');
