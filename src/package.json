@@ -41,7 +41,7 @@
     "highcharts": "^4.2.7",
     "html5shiv": "^3.7.3",
     "immutable": "^3.8.1",
-    "jquery": "^2.1.4",
+    "jquery": "^3.0",
     "jquery-easy-loading": "^1.2.0",
     "jstz": "^1.0.9",
     "lodash": "^4.15.0",
