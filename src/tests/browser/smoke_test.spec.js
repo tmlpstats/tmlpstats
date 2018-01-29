@@ -38,55 +38,77 @@ describe('Smoke Test', () => {
         $('table').waitForExist(DEFAULT_WAIT)
     })
 
-    it('can load new Submission UI', () => {
-        $('=Submit Report').click()
-        browser.pause(1000)
-        // We wait for the h3 first because it means the content pane is done loading
-        $('h3').waitForExist(DEFAULT_WAIT)
-        $('.submission-nav').waitForExist(1000)
+    describe('Submission UI Tests', () => {
+        it('can load new Submission UI', () => {
+            $('=Submit Report').click()
+            browser.pause(1000)
+            // We wait for the h3 first because it means the content pane is done loading
+            $('h3').waitForExist(DEFAULT_WAIT)
+            $('.submission-nav').waitForExist(1000)
+        })
+
+        it('can switch to Courses Link', () => {
+            $('.submission-nav').$('a=Courses').click()
+            $('h3=Manage Courses').waitForExist(DEFAULT_WAIT)
+
+            let coursesUrl = browser.getUrl()
+            // Clicking the first course means we have to have one in the database
+            $('.submission-content table tbody').$('tr:nth-child(1)').$('a').click()
+
+            // Do some minor edit to a course.
+            $('h3*=Edit Course').waitForExist(DEFAULT_WAIT)
+            let form = $('.submission-content form')
+            let terElement = form.$('[name*=currentTer]')
+            let newValue = 1 + (terElement.getValue()|0)
+            terElement.setValue(newValue.toString())
+            form.$('button=Save').click()
+            browser.pause(1000)
+        })
+
+        it('can switch to Review page', () => {
+            $('.submission-nav').$('a=Review').click()
+            $('h3=Review').waitForExist(DEFAULT_WAIT)
+        })
+
+        it('can switch to Class List', () => {
+            $('.submission-nav').$('a=Class List').click()
+            $('h3=Class List').waitForExist(DEFAULT_WAIT * 3)
+            $('h3=Program Leaders').waitForExist(DEFAULT_WAIT)
+        })
+
+        it('can manage Team Expansion', () => {
+            $('.submission-nav').$('a=Team Expansion').click()
+            $('h3=Manage Registrations').waitForExist(DEFAULT_WAIT)
+            let expansionUrl = browser.getUrl()
+            // Clicking the first team registration means we have to have one in the database
+            $('table tbody').$('tr:nth-child(1)').$('a').click()
+            $('h3*=Edit Application').waitForExist(DEFAULT_WAIT)
+            expect(browser.getUrl()).not.toEqual(expansionUrl)
+            let form = $('.submission-content form')
+            //form.$('[name*="email"]').click()
+            //form.$('[name*="email"]').setValue('hello@example.com')
+            form.$('button=Save').click()
+            browser.pause(1500)
+        })
     })
 
-    it('can switch to Courses Link', () => {
-        $('.submission-nav').$('a=Courses').click()
-        $('h3=Manage Courses').waitForExist(DEFAULT_WAIT)
+    describe('Regional Report', () => {
+        it('can view Regional report', () => {
+            $('#navbar').$('a*=Regional Report').click()
+            browser.pause(3000)
+            $('.report-nav-level0').waitForExist(DEFAULT_WAIT)
+        })
 
-        let coursesUrl = browser.getUrl()
-        // Clicking the first course means we have to have one in the database
-        $('.submission-content table tbody').$('tr:nth-child(1)').$('a').click()
+        it('defaults to summary tab', () => {
+            // Wait for the summary tab to show up
+            $('table.ratingsTable').waitForExist(DEFAULT_WAIT)
+        })
 
-        // Do some minor edit to a course.
-        $('h3*=Edit Course').waitForExist(DEFAULT_WAIT)
-        let form = $('.submission-content form')
-        let terElement = form.$('[name*=currentTer]')
-        let newValue = 1 + (terElement.getValue()|0)
-        terElement.setValue(newValue.toString())
-        form.$('button=Save').click()
-        browser.pause(1000)
+        it('Can switch to the applications tab', () => {
+            $('.report-nav-level0').$('a=Applications').click()
+            $('table.applicationTable').waitForExist(DEFAULT_WAIT)
+
+        })
     })
 
-    it('can switch to Review page', () => {
-        $('.submission-nav').$('a=Review').click()
-        $('h3=Review').waitForExist(DEFAULT_WAIT)
-    })
-
-    it('can manage Team Expansion', () => {
-        $('.submission-nav').$('a=Team Expansion').click()
-        $('h3=Manage Registrations').waitForExist(DEFAULT_WAIT)
-        let expansionUrl = browser.getUrl()
-        // Clicking the first team registration means we have to have one in the database
-        $('table tbody').$('tr:nth-child(1)').$('a').click()
-        $('h3*=Edit Application').waitForExist(DEFAULT_WAIT)
-        expect(browser.getUrl()).not.toEqual(expansionUrl)
-        let form = $('.submission-content form')
-        //form.$('[name*="email"]').click()
-        //form.$('[name*="email"]').setValue('hello@example.com')
-        form.$('button=Save').click()
-        browser.pause(1000)
-    })
-
-    it('can switch to Class List', () => {
-        $('.submission-nav').$('a=Class List').click()
-        $('h3=Class List').waitForExist(DEFAULT_WAIT * 3)
-        $('h3=Program Leaders').waitForExist(DEFAULT_WAIT)
-    })
 })
