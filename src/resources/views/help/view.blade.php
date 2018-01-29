@@ -2,10 +2,7 @@
 
 @section('content')
     <h1>{{ $title }}</h1>
-
-    <video src="https://tmlpstats.crast.us/videos/{{ $file }}" style="width: 100%" controls>
-    </video>
-
-    <a href="{{ action('HelpController@index') }}">Back to video listing</a>
-
+    <a href="{{ action('HelpController@index') }}"><< Back to video listing</a>
+    <br/><br/>
+    <video src="{{ $url }}" style="width: 100%" controls></video>
 @endsection
