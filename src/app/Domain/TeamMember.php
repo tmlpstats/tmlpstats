@@ -280,6 +280,8 @@ class TeamMember extends ParserDomain
         // Automatically populate canDelete meta data
         if ($key === 'id') {
             $this->meta['canDelete'] = $this->isNew();
+        } else if ($key === 'quarterNumber') {
+            $this->meta['quarterNumber'] = $value;
         }
     }
 

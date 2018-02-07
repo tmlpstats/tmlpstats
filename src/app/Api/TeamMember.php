@@ -83,6 +83,10 @@ class TeamMember extends AuthenticatedApiBase
             return $this->deleteTeamMember($center, $reportingDate, $data['id']);
         }
 
+        if (!isset($data['center'])) {
+            $data['center'] = $center->id;
+        }
+
         $submissionData = App::make(SubmissionData::class);
         $teamMemberId = $submissionData->numericStorageId($data, 'id');
 
