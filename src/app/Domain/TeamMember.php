@@ -273,4 +273,24 @@ class TeamMember extends ParserDomain
         return $person;
     }
 
+    public function __set($key, $value)
+    {
+        parent::__set($key, $value);
+
+        // Automatically populate canDelete meta data
+        if ($key === 'id') {
+            $this->meta['canDelete'] = $this->isNew();
+        }
+    }
+
+    /**
+     * Is this a new Team Member?
+     *
+     * @return boolean True if object hasn't been persisted
+     */
+    public function isNew()
+    {
+        // Unset or negative ID means this is new
+        return $this->id === null || $this->id < 0;
+    }
 }

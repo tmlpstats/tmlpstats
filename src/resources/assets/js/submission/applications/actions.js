@@ -71,7 +71,7 @@ export function saveApplication(center, reportingDate, data) {
             if (!result.storedId) {
                 dispatch(messages.replace('create', result.messages))
             } else {
-                let newData = objectAssign({}, data, {id: result.storedId})
+                let newData = objectAssign({}, data, {id: result.storedId, meta: result.meta})
                 dispatch(appsCollection.replaceItem(newData.id, newData))
                 dispatch(messages.replace(result.storedId, result.messages))
 

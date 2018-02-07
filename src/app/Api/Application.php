@@ -28,7 +28,6 @@ class Application extends AuthenticatedApiBase
             foreach ($found as $domain) {
                 $allApplications[$domain->id] = $domain;
                 $domain->meta['localChanges'] = true;
-                $domain->meta['canDelete'] = true;
             }
 
             $deleted = $deleted->map(function ($x) {return intval($x);})->flip();
@@ -42,7 +41,6 @@ class Application extends AuthenticatedApiBase
                     continue;
                 } else if ($domain = array_get($allApplications, $appData->tmlpRegistrationId)) {
                     // it's a small optimization, but prevent creating domain if we have an existing SubmissionData version
-                    $domain->meta['canDelete'] = false;
                     continue;
                 }
 
@@ -88,7 +86,7 @@ class Application extends AuthenticatedApiBase
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $teamApp, $appId, $pastWeeks);
 
-        if (!isset($data['_idGenerated']) || $validationResults['valid']) {
+        if (!$teamApp->isNew() || $validationResults['valid']) {
             $submissionData->store($center, $reportingDate, $teamApp);
         } else {
             return [
@@ -101,6 +99,7 @@ class Application extends AuthenticatedApiBase
         return [
             'success' => true,
             'storedId' => $appId,
+            'meta' => $teamApp->meta,
             'valid' => $validationResults['valid'],
             'messages' => $validationResults['messages'],
         ];
