@@ -68,6 +68,8 @@ class Application extends AuthenticatedApiBase
             return $this->deleteApp($center, $reportingDate, $data['id']);
         }
 
+        $data['center'] = $center->id;
+
         $submissionData = App::make(SubmissionData::class);
         $appId = $submissionData->numericStorageId($data, 'id');
 
