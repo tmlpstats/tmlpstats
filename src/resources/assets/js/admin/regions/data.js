@@ -46,6 +46,11 @@ export const scoreboardLockData = new FormReduxLoader({
     extraLMS: ['saveState']
 })
 
+export const quarterTransferData = new FormReduxLoader({
+    prefix: 'admin/quarterTransfer',
+    model: 'admin.regions.quarterTransfer.data',
+    extraLMS: ['saveState']
+})
 
 export const extraData = new SimpleReduxLoader({
     prefix: 'admin/extra',

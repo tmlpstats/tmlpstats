@@ -16,6 +16,8 @@ export function AdminFlow() {
             <Route path="regions/:regionAbbr" component={regionComponents.SelectQuarter}>
                 <Route path="quarter/:quarterId">
                     <Route path="quarter_dates" component={regionComponents.QuarterDates} />
+                    <Route path="manage_transfers" component={regionComponents.RegionQuarterTransfers} />
+                    <Route path="manage_transfers/from/:centerId" component={regionComponents.RunQuarterTransfer} />
                     <Route path="manage_scoreboards" component={regionComponents.RegionScoreboards} />
                     <Route path="manage_scoreboards/from/:centerId" component={regionComponents.EditScoreboardLock} />
                     <Route path="accountability_rosters" component={regionComponents.AccountabilityRosters} />
