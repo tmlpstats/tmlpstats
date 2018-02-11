@@ -140,7 +140,7 @@ export function stashTeamMember(center, reportingDate, data) {
                 return
             }
 
-            const newData = objectAssign({}, data, {id: result.storedId, meta: result.meta})
+            const newData = objectAssign({}, data, {id: result.storedId, quarterNumber: result.meta.quarterNumber, meta: result.meta})
             dispatch(messages.replace(newData.id, getMessages(result)))
             dispatch(teamMembersData.replaceItem(newData.id, newData))
 

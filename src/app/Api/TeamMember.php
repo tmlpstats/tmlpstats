@@ -29,7 +29,6 @@ class TeamMember extends AuthenticatedApiBase
             foreach ($found as $domain) {
                 $allTeamMembers[$domain->id] = $domain;
                 $domain->meta['localChanges'] = true;
-                $domain->meta['canDelete'] = true;
             }
             $deleted = $deleted->map(function ($x) {return intval($x);})->flip();
 
@@ -58,7 +57,6 @@ class TeamMember extends AuthenticatedApiBase
                     $allTeamMembers[$domain->id] = $domain;
                 } else {
                     $domain = $allTeamMembers[$tmd->teamMemberId];
-                    $domain->meta['canDelete'] = false;
                 }
                 $domain->meta['personId'] = $tmd->teamMember->personId;
                 $domain->meta['hasThisWeekReportData'] = ($includeData);
@@ -85,6 +83,8 @@ class TeamMember extends AuthenticatedApiBase
             return $this->deleteTeamMember($center, $reportingDate, $data['id']);
         }
 
+        $data['center'] = $center->id;
+
         $submissionData = App::make(SubmissionData::class);
         $teamMemberId = $submissionData->numericStorageId($data, 'id');
 
@@ -102,7 +102,7 @@ class TeamMember extends AuthenticatedApiBase
         $report = LocalReport::ensureStatsReport($center, $reportingDate);
         $validationResults = $this->validateObject($report, $domain, $teamMemberId, $pastWeeks);
 
-        if (!isset($data['_idGenerated']) || $validationResults['valid'] || isset($data['_alwaysStash'])) {
+        if (!$domain->isNew() || $validationResults['valid'] || isset($data['_alwaysStash'])) {
             $submissionData->store($center, $reportingDate, $domain);
         } else {
             return [
@@ -115,6 +115,7 @@ class TeamMember extends AuthenticatedApiBase
         return [
             'success' => true,
             'storedId' => $teamMemberId,
+            'meta' => $domain->meta,
             'valid' => $validationResults['valid'],
             'messages' => $validationResults['messages'],
         ];

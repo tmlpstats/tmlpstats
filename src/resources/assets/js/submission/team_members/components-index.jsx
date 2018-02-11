@@ -6,7 +6,7 @@ import { defaultMemoize } from 'reselect'
 import { arrayFind, objectAssign } from '../../reusable/ponyfill'
 
 import { Form, NullableTextControl, BooleanSelectView, SimpleSelect, connectCustomField, AddOneLink } from '../../reusable/form_utils'
-import { ModeSelectButtons, ButtonStateFlip, Alert } from '../../reusable/ui_basic'
+import { ModeSelectButtons, ButtonStateFlip } from '../../reusable/ui_basic'
 import { delayDispatch, rebind, connectRedux } from '../../reusable/dispatch'
 import { createKeyBasedMemoizer } from '../../reusable/selectors'
 import { buildTable } from '../../reusable/tabular'
@@ -260,14 +260,6 @@ export class TeamMembersIndex extends TeamMembersBase {
         return (
             <Form model={TEAM_MEMBERS_COLLECTION_FORM_KEY} onSubmit={this.saveWeeklyReporting}>
                 <h3>Class List</h3>
-                <Alert alert="info">
-                    <b>Dec 2017</b>: This view has changed somewhat.
-                    <p>
-                        In order to get access to the sorts, you now should click on
-                        the column headings. e.g. Clicking the "name" column will sort by that,
-                        and clicking again will reverse sort.
-                    </p>
-                </Alert>
                 <ModeSelectButtons
                         items={TABLES} current={teamMembers.meta.get('format')}
                         onClick={this.changeTableFormat} ariaGroupDesc="Sort Preferences" />
