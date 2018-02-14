@@ -7,6 +7,15 @@ use TmlpStats as Models;
 class HelpController extends Controller
 {
     /**
+     * Displays About page.
+     *
+     * @return Response
+     */
+    public function about() {
+        return view('help.about');
+    }
+
+    /**
      * Shows list of videos.
      *
      * @return Response
