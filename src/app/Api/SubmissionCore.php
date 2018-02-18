@@ -928,18 +928,21 @@ class SubmissionCore extends AuthenticatedApiBase
         foreach ($members as $id => $member) {
             if ($validStartQids->has($member->incomingQuarterId)
                 && $member->withdrawCode == null
-                && !$member->xferOut && !$member->wbo) {
-
+                && !$member->xferOut && !$member->wbo
+            ) {
                 $copy = 'Copied';
-                $data = $member->toArray();
-                unset($data['tdo'], $data['gitw']);
-                $data = array_merge($data, [
+                $data = collect($member->toArray())->except([
+                    // These change week to week, so don't copy them over
+                    'tdo', 'gitw',
+                    'rppCap', 'rppCpc', 'rppLf',
+                ])->merge([
+                    // New quarter, overwrite with default values
                     'xferIn' => false, 'ctw' => false,
                     'travel' => false, 'room' => false,
                     'comment' => '',
                     'quarterNumber' => array_get($data, 'quarterNumber', 0) + 1,
                     'accountabilities' => array_get($teamNqas, $id, []),
-                ]);
+                ])->all(); // ->all() on a collection returns the underlying array
                 $goodTeamMembers[$id] = true;
 
                 $result = $tmApi->stash($center, $cq->firstWeekDate, $data);
