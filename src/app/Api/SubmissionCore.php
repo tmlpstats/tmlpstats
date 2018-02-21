@@ -940,7 +940,6 @@ class SubmissionCore extends AuthenticatedApiBase
                     'xferIn' => false, 'ctw' => false,
                     'travel' => false, 'room' => false,
                     'comment' => '',
-                    'quarterNumber' => array_get($data, 'quarterNumber', 0) + 1,
                     'accountabilities' => array_get($teamNqas, $id, []),
                 ])->all(); // ->all() on a collection returns the underlying array
                 $goodTeamMembers[$id] = true;

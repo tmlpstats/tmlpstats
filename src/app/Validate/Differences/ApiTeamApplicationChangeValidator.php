@@ -28,6 +28,12 @@ class ApiTeamApplicationChangeValidator extends ApiValidatorAbstract
             return true;
         }
 
+        if (!$data->regDate) {
+            // regDate is checked in the object validator. Short circuit here
+            // since we need it to be set to continue validating date changes
+            return true;
+        }
+
         if ($data->regDate->ne($lastWeek->regDate)) {
             $this->addMessage('warning', [
                 'id' => 'TEAMAPP_REG_DATE_CHANGED',
