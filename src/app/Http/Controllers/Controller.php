@@ -29,6 +29,8 @@ class Controller extends BaseController
      */
     public function __construct()
     {
+        \Carbon\Carbon::setTestNow(\Carbon\Carbon::parse('2018-03-01'));
+
         $this->middleware('auth');
         $this->context = App::make(Api\Context::class);
     }
@@ -165,6 +167,7 @@ class Controller extends BaseController
         if (strpos($apiName, '.') !== false) {
             $apiName = str_replace('.', '\\', $apiName);
         }
+
         return App::make($apiName);
     }
 }
