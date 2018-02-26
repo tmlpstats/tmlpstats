@@ -1021,10 +1021,25 @@ class SubmissionCore extends AuthenticatedApiBase
         if (!empty($newTeamMembers)) {
             $report[] = 'Number of Team Expansion to copy as new Team Members: ' .
             count($newTeamMembers);
+
+            $nextQuarterMembers = $tmApi->allForCenter($center, $cq->firstWeekDate, true);
+            $alreadyCopied = collect($nextQuarterMembers)
+                ->filter(function($member) { return $member->isNew(); })
+                ->map(function($member) { return $member->_personId; })
+                ->flip() // rekey as personId => memberId
+                ->all();
+
             foreach ($newTeamMembers as $index => $newTeamMember) {
                 $logLine = "Team Member from Team Expansion {$newTeamMember['firstName']} {$newTeamMember['lastName']}";
                 $newTeamMember['_alwaysStash'] = true; // stash even though validation will fail because we're missing tdo/gitw
                 $newTeamMember['atWeekend'] = true;
+                $personId = $newTeamMember['_personId'];
+
+                // Reuse existing stash if one exists.
+                if (isset($alreadyCopied[$personId])) {
+                    $newTeamMember['id'] = $alreadyCopied[$personId];
+                }
+
                 $result = $tmApi->stash($center, $cq->firstWeekDate, $newTeamMember);
                 if ($result['success']) {
                     $report[] = "Copied $logLine";

@@ -2,14 +2,15 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Immutable from 'immutable'
 
-import { Link, withRouter } from 'react-router'
+import { withRouter } from 'react-router'
 
 import { defaultMemoize } from 'reselect'
 import { objectAssign } from '../../reusable/ponyfill'
 import { delayDispatch, connectRedux, rebind } from '../../reusable/dispatch'
-import { Form, formActions } from '../../reusable/form_utils'
-import { FormTypeahead } from '../../reusable/typeahead'
-import { ButtonStateFlip, Panel, Alert, ModeSelectButtons } from '../../reusable/ui_basic'
+import { formActions } from '../../reusable/form_utils'
+import { Panel, Alert, ModeSelectButtons } from '../../reusable/ui_basic'
+
+import { CenterList, CenterUpdateSelector } from './center_selector'
 
 import RegionBase from './RegionBase'
 import * as actions from './actions'
@@ -25,17 +26,10 @@ export class RegionScoreboards extends RegionBase {
             return <div>Loading...</div>
         }
         const baseUri = this.regionQuarterBaseUri()
-        const { centers } = this.regionCenters()
-
-        const dispCenters = centers.map((center) => {
-            const href = `${baseUri}/manage_scoreboards/from/${center.abbreviation}`
-            return <div key={center.id}><Link to={href}>{center.name}</Link></div>
-        })
+        const linkPrefix = `${baseUri}/manage_scoreboards/from`
         return (
-            <div>
-                <h4>Please select a center:</h4>
-                {dispCenters}
-            </div>
+            <CenterList centers={this.regionCenters().centers}
+                        linkPrefix={linkPrefix} />
         )
     }
 }
@@ -43,10 +37,6 @@ export class RegionScoreboards extends RegionBase {
 @withRouter
 @connectRedux(mapStateToProps)
 export class EditScoreboardLock extends RegionBase {
-    constructor(props) {
-        super(props)
-        rebind(this, 'onSubmit', 'onSelectAll')
-    }
     checkLock() {
         const { centerId, quarterId } = this.props.params
         const { data, loadState } = this.props.scoreboardLock
@@ -66,7 +56,7 @@ export class EditScoreboardLock extends RegionBase {
         }
         const { params, dispatch } = this.props
         const { centerId } = params
-        const { centers: otherCenters, regionQuarter: rawRegionQuarter } = this.regionCenters()
+        const { regionQuarter: rawRegionQuarter } = this.regionCenters()
         const center = this.props.centers.data[centerId]
         const sbl = this.props.scoreboardLock.data
         const regionQuarter = annotatedRegionQuarter(rawRegionQuarter)
@@ -96,21 +86,11 @@ export class EditScoreboardLock extends RegionBase {
 
         const otherCenter = sbl.applyCenter.length != 1 || sbl.applyCenter[0] != centerId
 
-        let acWarn
-        if (otherCenter) {
-            acWarn = (
-                <div className="col-md-5">
-                <Alert alert="warning" icon="warning-sign">
-                    Applying to a different center or more than one center
-                    copies these locks to those center(s), overwriting
-                    what was there.
-                </Alert>
-                </div>
-            )
-        }
+        const onSubmit = (center, quarter, data) => actions.saveScoreboardLocks(center, quarter, data)
+        const onCompleteUrl = this.regionQuarterBaseUri() + '/manage_scoreboards'
 
         return (
-            <Form model={MODEL} onSubmit={this.onSubmit.bind(this)}>
+            <div>
                 <h2>Edit Scoreboard Locks - {otherCenter? 'Multiple Centers' : center.name}</h2>
                 <Alert alert="warning">
                     <b>Important</b> - The way this dialogue works has changed since the last time
@@ -121,46 +101,19 @@ export class EditScoreboardLock extends RegionBase {
                     <p>We are going to keep changing this user experience to make it more streamlined, this is currently done as-is for the Nov 2017 repromise.</p>
                     <p>Contact Future Stats team if you need more info.</p>
                 </Alert>
-                {allLocks}
-                <div className="row">
-                    <div className="form-group">
-                        <div className="col-md-2">
-                            <label>Apply to center(s)</label>
-                            <br />
-                            <button type="button" className="btn btn-default" onClick={this.onSelectAll}>Select All Centers</button>
-                        </div>
-                        <div className="col-md-5">
-                            <FormTypeahead
-                                    model={MODEL+'.applyCenter'} items={otherCenters}
-                                    keyProp="abbreviation" labelProp="name"
-                                    multiple={true} rows={8} />
-                        </div>
-                        {acWarn}
-                    </div>
-                </div>
-
-                <ButtonStateFlip buttonClass="btn btn-primary btn-lg"
-                                 loadState={this.props.scoreboardLock.saveState}
-                                 wrapGroup={true}>Save</ButtonStateFlip>
+                <CenterUpdateSelector model={MODEL}
+                                      centerId={this.props.params.centerId}
+                                      centers={this.regionCenters().centers}
+                                      children={allLocks}
+                                      data={this.props.scoreboardLock.data}
+                                      saveState={this.props.scoreboardLock.saveState}
+                                      onSubmit={onSubmit}
+                                      onCompleteUrl={onCompleteUrl}
+                                      dispatch={dispatch}
+                                      router={this.props.router} />
                 <div style={{paddingTop: '20em'}}>&nbsp;</div>
-            </Form>
+            </div>
         )
-    }
-
-    onSelectAll() {
-        this.props.dispatch(formActions.change(`${MODEL}.applyCenter`, this.regionCenters().centers.map(x => x.abbreviation)))
-    }
-
-    onSubmit(data) {
-        this.props.dispatch(actions.saveScoreboardLocks(data.applyCenter[0], data.quarterId, data)).then(() => {
-            const applyCenter = data.applyCenter.slice(1)
-            if (applyCenter.length > 0) {
-                this.props.dispatch(formActions.change(`${MODEL}.applyCenter`, applyCenter))
-                setTimeout(() => { this.onSubmit({...data, applyCenter}) }, 200)
-            } else {
-                this.props.router.push(this.regionQuarterBaseUri() + '/manage_scoreboards')
-            }
-        })
     }
 }
 

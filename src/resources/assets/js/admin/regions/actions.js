@@ -4,7 +4,7 @@ import { normalize } from 'normalizr'
 import { actions as formActions } from 'react-redux-form'
 
 import Api from '../../api'
-import { regionsData, centersData, scoreboardLockData, regionSchema } from './data'
+import { regionsData, centersData, quarterTransferData, scoreboardLockData, regionSchema } from './data'
 
 export function loadRegionsData(region) {
     return regionsData.load({region}, {
@@ -53,6 +53,27 @@ export function saveScoreboardLocks(center, quarter, data, clear) {
                 // Typically, we want to get rid of the data
                 delayDispatch(dispatch, scoreboardLockData.resetAll())
             }
+        })
+    }
+}
+
+export function initializeQuarterTransferData(centerId, quarterId) {
+    return (dispatch) => {
+        const data = objectAssign({}, {centerId, quarterId, applyCenter: [centerId]})
+        dispatch(quarterTransferData.replaceCollection(data))
+        dispatch(quarterTransferData.loadState('loaded'))
+    }
+}
+
+export function runQuarterTransfer(center, quarter) {
+    return (dispatch) => {
+        console.log('>> run transfer', center, quarter)
+        dispatch(quarterTransferData.saveState('loading'))
+        return Api.SubmissionCore.initFirstWeekData({center, quarter}).then((data) => {
+            dispatch(quarterTransferData.saveState('loaded'))
+            data.report.forEach((msg) => {
+                console.log(msg)
+            })
         })
     }
 }

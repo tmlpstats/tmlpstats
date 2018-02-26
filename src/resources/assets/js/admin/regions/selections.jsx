@@ -76,6 +76,7 @@ export class SelectQuarter extends RegionBase {
                 <div>
                     <ul>
                         <li><Link to={base+'/quarter_dates'}>Quarter Dates</Link></li>
+                        <li><Link to={base+'/manage_transfers'}>Transfer Data to New Quarter</Link></li>
                         <li><Link to={base+'/manage_scoreboards'}>Manage Scoreboard Locks</Link></li>
                         <li><Link to={base+'/accountability_rosters'}>Next Qtr Weekend Accountability Rosters</Link></li>
                         <li><a href={'/regions/'+regionId}>Old Admin Page</a></li>
