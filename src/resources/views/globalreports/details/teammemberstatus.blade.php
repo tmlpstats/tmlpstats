@@ -78,12 +78,7 @@
                         @endif
                         <td>
                         <?php
-                            $comment = '';
-                            if (is_numeric($memberData->comment)) {
-                                $comment .= TmlpStats\Util::getExcelDate($memberData->comment)->format('F');
-                            } else {
-                                $comment .= trim($memberData->comment);
-                            }
+                            $comment = trim($memberData->comment);
 
                             if (isset($registrations[$memberData->teamMember->personId])) {
                                 if ($comment) {
@@ -91,11 +86,7 @@
                                 }
 
                                 $app = $registrations[$memberData->teamMember->personId];
-                                if (is_numeric($app->comment)) {
-                                    $comment .= TmlpStats\Util::getExcelDate($app->comment)->format('F');
-                                } else {
-                                    $comment .= trim($app->comment);
-                                }
+                                $comment .= trim($app->comment);
                             }
                         ?>
                         {{ $comment }}

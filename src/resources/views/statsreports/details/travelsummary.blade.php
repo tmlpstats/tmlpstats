@@ -36,7 +36,7 @@
                                 @endif
                             </td>
                             <td>
-                                {{ is_numeric($memberData->comment) ? TmlpStats\Util::getExcelDate($memberData->comment)->format(TmlpStats\Util::getLocaleDateFormat()) : $memberData->comment }}
+                                {{ $memberData->comment }}
                             </td>
                         </tr>
                     @endforeach
@@ -88,7 +88,7 @@
                             @endif
                         </td>
                         <td>
-                            {{ is_numeric($registrationData->comment) ? TmlpStats\Util::getExcelDate($registrationData->comment)->format(TmlpStats\Util::getLocaleDateFormat()) : $registrationData->comment }}
+                            {{ $registrationData->comment }}
                         </td>
                     </tr>
                 @endforeach

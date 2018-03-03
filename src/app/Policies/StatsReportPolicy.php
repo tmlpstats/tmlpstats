@@ -62,19 +62,6 @@ class StatsReportPolicy extends Policy
     }
 
     /**
-     * Can $user submit a stats report?
-     *
-     * @param User $user
-     * @param StatsReport $statsReport
-     * @return bool
-     */
-    public function submit(User $user, StatsReport $statsReport)
-    {
-        // Let's allow teams to submit stats for eachother for now. teamwork!
-        return $user->hasRole('globalStatistician') || $user->hasRole('localStatistician');
-    }
-
-    /**
      * Can $user view the full list of statsReports?
      *
      * @param User $user
