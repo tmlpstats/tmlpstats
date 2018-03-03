@@ -3,9 +3,10 @@ if (!isset($skip_navbar)) {
     $skip_navbar = false;
 }
 $baseController = App::make(TmlpStats\Http\Controllers\Controller::class);
+$context = App::make(TmlpStats\Api\Context::class);
 $center = $baseController->getCenter(Request::instance());
 $region = $baseController->getRegion(Request::instance());
-$reportingDate = $baseController->getReportingDate();
+$reportingDate = $context->getReportingDate();
 $needs_shim = Session::get('needs_shim', '');
 ?>
 <!DOCTYPE html>

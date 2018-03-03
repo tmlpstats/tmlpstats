@@ -17,7 +17,7 @@
         <ul>
           <li>The scoreboard shows the promises for the <b>upcoming</b> Friday</li>
           <li>As often as the statistician wants, they can edit the "actuals" during the week</li>
-          <li>When a new excel sheet is submitted, the scoreboard is reset to whatever was on the new sheet</li>
+          <li>When a new report is submitted, the scoreboard is reset to whatever was on the new report</li>
         </ul>
 
 

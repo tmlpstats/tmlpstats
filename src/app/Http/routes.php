@@ -33,8 +33,6 @@ Route::get('invites/{token}', 'InviteController@viewInvite');
 Route::post('invites/{token}', 'InviteController@acceptInvite');
 
 // Stats Reports
-Route::post('statsreports/{id}/submit', 'StatsReportController@submit');
-Route::get('statsreports/{id}/download', 'StatsReportController@downloadSheet');
 Route::get('statsreports/{id}/{report}', 'StatsReportController@dispatchReport');
 Route::get('statsreports/{id}', 'StatsReportController@show');
 
@@ -64,14 +62,6 @@ Route::get('center/{abbr}/submission/{reportingDate?}/{page?}/{irrelevant?}/{irr
 // Regions
 Route::get('regions', 'RegionController@index');
 Route::get('regions/{id}', 'RegionController@show');
-
-// Validate
-Route::get('validate', 'ImportController@indexValidateSheet')->name('validate');
-Route::post('validate', 'ImportController@validateSheet');
-
-// Import
-Route::get('import', 'ImportController@indexImportSheet');
-Route::post('import', 'ImportController@importSheet');
 
 Route::match(['get', 'post'], 'home', 'HomeController@index');
 Route::match(['get', 'post'], 'home/{abbr}', 'HomeController@home');

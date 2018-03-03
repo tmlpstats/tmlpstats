@@ -236,7 +236,7 @@ class ReportsController extends Controller
         // even if there hasn't been a report created yet
         $globalReport = null;
         if (!$reportingDate) {
-            $reportingDate = $this->getReportingDate();
+            $reportingDate = $this->context->getReportingDate();
 
             $globalReport = GlobalReport::reportingDate($reportingDate)->first();
             if (!$globalReport) {
@@ -292,8 +292,9 @@ class ReportsController extends Controller
      */
     public function mobileDash(Request $request, $abbr)
     {
+        $context = App::make(Api\Context::class);
         $center = Center::abbreviation($abbr)->firstOrFail();
-        $reportingDate = $this->getReportingDate();
+        $reportingDate = $context->getReportingDate();
 
         $this->setCenter($center);
 
@@ -302,7 +303,6 @@ class ReportsController extends Controller
             $report = StatsReport::byCenter($center)->official()->orderBy('reporting_date', 'desc')->first();
         }
 
-        $context = App::make(Api\Context::class);
         $context->setCenter($center);
         $context->setReportingDate($report->reportingDate);
 

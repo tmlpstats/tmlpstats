@@ -75,19 +75,6 @@ class StatsReportPolicy extends Policy
     }
 
     /**
-     * Can $user download the spreadsheet from $statsReport?
-     *
-     * @param User $user
-     * @param StatsReport $statsReport
-     * @return bool
-     */
-    public function downloadSheet(User $user, StatsReport $statsReport)
-    {
-        // No downloading for readonly users
-        return $this->read($user, $statsReport) && !$user->hasRole('readonly');
-    }
-
-    /**
      * Can $user view the full list of statsReports?
      *
      * @param User $user
@@ -96,28 +83,6 @@ class StatsReportPolicy extends Policy
     public function index(User $user)
     {
         return $user->hasRole('globalStatistician') || $user->hasRole('localStatistician') || $user->hasRole('programLeader');
-    }
-
-    /**
-     * Can $user validate spreadsheets?
-     *
-     * @param User $user
-     * @return bool
-     */
-    public function validate(User $user)
-    {
-        return $user->hasRole('globalStatistician') || $user->hasRole('localStatistician');
-    }
-
-    /**
-     * Can $user import spreadsheets (distinct from submitting)
-     *
-     * @param User $user
-     * @return bool
-     */
-    public function import(User $user)
-    {
-        return $user->hasRole('globalStatistician');
     }
 
     /**

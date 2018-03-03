@@ -44,22 +44,6 @@
         </div>
     </div>
 
-    <!--
-    <div class="form-group">
-        {!! Form::label('sheet_filename', 'Sheet Filename:', ['class' => 'col-sm-2 control-label']) !!}
-        <div class="col-sm-5">
-            {!! Form::text('sheet_filename', null, ['class' => 'form-control']) !!}
-        </div>
-    </div>
-    -->
-
-    <div class="form-group">
-        {!! Form::label('sheet_version', 'Sheet Version:', ['class' => 'col-sm-2 control-label']) !!}
-        <div class="col-sm-5">
-            {!! Form::text('sheet_version', null, ['class' => 'form-control']) !!}
-        </div>
-    </div>
-
     <div class="form-group">
         {!! Form::label('mailing_list', 'Mailing List:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-5">

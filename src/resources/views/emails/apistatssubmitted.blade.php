@@ -10,7 +10,7 @@ We received them on {{ $submittedAt->format('l, F jS \a\t g:ia') }} your local t
 <br/>
 
 @if (!$isResubmitted && $respondByDateTime)
-You are not complete yet. Your regional statistician will review your sheet and declare you complete by {{ $respondByDateTime->format('l \a\t g:ia') }} your local time.<br/>
+You are not complete yet. Your regional statistician will review your report and declare you complete by {{ $respondByDateTime->format('l \a\t g:ia') }} your local time.<br/>
 @endif
 <br/>
 
@@ -32,7 +32,7 @@ You are not complete yet. Your regional statistician will review your sheet and 
 @endif
 <br/>
 @if ($reportMessages)
-    @include('import.apiresults')
+    @include('statsreports.details.apiresults')
 @endif
 <br/>
 Best,<br/>

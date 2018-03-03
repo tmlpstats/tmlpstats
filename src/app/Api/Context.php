@@ -1,9 +1,11 @@
-<?php namespace TmlpStats\Api;
+<?php
+namespace TmlpStats\Api;
 
 use App;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use TmlpStats as Models;
 use TmlpStats\Encapsulations\Scopes;
 use TmlpStats\Http\Controllers\Controller;
@@ -247,7 +249,37 @@ class Context
             return $this->reportingDate;
         }
 
-        return App::make(Controller::class)->getReportingDate();
+        $reportingDate = null;
+        $reportingDateString = '';
+
+        // First check if the date is already cached in the session
+        if (Session::has('viewReportingDate')) {
+            $reportingDateString = Session::get('viewReportingDate');
+        }
+
+        // If we have a reportToken, use the reportingDate from that report
+        if (!$reportingDateString && Session::has('reportTokenId')) {
+            $reportToken = Models\ReportToken::find(Session::get('reportTokenId'));
+
+            if ($reportToken) {
+                $report = $reportToken->getReport();
+                $reportingDateString = $report->reportingDate->toDateString();
+                Session::set('viewReportingDate', $reportingDateString);
+            }
+        }
+
+        // Finally, create date or get reasonable default
+        if ($reportingDateString) {
+            $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
+        } else {
+            $reportingDate = $this->getSubmissionReportingDate();
+        }
+
+        $reportingDate = $reportingDate->startOfDay();
+
+        $this->setReportingDate($reportingDate);
+
+        return $reportingDate;
     }
 
     public function getSubmissionReportingDate()
