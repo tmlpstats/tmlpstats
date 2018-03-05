@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use TmlpStats as Models;
 use TmlpStats\Encapsulations\Scopes;
-use TmlpStats\Http\Controllers\Controller;
 
 /**
  * Context is decisive.
@@ -73,8 +72,19 @@ class Context
     {
         $center = $this->center;
         if ($center == null && $fallback) {
-            // TODO do this right, don't make it reliant on controller state, invert the paradigm.
-            return App::make(Controller::class)->getCenter($this->request);
+            // Get center from request data
+            if ($this->request->has('center')) {
+                $center = Models\Center::abbreviation($this->request->get('center'))->first();
+            }
+
+            // If all else fails, use the user's local center
+            if (!$center && $this->user) {
+                $center = $this->user->center;
+            }
+
+            if ($center) {
+                $this->setCenter($center);
+            }
         }
 
         return $center;
@@ -112,12 +122,37 @@ class Context
      * @param  boolean $fallback If true, fallback to the legacy controller method of getting a region from session.
      * @return Models\Region
      */
-    public function getRegion($fallback = false)
+    public function getRegion($fallback = false, $includeLocalRegions = false)
     {
         $region = $this->region;
         if ($region == null && $fallback) {
-            // TODO do this right, don't make it reliant on controller state, invert the paradigm.
-            $region = App::make(Controller::class)->getRegion($this->request);
+            // Get region from the request
+            if ($this->request->has('region')) {
+                $region = Models\Region::abbreviation($this->request->get('region'))->first();
+            }
+
+            // Get ther selected center and use its region
+            if (!$region && $center = $this->getCenter(true)) {
+                $region = $center->region;
+            }
+
+            // Nothing set yet? Use the user's home region
+            if (!$region && $this->user) {
+                $region = $this->user->homeRegion();
+            }
+
+            // If all else fails, default to NA
+            // TODO: I'm not sure this is ever actually used. Maybe by report token users?
+            if (!$region) {
+                $region = Models\Region::abbreviation('NA')->first();
+            }
+
+            $this->setRegion($region);
+        }
+
+        // Sometimes we only want global regions
+        if ($region && !$includeLocalRegions && !$region->isGlobalRegion()) {
+            $region = $region->getParentGlobalRegion();
         }
 
         return $region;
@@ -138,7 +173,7 @@ class Context
 
         $this->region = $region;
 
-        if ($setCenter) {
+        if ($setCenter && $this->user) {
             $centers = $region->centers;
             if ($centers && $this->getGlobalRegion()->id !== $this->user->homeRegion(true)->id) {
                 // in foreign regions, use the first center off the list
@@ -250,28 +285,18 @@ class Context
         }
 
         $reportingDate = null;
-        $reportingDateString = '';
-
-        // First check if the date is already cached in the session
-        if (Session::has('viewReportingDate')) {
-            $reportingDateString = Session::get('viewReportingDate');
-        }
 
         // If we have a reportToken, use the reportingDate from that report
-        if (!$reportingDateString && Session::has('reportTokenId')) {
+        if (Session::has('reportTokenId')) {
             $reportToken = Models\ReportToken::find(Session::get('reportTokenId'));
 
             if ($reportToken) {
-                $report = $reportToken->getReport();
-                $reportingDateString = $report->reportingDate->toDateString();
-                Session::set('viewReportingDate', $reportingDateString);
+                $reportingDate = $reportToken->getReport()->reportingDate;
             }
         }
 
-        // Finally, create date or get reasonable default
-        if ($reportingDateString) {
-            $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
-        } else {
+        // If we don't have one yet, set reasonable default
+        if (!$reportingDate) {
             $reportingDate = $this->getSubmissionReportingDate();
         }
 

@@ -31,6 +31,8 @@ class ReportsController extends Controller
             'getByToken',
             'mobileDash',
         ]]);
+
+        $this->context = App::make(Api\Context::class);
     }
 
     /**
@@ -48,7 +50,7 @@ class ReportsController extends Controller
 
         $center = Center::findOrFail($request->get('id'));
 
-        $this->setCenter($center);
+        $this->context->setCenter($center);
 
         Session::set('reportRedirect', 'center');
 
@@ -70,7 +72,7 @@ class ReportsController extends Controller
 
         $region = Region::findOrFail($request->get('id'));
 
-        $this->setRegion($region);
+        $this->context->setRegion($region);
 
         Session::set('reportRedirect', 'region');
 
@@ -90,7 +92,6 @@ class ReportsController extends Controller
             abort(400);
         }
 
-        Session::set('viewReportingDate', $request->get('date'));
         Session::set('reportRedirect', 'date');
 
         return ['success' => true];
@@ -137,12 +138,6 @@ class ReportsController extends Controller
     {
         if ($request->has('reportRedirect')) {
             Session::set('reportRedirect', $request->get('reportRedirect'));
-
-            // If the redirect is coming from an HTTP request, then reset the Session variable
-            // so we pick up the new version
-            if ($abbr && $request->get('reportRedirect') == 'center') {
-                Session::forget('viewCenterId');
-            }
         }
 
         if (Session::has('reportRedirect') && Session::get('reportRedirect') == 'region') {
@@ -153,14 +148,7 @@ class ReportsController extends Controller
             Session::set('reportRedirect', 'center');
         }
 
-        if (!Session::has('viewCenterId')) {
-            $center = $abbr
-                ? Center::abbreviation($abbr)->firstOrFail()
-                : $this->getCenter($request);
-            Session::set('viewCenterId', $center->id);
-        }
-
-        return $this->getReport($request, $abbr, $date, 'center', 'viewCenterId');
+        return $this->getReport($request, $abbr, $date, 'center');
     }
 
     /**
@@ -176,10 +164,6 @@ class ReportsController extends Controller
     {
         if ($request->has('reportRedirect')) {
             Session::set('reportRedirect', $request->get('reportRedirect'));
-
-            if ($abbr && $request->get('reportRedirect') == 'region') {
-                Session::forget('viewRegionId'); // it will be reset to the requested version below
-            }
         }
 
         if (Session::has('reportRedirect') && Session::get('reportRedirect') == 'center') {
@@ -190,17 +174,10 @@ class ReportsController extends Controller
             Session::set('reportRedirect', 'region');
         }
 
-        if (!Session::has('viewRegionId')) {
-            $region = $abbr
-                ? Region::abbreviation($abbr)->firstOrFail()
-                : $this->getRegion($request);
-            Session::set('viewRegionId', $region->id);
-        }
-
-        return $this->getReport($request, $abbr, $date, 'region', 'viewRegionId');
+        return $this->getReport($request, $abbr, $date, 'region');
     }
 
-    protected function getReport(Request $request, $abbr, $date, $reportType, $sessionField)
+    protected function getReport(Request $request, $abbr, $date, $reportType)
     {
         if ($reportType == 'region') {
             $reportTargetClass = Region::class;
@@ -210,25 +187,11 @@ class ReportsController extends Controller
             throw new \Exception("Invalid report type '{$reportType}'");
         }
 
-        $reportTarget = null;
-        $reportingDate = null;
+        $reportTarget = $reportTargetClass::abbreviation($abbr)->firstOrFail();
+        $reportingDate = $date ? Carbon::parse($date) : null;
         $reportViewUpdate = Session::has('reportRedirect');
         if ($reportViewUpdate) {
             Session::forget('reportRedirect');
-            if (Session::has($sessionField)) {
-                $reportTarget = $reportTargetClass::find(Session::get($sessionField));
-            }
-            if (Session::has('viewReportingDate')) {
-                $reportingDate = Carbon::parse(Session::get('viewReportingDate'));
-            }
-        }
-
-        if (!$reportTarget) {
-            $reportTarget = $reportTargetClass::abbreviation($abbr)->firstOrFail();
-        }
-
-        if (!$reportingDate && $date) {
-            $reportingDate = Carbon::parse($date);
         }
 
         // If we get here and still don't have a reporting date, then none was provided or set in the session
@@ -242,10 +205,6 @@ class ReportsController extends Controller
             if (!$globalReport) {
                 $reportingDate->subWeek();
                 $globalReport = GlobalReport::reportingDate($reportingDate)->first();
-            }
-
-            if ($globalReport) {
-                Session::set('viewReportingDate', $reportingDate->toDateString());
             }
         }
 
@@ -270,7 +229,7 @@ class ReportsController extends Controller
                 ->first();
 
             if ($report) {
-                $this->setCenter($report->center);
+                $this->context->setCenter($report->center);
             }
         }
 
@@ -295,8 +254,6 @@ class ReportsController extends Controller
         $context = App::make(Api\Context::class);
         $center = Center::abbreviation($abbr)->firstOrFail();
         $reportingDate = $context->getReportingDate();
-
-        $this->setCenter($center);
 
         $report = StatsReport::byCenter($center)->official()->reportingDate($reportingDate)->first();
         if ($report == null) {

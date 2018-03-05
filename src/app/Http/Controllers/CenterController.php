@@ -20,7 +20,6 @@ class CenterController extends Controller
         $center = Models\Center::abbreviation($abbr)->firstOrFail();
 
         $this->context->setCenter($center);
-        $this->setCenter($center);
 
         $statsReport = Models\StatsReport::byCenter($center)
             ->official()

@@ -7,7 +7,7 @@ use Eloquence\Database\Traits\CamelCaseModel;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Request;
-use TmlpStats\Http\Controllers\Controller;
+use TmlpStats\Api;
 use TmlpStats\Traits\CachedRelationships;
 
 class ReportToken extends Model
@@ -86,7 +86,7 @@ class ReportToken extends Model
                 $region = Region::find($this->ownerId);
             default:
                 if (!isset($region) || !$region) {
-                    $region = App::make(Controller::class)->getRegion(Request::instance());
+                    $region = App::make(Api\Context::class)->getRegion(true);
                 }
 
                 $reportUrl = "reports/regions/{$region->abbreviation}/{$date}";

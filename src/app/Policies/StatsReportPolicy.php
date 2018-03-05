@@ -28,9 +28,7 @@ class StatsReportPolicy extends Policy
         } else if ($user->hasRole('localStatistician')) {
             return $user->center->id === $statsReport->center->id || $user->id === $statsReport->user->id;
         } else if ($user->hasRole('readonly')) {
-            $result = $user->center && $user->center->id === $statsReport->center->id;
-
-            return $result;
+            return $user->center && $user->center->id === $statsReport->center->id;
         }
 
         return false;

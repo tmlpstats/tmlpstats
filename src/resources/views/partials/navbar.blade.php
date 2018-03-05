@@ -65,22 +65,16 @@ if ($currentUser && $currentUser->cannot('viewSubmissionUi', $currentCenter)) {
                 <div class="navbar-left">
                     <ul class="nav navbar-nav">
 
-                        @can ('validate', TmlpStats\StatsReport::class)
-                            @can ('showNewSubmissionUi', $submissionCenter)
-                            <li {!! Request::is('center/*/submission/*') ? 'class="active"' : '' !!}>
-                                <a href="{{ action('CenterController@submission', ['abbr' => $submissionCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Submit Report</a>
-                            </li>
-                            @else
-                            <li {!! Request::is('validate') ? 'class="active"' : '' !!}>
-                                <a href="{{ route('validate') }}">Validate</a>
-                            </li>
-                            @endcan
-                        @endcan
-
+                        @can ('showNewSubmissionUi', $submissionCenter)
+                        <li {!! Request::is('center/*/submission/*') ? 'class="active"' : '' !!}>
+                            <a href="{{ action('CenterController@submission', ['abbr' => $submissionCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Submit Report</a>
+                        </li>
                         {{-- Help --}}
                         <li {!! Request::is('help') ? 'class="active"' : '' !!}>
                             <a href="{{ action('HelpController@index') }}">Help</a>
                         </li>
+                        @endcan
+
 
                         {{-- Admin --}}
                         @if (Auth::user()->hasRole('administrator'))
@@ -106,6 +100,7 @@ if ($currentUser && $currentUser->cannot('viewSubmissionUi', $currentCenter)) {
             <div class="navbar-right">
                 <ul class="nav navbar-nav">
                     @if (Auth::check() && $reports)
+                        @if ($currentUser && !$currentUser->hasRole('readonly'))
                         {{-- Reporting Date --}}
                         <li class="dropdown">
                             <a href="#" class="btn btn-default btn-outline btn-circular navbar-btn dropdown-toggle"
@@ -142,19 +137,20 @@ if ($currentUser && $currentUser->cannot('viewSubmissionUi', $currentCenter)) {
                                 </ul>
                             @endif
                         </li>
+                        @endif
 
                         {{-- Region report button shows when you're not in a regional report --}}
-                        @if ($currentRegion != null && $currentUser->userCan('showReportButton'))
+                        @if ($currentRegion)
                         <li class="dropdown">
                             <a href="{{ $currentRegion->getUriRegionReport($reportingDate) }}" class="btn btn-primary navbar-btn btn-circular btn-toggle"
                                role="button">
                                 Regional Report
                             </a>
                         </li>
-                        @endcan
+                        @endif
 
                         {{-- Center --}}
-                        @if ($currentUser->isAdmin() || $currentUser->hasRole('globalStatistician'))
+                        @if ($currentUser && ($currentUser->isAdmin() || $currentUser->hasRole('globalStatistician')))
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
                                    aria-expanded="false">
@@ -178,6 +174,7 @@ if ($currentUser && $currentUser->cannot('viewSubmissionUi', $currentCenter)) {
                             </li>
                         @endif
 
+                        @if ($currentUser && !$currentUser->hasRole('readonly'))
                         {{-- Region --}}
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
@@ -194,6 +191,7 @@ if ($currentUser && $currentUser->cannot('viewSubmissionUi', $currentCenter)) {
                                 @endforeach
                             </ul>
                         </li>
+                        @endif
                     @endif
 
                     {{-- Login/Profile --}}

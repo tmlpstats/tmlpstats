@@ -10,6 +10,10 @@ class CenterPolicy extends Policy
 {
     public function showNewSubmissionUi(User $user, Center $center)
     {
+        if ($user->hasRole('readonly')) {
+            return false;
+        }
+
         $setting = Api\Context::ensure()->getSetting('showNewSubmissionUi', $center);
         if ($setting !== null) {
             return (bool) $setting;

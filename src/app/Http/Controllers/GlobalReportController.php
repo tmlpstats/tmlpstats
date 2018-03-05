@@ -52,7 +52,7 @@ class GlobalReportController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $region = $this->getRegion($request, true);
+        $region = $this->context->getRegion(true, true);
         $globalReport = Models\GlobalReport::findOrFail($id);
 
         return redirect(action('ReportsController@getRegionReport', [
@@ -63,7 +63,7 @@ class GlobalReportController extends Controller
 
     public function showReport(Request $request, Models\GlobalReport $globalReport, Models\Region $region = null)
     {
-        $region = $region ?: $this->getRegion($request, true);
+        $region = $region ?: $this->context->getRegion(true, true);
 
         $this->context->setRegion($region);
         $this->context->setReportingDate($globalReport->reportingDate);

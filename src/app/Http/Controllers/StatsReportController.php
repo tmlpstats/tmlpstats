@@ -890,7 +890,7 @@ class StatsReportController extends Controller
             }
         }
 
-        $thisQuarter = Models\Quarter::getCurrentQuarter($this->getRegion(\Request::instance()));
+        $thisQuarter = Models\Quarter::getCurrentQuarter($this->context->getRegion(true));
 
         return view('statsreports.details.peopletransfersummary', compact('teamMemberSummary', 'incomingSummary', 'thisQuarter'));
     }
