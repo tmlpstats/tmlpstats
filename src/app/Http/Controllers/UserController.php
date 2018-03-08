@@ -44,7 +44,7 @@ class UserController extends Controller
             ->with('person')
             ->get();
 
-        return view('users.index', compact('activeUsers', 'inactiveUsers'));
+        return view('admin.users.index', compact('activeUsers', 'inactiveUsers'));
     }
 
     /**
@@ -87,7 +87,7 @@ class UserController extends Controller
         }
         asort($centers);
 
-        return view('users.create', compact('centers', 'roles', 'selectedRole'));
+        return view('admin.users.create', compact('centers', 'roles', 'selectedRole'));
     }
 
     /**
@@ -139,7 +139,7 @@ class UserController extends Controller
 
         $this->authorize($user);
 
-        return view('users.show', compact('user'));
+        return view('admin.users.show', compact('user'));
     }
 
     /**
@@ -180,7 +180,7 @@ class UserController extends Controller
         }
         asort($centers);
 
-        return view('users.edit', compact('user', 'roles', 'centers'));
+        return view('admin.users.edit', compact('user', 'roles', 'centers'));
     }
 
     /**
@@ -242,82 +242,6 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        // Not allowed
     }
-
-    public function showProfile()
-    {
-        $user = Auth::user();
-
-        $this->authorize($user);
-
-        $roles = $user->roles;
-
-        return view('users.edit', compact('user', 'roles'));
-    }
-
-    public function updateProfile(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
-
-        $this->authorize($user);
-
-        $user->update($request->all());
-        $user->save();
-
-        return redirect('user/profile');
-    }
-
-    /**
-     * Send activation email
-     *
-     * @param Request $request
-     * @param User    $user
-     *
-     * @return mixed
-     */
-    protected function sendActivate(Request $request, User $user)
-    {
-        $activateUrl = url("/users/activate/{$user->token}");
-
-        try {
-            Mail::send('emails.activate', compact('invite', 'activateUrl'),
-                function($message) use ($user) {
-                    // Only send email to person in production
-                    if (config('app.env') === 'prod') {
-                        $message->to($user->email);
-                    } else {
-                        $message->to(config('tmlp.admin_email'));
-                    }
-
-                    $message->subject("Your TMLP Stats Account Invitation");
-                });
-            $successMessage = "Success! You are officially registered. We sent an email to {$user->email}. Please follow the instructions in the email to activate your account.";
-            if (config('app.env') === 'prod') {
-                Log::info("User activation email sent to {$user->email} for invite {$user->id}");
-            } else {
-                Log::info("User activation email sent to " . config('tmlp.admin_email') . " for invite {$user->id}");
-                $successMessage .= "<br/><br/><strong>Since this is development, we sent it to " . config('tmlp.admin_email') . " instead.</strong>";
-            }
-            $result['success'][] = $successMessage;
-
-        } catch (\Exception $e) {
-            Log::error("Exception caught sending user activation email: " . $e->getMessage());
-            $result['error'][] = "Failed to send user activation email to {$user->firstName}. Please try again.";
-        }
-
-        return $result;
-    }
-
-    // TODO: add feature to activate new accounts
-    // TODO: update invite code
-    //public function activate(Request $request, $token)
-    //{
-    //    $user = User::token($token)->first();
-    //    if ($user) {
-    //        abort(404);
-    //    }
-    //
-    //    $activateUrl = url("/user/activate/{$user->token}");
-    //}
 }
