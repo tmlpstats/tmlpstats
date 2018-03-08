@@ -7,11 +7,18 @@ use Illuminate\Http\Request;
 use Log;
 use Redirect;
 use TmlpStats as Models;
-use TmlpStats\Http\Requests\CenterRequest;
 use Validator;
 
 class AdminCenterController extends Controller
 {
+    protected $validationRules = [
+        'name'         => 'required|max:255',
+        'abbreviation' => 'required|max:5|unique:centers,abbreviation',
+        'team_name'    => 'string|max:255',
+        'stats_email'  => 'email',
+        'active'       => 'boolean',
+    ];
+
     /**
      * Authenticated admins only
      */
@@ -54,13 +61,15 @@ class AdminCenterController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * Input validation provided by CenterRequest
+     * Input validation provided by Request
      *
      * @return \Illuminate\Http\Response
      */
-    public function store(CenterRequest $request)
+    public function store(Request $request)
     {
         $this->authorize('store', Models\Center::class);
+
+        $this->validate($request, $this->validationRules);
 
         $input = $request->all();
 
@@ -133,16 +142,23 @@ class AdminCenterController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * Input validation provided by CenterRequest
+     * Input validation provided by Request
      *
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(CenterRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $center = Models\Center::abbreviation($id)->firstOrFail();
 
         $this->authorize($center);
+
+        // Add validation override so unique check ignores the current
+        // center's abbreviation
+        $validationRules = $this->validationRules;
+        $validationRules['abbreviation'] .= ",{$id},abbreviation";
+
+        $this->validate($request, $validationRules);
 
         $input = $request->all();
 

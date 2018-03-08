@@ -43,29 +43,27 @@ Route::get('globalreports', 'GlobalReportController@index');
 Route::get('globalreports/{id}', 'GlobalReportController@show');
 Route::get('globalreports/{id}/{report}/{regionAbbr?}', 'GlobalReportController@dispatchReport');
 
-// Report Tokens
-Route::resource('reporttokens', 'ReportTokenController');
-
 // Reports
 Route::get('report/{token}', 'ReportsController@getByToken');
 Route::get('reports/centers/{abbr?}/{date?}/{tab1?}/{tab2?}', 'ReportsController@getCenterReport');
 Route::get('reports/regions/{abbr?}/{date?}/{tab1?}/{tab2?}', 'ReportsController@getRegionReport');
+Route::post('reports/centers/setActive', 'ReportsController@setActiveCenter');
+Route::post('reports/regions/setActive', 'ReportsController@setActiveRegion');
+Route::post('reports/dates/setActive', 'ReportsController@setActiveReportingDate');
+
+Route::get('m/{abbr}', 'ReportsController@mobileDash');
 
 // Downloads
 Route::get('downloads/regions/{abbr}/{date}/{report}', 'GlobalReportController@generateApplicationsOverdueCsv');
 
-Route::post('reports/centers/setActive', 'ReportsController@setActiveCenter');
-Route::post('reports/regions/setActive', 'ReportsController@setActiveRegion');
-Route::post('reports/dates/setActive', 'ReportsController@setActiveReportingDate');
-Route::get('m/{abbr}', 'ReportsController@mobileDash');
-
 // Center Info
-Route::get('center/{abbr}', 'CenterController@dashboard');
+Route::get('center/{abbr}', 'CenterController@show');
 Route::get('center/{abbr}/next_qtr_accountabilities', 'CenterController@nextQtrAccountabilities');
 Route::get('center/{abbr}/submission/{reportingDate?}/{page?}/{irrelevant?}/{irrelevant2?}', 'CenterController@submission');
 
 // Regions
-Route::resource('regions', 'RegionController');
+Route::get('regions', 'RegionController@index');
+Route::get('regions/{id}', 'RegionController@show');
 
 // Validate
 Route::get('validate', 'ImportController@indexValidateSheet')->name('validate');
@@ -86,10 +84,6 @@ Route::post('feedback', 'ContactController@processFeedback');
 Route::get('auth/login', 'Auth\AuthController@getLogin');
 Route::post('auth/login', 'Auth\AuthController@postLogin');
 Route::get('auth/logout', 'Auth\AuthController@getLogout');
-
-// Registration routes...
-Route::get('auth/register', 'Auth\AuthController@getRegister');
-Route::post('auth/register', 'Auth\AuthController@postRegister');
 
 // Password reset link request routes...
 Route::get('password/email', 'Auth\PasswordController@getEmail');

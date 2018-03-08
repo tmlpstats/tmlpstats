@@ -58,7 +58,7 @@ class InviteController extends Controller
 
         $invites = Invite::all();
 
-        return view('invites.index', compact('invites'));
+        return view('admin.invites.index', compact('invites'));
     }
 
     /**
@@ -92,7 +92,7 @@ class InviteController extends Controller
 
         $centers = ['default' => 'Select a Center'] + $centers;
 
-        return view('invites.create', compact('centers', 'roles', 'selectedRole'));
+        return view('admin.invites.create', compact('centers', 'roles', 'selectedRole'));
     }
 
     /**
@@ -148,7 +148,7 @@ class InviteController extends Controller
 
         $this->authorize($invite);
 
-        return view('invites.show', compact('invite'));
+        return view('admin.invites.show', compact('invite'));
     }
 
     /**
@@ -181,7 +181,7 @@ class InviteController extends Controller
 
         $centers = ['default' => 'Select a Center'] + $centers;
 
-        return view('invites.edit', compact('invite', 'roles', 'centers'));
+        return view('admin.invites.edit', compact('invite', 'roles', 'centers'));
     }
 
     /**
@@ -340,12 +340,12 @@ class InviteController extends Controller
                             ->token($token)
                             ->first();
             if ($invite) {
-                return view('invites.deleted', compact('invite'));
+                return view('admin.invites.deleted', compact('invite'));
             }
             abort(404);
         }
 
-        return view('invites.accept', compact('invite'));
+        return view('admin.invites.accept', compact('invite'));
     }
 
     /**

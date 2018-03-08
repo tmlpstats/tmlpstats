@@ -58,7 +58,11 @@
     <div class="form-group">
         {!! Form::label('center', 'Last Invite Sent At:', ['class' => 'col-sm-2 control-label']) !!}
         <div class="col-sm-5" style="padding-top: 7px">
+            @if ($invite->emailSentAt)
             {{ Auth::user()->toLocalTimezone($invite->emailSentAt)->format('M j, Y \a\t g:i a T') }}
+            @else
+            Not Sent
+            @endif
         </div>
     </div>
 

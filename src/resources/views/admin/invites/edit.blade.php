@@ -7,7 +7,7 @@
 
     {!! Form::model($invite, ['url' => "/users/invites/{$invite->id}", 'method' => 'PUT', 'class' => 'form-horizontal', 'autocomplete' => 'off']) !!}
 
-    @include('invites.form', ['submitButtonText' => 'Update', 'roles' => $roles])
+    @include('admin.invites.form', ['submitButtonText' => 'Update', 'roles' => $roles])
 
     {!! Form::close() !!}
 
