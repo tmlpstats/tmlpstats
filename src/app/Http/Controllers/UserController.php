@@ -118,12 +118,10 @@ class UserController extends Controller
                 $user->roleId = $role->id;
             }
         }
-        if ($request->has('active')) {
-            $user->active = $request->get('active') == true;
-        }
-        if ($request->has('require_password_reset')) {
-            $user->requirePasswordReset = $request->get('require_password_reset') == true;
-        }
+
+        // Not passed means not set for checkboxes
+        $user->active = $request->get('active') == true;
+
         $user->save();
 
         return redirect('admin/users');
@@ -222,12 +220,10 @@ class UserController extends Controller
         if ($request->has('email')) {
             $user->setEmail($request->get('email'));
         }
-        if ($request->has('active')) {
-            $user->active = $request->get('active') == true;
-        }
-        if ($request->has('require_password_reset')) {
-            $user->requirePasswordReset = $request->get('require_password_reset') == true;
-        }
+
+        // Not passed means not set for checkboxes
+        $user->active = $request->get('active') == true;
+
         $user->save();
 
         $redirect = "admin/users/{$id}";

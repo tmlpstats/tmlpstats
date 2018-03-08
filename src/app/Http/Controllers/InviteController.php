@@ -17,6 +17,15 @@ use TmlpStats\Util;
 
 class InviteController extends Controller
 {
+    protected $validationRules = [
+        'first_name' => 'required|max:255',
+        'last_name' => 'required|max:255',
+        'email' => 'required|email',
+        'phone' => 'max:255',
+        'role' => 'required|exists:roles,id',
+        'center' => 'required|exists:centers,abbreviation',
+    ];
+
     /**
      * Create a new controller instance.
      */
@@ -96,6 +105,8 @@ class InviteController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Invite::class);
+
+        $this->validate($request, $this->validationRules);
 
         $invite = new Invite($request->all());
 
@@ -186,6 +197,8 @@ class InviteController extends Controller
         $invite = Invite::findOrFail($id);
 
         $this->authorize($invite);
+
+        $this->validate($request, $this->validationRules);
 
         $invite->update($request->all());
 

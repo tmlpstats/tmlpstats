@@ -42,16 +42,15 @@
     </div>
 </div>
 
-@if ($submitButtonText == 'Update')
+
 <div class="form-group">
-    {!! Form::label('require_password_reset', 'Require Password Reset:', ['class' => 'col-sm-2 control-label']) !!}
+    {!! Form::label('active', 'Active:', ['class' => 'col-sm-2 control-label']) !!}
     <div class="col-sm-5">
-        {!! Form::checkbox('require_password_reset', 1, false, ['class' => 'form-control']) !!}
+        {!! Form::checkbox('active', 1, $user ? $user->active : null, ['class' => 'form-control']) !!}
     </div>
 </div>
-@endif
 
 <div class="btn-group col-sm-offset-2">
-        {!! link_to($submitButtonText == 'Create' ? url('admin/users') : URL::previous(), 'Cancel', ['class' => 'btn btn-default']) !!}
-        {!! Form::submit($submitButtonText, ['class' => 'btn btn-default btn-primary']) !!}
+    {!! link_to($submitButtonText == 'Create' ? url('admin/users') : URL::previous(), 'Cancel', ['class' => 'btn btn-default']) !!}
+    {!! Form::submit($submitButtonText, ['class' => 'btn btn-default btn-primary']) !!}
 </div>
