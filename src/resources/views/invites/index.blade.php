@@ -32,7 +32,13 @@
                     <td>{{ $invite->role ? $invite->role->display : '' }}</td>
                     <td>{{ $invite->center ? $invite->center->name : '' }}</td>
                     <td>{{ $invite->invitedByUser->firstName }} {{ $invite->invitedByUser->lastName }}</td>
-                    <td>{{ Auth::user()->toLocalTimezone($invite->emailSentAt)->format('M j, Y \a\t g:i a T') }}</td>
+                    <td>
+                        @if ($invite->emailSentAt)
+                        {{ Auth::user()->toLocalTimezone($invite->emailSentAt)->format('M j, Y \a\t g:i a T') }}
+                        @else
+                        Not Sent
+                        @endif
+                    </td>
                     <td>
                         <a href="#" class="delete" title="Delete" style="color: black">
                             <span class="glyphicon glyphicon-remove"></span>
