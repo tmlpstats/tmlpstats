@@ -13,7 +13,7 @@ class HelpController extends Controller
      */
     public function index()
     {
-        $videos = [];
+        $videos = collect([]);
         foreach (Models\HelpVideo::active()->get() as $video) {
             if (!$this->context->can('watch', $video)) {
                 continue;
@@ -23,6 +23,7 @@ class HelpController extends Controller
                 'id' => $video->id,
                 'title' => $video->title,
                 'description' => $video->description,
+                'order' => $video->order,
                 'url' => $video->url,
                 'tags' => collect($video->tags)->map(function($tag) {
                     return $tag->name;

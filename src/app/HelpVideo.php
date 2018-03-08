@@ -15,6 +15,7 @@ class HelpVideo extends Model
         'url',
         'access_group',
         'active',
+        'order',
     ];
 
     protected $casts = [
