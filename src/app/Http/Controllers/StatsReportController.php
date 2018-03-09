@@ -481,9 +481,12 @@ class StatsReportController extends Controller
 
     protected function getClassList(Models\StatsReport $statsReport)
     {
-        return view('statsreports.details.classlist', [
-            'reportData' => App::make(Api\LocalReport::class)->getClassListByQuarter($statsReport),
+        $a = new Arrangements\TeamMembersByQuarter([
+            'teamMembersData' => App::make(Api\LocalReport::class)->getClassList($statsReport),
+            'includeXferAsWithdrawn' => true,
         ]);
+
+        return view('statsreports.details.classlist', $a->compose());
     }
 
     protected function getTmlpRegistrationsByStatus(Models\StatsReport $statsReport)
