@@ -3,7 +3,11 @@
     @foreach (['team1', 'team2', 'withdrawn'] as $group)
         @if (isset($reportData[$group]))
             <br/>
+            @if ($group === 'withdrawn')
+            <h4>Withdrawn/Transferred</h4>
+            @else
             <h4>{{ ucwords($group) }}</h4>
+            @endif
             <table class="table table-condensed table-striped table-hover classListTable want-datatable">
                 <thead>
                 <tr>

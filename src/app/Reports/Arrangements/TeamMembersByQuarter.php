@@ -1,4 +1,5 @@
-<?php namespace TmlpStats\Reports\Arrangements;
+<?php
+namespace TmlpStats\Reports\Arrangements;
 
 class TeamMembersByQuarter extends BaseArrangement
 {
@@ -7,7 +8,7 @@ class TeamMembersByQuarter extends BaseArrangement
      */
     public function build($data)
     {
-        $teamMembersData = $data['teamMembersData'];
+        $teamMembersData = $data['teamMembersData'] ?? [];
         $includeXferAsWithdrawn = array_get($data, 'includeXferAsWithdrawn', false);
 
         $reportData = [
