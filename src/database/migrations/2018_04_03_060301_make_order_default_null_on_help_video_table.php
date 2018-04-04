@@ -12,7 +12,7 @@ class MakeOrderDefaultNullOnHelpVideoTable extends Migration
      */
     public function up()
     {
-        DB::statement("ALTER TABLE `help_videos` MODIFY `order` int(10) unsigned DEFAULT 0;");
+        // DB::statement("ALTER TABLE `help_videos` MODIFY `order` int(10) unsigned DEFAULT 0;");
         // Schema::table('help_videos', function (Blueprint $table) {
         //     $table->integer('order')->unsigned()->nullable()->default(0)->change();
         // });
@@ -25,7 +25,7 @@ class MakeOrderDefaultNullOnHelpVideoTable extends Migration
      */
     public function down()
     {
-        DB::statement("ALTER TABLE `help_videos` MODIFY `order` int(10) unsigned NOT NULL;");
+        // DB::statement("ALTER TABLE `help_videos` MODIFY `order` int(10) unsigned NOT NULL;");
         // Schema::table('help_videos', function (Blueprint $table) {
         //     $table->integer('order')->unsigned()->change();
         // });
