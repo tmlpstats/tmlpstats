@@ -243,22 +243,6 @@ class AdminCenterController extends Controller
 
         $centerIds = $request->get('centerIds');
 
-        // Update sheet version
-        if ($request->has('sheetVersion')) {
-            $sheetVersion = $request->get('sheetVersion');
-
-            if (!preg_match("/\d+\.\d+\.\d+/", $sheetVersion)) {
-                $this->pushResponse($request, false, 'Version provided is not valid. Please use format 1.2.3.');
-                return;
-            }
-
-            if ($this->updateSheetVersion($centerIds, $sheetVersion)) {
-                $this->pushResponse($request, true, 'Version updated successfully.');
-            } else {
-                $this->pushResponse($request, false, 'There was a problem updating one or more centers. Please try again.');
-            }
-        }
-
         // Update password
         if ($request->has('newPassword') && $request->has('confirmPassword')) {
             $password = $request->get('newPassword');
@@ -291,30 +275,6 @@ class AdminCenterController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    protected function updateSheetVersion($centerIds, $sheetVersion)
-    {
-        $success = true;
-
-        foreach ($centerIds as $id) {
-            $center = Models\Center::find($id);
-            if (!$center) {
-                Log::error("Failed to update version for center {$id}. Center not found.");
-                $success = false;
-                continue;
-            }
-            $center->sheetVersion = $sheetVersion;
-            if (!$center->save()) {
-                Log::error("Failed to update version for center {$center->name}.");
-                $success = false;
-                continue;
-            }
-
-            Log::info("Updated version for {$center->name} to {$sheetVersion}.");
-        }
-
-        return $success;
     }
 
     protected function updatePassword($centerIds, $password)

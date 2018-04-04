@@ -104,7 +104,7 @@
                                     @endif
                                 </td>
                             @endif
-                            <td>{{ is_numeric($registrationData->comment) ? TmlpStats\Util::getExcelDate($registrationData->comment)->format('F') : $registrationData->comment }}</td>
+                            <td>{{ $registrationData->comment }}</td>
                         </tr>
                         @endforeach
                 </tbody>

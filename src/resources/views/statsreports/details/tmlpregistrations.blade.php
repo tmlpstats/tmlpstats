@@ -72,15 +72,10 @@
                                     <td></td>
                                 @endif
                             @endif
-                            <?php
-                                $comment = is_numeric($registrationData->comment)
-                                    ? TmlpStats\Util::getExcelDate($registrationData->comment)->format('F')
-                                    : $registrationData->comment;
-                            ?>
-                            @if ($comment)
+                            @if ($registrationData->comment)
                                 <td class="data-point comments">
-                                    <span data-toggle="tooltip" class="hl glyphicon glyphicon-th-list" title="{{ $comment }}"></span>
-                                    <span class="hs">{{ $comment }}</span>
+                                    <span data-toggle="tooltip" class="hl glyphicon glyphicon-th-list" title="{{ $registrationData->comment }}"></span>
+                                    <span class="hs">{{ $registrationData->comment }}</span>
                                 </td>
                             @else
                                 <td>&nbsp;</td>

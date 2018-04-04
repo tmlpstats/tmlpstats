@@ -86,7 +86,7 @@ class Handler extends ExceptionHandler
             $body .= "$e";
             try {
                 Mail::raw($body, function ($message) use ($center) {
-                    $message->to(config('tmlp.admin_email'))->subject("Exception processing sheet for {$center} center in " . strtoupper(config('app.env')));
+                    $message->to(config('tmlp.admin_email'))->subject("Exception processing request for {$center} center in " . strtoupper(config('app.env')));
                 });
             } catch (Exception $ex) {
                 Log::error('Exception caught sending error email: ' . $ex->getMessage());

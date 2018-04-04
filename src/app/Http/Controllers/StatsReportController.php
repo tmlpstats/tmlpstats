@@ -14,9 +14,6 @@ use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Encapsulations;
 use TmlpStats\Http\Controllers\Traits\LocalReportDispatch;
-use TmlpStats\Import\ImportManager;
-use TmlpStats\Import\Xlsx\XlsxArchiver;
-use TmlpStats\Import\Xlsx\XlsxImporter;
 use TmlpStats\Reports\Arrangements;
 
 class StatsReportController extends Controller
@@ -67,8 +64,6 @@ class StatsReportController extends Controller
         $this->context->setDateSelectAction('ReportsController@getCenterReport', [
             'abbr' => $statsReport->center->abbrLower(),
         ]);
-
-        list($sheetPath, $sheetUrl) = $this->getSheetPathUrl($statsReport);
 
         $center = $statsReport->center;
         $globalReport = Models\GlobalReport::reportingDate($statsReport->reportingDate)->first();
@@ -123,7 +118,6 @@ class StatsReportController extends Controller
             'nextReport',
             'centerReportingDate',
             'globalReport',
-            'sheetUrl',
             'reportToken',
             'showNavCenterSelect'
         ));
@@ -165,122 +159,6 @@ class StatsReportController extends Controller
             'maybeReportUrl',
             'reason'
         ));
-    }
-
-    protected function getSheetPathUrl($statsReport)
-    {
-        $sheetPath = XlsxArchiver::getInstance()->getSheetPath($statsReport);
-
-        $sheetUrl = '';
-        if ($sheetPath) {
-            $sheetUrl = $sheetPath ? url("/statsreports/{$statsReport->id}/download") : null;
-        }
-
-        return [$sheetPath, $sheetUrl];
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * Currently only supports updated locked property
-     *
-     * @param  int $id
-     *
-     * @return Response
-     */
-    public function submit(Request $request, $id)
-    {
-        $statsReport = Models\StatsReport::findOrFail($id);
-
-        $this->authorize($statsReport);
-
-        $userEmail = Auth::user()->email;
-        $response = [
-            'statsReport' => $id,
-            'success' => false,
-            'message' => '',
-        ];
-
-        $action = $request->get('function', null);
-        if ($action === 'submit') {
-
-            $sheetUrl = XlsxArchiver::getInstance()->getSheetPath($statsReport);
-            $sheet = [];
-
-            // We don't need the value, but we need to make sure a global report exists for this date
-            $globalReport = Models\GlobalReport::firstOrCreate([
-                'reporting_date' => $statsReport->reportingDate,
-            ]);
-
-            try {
-                // Check if we have cached the report already. If so, remove it from the cache and use it here
-                $cacheKey = "statsReport{$id}:importdata";
-                $importer = Cache::pull($cacheKey);
-                if (!$importer) {
-                    $importer = new XlsxImporter($sheetUrl, basename($sheetUrl), $statsReport->reportingDate, false);
-                    $importer->import();
-                }
-                $importer->saveReport();
-                $sheet = $importer->getResults();
-
-                $statsReport->submittedAt = Carbon::now();
-                $statsReport->submitComment = $request->get('comment', null);
-                $statsReport->locked = true;
-            } catch (Exception $e) {
-                Log::error('Error validating sheet: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-            }
-
-            if ($statsReport->isDirty() && $statsReport->save()) {
-                // Cache the validation results so we don't have to regenerate
-                $cacheKey = "statsReport{$id}:results";
-                Cache::tags(["statsReport{$id}"])->put($cacheKey, $sheet, static::CACHE_TTL);
-
-                XlsxArchiver::getInstance()->promoteWorkingSheet($statsReport);
-
-                $submittedAt = clone $statsReport->submittedAt;
-                $submittedAt->setTimezone($statsReport->center->timezone);
-
-                $response['submittedAt'] = $submittedAt->format('g:i A');
-                $result = ImportManager::sendStatsSubmittedEmail($statsReport, $sheet);
-
-                if (isset($result['success'])) {
-                    $response['success'] = true;
-                    $response['message'] = $result['success'][0];
-                } else {
-                    $response['success'] = false;
-                    $response['message'] = $result['error'][0];
-                }
-
-                Log::info("User {$userEmail} submitted statsReport {$id}");
-            } else {
-                $response['message'] = 'Unable to submit stats report.';
-                Log::error("User {$userEmail} attempted to submit statsReport {$id}. Failed to submit.");
-            }
-        } else {
-            $response['message'] = 'Invalid request.';
-            Log::error("User {$userEmail} attempted to submit statsReport {$id}. No value provided for submitReport. ");
-        }
-
-        return $response;
-    }
-
-    public function downloadSheet($id)
-    {
-        $statsReport = Models\StatsReport::findOrFail($id);
-
-        $this->authorize($statsReport);
-
-        $path = XlsxArchiver::getInstance()->getSheetPath($statsReport);
-
-        if ($path) {
-            $filename = XlsxArchiver::getInstance()->getDisplayFileName($statsReport);
-
-            return Response::download($path, $filename, [
-                'Content-Length: ' . filesize($path),
-            ]);
-        } else {
-            abort(404);
-        }
     }
 
     public function authorizeReport($statsReport, $report)
@@ -626,57 +504,27 @@ class StatsReportController extends Controller
 
     protected function getOverview(Models\StatsReport $statsReport)
     {
-        list($sheetPath, $sheetUrl) = $this->getSheetPathUrl($statsReport);
-
         return view('statsreports.details.overview_combined', [
             'statsReport' => $statsReport,
-            'sheetUrl' => $sheetUrl,
             'results' => $this->getResults($statsReport),
         ]);
     }
 
     protected function getResults(Models\StatsReport $statsReport)
     {
-        if ($statsReport->version === 'api') {
-            $reportMessages = $this->compileApiReportMessages($statsReport);
-
-            $centerName = $statsReport->center->name;
-            $reportingDate = $statsReport->reportingDate;
-
-            return view('import.apiresults', compact(
-                'centerName',
-                'reportingDate',
-                'reportMessages'
-            ));
-        }
-
-        $sheet = [];
-        $sheetUrl = '';
-
-        list($sheetPath, $sheetUrl) = $this->getSheetPathUrl($statsReport);
-
-        if ($sheetPath) {
-            try {
-                $importer = new XlsxImporter($sheetPath, basename($sheetPath), $statsReport->reportingDate, false);
-                $importer->import(false);
-                $sheet = $importer->getResults();
-            } catch (Exception $e) {
-                Log::error('Error validating sheet: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-            }
-
-        }
-
-        if (!$sheetUrl) {
+        if ($statsReport->version !== 'api') {
             return '<p>Results not available.</p>';
         }
 
-        $includeUl = true;
+        $reportMessages = $this->compileApiReportMessages($statsReport);
 
-        return view('import.results', compact(
-            'statsReport',
-            'sheetUrl',
-            'sheet',
-            'includeUl'
+        $centerName = $statsReport->center->name;
+        $reportingDate = $statsReport->reportingDate;
+
+        return view('statsreports.details.apiresults', compact(
+            'centerName',
+            'reportingDate',
+            'reportMessages'
         ));
     }
 
@@ -895,8 +743,8 @@ class StatsReportController extends Controller
 
         // Keep track of persons of interest
         $incomingSummary = [
-            'missing' => [], // Was on last week's sheet but not this week
-            'changed' => [], // On both sheets
+            'missing' => [], // Was on last week's report but not this week
+            'changed' => [], // On both reports
             'new' => [], // New on this week (could be a WD that's now reregistered)
         ];
 

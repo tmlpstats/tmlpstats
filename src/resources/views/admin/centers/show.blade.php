@@ -49,14 +49,6 @@
             <td>{{ $center->timezone }}</td>
         </tr>
         <tr>
-            <th>Sheet Filename:</th>
-            <td>{{ $center->sheetFilename }}</td>
-        </tr>
-        <tr>
-            <th>Sheet Version:</th>
-            <td>{{ $center->sheetVersion }}</td>
-        </tr>
-        <tr>
             <th>Mailing List:</th>
             <td><?php
                 $list = $center->getMailingList($quarter);

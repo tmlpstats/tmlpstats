@@ -20,7 +20,6 @@
                         <th>Rating</th>
                         <th>Submitted</th>
                         <th>Submitted By</th>
-                        <th>&nbsp;</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -41,13 +40,6 @@
                             <td>{{ $center['rating'] }}</td>
                             <td>{{ $center['updatedAt'] }}</td>
                             <td>{{ $center['updatedBy'] }}</td>
-                            <td style="text-align: center">
-                                @if ($center['sheet'])
-                                    <a href="{{ $center['sheet'] }}" title="Download" style="color: black">
-                                        <span class="glyphicon glyphicon-cloud-download"></span>
-                                    </a>
-                                @endif
-                            </td>
                         </tr>
                     @endforeach
                     </tbody>

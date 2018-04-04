@@ -12,7 +12,6 @@
         <tr>
             <th>Center</th>
             <th>Region</th>
-            <th>Sheet Version</th>
             <th>Email</th>
             <th>Active</th>
         </tr>
@@ -23,7 +22,6 @@
         <tr>
             <td><a href="{{ url("/admin/centers/{$center->abbreviation}/edit") }}">{{ $center->name }}</a></td>
             <td>{{ $center->region->name }}</td>
-            <td>{{ $center->sheetVersion }}</td>
             <td>{{ $center->statsEmail }}</td>
             <td><span class="glyphicon {{ $center->active ? 'glyphicon-ok' : 'glyphicon-remove' }}"></span></td>
         </tr>

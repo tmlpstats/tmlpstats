@@ -36,17 +36,6 @@
                 }
                 ?></td>
         </tr>
-        @if ($statsReport->version == 'api')
-        <tr>
-            <th>Submitted Report Version:</th>
-            <td>Online Submission (beta)</td>
-        </tr>
-        @else
-        <tr>
-            <th>Submitted Sheet Version:</th>
-            <td>{{ $statsReport->version }}</td>
-        </tr>
-        @endif
         <tr>
             <th>Rating:</th>
             <td>
@@ -57,22 +46,6 @@
                 @endif
             </td>
         </tr>
-        @if ($statsReport->version != 'api')
-        <tr>
-            <th>Spreadsheet:</th>
-            <td>
-                @can('downloadSheet', $statsReport)
-                    @if ($sheetUrl)
-                        <a href="{{ $sheetUrl }}">Download</a>
-                    @else
-                        <span style="font-style: italic">Sheet not available</span>
-                    @endif
-                @else
-                    <span style="font-style: italic">You must be logged in to download the report.</span>
-                @endcan
-            </td>
-        </tr>
-        @endif
         <tr>
             <th>Submission Comment:</th>
             <td>{!! nl2br(e($statsReport->submitComment)) !!}</td>

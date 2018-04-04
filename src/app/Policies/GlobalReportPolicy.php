@@ -36,11 +36,6 @@ class GlobalReportPolicy extends Policy
         return $user->hasRole('globalStatistician') || $user->hasRole('localStatistician') || $user->hasRole('programLeader');
     }
 
-    public function submit(User $user, GlobalReport $globalReport)
-    {
-        return $this->update($user, $globalReport);
-    }
-
     public function showReportButton(User $user)
     {
         if ($user->hasRole('readonly')) {

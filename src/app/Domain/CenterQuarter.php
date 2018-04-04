@@ -121,7 +121,7 @@ class CenterQuarter implements Arrayable, \JsonSerializable
 
     /**
      * Get the date when repromises are accepted.
-     * LEGACY/DEPRECATED: This is only used for the Excel submission.
+     * LEGACY/DEPRECATED: This setting is only used by old reports from Excel submission days
      *
      * Will check for a setting override, otherwise uses the classroom2 date
      *
@@ -135,23 +135,6 @@ class CenterQuarter implements Arrayable, \JsonSerializable
         }
 
         return $this->repromiseDate;
-    }
-
-    /**
-     * Is provided date the week to accept repromises?
-     *
-     * Will check for a setting override, otherwise uses the classroom2 date
-     *
-     * @param Carbon  $date    A reportingDate that is a day centered at midnight
-     * @param Center  $center  The center.
-     *
-     * @return bool
-     */
-    public function isRepromiseWeek(Carbon $date)
-    {
-        $repromiseDate = $this->getRepromiseDate();
-
-        return $date->eq($repromiseDate);
     }
 
     /**

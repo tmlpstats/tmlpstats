@@ -152,7 +152,7 @@
                                     if ($old) {
                                         echo 'Withdrawn last quarter: ' . $old->withdrawCode->display;
                                     } else if ($new->regDate->lt($thisQuarter->getQuarterStartDate($incoming->center))) {
-                                        echo 'Registered before quarter (' . $new->regDate->format('M j, Y') . '), but was not on last quarter\'s final sheet';
+                                        echo 'Registered before quarter (' . $new->regDate->format('M j, Y') . '), but was not on last quarter\'s final report';
                                     } else if ($new->teamYear == 2 && $new->regDate->diffInDays($thisQuarter->getQuarterStartDate($incoming->center)) < 4) {
                                         echo 'Registered at the weekend.';
                                     }

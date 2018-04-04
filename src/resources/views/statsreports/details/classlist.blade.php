@@ -73,7 +73,7 @@
                                     <td></td>
                                 @endif
                             @endif
-                            <td>{{ is_numeric($memberData->comment) ? TmlpStats\Util::getExcelDate($memberData->comment)->format(TmlpStats\Util::getLocaleDateFormat()) : $memberData->comment }}</td>
+                            <td>{{ $memberData->comment }}</td>
                             <td><?php
                                 $special = array();
                                 if (!$memberData->atWeekend) {

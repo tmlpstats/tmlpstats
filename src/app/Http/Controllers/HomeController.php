@@ -10,7 +10,6 @@ use Session;
 use TmlpStats\Api;
 use TmlpStats\Center;
 use TmlpStats\GlobalReport;
-use TmlpStats\Import\Xlsx\XlsxArchiver;
 use TmlpStats\Region;
 use TmlpStats\StatsReport;
 use TmlpStats\User;
@@ -175,17 +174,7 @@ class HomeController extends Controller
                 ? User::find($statsReport->user_id)
                 : null;
 
-            $sheetUrl = null;
-            $reportUrl = null;
-
-            if (Gate::allows('downloadSheet', $statsReport)) {
-                $sheetUrl = $statsReport && XlsxArchiver::getInstance()->getSheetPath($statsReport)
-                    ? url("/statsreports/{$statsReport->id}/download")
-                    : null;
-                $reportUrl = $statsReport
-                    ? StatsReportController::getUrl($statsReport)
-                    : null;
-            }
+            $reportUrl = $statsReport ? StatsReportController::getUrl($statsReport) : null;
 
             $submittedAt = null;
             if ($statsReport) {
@@ -201,7 +190,6 @@ class HomeController extends Controller
                 'rating' => $statsReport && $statsReport->isValidated() ? $statsReport->getRating() . ' (' . $statsReport->getPoints() . ' pts)' : '-',
                 'updatedAt' => $submittedAt ? $submittedAt->format('M j, Y @ g:ia T') : '-',
                 'updatedBy' => $user ? $user->firstName : '-',
-                'sheet' => $sheetUrl,
                 'reportUrl' => $reportUrl,
             );
 

@@ -11,7 +11,6 @@ use Illuminate\Routing\Controller as BaseController;
 use Session;
 use TmlpStats\Api;
 use TmlpStats\Center;
-use TmlpStats\Import\ImportManager;
 use TmlpStats\Region;
 use TmlpStats\ReportToken;
 
@@ -100,41 +99,6 @@ class Controller extends BaseController
         }
 
         return $center;
-    }
-
-    public function getReportingDate()
-    {
-        $reportingDate = null;
-        $reportingDateString = '';
-
-        // First check if the date is already cached in the session
-        if (Session::has('viewReportingDate')) {
-            $reportingDateString = Session::get('viewReportingDate');
-        }
-
-        // If we have a reportToken, use the reportingDate from that report
-        if (!$reportingDateString && Session::has('reportTokenId')) {
-            $reportToken = ReportToken::find(Session::get('reportTokenId'));
-
-            if ($reportToken) {
-                $report = $reportToken->getReport();
-                $reportingDateString = $report->reportingDate->toDateString();
-                Session::set('viewReportingDate', $reportingDateString);
-            }
-        }
-
-        // Finally, create date or get reasonable default
-        if ($reportingDateString) {
-            $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString);
-        } else {
-            $reportingDate = ImportManager::getExpectedReportDate();
-        }
-
-        $reportingDate = $reportingDate->startOfDay();
-
-        $this->setReportingDate($reportingDate);
-
-        return $reportingDate;
     }
 
     public function setRegion(Region $region)

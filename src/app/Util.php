@@ -25,67 +25,6 @@ class Util
         return strtolower($output);
     }
 
-    /**
-     * Convert snake_case string to camelCase
-     *
-     * @param $str
-     *
-     * @return mixed
-     */
-    public static function camelCase($str)
-    {
-        $parts = explode('_', $str);
-        $output = '';
-        if (count($parts) > 0) {
-            $output = array_shift($parts);
-        }
-        foreach ($parts as $part) {
-
-            $output .= ucfirst($part);
-        }
-        return $output ?: $str;
-    }
-
-    /**
-     * Convert an associative array to an object using the camelCase version of the keys as properties
-     *
-     * @param $array
-     *
-     * @return stdClass
-     */
-    public static function arrayToObject($array)
-    {
-        $object = new stdClass;
-
-        foreach ($array as $key => $value) {
-
-            $objectKey = static::camelCase($key);
-            $object->$objectKey = $value;
-        }
-
-        return $object;
-    }
-
-    /**
-     * Convert an object with snake_case properties to an object with camelCase properties
-     *
-     * @param $object
-     *
-     * @return stdClass
-     */
-    public static function objectToCamelCase($object)
-    {
-        $new = new stdClass;
-        $properties = get_object_vars($object);
-
-        foreach ($properties as $key => $value) {
-
-            $newKey = static::camelCase($key);
-            $new->$newKey = $value;
-        }
-        return $new;
-    }
-
     public static function formatPhone($phone)
     {
         // TODO: This handles the standard 10 digit North American phone number. Update to handle international formats
@@ -94,25 +33,6 @@ class Util
         }
 
         return $phone;
-    }
-
-    /**
-     * Convert an Excel date integer into a Carbon datetime object
-     *
-     * @param $excelDate
-     *
-     * @return bool|Carbon
-     */
-    public static function getExcelDate($excelDate)
-    {
-        $dateObj = null;
-        // Excel dates are numeric. If it's not, then it's probably some kind of date string.
-        if (is_numeric($excelDate)) {
-            $formattedDate = \PHPExcel_Style_NumberFormat::toFormattedString($excelDate, "YYYY-MM-DD");
-            $dateObj = Carbon::createFromFormat('Y-m-d', $formattedDate);
-        }
-
-        return $dateObj ? $dateObj->startOfDay() : false;
     }
 
     /**
@@ -152,16 +72,6 @@ class Util
     }
 
     /**
-     * Set the report date
-     *
-     * @param Carbon $date
-     */
-    public static function setReportDate(Carbon $date)
-    {
-        App::make(Api\Context::class)->setReportingDate($date);
-    }
-
-    /**
      * Get the previously set report date, or today
      *
      * @return Carbon
@@ -172,61 +82,6 @@ class Util
     }
 
     /**
-     * Alias for getReportDate() except you can optionally include the current time
-     *
-     * @param bool|false $includeTime
-     *
-     * @return Carbon|static
-     */
-    public static function now($includeTime = false)
-    {
-        $date = static::getReportDate();
-
-        if ($includeTime && $date->eq(Carbon::now()->startOfDay())) {
-            $date = Carbon::now();
-        }
-
-        return $date;
-    }
-
-    /**
-     * Split a name string into firstName and lastName parts
-     *
-     * @param $name
-     *
-     * @return array
-     */
-    public static function getNameParts($name)
-    {
-        $parts = array(
-            'firstName' => '',
-            'lastName'  => '',
-        );
-
-        if (strpos($name, '/') !== false) {
-            $name = str_replace('/', ' ', $name);
-        }
-
-        $names = explode(' ', trim($name));
-
-        $partsCount = count($names);
-        if ($names && $partsCount > 0) {
-            // For names Like 'Mary Louise C'
-            if ($partsCount > 2) {
-                $parts['firstName'] = implode(' ', array_slice($names, 0, -1));
-                $parts['firstName'] = trim($parts['firstName']);
-                $parts['lastName'] = trim(str_replace('.', '', $names[$partsCount - 1]));
-            } else {
-                $parts['firstName'] = trim($names[0]);
-                if ($partsCount > 1) {
-                    $parts['lastName'] = trim(str_replace('.', '', $names[1]));
-                }
-            }
-        }
-        return $parts;
-    }
-
-    /**
      * Get a random string (sha512 that's been base64 encoded to shorten it)
      *
      * @return string
@@ -234,25 +89,5 @@ class Util
     public static function getRandomString()
     {
         return str_random(64);
-    }
-
-    /**
-     * Get the date formatted using the locale
-     * e.g.
-     *      en-US => 12/25/2015
-     *      en-UK => 25/12/2015
-     *
-     * @return string
-     */
-    public static function getLocaleDateFormat()
-    {
-        $format = 'M j, Y';
-        if (Session::has('locale')) {
-            $format = Session::get('locale') == 'en-US'
-                ? 'n/j/y'
-                : 'j/n/y';
-        }
-
-        return $format;
     }
 }

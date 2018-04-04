@@ -1,7 +1,7 @@
 <?php
 namespace TmlpStats\Validate;
 
-class NullValidator extends ValidatorAbstract
+class NullValidator extends ApiValidatorAbstract
 {
     protected function validate($data)
     {

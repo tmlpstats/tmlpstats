@@ -5,7 +5,6 @@ use stdClass;
 use Symfony\Component\Yaml\Yaml;
 use TmlpStats\Domain\Scoreboard;
 use TmlpStats\Domain\ScoreboardGame;
-use TmlpStats\Import\Xlsx\DataImporter\CenterStatsImporter;
 use TmlpStats\Tests\TestAbstract;
 use TmlpStats\Util;
 
@@ -17,47 +16,6 @@ class ScoreboardTest extends TestAbstract
     {
         // Get the data for this test from a YAML file we can share between the JS and PHP tests
         return Yaml::parse(file_get_contents(__DIR__ . '/../inputs/scoreboard.yml'));
-    }
-
-    /**
-     * @dataProvider providerCalculatePoints
-     */
-    public function testCalculatePoints($promises, $actuals, $expectedResult)
-    {
-        $points = CenterStatsImporter::legacyCalculatePoints($promises, $actuals);
-
-        $this->assertEquals($expectedResult, $points);
-    }
-
-    public function providerCalculatePoints()
-    {
-        return collect($this->yamlProvider()['scoreboards_classic'])
-            ->map(function ($item) {
-                return [
-                    Util::arrayToObject($item['promise']),
-                    Util::arrayToObject($item['actual']),
-                    $item['points'],
-                ];
-            })
-            ->all();
-    }
-
-    /**
-     * @dataProvider providerCalculatePointsThrowsExceptionForInvalidInputs
-     */
-    public function testCalculatePointsThrowsExceptionForInvalidInputs($promises, $actuals)
-    {
-        $this->setExpectedException('\Exception');
-        CenterStatsImporter::legacyCalculatePoints($promises, $actuals);
-    }
-
-    public function providerCalculatePointsThrowsExceptionForInvalidInputs()
-    {
-        return [
-            [null, null],
-            [null, new stdClass()],
-            [new stdClass(), null],
-        ];
     }
 
     /**
