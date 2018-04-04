@@ -46,7 +46,7 @@ class HomeController extends Controller
         }
 
         // Admins/global statisticians default to the region overview page
-        $region = $this->getRegion($request);
+        $region = $this->context->getRegion(true);
         if ($region) {
             return redirect(action('HomeController@home', [
                 'abbr' => $region->abbrLower(),
@@ -106,18 +106,7 @@ class HomeController extends Controller
             $reportingDates[$dateString] = $report->reportingDate->format('F j, Y');
         }
 
-        // Find the best reportingDate
-        $reportingDateString = '';
-        if (Session::has('viewReportingDate')) {
-            $reportingDateString = Session::get('viewReportingDate');
-        }
-
-        if (!$reportingDateString || !isset($reportingDates[$reportingDateString])) {
-            $dateStrings = array_keys($reportingDates);
-            $reportingDateString = $dateStrings[0];
-        }
-
-        $reportingDate = Carbon::createFromFormat('Y-m-d', $reportingDateString)->startOfDay();
+        $reportingDate = Carbon::parse(key($reportingDates))->startOfDay();
 
         $centers = Center::active()
             ->byRegion($region)

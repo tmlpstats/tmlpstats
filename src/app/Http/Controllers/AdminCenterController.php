@@ -51,7 +51,7 @@ class AdminCenterController extends Controller
     {
         $this->authorize('create', Models\Center::class);
 
-        $selectedRegion = $this->getRegion($request);
+        $selectedRegion = $this->context->getRegion(true);
 
         $timezones = DateTimeZone::listIdentifiers();
 

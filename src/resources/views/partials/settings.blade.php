@@ -7,9 +7,6 @@ $region = $context->getRegion(true);
 <script type="text/javascript">
     var settings = {
         session: {
-            viewCenterId: @json(Session::get('viewCenterId')),
-            viewRegionId: @json(Session::get('viewRegionId')),
-            viewReportingDate: @json(Session::get('viewReportingDate')),
             csrfToken: @json(csrf_token()),
         },
 
