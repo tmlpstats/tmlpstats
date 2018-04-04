@@ -13,7 +13,7 @@ class MakeOrderToHelpVideosTable extends Migration
     public function up()
     {
         Schema::table('help_videos', function (Blueprint $table) {
-            $table->integer('order')->unsigned()->after('active');
+            $table->integer('order')->unsigned()->nullable()->default(0)->after('active');
         });
     }
 
