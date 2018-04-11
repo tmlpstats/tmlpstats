@@ -1,7 +1,7 @@
 import { Link, withRouter } from 'react-router'
 import { defaultMemoize } from 'reselect'
 
-import { Control, Form, SimpleField, Select, SimpleFormGroup, BooleanSelect, AddOneLink, formActions } from '../../reusable/form_utils'
+import { CheckBox, Control, Form, SimpleField, Select, SimpleFormGroup, BooleanSelect, AddOneLink, formActions } from '../../reusable/form_utils'
 import { objectAssign } from '../../reusable/ponyfill'
 import { rebind, delayDispatch, connectRedux } from '../../reusable/dispatch'
 import { SORT_BY } from '../../reusable/sort-helpers'
@@ -220,6 +220,15 @@ class _EditCreate extends ApplicationsBase {
 
         const selectableMembers = this.selectableMembers(this.props.teamMembers)
 
+        let reviewerCheckbox
+        if (app.teamYear == 2) {
+            reviewerCheckbox = (
+                <SimpleField label="Reviewer" model={modelKey+'.isReviewer'} divClass="col-md-6" customField={true}>
+                    <CheckBox model={modelKey+'.isReviewer'} />
+                </SimpleField>
+            )
+        }
+
         return (
             <div>
                 <h3>{this.title()}</h3>
@@ -236,6 +245,7 @@ class _EditCreate extends ApplicationsBase {
                             <option value="2">Team 2</option>
                         </Control.select>
                     </SimpleFormGroup>
+                    {reviewerCheckbox}
                     <SimpleField label="Comment" model={modelKey+'.comment'} divClass="col-md-6" customField={true}>
                         <textarea className="form-control" rows="3"></textarea>
                     </SimpleField>
