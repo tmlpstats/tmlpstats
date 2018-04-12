@@ -115,7 +115,7 @@ window.Tmlp = (function(window, $) {
 
         resetFeedbackForm();
 
-        $("#contactLink").on('click', function() {
+        $("#contactLink,#helpFeedback").on('click', function() {
 
             if (feedbackFormDirty) {
                 resetFeedbackForm();

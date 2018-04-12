@@ -69,12 +69,19 @@ if ($currentUser && $currentUser->cannot('viewSubmissionUi', $currentCenter)) {
                         <li {!! Request::is('center/*/submission/*') ? 'class="active"' : '' !!}>
                             <a href="{{ action('CenterController@submission', ['abbr' => $submissionCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Submit Report</a>
                         </li>
-                        {{-- Help --}}
-                        <li {!! Request::is('help') ? 'class="active"' : '' !!}>
-                            <a href="{{ action('HelpController@index') }}">Help</a>
+                        {{-- About/Help --}}
+                        <li class="dropdown {{ Request::is('help') || Request::is('about') ? 'active' : '' }}">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                               aria-expanded="false">
+                                Help <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="{{ action('HelpController@index') }}">Videos</a></li>
+                                <li><a id="helpFeedback" href="#">Feedback</a></li>
+                                <li><a href="{{ action('HelpController@about') }}">About</a></li>
+                            </ul>
                         </li>
                         @endcan
-
 
                         {{-- Admin --}}
                         @if (Auth::user()->hasRole('administrator'))
