@@ -138,7 +138,7 @@ window.Tmlp = (function(window, $) {
             data.message = $("textarea[name=message]").val();
             data.feedbackUrl = location.href;
 
-            var copySender = $("input[name=copySender]").val();
+            var copySender = $("input[name=copySender]").is(":checked");
             if (copySender) {
                 data.copySender = copySender;
             }
