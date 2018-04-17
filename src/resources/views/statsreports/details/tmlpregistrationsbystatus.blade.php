@@ -87,7 +87,7 @@
                                 </td>
                                 <td class="data-point">
                                     @if ($registrationData->appOutDate)
-                                        {{ Carbon\Carbon::now()->diffInDays($registrationData->appOutDate) }}
+                                        {{ $reportingDate->diffInDays($registrationData->appOutDate) }}
                                     @endif
                                 </td>
                                 <td class="data-point" {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
@@ -103,7 +103,7 @@
                                 </td>
                                 <td class="data-point">
                                     @if ($registrationData->appInDate)
-                                        {{ Carbon\Carbon::now()->diffInDays($registrationData->appInDate) }}
+                                        {{ $reportingDate->diffInDays($registrationData->appInDate) }}
                                     @endif
                                 </td>
                                 <td class="data-point" {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
@@ -125,7 +125,7 @@
                             @else
                                 <td class="data-point">
                                     @if ($registrationData->regDate)
-                                        {{ Carbon\Carbon::now()->diffInDays($registrationData->regDate) }}
+                                        {{ $reportingDate->diffInDays($registrationData->regDate) }}
                                     @endif
                                 </td>
                                 <td class="data-point" {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
