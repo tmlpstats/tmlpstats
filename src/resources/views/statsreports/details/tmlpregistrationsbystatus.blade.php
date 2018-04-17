@@ -26,15 +26,20 @@
                     @if ($group == 'withdrawn')
                         <th>Reason</th>
                         <th class="data-point">Withdraw Date</th>
+                        <th class="data-point">Days to Withdraw</th>
                     @elseif ($group == 'out')
                         <th class="data-point">App Out Date</th>
+                        <th class="data-point">Days Out</th>
                         <th class="data-point">Application Process Deadline</th>
                     @elseif ($group == 'waiting')
                         <th class="data-point">App In Date</th>
+                        <th class="data-point">Days In</th>
                         <th class="data-point">Application Process Deadline</th>
                     @elseif ($group == 'approved')
                         <th class="data-point">Approve Date</th>
+                        <th class="data-point">Days to Complete</th>
                     @else
+                        <th class="data-point">Days Since Reg</th>
                         <th class="data-point">Application Due</th>
                     @endif
                     <th>Comments</th>
@@ -65,6 +70,11 @@
                                             @date($registrationData->wdDate)
                                         @endif
                                     </td>
+                                    <td class="data-point">
+                                        @if ($registrationData->wdDate)
+                                            {{ $registrationData->regDate->diffInDays($registrationData->wdDate) }}
+                                        @endif
+                                    </td>
                                 @else
                                     <td></td>
                                     <td></td>
@@ -73,6 +83,11 @@
                                 <td class="data-point">
                                     @if ($registrationData->appOutDate)
                                         @date($registrationData->appOutDate)
+                                    @endif
+                                </td>
+                                <td class="data-point">
+                                    @if ($registrationData->appOutDate)
+                                        {{ Carbon\Carbon::now()->diffInDays($registrationData->appOutDate) }}
                                     @endif
                                 </td>
                                 <td class="data-point" {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
@@ -86,6 +101,11 @@
                                         @date($registrationData->appInDate)
                                     @endif
                                 </td>
+                                <td class="data-point">
+                                    @if ($registrationData->appInDate)
+                                        {{ Carbon\Carbon::now()->diffInDays($registrationData->appInDate) }}
+                                    @endif
+                                </td>
                                 <td class="data-point" {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
                                     @if ($registrationData->due())
                                         @date($registrationData->due())
@@ -97,7 +117,17 @@
                                         @date($registrationData->apprDate)
                                     @endif
                                 </td>
+                                <td class="data-point">
+                                    @if ($registrationData->apprDate)
+                                        {{ $registrationData->regDate->diffInDays($registrationData->apprDate) }}
+                                    @endif
+                                </td>
                             @else
+                                <td class="data-point">
+                                    @if ($registrationData->regDate)
+                                        {{ Carbon\Carbon::now()->diffInDays($registrationData->regDate) }}
+                                    @endif
+                                </td>
                                 <td class="data-point" {!! ($registrationData->due() && $registrationData->due()->lt($reportingDate)) ? 'style="color: red"' : '' !!}>
                                     @if ($registrationData->due())
                                         @date($registrationData->due())
