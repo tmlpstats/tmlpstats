@@ -21,9 +21,10 @@ class TeamMemberStatsSummary extends Component {
             return <div>Loading region data....</div>
         }
 
-        const { initialData: { reportData } } = this.props
+        const { initialData: { reportData, totals } } = this.props
         const header = this.renderHeader(reportData.dates)
         const body = this.renderBody(reportData)
+        const footer = this.renderFooter(reportData.dates, totals)
 
         return (
             <div className="table-responsive">
@@ -31,6 +32,7 @@ class TeamMemberStatsSummary extends Component {
                 <table className="table table-condensed table-bordered">
                     {header}
                     {body}
+                    {footer}
                 </table>
             </div>
         )
@@ -84,6 +86,35 @@ class TeamMemberStatsSummary extends Component {
             <tbody>
                 {rows}
             </tbody>
+        )
+    }
+
+    renderFooter(dates, totals) {
+        const totalsData = []
+        let total = 0
+        dates.forEach((obj) => {
+            const d = moment(obj.date).format('YYYY-MM-DD')
+            totalsData.push(this.renderFooterData(totals[d], d))
+            total += totals[d]
+        })
+
+        return (
+            <tfoot>
+                <tr key='totals'>
+                    <th key='name' className="border-top">Totals</th>
+                    <td key='quarter' className="data-point border-top"></td>
+                    <td key='total' className="data-point border-top">{total} / {dates.length}</td>
+                    {totalsData}
+                </tr>
+            </tfoot>
+        )
+    }
+
+    renderFooterData(data, date) {
+        return (
+            <td key={date} className={`data-point border-top`}>
+                <span className="numeric-glyphicon">{data}</span>
+            </td>
         )
     }
 }

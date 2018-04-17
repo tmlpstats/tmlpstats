@@ -446,6 +446,12 @@ class StatsReportController extends Controller
             return App::make(Api\TeamMember::class)->allForCenter($center, $d);
         });
 
+        $totals = $weeksData->map(function ($members) use ($type) {
+            return collect($members)->sum(function ($member) use ($type) {
+                return (int) $member->$type;
+            });
+        });
+
         if (!$weeksData) {
             return null;
         }
@@ -455,7 +461,7 @@ class StatsReportController extends Controller
             'field' => $type,
         ]);
 
-        return $a->compose();
+        return array_merge($a->compose(), ['totals' => $totals]);
     }
 
     protected function getGitwSummary(Models\StatsReport $statsReport)
