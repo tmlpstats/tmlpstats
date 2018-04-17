@@ -25,7 +25,7 @@
         seriesNames.push(seriesName);
 
         var series = [];
-        var now = new Date();
+        var now = new Date(settings.reportingDate);
         for (var i = 0; i < chartData.length; i++) {
             reportData = chartData[i];
 
