@@ -70,7 +70,6 @@ return [
     'GENERAL_INVALID_VALUE' => 'Incorrect value provided for :name (:value).',
     'GENERAL_MISSING_VALUE' => ':name is required, but no value was provided.',
     'PROGRAMLEADER_BOUNCED_EMAIL' => 'The email provided for :accountability (:email) is not reachable. Please correct it.',
-    'PROGRAMLEADER_ATTENDING_WEEKEND_MISSING' => 'Attending weekend must be provided. Please use Y if your :accountability will be at the weekend, or N otherwise.',
     'TEAMAPP_APPIN_DATE_BEFORE_APPOUT_DATE' => 'App in date is before app out date.',
     'TEAMAPP_APPIN_DATE_BEFORE_REG_DATE' => 'App in date is before registration date.',
     'TEAMAPP_APPIN_DATE_CHANGED' => 'Application in date changed from :was to :now.',
