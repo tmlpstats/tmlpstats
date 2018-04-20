@@ -601,17 +601,23 @@ class SubmissionCore extends AuthenticatedApiBase
     public function calculateProgramLeaderAttending(Models\Center $center, Carbon $reportingDate)
     {
         $leaders = App::make(Api\Submission\ProgramLeader::class)->allForCenter($center, $reportingDate, true);
-        $pmAttending = 0;
-        $clAttending = 0;
+        $pmAttending = null;
+        $clAttending = null;
 
         // This is done due to the limitations of our current storage method.
         // In the future, we should move towards a place we can loop people, allowing situations like multiple classroom leaders (where one's an apprentice or specifically during a weekend of a CL change)
         if (($pmId = $leaders['meta']['programManager']) !== null) {
-            $pmAttending += ($leaders[$pmId]->attendingWeekend) ? 1 : 0;
+            if (!is_null($leaders[$pmId]->attendingWeekend)) {
+                $pmAttending = (int) $pmAttending;
+                $pmAttending += ($leaders[$pmId]->attendingWeekend ? 1 : 0 );
+            }
         }
 
         if (($clId = $leaders['meta']['classroomLeader']) !== null && $clId != $pmId) {
-            $clAttending += ($leaders[$clId]->attendingWeekend) ? 1 : 0;
+            if (!is_null($leaders[$clId]->attendingWeekend)) {
+                $clAttending = (int) $clAttending;
+                $clAttending += ($leaders[$clId]->attendingWeekend ? 1 : 0 );
+            }
         }
 
         return [$pmAttending, $clAttending];
