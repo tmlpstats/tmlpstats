@@ -82,7 +82,7 @@ function defaultAccountabilities() {
         {"id":8,"name":"programManager","context":"team","display":"Program Manager"},
         {"id":1,"name":"regionalStatistician","context":"program","display":"Regional Statistician"},
         {"id":4,"name":"statistician","context":"team","display":"Statistician"},
-        {"id":5,"name":"statisticianApprentice","context":"team","display":"Statistician Apprentice"},
+        {"id":5,"name":"statisticianApprentice","context":"team","display":"Statistician In Training"},
         {"id":6,"name":"t1tl","context":"team","display":"Team 1 Team Leader"},
         {"id":13,"name":"t1x","context":"team","display":"T1 Expansion"},
         {"id":7,"name":"t2tl","context":"team","display":"Team 2 Team Leader"},

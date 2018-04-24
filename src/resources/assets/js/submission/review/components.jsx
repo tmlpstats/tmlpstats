@@ -274,7 +274,7 @@ class PreSubmitCard extends React.PureComponent {
                         <li>Team 2 Team Leader</li>
                         <li>Team 1 Team Leader</li>
                         <li>Statistician</li>
-                        <li>Statistician Apprentice</li>
+                        <li>Statistician In Training</li>
                     </ul>
                     You can re-submit your stats before 7PM your local time on Friday.
                     <br/><br/>
