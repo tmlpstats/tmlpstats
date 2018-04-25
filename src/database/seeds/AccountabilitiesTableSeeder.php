@@ -12,7 +12,7 @@ class AccountabilitiesTableSeeder extends ArraySeeder
             ['globalStatistician', 'program', 'Global Statistician'],
             ['globalLeader', 'program', 'Global Leader'],
             ['statistician', 'team', 'Statistician'],
-            ['statisticianApprentice', 'team', 'Statistician Apprentice'],
+            ['statisticianApprentice', 'team', 'Statistician In Training'],
             ['t1tl', 'team', 'Team 1 Team Leader'],
             ['t2tl', 'team', 'Team 2 Team Leader'],
             ['programManager', 'program', 'Program Manager'],

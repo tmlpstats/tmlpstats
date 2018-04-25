@@ -24,7 +24,7 @@ class ApiTeamMemberValidatorTest extends ApiValidatorTestAbstract
 
     protected $accountabilities = [
         4 => 'Statistician',
-        5 => 'Statistician Apprentice',
+        5 => 'Statistician In Training',
         6 => 'Team 1 Team Leader',
         7 => 'Team 2 Team Leader',
         8 => 'Program Manager',
