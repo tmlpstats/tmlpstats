@@ -85,5 +85,6 @@ Route::post('password/reset', 'Auth\PasswordController@postReset');
 
 // Help
 Route::get('about', 'HelpController@about');
+Route::get('docs', 'HelpController@docs');
 Route::get('help', 'HelpController@index');
 Route::get('help/view/{id}', 'HelpController@view');

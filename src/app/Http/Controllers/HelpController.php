@@ -7,6 +7,15 @@ use TmlpStats as Models;
 class HelpController extends Controller
 {
     /**
+     * Displays Documentation page.
+     *
+     * @return Response
+     */
+    public function docs() {
+        return view('help.docs');
+    }
+
+    /**
      * Displays About page.
      *
      * @return Response
