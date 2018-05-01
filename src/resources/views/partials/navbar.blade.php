@@ -77,6 +77,7 @@ if ($currentUser && $currentUser->cannot('viewSubmissionUi', $currentCenter)) {
                             </a>
                             <ul class="dropdown-menu" role="menu">
                                 <li><a href="{{ action('HelpController@index') }}">Videos</a></li>
+                                <li><a href="{{ action('HelpController@docs') }}">Documentation</a></li>
                                 <li><a id="helpFeedback" href="#">Feedback</a></li>
                                 <li><a href="{{ action('HelpController@about') }}">About</a></li>
                             </ul>
