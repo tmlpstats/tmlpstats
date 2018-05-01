@@ -32,6 +32,7 @@
             </tr>
         </table>
         <br/>
+        <h3>Ratings Breakdown</h3>
         <table class="table-bordered table-condensed">
             <tr>
                 <td colspan="2">Category of Team Performance Rating</td>
