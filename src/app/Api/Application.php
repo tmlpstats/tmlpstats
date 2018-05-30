@@ -8,13 +8,14 @@ use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Api\Exceptions;
 use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
+use TmlpStats\Traits;
 
 /**
  * Applications
  */
 class Application extends AuthenticatedApiBase
 {
-    use Traits\UsesReportDates, Traits\ValidatesObjects;
+    use Traits\UsesReportDates, Traits\ValidatesObjects, Traits\SanitizesLastNames;
 
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false)
     {
@@ -50,7 +51,7 @@ class Application extends AuthenticatedApiBase
             }
         }
 
-        return $allApplications;
+        return $this->sanitizeNames(array_values($allApplications));
     }
 
     /**

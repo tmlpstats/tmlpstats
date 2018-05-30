@@ -86,8 +86,8 @@ class Util
      *
      * @return string
      */
-    public static function getRandomString()
+    public static function getRandomString($length = 64)
     {
-        return str_random(64);
+        return str_random($length);
     }
 }

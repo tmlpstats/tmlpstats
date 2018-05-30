@@ -7,13 +7,14 @@ use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Api\Traits;
 use TmlpStats\Domain;
+use TmlpStats\Traits;
 
 /**
  * TeamMembers
  */
 class TeamMember extends AuthenticatedApiBase
 {
-    use Traits\UsesReportDates, Traits\ValidatesObjects;
+    use Traits\UsesReportDates, Traits\ValidatesObjects, Traits\SanitizesLastNames;
 
     private static $omitGames = ['tdo' => true, 'gitw' => true, 'rppCap' => true, 'rppCpc' => true, 'rppLf' => true];
 
@@ -63,7 +64,7 @@ class TeamMember extends AuthenticatedApiBase
             }
         }
 
-        return $allTeamMembers;
+        return $this->sanitizeNames($allTeamMembers);
     }
 
     /**
