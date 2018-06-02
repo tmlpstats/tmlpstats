@@ -21,10 +21,11 @@ if [[ -z "$NO_REBUILD_BUILDER" ]]; then
 	docker build -t tmlpstats/builder -f Dockerfile.builder .
 fi
 
-docker run -ti                    \
-           --name builder         \
+docker run -ti                         \
+           --rm                        \
+           --name builder              \
            -v $CHECKOUT:/opt/tmlpstats \
-           -e GIT_BRANCH="$GIT_BRANCH"  \
+           -e GIT_BRANCH="$GIT_BRANCH" \
            tmlpstats/builder /bin/bash -c /opt/tmlpstats/deployment/prod-packager/make-package.sh
 
 mv -f ${FILE} ${OUTPUT_FILE}
