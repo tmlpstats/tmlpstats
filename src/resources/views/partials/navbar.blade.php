@@ -220,7 +220,7 @@ if ($currentUser && $currentUser->cannot('viewSubmissionUi', $currentCenter)) {
             </div>
         </div>
     </div>
-    @if (config('app.env') == 'stage')
+    @if (config('app.env') === 'stage' && !config('app.demo'))
     <div class="stage-warning">This is NOT the official site. Use <a href="https://tmlpstats.com">tmlpstats.com</a></div>
     @endif
 </nav>
