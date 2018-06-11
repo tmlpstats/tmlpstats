@@ -19,6 +19,8 @@ class ApiController extends ApiControllerBase
 {
     protected $methods = [
         'Admin.Region.getRegion' => 'Admin__Region__getRegion',
+        'Admin.Region.getQuarterConfig' => 'Admin__Region__getQuarterConfig',
+        'Admin.Region.saveQuarterConfig' => 'Admin__Region__saveQuarterConfig',
         'Admin.Quarter.filter' => 'Admin__Quarter__filter',
         'Admin.System.allSystemMessages' => 'Admin__System__allSystemMessages',
         'Admin.System.regionSystemMessages' => 'Admin__System__regionSystemMessages',
@@ -88,6 +90,21 @@ class ApiController extends ApiControllerBase
     {
         return $this->app->make(Api\Admin\Region::class)->getRegion(
             $this->parse($input, 'region', 'Region')
+        );
+    }
+    protected function Admin__Region__getQuarterConfig($input)
+    {
+        return $this->app->make(Api\Admin\Region::class)->getQuarterConfig(
+            $this->parse($input, 'region', 'Region'),
+            $this->parse($input, 'quarter', 'Quarter')
+        );
+    }
+    protected function Admin__Region__saveQuarterConfig($input)
+    {
+        return $this->app->make(Api\Admin\Region::class)->saveQuarterConfig(
+            $this->parse($input, 'region', 'Region'),
+            $this->parse($input, 'quarter', 'Quarter'),
+            $this->parse($input, 'data', 'array')
         );
     }
     protected function Admin__Quarter__filter($input)

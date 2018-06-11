@@ -18,7 +18,24 @@ Api.Admin.Region = {
     Parameters:
       region: Region
     */
-    getRegion: bac('Admin.Region.getRegion')
+    getRegion: bac('Admin.Region.getRegion'),
+
+    /*
+    
+    Parameters:
+      region: Region
+      quarter: Quarter
+    */
+    getQuarterConfig: bac('Admin.Region.getQuarterConfig'),
+
+    /*
+    
+    Parameters:
+      region: Region
+      quarter: Quarter
+      data: array
+    */
+    saveQuarterConfig: bac('Admin.Region.saveQuarterConfig')
 }
 
 Api.Admin.Quarter = {

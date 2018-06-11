@@ -78,6 +78,25 @@ class RegionQuarter implements \JsonSerializable
         return QuarterDates::getNextMilestone($this, $ref);
     }
 
+    /**
+     * Get the date by which travel/room information is due.
+     *
+     * Will check for setting override, otherwise uses classroom 3 date
+     *
+     * @return Carbon
+     */
+    public function getTravelDueByDate()
+    {
+        $setting = $this->getSetting('travelDueByDate');
+
+        return ($setting) ? QuarterDates::parseQuarterDate($setting, $this) : $this->classroom2Date;
+    }
+
+    private function getSetting($name) 
+    {
+        return App::make(Api\Context::class)->getSetting($name, $this->region, $this->quarter);
+    }
+
     public function toArray()
     {
         $v = [

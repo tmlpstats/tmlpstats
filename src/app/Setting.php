@@ -13,6 +13,7 @@ class Setting extends Model
     protected $fillable = [
         'center_id',
         'quarter_id',
+        'region_id',
         'name',
         'value',
         'active',
