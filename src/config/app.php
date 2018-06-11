@@ -18,6 +18,20 @@ return [
     /// ADDED FOR LARAVEL 5.2 UPGRADE
     'env' => env('APP_ENV', 'prod'),
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Demo Mode
+    |--------------------------------------------------------------------------
+    |
+    | When in demo mode, the stage warning banner is disabled and the system
+    | now time is set to the next Wednesday so the application looks like it
+    | will when statisticians enter stats on their first week.
+    |
+    */
+    'demo' => (env('APP_ENV') === 'local' || env('APP_ENV') === 'stage')
+        && file_exists(__DIR__ . '/../storage/app/demo'),
+
     /*
     |--------------------------------------------------------------------------
     | Application URL

@@ -21,6 +21,14 @@
 
 require __DIR__.'/../bootstrap/autoload.php';
 
+/**
+ * Put app into demo mode.
+ */
+$config = include __DIR__ . '/../config/app.php';
+if ($config['demo'] ?? false) {
+    Carbon\Carbon::setTestNow('wednesday');
+}
+
 /*
 |--------------------------------------------------------------------------
 | Turn On The Lights

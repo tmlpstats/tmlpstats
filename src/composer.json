@@ -7,6 +7,7 @@
     "require": {
         "doctrine/dbal": "^2.5",
         "fideloper/proxy": "^3.2",
+        "fzaninotto/faker": "^1.5",
         "geoip/geoip": "^1.15",
         "guzzlehttp/guzzle": "^6.1",
         "intouch/laravel-newrelic": "^2.0",
@@ -19,7 +20,6 @@
         "respect/validation": "~1.0"
     },
     "require-dev": {
-        "fzaninotto/faker": "^1.5",
         "mockery/mockery": "~0.9",
         "phpspec/phpspec": "~2.1",
         "phpunit/phpunit": "~5.0",

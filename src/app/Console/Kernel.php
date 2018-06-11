@@ -13,6 +13,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\ClearTablesCommand::class,
+        Commands\EnableDemoModeCommand::class,
         Commands\FlushCacheTagCommand::class,
         Commands\FlushReportsCacheCommand::class,
         Commands\FlushTablesCommand::class,
