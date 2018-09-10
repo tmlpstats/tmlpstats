@@ -3,6 +3,7 @@ namespace TmlpStats;
 
 use Carbon\Carbon;
 use Eloquence\Database\Traits\CamelCaseModel;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use TmlpStats\Traits\CachedRelationships;
 
