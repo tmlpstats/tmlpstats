@@ -71,5 +71,7 @@ class Region extends AuthenticatedApiBase
             'quarter_id' => $quarter->id,
         ]);
         $domain->fillModel($rqd, compact('region', 'quarter'));
+        $rqd->save();
+        return ['success' => true];
     }
 }
