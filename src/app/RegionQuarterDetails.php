@@ -30,6 +30,13 @@ class RegionQuarterDetails extends Model
         'classroom3_date',
     );
 
+    protected function setKeysForSaveQuery(Builder $query)
+    {
+        return $query
+            ->where('region_id', '=', $this->getAttribute('region_id'))
+            ->where('quarter_id', '=', $this->getAttribute('quarter_id'));
+    }
+
     public function scopeByQuarter($query, Quarter $quarter)
     {
         return $query->whereQuarterId($quarter->id);
