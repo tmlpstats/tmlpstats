@@ -131,7 +131,6 @@ export default class Review extends SubmissionBase {
                 {fetching}
                 <ul>{categories}</ul>
                 <div>
-                    <Alert alert="warning">&nbsp;Submission is new and we are still adding the finishing touches. Let us know using the "Feedback" tab on the left if anything doesn't look right.</Alert>
                     <ButtonStateFlip loadState={reportSubmitting}
                                      buttonClass="btn btn-primary btn-lg"
                                      onClick={this.displayPreSubmitModal}>Submit Report</ButtonStateFlip>
