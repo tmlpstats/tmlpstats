@@ -125,11 +125,20 @@ export default class Review extends SubmissionBase {
             fetching = <p className="lead">Fetching updated messages....</p>
         }
 
+        let displayed
+        if (categories.length) {
+            displayed = <ul>{categories}</ul>
+        } else if (!fetching) {
+            displayed = (
+                <Alert alert="success">No errors or messages!</Alert>
+            )
+        }
+
         return (
             <div>
                 <h3>Review</h3>
                 {fetching}
-                <ul>{categories}</ul>
+                {displayed}
                 <div>
                     <ButtonStateFlip loadState={reportSubmitting}
                                      buttonClass="btn btn-primary btn-lg"
