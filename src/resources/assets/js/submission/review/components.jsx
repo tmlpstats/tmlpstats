@@ -111,7 +111,7 @@ export default class Review extends SubmissionBase {
         PAGES_CONFIG.forEach((config) => {
             const pageData = this.props[config.key]
             const rawMessages = pageData.messages
-            if (rawMessages) {
+            if (rawMessages && rawMessages.length) {
                 categories.push(<ReviewCategory key={config.key}
                                                 baseUri={this.baseUri()}
                                                 config={config}
