@@ -11,7 +11,7 @@
     <th>Currently on Team 2</th>
     <th>Team 2 Incoming</th>
     <th>Team 2 Completing</th>
-    <th>Team 2 Only</th>
+    <th>All T2</th>
     <th>Team 2 &amp; PM/CL</th>
     <th>Team 2 Registration Event</th>
 </thead>
