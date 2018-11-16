@@ -11,7 +11,7 @@
     <th>Currently on Team 2</th>
     <th>Team 2 Incoming</th>
     <th>Team 2 Completing</th>
-    <th>All T2</th>
+    <th>Team 2 Only</th>
     <th>Team 2 &amp; PM/CL</th>
     <th>Team 2 Registration Event</th>
 </thead>
@@ -63,8 +63,7 @@
         "Completing T2s"</td>
     <td></td>
     <td></td>
-    <td>PM, CRL,<br/>
-        All T2</td>
+    <td>All T2</td>
     <td>PM,<br/>
         Completing T1,<br/>
         All T2</td>
