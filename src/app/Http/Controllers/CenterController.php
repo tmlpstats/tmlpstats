@@ -38,12 +38,15 @@ class CenterController extends Controller
         $this->context->setReportingDate($reportingDate);
         $this->context->setRegion($center->region, false);
 
+        $submitted = Models\StatsReport::byCenter($center)->reportingDate($reportingDate)->official()->orderBy('submitted_at', 'desc')->first();
         $alreadySubmitted = false;
-        if (Models\StatsReport::byCenter($center)->reportingDate($reportingDate)->official()->count()) {
+        $alreadySubmittedAt = null;
+        if ($submitted !== null) {
             $alreadySubmitted = true;
+            $alreadySubmittedAt = $submitted->submittedAt;
         }
 
-        return view('centers.submission', compact('center', 'reportingDate', 'alreadySubmitted'));
+        return view('centers.submission', compact('center', 'reportingDate', 'alreadySubmitted', 'alreadySubmittedAt'));
     }
 
     public function nextQtrAccountabilities($abbr, $reportingDate = null)
