@@ -67,7 +67,7 @@ if ($currentUser && $currentUser->cannot('viewSubmissionUi', $currentCenter)) {
 
                         @can ('showNewSubmissionUi', $submissionCenter)
                         <li {!! Request::is('center/*/submission/*') ? 'class="active"' : '' !!}>
-                            <a href="{{ action('CenterController@submission', ['abbr' => $submissionCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Work On Report</a>
+                            <a href="{{ action('CenterController@submission', ['abbr' => $submissionCenter->abbrLower(), 'reportingDate' => $submissionReportingDate->toDateString()]) }}">Work on Report</a>
                         </li>
                         {{-- About/Help --}}
                         <li class="dropdown {{ Request::is('help') || Request::is('about') ? 'active' : '' }}">
