@@ -95,8 +95,8 @@ if ($currentUser && $currentUser->cannot('viewSubmissionUi', $currentCenter)) {
                                     <li><a href="{{ url('/admin/users') }}">Users</a></li>
                                     <li><a href="{{ url('/users/invites') }}">Invites</a></li>
                                     <li><a href="{{ url('/admin/centers') }}">Centers</a></li>
-                                    @if ($homeRegion)
-                                    <li><a href="{{ url("/admin/regions/{$homeRegion->abbrLower()}") }}">Regions</a></li>
+                                    @if ($currentRegion)
+                                    <li><a href="{{ url("/admin/regions/{$currentRegion->abbrLower()}") }}">Regions</a></li>
                                     @endif
                                 </ul>
                             </li>
