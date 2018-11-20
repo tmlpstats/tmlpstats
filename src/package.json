@@ -22,10 +22,10 @@
     "eslint": "^3.17",
     "eslint-plugin-react": "^6.0.0",
     "jest": "^19",
-    "laravel-mix": "^1.4",
+    "laravel-mix": "^1.7.2",
     "react-test-renderer": "^15.5",
     "wdio-browserstack-service": "^0.1.4",
-    "wdio-mocha-framework": "^0.5.9",
+    "wdio-mocha-framework": "^0.6.4",
     "wdio-spec-reporter": "^0.1.0",
     "webdriverio": "^4.6.2"
   },
