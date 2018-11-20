@@ -3,7 +3,6 @@
 exports[`NQA Should Render As Snapshot 1`] = `
 <form
   className="form-horizontal nextQuarterAccountabilities"
-  noValidate={undefined}
   onReset={[Function]}
   onSubmit={[Function]}
 >
@@ -34,7 +33,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
           className="col-md-8"
         >
           <div
-            aria-label={undefined}
             className="btn-group"
             role="group"
           >
@@ -118,7 +116,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqEmail"
             name="submission.next_qtr_accountabilities.data.6.email"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -137,7 +134,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqPhone"
             name="submission.next_qtr_accountabilities.data.6.phone"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -156,7 +152,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqNotes"
             name="submission.next_qtr_accountabilities.data.6.notes"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -209,7 +204,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
           className="col-md-8"
         >
           <div
-            aria-label={undefined}
             className="btn-group"
             role="group"
           >
@@ -266,7 +260,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqEmail"
             name="submission.next_qtr_accountabilities.data.7.email"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -285,7 +278,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqPhone"
             name="submission.next_qtr_accountabilities.data.7.phone"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -304,7 +296,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqNotes"
             name="submission.next_qtr_accountabilities.data.7.notes"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -357,7 +348,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
           className="col-md-8"
         >
           <div
-            aria-label={undefined}
             className="btn-group"
             role="group"
           >
@@ -441,7 +431,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqEmail"
             name="submission.next_qtr_accountabilities.data.4.email"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -460,7 +449,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqPhone"
             name="submission.next_qtr_accountabilities.data.4.phone"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -479,7 +467,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqNotes"
             name="submission.next_qtr_accountabilities.data.4.notes"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -532,7 +519,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
           className="col-md-8"
         >
           <div
-            aria-label={undefined}
             className="btn-group"
             role="group"
           >
@@ -589,7 +575,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqEmail"
             name="submission.next_qtr_accountabilities.data.17.email"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -608,7 +593,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqPhone"
             name="submission.next_qtr_accountabilities.data.17.phone"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -627,7 +611,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqNotes"
             name="submission.next_qtr_accountabilities.data.17.notes"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -680,7 +663,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
           className="col-md-8"
         >
           <div
-            aria-label={undefined}
             className="btn-group"
             role="group"
           >
@@ -791,7 +773,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqNotes"
             name="submission.next_qtr_accountabilities.data.5.notes"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -844,7 +825,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
           className="col-md-8"
         >
           <div
-            aria-label={undefined}
             className="btn-group"
             role="group"
           >
@@ -901,7 +881,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqEmail"
             name="submission.next_qtr_accountabilities.data.11.email"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -920,7 +899,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqPhone"
             name="submission.next_qtr_accountabilities.data.11.phone"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -939,7 +917,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqNotes"
             name="submission.next_qtr_accountabilities.data.11.notes"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -992,7 +969,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
           className="col-md-8"
         >
           <div
-            aria-label={undefined}
             className="btn-group"
             role="group"
           >
@@ -1049,7 +1025,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqEmail"
             name="submission.next_qtr_accountabilities.data.12.email"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1068,7 +1043,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqPhone"
             name="submission.next_qtr_accountabilities.data.12.phone"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1087,7 +1061,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqNotes"
             name="submission.next_qtr_accountabilities.data.12.notes"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1140,7 +1113,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
           className="col-md-8"
         >
           <div
-            aria-label={undefined}
             className="btn-group"
             role="group"
           >
@@ -1197,7 +1169,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqEmail"
             name="submission.next_qtr_accountabilities.data.15.email"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1216,7 +1187,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqPhone"
             name="submission.next_qtr_accountabilities.data.15.phone"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1235,7 +1205,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqNotes"
             name="submission.next_qtr_accountabilities.data.15.notes"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1288,7 +1257,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
           className="col-md-8"
         >
           <div
-            aria-label={undefined}
             className="btn-group"
             role="group"
           >
@@ -1345,7 +1313,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqEmail"
             name="submission.next_qtr_accountabilities.data.16.email"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1364,7 +1331,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqPhone"
             name="submission.next_qtr_accountabilities.data.16.phone"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1383,7 +1349,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqNotes"
             name="submission.next_qtr_accountabilities.data.16.notes"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1436,7 +1401,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
           className="col-md-8"
         >
           <div
-            aria-label={undefined}
             className="btn-group"
             role="group"
           >
@@ -1493,7 +1457,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqEmail"
             name="submission.next_qtr_accountabilities.data.13.email"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1512,7 +1475,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqPhone"
             name="submission.next_qtr_accountabilities.data.13.phone"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1531,7 +1493,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqNotes"
             name="submission.next_qtr_accountabilities.data.13.notes"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1584,7 +1545,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
           className="col-md-8"
         >
           <div
-            aria-label={undefined}
             className="btn-group"
             role="group"
           >
@@ -1641,7 +1601,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqEmail"
             name="submission.next_qtr_accountabilities.data.14.email"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1660,7 +1619,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqPhone"
             name="submission.next_qtr_accountabilities.data.14.phone"
             type="text"
-            value={undefined}
           />
         </div>
       </div>
@@ -1679,7 +1637,6 @@ exports[`NQA Should Render As Snapshot 1`] = `
             className="testing-control form-control nqNotes"
             name="submission.next_qtr_accountabilities.data.14.notes"
             type="text"
-            value={undefined}
           />
         </div>
       </div>

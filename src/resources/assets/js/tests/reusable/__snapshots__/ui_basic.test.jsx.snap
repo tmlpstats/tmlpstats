@@ -193,7 +193,7 @@ exports[`Modal 1`] = `
         <button
           aria-label="Close"
           className="close"
-          onClick={[Function]}
+          onClick={[MockFunction]}
           type="button"
         >
           <span
@@ -227,7 +227,6 @@ exports[`Modal 1`] = `
 
 exports[`ModeSelectButtons 1`] = `
 <div
-  aria-label={undefined}
   className="btn-group"
   role="group"
 >
