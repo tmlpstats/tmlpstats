@@ -2,7 +2,8 @@ language: php
 php:
   - 7.0
   - 7.1
-dist: precise
+dist: trusty
+sudo: required
 
 env:
   matrix:
@@ -15,8 +16,6 @@ matrix:
       env: PHP_COVERAGE_ON=y
     - php: 7.1
       env: PHP_COVERAGE_ON=y
-
-sudo: required
 
 cache:
   directories:
@@ -45,7 +44,7 @@ script:
     fi
   - >
     if [[ $TRAVIS_PHP_VERSION =~ ^7 ]]; then
-      npm test -- --coverage &&
+      $HOME/node/bin/npm test -- --coverage &&
       phpdbg -qrr vendor/bin/phpunit $PHP_COVERAGE_OPTS -d memory_limit="1G";
     else
       php -d max_execution_time="1800" -d memory_limit="1G" vendor/bin/phpunit;
@@ -58,7 +57,7 @@ after_script:
       if [[ $PHP_COVERAGE_ON = "y" ]]; then
         travis_retry php vendor/bin/coveralls -v;
       else
-        npm install coveralls &&
-        cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js;
+        $HOME/node/bin/npm install coveralls &&
+        cat ./resources/assets/js/coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js;
       fi
     fi
