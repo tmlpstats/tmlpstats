@@ -35,6 +35,10 @@ class SubmissionCore extends AuthenticatedApiBase
         $quarter = $rq['quarter'];
 
         $crd = Encapsulations\CenterReportingDate::ensure($center, $reportingDate);
+        $cq = $crd->getCenterQuarter();
+        if ($cq->classroom2Date === null || $cq->classroom3Date === null) {
+            throw new \Exception("The quarter {$cq->quarter->getDisplayLabel()} does not have its milestone date configured. Please contact your regional statistician");
+        }
         $centerQuarter = $crd->getCenterQuarter();
 
         if ($lastValidReport === null) {
