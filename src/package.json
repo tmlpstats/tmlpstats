@@ -22,6 +22,7 @@
     "eslint": "^3.17",
     "eslint-plugin-react": "^6.0.0",
     "jest": "^23",
+    "jest-matchers": "^20.0.3",
     "laravel-mix": "^1.7.2",
     "react-test-renderer": "^15.5",
     "wdio-browserstack-service": "^0.1.16",

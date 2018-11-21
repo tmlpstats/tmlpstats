@@ -40,7 +40,7 @@ describe('Smoke Test', () => {
 
     describe('Submission UI Tests', () => {
         it('can load new Submission UI', () => {
-            $('=Submit Report').click()
+            $('=Work on Report').click()
             browser.pause(1000)
             // We wait for the h3 first because it means the content pane is done loading
             $('h3').waitForExist(DEFAULT_WAIT)

@@ -22,7 +22,7 @@ describe('Scoreboard', () => {
     })
 
     it('can load new Submission UI', () => {
-        $('=Submit Report').click()
+        $('=Work on Report').click()
         browser.pause(1000)
         // We wait for the h3 first because it means the content pane is done loading.
         $('h3').waitForExist(DEFAULT_WAIT)
@@ -71,6 +71,7 @@ describe('Scoreboard', () => {
         // Now verify that changes persisted.
         browser.refresh()
         cap.waitForExist(DEFAULT_WAIT)
+        browser.pause(500)
         expect(cap.getValue()).toEqual('60')
         expect(cpc.getValue()).toEqual('20')
         expect(t1x.getValue()).toEqual('10')
