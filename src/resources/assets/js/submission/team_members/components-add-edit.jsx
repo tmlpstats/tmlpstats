@@ -238,7 +238,7 @@ class _EditCreate extends TeamMembersBase {
         return (
             <div>
                 <SimpleFormGroup label="Travel Booked" divClass="col-md-6 boolSelect">
-                    <BooleanSelect model={modelKey+'.travel'} style={{maxWidth: '4em'}} />
+                    <BooleanSelect model={modelKey+'.travel'} />
                 </SimpleFormGroup>
                 <SimpleFormGroup label="Room Booked" divClass="col-md-6 boolSelect">
                     <BooleanSelect model={modelKey+'.room'} />
