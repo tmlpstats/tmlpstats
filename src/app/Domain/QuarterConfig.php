@@ -46,14 +46,20 @@ class QuarterConfig extends ParserDomain
     ];
 
     public function validate() {
-        if ($this->classroom1Date->lt($this->startWeekendDate)) {
-            throw new BadRequestException("classroom 1 must be after weekend");
-        }
-        if ($this->classroom2Date->lt($this->classroom1Date)) {
-            throw new BadRequestException("classroom 2 must be after classroom 1");
-        }
-        if ($this->classroom3Date->lt($this->classroom2Date)) {
-            throw new BadRequestException("classroom 3 must be after classroom 2");
+        if ($this->classroom1Date !== null) {
+            if ($this->classroom1Date->lt($this->startWeekendDate)) {
+                throw new BadRequestException("classroom 1 must be after weekend");
+            }
+
+            if ($this->classroom2Date !== null) {
+                if ($this->classroom2Date->lt($this->classroom1Date)) {
+                    throw new BadRequestException("classroom 2 must be after classroom 1");
+                }
+                if ($this->classrom3Date !== null && $this->classroom3Date->lt($this->classroom2Date)) {
+                    throw new BadRequestException("classroom 3 must be after classroom 2");
+                }            
+
+            }
         }
     }
 

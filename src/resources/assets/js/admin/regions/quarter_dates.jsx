@@ -2,6 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import moment from 'moment'
 import { withRouter } from 'react-router'
+import { createSelector } from 'reselect'
+
 import { rebind, connectRedux } from '../../reusable/dispatch'
 import { Form, Select, SimpleField, DateInput, SimpleDateInput, formActions, SimpleFormGroup } from '../../reusable/form_utils'
 import { ButtonStateFlip } from '../../reusable/ui_basic'
@@ -39,7 +41,17 @@ export class QuarterDates extends RegionBase {
 
     constructor(props) {
         super(props)
-        rebind(this, 'onSubmit')
+        rebind(this, 'onSubmit', 'outsideQuarter')
+        this.initialVisibleMonth = createSelector(
+            obj => obj.startWeekendDate,
+            (startWeekendDate) => {
+                const initial = (startWeekendDate? moment(startWeekendDate) : moment())
+                const v = initial.clone().startOf('month');
+                return function() {
+                    return v
+                }
+            }
+        )
     }
 
     checkDatesData() {
@@ -68,6 +80,7 @@ export class QuarterDates extends RegionBase {
         let preferences
 
         const obj = this.props.quarterDates
+        const ivm = this.initialVisibleMonth(obj)
 
         if (obj && obj.endWeekendDate && obj.classroom2Date) {
             let afterWeeks
@@ -90,15 +103,16 @@ export class QuarterDates extends RegionBase {
             )
         }
 
+
         return (
             <Form model={MODEL} onSubmit={this.onSubmit}>
                 <div className="form-horizontal">
                     <h4>Basic Setup</h4>
                     <SimpleDateInput label="Start Weekend Date" model={MODEL+'.startWeekendDate'} isDayBlocked={onlyFridays} />
-                    <SimpleDateInput label="Milestone 1 Date" model={MODEL+'.classroom1Date'} isDayBlocked={onlyFridays} />
-                    <SimpleDateInput label="Milestone 2 Date" model={MODEL+'.classroom2Date'} isDayBlocked={onlyFridays} />
-                    <SimpleDateInput label="Milestone 3 Date" model={MODEL+'.classroom3Date'} isDayBlocked={onlyFridays} />
-                    <SimpleDateInput label="End Weekend Date" model={MODEL+'.endWeekendDate'} isDayBlocked={onlyFridays} />
+                    <SimpleDateInput label="Milestone 1 Date" model={MODEL+'.classroom1Date'} isDayBlocked={onlyFridays} isOutsideRange={this.outsideQuarter} initialVisibleMonth={ivm} />
+                    <SimpleDateInput label="Milestone 2 Date" model={MODEL+'.classroom2Date'} isDayBlocked={onlyFridays} isOutsideRange={this.outsideQuarter} initialVisibleMonth={ivm} />
+                    <SimpleDateInput label="Milestone 3 Date" model={MODEL+'.classroom3Date'} isDayBlocked={onlyFridays} isOutsideRange={this.outsideQuarter} initialVisibleMonth={ivm} />
+                    <SimpleDateInput label="End Weekend Date" model={MODEL+'.endWeekendDate'} isDayBlocked={onlyFridays} initialVisibleMonth={ivm} />
                     <SimpleField label="Weekend Location" model={MODEL+'.location'} />
                 </div>
                 {preferences}
@@ -109,6 +123,18 @@ export class QuarterDates extends RegionBase {
                 </div>
             </Form>
         )
+    }
+
+    outsideQuarter(date) {
+        const { startWeekendDate, endWeekendDate } = this.props.quarterDates
+        let outside = false
+        if (startWeekendDate) {
+            outside = date.isBefore(startWeekendDate)
+        }
+        if (!outside && endWeekendDate) {
+            outside = date.isAfter(endWeekendDate)
+        }
+        return outside
     }
 
     onSubmit(data) {
