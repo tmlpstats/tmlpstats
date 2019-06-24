@@ -9,7 +9,7 @@
         <th class="data-point">Invited</th>
         <th class="data-point">Confirmed</th>
         <th class="data-point">Attended</th>
-        <th class="data-point border-left">Guests Effectiveness</th>
+        <th class="data-point border-left">Games Effectiveness</th>
     </tr>
     </thead>
     <tbody>

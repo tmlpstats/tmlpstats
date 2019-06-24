@@ -276,7 +276,7 @@ trait GlobalReportDispatch
     // Get report Completed
     protected abstract function getCoursesCompleted();
 
-    // Get report Guest Games
+    // Get report Transforming Lives Games
     protected abstract function getCoursesGuestGames();
 
     // Get report Summary

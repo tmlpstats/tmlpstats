@@ -15,7 +15,7 @@
                 Completion
             </th>
             <th colspan="5" class="data-point border-left">
-                Guest Game
+                Transforming Lives Game
             </th>
         </tr>
         <tr>
@@ -34,7 +34,7 @@
             <th class="data-point">Invited</th>
             <th class="data-point">Confirmed</th>
             <th class="data-point">Attended</th>
-            <th class="data-point border-left">Guests Effectiveness</th>
+            <th class="data-point border-left">Games Effectiveness</th>
         </tr>
     </thead>
     <tbody>

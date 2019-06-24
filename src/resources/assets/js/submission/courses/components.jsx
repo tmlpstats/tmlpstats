@@ -83,7 +83,7 @@ class CoursesIndexView extends CoursesBase {
                         <th className="data-point">Total Ever Registered</th>
                         <th className="data-point">Completed Standard Starts</th>
                         <th className="data-point">Registered</th>
-                        <th className="data-point">Guests Attended</th>
+                        <th className="data-point">Lives Attended</th>
                     </tr>
                 </thead>
                 <tbody>{completed}</tbody>
@@ -139,7 +139,7 @@ class CoursesIndexView extends CoursesBase {
                             <th>Location</th>
                             <th className="data-point">Quarter Starting Standard Starts</th>
                             <th className="data-point">Standard Starts</th>
-                            <th className="data-point">Guests Confirmed</th>
+                            <th className="data-point">Lives Confirmed</th>
                         </tr>
                     </thead>
                     <tbody>{courses}</tbody>
@@ -270,15 +270,15 @@ class _EditCreate extends CoursesBase {
                 guestGameFields = (
                     <div className="row">
                     <div className="col-md-12">
-                        <h4>Guest Game</h4>
-                        <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
-                        <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
-                        <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
-                        <SimpleField label="Guests Attended" model={modelKey+'.guestsAttended'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
+                        <h4>Transforming Lives Game</h4>
+                        <SimpleField label="Lives Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
+                        <SimpleField label="Lives Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
+                        <SimpleField label="Lives Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
+                        <SimpleField label="Lives Attended" model={modelKey+'.guestsAttended'} labelClass="col-md-2" divClass="col-md-2" disabled={guestsState == 'disabled'} />
                         <div className="row">
                             <div className="col-md-2"></div>
                             <div className="col-md-6">
-                                This is the team's guest game. It is a total of all guests who are potentials for Team's games:<br/>
+                                This is the team's transforming lives games. It is a total of all guests who are potentials for Team's games:<br/>
                                 Landmark Forum, Landmark Forum for Teens, Communication: Access to Power,
                                 Communication: Power to Create, Team 1 Expansion and Team 2 Expansion.
                             </div>
@@ -290,14 +290,14 @@ class _EditCreate extends CoursesBase {
                 guestGameFields = (
                     <div className="row">
                     <div className="col-md-12">
-                        <h4>Guest Game</h4>
-                        <SimpleField label="Guests Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-2" divClass="col-md-2" />
-                        <SimpleField label="Guests Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" />
-                        <SimpleField label="Guests Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-2" divClass="col-md-2" />
+                        <h4>Transforming Lives Game</h4>
+                        <SimpleField label="Lives Promised" model={modelKey+'.guestsPromised'} labelClass="col-md-2" divClass="col-md-2" />
+                        <SimpleField label="Lives Invited" model={modelKey+'.guestsInvited'} labelClass="col-md-2" divClass="col-md-2" />
+                        <SimpleField label="Lives Confirmed" model={modelKey+'.guestsConfirmed'} labelClass="col-md-2" divClass="col-md-2" />
                         <div className="row">
                             <div className="col-md-2"></div>
                             <div className="col-md-6">
-                                This is the team's guest game. It is a total of all guests who are potentials for Team's games:<br/>
+                                This is the team's transforming lives game. It is a total of all guests who are potentials for Team's games:<br/>
                                 Landmark Forum, Landmark Forum for Teens, Communication: Access to Power,
                                 Communication: Power to Create, Team 1 Expansion and Team 2 Expansion.
                             </div>

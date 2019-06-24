@@ -1060,7 +1060,7 @@ class GlobalReportController extends Controller
         return $this->coursesData($globalReport, $region)->getOne('CoursesCompleted');
     }
 
-    // Get report Guest Games
+    // Get report Transforming Lives Games
     protected function getCoursesGuestGames($globalReport, $region)
     {
         return $this->coursesData($globalReport, $region)->getOne('CoursesGuestGames');

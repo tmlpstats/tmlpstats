@@ -6,7 +6,7 @@
             <th colspan="3" class="data-point border-left">Quarter Starting</th>
             <th colspan="4" class="data-point border-left">Current</th>
             @unless (isset($excludeGuestGame) && $excludeGuestGame)
-                <th colspan="3" class="data-point border-left">Guest Game</th>
+                <th colspan="3" class="data-point border-left">Transforming Lives Game</th>
             @endunless
         </tr>
         <tr>

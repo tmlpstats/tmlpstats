@@ -12,7 +12,7 @@
         @if (count($reportData) > 0)
             @include('reports.courses.guests', ['coursesData' => $reportData])
         @else
-            <p>No courses currently have guest games.</p>
+            <p>No courses currently have transforming lives games.</p>
         @endif
     @elseif ($type == 'completedThisWeek')
         @if (count($reportData) > 0)

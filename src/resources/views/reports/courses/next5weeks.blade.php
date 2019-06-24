@@ -5,7 +5,7 @@
             <th>&nbsp;</th>
             <th>&nbsp;</th>
             <th colspan="3" class="data-point border-left">Current</th>
-            <th colspan="3" class="data-point border-left">Guest Game</th>
+            <th colspan="3" class="data-point border-left">Transforming Lives Game</th>
         </tr>
         @endunless
         <tr>

@@ -215,7 +215,7 @@ const GlobalReport = {
         "id": "CoursesGuestGames",
         "n": 28,
         "type": "report",
-        "name": "Guest Games"
+        "name": "Transforming Lives Games"
     },
     "CoursesSummary": {
         "id": "CoursesSummary",

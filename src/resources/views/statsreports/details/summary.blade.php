@@ -144,11 +144,11 @@ $mobileDashUrl = "https://tmlpstats.com/m/" . strtolower($statsReport->center->a
                             <dl class="dl-horizontal">
                                 <dt>Standard Starts:</dt>
                                 <dd>{{ $courseData['currentStandardStarts'] }}</dd>
-                                <dt>Guests Promised:</dt>
+                                <dt>Lives Promised:</dt>
                                 <dd>{{ (int) $courseData['guestsPromised'] }}</dd>
-                                <dt>Guests Invited:</dt>
+                                <dt>Lives Invited:</dt>
                                 <dd>{{ (int) $courseData['guestsInvited'] }}</dd>
-                                <dt>Guests Confirmed:</dt>
+                                <dt>Lives Confirmed:</dt>
                                 <dd>{{ (int) $courseData['guestsConfirmed'] }}</dd>
                             </dl>
                         @endforeach
