@@ -71,8 +71,8 @@ describe('Smoke Test', () => {
         })
 
         it('can switch to Class List', () => {
-            $('.submission-nav').$('a=Class List').click()
-            $('h3=Class List').waitForExist(DEFAULT_WAIT * 3)
+            $('.submission-nav').$('a=Team Members').click()
+            $('h3=Team Members').waitForExist(DEFAULT_WAIT * 3)
             $('h3=Program Leaders').waitForExist(DEFAULT_WAIT)
         })
 

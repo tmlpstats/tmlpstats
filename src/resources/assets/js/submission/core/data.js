@@ -10,7 +10,7 @@ import Api from '../../api'
 export const PAGES_CONFIG = [
     {key: 'scoreboard', name: 'Scoreboard', className: 'Scoreboard'},
     {key: 'applications', name: 'Team Expansion', className: 'TeamApplication'},
-    {key: 'team_members', name: 'Class List', className: 'TeamMember'},
+    {key: 'team_members', name: 'Team Members', className: 'TeamMember'},
     {key: 'courses', name: 'Courses', className: 'Course'},
     {key: 'next_qtr_accountabilities', name: 'Accountabilities', className: 'NextQtrAccountability'},
     {key: 'program_leaders', name: 'Program Leaders', className: 'ProgramLeader', hide_nav: true},

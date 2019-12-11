@@ -259,7 +259,7 @@ export class TeamMembersIndex extends TeamMembersBase {
 
         return (
             <Form model={TEAM_MEMBERS_COLLECTION_FORM_KEY} onSubmit={this.saveWeeklyReporting}>
-                <h3>Class List</h3>
+                <h3>Team Members</h3>
                 <ModeSelectButtons
                         items={TABLES} current={teamMembers.meta.get('format')}
                         onClick={this.changeTableFormat} ariaGroupDesc="Sort Preferences" />
