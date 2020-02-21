@@ -1,6 +1,8 @@
 <?php
 namespace TmlpStats\Http\Controllers;
 
+use TmlpStats\Http\Requests\Request;
+
 class WelcomeController extends Controller
 {
     /**
@@ -24,6 +26,7 @@ class WelcomeController extends Controller
     /**
      * Show the application welcome screen to the user.
      *
+     * @param Request $request
      * @return Response
      */
     public function apply(Request $request)
