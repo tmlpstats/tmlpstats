@@ -67,6 +67,7 @@ Route::match(['get', 'post'], 'home', 'HomeController@index');
 Route::match(['get', 'post'], 'home/{abbr}', 'HomeController@home');
 
 Route::get('/', 'WelcomeController@index');
+Route::get('/', 'WelcomeController@apply');
 
 Route::post('feedback', 'ContactController@processFeedback');
 

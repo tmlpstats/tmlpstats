@@ -21,4 +21,9 @@ class WelcomeController extends Controller
         return view('welcome');
     }
 
+    public function apply()
+    {
+        return view('apply');
+    }
+
 }
