@@ -26,9 +26,10 @@ class WelcomeController extends Controller
      *
      * @return Response
      */
-    public function apply()
+    public function apply(Request $request)
     {
-        return view('apply');
+        $source = $request->input('source');
+        return view('apply', ['source' => $source]);
     }
 
 }
