@@ -63,11 +63,11 @@
 
     <div>
         <h3>Local Statistician Accountability</h3>
-        <iframe src="https://docs.google.com/document/d/e/2PACX-1vSLqXo2rOTd9sKA3XaueowKCaeHXbeuBXul52q-aFbzXH52062RNC_-84_NnViURdMfeBEy7VZZ4svp/pub?embedded=true"></iframe>
+        <iframe style="width:50%; height:500px;" src="https://docs.google.com/document/d/e/2PACX-1vSLqXo2rOTd9sKA3XaueowKCaeHXbeuBXul52q-aFbzXH52062RNC_-84_NnViURdMfeBEy7VZZ4svp/pub?embedded=true"></iframe>
     </div>
 
     <div>
         <h3>Regional Statistician Accountability</h3>
-        <iframe src="https://docs.google.com/document/d/e/2PACX-1vS-PhGAnFiMXJNG1_v8c2eRuMIQapJOUWE_sZlCJs8a0E09Z_VjgAs7yaNw828m9TI9dvT-IRP1ad3Y/pub?embedded=true"></iframe>
+        <iframe style="width:50%; height:500px;" src="https://docs.google.com/document/d/e/2PACX-1vS-PhGAnFiMXJNG1_v8c2eRuMIQapJOUWE_sZlCJs8a0E09Z_VjgAs7yaNw828m9TI9dvT-IRP1ad3Y/pub?embedded=true"></iframe>
     </div>
 @endsection
