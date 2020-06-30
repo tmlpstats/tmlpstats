@@ -16,6 +16,7 @@ import { TEAM_MEMBERS_COLLECTION_FORM_KEY } from './reducers'
 import { teamMembersData, teamMemberText } from './data'
 import * as actions from './actions'
 import { TeamMembersBase, GITW_LABELS, YES_NO, TDO_OPTIONS } from './components-base'
+import {actions as formActions} from "react-redux-form";
 
 const STATE_UPDATING = 'Updating'
 const STATE_NOTHING = 'Nothing'
@@ -177,7 +178,7 @@ export class TeamMembersIndex extends TeamMembersBase {
     }
     constructor(props) {
         super(props)
-        rebind(this, 'saveWeeklyReporting', 'changeTableFormat')
+        rebind(this, 'saveWeeklyReporting', 'changeTableFormat', 'markDefault')
         const keyMemoizer = createKeyBasedMemoizer()
         this.preprocess = defaultMemoize((teamMembers, accountabilities, wr, weeklySave) => {
             // Phase1: The keyMemoizer only re-annotates team members if they've changed.
@@ -258,11 +259,29 @@ export class TeamMembersIndex extends TeamMembersBase {
         const TableClass = currentTablePrefs.table
 
         return (
-            <Form model={TEAM_MEMBERS_COLLECTION_FORM_KEY} onSubmit={this.saveWeeklyReporting}>
+            <Form model={TEAM_MEMBERS_COLLECTION_FORM_KEY} onSubmit={this.saveWeeklyReporting}
+                  onChange={modelValue => console.log(modelValue)}
+            >
                 <h3>Team Members</h3>
+                <div style={{position: 'relative'}}>
                 <ModeSelectButtons
                         items={TABLES} current={teamMembers.meta.get('format')}
                         onClick={this.changeTableFormat} ariaGroupDesc="Sort Preferences" />
+                    {
+                        currentTablePrefs.label === 'GITW/TDO' &&
+                        <button style={{float: 'right'}}
+                                   onClick={this.markDefault}>
+                            Mark all as default
+                        </button>
+                    }
+                    {
+                        currentTablePrefs.label === 'Travel/Room' &&
+                        <button style={{float: 'right'}}
+                                onClick={this.markDefault}>
+                            Mark all as default
+                        </button>
+                    }
+                </div>
                 <TableClass data={current} columnContext={columnContext} />
                 <ButtonStateFlip loadState={weeklySave}>Save {currentTablePrefs.label} changes</ButtonStateFlip>
                 <br />
@@ -272,6 +291,26 @@ export class TeamMembersIndex extends TeamMembersBase {
                 <ProgramLeadersIndex params={this.props.params} />
             </Form>
         )
+    }
+
+    markDefault() {
+        let table = document.querySelector('[id^="tbl-submission_team_members_"]').getElementsByTagName("tbody")[0];
+        let rows = table.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+            let row = rows[i];
+            let cols = row.getElementsByTagName('td');
+
+            let gitwCol = cols[3], tdoCol = cols[4];
+
+            let gitwSelect = gitwCol.getElementsByTagName('select')[0];
+            let tdoSelect = tdoCol.getElementsByTagName('select')[0];
+
+            this.props.dispatch(formActions.change(gitwSelect.name, true))
+            this.props.dispatch(formActions.change(tdoSelect.name, tdoSelect.name.endsWith('tdo') ? 0 : true))
+
+            this.props.dispatch(actions.markWeeklyReportingFromModel(gitwSelect.name));
+        }
     }
 
     saveWeeklyReporting(data) {
@@ -321,6 +360,7 @@ class TeamMemberWithdrawnRow extends React.PureComponent {
 @connectCustomField
 class BooleanLiveSelect extends BooleanSelectView {
     onChange(e) {
+        console.log('change')
         super.onChange(e)
         this.props.dispatch(actions.markWeeklyReportingFromModel(this.props.model))
     }
