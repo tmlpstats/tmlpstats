@@ -129,10 +129,21 @@ class HomeController extends Controller
                 $regionsData[0]['centersData'] = array();
                 break;
             case 'IND':
-                $regionsData[0]['displayName'] = 'India Region';
-                $regionsData[0]['validatedCount'] = 0;
-                $regionsData[0]['completeCount'] = 0;
-                $regionsData[0]['centersData'] = array();
+                $regionsData['MUM']['displayName'] = 'India - Mumbai Center';
+                $regionsData['MUM']['validatedCount'] = 0;
+                $regionsData['MUM']['completeCount'] = 0;
+                $regionsData['MUM']['centersData'] = array();
+
+                $regionsData['BLR']['displayName'] = 'India - Bangalore Center';
+                $regionsData['BLR']['validatedCount'] = 0;
+                $regionsData['BLR']['completeCount'] = 0;
+                $regionsData['BLR']['centersData'] = array();
+
+                $regionsData['DL']['displayName'] = 'India - Delhi Center';
+                $regionsData['DL']['validatedCount'] = 0;
+                $regionsData['DL']['completeCount'] = 0;
+                $regionsData['DL']['centersData'] = array();
+
                 break;
             case 'NA':
             default:
