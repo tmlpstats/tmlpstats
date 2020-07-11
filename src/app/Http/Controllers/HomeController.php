@@ -147,15 +147,19 @@ class HomeController extends Controller
                 break;
             case 'NA':
             default:
-                $regionsData['East']['displayName'] = 'North America - Eastern Region';
-                $regionsData['East']['validatedCount'] = 0;
-                $regionsData['East']['completeCount'] = 0;
-                $regionsData['East']['centersData'] = array();
-
-                $regionsData['West']['displayName'] = 'North America - Western Region';
-                $regionsData['West']['validatedCount'] = 0;
-                $regionsData['West']['completeCount'] = 0;
-                $regionsData['West']['centersData'] = array();
+                $regionsData[0]['displayName'] = 'North America Region';
+                $regionsData[0]['validatedCount'] = 0;
+                $regionsData[0]['completeCount'] = 0;
+                $regionsData[0]['centersData'] = array();
+//                $regionsData['East']['displayName'] = 'North America - Eastern Region';
+//                $regionsData['East']['validatedCount'] = 0;
+//                $regionsData['East']['completeCount'] = 0;
+//                $regionsData['East']['centersData'] = array();
+//
+//                $regionsData['West']['displayName'] = 'North America - Western Region';
+//                $regionsData['West']['validatedCount'] = 0;
+//                $regionsData['West']['completeCount'] = 0;
+//                $regionsData['West']['centersData'] = array();
                 break;
         }
 
