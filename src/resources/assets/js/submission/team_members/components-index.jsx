@@ -267,7 +267,7 @@ export class TeamMembersIndex extends TeamMembersBase {
                 <ModeSelectButtons
                         items={TABLES} current={teamMembers.meta.get('format')}
                         onClick={this.changeTableFormat} ariaGroupDesc="Sort Preferences" />
-                    {
+                    {/*{
                         currentTablePrefs.label === 'GITW/TDO' &&
                         <button style={{float: 'right'}}
                                    onClick={this.markDefault}>
@@ -280,7 +280,7 @@ export class TeamMembersIndex extends TeamMembersBase {
                                 onClick={this.markDefault}>
                             Mark all as default
                         </button>
-                    }
+                    }*/}
                 </div>
                 <TableClass data={current} columnContext={columnContext} />
                 <ButtonStateFlip loadState={weeklySave}>Save {currentTablePrefs.label} changes</ButtonStateFlip>
