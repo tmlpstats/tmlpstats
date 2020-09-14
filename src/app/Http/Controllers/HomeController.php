@@ -151,15 +151,15 @@ class HomeController extends Controller
 //                $regionsData[0]['validatedCount'] = 0;
 //                $regionsData[0]['completeCount'] = 0;
 //                $regionsData[0]['centersData'] = array();
-                $regionsData['East']['displayName'] = 'North America - Eastern Region';
-                $regionsData['East']['validatedCount'] = 0;
-                $regionsData['East']['completeCount'] = 0;
-                $regionsData['East']['centersData'] = array();
+                $regionsData['EAST']['displayName'] = 'North America - Eastern Region';
+                $regionsData['EAST']['validatedCount'] = 0;
+                $regionsData['EAST']['completeCount'] = 0;
+                $regionsData['EAST']['centersData'] = array();
 
-                $regionsData['West']['displayName'] = 'North America - Western Region';
-                $regionsData['West']['validatedCount'] = 0;
-                $regionsData['West']['completeCount'] = 0;
-                $regionsData['West']['centersData'] = array();
+                $regionsData['WEST']['displayName'] = 'North America - Western Region';
+                $regionsData['WEST']['validatedCount'] = 0;
+                $regionsData['WEST']['completeCount'] = 0;
+                $regionsData['WEST']['centersData'] = array();
                 break;
         }
 
