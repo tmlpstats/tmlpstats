@@ -684,6 +684,12 @@ class GlobalReportController extends Controller
         return $this->getTeamMemberGameSummary($globalReport, $region, 'gitw');
     }
 
+    protected function getRegSummary(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        return $this->getTeamMemberRegSummary($globalReport, $region);
+    }
+
+
     protected function getTdoSummary(Models\GlobalReport $globalReport, Models\Region $region)
     {
         return $this->getTeamMemberGameSummary($globalReport, $region, 'tdo');
@@ -781,6 +787,123 @@ class GlobalReportController extends Controller
         }
 
         return view('globalreports.details.tdogitwsummary', compact('reportData', 'totals', 'statsReports', 'game'));
+    }
+
+    protected function getTeamMemberRegSummary(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        $teamMembers = App::make(Api\GlobalReport::class)->getClassListByCenter($globalReport, $region);
+        if (!$teamMembers) {
+            return null;
+        }
+
+        $a = new Arrangements\TeamMembersByCenter(['teamMembersData' => $teamMembers]);
+        $teamMembersByCenter = $a->compose();
+        $teamMembersByCenter = $teamMembersByCenter['reportData'];
+
+        $template = [
+            'lf' => 0,
+            'lf_rpp' => 0,
+            'cap' => 0,
+            'cap_rpp' => 0,
+            'cpc' => 0,
+            'cpc_rpp' => 0,
+            'total' => 0,
+            'total_rpp' => 0,
+            'member_count' => 0,
+        ];
+        $totals = [
+            'team1' => $template,
+            'team2' => $template,
+            'total' => $template,
+        ];
+
+        $statsReports = [];
+        $reportData = [];
+        foreach ($teamMembersByCenter as $centerName => $centerData) {
+            $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Models\Center::name($centerName)->first());
+            foreach ($centerData as $memberData) {
+                // if not active then ignore
+                if (!$memberData->isActiveMember()) {
+                    continue;
+                }
+
+                $team = "team{$memberData->teamYear}";
+
+                if (!isset($reportData[$centerName][$team])) {
+                    $reportData[$centerName][$team] = $template;
+                }
+
+                $reportData[$centerName][$team]['member_count']++;
+                $totals[$team]['member_count']++;
+                $totals['total']['member_count']++;
+
+                $reportData[$centerName][$team]['lf'] += $memberData->rpp_lf;
+                $totals[$team]['lf'] += $memberData->rpp_lf;
+                $totals['total']['lf'] += $memberData->rpp_lf;
+
+                $reportData[$centerName][$team]['cap'] += $memberData->rpp_cap;
+                $totals[$team]['cap'] += $memberData->rpp_cap;
+                $totals['total']['cap'] += $memberData->rpp_cap;
+
+                $reportData[$centerName][$team]['cpc'] += $memberData->rpp_cpc;
+                $totals[$team]['cpc'] += $memberData->rpp_cpc;
+                $totals['total']['cpc'] += $memberData->rpp_cpc;
+
+                $reportData[$centerName][$team]['total'] += $memberData->rpp_lf + $memberData->rpp_cap + $memberData->rpp_cpc;
+                $totals[$team]['total'] += $memberData->rpp_lf + $memberData->rpp_cap + $memberData->rpp_cpc;
+                $totals['total']['total'] += $memberData->rpp_lf + $memberData->rpp_cap + $memberData->rpp_cpc;
+
+            }
+        }
+        ksort($reportData);
+
+        foreach ($reportData as $centerName => $data) {
+            $lf = 0;
+            $cap = 0;
+            $cpc = 0;
+            $total = 0;
+            $member_count = 0;
+
+            foreach (['team1', 'team2'] as $team) {
+                if (!isset($reportData[$centerName][$team]) || !$reportData[$centerName][$team]['total']) {
+                    // If the center doesn't have anyone on this team, set the defaults and skip it
+                    // since there are no stats
+                    $reportData[$centerName][$team] = $template;
+                    continue;
+                }
+
+                $reportData[$centerName][$team]['lf_rpp'] = round(($reportData[$centerName][$team]['lf'] / $reportData[$centerName][$team]['member_count']));
+                $reportData[$centerName][$team]['cap_rpp'] = round(($reportData[$centerName][$team]['cap'] / $reportData[$centerName][$team]['member_count']));
+                $reportData[$centerName][$team]['cpc_rpp'] = round(($reportData[$centerName][$team]['cpc'] / $reportData[$centerName][$team]['member_count']));
+                $reportData[$centerName][$team]['total_rpp'] = round(($reportData[$centerName][$team]['total'] / $reportData[$centerName][$team]['member_count']));
+
+                $lf += $reportData[$centerName][$team]['lf'];
+                $cap += $reportData[$centerName][$team]['cap'];
+                $cpc += $reportData[$centerName][$team]['cpc'];
+                $total += $reportData[$centerName][$team]['total'];
+                $member_count += $reportData[$centerName][$team]['member_count'];
+            }
+
+            $reportData[$centerName]['total']['lf'] = $lf;
+            $reportData[$centerName]['total']['lf_rpp'] = $lf  ? $lf / $member_count : 0;
+            $reportData[$centerName]['total']['cap'] = $cap;
+            $reportData[$centerName]['total']['cap_rpp'] = $cap ? $cap / $member_count : 0;
+            $reportData[$centerName]['total']['cpc'] = $cpc;
+            $reportData[$centerName]['total']['cpc_rpp'] = $cpc ? $cpc / $member_count : 0;
+            $reportData[$centerName]['total']['total'] = $total;
+            $reportData[$centerName]['total']['total_rpp'] = $total ? $total / $member_count : 0;
+            $reportData[$centerName]['total']['member_count'] = $member_count;
+
+        }
+
+        foreach ($totals as $team => $data) {
+            $totals[$team]['lf_rpp'] =     $totals[$team]['lf']    ? $totals[$team]['lf']    / $totals[$team]['member_count'] : 0;
+            $totals[$team]['cap_rpp'] =    $totals[$team]['cap']   ? $totals[$team]['cap']   / $totals[$team]['member_count'] : 0;
+            $totals[$team]['cpc_rpp'] =    $totals[$team]['cpc']   ? $totals[$team]['cpc']   / $totals[$team]['member_count'] : 0;
+            $totals[$team]['total_rpp'] =  $totals[$team]['total'] ? $totals[$team]['total'] / $totals[$team]['member_count'] : 0;
+        }
+
+        return view('globalreports.details.regsummary', compact('reportData', 'totals', 'statsReports', 'game'));
     }
 
     protected function getTeam2RegisteredAtWeekend(Models\GlobalReport $globalReport, Models\Region $region)

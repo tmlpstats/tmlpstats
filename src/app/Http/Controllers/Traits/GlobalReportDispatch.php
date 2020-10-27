@@ -119,6 +119,10 @@ trait GlobalReportDispatch
             'id' => 'CoursesSummary',
             'method' => 'getCoursesSummary',
         ],
+        'regsummary' => [
+            'id' => 'RegSummary',
+            'method' => 'getRegSummary',
+        ],
         'tdosummary' => [
             'id' => 'TdoSummary',
             'method' => 'getTdoSummary',
@@ -281,6 +285,9 @@ trait GlobalReportDispatch
 
     // Get report Summary
     protected abstract function getCoursesSummary();
+
+    // Get report Registrations
+    protected abstract function getRegSummary();
 
     // Get report Training & Development
     protected abstract function getTdoSummary();

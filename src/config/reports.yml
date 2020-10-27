@@ -655,6 +655,9 @@ reportMeta:
         type: grouping
         name: Team Members
         children:
+          RegSummary:
+            name: Registrations
+            shartName: REG
           TdoSummary:
             name: Training & Development
             shortName: TDO

@@ -14,3 +14,4 @@ docker/mysql/sql/dump.sql
 docker/mysql/sql/030-dump.sql
 docker/mysql/sql/030-dump.sql.gz
 !/docker/mysql/sql/030-dump.sql
+/docker/mysql/sql/030-dump.sql

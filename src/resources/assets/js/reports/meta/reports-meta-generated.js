@@ -237,68 +237,75 @@ const GlobalReport = {
             "CoursesSummary"
         ]
     },
+    "RegSummary": {
+        "id": "RegSummary",
+        "n": 31,
+        "type": "report",
+        "name": "Registrations"
+    },
     "TdoSummary": {
         "id": "TdoSummary",
-        "n": 31,
+        "n": 32,
         "type": "report",
         "name": "Training & Development",
         "shortName": "TDO"
     },
     "GitwSummary": {
         "id": "GitwSummary",
-        "n": 32,
+        "n": 33,
         "type": "report",
         "name": "GITW",
         "shortName": "GITW"
     },
     "TeamMemberStatusCtw": {
         "id": "TeamMemberStatusCtw",
-        "n": 33,
+        "n": 34,
         "type": "report",
         "name": "CTW"
     },
     "TeamMemberStatusWbo": {
         "id": "TeamMemberStatusWbo",
-        "n": 34,
+        "n": 35,
         "type": "report",
         "name": "WBI"
     },
     "TeamMemberStatusTransfer": {
         "id": "TeamMemberStatusTransfer",
-        "n": 35,
+        "n": 36,
         "type": "report",
         "name": "Transfers"
     },
     "TeamMemberStatusWithdrawn": {
         "id": "TeamMemberStatusWithdrawn",
-        "n": 36,
+        "n": 37,
         "type": "report",
         "name": "Withdrawn"
     },
     "WithdrawReport": {
         "id": "WithdrawReport",
-        "n": 37,
+        "n": 38,
         "type": "report",
         "name": "Withdraw Compliance"
     },
     "Team1SummaryGrid": {
         "id": "Team1SummaryGrid",
-        "n": 38,
+        "n": 39,
         "type": "report",
         "name": "Team 1 Summary Grid"
     },
     "Team2SummaryGrid": {
         "id": "Team2SummaryGrid",
-        "n": 39,
+        "n": 40,
         "type": "report",
         "name": "Team 2 Summary Grid"
     },
     "TeamMemberStatusGroup": {
         "id": "TeamMemberStatusGroup",
-        "n": 40,
+        "n": 41,
         "type": "grouping",
         "name": "Team Members",
         "children": [
+            "RegSummary",
             "TdoSummary",
             "GitwSummary",
             "TeamMemberStatusCtw",
@@ -312,44 +319,44 @@ const GlobalReport = {
     },
     "TravelReport": {
         "id": "TravelReport",
-        "n": 41,
+        "n": 42,
         "type": "report",
         "name": "Travel Summary"
     },
     "TeamMemberStatusPotentialsOverview": {
         "id": "TeamMemberStatusPotentialsOverview",
-        "n": 42,
+        "n": 43,
         "type": "report",
         "name": "Potentials Overview"
     },
     "TeamMemberStatusPotentials": {
         "id": "TeamMemberStatusPotentials",
-        "n": 43,
+        "n": 44,
         "type": "report",
         "name": "Potentials Details"
     },
     "AcknowledgementReport": {
         "id": "AcknowledgementReport",
-        "n": 44,
+        "n": 45,
         "type": "report",
         "name": "Acknowledgement Report"
     },
     "ProgramSupervisor": {
         "id": "ProgramSupervisor",
-        "n": 45,
+        "n": 46,
         "type": "report",
         "name": "Program Supervisor"
     },
     "QuarterOverviewReport": {
         "id": "QuarterOverviewReport",
-        "n": 46,
+        "n": 47,
         "type": "report",
         "name": "Quarter Overview",
         "render": "react"
     },
     "WeekendGroup": {
         "id": "WeekendGroup",
-        "n": 47,
+        "n": 48,
         "type": "grouping",
         "name": "Weekend",
         "children": [
