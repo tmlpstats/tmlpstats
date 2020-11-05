@@ -5,6 +5,7 @@ use App;
 use Carbon\Carbon;
 use Gate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use League\Csv\Writer;
 use Response;
 use TmlpStats as Models;
@@ -819,8 +820,12 @@ class GlobalReportController extends Controller
 
         $statsReports = [];
         $reportData = [];
+
+        // loop through centers for the current quarter
         foreach ($teamMembersByCenter as $centerName => $centerData) {
             $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Models\Center::name($centerName)->first());
+//            Log::info($centerName . ' Stats Report', $statsReports[$centerName]);
+            // loop through team members that belong to the center for the current quarter
             foreach ($centerData as $memberData) {
                 // if not active then ignore
                 if (!$memberData->isActiveMember()) {
