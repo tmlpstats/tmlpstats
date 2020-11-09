@@ -796,7 +796,6 @@ class GlobalReportController extends Controller
         if (!$teamMembers) {
             return null;
         }
-
         $a = new Arrangements\TeamMembersByCenter(['teamMembersData' => $teamMembers]);
         $teamMembersByCenter = $a->compose();
         $teamMembersByCenter = $teamMembersByCenter['reportData'];
@@ -824,10 +823,14 @@ class GlobalReportController extends Controller
         // loop through centers for the current quarter
         foreach ($teamMembersByCenter as $centerName => $centerData) {
             $statsReports[$centerName] = $globalReport->getStatsReportByCenter(Models\Center::name($centerName)->first());
-//            Log::info($centerName . ' Stats Report', $statsReports[$centerName]);
+
             // loop through team members that belong to the center for the current quarter
             foreach ($centerData as $memberData) {
+
+
                 // if not active then ignore
+                // ($this->withdrawCodeId === null && !$this->wbo && !$this->xferOut)
+                // wbo = well-being out
                 if (!$memberData->isActiveMember()) {
                     continue;
                 }
@@ -838,25 +841,28 @@ class GlobalReportController extends Controller
                     $reportData[$centerName][$team] = $template;
                 }
 
+                // increase counts by 1
                 $reportData[$centerName][$team]['member_count']++;
                 $totals[$team]['member_count']++;
                 $totals['total']['member_count']++;
 
-                $reportData[$centerName][$team]['lf'] += $memberData->rpp_lf;
-                $totals[$team]['lf'] += $memberData->rpp_lf;
-                $totals['total']['lf'] += $memberData->rpp_lf;
+                $reportData[$centerName][$team]['lf'] += $memberData->rpp_lf;               // add the team members personal LF registrations to the centers team year [team1/team2] total
+                $totals[$team]['lf'] += $memberData->rpp_lf;                                // add the team members personal LF registrations to the centers total
+                $totals['total']['lf'] += $memberData->rpp_lf;                              // add the team members personal LF registrations to the region's total
 
-                $reportData[$centerName][$team]['cap'] += $memberData->rpp_cap;
-                $totals[$team]['cap'] += $memberData->rpp_cap;
-                $totals['total']['cap'] += $memberData->rpp_cap;
 
-                $reportData[$centerName][$team]['cpc'] += $memberData->rpp_cpc;
-                $totals[$team]['cpc'] += $memberData->rpp_cpc;
-                $totals['total']['cpc'] += $memberData->rpp_cpc;
+                $reportData[$centerName][$team]['cap'] += $memberData->rpp_cap;            // add the team members personal CAP registrations to the centers team year [team1/team2] total
+                $totals[$team]['cap'] += $memberData->rpp_cap;                             // add the team members personal CAP registrations to the centers total
+                $totals['total']['cap'] += $memberData->rpp_cap;                           // add the team members personal CAP registrations to the region's total
 
-                $reportData[$centerName][$team]['total'] += $memberData->rpp_lf + $memberData->rpp_cap + $memberData->rpp_cpc;
-                $totals[$team]['total'] += $memberData->rpp_lf + $memberData->rpp_cap + $memberData->rpp_cpc;
-                $totals['total']['total'] += $memberData->rpp_lf + $memberData->rpp_cap + $memberData->rpp_cpc;
+
+                $reportData[$centerName][$team]['cpc'] += $memberData->rpp_cpc;            // add the team members personal CPC registrations to the centers team year [team1/team2] total
+                $totals[$team]['cpc'] += $memberData->rpp_cpc;                             // add the team members personal CPC registrations to the centers total
+                $totals['total']['cpc'] += $memberData->rpp_cpc;                           // add the team members personal CAP registrations to the region's total
+
+                $reportData[$centerName][$team]['total'] += $memberData->rpp_lf + $memberData->rpp_cap + $memberData->rpp_cpc;      // add the team members personal registrations to the centers team year [team1/team2] total
+                $totals[$team]['total'] += $memberData->rpp_lf + $memberData->rpp_cap + $memberData->rpp_cpc;                       // add the team members personal registrations to the centers total
+                $totals['total']['total'] += $memberData->rpp_lf + $memberData->rpp_cap + $memberData->rpp_cpc;                     // add the team members personal registrations to the region's total
 
             }
         }
@@ -870,25 +876,26 @@ class GlobalReportController extends Controller
             $member_count = 0;
 
             foreach (['team1', 'team2'] as $team) {
-                if (!isset($reportData[$centerName][$team]) || !$reportData[$centerName][$team]['total']) {
+                if (!isset($reportData[$centerName][$team])) {
                     // If the center doesn't have anyone on this team, set the defaults and skip it
                     // since there are no stats
                     $reportData[$centerName][$team] = $template;
                     continue;
                 }
 
-                $reportData[$centerName][$team]['lf_rpp'] = round(($reportData[$centerName][$team]['lf'] / $reportData[$centerName][$team]['member_count']));
-                $reportData[$centerName][$team]['cap_rpp'] = round(($reportData[$centerName][$team]['cap'] / $reportData[$centerName][$team]['member_count']));
-                $reportData[$centerName][$team]['cpc_rpp'] = round(($reportData[$centerName][$team]['cpc'] / $reportData[$centerName][$team]['member_count']));
-                $reportData[$centerName][$team]['total_rpp'] = round(($reportData[$centerName][$team]['total'] / $reportData[$centerName][$team]['member_count']));
+                $reportData[$centerName][$team]['lf_rpp'] = ($reportData[$centerName][$team]['lf'] / $reportData[$centerName][$team]['member_count']);  // calculate reg per participant for center team year [team1/team2] LF
+                $reportData[$centerName][$team]['cap_rpp'] = ($reportData[$centerName][$team]['cap'] / $reportData[$centerName][$team]['member_count']); // calculate reg per participant for center team year [team1/team2] CAP
+                $reportData[$centerName][$team]['cpc_rpp'] = ($reportData[$centerName][$team]['cpc'] / $reportData[$centerName][$team]['member_count']); // calculate reg per participant for center team year [team1/team2] CPC
+                $reportData[$centerName][$team]['total_rpp'] = ($reportData[$centerName][$team]['total'] / $reportData[$centerName][$team]['member_count']); // calculate reg per participant for center team year [team1/team2] Total
 
-                $lf += $reportData[$centerName][$team]['lf'];
-                $cap += $reportData[$centerName][$team]['cap'];
-                $cpc += $reportData[$centerName][$team]['cpc'];
-                $total += $reportData[$centerName][$team]['total'];
-                $member_count += $reportData[$centerName][$team]['member_count'];
+                $lf += $reportData[$centerName][$team]['lf'];                           // add center team1 and team2 lf total
+                $cap += $reportData[$centerName][$team]['cap'];                         // add center team1 and team2 cap total
+                $cpc += $reportData[$centerName][$team]['cpc'];                         // add center team1 and team2 cpc total
+                $total += $reportData[$centerName][$team]['total'];                     // add center team1 and team2 team total
+                $member_count += $reportData[$centerName][$team]['member_count'];       // add center team1 and team2 members count to team total
             }
 
+            // set and calculate centers totals and rpp
             $reportData[$centerName]['total']['lf'] = $lf;
             $reportData[$centerName]['total']['lf_rpp'] = $lf  ? $lf / $member_count : 0;
             $reportData[$centerName]['total']['cap'] = $cap;
@@ -901,12 +908,14 @@ class GlobalReportController extends Controller
 
         }
 
+        // calculate regions rpp for each game
         foreach ($totals as $team => $data) {
             $totals[$team]['lf_rpp'] =     $totals[$team]['lf']    ? $totals[$team]['lf']    / $totals[$team]['member_count'] : 0;
             $totals[$team]['cap_rpp'] =    $totals[$team]['cap']   ? $totals[$team]['cap']   / $totals[$team]['member_count'] : 0;
             $totals[$team]['cpc_rpp'] =    $totals[$team]['cpc']   ? $totals[$team]['cpc']   / $totals[$team]['member_count'] : 0;
             $totals[$team]['total_rpp'] =  $totals[$team]['total'] ? $totals[$team]['total'] / $totals[$team]['member_count'] : 0;
         }
+
 
         return view('globalreports.details.regsummary', compact('reportData', 'totals', 'statsReports', 'game'));
     }
