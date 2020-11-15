@@ -28,9 +28,9 @@ class ApiCenterGamesValidator extends ApiValidatorAbstract
             return false;
         }
 
-        if (!$this->validateCourses($data, $reportedActuals, $ref)) {
+        /*if (!$this->validateCourses($data, $reportedActuals, $ref)) {
             $this->isValid = false;
-        }
+        }*/
 
         if (!$this->validateTeamExpansion($data, $reportedActuals, $ref)) {
             $this->isValid = false;
