@@ -11,7 +11,8 @@ import SubmissionNav from './SubmissionNav'
 import { PAGES_CONFIG } from './data'
 
 const steps = _.reject(PAGES_CONFIG, {hide_nav: true})
-const stepsNoNqa = _.reject(steps, {key: 'next_qtr_accountabilities'})
+const stepsNOCourses = _.reject(steps, {key: 'courses'})
+const stepsNoNqa = (nav) => _.reject(nav, {key: 'next_qtr_accountabilities'})
 
 @connectRedux()
 export default class SubmissionFlowRoot extends SubmissionBase {
@@ -33,7 +34,9 @@ export default class SubmissionFlowRoot extends SubmissionBase {
         if (!this.checkReportingDate()) {
             return this.renderBasicLoading(core.coreInit)
         }
-        const navSteps = (core.lookups.capabilities.nextQtrAccountabilities) ? steps : stepsNoNqa
+        const regionId = core.lookups.center.region.parentId ? core.lookups.center.region.parentId : core.lookups.center.region.id
+        const navSteps1 = [4].includes(regionId) ? stepsNOCourses : steps
+        const navSteps = (core.lookups.capabilities.nextQtrAccountabilities) ? navSteps1 : stepsNoNqa(navSteps1)
         const largeLayout = browser.greaterThan.large
 
         const nav = <SubmissionNav params={params} steps={navSteps} location={location} tabbed={!largeLayout} />
