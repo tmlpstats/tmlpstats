@@ -87,6 +87,7 @@ return [
     'TEAMAPP_APPR_DATE_CHANGED' => 'Approval date changed from :was to :now.',
     'TEAMAPP_APPR_DATE_IN_FUTURE' => 'Approve date is in the future.',
     'TEAMAPP_APPR_LATE' => 'Approval process was not completed within :daysSince days of returned application. Application is out of integrity with the design of the application process.',
+    'TEAMAPP_APPR_LATE2' => 'Approval process was not completed within :daysSince days of registration. The application is out of integrity with the design of the application process.',
     'TEAMAPP_BOUNCED_EMAIL' => 'The email provided (:email) is not reachable. Please correct it.',
     'TEAMAPP_INCOMING_QUARTER_CHANGED' => 'Applicant incoming quarter was :was, and is now :now. Ensure that applicant is within integrity of application process (only transferred once to a future quarter after the application is approved).',
     'TEAMAPP_NO_COMMITTED_TEAM_MEMBER' => 'No committed team member provided.',
