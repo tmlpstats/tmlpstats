@@ -710,7 +710,7 @@ reportMeta:
         cacheTime: 0
 
       CenterStats:
-        name: Center Games
+        name: Team Games
 
       TeamMembers:
         name: Team Members
