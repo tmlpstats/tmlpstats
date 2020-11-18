@@ -76,7 +76,7 @@ class StatsReport extends Model
                 $this->reportingDate->year,
                 $this->reportingDate->month,
                 $this->reportingDate->day,
-                19, 0, 59,
+                18, 0, 59,
                 $this->center->timezone
             );
         }
