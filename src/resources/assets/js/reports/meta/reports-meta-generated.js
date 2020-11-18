@@ -399,7 +399,7 @@ const LocalReport = {
         "id": "CenterStats",
         "n": 2,
         "type": "report",
-        "name": "Center Games"
+        "name": "Team Games"
     },
     "ClassList": {
         "id": "ClassList",

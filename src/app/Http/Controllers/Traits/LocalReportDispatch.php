@@ -124,7 +124,7 @@ trait LocalReportDispatch
     // Get report Report Details
     protected abstract function getOverview();
 
-    // Get report Center Games
+    // Get report Team Games
     protected abstract function getCenterStats();
 
     // Get report Summary
