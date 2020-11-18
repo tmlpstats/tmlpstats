@@ -143,7 +143,7 @@ export class ProgramLeadersEdit extends _EditCreate {
             <div className="row">
                 <div className={column+' tmBox'}>
                     <SimpleField label="First Name" model={modelKey+'.firstName'} divClass={column} />
-                    <SimpleField label="Last Name" model={modelKey+'.lastName'} divClass={column} />
+                    <SimpleField label="Last Name Initial" model={modelKey+'.lastName'} divClass={column} />
                     <SimpleField label="Email" model={modelKey+'.email'} divClass={column} customField={true}>
                         <input type="email" className="form-control" />
                     </SimpleField>
@@ -195,7 +195,7 @@ export class ProgramLeadersAdd extends _EditCreate {
             <div className="row">
                 <div className={column+' tmBox'}>
                     <SimpleField label="First Name" model={modelKey+'.firstName'} divClass={column} />
-                    <SimpleField label="Last Name" model={modelKey+'.lastName'} divClass={column} />
+                    <SimpleField label="Last Name Initial" model={modelKey+'.lastName'} divClass={column} />
                     <SimpleField label="Email" model={modelKey+'.email'} divClass={column} customField={true}>
                         <input type="email" className="form-control" />
                     </SimpleField>

@@ -4,7 +4,7 @@
         <tr>
             <th>Accountability</th>
             <th>First Name</th>
-            <th>Last Name</th>
+            <th>Last Name Initial</th>
             <th>Phone</th>
             <th>Email</th>
         </tr>

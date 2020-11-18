@@ -10,7 +10,7 @@
         <thead>
         <tr>
             <th>First Name</th>
-            <th>Last Name</th>
+            <th>Last Name Initial</th>
             <th class="data-point">Team Year</th>
         </tr>
         </thead>
@@ -36,7 +36,7 @@
         <thead>
         <tr>
             <th>First Name</th>
-            <th>Last Name</th>
+            <th>Last Name Initial</th>
             <th class="data-point">Team Year</th>
         </tr>
         </thead>
@@ -58,7 +58,7 @@
         <thead>
         <tr>
             <th>First Name</th>
-            <th>Last Name</th>
+            <th>Last Name Initial</th>
             <th class="data-point">Team Year</th>
             <th>Application Status</th>
             <th>Comment</th>

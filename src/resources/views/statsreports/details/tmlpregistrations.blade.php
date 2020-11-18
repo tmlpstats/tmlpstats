@@ -19,7 +19,7 @@
                     @endif
                     <tr>
                         <th>First<span class="hs"> Name</span></th>
-                        <th>Last<span class="hs"> Name</span></th>
+                        <th>Last<span class="hs"> Name Initial</span></th>
                         <th class="data-point">Reg<span class="hs">istered</span></th>
                         <th class="data-point">App Out</th>
                         <th class="data-point">App In</th>

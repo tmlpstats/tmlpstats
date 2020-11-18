@@ -9,7 +9,7 @@
         <thead>
         <tr>
             <th>First Name</th>
-            <th>Last Name</th>
+            <th>Last Name Initial</th>
             <th class="data-point">Quarter</th>
             <th class="data-point">Travel</th>
             <th class="data-point">Room</th>
@@ -52,7 +52,7 @@
         <thead>
         <tr>
             <th>First Name</th>
-            <th>Last Name</th>
+            <th>Last Name Initial</th>
             <th>Application Status</th>
             <th class="data-point">Travel</th>
             <th class="data-point">Room</th>

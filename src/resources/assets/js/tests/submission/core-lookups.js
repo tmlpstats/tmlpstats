@@ -45,7 +45,7 @@ function legacyTeamMember(input) {
             "person":{
                 "id":personId,
                 "firstName":popInput('firstName', 'First Name'),
-                "lastName":popInput('lastName', 'Last Name'),
+                "lastName":popInput('lastName', 'Last Name Intial'),
                 "phone":popInput('phone', "(123) 456-7890"),
                 "email": popInput('email', "email123@gmail.com"),
                 "centerId":popInput('centerId', 16),

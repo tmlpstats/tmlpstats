@@ -20,7 +20,7 @@
                 <thead>
                 <tr>
                     <th>First Name</th>
-                    <th>Last Name</th>
+                    <th>Last Name Initial</th>
                     <th class="data-point">Team Year</th>
                     <th class="data-point">Reg Date</th>
                     @if ($group == 'withdrawn')

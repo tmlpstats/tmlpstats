@@ -12,7 +12,7 @@
                 <thead>
                 <tr>
                     <th>First Name</th>
-                    <th>Last Name</th>
+                    <th>Last Name Initial</th>
                     <th class="data-point">Quarter</th>
                     <th>Accountability</th>
                     @if ($group != 'withdrawn')
