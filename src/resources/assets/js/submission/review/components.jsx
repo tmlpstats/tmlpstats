@@ -284,7 +284,7 @@ class PreSubmitCard extends React.PureComponent {
                         <li>Statistician</li>
                         <li>Statistician In Training</li>
                     </ul>
-                    You can re-submit your stats before 7PM your local time on Friday.
+                    You can re-submit your stats before 6PM your local time on Friday.
                     <br/><br/>
                     <Form model={modelKey} onSubmit={onSubmit}>
                         {skipEmailCheckbox}
