@@ -679,6 +679,9 @@ reportMeta:
           Team2SummaryGrid:
             name: Team 2 Summary Grid
 
+      Classrooms:
+        name: Classrooms
+
       WeekendGroup:
         type: grouping
         name: Weekend

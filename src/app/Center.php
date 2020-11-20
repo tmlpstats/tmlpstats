@@ -22,6 +22,7 @@ class Center extends Model
         'sheet_filename',
         'sheet_version',
         'timezone',
+        'classroom_id',
     );
 
     protected $casts = array(
@@ -210,6 +211,11 @@ class Center extends Model
     public function reportTokens()
     {
         return $this->morphMany('TmlpStats\ReportToken', 'owner');
+    }
+
+    public function classroom()
+    {
+        return $this->belongsTo('TmlpStats\Classroom');
     }
 
     public function getUriCenterReport($reportingDate = null)

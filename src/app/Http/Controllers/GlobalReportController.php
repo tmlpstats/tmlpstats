@@ -1428,4 +1428,15 @@ class GlobalReportController extends Controller
             'date' => $globalReport->reportingDate->toDateString(),
         ]);
     }
+
+    protected function getClassrooms(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        $classrooms = $region->classrooms();
+        foreach ($classrooms as $classroom) {
+            $teams = $classrooms->teams;
+            foreach ($teams as $team) {
+
+            }
+        }
+    }
 }
