@@ -34,8 +34,7 @@ export default class SubmissionFlowRoot extends SubmissionBase {
         if (!this.checkReportingDate()) {
             return this.renderBasicLoading(core.coreInit)
         }
-        const regionId = core.lookups.center.region.parentId ? core.lookups.center.region.parentId : core.lookups.center.region.id
-        const navSteps1 = [].includes(regionId) ? stepsNOCourses : steps
+        const navSteps1 = core.lookups.currentQuarter > 49 ? stepsNOCourses : steps
         const navSteps = (core.lookups.capabilities.nextQtrAccountabilities) ? navSteps1 : stepsNoNqa(navSteps1)
         const largeLayout = browser.greaterThan.large
 
