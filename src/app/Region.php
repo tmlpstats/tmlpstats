@@ -108,6 +108,11 @@ class Region extends Model
         return $this->hasMany('TmlpStats\Center');
     }
 
+    public function classrooms()
+    {
+        return $this->hasMany('TmlpStats\Classroom');
+    }
+
     public function reportTokens()
     {
         return $this->morphMany('TmlpStats\ReportToken', 'owner');

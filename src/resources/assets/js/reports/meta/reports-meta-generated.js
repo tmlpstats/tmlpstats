@@ -317,46 +317,52 @@ const GlobalReport = {
             "Team2SummaryGrid"
         ]
     },
+    "Classrooms": {
+        "id": "Classrooms",
+        "n": 42,
+        "type": "report",
+        "name": "Classrooms"
+    },
     "TravelReport": {
         "id": "TravelReport",
-        "n": 42,
+        "n": 43,
         "type": "report",
         "name": "Travel Summary"
     },
     "TeamMemberStatusPotentialsOverview": {
         "id": "TeamMemberStatusPotentialsOverview",
-        "n": 43,
+        "n": 44,
         "type": "report",
         "name": "Potentials Overview"
     },
     "TeamMemberStatusPotentials": {
         "id": "TeamMemberStatusPotentials",
-        "n": 44,
+        "n": 45,
         "type": "report",
         "name": "Potentials Details"
     },
     "AcknowledgementReport": {
         "id": "AcknowledgementReport",
-        "n": 45,
+        "n": 46,
         "type": "report",
         "name": "Acknowledgement Report"
     },
     "ProgramSupervisor": {
         "id": "ProgramSupervisor",
-        "n": 46,
+        "n": 47,
         "type": "report",
         "name": "Program Supervisor"
     },
     "QuarterOverviewReport": {
         "id": "QuarterOverviewReport",
-        "n": 47,
+        "n": 48,
         "type": "report",
         "name": "Quarter Overview",
         "render": "react"
     },
     "WeekendGroup": {
         "id": "WeekendGroup",
-        "n": 48,
+        "n": 49,
         "type": "grouping",
         "name": "Weekend",
         "children": [
@@ -378,6 +384,7 @@ const GlobalReport = {
             "ApplicationsGroup",
             "CoursesGroup",
             "TeamMemberStatusGroup",
+            "Classrooms",
             "WeekendGroup"
         ]
     }

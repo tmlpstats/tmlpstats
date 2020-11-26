@@ -159,6 +159,10 @@ trait GlobalReportDispatch
             'id' => 'Team2SummaryGrid',
             'method' => 'getTeam2SummaryGrid',
         ],
+        'classrooms' => [
+            'id' => 'Classrooms',
+            'method' => 'getClassrooms',
+        ],
         'travelreport' => [
             'id' => 'TravelReport',
             'method' => 'getTravelReport',
@@ -315,6 +319,9 @@ trait GlobalReportDispatch
 
     // Get report Team 2 Summary Grid
     protected abstract function getTeam2SummaryGrid();
+
+    // Get report Classrooms
+    protected abstract function getClassrooms();
 
     // Get report Travel Summary
     protected abstract function getTravelReport();

@@ -1428,4 +1428,42 @@ class GlobalReportController extends Controller
             'date' => $globalReport->reportingDate->toDateString(),
         ]);
     }
+
+    protected function getClassrooms(Models\GlobalReport $globalReport, Models\Region $region)
+    {
+        $reportData = [];
+
+        $teamMembers = App::make(Api\GlobalReport::class)->getClassListByCenter($globalReport, $region);
+        if (!$teamMembers) {
+            return null;
+        }
+        $a = new Arrangements\TeamMembersByCenter(['teamMembersData' => $teamMembers]);
+        $teamMembersByCenter = $a->compose();
+        $teamMembersByCenter = $teamMembersByCenter['reportData'];
+
+
+        $classrooms = $region->classrooms;
+        foreach ($classrooms as $classroom) {
+
+            $classroom_count = 0;
+            $teams = $classroom->teams;
+
+            foreach ($teams as $team) {
+
+                $team_members = $teamMembersByCenter[$team->name];
+
+                foreach ($team_members as $team_member) {
+
+                    if (!$team_member->isActiveMember()) {
+                        continue;
+                    };
+
+                    $classroom_count++;
+                }
+            }
+            $reportData[$classroom->name] = $classroom_count;
+        }
+
+        return view('globalreports.details.classrooms', compact('reportData'));
+    }
 }
