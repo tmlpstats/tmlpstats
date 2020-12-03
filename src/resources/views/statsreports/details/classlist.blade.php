@@ -18,6 +18,9 @@
                     @if ($group != 'withdrawn')
                         <th class="data-point">GITW</th>
                         <th class="data-point">TDO</th>
+                        <th class="data-point">CAP</th>
+                        <th class="data-point">CPC</th>
+                        <th class="data-point">LF</th>
                     @else
                         <th>Withdraw</th>
                     @endif
@@ -66,6 +69,31 @@
                                         -
                                     @endif
                                 </td>
+
+
+                                <td class="data-point">
+                                    @if ($memberData->isActiveMember())
+                                        {{ $memberData->rpp_cap }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td class="data-point">
+                                    @if ($memberData->isActiveMember())
+                                        {{ $memberData->rpp_cpc }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td class="data-point">
+                                    @if ($memberData->isActiveMember())
+                                        {{ $memberData->rpp_lf }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+
+
                             @else
                                 @if ($memberData->withdrawCode)
                                     <td title="{{ $memberData->withdrawCode->code }}">{{ $memberData->withdrawCode->display }}</td>
