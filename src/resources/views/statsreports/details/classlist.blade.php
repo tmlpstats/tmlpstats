@@ -76,7 +76,7 @@
                                         @if ($memberData->rpp_cap > 0)
                                             <strong>{{ $memberData->rpp_cap }}</strong>
                                         @else
-                                            {{ $memberData->rpp_cap }}
+                                            <span style="color: #8e8a8a;" >{{ $memberData->rpp_cap }}</span>
                                         @endif
                                     @else
                                         -
@@ -87,7 +87,7 @@
                                         @if ($memberData->rpp_cpc > 0)
                                             <strong>{{ $memberData->rpp_cpc }}</strong>
                                         @else
-                                            {{ $memberData->rpp_cpc }}
+                                            <span style="color: #8e8a8a;" >{{ $memberData->rpp_cpc }}</span>
                                         @endif
                                     @else
                                         -
@@ -98,7 +98,7 @@
                                         @if ($memberData->rpp_lf > 0)
                                             <strong>{{ $memberData->rpp_lf }}</strong>
                                         @else
-                                            {{ $memberData->rpp_lf }}
+                                            <span style="color: #8e8a8a;" >{{ $memberData->rpp_lf }}</span>
                                         @endif
                                     @else
                                         -
