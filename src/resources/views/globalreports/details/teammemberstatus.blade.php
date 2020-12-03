@@ -40,7 +40,7 @@
                 @foreach ($reportData[$group] as $memberData)
                     <tr>
                         <td>
-                            @statsReportLink($memberData->statsReport)
+                            @statsReportLink($memberData->statsReport,'/TeamMembers/ClassList')
                                 {{ $memberData->center->name }}
                             @endStatsReportLink
                         </td>
