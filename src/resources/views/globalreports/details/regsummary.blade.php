@@ -101,7 +101,7 @@
                     @foreach ($reportData as $centerName => $centerData)
                         <tr>
                             <td class="border-left border-right">
-                                @statsReportLink($statsReports[$centerName])
+                                @statsReportLink($statsReports[$centerName],'/TeamMembers/ClassList')
                                 {{ $centerName }}
                                 @endStatsReportLink
                             </td>
@@ -168,7 +168,7 @@
                     @foreach ($reportData as $centerName => $centerData)
                         <tr>
                             <td class="border-left border-right">
-                                @statsReportLink($statsReports[$centerName])
+                                @statsReportLink($statsReports[$centerName],'/TeamMembers/ClassList')
                                 {{ $centerName }}
                                 @endStatsReportLink
                             </td>
@@ -234,7 +234,7 @@
                     @foreach ($reportData as $centerName => $centerData)
                         <tr>
                             <td class="border-left border-right">
-                                @statsReportLink($statsReports[$centerName])
+                                @statsReportLink($statsReports[$centerName],'/TeamMembers/ClassList')
                                 {{ $centerName }}
                                 @endStatsReportLink
                             </td>
