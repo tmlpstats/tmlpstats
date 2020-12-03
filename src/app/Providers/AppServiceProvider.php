@@ -69,7 +69,7 @@ class AppServiceProvider extends ServiceProvider
             // Remove wrapping parens
             $data = substr($expression, 1, -1);
             $query = '';
-            if (strpos($data, ',') !== false) {
+            if (strpos($data, ',') != false) {
                 $parts = explode(',', $data);
                 $data = $parts[0];
                 $query = trim(str_replace("'", '', $parts[1]));
