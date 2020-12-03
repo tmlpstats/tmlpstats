@@ -57,7 +57,7 @@
             ?>
             <tr>
                 <td class="border-right">
-                    @statsReportLink($statsReports[$centerName])
+                    @statsReportLink($statsReports[$centerName], '/TeamExpansion/TmlpRegistrations')
                         {{ $centerName }}
                     @endStatsReportLink
                 </td>

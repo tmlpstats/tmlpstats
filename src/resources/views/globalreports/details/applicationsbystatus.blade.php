@@ -55,7 +55,7 @@
                         <tr>
                             @endif
                             <td>
-                                @statsReportLink($registrationData->statsReport)
+                                @statsReportLink($registrationData->statsReport, '/TeamExpansion/TmlpRegistrationsByStatus')
                                     {{ $registrationData->center->name }}
                                 @endStatsReportLink
                             </td>

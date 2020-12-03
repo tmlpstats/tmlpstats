@@ -47,7 +47,7 @@
                     ?>
                     <tr title="{{ $title }}">
                         <td>
-                            @statsReportLink($registrationData->statsReport)
+                            @statsReportLink($registrationData->statsReport, '/TeamExpansion/TmlpRegistrations')
                                 {{ $registrationData->center->name }}
                             @endStatsReportLink
                         </td>
