@@ -73,21 +73,33 @@
 
                                 <td class="data-point">
                                     @if ($memberData->isActiveMember())
-                                        {{ $memberData->rpp_cap }}
+                                        @if ($memberData->rpp_cap > 0)
+                                            <strong>{{ $memberData->rpp_cap }}</strong>
+                                        @else
+                                            {{ $memberData->rpp_cap }}
+                                        @endif
                                     @else
                                         -
                                     @endif
                                 </td>
                                 <td class="data-point">
                                     @if ($memberData->isActiveMember())
-                                        {{ $memberData->rpp_cpc }}
+                                        @if ($memberData->rpp_cpc > 0)
+                                            <strong>{{ $memberData->rpp_cpc }}</strong>
+                                        @else
+                                            {{ $memberData->rpp_cpc }}
+                                        @endif
                                     @else
                                         -
                                     @endif
                                 </td>
                                 <td class="data-point">
                                     @if ($memberData->isActiveMember())
-                                        {{ $memberData->rpp_lf }}
+                                        @if ($memberData->rpp_lf > 0)
+                                            <strong>{{ $memberData->rpp_lf }}</strong>
+                                        @else
+                                            {{ $memberData->rpp_lf }}
+                                        @endif
                                     @else
                                         -
                                     @endif
