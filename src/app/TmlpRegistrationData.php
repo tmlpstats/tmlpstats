@@ -75,13 +75,8 @@ class TmlpRegistrationData extends Model
             return null;
         }
 
-        if ($this->appInDate) {
-            return $this->appInDate->copy()->addDays(7);
-        } else if ($this->appOutDate) {
-            return $this->appOutDate->copy()->addDays(7);
-        } else {
-            return $this->regDate->copy()->addDays(3);
-        }
+        return $this->regDate->copy()->addDays(14);
+
     }
 
     public function mirror(TmlpRegistrationData $data)
