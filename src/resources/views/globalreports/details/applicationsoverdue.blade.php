@@ -37,13 +37,6 @@
                 @foreach ($reportData[$group] as $registrationData)
                     <?php
                         $title = '';
-                        if ($group == 'notSent') {
-                            $title = 'Due within 3 days of registration.';
-                        } else if ($group == 'out') {
-                            $title = 'Due within 7 days of sending out.';
-                        } else if ($group == 'waiting') {
-                            $title = 'Due within 7 days of receiving.';
-                        }
                     ?>
                     <tr title="{{ $title }}">
                         <td>
