@@ -124,7 +124,7 @@ export class GlobalReport extends Component {
             <div>
                 <ReportTitle title={title} reportToken={config.reportToken} nav={nav} />
                 <RegionSystemMessages region={this.props.params.regionAbbr} section="global_report" />
-                <TabbedReport tabs={tabs} fullReport={this.fullReport} reportContext={this} />
+                <TabbedReport tabs={tabs} fullReport={this.fullReport} reportContext={this} reportConfig={config} />
             </div>
         )
     }

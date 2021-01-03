@@ -245,6 +245,7 @@ class GlobalReport extends AuthenticatedApiBase
 
         $rrd = Encapsulations\RegionReportingDate::ensure($region, $reportingDate);
         $rq = $rrd->getRegionQuarter();
+        $q = $rrd->getQuarter();
 
         $canReportToken = $this->context->can('readLink', Models\ReportToken::class);
         $reportToken = null;
@@ -254,6 +255,7 @@ class GlobalReport extends AuthenticatedApiBase
 
         return [
             'globalReportId' => $report->id,
+            'currentQuarterId' => $q->id,
             'flags' => [
                 'afterClassroom2' => $reportingDate->gte($rq->classroom2Date),
                 'lastWeek' => $reportingDate->gte($rq->endWeekendDate),

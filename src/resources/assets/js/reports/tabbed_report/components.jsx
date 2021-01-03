@@ -26,15 +26,21 @@ export class TabbedReport extends Component {
     }
 
     render() {
-        const { tabs, reportContext } = this.props
+        const { tabs, reportContext, reportConfig } = this.props
         let navTabs = []
         let content
 
         reportContext.fullReport._root.children.forEach((id) => {
+
             const report = reportContext.fullReport[id]
             const active = (report.id == tabs[0])
             const uriBasis = report.type == 'grouping' ? [id, report.children[0]] : [id]
             const href = reportContext.reportUri(uriBasis)
+
+            if (report.id === 'CoursesGroup' && reportConfig.currentQuarterId > 49 ) {
+                return
+            }
+
             navTabs.push(
                 <li className={active? 'active' : ''} key={id}><Link to={href}>{reportContext.responsiveLabel(report)}</Link></li>
             )
