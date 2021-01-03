@@ -285,7 +285,7 @@
             <th colspan="{{ ($teamYear == 2) ? 3 : 2 }}" class="data-point border-right">Weekend Reg</th>
             <th colspan="4" class="data-point border-right">Applications for Upcoming AND Future Weekends</th>
             <th colspan="4" class="data-point border-right">Applications For Upcoming Weekend</th>
-            <th colspan="1" class="data-point border-right">On Team At Last Weekend</th>
+            <th colspan="1" class="data-point border-right">On Team After The Weekend</th>
             <th colspan="1" class="data-point border-right">Xfer Out</th>
             <th colspan="1" class="data-point border-right">Xfer In</th>
             <th colspan="5" class="data-point border-right">Withdraws</th>
