@@ -11,6 +11,7 @@ import { SubmissionBase, React } from '../base_components'
 import { getValidationMessagesIfStale, displayState, submitReport, submitState } from './actions'
 import { DISPLAY_STATES } from './data'
 import { REVIEW_SUBMIT_FORM_KEY } from './reducers'
+import {loadScoreboard} from "../scoreboard/actions";
 
 const CLASSES = {error: 'bg-danger', warning: 'bg-warning'}
 
@@ -22,6 +23,7 @@ export default class Review extends SubmissionBase {
 
     static onRouteEnter(nextState) {
         const { store } = require('../../store')
+        store.dispatch(loadScoreboard(nextState.params.centerId, nextState.params.reportingDate))
         store.dispatch(getValidationMessagesIfStale(nextState.params.centerId, nextState.params.reportingDate))
     }
 
