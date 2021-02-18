@@ -69,6 +69,9 @@ Route::match(['get', 'post'], 'home/{abbr}', 'HomeController@home');
 Route::get('/', 'WelcomeController@index');
 Route::get('apply', 'WelcomeController@apply');
 
+Route::get('interestform', 'InterestFormController@index');
+Route::post('interestform', 'InterestFormController@submit');
+
 Route::post('feedback', 'ContactController@processFeedback');
 
 // Authentication routes...
