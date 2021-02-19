@@ -197,7 +197,7 @@
     <div>
         <div class="wrapper">
             <div class="inner">
-                <form method="POST" action="/interestform">
+                <form method="POST" action="/interest">
                     {{ csrf_field() }}
                     <h3>Interest Form</h3>
                     <div class="form-wrapper">
