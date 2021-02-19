@@ -1,5 +1,5 @@
 {{ $interest_form->firstname }} {{ $interest_form->lastname }} is interested
-in joining the {{ $interest_form->vision_team ? ' Vision ' : "" }}
+in joining the {{ $interest_form->vision_team ? " Vision " : "" }}
 {{ $interest_form->vision_team && $interest_form->regional_statistician_team ? " and " : "Team" }}
 {{$interest_form->regional_statistician_team ? " Regional Statistician Team " : "" }}
 <br>
