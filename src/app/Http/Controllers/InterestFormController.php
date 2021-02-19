@@ -62,16 +62,34 @@ class InterestFormController extends Controller
             Mail::send('emails.interest', compact('interest_form'),
                 function ($message) use ($interest_form) {
                     // Only send email to person in production
+                    $message->from('vision.tmlp@gmail.com', 'TMLPSTATS');
                     if (config('app.env') === 'prod') {
-                        $message->to('vision.tmlp@gmail.com');
+                        if ($interest_form->vision_team) {
+                            $message->to('visiontmlp@googlegroups.com');
+                        } else {
+                            $message->to('visiontmlp@googlegroups.com');
+                        }
+
+                        if ($interest_form->regional_statistician_team) {
+                            $message->to('na.statistician@gmail.com');
+                        }
+                        $message->cc('global.statistician@gmail.com');
                     } else {
-                        $message->to('vision.tmlp@gmail.com');
+                        if ($interest_form->vision_team) {
+                            $message->to('vision.tmlp@gmail.com');
+                        } else {
+                            $message->to('vision.tmlp@gmail.com');
+                        }
+
+                        if ($interest_form->regional_statistician_team) {
+                            $message->to('nicholas.tmlp@gmail.com');
+                        }
                     }
-                    $team = $interest_form->vision_team ? "Vision" : "" .
-                                                $interest_form->vision_team && $interest_form->regional_statistician_team ? " and " : "Team" .
-                                                $interest_form->regional_statistician_team ? " Regional Statistician Team " : "" .
-                                                $interest_form->vision_team && $interest_form->regional_statistician_team ? "s" : "";
-                    $message->subject("You have a new interest in the " . $team);
+                    $team = ($interest_form->vision_team ? "Vision" : "") .
+                        (($interest_form->vision_team && $interest_form->regional_statistician_team) ? " and " : ($interest_form->regional_statistician_team ? "" :  "Team")) .
+                        ($interest_form->regional_statistician_team ? " Regional Statistician Team" : "") .
+                        ($interest_form->vision_team && $interest_form->regional_statistician_team ? "s" : "");
+                    $message->subject("New interest in the " . $team);
                 });
             $successMessage = "Success! interest email sent.";
             if (config('app.env') === 'prod') {
