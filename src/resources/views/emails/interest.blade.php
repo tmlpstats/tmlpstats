@@ -1,13 +1,12 @@
-{{ $interest_form->firstname }} {{ $interest_form->firstname }} is interested
+{{ $interest_form->firstname }} {{ $interest_form->lastname }} is interested
 in joining the {{ $interest_form->vision ? ' Vision ' : "" }}
-{{ $interest_form->vision && $interest_form->regional ? " and " : "Team" }}
+{{ $interest_form->vision_team && $interest_form->regional_team ? " and " : "Team" }}
 {{$interest_form->regional ? " Regional Statistician Team " : "" }}
 <br>
-<b>Summary</b>
 <br>
-{{ $interest_form->vision }} {{ $interest_form->regional }}
+<h3>Summary</h3>
 <br>
-{{ $interest_form->firstname }} {{ $interest_form->firstname }}
+<h4>{{ $interest_form->firstname }} {{ $interest_form->lastname }}</h4>
 <br>
 {{ $interest_form->email }}
 <br>
@@ -16,6 +15,6 @@ in joining the {{ $interest_form->vision ? ' Vision ' : "" }}
 {{ $interest_form->team }}
 <br>
 <br>
-
 Best,
+<br>
 The Vision Team

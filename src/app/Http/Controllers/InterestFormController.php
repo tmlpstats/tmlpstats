@@ -67,10 +67,11 @@ class InterestFormController extends Controller
                     } else {
                         $message->to('vision.tmlp@gmail.com');
                     }
-                    $team = $interest_form->vision ? "Vision" : "" .
-                                                $interest_form->vision && $interest_form->regional ? " and " : "Team" .
-                                                $interest_form->regional ? " Regional Statistician Team " : "";
-                    $message->subject("TMLPSTATS - New " . $team . "Interest");
+                    $team = $interest_form->vision_team ? "Vision" : "" .
+                                                $interest_form->vision_team && $interest_form->regional_team ? " and " : "Team" .
+                                                $interest_form->regional_team ? " Regional Statistician Team " : "" .
+                                                $interest_form->vision_team && $interest_form->regional_team ? "s" : "";
+                    $message->subject("You have a new interest in the " . $team);
                 });
             $successMessage = "Success! interest email sent.";
             if (config('app.env') === 'prod') {
