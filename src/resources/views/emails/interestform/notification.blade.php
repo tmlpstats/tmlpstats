@@ -11,9 +11,8 @@ in joining the {{ $interest_form->vision_team ? " Vision " : "" }}
 <br>
 {{ $interest_form->phone }}
 <br>
-{{ $interest_form->team }}
+{{ $interest_form->team->getGlobalRegion()->name }} - {{ $interest_form->team->name }}
 <br>
 <br>
-With possibility,
-<br>
-The Vision Team
+
+- Vision Team

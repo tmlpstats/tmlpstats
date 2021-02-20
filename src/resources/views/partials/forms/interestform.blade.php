@@ -203,11 +203,11 @@
                     <div class="form-wrapper">
                         <label>What team(s) are you interested in?</label>
                         <div class="form-group">
-                            <label for="vision" class="option">
-                                <input type="radio" name="team_interest" id="vision" value="vision" required> Vision
-                            </label>
                             <label for="regional" class="option">
                                 <input type="radio" name="team_interest" id="regional" value="regional"> Regional Statistician
+                            </label>
+                            <label for="vision" class="option">
+                                <input type="radio" name="team_interest" id="vision" value="vision" required> Vision Team
                             </label>
                             <label for="both" class="option">
                                 <input type="radio" name="team_interest" id="both" value="both"> Both
@@ -238,52 +238,52 @@
                         <select id="team" name="team" class="form-control" required>
                             <option></option>
                             <optgroup label="Australia & New Zealand">
-                                <option value="Auckland">Auckland</option>
-                                <option value="Melbourne">Melbourne</option>
-                                <option value="Perth">Perth</option>
-                                <option value="Sydney">Sydney</option>
+                                <option value="27">Auckland</option>
+                                <option value="28">Melbourne</option>
+                                <option value="29">Perth</option>
+                                <option value="30">Sydney</option>
                             </optgroup>
-                            <optgroup label="German Cars">
-                                <option value="London">London</option>
-                                <option value="Tel Aviv">Tel Aviv</option>
+                            <optgroup label="Europe & Middle East">
+                                <option value="25">London</option>
+                                <option value="26">Tel Aviv</option>
                             </optgroup>
                             <optgroup label="India">
-                                <option value="Ahmedabad">Ahmedabad</option>
-                                <option value="Aurangabad">Aurangabad</option>
-                                <option value="Bangalore">Bangalore</option>
-                                <option value="Chennai">Chennai</option>
-                                <option value="Delhi">Delhi</option>
-                                <option value="Hyderabad">Hyderabad</option>
-                                <option value="Mumbai Blue">Mumbai Blue</option>
-                                <option value="Mumbai Green">Mumbai Green</option>
-                                <option value="Mumbai Red">Mumbai Red</option>
+                                <option value="31">Ahmedabad</option>
+                                <option value="32">Aurangabad</option>
+                                <option value="33">Bangalore</option>
+                                <option value="43">Chennai</option>
+                                <option value="41">Delhi</option>
+                                <option value="35">Hyderabad</option>
+                                <option value="36">Mumbai Blue</option>
+                                <option value="37">Mumbai Green</option>
+                                <option value="38">Mumbai Red</option>
                             </optgroup>
                             <optgroup label="North America">
-                                <option value="Atlanta">Atlanta</option>
-                                <option value="Boston">Boston</option>
-                                <option value="Central Florida">Central Florida</option>
-                                <option value="Chicago">Chicago</option>
-                                <option value="Dallas">Dallas</option>
-                                <option value="Denver">Denver</option>
-                                <option value="Detroit">Detroit</option>
-                                <option value="Florida">Florida</option>
-                                <option value="Houston">Houston</option>
-                                <option value="Los Angeles">Los Angeles</option>
-                                <option value="Mexico">Mexico</option>
-                                <option value="Montreal">Montreal</option>
-                                <option value="MSP">MSP</option>
-                                <option value="New Jersey">New Jersey</option>
-                                <option value="New York">New York</option>
-                                <option value="Orange County">Orange County</option>
-                                <option value="Philadelphia">Philadelphia</option>
-                                <option value="Phoenix">Phoenix</option>
-                                <option value="San Diego">San Diego</option>
-                                <option value="San Francisco">San Francisco</option>
-                                <option value="San Jose">San Jose</option>
-                                <option value="Seattle">Seattle</option>
-                                <option value="Toronto">Toronto</option>
-                                <option value="Vancouver">Vancouver</option>
-                                <option value="Washington, DC">Washington, DC</option>
+                                <option value="13">Atlanta</option>
+                                <option value="2">Boston</option>
+                                <option value="44">Central Florida</option>
+                                <option value="14">Chicago</option>
+                                <option value="15">Dallas</option>
+                                <option value="16">Denver</option>
+                                <option value="17">Detroit</option>
+                                <option value="18">Florida</option>
+                                <option value="19">Houston</option>
+                                <option value="3">Los Angeles</option>
+                                <option value="12">Mexico</option>
+                                <option value="20">Montreal</option>
+                                <option value="4">MSP</option>
+                                <option value="21">New Jersey</option>
+                                <option value="22">New York</option>
+                                <option value="5">Orange County</option>
+                                <option value="23">Philadelphia</option>
+                                <option value="6">Phoenix</option>
+                                <option value="7">San Diego</option>
+                                <option value="9">San Francisco</option>
+                                <option value="10">San Jose</option>
+                                <option value="8">Seattle</option>
+                                <option value="24">Toronto</option>
+                                <option value="1">Vancouver</option>
+                                <option value="11">Washington, DC</option>
                             </optgroup>
                         </select>
                     </div>

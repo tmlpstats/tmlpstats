@@ -12,18 +12,14 @@ class InterestForm extends Model
         'last_name',
         'email',
         'phone',
-        'team',
+        'team_id',
         'vision_team',
         'regional_statistician_team',
     ];
 
-    public function formatPhone()
+    public function team()
     {
-        return Util::formatPhone($this->phone);
-    }
-
-    public function tmlp_participant_team() {
-        return $this->hasOne('TmlpStats\Center', 'tmlp_participant_team_id');
+        return $this->hasOne('TmlpStats\Center', 'id', 'team_id');
     }
 
 }

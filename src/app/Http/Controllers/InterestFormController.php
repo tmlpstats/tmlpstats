@@ -38,7 +38,7 @@ class InterestFormController extends Controller
         $interest_form->lastname = $request->input('lastname');
         $interest_form->email = $request->input('email');
         $interest_form->phone = $request->input('phone');
-        $interest_form->team = $request->input('team');
+        $interest_form->team_id = $request->input('team');
 
         $team_interest = $request->input('team_interest');
         $interest_form->regional_statistician_team = $team_interest === 'regional' || $team_interest === 'both';
@@ -59,38 +59,47 @@ class InterestFormController extends Controller
     protected function sendInterest(InterestForm $interest_form)
     {
         try {
-            Mail::send('emails.interest', compact('interest_form'),
+            Mail::send('emails.interestform.notification', compact('interest_form'),
                 function ($message) use ($interest_form) {
                     // Only send email to person in production
-                    $message->from('vision.tmlp@gmail.com', 'TMLPSTATS');
+
                     if (config('app.env') === 'prod') {
+                        $message->from('no-reply@tmlpstats.com', 'TMLPSTATS');
+                        $message->replyTo('visiontmlp@googlegroups.com', 'The Vision Team');
                         if ($interest_form->vision_team) {
                             $message->to('visiontmlp@googlegroups.com');
                         } else {
-                            $message->to('visiontmlp@googlegroups.com');
+                            $message->bcc('visiontmlp@googlegroups.com');
                         }
 
                         if ($interest_form->regional_statistician_team) {
-                            $message->to('na.statistician@gmail.com');
+                            $region = $interest_form->team->getGlobalRegion();
+                            $message->to($region->email, $region->name);
                         }
                         $message->cc('global.statistician@gmail.com');
+
                     } else {
+
                         if ($interest_form->vision_team) {
                             $message->to('vision.tmlp@gmail.com');
                         } else {
-                            $message->to('vision.tmlp@gmail.com');
+                            $message->bcc('vision.tmlp@gmail.com');
                         }
 
                         if ($interest_form->regional_statistician_team) {
-                            $message->to('nicholas.tmlp@gmail.com');
+                            $region = $interest_form->team->getGlobalRegion();
+                            $message->to('nicholas.tmlp@gmail.com', $region->name);
                         }
+
                     }
+
                     $team = ($interest_form->vision_team ? "Vision" : "") .
                         (($interest_form->vision_team && $interest_form->regional_statistician_team) ? " and " : ($interest_form->regional_statistician_team ? "" :  "Team")) .
                         ($interest_form->regional_statistician_team ? " Regional Statistician Team" : "") .
                         ($interest_form->vision_team && $interest_form->regional_statistician_team ? "s" : "");
                     $message->subject("New interest in the " . $team);
                 });
+
             $successMessage = "Success! interest email sent.";
             if (config('app.env') === 'prod') {
                 Log::info($successMessage);
