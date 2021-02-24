@@ -3,7 +3,6 @@ namespace TmlpStats\Api;
 
 use App;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use TmlpStats as Models;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
 use TmlpStats\Api\Traits;
@@ -175,55 +174,6 @@ class TeamMember extends AuthenticatedApiBase
             $validationResults = $this->validateObject($report, $existing, $existing->id);
             $messages[$updatedDomain->id] = $validationResults['messages'];
         }
-
-//        $numTeamMembers =  count($sourceData);
-//
-//        $cap = 0;
-//        $cpc = 0;
-//        $lf = 0;
-//        $gitw = 0;
-//
-//        $teamMemberData = $submissionData->allForType($center, $reportingDate, Domain\TeamMember::class);
-//        foreach ($teamMemberData as $item) {
-//
-//            if ($item->rppCap != null) {
-//                $cap += $item->rppCap;
-//            }
-//            if ($item->rppCpc != null) {
-//                $cpc += $item->rppCpc;
-//            }
-//            if ($item->rppLf != null) {
-//                $lf += $item->rppLf;
-//            }
-//            if ($item->gitw != null && $item->gitw == 1) {
-//                $gitw++;
-//            }
-//
-//        }
-
-//        $scoreboards = App::make(Models\Api\Submission\Scoreboard::class)->allForCenter($center, $reportingDate, true);
-//        $prevWeek = null;
-//        $currentWeek = null;
-//        foreach ($scoreboards as  $scoreboard) {
-//            if ($scoreboard['week'] == $reportingDate->toDateString()) {
-//                $currentWeek = $scoreboard;
-//                break;
-//            }
-//            $prevWeek = $scoreboard;
-//        }
-
-//        if ($prevWeek != null) {
-//            $cap += $prevWeek['games']['cap']['actual'];
-//            $cpc += $prevWeek['games']['cpc']['actual'];
-//            $lf += $prevWeek['games']['lf']['actual'];
-//        }
-//
-//        $currentWeek['games']['cap']['actual'] = $cap;
-//        $currentWeek['games']['cpc']['actual'] = $cpc;
-//        $currentWeek['games']['lf']['actual'] = $lf;
-//        $currentWeek['games']['gitw']['actual'] = round($gitw/$numTeamMembers * 100, 0);
-
-//        App::make(Models\Api\Submission\Scoreboard::class)->stash($center, $reportingDate, $currentWeek);
 
         return ['messages' => $messages];
     }

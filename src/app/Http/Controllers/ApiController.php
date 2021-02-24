@@ -12,7 +12,6 @@ namespace TmlpStats\Http\Controllers;
 ///////////////////////////////
 
 use App;
-use Illuminate\Support\Facades\Log;
 use TmlpStats\Api;
 use TmlpStats\Http\Controllers\ApiControllerBase;
 
@@ -350,21 +349,14 @@ class ApiController extends ApiControllerBase
     }
     protected function Submission__Scoreboard__allForCenter($input)
     {
-        $scoreboard = $this->app->make(Api\Submission\Scoreboard::class)->allForCenter(
+        return $this->app->make(Api\Submission\Scoreboard::class)->allForCenter(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
-            $this->parse($input, 'includeInProgress', 'bool', true)
-        );
-
-        return $this->app->make(Api\Submission\Scoreboard::class)->calculateScoreboard(
-            $this->parse($input, 'center', 'Center'),
-            $this->parse($input, 'reportingDate', 'date'),
-            $scoreboard
+            $this->parse($input, 'includeInProgress', 'bool', false)
         );
     }
     protected function Submission__Scoreboard__stash($input)
     {
-        Log::info($this->parse($input, 'data', 'array'));
         return $this->app->make(Api\Submission\Scoreboard::class)->stash(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
@@ -454,17 +446,14 @@ class ApiController extends ApiControllerBase
             $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'data', 'array')
         );
-
     }
     protected function TeamMember__bulkStashWeeklyReporting($input)
     {
-        $msg = $this->app->make(Api\TeamMember::class)->bulkStashWeeklyReporting(
+        return $this->app->make(Api\TeamMember::class)->bulkStashWeeklyReporting(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date'),
             $this->parse($input, 'updates', 'array')
         );
-
-        return $msg;
     }
     protected function UserProfile__setLocale($input)
     {
@@ -481,9 +470,6 @@ class ApiController extends ApiControllerBase
     }
     protected function ValidationData__validate($input)
     {
-        //TODO: Update Scoreboard before pulling reveiw data
-//        $this->Submission__Scoreboard__allForCenter($input);
-
         return $this->app->make(Api\ValidationData::class)->validate(
             $this->parse($input, 'center', 'Center'),
             $this->parse($input, 'reportingDate', 'date')

@@ -23,9 +23,7 @@ import { getValidationMessagesIfStale } from '../review/actions'
 class SubmissionScoreboardView extends SubmissionBase {
     static onRouteEnter(nextState) {
         const { store } = require('../../store')
-        store.dispatch(loadScoreboard(nextState.params.centerId, nextState.params.reportingDate))
         store.dispatch(getValidationMessagesIfStale(nextState.params.centerId, nextState.params.reportingDate))
-
     }
 
     constructor(props) {
@@ -128,7 +126,6 @@ export class ScoreboardRow extends SubmissionBase {
         weeks.forEach((sb) => {
             const scoreboard = new Scoreboard(sb)
             weekScoreboards.push(scoreboard)
-            // finds the last week with data entered in actuals
             if (scoreboard.hasActuals()) {
                 lastWeek = scoreboard
             }
@@ -164,7 +161,7 @@ export class ScoreboardRow extends SubmissionBase {
 
                 const actualVal = (
                     <NullableTextControl
-                        model={modelKey+'.actual'} disabled={true}
+                        model={modelKey+'.actual'} disabled={!scoreboard.meta.canEditActual}
                         className=" " controlProps={{autoComplete: 'off', }}
                         changeAction={changeRemovePercent} />
                 )
