@@ -3,20 +3,129 @@ namespace TmlpStats\Api\Submission;
 
 use App;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use TmlpStats as Models;
 use TmlpStats\Api;
 use TmlpStats\Api\Base\AuthenticatedApiBase;
+use TmlpStats\Api\SubmissionData;
 use TmlpStats\Domain;
 
 class Scoreboard extends AuthenticatedApiBase
 {
     const LOCK_SETTING_KEY = 'scoreboardLock';
 
+    public function calculateScoreboard(Models\Center $center, Carbon $reportingDate, $scoreboard)
+    {
+        $submissionData = App::make(SubmissionData::class);
+        $quarter = App::make(Models\Quarter::class)->getCurrentQuarter($center->region);
+
+        $prevWeek = null;
+        $currentWeek = null;
+        foreach ($scoreboard as $date => $week) {
+            if ($week['week'] == $reportingDate->toDateString()) {
+                $currentWeek = $week;
+                break;
+            }
+            $prevWeek = $week;
+        }
+
+
+        // calculate CAP, CPC, LF, GITW
+        $teamMembers = App::make(Models\Api\TeamMember::class)->allForCenter($center, $reportingDate, true);
+        $numTeamMembers =  count($teamMembers);
+        foreach ($teamMembers as $item) {
+            if ($item->withdrawCodeId || $item->xferOut || $item->wbo) {
+                $numTeamMembers--;
+            }
+        }
+
+        $cap = 0;
+        $cpc = 0;
+        $lf = 0;
+        $gitw = 0;
+
+        $teamMemberData = $submissionData->allForType($center, $reportingDate, Domain\TeamMember::class);
+        foreach ($teamMemberData as $item) {
+
+            if ($item->withdrawCodeId || $item->xferOut || $item->wbo) {
+                continue;
+            }
+
+            if ($item->rppCap != null) {
+                $cap += $item->rppCap;
+            }
+            if ($item->rppCpc != null) {
+                $cpc += $item->rppCpc;
+            }
+            if ($item->rppLf != null) {
+                $lf += $item->rppLf;
+            }
+            if ($item->gitw != null && $item->gitw == 1) {
+                $gitw++;
+            }
+
+        }
+
+        if ($prevWeek != null) {
+            $cap += $prevWeek['games']['cap']['actual'];
+            $cpc += $prevWeek['games']['cpc']['actual'];
+            $lf += $prevWeek['games']['lf']['actual'];
+        }
+
+        $currentWeek['games']['cap']['actual'] = $cap;
+        $currentWeek['games']['cpc']['actual'] = $cpc;
+        $currentWeek['games']['lf']['actual'] = $lf;
+        $currentWeek['games']['gitw']['actual'] = round($gitw/$numTeamMembers * 100);
+
+
+        // calculate T1X, T2X
+        $applications = App::make(Models\Api\Application::class)->allForCenter($center, $reportingDate, true);      // get all applications for center for the quarter
+
+
+        $t1x = 0;
+        $t2x = 0;
+
+        foreach ($applications as $application)
+        {
+            if($application->apprDate != null) {
+
+                if ($application->apprDate > $quarter->getQuarterStartDate() && $application->apprDate <= $quarter->getQuarterEndDate()) {
+                    if ($application->teamYear == 1) {
+                        $t1x++;
+                    } else {
+                        $t2x++;
+                    }
+                }
+
+                if($application->wdDate != null && $application->wdDate > $quarter->getQuarterStartDate() && $application->wdDate <= $quarter->getQuarterEndDate()) {
+                    if($application->teamYear == 1) {
+                        $t1x--;
+                    } else {
+                        $t2x--;
+                    }
+                }
+
+            }
+
+
+        }
+
+        $currentWeek['games']['t1x']['actual'] = $t1x;
+        $currentWeek['games']['t2x']['actual'] = $t2x;
+
+
+        $this->stash($center, $reportingDate, $currentWeek);
+
+        return $this->allForCenter($center, $reportingDate, false);
+
+    }
+
     public function allForCenter(Models\Center $center, Carbon $reportingDate, $includeInProgress = false, $returnObject = false)
     {
         $this->assertAuthz($this->context->can('viewSubmissionUi', $center));
         $submissionCore = App::make(Api\SubmissionCore::class);
         $submissionCore->checkCenterDate($center, $reportingDate);
+
 
         $localReport = App::make(Api\LocalReport::class);
         $rq = $submissionCore->reportAndQuarter($center, $reportingDate);
