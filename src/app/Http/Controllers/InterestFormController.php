@@ -124,7 +124,7 @@ class InterestFormController extends Controller
                         $message->replyTo('visiontmlp@googlegroups.com', 'Vision Team');
                         $message->to($interest_form->email);
                         $message->bcc('visiontmlp@googlegroups.com');
-                        $message->subject("We got it. You're interested! ;) Now for what's next");
+                        $message->subject("Thank you for your interest in the Vision Team");
                     });
 
                 $successMessage = "Success! interest email sent.";
