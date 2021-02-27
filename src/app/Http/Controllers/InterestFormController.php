@@ -114,6 +114,29 @@ class InterestFormController extends Controller
             $results['error'][] = "Failed to send interest email. Please try again.";
         }
 
+        if ($interest_form->vision_team) {
+            try {
+                Mail::send('emails.interestform.response', compact('interest_form'),
+                    function ($message) use ($interest_form) {
+                        // Only send email to person in production
+
+                        $message->from('no-reply@tmlpstats.com', 'Vision Team');
+                        $message->replyTo('visiontmlp@googlegroups.com', 'Vision Team');
+                        $message->to($interest_form->email);
+                        $message->bcc('visiontmlp@googlegroups.com');
+                        $message->subject("We got it. You're interested! ;) Now for what's next");
+                    });
+
+                $successMessage = "Success! interest email sent.";
+                Log::info($successMessage);
+            } catch (\Exception $e) {
+                Log::error("Exception caught sending invite email: " . $e->getMessage());
+                $results['error'][] = "Failed to send interest email. Please try again.";
+            }
+        }
+
+
+
         return $results;
     }
 
