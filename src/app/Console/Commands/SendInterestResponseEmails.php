@@ -47,7 +47,7 @@ class SendInterestResponseEmails extends Command
         foreach ($interest_forms as $interest_form) {
             if ($interest_form->vision_team) {
                 try {
-                    Mail::send('emails.interestform.response', compact('interest_form'),
+                    Mail::send(['text' => 'emails.interestform.responsetext'], compact('interest_form'),
                         function ($message) use ($interest_form) {
                             $message->from('no-reply@tmlpstats.com', 'Vision Team');
                             $message->to($interest_form->email);

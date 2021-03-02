@@ -116,14 +116,13 @@ class InterestFormController extends Controller
 
         if ($interest_form->vision_team) {
             try {
-                Mail::send('emails.interestform.response', compact('interest_form'),
+                Mail::send(['text' => 'emails.interestform.response'], compact('interest_form'),
                     function ($message) use ($interest_form) {
                         // Only send email to person in production
 
                         $message->from('no-reply@tmlpstats.com', 'Vision Team');
-                        $message->replyTo('visiontmlp@googlegroups.com', 'Vision Team');
                         $message->to($interest_form->email);
-                        $message->bcc('visiontmlp@googlegroups.com');
+                        $message->cc('visiontmlp@googlegroups.com');
                         $message->subject("Thank you for your interest!");
                     });
 
