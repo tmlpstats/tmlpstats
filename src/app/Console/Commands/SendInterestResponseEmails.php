@@ -51,8 +51,8 @@ class SendInterestResponseEmails extends Command
                         function ($message) use ($interest_form) {
                             $message->from('no-reply@tmlpstats.com', 'Vision Team');
                             $message->to($interest_form->email);
-                            $message->bcc('visiontmlp@googlegroups.com');
-                            $message->subject("Thank you for your interest!");
+                            $message->cc('visiontmlp@googlegroups.com');
+                            $message->subject("Come Play With Us!");
                         }
                     );
 
