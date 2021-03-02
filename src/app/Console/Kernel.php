@@ -24,6 +24,7 @@ class Kernel extends ConsoleKernel
         Commands\SanitizeDb::class,
         Commands\SendTestEmailCommand::class,
         Commands\UpdatePromise::class,
+        Commands\SendInterestResponseEmails::class,
     ];
 
     /**

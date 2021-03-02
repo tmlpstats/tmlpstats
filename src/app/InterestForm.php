@@ -22,4 +22,9 @@ class InterestForm extends Model
         return $this->hasOne('TmlpStats\Center', 'id', 'team_id');
     }
 
+    public function scopeInEmail($query, $emails)
+    {
+        return $query->whereIn('email', $emails);
+    }
+
 }
