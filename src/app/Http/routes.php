@@ -68,7 +68,7 @@ Route::match(['get', 'post'], 'home/{abbr}', 'HomeController@home');
 
 Route::get('/', 'WelcomeController@index');
 Route::get('apply', 'WelcomeController@apply');
-Route::get('apply/regionalstatistican', 'WelcomeController@applyRegionalStatistician');
+Route::get('apply/regionalstatistician', 'WelcomeController@applyRegionalStatistician');
 
 
 Route::get('interest', 'InterestFormController@index');
