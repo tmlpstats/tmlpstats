@@ -26,4 +26,9 @@ class WelcomeController extends Controller
         return view('apply');
     }
 
+    public function applyRegionalStatistician()
+    {
+        return view('applyregionalstats');
+    }
+
 }
