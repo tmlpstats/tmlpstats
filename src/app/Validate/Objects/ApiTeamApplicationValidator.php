@@ -271,17 +271,17 @@ class ApiTeamApplicationValidator extends ApiObjectsValidatorAbstract
 
 
             // If it is, check if it was late this week, but only show the message on the first week
-            if ($data->regDate && $reportingDate->gte($data->regDate)
+            if ($data->appOutDate && $reportingDate->gte($data->appOutDate)
                 && (
                     (
                         !$data->apprDate
-                        && $data->regDate->diffInDays($reportingDate) > static::MAX_DAYS_TO_APPROVE_APPLICATION
+                        && $data->appOutDate->diffInDays($reportingDate) > static::MAX_DAYS_TO_APPROVE_APPLICATION
                     )
                     ||
                     (
                         $data->apprDate
                         && $reportingDate->gte($data->apprDate)
-                        && $data->apprDate->diffInDays($data->regDate) > static::MAX_DAYS_TO_APPROVE_APPLICATION
+                        && $data->apprDate->diffInDays($data->appOutDate) > static::MAX_DAYS_TO_APPROVE_APPLICATION
                         && $data->apprDate->diffInDays($reportingDate) < 7
                     )
                 )
