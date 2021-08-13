@@ -71,11 +71,11 @@ class TmlpRegistrationData extends Model
 
     public function due()
     {
-        if ($this->withdrawCodeId || $this->apprDate) {
+        if (!$this->app_out_date || $this->withdrawCodeId || $this->apprDate) {
             return null;
         }
 
-        return $this->regDate->copy()->addDays(14);
+        return $this->app_out_date->copy()->addDays(14);
 
     }
 
