@@ -1441,7 +1441,6 @@ class GlobalReportController extends Controller
         $teamMembersByCenter = $a->compose();
         $teamMembersByCenter = $teamMembersByCenter['reportData'];
 
-
         $classrooms = $region->classrooms;
         foreach ($classrooms as $classroom) {
 

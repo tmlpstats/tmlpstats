@@ -17,7 +17,7 @@ class Classroom extends Model
 
     public function teams()
     {
-        return $this->hasMany('TmlpStats\Center');
+        return $this->hasMany('TmlpStats\Center')->active();
     }
 
 }
