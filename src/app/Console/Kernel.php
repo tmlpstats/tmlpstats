@@ -41,6 +41,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('create:quarter')
                  ->dailyAt('15:00')
+                 ->timezone('America/Los_Angeles')
                  ->when(function () {
                      $regions = Region::isGlobal()->get();
 
