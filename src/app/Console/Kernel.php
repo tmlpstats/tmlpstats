@@ -39,12 +39,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('inspire')
-                 ->hourly()
-                 ->appendOutputTo(storage_path('logs/inspire.log'));
-
         $schedule->command('create:quarter')
-                 ->everyMinute()
+                 ->dailyAt('15:00')
                  ->when(function () {
                      $regions = Region::isGlobal()->get();
 
@@ -52,14 +48,15 @@ class Kernel extends ConsoleKernel
                      foreach ($regions as $region) {
                          $qrt = Quarter::current($region)->first();
                          $cl3_date = $qrt->getClassroom3Date($region->centers[0]);
-                         $earliest_cl3 = $cl3_date < $earliest_cl3 ? $cl3_date : $earliest_cl3;
+                         $earliest_cl3 = $cl3_date < $earliest_cl3 && !$qrt->next_quarter_created ? $cl3_date : $earliest_cl3;
                      }
 
                      $dt = Carbon::now();
 
-                     return $earliest_cl3->diffInDays($dt) == 28;
+                     return $earliest_cl3->diffInDays($dt) <= 14;
 
                  })
+                 ->withoutOverlapping()
                  ->appendOutputTo(storage_path('logs/create_quarter.log'));
     }
 
