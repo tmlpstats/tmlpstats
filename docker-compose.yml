@@ -9,6 +9,10 @@ services:
       - "8030:8030"
     volumes:
       - "./:/app"
+    labels:
+        ofelia.enabled: "true"
+        ofelia.job-exec.larvel-scheduler.schedule: "@every 5s"
+        ofelia.job-exec.larvel-scheduler.command: "php /var/www/tmlpstats/src/artisan schedule:run"
     environment:
       - VHOSTNAME=vagrant.tmlpstats.com
       - APP_DEBUG=true
@@ -43,6 +47,13 @@ services:
 
   memcached:
     image: memcached:1.4-alpine
+
+  scheduler:
+    image: mcuadros/ofelia:latest
+    command: daemon --docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
 
 
 networks:
