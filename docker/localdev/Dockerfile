@@ -17,7 +17,8 @@ ENV DB_DATABASE=tmlpstats_main \
     MAIL_PRETEND=true \
     APP_KEY=4a2d4738b5d10e8b6b452d3eb60372d5 \
     APP_ENV=local \
-    APP_DEBUG=true
+    APP_DEBUG=true \
+    APP_URL=http://localhost:8030
 
 COPY docker/localdev/000-default.conf /etc/apache2/sites-available
 COPY docker/localdev/start.sh docker/localdev/localdev-version.txt /usr/bin/

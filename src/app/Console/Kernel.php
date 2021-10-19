@@ -29,6 +29,7 @@ class Kernel extends ConsoleKernel
         Commands\UpdatePromise::class,
         Commands\SendInterestResponseEmails::class,
         Commands\CreateQuarter::class,
+        Commands\SendSetupQrtEmail::class,
     ];
 
     /**

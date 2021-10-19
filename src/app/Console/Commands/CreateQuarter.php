@@ -4,7 +4,6 @@ namespace TmlpStats\Console\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
 use TmlpStats;
 
 use DB;
@@ -56,7 +55,9 @@ class CreateQuarter extends Command
 
         $this->update_current_quarter();
 
-        $this->send_set_quarter_dates_email($quarter_id);
+        $this->call('send:setup-qrt', [
+            'qrt' => $quarter_id
+        ]);
 
     }
 
@@ -110,28 +111,6 @@ class CreateQuarter extends Command
 
     }
 
-    public function send_set_quarter_dates_email($quarter_id) {
 
-
-        $quarter = TmlpStats\Quarter::find($quarter_id);
-        $regions = TmlpStats\Region::all();
-
-        foreach ($regions as $region) {
-            if ($region->isGlobalRegion()) {
-                try {
-                    Mail::send('emails.set_new_quarter_dates', ['region' => $region, 'quarter' => $quarter ], function ($message) use ($quarter, $region) {
-                        $message->to($region->email);
-                        $message->cc('global.statistician@gmail.com');
-                        $message->replyTo('vision.tmlp@gmail.com');
-                        $message->subject("[Action Required] Set New Quarter Dates for {$quarter->getDisplayLabel()}");
-            });
-                    $this->info("Sent test email to {$region->email}");
-                } catch (\Exception $e) {
-                    $this->info('Caught exception sending error email: ' . $e->getMessage());
-                }
-            }
-        }
-
-    }
 
 }
