@@ -63,9 +63,9 @@ class SendSetupQrtEmail extends Command
                 // use email associated to region other that NA because regional statistician has a different email address
                 $to = $region->id !== 1 ? $region->email : 'na.statistician@gmail.com';
                 try {
-                    Mail::send('emails.set_new_quarter_dates', ['region' => $region, 'quarter' => $quarter ], function ($message) use ($quarter, $to) {
-                        $message->to($to);
-                        $message->cc('global.statistician@gmail.com', 'vision.tmlp@gmail.com');
+                    Mail::send('emails.set_new_quarter_dates', ['region' => $region, 'quarter' => $quarter ], function ($message) use ($quarter, $region, $to) {
+                        $message->to($to, $region->name . ' Statistician');
+                        $message->cc(['global.statistician@gmail.com' => 'Global Statistician', 'vision.tmlp@gmail.com' => 'Vision Leader']);
                         $message->replyTo('vision.tmlp@gmail.com');
                         $message->subject("[Action Required] Set New Quarter Dates for {$quarter->getDisplayLabel()}");
                     });
