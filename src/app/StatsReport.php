@@ -24,6 +24,12 @@ class StatsReport extends Model
         'locked',
         'submitted_at',
         'submit_comment',
+        'reviewed',
+        'reviewed_at',
+        'reviewed_by',
+        'approved',
+        'approved_at',
+        'approved_by'
     ];
 
     protected $dates = [

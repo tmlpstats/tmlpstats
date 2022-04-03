@@ -347,6 +347,31 @@ class SubmissionCore extends AuthenticatedApiBase
         ];
     }
 
+    public function submitApproval(Models\Center $center, Carbon $reportingDate, array $data) {
+        // get global report 'official'
+        $globalReport = Models\GlobalReport::firstOrCreate([
+            'reporting_date' => $reportingDate,
+        ]);
+
+        // get current submitted stats report
+        $statsReport = $globalReport->getStatsReportByCenter($center);
+
+        // indicate that stats have been reviewed
+        $statsReport->reviewed = true;
+        $statsReport->reviewedAt = Carbon::now();
+        $statsReport->reviewedBy = $this->context->getUser()->id;
+
+        // only indicate approved if approval flagged in request payload
+        if (array_get($data, 'approved', false)) {
+            $statsReport->approved = true;
+            $statsReport->approvedAt = Carbon::now();
+            $statsReport->approvedBy = $this->context->getUser()->id;
+        }
+        $statsReport->save();
+    }
+
+
+
     /**
      * Create application objects for submitted statsReport
      *
