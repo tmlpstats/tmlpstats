@@ -5,8 +5,11 @@
             'EME' => 'Europe/Middle East',
             'IND' => 'India',
             'NA'  => 'North America',
-            'East'  => 'North America - East',
-            'West'  => 'North America - West',
+            'EAST'  => 'North America - East',
+            'WEST'  => 'North America - West',
+            'MUM' => 'Mumbai Centre',
+            'BLR' => 'Bangalore Centre',
+            'DL' => 'Delhi Centre'
         ]
         : [
             'ANZ' => 'Australia/New Zealand',
