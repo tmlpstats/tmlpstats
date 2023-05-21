@@ -73,6 +73,6 @@
 
     <div>
         <h3>Protocols for Reporting Statistics</h3>
-        <iframe src="https://docs.google.com/document/d/e/2PACX-1vSxXP0ijNKVu21LjNr3MBIqFA-cNtqh3pYtHyd5ja-_PFaRy6xIi3UERRJzvqxW3Q/pub?embedded=true"></iframe>
+        <iframe style="width:50%; height:500px;" src="https://docs.google.com/document/d/e/2PACX-1vSxXP0ijNKVu21LjNr3MBIqFA-cNtqh3pYtHyd5ja-_PFaRy6xIi3UERRJzvqxW3Q/pub?embedded=true"></iframe>
     </div>
 @endsection
